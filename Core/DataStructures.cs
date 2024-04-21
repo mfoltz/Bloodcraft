@@ -98,7 +98,7 @@ namespace Cobalt.Core
             {
                 string json = JsonSerializer.Serialize(data, prettyJsonOptions);
                 File.WriteAllText(path, json);
-                Plugin.Log.LogInfo($"{key} data saved successfully.");
+                //Plugin.Log.LogInfo($"{key} data saved successfully.");
             }
             catch (IOException ex)
             {
