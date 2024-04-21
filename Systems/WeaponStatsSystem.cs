@@ -54,7 +54,7 @@ namespace Cobalt.Systems
                 {
                     private static Dictionary<StatType, float> baseCaps = new()
                 {
-                    {StatType.MaxHealth, 500},
+                    {StatType.MaxHealth, 1000f},
                     {StatType.CastSpeed, 1f},
                     {StatType.AttackSpeed, 1f},
                     {StatType.PhysicalPower, 50},
@@ -72,15 +72,15 @@ namespace Cobalt.Systems
                 {
                     private static Dictionary<StatType, (float Increase, int MasteryCost)> baseIncreases = new()
                     {
-                        {StatType.MaxHealth, (0.1f, 50)},
-                        {StatType.CastSpeed, (0.01f, 30)},
-                        {StatType.AttackSpeed, (0.01f, 30)},
-                        {StatType.PhysicalPower, (5f, 40)},
-                        {StatType.SpellPower, (5f, 40)},
-                        {StatType.PhysicalCritChance, (0.01f, 20)},
-                        {StatType.PhysicalCritDamage, (0.1f, 20)},
-                        {StatType.SpellCritChance, (0.01f, 20)},
-                        {StatType.SpellCritDamage, (0.1f, 20)}
+                        {StatType.MaxHealth, (1f, 10)},
+                        {StatType.CastSpeed, (0.01f, 100)}, 
+                        {StatType.AttackSpeed, (0.01f, 100)},
+                        {StatType.PhysicalPower, (0.5f, 25)}, 
+                        {StatType.SpellPower, (0.5f, 25)},
+                        {StatType.PhysicalCritChance, (0.01f, 50)}, // Decreased cost
+                        {StatType.PhysicalCritDamage, (0.05f, 50)}, // Increased cost
+                        {StatType.SpellCritChance, (0.01f, 50)}, // Decreased cost
+                        {StatType.SpellCritDamage, (0.05f, 50)} // Increased cost
                     };
 
                     public static Dictionary<StatType, (float Increase, int MasteryCost)> BaseIncreases

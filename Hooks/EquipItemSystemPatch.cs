@@ -53,6 +53,29 @@ namespace Cobalt.Hooks
                 entities.Dispose();
             }
         }
+
+        public static void Postfix(EquipItemSystem __instance)
+        {
+            Plugin.Log.LogInfo("EquipItemSystem Postfix called...");
+            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
+                    Entity userEntity = entity.Read<EntityOwner>().Owner.Read<PlayerCharacter>().UserEntity;
+                    GearOverride.SetLevel(userEntity);
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Exited EquipItemSystem hook early: {e}");
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
     }
 
     [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
@@ -86,9 +109,15 @@ namespace Cobalt.Hooks
         {
             Entity character = user.Read<User>().LocalCharacter._Entity;
             ulong steamId = user.Read<User>().PlatformId;
-            if (!DataStructures.PlayerExperience.TryGetValue(steamId, out var experience))
+            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
-                return;
+                Equipment equipment = character.Read<Equipment>();
+                int playerLevel = xpData.Key;
+                equipment.ArmorLevel = ModifiableFloat.CreateFixed(0f);
+                equipment.WeaponLevel = ModifiableFloat.CreateFixed(0f);
+                equipment.SpellLevel = ModifiableFloat.CreateFixed(playerLevel);
+
+                character.Write(equipment);
             }
         }
     }

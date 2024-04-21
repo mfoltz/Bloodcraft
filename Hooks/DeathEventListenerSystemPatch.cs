@@ -1,9 +1,10 @@
+using Cobalt.Core;
 using Cobalt.Systems;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 
-namespace OpenRPG.Hooks;
+namespace Cobalt.Hooks;
 
 [HarmonyPatch]
 public class DeathEventListenerSystem_Patch
@@ -23,6 +24,10 @@ public class DeathEventListenerSystem_Patch
                     ArmsMasterySystem.UpdateMastery(ev.Killer, ev.Died);
                 }
             }
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.LogError($"Exited DeathEventListenerSystem hook early: {e}");
         }
         finally
         {

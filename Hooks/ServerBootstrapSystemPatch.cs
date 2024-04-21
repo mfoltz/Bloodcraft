@@ -6,7 +6,7 @@ using Unity.Entities;
 using static Cobalt.Systems.WeaponStatsSystem;
 using User = ProjectM.Network.User;
 
-namespace VPlus.Hooks
+namespace Cobalt.Hooks
 {
     [HarmonyPatch]
     public class ServerBootstrapPatches

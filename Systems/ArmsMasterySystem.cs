@@ -10,7 +10,7 @@ namespace Cobalt.Systems
     public class ArmsMasterySystem
     {
         private static readonly float MasteryMultiplier = 5; // mastery points multiplier from normal units
-        private static readonly int MaxMastery = 1000; // maximum stored mastery points
+        private static readonly int MaxMastery = 10000; // maximum stored mastery points
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
 
         private static PrefabGUID vBloodType = new(1557174542);
