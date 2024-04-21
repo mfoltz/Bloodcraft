@@ -23,7 +23,7 @@ namespace Cobalt.Systems.Weapon
         {
             public class WeaponFocusSystem
             {
-                public enum StatType
+                public enum WeaponStatType
                 {
                     MaxHealth,
                     CastSpeed,
@@ -36,53 +36,53 @@ namespace Cobalt.Systems.Weapon
                     SpellCritDamage
                 }
 
-                public static readonly Dictionary<int, StatType> FocusStatMap = new()
+                public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
                 {
-                { 0, StatType.MaxHealth },
-                { 1, StatType.CastSpeed },
-                { 2, StatType.AttackSpeed },
-                { 3, StatType.PhysicalPower },
-                { 4, StatType.SpellPower },
-                { 5, StatType.PhysicalCritChance },
-                { 6, StatType.PhysicalCritDamage },
-                { 7, StatType.SpellCritChance },
-                { 8, StatType.SpellCritDamage }
+                { 0, WeaponStatType.MaxHealth },
+                { 1, WeaponStatType.CastSpeed },
+                { 2, WeaponStatType.AttackSpeed },
+                { 3, WeaponStatType.PhysicalPower },
+                { 4, WeaponStatType.SpellPower },
+                { 5, WeaponStatType.PhysicalCritChance },
+                { 6, WeaponStatType.PhysicalCritDamage },
+                { 7, WeaponStatType.SpellCritChance },
+                { 8, WeaponStatType.SpellCritDamage }
                 };
 
-                public class StatCaps
+                public class WeaponStatCaps
                 {
-                    private static Dictionary<StatType, float> baseCaps = new()
+                    private static Dictionary<WeaponStatType, float> baseCaps = new()
                     {
-                        {StatType.MaxHealth, 1000f},
-                        {StatType.CastSpeed, 1f},
-                        {StatType.AttackSpeed, 1f},
-                        {StatType.PhysicalPower, 50},
-                        {StatType.SpellPower, 50},
-                        {StatType.PhysicalCritChance, 0.5f},
-                        {StatType.PhysicalCritDamage, 2f},
-                        {StatType.SpellCritChance, 0.5f},
-                        {StatType.SpellCritDamage, 2f}
+                        {WeaponStatType.MaxHealth, 1000f},
+                        {WeaponStatType.CastSpeed, 1f},
+                        {WeaponStatType.AttackSpeed, 1f},
+                        {WeaponStatType.PhysicalPower, 50},
+                        {WeaponStatType.SpellPower, 50},
+                        {WeaponStatType.PhysicalCritChance, 0.5f},
+                        {WeaponStatType.PhysicalCritDamage, 2f},
+                        {WeaponStatType.SpellCritChance, 0.5f},
+                        {WeaponStatType.SpellCritDamage, 2f}
                     };
 
-                    public static Dictionary<StatType, float> BaseCaps { get => baseCaps; set => baseCaps = value; }
+                    public static Dictionary<WeaponStatType, float> BaseCaps { get => baseCaps; set => baseCaps = value; }
                 }
 
-                public class StatIncreases
+                public class WeaponStatIncreases
                 {
-                    private static Dictionary<StatType, (float Increase, int MasteryCost)> baseIncreases = new()
+                    private static Dictionary<WeaponStatType, (float Increase, int MasteryCost)> baseIncreases = new()
                     {
-                        {StatType.MaxHealth, (1f, 10)},
-                        {StatType.CastSpeed, (0.01f, 100)},
-                        {StatType.AttackSpeed, (0.01f, 100)},
-                        {StatType.PhysicalPower, (0.5f, 25)},
-                        {StatType.SpellPower, (0.5f, 25)},
-                        {StatType.PhysicalCritChance, (0.01f, 50)},
-                        {StatType.PhysicalCritDamage, (0.05f, 50)},
-                        {StatType.SpellCritChance, (0.01f, 50)},
-                        {StatType.SpellCritDamage, (0.05f, 50)}
+                        {WeaponStatType.MaxHealth, (1f, 10)},
+                        {WeaponStatType.CastSpeed, (0.01f, 100)},
+                        {WeaponStatType.AttackSpeed, (0.01f, 100)},
+                        {WeaponStatType.PhysicalPower, (0.5f, 25)},
+                        {WeaponStatType.SpellPower, (0.5f, 25)},
+                        {WeaponStatType.PhysicalCritChance, (0.01f, 50)},
+                        {WeaponStatType.PhysicalCritDamage, (0.05f, 50)},
+                        {WeaponStatType.SpellCritChance, (0.01f, 50)},
+                        {WeaponStatType.SpellCritDamage, (0.05f, 50)}
                     };
 
-                    public static Dictionary<StatType, (float Increase, int MasteryCost)> BaseIncreases
+                    public static Dictionary<WeaponStatType, (float Increase, int MasteryCost)> BaseIncreases
                     {
                         get => baseIncreases;
                         set => baseIncreases = value;

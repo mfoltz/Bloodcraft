@@ -58,36 +58,43 @@ namespace Cobalt.Systems.Bloodline
             var steamId = userEntity.Read<User>().PlatformId;
 
             UnitStats stats = entityManager.GetComponentData<UnitStats>(player);
-            Health health = entityManager.GetComponentData<Health>(player);
-            UpdateStats(player, stats, health, steamId, entityManager);
+            UpdateStats(player, stats, steamId, entityManager);
         }
 
-        public static void UpdateStats(Entity player, UnitStats stats, Health health, ulong steamId, EntityManager entityManager)
+        public static void UpdateStats(Entity player, UnitStats stats, ulong steamId, EntityManager entityManager)
         {
             if (!DataStructures.PlayerBloodlineStats.TryGetValue(steamId, out PlayerBloodlineStats bloodStats))
             {
                 return; // No bloodline stats to check
             }
 
-            UpdateStatIfIncreased(player, entityManager, ref health.MaxHealth, bloodStats.MaxHealth, health.MaxHealth._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.AttackSpeed, bloodStats.CastSpeed, stats.AttackSpeed._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PrimaryAttackSpeed, bloodStats.AttackSpeed, stats.PrimaryAttackSpeed._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalPower, bloodStats.PhysicalPower, stats.PhysicalPower._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.SpellPower, bloodStats.SpellPower, stats.SpellPower._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalCriticalStrikeChance, bloodStats.PhysicalCritChance, stats.PhysicalCriticalStrikeChance._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalCriticalStrikeDamage, bloodStats.PhysicalCritDamage, stats.PhysicalCriticalStrikeDamage._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.SpellCriticalStrikeChance, bloodStats.SpellCritChance, stats.SpellCriticalStrikeChance._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.SpellCriticalStrikeDamage, bloodStats.SpellCritDamage, stats.SpellCriticalStrikeDamage._Value);
+            UpdateStatIfIncreased(player, entityManager, ref stats.ResourceYieldModifier, bloodStats.ResourceYield, stats.ResourceYieldModifier._Value);
+            UpdateStatIfIncreased(player, entityManager, ref stats.ReducedResourceDurabilityLoss, bloodStats.DurabilityLoss, stats.ReducedResourceDurabilityLoss._Value);
+            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalResistance, bloodStats.PhysicalResistance, stats.PhysicalResistance._Value);
+            UpdateStatIfIncreased(player, entityManager, ref stats.SpellResistance, bloodStats.SpellResistance, stats.SpellResistance._Value);
+            UpdateStatIfIncreasedInt(player, entityManager, ref stats.SunResistance, bloodStats.SunResistance, stats.SunResistance._Value);
+            UpdateStatIfIncreasedInt(player, entityManager, ref stats.FireResistance, bloodStats.FireResistance, stats.FireResistance._Value);
+            UpdateStatIfIncreasedInt(player, entityManager, ref stats.HolyResistance, bloodStats.HolyResistance, stats.HolyResistance._Value);
+            UpdateStatIfIncreasedInt(player, entityManager, ref stats.SilverResistance, bloodStats.SilverResistance, stats.SilverResistance._Value);
+            UpdateStatIfIncreased(player, entityManager, ref stats.PassiveHealthRegen, bloodStats.PassiveHealthRegene, stats.PassiveHealthRegen._Value);
 
             player.Write(stats); // Assuming there's at least one stat update
         }
 
-        public static void UpdateStatIfIncreased(Entity player, EntityManager entityManager, ref ModifiableFloat currentStat, float masteryIncrease, float currentStatValue)
+        public static void UpdateStatIfIncreased(Entity player, EntityManager entityManager, ref ModifiableFloat currentStat, float bloodIncrease, float currentStatValue)
         {
-            float newStatValue = currentStatValue + masteryIncrease;
+            float newStatValue = currentStatValue + bloodIncrease;
             if (newStatValue > currentStat._Value)
             {
-                currentStat = ModifiableFloat.Create(player, entityManager, newStatValue);
+                currentStat._Value = newStatValue;
+            }
+        }
+        public static void UpdateStatIfIncreasedInt(Entity player, EntityManager entityManager, ref ModifiableInt currentStat, float bloodIncrease, int currentStatValue)
+        {
+            int newStatValue = (int)(currentStatValue + bloodIncrease);
+            if (newStatValue > currentStat._Value)
+            {
+                currentStat._Value = newStatValue;
             }
         }
 

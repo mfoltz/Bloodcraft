@@ -10,7 +10,7 @@ namespace Cobalt.Core.Commands
             var SteamID = ctx.Event.User.PlatformId;
             if (DataStructures.PlayerMastery.TryGetValue(SteamID, out var mastery))
             {
-                ctx.Reply($"You have <color=white>{mastery.Key}</color> mastery points. To spend them, use ");
+                ctx.Reply($"You have <color=white>{mastery.Key}</color> blood points. To spend them, use ");
             }
             else
             {
@@ -30,7 +30,7 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Bloodline progress logging is now {(bools["BloodlineLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "setBloodlineProgress", shortHand: "sbp", adminOnly: false, usage: ".sbp [Player] [BloodlinePoints]", description: "Sets player bloodline points.")]
+        [Command(name: "setBloodlineProgress", shortHand: "sbp", adminOnly: false, usage: ".sbp [Player] [BloodlinePoints]", description: "Sets player blood points.")]
         public static void SetMasteryCommand(ChatCommandContext ctx, string name, int value)
         {
 

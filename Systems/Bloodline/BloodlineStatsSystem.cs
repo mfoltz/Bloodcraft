@@ -7,81 +7,85 @@ namespace Cobalt.Systems.Bloodline
     {
         public class PlayerBloodlineStats
         {
-            public float MaxHealth { get; set; }
-            public float CastSpeed { get; set; }
-            public float AttackSpeed { get; set; }
-            public float PhysicalPower { get; set; }
-            public float SpellPower { get; set; }
-            public float PhysicalCritChance { get; set; }
-            public float PhysicalCritDamage { get; set; }
-            public float SpellCritChance { get; set; }
-            public float SpellCritDamage { get; set; }
+            public float ResourceYield { get; set; }
+            public float DurabilityLoss { get; set; }
+            public float PhysicalResistance { get; set; }
+            public float SpellResistance { get; set; }
+            public float SunResistance { get; set; }
+            public float FireResistance { get; set; }
+            public float HolyResistance { get; set; }
+            public float SilverResistance { get; set; }
+            public float PassiveHealthRegene { get; set; }
         }
 
         public class BloodlineStatManager
         {
             public class BloodFocusSystem
             {
-                public enum StatType
+                public enum BloodStatType
                 {
-                    MaxHealth,
-                    CastSpeed,
-                    AttackSpeed,
-                    PhysicalPower,
-                    SpellPower,
-                    PhysicalCritChance,
-                    PhysicalCritDamage,
-                    SpellCritChance,
-                    SpellCritDamage
+                    ResourceYield,
+                    DurabilityLoss,
+                    PhysicalResistance,
+                    SpellResistance,
+                    SunResistance,
+                    FireResistance,
+                    HolyResistance,
+                    SilverResistance,
+                    PassiveHealthRegene
                 }
 
-                public static readonly Dictionary<int, StatType> FocusStatMap = new()
+                public static readonly Dictionary<int, BloodStatType> BloodStatMap = new()
                 {
-                { 0, StatType.MaxHealth },
-                { 1, StatType.CastSpeed },
-                { 2, StatType.AttackSpeed },
-                { 3, StatType.PhysicalPower },
-                { 4, StatType.SpellPower },
-                { 5, StatType.PhysicalCritChance },
-                { 6, StatType.PhysicalCritDamage },
-                { 7, StatType.SpellCritChance },
-                { 8, StatType.SpellCritDamage }
+                { 0, BloodStatType.ResourceYield },
+                { 1, BloodStatType.DurabilityLoss },
+                { 2, BloodStatType.PhysicalResistance },
+                { 3, BloodStatType.SpellResistance },
+                { 4, BloodStatType.SunResistance },
+                { 5, BloodStatType.FireResistance },
+                { 6, BloodStatType.HolyResistance },
+                { 7, BloodStatType.SilverResistance },
+                { 8, BloodStatType.PassiveHealthRegene }
                 };
 
-                public class StatCaps
+                public class BloodStatCaps
                 {
-                    private static Dictionary<StatType, float> baseCaps = new()
+                    private static Dictionary<BloodStatType, float> baseCaps = new()
                     {
-                        {StatType.MaxHealth, 1000f},
-                        {StatType.CastSpeed, 0.5f},
-                        {StatType.AttackSpeed, 0.5f},
-                        {StatType.PhysicalPower, 50},
-                        {StatType.SpellPower, 50},
-                        {StatType.PhysicalCritChance, 0.5f},
-                        {StatType.PhysicalCritDamage, 2f},
-                        {StatType.SpellCritChance, 0.5f},
-                        {StatType.SpellCritDamage, 2f}
+                        {BloodStatType.ResourceYield, 1f},
+                        {BloodStatType.DurabilityLoss, 1f},
+                        {BloodStatType.PhysicalResistance, 0.25f},
+                        {BloodStatType.SpellResistance, 0.25f},
+                        {BloodStatType.SunResistance, 100f},
+                        {BloodStatType.FireResistance, 100f},
+                        {BloodStatType.HolyResistance, 100f},
+                        {BloodStatType.SilverResistance, 100f},
+                        {BloodStatType.PassiveHealthRegene, 2.5f}
                     };
 
-                    public static Dictionary<StatType, float> BaseCaps { get => baseCaps; set => baseCaps = value; }
+                    public static Dictionary<BloodStatType, float> BaseCaps 
+                    { 
+                        get => baseCaps; 
+                        set => baseCaps = value; 
+                    }
                 }
 
-                public class StatIncreases
+                public class BloodStatIncreases
                 {
-                    private static Dictionary<StatType, (float Increase, int MasteryCost)> baseIncreases = new()
+                    private static Dictionary<BloodStatType, (float Increase, int BloodCost)> baseIncreases = new()
                     {
-                        {StatType.MaxHealth, (1f, 10)},
-                        {StatType.CastSpeed, (0.01f, 100)},
-                        {StatType.AttackSpeed, (0.01f, 100)},
-                        {StatType.PhysicalPower, (0.5f, 25)},
-                        {StatType.SpellPower, (0.5f, 25)},
-                        {StatType.PhysicalCritChance, (0.01f, 50)},
-                        {StatType.PhysicalCritDamage, (0.05f, 50)},
-                        {StatType.SpellCritChance, (0.01f, 50)},
-                        {StatType.SpellCritDamage, (0.05f, 50)}
+                        {BloodStatType.ResourceYield, (0.01f, 100)},
+                        {BloodStatType.DurabilityLoss, (0.01f, 50)},
+                        {BloodStatType.PhysicalResistance, (0.01f, 150)},
+                        {BloodStatType.SpellResistance, (0.01f, 150)},
+                        {BloodStatType.SunResistance, (1f, 50)},
+                        {BloodStatType.FireResistance, (1f, 50)},
+                        {BloodStatType.HolyResistance, (1f, 50)},
+                        {BloodStatType.SilverResistance, (1f, 50)},
+                        {BloodStatType.PassiveHealthRegene, (0.05f, 100)}
                     };
 
-                    public static Dictionary<StatType, (float Increase, int MasteryCost)> BaseIncreases
+                    public static Dictionary<BloodStatType, (float Increase, int BloodCost)> BaseIncreases
                     {
                         get => baseIncreases;
                         set => baseIncreases = value;

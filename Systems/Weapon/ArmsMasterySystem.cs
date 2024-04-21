@@ -87,7 +87,7 @@ namespace Cobalt.Systems.Weapon
             float newStatValue = currentStatValue + masteryIncrease;
             if (newStatValue > currentStat._Value)
             {
-                currentStat = ModifiableFloat.Create(player, entityManager, newStatValue);
+                currentStat._Value = newStatValue;
             }
         }
 

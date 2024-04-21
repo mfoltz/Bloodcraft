@@ -9,7 +9,7 @@ using System.Reflection;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem;
-using StatType = Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem.StatType;
+using WeaponStatType = Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem.WeaponStatType;
 
 namespace Cobalt.Core
 {
@@ -58,9 +58,9 @@ namespace Cobalt.Core
 
         private static void UpdateStatCaps(VampireStatModifiers vampireStatModifiers)
         {
-            StatCaps.BaseCaps[StatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
-            StatCaps.BaseCaps[StatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
-            StatCaps.BaseCaps[StatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
+            WeaponStatCaps.BaseCaps[WeaponStatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
+            WeaponStatCaps.BaseCaps[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
+            WeaponStatCaps.BaseCaps[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
         }
 
         private static void InitConfig()
