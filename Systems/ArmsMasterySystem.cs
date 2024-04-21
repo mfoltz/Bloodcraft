@@ -1,6 +1,5 @@
 ﻿using Bloodstone.API;
 using Cobalt.Core;
-using KindredCommands;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
@@ -8,7 +7,7 @@ using static Cobalt.Systems.WeaponStatsSystem;
 
 namespace Cobalt.Systems
 {
-    public class ArmsSystem
+    public class ArmsMasterySystem
     {
         private static readonly float MasteryMultiplier = 5; // mastery points multiplier from normal units
         private static readonly int MaxMastery = 1000; // maximum stored mastery points

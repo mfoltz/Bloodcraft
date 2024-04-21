@@ -1,7 +1,7 @@
-﻿using HarmonyLib;
+﻿using Cobalt.Core;
+using HarmonyLib;
 using ProjectM;
 using Unity.Entities;
-using Cobalt.Core;
 
 namespace Cobalt.Hooks
 {

@@ -19,7 +19,6 @@ namespace VPlus.Hooks
             ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
             Entity userEntity = serverClient.UserEntity;
             User user = __instance.EntityManager.GetComponentData<User>(userEntity);
-            Entity playerEntity = user.LocalCharacter.GetEntityOnServer();
             ulong steamId = user.PlatformId;
 
             if (!DataStructures.PlayerBools.ContainsKey(steamId))

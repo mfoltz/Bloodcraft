@@ -1,6 +1,5 @@
 ﻿using Bloodstone.API;
 using Cobalt.Core;
-using KindredCommands;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;

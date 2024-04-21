@@ -4,6 +4,7 @@ using ProjectM;
 using Unity.Collections;
 
 namespace OpenRPG.Hooks;
+
 [HarmonyPatch]
 public class DeathEventListenerSystem_Patch
 {
@@ -12,13 +13,20 @@ public class DeathEventListenerSystem_Patch
     public static void Postfix(DeathEventListenerSystem __instance)
     {
         NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
-        foreach (DeathEvent ev in deathEvents)
+        try
         {
-            if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
+            foreach (DeathEvent ev in deathEvents)
             {
-                ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
-				ArmsSystem.UpdateMastery(ev.Killer, ev.Died);
-			}
+                if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
+                {
+                    ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
+                    ArmsMasterySystem.UpdateMastery(ev.Killer, ev.Died);
+                }
+            }
+        }
+        finally
+        {
+            deathEvents.Dispose();
         }
     }
 }

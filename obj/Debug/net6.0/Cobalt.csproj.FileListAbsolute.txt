@@ -5,3 +5,10 @@ C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.AssemblyInfoInputs.ca
 C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.AssemblyInfo.cs
 C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.csproj.CoreCompileInputs.cache
 C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.sourcelink.json
+C:\Users\mitch\Source\Repos\Cobalt\bin\Debug\net6.0\Cobalt.deps.json
+C:\Users\mitch\Source\Repos\Cobalt\bin\Debug\net6.0\Cobalt.dll
+C:\Users\mitch\Source\Repos\Cobalt\bin\Debug\net6.0\Cobalt.pdb
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.dll
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\refint\Cobalt.dll
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.pdb
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\ref\Cobalt.dll

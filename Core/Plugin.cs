@@ -6,12 +6,8 @@ using Cobalt.Hooks;
 using HarmonyLib;
 using ProjectM;
 using System.Reflection;
-using System.Text.Json;
-using Unity.Collections;
 using Unity.Entities;
 using VampireCommandFramework;
-using VRising.GameData;
-using static Cobalt.Systems.WeaponStatsSystem;
 using static Cobalt.Systems.WeaponStatsSystem.StatManager.FocusSystem;
 using StatType = Cobalt.Systems.WeaponStatsSystem.StatManager.FocusSystem.StatType;
 
@@ -43,7 +39,6 @@ namespace Cobalt.Core
             CommandRegistry.RegisterAll();
             InitConfig();
             ServerEventsPatch.OnGameDataInitialized += GameDataOnInitialize;
-            GameData.OnInitialize += GameDataOnInitialize;
             LoadAllData();
             UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
