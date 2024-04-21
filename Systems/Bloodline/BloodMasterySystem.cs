@@ -9,7 +9,7 @@ namespace Cobalt.Systems.Bloodline
 {
     public class BloodMasterySystem
     {
-        private static readonly float BloodlineMultiplier = 0.5f; // mastery points multiplier from normal units
+        private static readonly float BloodlineMultiplier = 1f; // mastery points multiplier from normal units
         private static readonly int MaxBloodline = 10000; // maximum stored mastery points
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
 
