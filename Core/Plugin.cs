@@ -8,8 +8,8 @@ using ProjectM;
 using System.Reflection;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.WeaponStatsSystem.StatManager.FocusSystem;
-using StatType = Cobalt.Systems.WeaponStatsSystem.StatManager.FocusSystem.StatType;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem;
+using StatType = Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem.StatType;
 
 namespace Cobalt.Core
 {
@@ -27,8 +27,10 @@ namespace Cobalt.Core
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.ConfigPath, "player_experience.json");
         public static readonly string PlayerMasteryJson = Path.Combine(Plugin.ConfigPath, "player_mastery.json");
+        public static readonly string PlayerBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_bloodline.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
-        public static readonly string PlayerStatsJson = Path.Combine(Plugin.ConfigPath, "player_stats.json");
+        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
+        public static readonly string PlayerBloodlineStatsJson = Path.Combine(Plugin.ConfigPath, "player_bloodline_stats.json");
 
         public override void Load()
         {
@@ -52,7 +54,6 @@ namespace Cobalt.Core
         {
             VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
             UpdateStatCaps(vampireStatModifiers);
-            UpdateStatIncreases(vampireStatModifiers);
         }
 
         private static void UpdateStatCaps(VampireStatModifiers vampireStatModifiers)
@@ -60,21 +61,6 @@ namespace Cobalt.Core
             StatCaps.BaseCaps[StatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
             StatCaps.BaseCaps[StatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
             StatCaps.BaseCaps[StatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
-        }
-
-        private static void UpdateStatIncreases(VampireStatModifiers vampireStatModifiers)
-        {
-            // Update MaxHealth
-            var (Increase, MasteryCost) = StatIncreases.BaseIncreases[StatType.MaxHealth];
-            StatIncreases.BaseIncreases[StatType.MaxHealth] = (Increase * vampireStatModifiers.MaxHealthModifier, MasteryCost);
-
-            // Update PhysicalPower
-            var physicalPowerData = StatIncreases.BaseIncreases[StatType.PhysicalPower];
-            StatIncreases.BaseIncreases[StatType.PhysicalPower] = (physicalPowerData.Increase * vampireStatModifiers.PhysicalPowerModifier, physicalPowerData.MasteryCost);
-
-            // Update SpellPower
-            var spellPowerData = StatIncreases.BaseIncreases[StatType.SpellPower];
-            StatIncreases.BaseIncreases[StatType.SpellPower] = (spellPowerData.Increase * vampireStatModifiers.SpellPowerModifier, spellPowerData.MasteryCost);
         }
 
         private static void InitConfig()
@@ -98,16 +84,20 @@ namespace Cobalt.Core
         {
             DataStructures.SavePlayerExperience();
             DataStructures.SavePlayerMastery();
+            DataStructures.SavePlayerBloodLine();
             DataStructures.SavePlayerBools();
-            DataStructures.SavePlayerStats();
+            DataStructures.SavePlayerWeaponStats();
+            DataStructures.SavePlayerBloodlineStats();
         }
 
         private static void LoadAllData()
         {
             DataStructures.LoadPlayerExperience();
             DataStructures.LoadPlayerMastery();
+            DataStructures.LoadPlayerBloodLine();
             DataStructures.LoadPlayerBools();
-            DataStructures.LoadPlayerStats();
+            DataStructures.LoadPlayerWeaponStats();
+            DataStructures.LoadPlayerBloodlineStats();
         }
 
         public void OnGameInitialized()

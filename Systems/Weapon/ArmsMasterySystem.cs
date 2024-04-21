@@ -3,9 +3,9 @@ using Cobalt.Core;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
-using static Cobalt.Systems.WeaponStatsSystem;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 
-namespace Cobalt.Systems
+namespace Cobalt.Systems.Weapon
 {
     public class ArmsMasterySystem
     {
@@ -45,7 +45,7 @@ namespace Cobalt.Systems
 
             if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["MasteryLogging"])
             {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"You've gained <color=white>{MasteryValue}</color> mastery points!");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"You've gained <color=cyan>{MasteryValue}</color> mastery experience.");
             }
             HandleUpdate(Killer, entityManager);
         }
@@ -64,7 +64,7 @@ namespace Cobalt.Systems
 
         public static void UpdateStats(Entity player, UnitStats stats, Health health, ulong steamId, EntityManager entityManager)
         {
-            if (!DataStructures.PlayerStats.TryGetValue(steamId, out PlayerStats masteryStats))
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out PlayerWeaponStats masteryStats))
             {
                 return; // No mastery stats to check
             }
@@ -98,18 +98,18 @@ namespace Cobalt.Systems
             {
                 if (Value + Mastery.Key > MaxMastery)
                 {
-                    KeyValuePair<int, DateTime> WeaponMastery = new(MaxMastery, DateTime.Now);
+                    KeyValuePair<int, float> WeaponMastery = new(MaxMastery, 0f);
                     DataStructures.PlayerMastery[SteamID] = WeaponMastery;
                 }
                 else
                 {
-                    KeyValuePair<int, DateTime> WeaponMastery = new(Value + Mastery.Key, DateTime.Now);
+                    KeyValuePair<int, float> WeaponMastery = new(Value + Mastery.Key, 0f);
                     DataStructures.PlayerMastery[SteamID] = WeaponMastery;
                 }
             }
             else
             {
-                KeyValuePair<int, DateTime> WeaponMastery = new(Value, DateTime.Now);
+                KeyValuePair<int, float> WeaponMastery = new(Value, 0f);
                 DataStructures.PlayerMastery.Add(SteamID, WeaponMastery);
             }
 

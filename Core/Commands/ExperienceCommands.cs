@@ -31,7 +31,7 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Experience progress logging is now {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "set", shortHand: "s", adminOnly: true, usage: ".set [Player] [Level]", description: "Sets player level.")]
+        [Command(name: "setExperienceProgress", shortHand: "sep", adminOnly: true, usage: ".sep [Player] [ExperiencePoints]", description: "Sets player experience.")]
         public static void MasterySetCommand(ChatCommandContext ctx, string name, int value)
         {
 

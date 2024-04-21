@@ -1,5 +1,7 @@
 using Cobalt.Core;
 using Cobalt.Systems;
+using Cobalt.Systems.Bloodline;
+using Cobalt.Systems.Weapon;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
@@ -22,6 +24,7 @@ public class DeathEventListenerSystem_Patch
                 {
                     ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
                     ArmsMasterySystem.UpdateMastery(ev.Killer, ev.Died);
+                    BloodMasterySystem.UpdateBloodline(ev.Killer, ev.Died);
                 }
             }
         }

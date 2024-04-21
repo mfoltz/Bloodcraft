@@ -1,11 +1,11 @@
 ﻿using Bloodstone.API;
 using ProjectM;
 
-namespace Cobalt.Systems
+namespace Cobalt.Systems.Bloodline
 {
-    public class WeaponStatsSystem
+    public class BloodlineStatsSystem
     {
-        public class PlayerStats
+        public class PlayerBloodlineStats
         {
             public float MaxHealth { get; set; }
             public float CastSpeed { get; set; }
@@ -18,11 +18,9 @@ namespace Cobalt.Systems
             public float SpellCritDamage { get; set; }
         }
 
-        public class StatManager
+        public class BloodlineStatManager
         {
-            private static readonly ServerGameSettingsSystem serverGameSettingsSystem = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>();
-
-            public class FocusSystem
+            public class BloodFocusSystem
             {
                 public enum StatType
                 {
@@ -55,8 +53,8 @@ namespace Cobalt.Systems
                     private static Dictionary<StatType, float> baseCaps = new()
                     {
                         {StatType.MaxHealth, 1000f},
-                        {StatType.CastSpeed, 1f},
-                        {StatType.AttackSpeed, 1f},
+                        {StatType.CastSpeed, 0.5f},
+                        {StatType.AttackSpeed, 0.5f},
                         {StatType.PhysicalPower, 50},
                         {StatType.SpellPower, 50},
                         {StatType.PhysicalCritChance, 0.5f},
@@ -73,14 +71,14 @@ namespace Cobalt.Systems
                     private static Dictionary<StatType, (float Increase, int MasteryCost)> baseIncreases = new()
                     {
                         {StatType.MaxHealth, (1f, 10)},
-                        {StatType.CastSpeed, (0.01f, 100)}, 
+                        {StatType.CastSpeed, (0.01f, 100)},
                         {StatType.AttackSpeed, (0.01f, 100)},
-                        {StatType.PhysicalPower, (0.5f, 25)}, 
+                        {StatType.PhysicalPower, (0.5f, 25)},
                         {StatType.SpellPower, (0.5f, 25)},
-                        {StatType.PhysicalCritChance, (0.01f, 50)}, // Decreased cost
-                        {StatType.PhysicalCritDamage, (0.05f, 50)}, // Increased cost
-                        {StatType.SpellCritChance, (0.01f, 50)}, // Decreased cost
-                        {StatType.SpellCritDamage, (0.05f, 50)} // Increased cost
+                        {StatType.PhysicalCritChance, (0.01f, 50)},
+                        {StatType.PhysicalCritDamage, (0.05f, 50)},
+                        {StatType.SpellCritChance, (0.01f, 50)},
+                        {StatType.SpellCritDamage, (0.05f, 50)}
                     };
 
                     public static Dictionary<StatType, (float Increase, int MasteryCost)> BaseIncreases

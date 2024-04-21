@@ -36,7 +36,7 @@ namespace Cobalt.Hooks
                 DataStructures.SavePlayerBools();
                 DataStructures.SavePlayerMastery();
                 DataStructures.SavePlayerExperience();
-                DataStructures.SavePlayerStats();
+                DataStructures.SavePlayerWeaponStats();
             }
         }
     }

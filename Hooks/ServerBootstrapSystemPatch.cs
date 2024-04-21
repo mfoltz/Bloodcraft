@@ -3,7 +3,8 @@ using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
-using static Cobalt.Systems.WeaponStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodlineStatsSystem;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks
@@ -36,19 +37,30 @@ namespace Cobalt.Hooks
 
             if (!DataStructures.PlayerExperience.ContainsKey(steamId))
             {
-                DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0));
+                DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerExperience();
             }
             if (!DataStructures.PlayerMastery.ContainsKey(steamId))
             {
-                DataStructures.PlayerMastery.Add(steamId, new KeyValuePair<int, DateTime>(0, DateTime.Now));
+                DataStructures.PlayerMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerMastery();
             }
-            if (!DataStructures.PlayerStats.ContainsKey(steamId))
+            if (!DataStructures.PlayerBloodline.ContainsKey(steamId))
             {
-                DataStructures.PlayerStats.Add(steamId, new PlayerStats());
-                DataStructures.SavePlayerStats();
+                DataStructures.PlayerBloodline.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerBloodLine();
             }
+            if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
+            {
+                DataStructures.PlayerWeaponStats.Add(steamId, new PlayerWeaponStats());
+                DataStructures.SavePlayerWeaponStats();
+            }
+            if (!DataStructures.PlayerBloodlineStats.ContainsKey(steamId))
+            {
+                DataStructures.PlayerBloodlineStats.Add(steamId, new PlayerBloodlineStats());
+                DataStructures.SavePlayerBloodlineStats();
+            }
+            
         }
     }
 }
