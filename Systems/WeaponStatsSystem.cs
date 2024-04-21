@@ -53,17 +53,17 @@ namespace Cobalt.Systems
                 public class StatCaps
                 {
                     private static Dictionary<StatType, float> baseCaps = new()
-                {
-                    {StatType.MaxHealth, 1000f},
-                    {StatType.CastSpeed, 1f},
-                    {StatType.AttackSpeed, 1f},
-                    {StatType.PhysicalPower, 50},
-                    {StatType.SpellPower, 50},
-                    {StatType.PhysicalCritChance, 0.5f},
-                    {StatType.PhysicalCritDamage, 2f},
-                    {StatType.SpellCritChance, 0.5f},
-                    {StatType.SpellCritDamage, 2f}
-                };
+                    {
+                        {StatType.MaxHealth, 1000f},
+                        {StatType.CastSpeed, 1f},
+                        {StatType.AttackSpeed, 1f},
+                        {StatType.PhysicalPower, 50},
+                        {StatType.SpellPower, 50},
+                        {StatType.PhysicalCritChance, 0.5f},
+                        {StatType.PhysicalCritDamage, 2f},
+                        {StatType.SpellCritChance, 0.5f},
+                        {StatType.SpellCritDamage, 2f}
+                    };
 
                     public static Dictionary<StatType, float> BaseCaps { get => baseCaps; set => baseCaps = value; }
                 }

@@ -40,7 +40,7 @@ namespace Cobalt.Core
             InitConfig();
             ServerEventsPatch.OnGameDataInitialized += GameDataOnInitialize;
             LoadAllData();
-            UpdateStats();
+            //UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
         }
 
