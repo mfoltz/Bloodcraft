@@ -1,8 +1,8 @@
 ﻿using ProjectM;
 using VampireCommandFramework;
-using VCreate.Core.Toolbox;
+using Cobalt.Core.Toolbox;
 
-namespace VCreate.Core.Converters
+namespace Cobalt.Core.Converters
 {
     public record struct FoundPrefabGuid(PrefabGUID Value);
     public class FoundPrefabConverter : CommandArgumentConverter<FoundPrefabGuid>

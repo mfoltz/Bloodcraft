@@ -7,7 +7,7 @@ using Unity;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace VCreate.Core.Toolbox;
+namespace Cobalt.Core.Toolbox;
 
 public static class ECSExtensions
 {

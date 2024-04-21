@@ -1,7 +1,7 @@
 using ProjectM;
 using System.Collections.ObjectModel;
 
-namespace VCreate.Data;
+namespace Cobalt.Data;
 internal static class Characters
 {
     

@@ -1,7 +1,7 @@
 ﻿using ProjectM;
 using System.Reflection;
 
-namespace VCreate.Data;
+namespace Cobalt.Data;
 
 public static class Prefabs
 {

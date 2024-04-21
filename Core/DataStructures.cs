@@ -1,15 +1,11 @@
 ﻿using System.Text.Json;
-using VCreate.Systems;
-namespace VCreate.Core
+using static Cobalt.Systems.WeaponStatsSystem;
+
+namespace Cobalt.Core
 {
     public class DataStructures
     {
         // Encapsulated fields with properties
-        private static readonly JsonSerializerOptions jsonOptions = new()
-        {
-            WriteIndented = false,
-            IncludeFields = true
-        };
 
         private static readonly JsonSerializerOptions prettyJsonOptions = new()
         {
@@ -17,112 +13,109 @@ namespace VCreate.Core
             IncludeFields = true
         };
 
-        private static Dictionary<ulong, Omnitool> playerSettings = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
+        private static Dictionary<ulong, KeyValuePair<int, DateTime>> playerMastery = [];
+        private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
+        private static Dictionary<ulong, PlayerStats> playerStats = [];
 
-        private static Dictionary<ulong, Dictionary<string, PetExperienceProfile>> playerPetsMap = [];
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
+        {
+            get => playerExperience;
+            set => playerExperience = value;
+        }
 
-        private static Dictionary<ulong, List<int>> unlockedPets = [];
+        public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
+        {
+            get => playerBools;
+            set => playerBools = value;
+        }
 
-        private static Dictionary<ulong, Dictionary<int, Dictionary<string, HashSet<int>>>> petBuffMap = [];
+        public static Dictionary<ulong, KeyValuePair<int, DateTime>> PlayerMastery
+        {
+            get => playerMastery;
+            set => playerMastery = value;
+        }
 
-        // Property for playerSettings if external access or modification is required
-        public static Dictionary<ulong, Omnitool> PlayerSettings
+        public static Dictionary<ulong, PlayerStats> PlayerStats
         {
-            get => playerSettings;
-            set => playerSettings = value;
+            get => playerStats;
+            set => playerStats = value;
         }
-        public static Dictionary<ulong, Dictionary<string, PetExperienceProfile>> PlayerPetsMap
+
+        private static readonly Dictionary<string, string> filePaths = new()
         {
-            get => playerPetsMap;
-            set => playerPetsMap = value;
-        }
-        public static Dictionary<ulong, List<int>> UnlockedPets
+            {"Experience", Plugin.PlayerExperienceJson},
+            {"Mastery", Plugin.PlayerMasteryJson},
+            {"Bools", Plugin.PlayerBoolsJson},
+            {"Stats", Plugin.PlayerStatsJson}
+        };
+
+        // Generic method to save any type of dictionary.
+
+        public static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
         {
-            get => unlockedPets;
-            set => unlockedPets = value;
-        }
-        public static Dictionary<ulong, Dictionary<int, Dictionary<string, HashSet<int>>>> PetBuffMap
-        {
-            get => petBuffMap;
-            set => petBuffMap = value;
-        }
-        public static void SavePlayerSettings()
-        {
+            string path = filePaths[key];
+            if (!File.Exists(path))
+            {
+                // If the file does not exist, create a new empty file to avoid errors on initial load.
+                File.Create(path).Dispose();
+                dataStructure = []; // Initialize as empty if file does not exist.
+                Plugin.Log.LogInfo($"{key} file created as it did not exist.");
+                return;
+            }
+
             try
             {
-                //string json = JsonSerializer.Serialize(playerSettings, prettyJsonOptions); // Consider using prettyJsonOptions if you want the output to be indented.
-                File.WriteAllText(Plugin.PlayerSettingsJson, JsonSerializer.Serialize(DataStructures.PlayerSettings));
+                string json = File.ReadAllText(path);
+                var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
+                dataStructure = data ?? []; // Ensure non-null assignment.
+                Plugin.Log.LogInfo($"{key} data loaded successfully.");
             }
             catch (IOException ex)
             {
-                // Handle file write exceptions
-                Plugin.Log.LogInfo($"An error occurred saving settings: {ex.Message}");
-
+                Plugin.Log.LogError($"Error reading {key} data from file: {ex.Message}");
+                dataStructure = []; // Provide default empty dictionary on error.
             }
             catch (JsonException ex)
             {
-                // Handle JSON serialization exceptions
-                Plugin.Log.LogInfo($"An error occurred during JSON serialization: {ex.Message}");
+                Plugin.Log.LogError($"JSON deserialization error when loading {key} data: {ex.Message}");
+                dataStructure = []; // Provide default empty dictionary on error.
             }
         }
-        public static void SavePetExperience()
+
+        public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
+
+        public static void LoadPlayerMastery() => LoadData(ref playerMastery, "Mastery");
+
+        public static void LoadPlayerBools() => LoadData(ref playerBools, "Bools");
+
+        public static void LoadPlayerStats() => LoadData(ref playerStats, "Stats");
+
+        public static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
+            string path = filePaths[key];
             try
             {
-                //string json = JsonSerializer.Serialize(playerSettings, prettyJsonOptions); // Consider using prettyJsonOptions if you want the output to be indented.
-                File.WriteAllText(Plugin.PetDataJson, JsonSerializer.Serialize(DataStructures.PlayerPetsMap));
+                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                File.WriteAllText(path, json);
+                Plugin.Log.LogInfo($"{key} data saved successfully.");
             }
             catch (IOException ex)
             {
-                // Handle file write exceptions
-                Plugin.Log.LogInfo($"An error occurred saving settings: {ex.Message}");
-
+                Plugin.Log.LogError($"Failed to write {key} data to file: {ex.Message}");
             }
             catch (JsonException ex)
             {
-                // Handle JSON serialization exceptions
-                Plugin.Log.LogInfo($"An error occurred during JSON serialization: {ex.Message}");
-            }
-        }
-        public static void SaveUnlockedPets()
-        {
-            try
-            {
-                //string json = JsonSerializer.Serialize(playerSettings, prettyJsonOptions); // Consider using prettyJsonOptions if you want the output to be indented.
-                File.WriteAllText(Plugin.UnlockedPetsJson, JsonSerializer.Serialize(DataStructures.UnlockedPets));
-            }
-            catch (IOException ex)
-            {
-                // Handle file write exceptions
-                Plugin.Log.LogInfo($"An error occurred saving settings: {ex.Message}");
-
-            }
-            catch (JsonException ex)
-            {
-                // Handle JSON serialization exceptions
-                Plugin.Log.LogInfo($"An error occurred during JSON serialization: {ex.Message}");
-            }
-        }
-        public static void SavePetBuffMap()
-        {
-            try
-            {
-                //string json = JsonSerializer.Serialize(playerSettings, prettyJsonOptions); // Consider using prettyJsonOptions if you want the output to be indented.
-                File.WriteAllText(Plugin.PetBuffMapJson, JsonSerializer.Serialize(DataStructures.PetBuffMap));
-            }
-            catch (IOException ex)
-            {
-                // Handle file write exceptions
-                Plugin.Log.LogInfo($"An error occurred saving settings: {ex.Message}");
-
-            }
-            catch (JsonException ex)
-            {
-                // Handle JSON serialization exceptions
-                Plugin.Log.LogInfo($"An error occurred during JSON serialization: {ex.Message}");
+                Plugin.Log.LogError($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
 
-        
+        public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
+
+        public static void SavePlayerMastery() => SaveData(PlayerMastery, "Mastery");
+
+        public static void SavePlayerBools() => SaveData(PlayerBools, "Bools");
+
+        public static void SavePlayerStats() => SaveData(PlayerStats, "Stats");
     }
 }

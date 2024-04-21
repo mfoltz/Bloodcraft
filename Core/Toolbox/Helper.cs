@@ -10,11 +10,11 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using VCreate.Core.Services;
-using VCreate.Data;
+using Cobalt.Core.Services;
+using Cobalt.Data;
 using Buff = ProjectM.Buff;
 
-namespace VCreate.Core.Toolbox;
+namespace Cobalt.Core.Toolbox;
 
 public static class Helper
 {

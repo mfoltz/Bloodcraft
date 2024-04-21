@@ -1,19 +1,12 @@
 using ProjectM;
 
-namespace VCreate.Data;
+namespace Cobalt.Data;
 
-public class Item
+public class Item(PrefabGUID prefabGUID, string formalPrefabName, string overrideName = "")
 {
-    public PrefabGUID PrefabGUID { get; }
-    public string FormalPrefabName { get; }
-    public string OverrideName { get; private set; }
-
-    public Item(PrefabGUID prefabGUID, string formalPrefabName, string overrideName = "")
-    {
-        PrefabGUID = prefabGUID;
-        FormalPrefabName = formalPrefabName;
-        OverrideName = overrideName;
-    }
+    public PrefabGUID PrefabGUID { get; } = prefabGUID;
+    public string FormalPrefabName { get; } = formalPrefabName;
+    public string OverrideName { get; private set; } = overrideName;
 
     public string GetName()
     {
@@ -23,8 +16,8 @@ public class Item
 
 public static class Items
 {
-    public static List<Item> GiveableItems = new List<Item>()
-    {
+    public static List<Item> GiveableItems =
+    [
         new Item(new PrefabGUID(1270271716), "Item_Ingredient_Battery", "Depleted Battery"),
         new Item(new PrefabGUID(-412448857), "Item_Ingredient_BatteryCharged", "Charged Battery"),
         new Item(new PrefabGUID(1821405450), "Item_Ingredient_Bone", "Bone"),
@@ -607,5 +600,5 @@ public static class Items
         new Item(Prefabs.Item_Weapon_Longbow_T07_DarkSilver, "Item_Weapon_Longbow_T07_DarkSilver", "Dark Silver Longbow"),
         new Item(Prefabs.Item_Weapon_Longbow_T08_Sanguine, "Item_Weapon_Longbow_T08_Sanguine", "Sanguine Longbow"),
         new Item(Prefabs.Item_Weapon_Longbow_T09_ShadowMatter, "Item_Weapon_Longbow_T09_ShadowMatter", "Shadow Longbow"),
-    };
+    ];
 }

@@ -1,9 +1,9 @@
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
-using VCreate.Core.Toolbox;
+using Cobalt.Core.Toolbox;
 
-namespace VCreate.Core.Services;
+namespace Cobalt.Core.Services;
 
 public static class PlayerService
 {

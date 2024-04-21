@@ -1,7 +1,7 @@
 ﻿using VampireCommandFramework;
-using VCreate.Core.Services;
+using Cobalt.Core.Services;
 
-namespace VCreate.Core.Converters
+namespace Cobalt.Core.Converters
 {
     public record FoundPlayer(PlayerService.Player Value);
     public class FoundPlayerConverter : CommandArgumentConverter<FoundPlayer>

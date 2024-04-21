@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using static VCreate.Core.Services.PlayerService;
 
-namespace VCreate.Core.Toolbox
+namespace Cobalt.Core.Toolbox
 {
     public static class Utilities
     {
