@@ -53,7 +53,7 @@ namespace Cobalt.Systems.Bloodline
                     private static Dictionary<BloodStatType, float> baseCaps = new()
                     {
                         {BloodStatType.ResourceYield, 1f},
-                        {BloodStatType.DurabilityLoss, 1f},
+                        {BloodStatType.DurabilityLoss, 2f},
                         {BloodStatType.PhysicalResistance, 0.25f},
                         {BloodStatType.SpellResistance, 0.25f},
                         {BloodStatType.SunResistance, 100f},
@@ -76,8 +76,8 @@ namespace Cobalt.Systems.Bloodline
                     {
                         {BloodStatType.ResourceYield, (0.01f, 100)},
                         {BloodStatType.DurabilityLoss, (0.01f, 50)},
-                        {BloodStatType.PhysicalResistance, (0.01f, 150)},
-                        {BloodStatType.SpellResistance, (0.01f, 150)},
+                        {BloodStatType.PhysicalResistance, (0.01f, 400)},
+                        {BloodStatType.SpellResistance, (0.01f, 400)},
                         {BloodStatType.SunResistance, (1f, 50)},
                         {BloodStatType.FireResistance, (1f, 50)},
                         {BloodStatType.HolyResistance, (1f, 50)},

@@ -136,8 +136,11 @@ namespace Cobalt.Systems
             }
             else
             {
-                int levelProgress = GetLevelProgress(SteamID);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You gained <color=white>{gainedXP}</color> experience points. (<color=yellow>{levelProgress}%</color>)");
+                if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
+                {
+                    int levelProgress = GetLevelProgress(SteamID);
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You gained <color=white>{gainedXP}</color> experience points. (<color=yellow>{levelProgress}%</color>)");
+                }
             }
         }
 

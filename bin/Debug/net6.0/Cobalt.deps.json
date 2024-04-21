@@ -15,7 +15,8 @@
           "HarmonyX": "2.10.1",
           "VRising.Bloodstone": "0.1.6",
           "VRising.Unhollowed.Client": "0.6.5.57575090",
-          "VRising.VampireCommandFramework": "0.8.2"
+          "VRising.VampireCommandFramework": "0.8.2",
+          "VRising.GameData": "0.3.3.0"
         },
         "runtime": {
           "Cobalt.dll": {}
@@ -1484,6 +1485,14 @@
             "fileVersion": "0.8.2.0"
           }
         }
+      },
+      "VRising.GameData/0.3.3.0": {
+        "runtime": {
+          "VRising.GameData.dll": {
+            "assemblyVersion": "0.3.3.0",
+            "fileVersion": "0.3.3.0"
+          }
+        }
       }
     }
   },
@@ -2136,6 +2145,11 @@
       "sha512": "sha512-VXLAtMTaTfGdcTC0/a9KZzYhMqRmrCLNAb5LCuT8GKaR6SlkU95a7eDEvlsR9cp5aHKPw3eu44uVZN3oH+qOtw==",
       "path": "vrising.vampirecommandframework/0.8.2",
       "hashPath": "vrising.vampirecommandframework.0.8.2.nupkg.sha512"
+    },
+    "VRising.GameData/0.3.3.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

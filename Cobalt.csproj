@@ -30,6 +30,12 @@
     <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.5.57575090" />
     <PackageReference Include="VRising.VampireCommandFramework" Version="0.8.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="VRising.GameData">
+      <HintPath>VRising.GameData.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 	<Target Name="CopyDLLsServer" AfterTargets="Build">
 		<Message Text="DLL to V Rising Server" Importance="High" />
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />

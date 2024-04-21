@@ -43,7 +43,7 @@ namespace Cobalt.Systems.Bloodline
             BloodValue = (int)(BloodValue * BloodlineMultiplier);
             SetBlood(SteamID, BloodValue);
 
-            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["MasteryLogging"])
+            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["BloodlineLogging"])
             {
                 ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"You've gained <color=pink>{BloodValue}</color> bloodline experience.");
             }

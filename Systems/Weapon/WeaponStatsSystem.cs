@@ -71,7 +71,7 @@ namespace Cobalt.Systems.Weapon
                 {
                     private static Dictionary<WeaponStatType, (float Increase, int MasteryCost)> baseIncreases = new()
                     {
-                        {WeaponStatType.MaxHealth, (1f, 10)},
+                        {WeaponStatType.MaxHealth, (10f, 100)},
                         {WeaponStatType.CastSpeed, (0.01f, 100)},
                         {WeaponStatType.AttackSpeed, (0.01f, 100)},
                         {WeaponStatType.PhysicalPower, (0.5f, 25)},
