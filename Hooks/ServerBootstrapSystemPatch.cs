@@ -27,10 +27,13 @@ namespace Cobalt.Hooks
                 {
                     { "MasteryLogging", false },
                     { "ExperienceLogging", false },
-                    { "BloodlineLogging", false }
+                    { "BloodlineLogging", false },
+                    { "ExperienceShare", false }
                 });
                 DataStructures.SavePlayerBools();
             }
+            
+
             if (!DataStructures.PlayerExperience.ContainsKey(steamId))
             {
                 DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0));

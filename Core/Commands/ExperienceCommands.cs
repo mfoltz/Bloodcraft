@@ -9,9 +9,9 @@ namespace Cobalt.Core.Commands
         public static void GetExperienceCommand(ChatCommandContext ctx)
         {
             var SteamID = ctx.Event.User.PlatformId;
-            if (DataStructures.PlayerMastery.TryGetValue(SteamID, out var mastery))
+            if (DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
             {
-                ctx.Reply($"You have <color=white>{mastery.Key}</color> mastery points. To spend them, use ");
+                ctx.Reply($"You have <color=white>{xpData.Key}</color> experience points.");
             }
             else
             {

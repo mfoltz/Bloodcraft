@@ -9,6 +9,7 @@ namespace Cobalt.Core
         public static void LogComponentTypes(this Entity entity)
         {
             NativeArray<ComponentType>.Enumerator enumerator = VWorld.Server.EntityManager.GetComponentTypes(entity).GetEnumerator();
+            Plugin.Log.LogInfo("===");
             while (enumerator.MoveNext())
             {
                 ComponentType current = enumerator.Current;

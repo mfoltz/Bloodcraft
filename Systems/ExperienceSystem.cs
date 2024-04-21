@@ -98,19 +98,18 @@ namespace Cobalt.Systems
             DataStructures.SavePlayerExperience();
         }
 
-        private static void CheckAndHandleLevelUp(Entity userEntity, ulong SteamID, int gainedXP)
+        private static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, int gainedXP)
         {
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
             EntityManager entityManager = VWorld.Server.EntityManager;
-            Entity character = userEntity.Read<User>().LocalCharacter._Entity;
+            Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
             int currentLevel = DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
             if (leveledUp)
             {
                 // apply level up buff here
-                string name = userEntity.Read<User>().CharacterName.ToString();
                 //Helper.BuffPlayerByName(name, levelUpBuff);
-                serverGameManager.InstantiateBuffEntityImmediate(userEntity, character, levelUpBuff);
+                serverGameManager.InstantiateBuffEntityImmediate(userEntity, characterEntity, levelUpBuff);
             }
             NotifyPlayer(entityManager, userEntity, SteamID, gainedXP, leveledUp);
         }

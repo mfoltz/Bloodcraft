@@ -9,7 +9,7 @@ namespace Cobalt.Systems
 {
     public class ArmsMasterySystem
     {
-        private static readonly float MasteryMultiplier = 5; // mastery points multiplier from normal units
+        private static readonly float MasteryMultiplier = 1; // mastery points multiplier from normal units
         private static readonly int MaxMastery = 10000; // maximum stored mastery points
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
 
@@ -37,7 +37,7 @@ namespace Cobalt.Systems
             {
                 isVBlood = false;
             }
-            int MasteryValue = (int)((VictimStats.SpellPower + VictimStats.PhysicalPower) / 2);
+            int MasteryValue = (int)((VictimStats.SpellPower + VictimStats.PhysicalPower) / 4);
             if (isVBlood) MasteryValue *= (int)VBloodMultiplier;
 
             MasteryValue = (int)(MasteryValue * MasteryMultiplier);
@@ -45,18 +45,17 @@ namespace Cobalt.Systems
 
             if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["MasteryLogging"])
             {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"You've gained <color=white>{MasteryValue}</color> points!");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"You've gained <color=white>{MasteryValue}</color> mastery points!");
             }
             HandleUpdate(Killer, entityManager);
         }
 
         public static void HandleUpdate(Entity player, EntityManager entityManager)
         {
-            var Owner = entityManager.GetComponentData<EntityOwner>(player).Owner;
-            if (!entityManager.HasComponent<PlayerCharacter>(Owner)) return;
+            if (!entityManager.HasComponent<PlayerCharacter>(player)) return;
 
-            var userEntity = entityManager.GetComponentData<PlayerCharacter>(Owner).UserEntity;
-            var steamId = entityManager.GetComponentData<User>(userEntity).PlatformId;
+            var userEntity = player.Read<PlayerCharacter>().UserEntity;
+            var steamId = userEntity.Read<User>().PlatformId;
 
             UnitStats stats = entityManager.GetComponentData<UnitStats>(player);
             Health health = entityManager.GetComponentData<Health>(player);
