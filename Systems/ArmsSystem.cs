@@ -1,6 +1,6 @@
 ﻿using Bloodstone.API;
 using Cobalt.Core;
-using Cobalt.Core.Toolbox;
+using KindredCommands;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
@@ -20,18 +20,18 @@ namespace Cobalt.Systems
         {
             EntityManager entityManager = VWorld.Server.EntityManager;
             if (Killer == Victim) return;
-            if (Utilities.HasComponent<Minion>(Victim)) return;
+            if (entityManager.HasComponent<Minion>(Victim)) return;
 
-            Entity userEntity = Utilities.GetComponentData<PlayerCharacter>(Killer).UserEntity;
-            User User = Utilities.GetComponentData<User>(userEntity);
+            Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
+            User User = entityManager.GetComponentData<User>(userEntity);
             ulong SteamID = User.PlatformId;
 
-            var VictimStats = Utilities.GetComponentData<UnitStats>(Victim);
+            var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
 
             bool isVBlood;
-            if (Utilities.HasComponent<BloodConsumeSource>(Victim))
+            if (entityManager.HasComponent<BloodConsumeSource>(Victim))
             {
-                BloodConsumeSource BloodSource = Utilities.GetComponentData<BloodConsumeSource>(Victim);
+                BloodConsumeSource BloodSource = entityManager.GetComponentData<BloodConsumeSource>(Victim);
                 isVBlood = BloodSource.UnitBloodType.Equals(vBloodType);
             }
             else
@@ -53,14 +53,14 @@ namespace Cobalt.Systems
 
         public static void HandleUpdate(Entity player, EntityManager entityManager)
         {
-            var Owner = Utilities.GetComponentData<EntityOwner>(player).Owner;
-            if (!Utilities.HasComponent<PlayerCharacter>(Owner)) return;
+            var Owner = entityManager.GetComponentData<EntityOwner>(player).Owner;
+            if (!entityManager.HasComponent<PlayerCharacter>(Owner)) return;
 
-            var userEntity = Utilities.GetComponentData<PlayerCharacter>(Owner).UserEntity;
-            var steamId = Utilities.GetComponentData<User>(userEntity).PlatformId;
+            var userEntity = entityManager.GetComponentData<PlayerCharacter>(Owner).UserEntity;
+            var steamId = entityManager.GetComponentData<User>(userEntity).PlatformId;
 
-            UnitStats stats = Utilities.GetComponentData<UnitStats>(player);
-            Health health = Utilities.GetComponentData<Health>(player);
+            UnitStats stats = entityManager.GetComponentData<UnitStats>(player);
+            Health health = entityManager.GetComponentData<Health>(player);
             UpdateStats(player, stats, health, steamId, entityManager);
         }
 

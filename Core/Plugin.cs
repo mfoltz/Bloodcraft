@@ -7,6 +7,7 @@ using HarmonyLib;
 using ProjectM;
 using System.Reflection;
 using System.Text.Json;
+using Unity.Collections;
 using Unity.Entities;
 using VampireCommandFramework;
 using VRising.GameData;

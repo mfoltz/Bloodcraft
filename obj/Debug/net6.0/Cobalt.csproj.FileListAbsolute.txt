@@ -1,0 +1,7 @@
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.csproj.AssemblyReference.cache
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\MyPluginInfo.cs
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.AssemblyInfoInputs.cache
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.AssemblyInfo.cs
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.csproj.CoreCompileInputs.cache
+C:\Users\mitch\Source\Repos\Cobalt\obj\Debug\net6.0\Cobalt.sourcelink.json

@@ -1,8 +1,9 @@
 ﻿using Bloodstone.API;
 using Cobalt.Core;
-using Cobalt.Core.Toolbox;
+using KindredCommands;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using Unity.Entities;
 
 namespace Cobalt.Systems
@@ -21,20 +22,21 @@ namespace Cobalt.Systems
 
         public static void EXPMonitor(Entity killerEntity, Entity victimEntity)
         {
-            if (!IsValidVictim(victimEntity)) return;
-            UpdateEXP(killerEntity, victimEntity);
+            EntityManager entityManager = VWorld.Server.EntityManager;
+            if (!IsValidVictim(entityManager, victimEntity)) return;
+            UpdateEXP(entityManager, killerEntity, victimEntity);
         }
 
-        private static bool IsValidVictim(Entity victimEntity)
+        private static bool IsValidVictim(EntityManager entityManager, Entity victimEntity)
         {
-            return !Utilities.HasComponent<Minion>(victimEntity) && Utilities.HasComponent<UnitLevel>(victimEntity);
+            return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
         }
 
-        private static void UpdateEXP(Entity killerEntity, Entity victimEntity)
+        private static void UpdateEXP(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
         {
-            PlayerCharacter player = Utilities.GetComponentData<PlayerCharacter>(killerEntity);
+            PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
             Entity userEntity = player.UserEntity;
-            User user = Utilities.GetComponentData<User>(userEntity);
+            User user = entityManager.GetComponentData<User>(userEntity);
             ulong SteamID = user.PlatformId;
 
             if (!DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
@@ -44,13 +46,13 @@ namespace Cobalt.Systems
 
             if (xpData.Key >= MaxLevel) return; // Check if already at max level
 
-            ProcessExperienceGain(killerEntity, victimEntity, SteamID);
+            ProcessExperienceGain(entityManager, killerEntity, victimEntity, SteamID);
         }
 
-        private static void ProcessExperienceGain(Entity killerEntity, Entity victimEntity, ulong SteamID)
+        private static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID)
         {
-            UnitLevel victimLevel = Utilities.GetComponentData<UnitLevel>(victimEntity);
-            bool isVBlood = IsVBlood(victimEntity);
+            UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
+            bool isVBlood = IsVBlood(entityManager, victimEntity);
 
             int gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
 
@@ -59,9 +61,9 @@ namespace Cobalt.Systems
             CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP);
         }
 
-        private static bool IsVBlood(Entity victimEntity)
+        private static bool IsVBlood(EntityManager entityManager, Entity victimEntity)
         {
-            return Utilities.HasComponent<BloodConsumeSource>(victimEntity) && Utilities.GetComponentData<BloodConsumeSource>(victimEntity).UnitBloodType.Equals(vBloodType);
+            return entityManager.HasComponent<BloodConsumeSource>(victimEntity) && entityManager.GetComponentData<BloodConsumeSource>(victimEntity).UnitBloodType.Equals(vBloodType);
         }
 
         private static int CalculateExperienceGained(int victimLevel, bool isVBlood)
@@ -99,14 +101,17 @@ namespace Cobalt.Systems
 
         private static void CheckAndHandleLevelUp(Entity userEntity, ulong SteamID, int gainedXP)
         {
+            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
             EntityManager entityManager = VWorld.Server.EntityManager;
+            Entity character = userEntity.Read<User>().LocalCharacter._Entity;
             int currentLevel = DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
             if (leveledUp)
             {
                 // apply level up buff here
                 string name = userEntity.Read<User>().CharacterName.ToString();
-                Helper.BuffPlayerByName(name, levelUpBuff);
+                //Helper.BuffPlayerByName(name, levelUpBuff);
+                serverGameManager.InstantiateBuffEntityImmediate(userEntity, character, levelUpBuff);
             }
             NotifyPlayer(entityManager, userEntity, SteamID, gainedXP, leveledUp);
         }
@@ -125,7 +130,7 @@ namespace Cobalt.Systems
 
         private static void NotifyPlayer(EntityManager entityManager, Entity userEntity, ulong SteamID, int gainedXP, bool leveledUp)
         {
-            User user = Utilities.GetComponentData<User>(userEntity);
+            User user = entityManager.GetComponentData<User>(userEntity);
             if (leveledUp)
             {
                 int newLevel = DataStructures.PlayerExperience[SteamID].Key;

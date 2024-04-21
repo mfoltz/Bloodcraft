@@ -3,7 +3,6 @@ using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
-using Cobalt.Core.Toolbox;
 
 namespace Cobalt.Hooks
 {
@@ -19,7 +18,7 @@ namespace Cobalt.Hooks
             {
                 foreach (var entity in entities)
                 {
-                    entity.LogComponentTypes();
+                    Utilities.LogComponentTypes(entity);
                 }
             }
             catch (Exception e)
