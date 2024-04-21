@@ -112,7 +112,6 @@ namespace Cobalt.Core
 
         public void OnGameInitialized()
         {
-            throw new NotImplementedException();
         }
     }
 }
