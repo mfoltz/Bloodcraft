@@ -1,123 +1,12 @@
-﻿using Bloodstone.API;
-using Cobalt.Core;
+﻿using Cobalt.Core;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.Scripting;
-using Stunlock.Core;
-using System.ComponentModel;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Properties;
-using UnityEngine.Jobs;
-using static UnityEngine.SpookyHash;
 
 namespace Cobalt.Hooks
 {
-    /*
-    [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
-    public static class EquipItemSystemPatches
-    {
-        public static void Prefix(EquipItemSystem __instance)
-        {
-            Plugin.Log.LogInfo("EquipItemSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    if (!entity.Has<FromCharacter>()) continue;
-                    Entity character = entity.Read<FromCharacter>().Character;
-                    GearOverride.SetLevel(character);
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogError($"Exited EquipItemSystem hook early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
-        public static void Postfix(EquipItemSystem __instance)
-        {
-            Plugin.Log.LogInfo("EquipItemSystem Postfix called...");
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    if (!entity.Has<FromCharacter>()) continue;
-                    Entity character = entity.Read<FromCharacter>().Character;
-                    GearOverride.SetLevel(character);
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogError($"Exited EquipItemSystem hook early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
-    public static class UnequipItemSystemPatch
-    {
-        public static void Prefix(UnEquipItemSystem __instance)
-        {
-            Plugin.Log.LogInfo("UnEquipItemSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    if (!entity.Has<FromCharacter>()) continue;
-                    Entity character = entity.Read<FromCharacter>().Character;
-                    GearOverride.SetLevel(character);
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogInfo($"Exited UnEquipItemSystem hook early {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
-        public static void Postfix(UnEquipItemSystem __instance)
-        {
-            Plugin.Log.LogInfo("UnEquipItemSystem Postfix called...");
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    if (!entity.Has<FromCharacter>()) continue;
-                    Entity character = entity.Read<FromCharacter>().Character;
-                    GearOverride.SetLevel(character);
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogError($"Exited UnEquipItemSystem hook early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-    }
-    */
-
-    [HarmonyPatch(typeof(EquipmentSystem), nameof(EquipmentSystem.OnUpdate))]
     [HarmonyPatch(typeof(EquipmentSystem), nameof(EquipmentSystem.OnUpdate))]
     public static class EquipmentSystemPatch
     {
@@ -130,10 +19,11 @@ namespace Cobalt.Hooks
                 foreach (var entity in entities)
                 {
                     //entity.LogComponentTypes();
-                    if (entity.Read<Equippable>().EquipTarget._Entity.Equals(Entity.Null)) continue;
+                    Entity player = entity.Read<Equippable>().EquipTarget._Entity;
+                    if (player.Equals(Entity.Null)) continue;
                     else
                     {
-                        GearOverride.SetLevel(entity.Read<Equippable>().EquipTarget._Entity);
+                        GearOverride.SetLevel(player);
                     }
                 }
             }
