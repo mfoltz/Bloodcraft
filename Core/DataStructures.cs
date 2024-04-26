@@ -30,10 +30,6 @@ namespace Cobalt.Core
             set => playerBools = value;
         }
 
-        
-
-       
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWoodcutting
         {
             get => playerWoodcutting;
@@ -96,11 +92,7 @@ namespace Cobalt.Core
 
         public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
 
-
-
-        public static void LoadPlayerBools() => LoadData(ref playerBools, "Bools");
-
-
+        public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
 
         public static void LoadPlayerWoodcutting() => LoadData(ref playerWoodcutting, "Woodcutting");
 
@@ -129,11 +121,7 @@ namespace Cobalt.Core
 
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
 
-
-
         public static void SavePlayerBools() => SaveData(PlayerBools, "Bools");
-
-
 
         public static void SavePlayerWoodcutting() => SaveData(PlayerWoodcutting, "Woodcutting");
 

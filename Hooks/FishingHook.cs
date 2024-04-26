@@ -28,8 +28,9 @@ public class FishingSystemPatch
                 {
                     if (entity.Equals(Entity.Null)) continue;
                     if (!entity.Has<Buff>()) continue;
-                    entity.LogComponentTypes();
+                    
                     if (!entity.Read<PrefabGUID>().GuidHash.Equals(1753229314)) continue; // AB_Fishing_Target_ReadyBuff
+                    entity.LogComponentTypes();
                     Entity character = entity.Read<Buff>().Target;
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
                     ulong steamId = user.PlatformId;

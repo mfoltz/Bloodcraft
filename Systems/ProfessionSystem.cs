@@ -12,9 +12,9 @@ namespace Cobalt.Systems
 {
     public class ProfessionSystem
     {
-        private static readonly float ProfessionMultiplier = 0.5f; // mastery points multiplier from normal units
-        private static readonly float ProfessionConstant = 1f; // constant for calculating level from xp
-        private static readonly int ProfessionXPPower = 2; // power for calculating level from xp
+        private static readonly float ProfessionMultiplier = 1f; // multiplier for profession experiene per harvest
+        private static readonly float ProfessionConstant = 0.5f; // constant for calculating level from xp
+        private static readonly int ProfessionXPPower = 3; // power for calculating level from xp
         private static readonly int MaxProfessionLevel = 99; // maximum level
 
         public static void UpdateProfessions(Entity Killer, Entity Victim)
@@ -103,13 +103,11 @@ namespace Cobalt.Systems
                 int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level {newLevel} in {professionName}!");
             }
-            else
+
+            if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
             {
-                if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
-                {
-                    int levelProgress = GetLevelProgress(steamID, handler);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=white>{gainedXP}</color> experience in {professionName}. (<color=yellow>{levelProgress}%</color> completion towards next level.)");
-                }
+                int levelProgress = GetLevelProgress(steamID, handler);
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=white>{gainedXP}</color> {professionName} experience. (<color=yellow>{levelProgress}%</color>)");
             }
         }
 
@@ -197,6 +195,7 @@ namespace Cobalt.Systems
                 {
                     case "fishing":
                         return new FishingHandler();
+
                     default:
                         // Fall back to type checks for other professions
                         if (itemTypeName.Contains("wood"))

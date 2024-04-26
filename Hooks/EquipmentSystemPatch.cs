@@ -42,6 +42,7 @@ namespace Cobalt.Hooks
     {
         public static void SetLevel(Entity character)
         {
+
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
