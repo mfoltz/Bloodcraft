@@ -7,7 +7,7 @@ namespace Cobalt.Hooks
 {
     public delegate void OnGameDataInitializedEventHandler(World world);
 
-    internal class ServerEventsPatch
+    internal class ServerEventsPatches
     {
         internal static event OnGameDataInitializedEventHandler OnGameDataInitialized;
 
@@ -34,9 +34,10 @@ namespace Cobalt.Hooks
             public static void Prefix()
             {
                 DataStructures.SavePlayerBools();
-                DataStructures.SavePlayerMastery();
                 DataStructures.SavePlayerExperience();
-                DataStructures.SavePlayerWeaponStats();
+                DataStructures.SavePlayerFishing();
+                DataStructures.SavePlayerMining();
+                DataStructures.SavePlayerWoodcutting();
             }
         }
     }

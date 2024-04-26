@@ -54,10 +54,10 @@ namespace Cobalt.Systems
             bool isVBlood = IsVBlood(entityManager, victimEntity);
 
             int gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
-
+            int currentLevel = DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
             UpdatePlayerExperience(SteamID, gainedXP);
 
-            CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP);
+            CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel);
         }
 
         private static bool IsVBlood(EntityManager entityManager, Entity victimEntity)
@@ -98,18 +98,29 @@ namespace Cobalt.Systems
             DataStructures.SavePlayerExperience();
         }
 
-        private static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, int gainedXP)
+        private static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, int gainedXP, int currentLevel)
         {
-            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
+            
             EntityManager entityManager = VWorld.Server.EntityManager;
             Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
-            int currentLevel = DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
+            
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
+            Plugin.Log.LogInfo($"Leveled up: {leveledUp}");
             if (leveledUp)
             {
+                Plugin.Log.LogInfo("Applying level up buff...");
+                DebugEventsSystem debugEventsSystem = VWorld.Server.GetExistingSystem<DebugEventsSystem>();
+                ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                {
+                    BuffPrefabGUID = levelUpBuff,
+                };
+                FromCharacter fromCharacter = new()
+                {
+                    Character = characterEntity,
+                    User = userEntity,
+                };
                 // apply level up buff here
-                //Helper.BuffPlayerByName(name, levelUpBuff);
-                serverGameManager.InstantiateBuffEntityImmediate(userEntity, characterEntity, levelUpBuff);
+                debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             }
             NotifyPlayer(entityManager, userEntity, SteamID, gainedXP, leveledUp);
         }
@@ -119,7 +130,7 @@ namespace Cobalt.Systems
             int newLevel = ConvertXpToLevel(DataStructures.PlayerExperience[SteamID].Value);
             if (newLevel > currentLevel)
             {
-                DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, DataStructures.PlayerExperience[SteamID].Value);
+                //DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, DataStructures.PlayerExperience[SteamID].Value);
 
                 return true;
             }
@@ -132,14 +143,14 @@ namespace Cobalt.Systems
             if (leveledUp)
             {
                 int newLevel = DataStructures.PlayerExperience[SteamID].Key;
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations! You've reached level <color=pink>{newLevel}</color>!");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations You've reached level {newLevel}!");
             }
             else
             {
                 if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
                 {
                     int levelProgress = GetLevelProgress(SteamID);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You gained <color=white>{gainedXP}</color> experience points. (<color=yellow>{levelProgress}%</color>)");
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=white>{gainedXP}</color> <color=#FFC0CB>leveling</color> experience. (<color=yellow>{levelProgress}%</color>)");
                 }
             }
         }

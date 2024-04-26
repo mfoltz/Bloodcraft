@@ -8,8 +8,6 @@ using ProjectM;
 using System.Reflection;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem;
-using WeaponStatType = Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager.WeaponFocusSystem.WeaponStatType;
 
 namespace Cobalt.Core
 {
@@ -26,11 +24,10 @@ namespace Cobalt.Core
 
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.ConfigPath, "player_experience.json");
-        public static readonly string PlayerMasteryJson = Path.Combine(Plugin.ConfigPath, "player_mastery.json");
-        public static readonly string PlayerBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_bloodline.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
-        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
-        public static readonly string PlayerBloodlineStatsJson = Path.Combine(Plugin.ConfigPath, "player_bloodline_stats.json");
+        public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.ConfigPath, "player_woodcutting.json");
+        public static readonly string PlayerMiningJson = Path.Combine(Plugin.ConfigPath, "player_mining.json");
+        public static readonly string PlayerFishingJson = Path.Combine(Plugin.ConfigPath, "player_fishing.json");
 
         public override void Load()
         {
@@ -40,7 +37,7 @@ namespace Cobalt.Core
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             CommandRegistry.RegisterAll();
             InitConfig();
-            ServerEventsPatch.OnGameDataInitialized += GameDataOnInitialize;
+            ServerEventsPatches.OnGameDataInitialized += GameDataOnInitialize;
             LoadAllData();
             //UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
@@ -50,18 +47,9 @@ namespace Cobalt.Core
         {
         }
 
-        private static void UpdateStats()
-        {
-            VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
-            UpdateStatCaps(vampireStatModifiers);
-        }
+       
 
-        private static void UpdateStatCaps(VampireStatModifiers vampireStatModifiers)
-        {
-            WeaponStatCaps.BaseCaps[WeaponStatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
-            WeaponStatCaps.BaseCaps[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
-            WeaponStatCaps.BaseCaps[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
-        }
+      
 
         private static void InitConfig()
         {
@@ -83,21 +71,19 @@ namespace Cobalt.Core
         private static void SaveAllData()
         {
             DataStructures.SavePlayerExperience();
-            DataStructures.SavePlayerMastery();
-            DataStructures.SavePlayerBloodLine();
             DataStructures.SavePlayerBools();
-            DataStructures.SavePlayerWeaponStats();
-            DataStructures.SavePlayerBloodlineStats();
+            DataStructures.SavePlayerWoodcutting();
+            DataStructures.SavePlayerMining();
+            DataStructures.SavePlayerFishing();
         }
 
         private static void LoadAllData()
         {
             DataStructures.LoadPlayerExperience();
-            DataStructures.LoadPlayerMastery();
-            DataStructures.LoadPlayerBloodLine();
             DataStructures.LoadPlayerBools();
-            DataStructures.LoadPlayerWeaponStats();
-            DataStructures.LoadPlayerBloodlineStats();
+            DataStructures.LoadPlayerWoodcutting();
+            DataStructures.LoadPlayerMining();
+            DataStructures.LoadPlayerFishing();
         }
 
         public void OnGameInitialized()

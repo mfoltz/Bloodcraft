@@ -3,8 +3,6 @@ using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Bloodline.BloodlineStatsSystem;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks
@@ -26,41 +24,34 @@ namespace Cobalt.Hooks
             {
                 DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
                 {
-                    { "MasteryLogging", false },
                     { "ExperienceLogging", false },
-                    { "BloodlineLogging", false },
-                    { "ExperienceShare", false }
+                    { "ExperienceShare", false },
+                    { "ProfessionLogging", false },
                 });
                 DataStructures.SavePlayerBools();
             }
-            
 
             if (!DataStructures.PlayerExperience.ContainsKey(steamId))
             {
                 DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerExperience();
             }
-            if (!DataStructures.PlayerMastery.ContainsKey(steamId))
+
+            if (!DataStructures.PlayerWoodcutting.ContainsKey(steamId))
             {
-                DataStructures.PlayerMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                DataStructures.SavePlayerMastery();
+                DataStructures.PlayerWoodcutting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerWoodcutting();
             }
-            if (!DataStructures.PlayerBloodline.ContainsKey(steamId))
+            if (!DataStructures.PlayerMining.ContainsKey(steamId))
             {
-                DataStructures.PlayerBloodline.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                DataStructures.SavePlayerBloodLine();
+                DataStructures.PlayerMining.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerMining();
             }
-            if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
+            if (!DataStructures.PlayerFishing.ContainsKey(steamId))
             {
-                DataStructures.PlayerWeaponStats.Add(steamId, new PlayerWeaponStats());
-                DataStructures.SavePlayerWeaponStats();
+                DataStructures.PlayerFishing.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerFishing();
             }
-            if (!DataStructures.PlayerBloodlineStats.ContainsKey(steamId))
-            {
-                DataStructures.PlayerBloodlineStats.Add(steamId, new PlayerBloodlineStats());
-                DataStructures.SavePlayerBloodlineStats();
-            }
-            
         }
     }
 }

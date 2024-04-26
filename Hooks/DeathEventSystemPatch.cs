@@ -1,7 +1,5 @@
 using Cobalt.Core;
 using Cobalt.Systems;
-using Cobalt.Systems.Bloodline;
-using Cobalt.Systems.Weapon;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
@@ -23,8 +21,11 @@ public class DeathEventListenerSystem_Patch
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
                     ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
-                    ArmsMasterySystem.UpdateMastery(ev.Killer, ev.Died);
-                    BloodMasterySystem.UpdateBloodline(ev.Killer, ev.Died);
+                }
+                else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
+                {
+                    ev.Died.LogComponentTypes();
+                    ProfessionSystem.UpdateProfessions(ev.Killer, ev.Died);
                 }
             }
         }
