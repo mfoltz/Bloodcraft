@@ -51,7 +51,7 @@ namespace Cobalt.Core
         private static readonly Dictionary<string, string> filePaths = new()
         {
             {"Experience", Plugin.PlayerExperienceJson},
-            {"Bools", Plugin.PlayerBoolsJson},
+            {"PlayerBools", Plugin.PlayerBoolsJson},
             {"Woodcutting", Plugin.PlayerWoodcuttingJson},
             {"Mining", Plugin.PlayerMiningJson},
             {"Fishing", Plugin.PlayerFishingJson}
@@ -121,7 +121,7 @@ namespace Cobalt.Core
 
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
 
-        public static void SavePlayerBools() => SaveData(PlayerBools, "Bools");
+        public static void SavePlayerBools() => SaveData(PlayerBools, "PlayerBools");
 
         public static void SavePlayerWoodcutting() => SaveData(PlayerWoodcutting, "Woodcutting");
 
