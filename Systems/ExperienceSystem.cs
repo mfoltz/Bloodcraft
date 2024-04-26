@@ -105,10 +105,10 @@ namespace Cobalt.Systems
             Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
             
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
-            Plugin.Log.LogInfo($"Leveled up: {leveledUp}");
+            //Plugin.Log.LogInfo($"Leveled up: {leveledUp}");
             if (leveledUp)
             {
-                Plugin.Log.LogInfo("Applying level up buff...");
+                //Plugin.Log.LogInfo("Applying level up buff...");
                 DebugEventsSystem debugEventsSystem = VWorld.Server.GetExistingSystem<DebugEventsSystem>();
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
@@ -150,7 +150,7 @@ namespace Cobalt.Systems
                 if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
                 {
                     int levelProgress = GetLevelProgress(SteamID);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=white>{gainedXP}</color> <color=#00FFFF>leveling</color> experience. (<color=yellow>{levelProgress}%</color>)");
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=yellow>{gainedXP}</color> experience. (<color=white>{levelProgress}%</color>)");
                 }
             }
         }

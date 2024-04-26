@@ -101,13 +101,13 @@ namespace Cobalt.Systems
             if (leveledUp)
             {
                 int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level {newLevel} in {professionName}!");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} skill improved to {newLevel}.");
             }
 
             if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
             {
                 int levelProgress = GetLevelProgress(steamID, handler);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=white>{gainedXP}</color> {professionName} experience. (<color=yellow>{levelProgress}%</color>)");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=yellow>{gainedXP}</color> {professionName} experience. (<color=white>{levelProgress}%</color>)");
             }
         }
 
@@ -253,7 +253,7 @@ namespace Cobalt.Systems
 
             public override string GetProfessionName()
             {
-                return "<color=#A52A2A>woodcutting</color>";
+                return "<color=#A52A2A>Woodcutting</color>";
             }
         }
 
@@ -269,7 +269,7 @@ namespace Cobalt.Systems
 
             public override string GetProfessionName()
             {
-                return "<color=#808080>mining</color>";
+                return "<color=#808080>Mining</color>";
             }
         }
 
@@ -285,7 +285,7 @@ namespace Cobalt.Systems
 
             public override string GetProfessionName()
             {
-                return "<color=#0000ff>fishing</color>";
+                return "<color=#0000ff>Fishing</color>";
             }
         }
     }
