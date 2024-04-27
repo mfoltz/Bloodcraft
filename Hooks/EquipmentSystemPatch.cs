@@ -19,11 +19,11 @@ namespace Cobalt.Hooks
                 foreach (var entity in entities)
                 {
                     //entity.LogComponentTypes();
-                    Entity player = entity.Read<Equippable>().EquipTarget._Entity;
-                    if (player.Equals(Entity.Null)) continue;
+                    Entity character = entity.Read<Equippable>().EquipTarget._Entity;
+                    if (character.Equals(Entity.Null) || character.Has<ServantPower>()) continue;
                     else
                     {
-                        GearOverride.SetLevel(player);
+                        GearOverride.SetLevel(character);
                     }
                 }
             }
@@ -40,13 +40,13 @@ namespace Cobalt.Hooks
 
     public static class GearOverride
     {
-        public static void SetLevel(Entity character)
+        public static void SetLevel(Entity player)
         {
 
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
-                Equipment equipment = character.Read<Equipment>();
+                Equipment equipment = player.Read<Equipment>();
                 RemoveItemLevels(equipment);
 
                 if (equipment.SpellLevel._Value.Equals(xpData.Key) && equipment.ArmorLevel._Value.Equals(0f) && equipment.WeaponLevel._Value.Equals(0f))
@@ -59,7 +59,7 @@ namespace Cobalt.Hooks
                 equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
                 
-                character.Write(equipment);
+                player.Write(equipment);
                 //Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
             }
         }

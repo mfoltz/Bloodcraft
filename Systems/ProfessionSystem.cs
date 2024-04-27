@@ -47,7 +47,10 @@ namespace Cobalt.Systems
 
             int ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel;
      
-            Plugin.Log.LogInfo(ProfessionValue);
+            if (ProfessionValue.Equals(0))
+            {
+                ProfessionValue = 5;
+            }
 
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
 
