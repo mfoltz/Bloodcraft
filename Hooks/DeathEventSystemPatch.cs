@@ -24,7 +24,7 @@ public class DeathEventListenerSystem_Patch
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
                 {
-                    ev.Died.LogComponentTypes();
+                    //ev.Died.LogComponentTypes();
                     ProfessionSystem.UpdateProfessions(ev.Killer, ev.Died);
                 }
             }

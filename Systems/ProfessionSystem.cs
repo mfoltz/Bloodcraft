@@ -44,6 +44,8 @@ namespace Cobalt.Systems
 
             int ProfessionValue = VictimLevel.Level;
 
+            //Plugin.Log.LogInfo(ProfessionValue);
+
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
 
             IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID);
@@ -54,7 +56,7 @@ namespace Cobalt.Systems
             }
             else
             {
-                Plugin.Log.LogError($"No handler found for profession...");
+                //Plugin.Log.LogError($"No handler found for profession...");
             }
         }
 
@@ -101,14 +103,18 @@ namespace Cobalt.Systems
             if (leveledUp)
             {
                 int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} skill improved to {newLevel}.");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} improved to <color=#FFC0CB>{newLevel}</color>!");
+            }
+            else
+            {
+                if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
+                {
+                    int levelProgress = GetLevelProgress(steamID, handler);
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> {professionName} (<color=white>{levelProgress}%</color>)");
+                }
             }
 
-            if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
-            {
-                int levelProgress = GetLevelProgress(steamID, handler);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You've gained <color=yellow>{gainedXP}</color> {professionName} experience. (<color=white>{levelProgress}%</color>)");
-            }
+            
         }
 
         private static int ConvertXpToLevel(float xp)
@@ -144,7 +150,7 @@ namespace Cobalt.Systems
             double neededXP = nextLevelXP - currentLevelXP;
             double earnedXP = currentXP - currentLevelXP;
 
-            return (int)Math.Ceiling(earnedXP / neededXP * 100);
+            return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
     }
 
