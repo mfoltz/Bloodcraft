@@ -29,30 +29,32 @@ public class FishingSystemPatch
                     if (entity.Equals(Entity.Null)) continue;
                     if (!entity.Has<Buff>()) continue;
                     if (!entity.Read<PrefabGUID>().GuidHash.Equals(1753229314)) continue; // AB_Fishing_Target_ReadyBuff
-                    entity.LogComponentTypes();
-                    Entity character = entity.Read<Buff>().Target;
-                    character.LogComponentTypes();
+                    //entity.LogComponentTypes();
+                    Entity character = entity.Read<EntityOwner>().Owner;
+                    //character.LogComponentTypes();
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
                     ulong steamId = user.PlatformId;
                     PrefabGUID toProcess = new(0);
-                    Attached attached = entity.Read<Attached>();
-                    if (!attached.Parent.Equals(Entity.Null))
+                    Entity target = entity.Read<Buff>().Target;
+                    
+                    if (!target.Equals(Entity.Null))
                     {
-                        attached.Parent.LogComponentTypes();
-                        if (!attached.Parent.Has<DropTableBuffer>())
+                        //target.LogComponentTypes();
+                        if (!target.Has<DropTableBuffer>())
                         {
-                            Plugin.Log.LogInfo("No DropTableBuffer found on parent entity...");
+                            //Plugin.Log.LogInfo("No DropTableBuffer found on parent entity...");
                         }
                         else
                         {
-                            var dropTableBuffer = attached.Parent.ReadBuffer<DropTableBuffer>();
+                            var dropTableBuffer = target.ReadBuffer<DropTableBuffer>();
                             if (dropTableBuffer.IsEmpty || !dropTableBuffer.IsCreated)
                             {
-                                Plugin.Log.LogInfo("DropTableBuffer is empty or not created...");
+                                //Plugin.Log.LogInfo("DropTableBuffer is empty or not created...");
                             }
                             else
                             {
                                 toProcess = dropTableBuffer[0].DropTableGuid;
+                                //Plugin.Log.LogInfo($"{toProcess.LookupName()}");
                             }
                         }
                     }
@@ -63,10 +65,7 @@ public class FishingSystemPatch
                     {
                         ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, toProcess, handler);
                     }
-                    else
-                    {
-                        Plugin.Log.LogError("No handler found for profession...");
-                    }
+                    
                 }
             }
             catch (Exception e)

@@ -1,7 +1,9 @@
 ﻿using Bloodstone.API;
 using Cobalt.Core;
 using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Network;
+using ProjectM.Sequencer;
 using Steamworks;
 using Unity.Entities;
 using static Cobalt.Systems.ProfessionUtilities;
@@ -12,9 +14,9 @@ namespace Cobalt.Systems
 {
     public class ProfessionSystem
     {
-        private static readonly float ProfessionMultiplier = 1f; // multiplier for profession experiene per harvest
-        private static readonly float ProfessionConstant = 0.5f; // constant for calculating level from xp
-        private static readonly int ProfessionXPPower = 3; // power for calculating level from xp
+        private static readonly float ProfessionMultiplier = 1; // multiplier for profession experience per harvest
+        private static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
+        private static readonly int ProfessionXPPower = 2; // power for calculating level from xp
         private static readonly int MaxProfessionLevel = 99; // maximum level
 
         public static void UpdateProfessions(Entity Killer, Entity Victim)
@@ -26,11 +28,12 @@ namespace Cobalt.Systems
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong SteamID = user.PlatformId;
             if (!Victim.Has<UnitLevel>()) return;
-            var VictimLevel = entityManager.GetComponentData<UnitLevel>(Victim);
+            //var VictimLevel = entityManager.GetComponentData<UnitLevel>(Victim);
 
             PrefabGUID prefabGUID = new(0);
-            if (entityManager.HasComponent<YieldResourcesOnDamageTaken>(Victim))
+            if (entityManager.HasComponent<YieldResourcesOnDamageTaken>(Victim) && entityManager.HasComponent<EntityCategory>(Victim))
             {
+                //Victim.LogComponentTypes();
                 var yield = Victim.ReadBuffer<YieldResourcesOnDamageTaken>();
                 if (yield.IsCreated && !yield.IsEmpty)
                 {
@@ -42,9 +45,9 @@ namespace Cobalt.Systems
                 return;
             }
 
-            int ProfessionValue = VictimLevel.Level;
-
-            //Plugin.Log.LogInfo(ProfessionValue);
+            int ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel;
+     
+            Plugin.Log.LogInfo(ProfessionValue);
 
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
 
@@ -103,14 +106,14 @@ namespace Cobalt.Systems
             if (leveledUp)
             {
                 int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} improved to <color=#FFC0CB>{newLevel}</color>!");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
             }
             else
             {
                 if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> {professionName} (<color=white>{levelProgress}%</color>)");
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
                 }
             }
 
@@ -144,13 +147,10 @@ namespace Cobalt.Systems
         {
             float currentXP = GetXp(steamID, handler);
             int currentLevel = GetLevel(steamID, handler);
-            int currentLevelXP = ConvertLevelToXp(currentLevel);
             int nextLevelXP = ConvertLevelToXp(currentLevel + 1);
-
-            double neededXP = nextLevelXP - currentLevelXP;
-            double earnedXP = currentXP - currentLevelXP;
-
-            return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
+            //Plugin.Log.LogInfo($"Lv: {currentLevel} | xp: {currentXP} | toNext: {nextLevelXP}");
+            int percent = (int)(currentXP / nextLevelXP * 100);
+            return percent;
         }
     }
 
@@ -291,7 +291,7 @@ namespace Cobalt.Systems
 
             public override string GetProfessionName()
             {
-                return "<color=#0000ff>Fishing</color>";
+                return "<color=#00FFFF>Fishing</color>";
             }
         }
     }
