@@ -27,6 +27,7 @@ namespace Cobalt.Hooks
                     { "ExperienceLogging", false },
                     { "ExperienceShare", false },
                     { "ProfessionLogging", false },
+                    { "FishingFlag", false }
                 });
                 DataStructures.SavePlayerBools();
             }

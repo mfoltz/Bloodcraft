@@ -14,7 +14,7 @@ namespace Cobalt.Systems
 {
     public class ProfessionSystem
     {
-        private static readonly float ProfessionMultiplier = 1; // multiplier for profession experience per harvest
+        private static readonly float ProfessionMultiplier = 5; // multiplier for profession experience per harvest
         private static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
         private static readonly int ProfessionXPPower = 2; // power for calculating level from xp
         private static readonly int MaxProfessionLevel = 99; // maximum level
@@ -45,11 +45,11 @@ namespace Cobalt.Systems
                 return;
             }
 
-            int ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel;
-     
+            float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel;
+            Plugin.Log.LogInfo($"{ProfessionValue} | {prefabGUID.LookupName()}");
             if (ProfessionValue.Equals(0))
             {
-                ProfessionValue = 5;
+                ProfessionValue = 10;
             }
 
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
@@ -66,7 +66,7 @@ namespace Cobalt.Systems
             }
         }
 
-        public static void SetProfession(User user, ulong steamID, int value, PrefabGUID prefabGUID, IProfessionHandler handler)
+        public static void SetProfession(User user, ulong steamID, float value, PrefabGUID prefabGUID, IProfessionHandler handler)
         {
             if (prefabGUID.GuidHash.Equals(0)) return;
 
@@ -79,7 +79,7 @@ namespace Cobalt.Systems
             UpdatePlayerExperience(entityManager, user, steamID, xpData, value, handler);
         }
 
-        private static void UpdatePlayerExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, int gainedXP, IProfessionHandler handler)
+        private static void UpdatePlayerExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
         {
             float newExperience = xpData.Value + gainedXP;
             int newLevel = ConvertXpToLevel(newExperience);
@@ -103,8 +103,9 @@ namespace Cobalt.Systems
             NotifyPlayer(entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
 
-        private static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, int gainedXP, bool leveledUp, IProfessionHandler handler)
+        private static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
+            gainedXP = (int)gainedXP;
             string professionName = handler.GetProfessionName();
             if (leveledUp)
             {
@@ -119,8 +120,6 @@ namespace Cobalt.Systems
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
                 }
             }
-
-            
         }
 
         private static int ConvertXpToLevel(float xp)
@@ -182,7 +181,7 @@ namespace Cobalt.Systems
 
         public interface IProfessionHandler
         {
-            void AddExperience(ulong steamID, int experience);
+            void AddExperience(ulong steamID, float experience);
 
             void SaveChanges();
 
@@ -222,7 +221,7 @@ namespace Cobalt.Systems
             // Abstract property to get the specific data structure for each profession.
             protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
 
-            public virtual void AddExperience(ulong steamID, int experience)
+            public virtual void AddExperience(ulong steamID, float experience)
             {
                 if (DataStructure.TryGetValue(steamID, out var currentData))
                 {

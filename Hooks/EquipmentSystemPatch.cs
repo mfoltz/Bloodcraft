@@ -20,7 +20,7 @@ namespace Cobalt.Hooks
                 {
                     //entity.LogComponentTypes();
                     Entity character = entity.Read<Equippable>().EquipTarget._Entity;
-                    if (character.Equals(Entity.Null) || character.Has<ServantPower>()) continue;
+                    if (character.Equals(Entity.Null) || !character.Has<PlayerCharacter>()) continue;
                     else
                     {
                         GearOverride.SetLevel(character);

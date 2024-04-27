@@ -1,4 +1,8 @@
+using Bloodstone.API;
+using ProjectM;
+using Unity.Entities;
 using VampireCommandFramework;
+using VRising.GameData.Utils;
 
 namespace Cobalt.Core.Commands
 {
@@ -35,6 +39,31 @@ namespace Cobalt.Core.Commands
         public static void MasterySetCommand(ChatCommandContext ctx, string name, int value)
         {
 
+        }
+
+        [Command(name: "logPrefabComponents", shortHand: "logprefab", adminOnly: true, usage: ".logprefab [#]", description: "WIP")]
+        public static void LogUnitStats(ChatCommandContext ctx, int prefab)
+        {
+            PrefabGUID toLog = new(prefab);
+            if (toLog.GetPrefabName().Equals(""))
+            {
+                ctx.Reply("Invalid prefab.");
+                return;
+            }
+            else
+            {
+                Entity entity = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>()._PrefabGuidToEntityMap[toLog];
+                if (entity == Entity.Null)
+                {
+                    ctx.Reply("Entity not found.");
+                    return;
+                }
+                else
+                {
+                    entity.LogComponentTypes();
+                    ctx.Reply("Components logged.");
+                }
+            }
         }
     }
 }

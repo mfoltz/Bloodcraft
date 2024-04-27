@@ -17,7 +17,7 @@ public class FishingSystemPatch
     [HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
     public static class GameplayEventsSystemPatch
     {
-        private static readonly int BaseFishingXP = 10;
+        private static readonly int BaseFishingXP = 25;
 
         public static void Prefix(CreateGameplayEventOnDestroySystem __instance)
         {
@@ -27,11 +27,16 @@ public class FishingSystemPatch
                 foreach (Entity entity in entities)
                 {
                     if (entity.Equals(Entity.Null)) continue;
+                    Plugin.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
                     if (!entity.Has<Buff>()) continue;
-                    if (!entity.Read<PrefabGUID>().GuidHash.Equals(1753229314)) continue; // AB_Fishing_Target_ReadyBuff
-                    //entity.LogComponentTypes();
+                    PrefabGUID prefabGUID = entity.Read<PrefabGUID>();                    
+                    
+                    if (!prefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
+                    {
+                        continue;
+                    }
+
                     Entity character = entity.Read<EntityOwner>().Owner;
-                    //character.LogComponentTypes();
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
                     ulong steamId = user.PlatformId;
                     PrefabGUID toProcess = new(0);
@@ -42,14 +47,14 @@ public class FishingSystemPatch
                         //target.LogComponentTypes();
                         if (!target.Has<DropTableBuffer>())
                         {
-                            //Plugin.Log.LogInfo("No DropTableBuffer found on parent entity...");
+                            Plugin.Log.LogInfo("No DropTableBuffer found on parent entity...");
                         }
                         else
                         {
                             var dropTableBuffer = target.ReadBuffer<DropTableBuffer>();
                             if (dropTableBuffer.IsEmpty || !dropTableBuffer.IsCreated)
                             {
-                                //Plugin.Log.LogInfo("DropTableBuffer is empty or not created...");
+                                Plugin.Log.LogInfo("DropTableBuffer is empty or not created...");
                             }
                             else
                             {
@@ -65,7 +70,6 @@ public class FishingSystemPatch
                     {
                         ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, toProcess, handler);
                     }
-                    
                 }
             }
             catch (Exception e)
