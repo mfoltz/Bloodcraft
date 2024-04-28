@@ -14,7 +14,7 @@ namespace Cobalt.Systems
 {
     public class ProfessionSystem
     {
-        private static readonly float ProfessionMultiplier = 5; // multiplier for profession experience per harvest
+        private static readonly float ProfessionMultiplier = 10; // multiplier for profession experience per harvest
         private static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
         private static readonly int ProfessionXPPower = 2; // power for calculating level from xp
         private static readonly int MaxProfessionLevel = 99; // maximum level
@@ -46,19 +46,29 @@ namespace Cobalt.Systems
             }
 
             float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel;
-            Plugin.Log.LogInfo($"{ProfessionValue} | {prefabGUID.LookupName()}");
+            if (Victim.Read<UnitLevel>().Level > ProfessionValue)
+            {
+                ProfessionValue = Victim.Read<UnitLevel>().Level;
+            }
+            Plugin.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {prefabGUID.LookupName()}");
             if (ProfessionValue.Equals(0))
             {
                 ProfessionValue = 10;
             }
-
+            
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
 
             IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID);
 
+            
+
             if (handler != null)
             {
-                SetProfession(user, SteamID, ProfessionValue, prefabGUID, handler);
+                if (handler.GetProfessionName().Equals("Woodcutting"))
+                {
+                    ProfessionValue *= GetWoodcuttingModifier(prefabGUID);
+                }
+                SetProfession(user, SteamID, ProfessionValue, handler);
             }
             else
             {
@@ -66,10 +76,8 @@ namespace Cobalt.Systems
             }
         }
 
-        public static void SetProfession(User user, ulong steamID, float value, PrefabGUID prefabGUID, IProfessionHandler handler)
+        public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
         {
-            if (prefabGUID.GuidHash.Equals(0)) return;
-
             EntityManager entityManager = VWorld.Server.EntityManager;
 
             handler.AddExperience(steamID, value);
@@ -158,7 +166,7 @@ namespace Cobalt.Systems
 
     public class ProfessionUtilities
     {
-        private static readonly Dictionary<string, int> FishingLocations = new()
+        private static readonly Dictionary<string, int> FishingMultipliers = new()
         {
             { "farbane", 1 },
             { "dunley", 2 },
@@ -166,10 +174,27 @@ namespace Cobalt.Systems
             { "cursed", 4 },
             { "silverlight", 4 }
         };
-
+        private static readonly Dictionary<string, int> WoodcuttingMultipliers = new()
+        {
+            { "hallow", 2 },
+            { "gloom", 3 },
+            { "cursed", 4 }
+           
+        };
         public static int GetFishingModifier(PrefabGUID prefab)
         {
-            foreach (KeyValuePair<string, int> location in FishingLocations)
+            foreach (KeyValuePair<string, int> location in FishingMultipliers)
+            {
+                if (prefab.LookupName().ToLower().Contains(location.Key))
+                {
+                    return location.Value;
+                }
+            }
+            return 1;
+        }
+        public static int GetWoodcuttingModifier(PrefabGUID prefab)
+        {
+            foreach (KeyValuePair<string, int> location in WoodcuttingMultipliers)
             {
                 if (prefab.LookupName().ToLower().Contains(location.Key))
                 {
@@ -203,6 +228,10 @@ namespace Cobalt.Systems
                 {
                     case "fishing":
                         return new FishingHandler();
+                    case "blacksmithing":
+                        return new BlacksmithingHandler();
+                    case "tailoring":
+                        return new TailoringHandler();
 
                     default:
                         // Fall back to type checks for other professions
@@ -247,6 +276,37 @@ namespace Cobalt.Systems
             public abstract void SaveChanges();
 
             public abstract string GetProfessionName();
+        }
+
+        public class BlacksmithingHandler : BaseProfessionHandler
+        {
+            // Override the DataStructure to provide the specific dictionary for woodcutting.
+            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerBlacksmithing;
+
+            public override void SaveChanges()
+            {
+                DataStructures.SavePlayerBlacksmithing();
+            }
+
+            public override string GetProfessionName()
+            {
+                return "<color=#353641>Blacksmithing</color>";
+            }
+        }
+        public class TailoringHandler : BaseProfessionHandler
+        {
+            // Override the DataStructure to provide the specific dictionary for woodcutting.
+            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerWoodcutting;
+
+            public override void SaveChanges()
+            {
+                DataStructures.SavePlayerTailoring();
+            }
+
+            public override string GetProfessionName()
+            {
+                return "<color=#F9DEBD>Tailoring</color>";
+            }
         }
 
         public class WoodcuttingHandler : BaseProfessionHandler

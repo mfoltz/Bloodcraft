@@ -3,6 +3,8 @@ using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks
@@ -27,7 +29,11 @@ namespace Cobalt.Hooks
                     { "ExperienceLogging", false },
                     { "ExperienceShare", false },
                     { "ProfessionLogging", false },
-                    { "FishingFlag", false }
+                    { "FishingFlag", false },
+                    { "BloodLogging", false },
+                    { "MasteryLogging", false },
+                    { "Blacksmithing", false },
+                    { "Tailoring", false }
                 });
                 DataStructures.SavePlayerBools();
             }
@@ -52,6 +58,30 @@ namespace Cobalt.Hooks
             {
                 DataStructures.PlayerFishing.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerFishing();
+            }
+            if (!DataStructures.PlayerBloodMastery.ContainsKey(steamId))
+            {
+                DataStructures.PlayerBloodMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerBloodline();
+            }
+            if (!DataStructures.PlayerCombatMastery.ContainsKey(steamId))
+            {
+                DataStructures.PlayerCombatMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerMastery();
+            }
+            if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
+            {
+                DataStructures.PlayerWeaponStats.Add(steamId, new PlayerWeaponStats());
+                DataStructures.SavePlayerWeaponStats();
+            }
+            if (!DataStructures.PlayerBloodStats.ContainsKey(steamId))
+            {
+                DataStructures.PlayerBloodStats.Add(steamId, new PlayerBloodlineStats());
+                DataStructures.SavePlayerBloodlineStats();
+            }
+            if (!DataStructures.PlayerCraftingJobs.ContainsKey(steamId))
+            {
+                DataStructures.PlayerCraftingJobs.Add(steamId, []);
             }
         }
     }

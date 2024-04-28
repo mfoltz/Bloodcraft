@@ -28,7 +28,12 @@ namespace Cobalt.Core
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.ConfigPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.ConfigPath, "player_mining.json");
         public static readonly string PlayerFishingJson = Path.Combine(Plugin.ConfigPath, "player_fishing.json");
-
+        public static readonly string PlayerBlacksmithingJson = Path.Combine(Plugin.ConfigPath, "player_blacksmithing.json");
+        public static readonly string PlayerTailoringJson = Path.Combine(Plugin.ConfigPath, "player_tailoring.json");
+        public static readonly string PlayerCombatMasteryJson = Path.Combine(Plugin.ConfigPath, "player_mastery.json");
+        public static readonly string PlayerBloodMasteryJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
+        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
+        public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.ConfigPath, "player_blood_stats.json");
         public override void Load()
         {
             Instance = this;
@@ -75,6 +80,10 @@ namespace Cobalt.Core
             DataStructures.SavePlayerWoodcutting();
             DataStructures.SavePlayerMining();
             DataStructures.SavePlayerFishing();
+            DataStructures.SavePlayerBloodline();
+            DataStructures.SavePlayerMastery();
+            DataStructures.SavePlayerWeaponStats();
+            DataStructures.SavePlayerBloodlineStats();
         }
 
         private static void LoadAllData()
@@ -84,6 +93,12 @@ namespace Cobalt.Core
             DataStructures.LoadPlayerWoodcutting();
             DataStructures.LoadPlayerMining();
             DataStructures.LoadPlayerFishing();
+            DataStructures.LoadPlayerBlacksmithing();
+            DataStructures.LoadPlayerTailoring();
+            DataStructures.LoadPlayerBloodMastery();
+            DataStructures.LoadPlayerCombatMastery();
+            DataStructures.LoadPlayerWeaponStats();
+            DataStructures.LoadPlayerBloodStats();
         }
 
         public void OnGameInitialized()

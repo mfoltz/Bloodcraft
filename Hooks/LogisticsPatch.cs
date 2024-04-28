@@ -9,6 +9,7 @@ using ProjectM.Gameplay;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Sequencer;
 using ProjectM.Shared.Systems;
 using System.Reflection.Metadata.Ecma335;
 using Unity.Collections;
@@ -18,6 +19,34 @@ namespace Cobalt.Hooks;
 
 public class LogisticsPatches
 {
+    [HarmonyPatch(typeof(UpdateRefiningSystem), nameof(UpdateRefiningSystem.OnUpdate))]
+    public static class UpdateRefiningSystemPatch
+    {
+        public static void Prefix(UpdateRefiningSystem __instance)
+        {
+            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    if (entity.Equals(Entity.Null)) continue;
+                    Refinementstation refinementstation = entity.Read<Refinementstation>();
+                    if (!refinementstation.IsWorking) continue;
+                    Plugin.Log.LogInfo($"{refinementstation.CurrentRecipeGuid.LookupName()} | {refinementstation.Status}");
+                    //entity.LogComponentTypes();
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Exited UpdateRefiningSystem hook early: {e}");
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+            
+        }
+    }
 
     [HarmonyPatch(typeof(ServantMissionUpdateSystem), nameof(ServantMissionUpdateSystem.OnUpdate))]
     public static class ServantMissionPatch
@@ -75,16 +104,14 @@ public class LogisticsPatches
                             if (stash.Equals(Entity.Null)) continue;
                             else
                             {
-                                if (serverGameManager.IsAllies(stash, servant) && SameTerritory(stash, servant))
+                                if (serverGameManager.IsAllies(stash, servant) && SameTerritory(stash, servant) && stash.Read<NameableInteractable>().Name.ToString().ToLower().Equals("missions"))
                                 {
-                                    // if allies and in the same territory, check if the stash has any common items and move them there
+                                    // if allies and in the same territory and named missions, try to move items
                                     if (InventoryUtilities.TryGetInventoryEntity(entityManager, stash, out Entity stashInventory))
                                     {
-                                        InventoryUtilitiesServer.TrySmartMergeInventories(entityManager, gameDataSystem.ItemHashLookupMap, inventory, stashInventory, out bool _);
-                                        buffer = servant.ReadBuffer<InventoryBuffer>();
-                                        if (buffer.IsEmpty)
+                                        for (int i = 0; i < buffer.Length; i++)
                                         {
-                                            break;
+                                            InventoryUtilitiesServer.TryMoveItem(entityManager, gameDataSystem.ItemHashLookupMap, inventory, i, stashInventory);
                                         }
                                     }
                                 }

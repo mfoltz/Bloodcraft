@@ -17,7 +17,7 @@ public class FishingSystemPatch
     [HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
     public static class GameplayEventsSystemPatch
     {
-        private static readonly int BaseFishingXP = 25;
+        private static readonly int BaseFishingXP = 100;
 
         public static void Prefix(CreateGameplayEventOnDestroySystem __instance)
         {
@@ -27,7 +27,6 @@ public class FishingSystemPatch
                 foreach (Entity entity in entities)
                 {
                     if (entity.Equals(Entity.Null)) continue;
-                    Plugin.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
                     if (!entity.Has<Buff>()) continue;
                     PrefabGUID prefabGUID = entity.Read<PrefabGUID>();                    
                     
@@ -68,7 +67,7 @@ public class FishingSystemPatch
 
                     if (handler != null)
                     {
-                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, toProcess, handler);
+                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
                     }
                 }
             }

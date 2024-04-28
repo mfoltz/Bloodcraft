@@ -1,5 +1,6 @@
 using Bloodstone.API;
 using ProjectM;
+using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
 using VRising.GameData.Utils;
@@ -45,24 +46,42 @@ namespace Cobalt.Core.Commands
         public static void LogUnitStats(ChatCommandContext ctx, int prefab)
         {
             PrefabGUID toLog = new(prefab);
-            if (toLog.GetPrefabName().Equals(""))
+        
+            Entity entity = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>()._PrefabGuidToEntityMap[toLog];
+            if (entity == Entity.Null)
             {
-                ctx.Reply("Invalid prefab.");
+                ctx.Reply("Entity not found.");
                 return;
             }
             else
             {
-                Entity entity = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>()._PrefabGuidToEntityMap[toLog];
-                if (entity == Entity.Null)
-                {
-                    ctx.Reply("Entity not found.");
-                    return;
-                }
-                else
-                {
-                    entity.LogComponentTypes();
-                    ctx.Reply("Components logged.");
-                }
+                entity.LogComponentTypes();
+                ctx.Reply("Components logged.");
+            }
+            
+        }
+        public class BuildingCostsToggle
+        {
+            private static bool buildingCostsFlag = false;
+
+            private static SetDebugSettingEvent BuildingCostsDebugSetting = new()
+            {
+                SettingType = (DebugSettingType)5, // Assuming this is the correct DebugSettingType for building costs
+                Value = false
+            };
+
+            [Command(name: "toggleBuildingCosts", shortHand: "tbc", adminOnly: true, usage: ".tbc", description: "Toggles building costs, useful for setting up a castle linked to your heart easily.")]
+            public static void ToggleBuildingCostsCommand(ChatCommandContext ctx)
+            {
+                User user = ctx.Event.User;
+
+                DebugEventsSystem existingSystem = VWorld.Server.GetExistingSystem<DebugEventsSystem>();
+                buildingCostsFlag = !buildingCostsFlag; // Toggle the flag
+
+                BuildingCostsDebugSetting.Value = buildingCostsFlag;
+                existingSystem.SetDebugSetting(user.Index, ref BuildingCostsDebugSetting);
+          
+                ctx.Reply($"BuildingCostsDisabled: {BuildingCostsDebugSetting.Value}");
             }
         }
     }

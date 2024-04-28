@@ -38,6 +38,12 @@ namespace Cobalt.Hooks
                 DataStructures.SavePlayerFishing();
                 DataStructures.SavePlayerMining();
                 DataStructures.SavePlayerWoodcutting();
+                DataStructures.SavePlayerBlacksmithing();
+                DataStructures.SavePlayerTailoring();
+                DataStructures.SavePlayerMastery();
+                DataStructures.SavePlayerBloodline();
+                DataStructures.SavePlayerWeaponStats();
+                DataStructures.SavePlayerBloodlineStats();
             }
         }
     }
