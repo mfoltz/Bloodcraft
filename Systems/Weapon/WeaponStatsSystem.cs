@@ -84,7 +84,8 @@ namespace Cobalt.Systems.Weapon
                     { 7, WeaponStatType.SpellCritChance },
                     { 8, WeaponStatType.SpellCritDamage }
                 };
-                private readonly static Dictionary<WeaponStatType, float> baseCaps = new()
+
+                private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
                     {WeaponStatType.MaxHealth, 1000f},
                     {WeaponStatType.CastSpeed, 1f},
@@ -97,8 +98,8 @@ namespace Cobalt.Systems.Weapon
                     {WeaponStatType.SpellCritDamage, 2f}
                 };
 
-                public static Dictionary<WeaponStatType, float> BaseCaps 
-                { 
+                public static Dictionary<WeaponStatType, float> BaseCaps
+                {
                     get => baseCaps;
                 }
             }

@@ -48,7 +48,7 @@ namespace Cobalt.Systems.Bloodline
                 BloodMasteryValue += BaseBloodMastery;
             }
             SetBloodMastery(User, BloodMasteryValue, entityManager);
-            
+
             HandleUpdate(Killer, entityManager);
         }
 
@@ -94,7 +94,7 @@ namespace Cobalt.Systems.Bloodline
 
             player.Write(stats); // Update player stats
         }
-        
+
         private static void ApplyStatIncrease(UnitStats stats, BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType, float increase)
         {
             switch (statType)
@@ -102,31 +102,40 @@ namespace Cobalt.Systems.Bloodline
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.ResourceYield:
                     stats.ResourceYieldModifier._Value = Math.Max(stats.ResourceYieldModifier._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PhysicalResistance:
                     stats.PhysicalResistance._Value = Math.Max(stats.PhysicalResistance._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SpellResistance:
                     stats.SpellResistance._Value = Math.Max(stats.SpellResistance._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SunResistance:
                     stats.SunResistance._Value = (int)Math.Max(stats.SunResistance._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.FireResistance:
                     stats.FireResistance._Value = (int)Math.Max(stats.FireResistance._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.HolyResistance:
                     stats.HolyResistance._Value = (int)Math.Max(stats.HolyResistance._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SilverResistance:
                     stats.SilverResistance._Value = (int)Math.Max(stats.SilverResistance._Value, increase);
                     break;
+
                 case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PassiveHealthRegen:
                     stats.PassiveHealthRegen._Value = Math.Max(stats.PassiveHealthRegen._Value, increase);
                     break;
+
                 default:
                     throw new InvalidOperationException("Unknown stat type to apply");
             }
         }
+
         public static void SetBloodMastery(User user, float Value, EntityManager entityManager)
         {
             ulong SteamID = user.PlatformId;
@@ -154,6 +163,7 @@ namespace Cobalt.Systems.Bloodline
             DataStructures.SavePlayerBloodMastery();
             NotifyPlayer(entityManager, user, Value, leveledUp, newLevel);
         }
+
         private static void NotifyPlayer(EntityManager entityManager, User user, float gainedXP, bool leveledUp, int newLevel)
         {
             ulong steamID = user.PlatformId;

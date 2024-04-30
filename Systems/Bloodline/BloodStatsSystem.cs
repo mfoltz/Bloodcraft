@@ -1,7 +1,4 @@
-﻿using Bloodstone.API;
-using ProjectM;
-
-namespace Cobalt.Systems.Bloodline
+﻿namespace Cobalt.Systems.Bloodline
 {
     public class BloodMasteryStatsSystem
     {

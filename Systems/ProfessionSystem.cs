@@ -55,12 +55,10 @@ namespace Cobalt.Systems
             {
                 ProfessionValue = 10;
             }
-            
+
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
 
             IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID);
-
-            
 
             if (handler != null)
             {
@@ -68,7 +66,7 @@ namespace Cobalt.Systems
                 {
                     ProfessionValue *= GetWoodcuttingModifier(prefabGUID);
                 }
-                
+
                 SetProfession(user, SteamID, ProfessionValue, handler);
             }
             else
@@ -175,13 +173,14 @@ namespace Cobalt.Systems
             { "cursed", 4 },
             { "silverlight", 4 }
         };
+
         private static readonly Dictionary<string, int> WoodcuttingMultipliers = new()
         {
             { "hallow", 2 },
             { "gloom", 3 },
             { "cursed", 4 }
-           
         };
+
         private static readonly Dictionary<string, int> TierMultiplier = new()
         {
             { "t01", 1 },
@@ -194,6 +193,7 @@ namespace Cobalt.Systems
             { "t08", 8 },
             { "t09", 9 },
         };
+
         public static int GetFishingModifier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> location in FishingMultipliers)
@@ -205,6 +205,7 @@ namespace Cobalt.Systems
             }
             return 1;
         }
+
         public static int GetWoodcuttingModifier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> location in WoodcuttingMultipliers)
@@ -216,6 +217,7 @@ namespace Cobalt.Systems
             }
             return 1;
         }
+
         public static int GetTierMultiplier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> tier in TierMultiplier)
@@ -250,7 +252,6 @@ namespace Cobalt.Systems
                 // Check context to decide on a handler
                 switch (context)
                 {
-           
                     default:
                         // Fall back to type checks for other professions
                         if (itemTypeName.Contains("wood"))
@@ -323,6 +324,7 @@ namespace Cobalt.Systems
                 return "<color=#7E22CE>Jewelcrafting</color>";
             }
         }
+
         public class AlchemyHandler : BaseProfessionHandler
         {
             // Override the DataStructure to provide the specific dictionary for woodcutting.
@@ -354,6 +356,7 @@ namespace Cobalt.Systems
                 return "<color=#008000>Harvesting</color>";
             }
         }
+
         public class BlacksmithingHandler : BaseProfessionHandler
         {
             // Override the DataStructure to provide the specific dictionary for woodcutting.
@@ -369,6 +372,7 @@ namespace Cobalt.Systems
                 return "<color=#353641>Blacksmithing</color>";
             }
         }
+
         public class TailoringHandler : BaseProfessionHandler
         {
             // Override the DataStructure to provide the specific dictionary for woodcutting.
