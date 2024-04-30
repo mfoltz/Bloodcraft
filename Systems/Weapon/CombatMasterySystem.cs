@@ -11,7 +11,6 @@ namespace Cobalt.Systems.Weapon
     {
         private static readonly float CombatMasteryMultiplier = 1; // mastery points multiplier from normal units
         private static readonly float CombatValueModifier = 4f;
-        private static readonly int MaxCombatMastery = 10000; // maximum stored mastery points
         private static readonly float MaxCombatMasteryLevel = 99; // maximum level
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
         private static readonly float CombatMasteryConstant = 0.1f; // constant for calculating level from xp
@@ -29,7 +28,8 @@ namespace Cobalt.Systems.Weapon
             Pistols,
             Reaper,
             Longbow,
-            Whip
+            Whip,
+            Unarmed
         }
 
         private static readonly Dictionary<WeaponType, string> masteryToFileKey = new()
@@ -44,7 +44,8 @@ namespace Cobalt.Systems.Weapon
             { WeaponType.Pistols, "PistolsMastery" },
             { WeaponType.Reaper, "ReaperMastery" },
             { WeaponType.Longbow, "LongbowMastery" },
-            { WeaponType.Whip, "WhipMastery" }
+            { WeaponType.Whip, "WhipMastery" },
+            { WeaponType.Unarmed, "UnarmedMastery" }
         };
 
         public static readonly Dictionary<WeaponType, Dictionary<ulong, KeyValuePair<int, float>>> weaponMasteries = new()
@@ -59,7 +60,8 @@ namespace Cobalt.Systems.Weapon
             { WeaponType.Pistols, new Dictionary<ulong, KeyValuePair<int, float>>() },
             { WeaponType.Reaper, new Dictionary<ulong, KeyValuePair<int, float>>() },
             { WeaponType.Longbow, new Dictionary<ulong, KeyValuePair<int, float>>() },
-            { WeaponType.Whip, new Dictionary<ulong, KeyValuePair<int, float>>() }
+            { WeaponType.Whip, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Unarmed, new Dictionary<ulong, KeyValuePair<int, float>>() }
         };
 
         public static void UpdateCombatMastery(Entity Killer, Entity Victim)
@@ -108,13 +110,14 @@ namespace Cobalt.Systems.Weapon
 
         public static void UpdateStats(Entity player, UnitStats unitStats, Health health, ulong steamId, PrefabGUID weapon)
         {
+            CombatMasterySystem.WeaponType weaponType = GetWeaponTypeFromPrefab(weapon);
             if (!player.Has<PlayerCharacter>())
             {
                 Plugin.Log.LogInfo("No player character found for stats modifying...");
                 return;
             }
 
-            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.TryGetValue(weapon.GuidHash, out var masteryStats))
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.Weapons.TryGetValue(weaponType, out var masteryStats))
             {
                 Plugin.Log.LogInfo("No stats found for this weapon.");
                 return; // No mastery stats to check
@@ -130,13 +133,18 @@ namespace Cobalt.Systems.Weapon
                     float baseCap = WeaponStatManager.WeaponFocusSystem.BaseCaps[statType];
                     float scaledCap = baseCap * levelPercentage; // Scale cap based on the player's level
                     float currentStatValue = masteryStats.GetStatValue(statType);
-                    float statIncrease = Math.Min(currentStatValue, scaledCap); // Ensure it doesn't exceed the scaled cap
-
-                    ApplyStatIncrease(health, unitStats, statType, statIncrease);
+                    if (scaledCap > currentStatValue)
+                    {
+                        currentStatValue += scaledCap;
+                        weaponsStats.Weapons[weaponType].SetStatValue(currentStatValue, statType);
+                        DataStructures.SavePlayerWeaponStats();
+                        ApplyStatIncrease(health, unitStats, statType, scaledCap);
+                    }
                 }
             }
 
             player.Write(unitStats); // Assuming there's at least one stat update
+            player.Write(health); // Update player health
         }
 
         private static void ApplyStatIncrease(Health health, UnitStats unitStats, WeaponStatManager.WeaponFocusSystem.WeaponStatType statType, float increase)
@@ -144,39 +152,39 @@ namespace Cobalt.Systems.Weapon
             switch (statType)
             {
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth:
-                    health.MaxHealth._Value = Math.Max(health.MaxHealth._Value, increase);
+                    health.MaxHealth._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed:
-                    unitStats.AttackSpeed._Value = Math.Max(unitStats.AttackSpeed._Value, increase);
+                    unitStats.AttackSpeed._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed:
-                    unitStats.PrimaryAttackSpeed._Value = Math.Max(unitStats.PrimaryAttackSpeed._Value, increase);
+                    unitStats.PrimaryAttackSpeed._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower:
-                    unitStats.PhysicalPower._Value = Math.Max(unitStats.PhysicalPower._Value, increase);
+                    unitStats.PhysicalPower._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower:
-                    unitStats.SpellPower._Value = Math.Max(unitStats.SpellPower._Value, increase);
+                    unitStats.SpellPower._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance:
-                    unitStats.PhysicalCriticalStrikeChance._Value = Math.Max(unitStats.PhysicalCriticalStrikeChance._Value, increase);
+                    unitStats.PhysicalCriticalStrikeChance._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage:
-                    unitStats.PhysicalCriticalStrikeDamage._Value = Math.Max(unitStats.PhysicalCriticalStrikeDamage._Value, increase);
+                    unitStats.PhysicalCriticalStrikeDamage._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance:
-                    unitStats.SpellCriticalStrikeChance._Value = Math.Max(unitStats.SpellCriticalStrikeChance._Value, increase);
+                    unitStats.SpellCriticalStrikeChance._Value += increase; // Add increase directly
                     break;
 
                 case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage:
-                    unitStats.SpellCriticalStrikeDamage._Value = Math.Max(unitStats.SpellCriticalStrikeDamage._Value, increase);
+                    unitStats.SpellCriticalStrikeDamage._Value += increase; // Add increase directly
                     break;
 
                 default:
@@ -195,10 +203,10 @@ namespace Cobalt.Systems.Weapon
 
                 if (leveledUp)
                 {
-                    if (newLevel > MaxCombatMastery)
+                    if (newLevel > MaxCombatMasteryLevel)
                     {
-                        newExperience = ConvertLevelToXp(MaxCombatMastery);
-                        newLevel = MaxCombatMastery;
+                        newExperience = ConvertLevelToXp((int)MaxCombatMasteryLevel);
+                        newLevel = (int)MaxCombatMasteryLevel;
                     }
                 }
 
@@ -220,14 +228,14 @@ namespace Cobalt.Systems.Weapon
 
             if (leveledUp)
             {
-                message = $"{weaponName} Mastery improved to level [<color=white>{newLevel}</color>]!";
+                message = $"{weaponName} improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
             {
                 if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["CombatLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> {weaponName.ToLower()} mastery (<color=white>{levelProgress}%</color> to next level)";
+                    message = $"+<color=yellow>{gainedXP}</color> {weaponName.ToLower()} mastery (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }

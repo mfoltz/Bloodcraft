@@ -1,9 +1,11 @@
 ﻿using Cobalt.Core;
+using Cobalt.Systems.Weapon;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 
 namespace Cobalt.Hooks
 {
@@ -24,6 +26,7 @@ namespace Cobalt.Hooks
                     else
                     {
                         GearOverride.SetLevel(character);
+                        UnitStatsOverride.UpdatePlayerStats(character);
                     }
                 }
             }
@@ -38,11 +41,97 @@ namespace Cobalt.Hooks
         }
     }
 
+    public static class UnitStatsOverride
+    {
+        private static PlayerWeaponStats GetPlayerWeaponStats(Entity character, CombatMasterySystem.WeaponType weaponType)
+        {
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+            {
+                if (weaponData.Weapons.TryGetValue(weaponType, out var stats))
+                {
+                    return stats;  // Return stats if available
+                }
+            }
+            return new PlayerWeaponStats();  // Return a new instance with default stats if not found
+        }
+
+        private static void ApplyStatBonuses(Entity character, CombatMasterySystem.WeaponType weaponType)
+        {
+            var stats = character.Read<UnitStats>();
+            var health = character.Read<Health>();  // Assuming there's a Health component
+            var bonuses = GetPlayerWeaponStats(character, weaponType);
+            if (bonuses == null) return;
+            // Add the bonuses
+            health.MaxHealth._Value += bonuses.MaxHealth;
+            stats.AttackSpeed._Value += bonuses.AttackSpeed;
+            stats.PrimaryAttackSpeed._Value += bonuses.AttackSpeed;
+            stats.PhysicalPower._Value += bonuses.PhysicalPower;
+            stats.SpellPower._Value += bonuses.SpellPower;
+            stats.PhysicalCriticalStrikeChance._Value += bonuses.PhysicalCritChance;
+            stats.PhysicalCriticalStrikeDamage._Value += bonuses.PhysicalCritDamage;
+            stats.SpellCriticalStrikeChance._Value += bonuses.SpellCritChance;
+            stats.SpellCriticalStrikeDamage._Value += bonuses.SpellCritDamage;
+
+            character.Write(stats);
+            character.Write(health);
+        }
+
+        public static void RemoveStatBonuses(Entity character, CombatMasterySystem.WeaponType weaponType)
+        {
+            var stats = character.Read<UnitStats>();
+            var health = character.Read<Health>();
+            var bonuses = GetPlayerWeaponStats(character, weaponType);
+            // Subtract the bonuses
+            health.MaxHealth._Value -= bonuses.MaxHealth;
+            stats.AttackSpeed._Value -= bonuses.AttackSpeed;
+            stats.PrimaryAttackSpeed._Value -= bonuses.AttackSpeed;
+            stats.PhysicalPower._Value -= bonuses.PhysicalPower;
+            stats.SpellPower._Value -= bonuses.SpellPower;
+            stats.PhysicalCriticalStrikeChance._Value -= bonuses.PhysicalCritChance;
+            stats.PhysicalCriticalStrikeDamage._Value -= bonuses.PhysicalCritDamage;
+            stats.SpellCriticalStrikeChance._Value -= bonuses.SpellCritChance;
+            stats.SpellCriticalStrikeDamage._Value -= bonuses.SpellCritDamage;
+
+            character.Write(stats);
+            character.Write(health);
+        }
+
+        public static CombatMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
+        {
+            // Assuming an implementation to retrieve the current weapon type
+            return CombatMasterySystem.GetWeaponTypeFromPrefab(character.Read<Equipment>().WeaponSlotEntity._Entity.Read<PrefabGUID>());
+        }
+
+        public static void UpdatePlayerStats(Entity character)
+        {
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+            {
+                return;  // No weapon data to update
+            }
+
+            // Get the current weapon type
+            CombatMasterySystem.WeaponType currentWeapon = GetCurrentWeaponType(character);
+
+            // Check if weapon has changed
+            if (weaponData.CurrentWeapon != currentWeapon)
+            {
+                RemoveStatBonuses(character, weaponData.PreviousWeapon);  // Remove bonuses from the previous weapon
+                ApplyStatBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
+
+                // Update weapon data
+                weaponData.PreviousWeapon = weaponData.CurrentWeapon;
+                weaponData.CurrentWeapon = currentWeapon;
+            }
+        }
+    }
+
     public static class GearOverride
     {
         public static void SetLevel(Entity player)
         {
-
             ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
@@ -58,11 +147,12 @@ namespace Cobalt.Hooks
                 equipment.ArmorLevel._Value = 0f;
                 equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
-                
+
                 player.Write(equipment);
                 //Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
             }
         }
+
         public static void RemoveItemLevels(Equipment equipment)
         {
             // Reset level for Armor Chest Slot
@@ -97,15 +187,6 @@ namespace Cobalt.Hooks
                 equipment.ArmorLegsSlotEntity._Entity.Write(legsLevel);
             }
 
-            // Reset level for Weapon Slot (actually don't do this it makes gathering resources... difficult)
-            /*
-            if (!equipment.WeaponSlotEntity._Entity.Equals(Entity.Null) && !equipment.WeaponSlotEntity._Entity.Read<WeaponLevelSource>().Level.Equals(0f))
-            {
-                WeaponLevelSource weaponLevel = equipment.WeaponSlotEntity._Entity.Read<WeaponLevelSource>();
-                weaponLevel.Level = 0f;
-                equipment.WeaponSlotEntity._Entity.Write(weaponLevel);
-            }
-            */
             // Reset level for Grimoire Slot (Spell Level)
             if (!equipment.GrimoireSlotEntity._Entity.Equals(Entity.Null) && !equipment.GrimoireSlotEntity._Entity.Read<SpellLevelSource>().Level.Equals(0f))
             {

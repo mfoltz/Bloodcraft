@@ -49,6 +49,47 @@
                 };
             }
 
+            public void SetStatValue(float value, BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType)
+            {
+                switch (statType)
+                {
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.ResourceYield:
+                        ResourceYield = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PhysicalResistance:
+                        PhysicalResistance = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SpellResistance:
+                        SpellResistance = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SunResistance:
+                        SunResistance = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.FireResistance:
+                        FireResistance = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.HolyResistance:
+                        HolyResistance = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SilverResistance:
+                        SilverResistance = value;
+                        break;
+
+                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PassiveHealthRegen:
+                        PassiveHealthRegen = value;
+                        break;
+
+                    default:
+                        throw new ArgumentException("Unknown blood stat type");
+                }
+            }
+
             public int StatsChosen => ChosenStats.Count;
         }
 

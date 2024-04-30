@@ -5,6 +5,13 @@ namespace Cobalt.Systems.Weapon
 {
     public class WeaponStatsSystem
     {
+        public class PlayerWeaponData
+        {
+            public CombatMasterySystem.WeaponType CurrentWeapon { get; set; }
+            public CombatMasterySystem.WeaponType PreviousWeapon { get; set; }
+            public Dictionary<CombatMasterySystem.WeaponType, PlayerWeaponStats> Weapons { get; set; }
+        }
+
         public class PlayerWeaponStats
         {
             public float MaxHealth { get; set; }
@@ -52,6 +59,48 @@ namespace Cobalt.Systems.Weapon
                     WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage => SpellCritDamage,
                     _ => throw new ArgumentException("Unknown weapon stat type"),
                 };
+            }
+
+            public void SetStatValue(float value, WeaponStatManager.WeaponFocusSystem.WeaponStatType statType)
+            {
+                switch (statType)
+                {
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth:
+                        MaxHealth = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed:
+                        CastSpeed = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed:
+                        AttackSpeed = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower:
+                        PhysicalPower = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower:
+                        SpellPower = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance:
+                        PhysicalCritChance = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage:
+                        PhysicalCritDamage = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance:
+                        SpellCritChance = value;
+                        break;
+
+                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage:
+                        SpellCritDamage = value;
+                        break;
+                }
             }
         }
 

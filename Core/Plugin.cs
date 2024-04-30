@@ -44,9 +44,10 @@ namespace Cobalt.Core
         public static readonly string PlayerReaperMastery = Path.Combine(Plugin.ConfigPath, "player_reaper.json");
         public static readonly string PlayerLongbowMasteryJson = Path.Combine(Plugin.ConfigPath, "player_longbow.json");
         public static readonly string PlayerWhipMasteryJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
-        public static readonly string PlayerBloodMasteryJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
+        public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
         public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
         public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.ConfigPath, "player_blood_stats.json");
+
         public override void Load()
         {
             Instance = this;
@@ -64,10 +65,6 @@ namespace Cobalt.Core
         private void GameDataOnInitialize(World world)
         {
         }
-
-       
-
-      
 
         private static void InitConfig()
         {
@@ -101,6 +98,7 @@ namespace Cobalt.Core
                 loadFunction();
             }
         }
+
         private static readonly Action[] saveFunctions =
         [
             DataStructures.SavePlayerExperience,
@@ -156,6 +154,7 @@ namespace Cobalt.Core
             DataStructures.LoadPlayerWeaponStats,
             DataStructures.LoadPlayerBloodStats
         ];
+
         public void OnGameInitialized()
         {
         }

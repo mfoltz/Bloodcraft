@@ -1,4 +1,5 @@
 using Cobalt.Systems.Bloodline;
+using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Bloodline.BloodMasteryStatsSystem;
 
@@ -65,13 +66,14 @@ namespace Cobalt.Core.Commands
         public static void ResetBloodlineStatsCommand(ChatCommandContext ctx)
         {
             ulong steamId = ctx.Event.User.PlatformId;
-
+            Entity character = ctx.Event.SenderCharacterEntity;
             if (!DataStructures.PlayerBloodStats.TryGetValue(steamId, out var stats))
             {
                 ctx.Reply("No blood mastery found for this SteamID.");
                 return;
             }
             stats.ResetChosenStats();
+            BloodMasterySystem.RemoveAllStatBonuses(character, steamId);
             DataStructures.SavePlayerBloodStats();
             ctx.Reply($"Blood stat choices reset.");
         }

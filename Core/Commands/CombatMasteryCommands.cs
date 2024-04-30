@@ -1,3 +1,4 @@
+using Cobalt.Hooks;
 using Cobalt.Systems.Weapon;
 using LibCpp2IL.BinaryStructures;
 using ProjectM;
@@ -43,7 +44,6 @@ namespace Cobalt.Core.Commands
         [Command(name: "setWeaponStat", shortHand: "sws", adminOnly: true, usage: ".sws <Stat>", description: "Choose a weapon stat to enhance based on your weapon mastery.")]
         public static void SetWeaponStat(ChatCommandContext ctx, string statChoice)
         {
-
             string statType = statChoice.ToLower();
             // If not, try parsing it from the string representation
             if (!Enum.TryParse<WeaponStatManager.WeaponFocusSystem.WeaponStatType>(statType, true, out _))
@@ -57,20 +57,18 @@ namespace Cobalt.Core.Commands
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
 
-            
-
             // Ensure that there is a dictionary for the player's stats
             if (!DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats))
             {
-                weaponsStats = [];
+                weaponsStats = new();
                 DataStructures.PlayerWeaponStats[steamID] = weaponsStats;
             }
-
+            var weaponType = CombatMasterySystem.GetWeaponTypeFromPrefab(weapon);
             // Ensure that there are stats registered for the specific weapon
-            if (!weaponsStats.TryGetValue(weapon.GuidHash, out var stats))
+            if (!weaponsStats.Weapons.TryGetValue(weaponType, out var stats))
             {
                 stats = new PlayerWeaponStats();
-                weaponsStats[weapon.GuidHash] = stats;
+                weaponsStats.Weapons[weaponType] = stats;
             }
 
             // Choose a stat for the specific weapon stats instance
@@ -88,10 +86,12 @@ namespace Cobalt.Core.Commands
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
-
-            if (DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats) && weaponsStats.TryGetValue(weapon.GuidHash, out var stats))
+            CombatMasterySystem.WeaponType weaponType = CombatMasterySystem.GetWeaponTypeFromPrefab(weapon);
+            if (DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats) && weaponsStats.Weapons.TryGetValue(weaponType, out var stats))
             {
+                UnitStatsOverride.RemoveStatBonuses(character, weaponType);
                 stats.ResetChosenStats();
+
                 DataStructures.SavePlayerWeaponStats();
                 ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
             }

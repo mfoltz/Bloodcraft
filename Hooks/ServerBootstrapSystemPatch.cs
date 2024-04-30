@@ -139,7 +139,7 @@ namespace Cobalt.Hooks
             }
             if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
             {
-                DataStructures.PlayerWeaponStats.Add(steamId, []);
+                DataStructures.PlayerWeaponStats.Add(steamId, new());
                 DataStructures.SavePlayerWeaponStats();
             }
             if (!DataStructures.PlayerBloodStats.ContainsKey(steamId))
