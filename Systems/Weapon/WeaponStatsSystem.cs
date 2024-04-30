@@ -36,6 +36,23 @@ namespace Cobalt.Systems.Weapon
             }
 
             public int StatsChosen => ChosenStats.Count;
+
+            public float GetStatValue(WeaponStatManager.WeaponFocusSystem.WeaponStatType statType)
+            {
+                return statType switch
+                {
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth => MaxHealth,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed => CastSpeed,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed => AttackSpeed,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower => PhysicalPower,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower => SpellPower,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance => PhysicalCritChance,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage => PhysicalCritDamage,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance => SpellCritChance,
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage => SpellCritDamage,
+                    _ => throw new ArgumentException("Unknown weapon stat type"),
+                };
+            }
         }
 
         public class WeaponStatManager
@@ -67,6 +84,23 @@ namespace Cobalt.Systems.Weapon
                     { 7, WeaponStatType.SpellCritChance },
                     { 8, WeaponStatType.SpellCritDamage }
                 };
+                private readonly static Dictionary<WeaponStatType, float> baseCaps = new()
+                {
+                    {WeaponStatType.MaxHealth, 1000f},
+                    {WeaponStatType.CastSpeed, 1f},
+                    {WeaponStatType.AttackSpeed, 1f},
+                    {WeaponStatType.PhysicalPower, 50},
+                    {WeaponStatType.SpellPower, 50},
+                    {WeaponStatType.PhysicalCritChance, 0.5f},
+                    {WeaponStatType.PhysicalCritDamage, 2f},
+                    {WeaponStatType.SpellCritChance, 0.5f},
+                    {WeaponStatType.SpellCritDamage, 2f}
+                };
+
+                public static Dictionary<WeaponStatType, float> BaseCaps 
+                { 
+                    get => baseCaps;
+                }
             }
         }
     }

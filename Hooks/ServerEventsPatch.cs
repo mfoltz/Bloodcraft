@@ -33,17 +33,7 @@ namespace Cobalt.Hooks
         {
             public static void Prefix()
             {
-                DataStructures.SavePlayerBools();
-                DataStructures.SavePlayerExperience();
-                DataStructures.SavePlayerFishing();
-                DataStructures.SavePlayerMining();
-                DataStructures.SavePlayerWoodcutting();
-                DataStructures.SavePlayerBlacksmithing();
-                DataStructures.SavePlayerTailoring();
-                DataStructures.SavePlayerCombatMastery();
-                DataStructures.SavePlayerBloodMastery();
-                DataStructures.SavePlayerWeaponStats();
-                DataStructures.SavePlayerBloodStats();
+                Plugin.SaveAllData();
             }
         }
     }

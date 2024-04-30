@@ -39,7 +39,7 @@ namespace Cobalt.Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowMastery = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipMastery = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerBloodMastery = [];
-        private static Dictionary<ulong, Dictionary<PrefabGUID, PlayerWeaponStats>> playerWeaponStats = [];
+        private static Dictionary<ulong, Dictionary<int, PlayerWeaponStats>> playerWeaponStats = [];
         private static Dictionary<ulong, BloodMasteryStats> playerBloodlineStats = [];
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
@@ -174,7 +174,7 @@ namespace Cobalt.Core
             set => playerBloodMastery = value;
         }
 
-        public static Dictionary<ulong, Dictionary<PrefabGUID, PlayerWeaponStats>> PlayerWeaponStats
+        public static Dictionary<ulong, Dictionary<int, PlayerWeaponStats>> PlayerWeaponStats
         {
             get => playerWeaponStats;
             set => playerWeaponStats = value;

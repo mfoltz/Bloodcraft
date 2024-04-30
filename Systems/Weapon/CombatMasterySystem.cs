@@ -12,7 +12,12 @@ namespace Cobalt.Systems.Weapon
         private static readonly float CombatMasteryMultiplier = 1; // mastery points multiplier from normal units
         private static readonly float CombatValueModifier = 4f;
         private static readonly int MaxCombatMastery = 10000; // maximum stored mastery points
+        private static readonly float MaxCombatMasteryLevel = 99; // maximum level
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
+        private static readonly float CombatMasteryConstant = 0.1f; // constant for calculating level from xp
+        private static readonly int CombatMasteryXPPower = 2; // power for calculating level from xp
+
+        
         public enum WeaponType
         {
             Sword,
@@ -83,12 +88,9 @@ namespace Cobalt.Systems.Weapon
             if (isVBlood) CombatMasteryValue *= VBloodMultiplier;
 
             CombatMasteryValue *= CombatMasteryMultiplier;
-            SetCombatMastery(SteamID, CombatMasteryValue, weaponType);
+            SetCombatMastery(SteamID, CombatMasteryValue, weaponType, entityManager, User);
 
-            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["CombatLogging"])
-            {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"+<color=yellow>{CombatMasteryValue}</color> <color=white>{weaponType}</color> <color=#BDD0D7>proficiency</color>");
-            }
+            
             HandleUpdate(Killer, entityManager);
         }
 
@@ -113,80 +115,158 @@ namespace Cobalt.Systems.Weapon
                 return;
             }
 
-            Equipment equipment = player.Read<Equipment>();
-            PrefabGUID weaponGUID = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
-
-            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.TryGetValue(weaponGUID, out var masteryStats))
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.TryGetValue(weapon.GuidHash, out var masteryStats))
             {
                 Plugin.Log.LogInfo("No stats found for this weapon.");
                 return; // No mastery stats to check
             }
 
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth))
-                UpdateStatIfIncreased(ref health.MaxHealth, masteryStats.MaxHealth, health.MaxHealth._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed))
-                UpdateStatIfIncreased(ref unitStats.AttackSpeed, masteryStats.AttackSpeed, unitStats.AttackSpeed._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed))
-                UpdateStatIfIncreased(ref unitStats.PrimaryAttackSpeed, masteryStats.CastSpeed, unitStats.PrimaryAttackSpeed._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower))
-                UpdateStatIfIncreased(ref unitStats.PhysicalPower, masteryStats.PhysicalPower, unitStats.PhysicalPower._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower))
-                UpdateStatIfIncreased(ref unitStats.SpellPower, masteryStats.SpellPower, unitStats.SpellPower._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance))
-                UpdateStatIfIncreased(ref unitStats.PhysicalCriticalStrikeChance, masteryStats.PhysicalCritChance, unitStats.PhysicalCriticalStrikeChance._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage))
-                UpdateStatIfIncreased(ref unitStats.PhysicalCriticalStrikeDamage, masteryStats.PhysicalCritDamage, unitStats.PhysicalCriticalStrikeDamage._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance))
-                UpdateStatIfIncreased(ref unitStats.SpellCriticalStrikeChance, masteryStats.SpellCritChance, unitStats.SpellCriticalStrikeChance._Value);
-            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage))
-                UpdateStatIfIncreased(ref unitStats.SpellCriticalStrikeDamage, masteryStats.SpellCritDamage, unitStats.SpellCriticalStrikeDamage._Value);
+            if (weaponMasteries.TryGetValue(WeaponType.Sword, out var masteryDictionary) && masteryDictionary.TryGetValue(steamId, out var mastery))
+            {
+                int playerLevel = ConvertXpToLevel(mastery.Value);
+                float levelPercentage = playerLevel / MaxCombatMasteryLevel; // Calculate the percentage of the max level (99)
+
+                foreach (var statType in masteryStats.ChosenStats)
+                {
+                    float baseCap = WeaponStatManager.WeaponFocusSystem.BaseCaps[statType];
+                    float scaledCap = baseCap * levelPercentage; // Scale cap based on the player's level
+                    float currentStatValue = masteryStats.GetStatValue(statType);
+                    float statIncrease = Math.Min(currentStatValue, scaledCap); // Ensure it doesn't exceed the scaled cap
+
+                    ApplyStatIncrease(health, unitStats, statType, statIncrease);
+                }
+            }
+
             player.Write(unitStats); // Assuming there's at least one stat update
         }
 
-        public static void UpdateStatIfIncreased(ref ModifiableFloat currentStat, float masteryIncrease, float currentStatValue)
+        private static void ApplyStatIncrease(Health health, UnitStats unitStats, WeaponStatManager.WeaponFocusSystem.WeaponStatType statType, float increase)
         {
-            float newStatValue = currentStatValue + masteryIncrease;
-            if (newStatValue > currentStat._Value)
+            switch (statType)
             {
-                currentStat._Value = newStatValue;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth:
+                    health.MaxHealth._Value = Math.Max(health.MaxHealth._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed:
+                    unitStats.AttackSpeed._Value = Math.Max(unitStats.AttackSpeed._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed:
+                    unitStats.PrimaryAttackSpeed._Value = Math.Max(unitStats.PrimaryAttackSpeed._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower:
+                    unitStats.PhysicalPower._Value = Math.Max(unitStats.PhysicalPower._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower:
+                    unitStats.SpellPower._Value = Math.Max(unitStats.SpellPower._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance:
+                    unitStats.PhysicalCriticalStrikeChance._Value = Math.Max(unitStats.PhysicalCriticalStrikeChance._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage:
+                    unitStats.PhysicalCriticalStrikeDamage._Value = Math.Max(unitStats.PhysicalCriticalStrikeDamage._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance:
+                    unitStats.SpellCriticalStrikeChance._Value = Math.Max(unitStats.SpellCriticalStrikeChance._Value, increase);
+                    break;
+                case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage:
+                    unitStats.SpellCriticalStrikeDamage._Value = Math.Max(unitStats.SpellCriticalStrikeDamage._Value, increase);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown weapon stat type to apply");
             }
         }
 
-        public static void SetCombatMastery(ulong steamID, float value, WeaponType weaponType)
+        public static void SetCombatMastery(ulong steamID, float value, WeaponType weaponType, EntityManager entityManager, User user)
         {
             if (weaponMasteries.TryGetValue(weaponType, out var masteryDictionary))
             {
                 bool isPlayerFound = masteryDictionary.TryGetValue(steamID, out var mastery);
-                if (isPlayerFound)
+                float newExperience = value + (isPlayerFound ? mastery.Value : 0);
+                int newLevel = ConvertXpToLevel(newExperience);
+                bool leveledUp = isPlayerFound && newLevel > mastery.Key;
+
+                if (leveledUp)
                 {
-                    float newValue = value + mastery.Value;
-                    if (newValue > MaxCombatMastery)
+                    if (newLevel > MaxCombatMastery)
                     {
-                        newValue = MaxCombatMastery;
+                        newExperience = ConvertLevelToXp(MaxCombatMastery);
+                        newLevel = MaxCombatMastery;
                     }
-                    masteryDictionary[steamID] = new KeyValuePair<int, float>(mastery.Key, newValue);
-                }
-                else
-                {
-                    masteryDictionary.Add(steamID, new KeyValuePair<int, float>(0, value));
                 }
 
-                // Save the updated mastery data to the appropriate JSON file
+                masteryDictionary[steamID] = new KeyValuePair<int, float>(newLevel, newExperience);
                 DataStructures.SaveData(masteryDictionary, masteryToFileKey[weaponType]);
+
+                NotifyPlayer(entityManager, user, weaponType, value, leveledUp, newLevel);
             }
+        }
+        public static void NotifyPlayer(EntityManager entityManager, User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel)
+        {
+            ulong steamID = user.PlatformId;
+            gainedXP = (int)gainedXP;  // Convert to integer if necessary
+            int levelProgress = GetLevelProgress(steamID, weaponType);  // Calculate the current progress to the next level
+
+            string weaponName = weaponType.ToString();  // Get a human-readable weapon name
+            string message;
+
+            if (leveledUp)
+            {
+                message = $"{weaponName} Mastery improved to level [<color=white>{newLevel}</color>]!";
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
+            }
+            else
+            {
+                if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["CombatLogging"])
+                {
+                    message = $"+<color=yellow>{gainedXP}</color> {weaponName.ToLower()} mastery (<color=white>{levelProgress}%</color> to next level)";
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
+                }
+            }
+
+            
+        }
+        private static int GetLevelProgress(ulong steamID, WeaponType weaponType)
+        {
+            if (weaponMasteries.TryGetValue(weaponType, out var masteryDictionary) && masteryDictionary.TryGetValue(steamID, out var mastery))
+            {
+                float currentXP = mastery.Value;
+                int currentLevel = ConvertXpToLevel(currentXP);
+                int nextLevelXP = (int)ConvertLevelToXp(currentLevel + 1);
+                return (int)((currentXP - ConvertLevelToXp(currentLevel)) / (nextLevelXP - ConvertLevelToXp(currentLevel)) * 100);
+            }
+            return 0; // Return 0 if no mastery data found
         }
         public static WeaponType GetWeaponTypeFromPrefab(PrefabGUID weapon)
         {
-            string weaponCheck = weapon.ToString().ToLower();
+            string weaponCheck = weapon.LookupName().ToString().ToLower();
             foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
             {
+                //Plugin.Log.LogInfo($"{weaponCheck}|{type.ToString().ToLower()}");
                 // Convert the enum name to lower case and check if it is contained in the weapon GUID string
-                if (weaponCheck.Contains(type.ToString().ToLower()))
+                if (weaponCheck.Contains(type.ToString().ToLower()) && !weaponCheck.Contains("great"))
                 {
                     return type;
                 }
+                else
+                {
+                    if (weaponCheck.Contains("great"))
+                    {
+                        return WeaponType.GreatSword;
+                    }
+                }
             }
             return WeaponType.Sword; // Return Unknown if no match is found
+        }
+        private static int ConvertXpToLevel(float xp)
+        {
+            // Using a hypothetical formula: level = constant * sqrt(xp)
+            // You might need to adjust this based on your game's leveling curve
+            return (int)(CombatMasteryConstant * Math.Sqrt(xp));
+        }
+        private static float ConvertLevelToXp(int level)
+        {
+            // Reverse the formula used in ConvertXpToLevel
+            return (float)Math.Pow(level / CombatMasteryConstant, CombatMasteryXPPower);
         }
     }
 }

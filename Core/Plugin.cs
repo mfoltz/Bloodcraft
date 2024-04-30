@@ -86,7 +86,7 @@ namespace Cobalt.Core
             return true;
         }
 
-        private static void SaveAllData()
+        public static void SaveAllData()
         {
             foreach (var saveFunction in saveFunctions)
             {

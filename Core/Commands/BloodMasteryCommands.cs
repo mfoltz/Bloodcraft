@@ -53,6 +53,7 @@ namespace Cobalt.Core.Commands
             {
                 stats.ChooseStat(statType);
                 ctx.Reply($"Blood stat added: {stat}");
+                DataStructures.SavePlayerBloodStats();
             }
             else
             {
@@ -71,6 +72,7 @@ namespace Cobalt.Core.Commands
                 return;
             }
             stats.ResetChosenStats();
+            DataStructures.SavePlayerBloodStats();
             ctx.Reply($"Blood stat choices reset.");
         }
     }

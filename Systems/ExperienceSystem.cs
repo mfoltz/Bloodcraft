@@ -15,8 +15,6 @@ namespace Cobalt.Systems
         public static readonly int EXPPower = 2; // power for calculating level from xp
         public static readonly int MaxLevel = 90; // maximum level
 
-        private static readonly PrefabGUID vBloodType = new(1557174542);
-
         private static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
         public static void EXPMonitor(Entity killerEntity, Entity victimEntity)
@@ -100,10 +98,9 @@ namespace Cobalt.Systems
 
         private static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, int gainedXP, int currentLevel)
         {
-            
             EntityManager entityManager = VWorld.Server.EntityManager;
             Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
-            
+
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
             //Plugin.Log.LogInfo($"Leveled up: {leveledUp}");
             if (leveledUp)

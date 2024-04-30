@@ -67,10 +67,10 @@ namespace Cobalt.Core.Commands
             }
 
             // Ensure that there are stats registered for the specific weapon
-            if (!weaponsStats.TryGetValue(weapon, out var stats))
+            if (!weaponsStats.TryGetValue(weapon.GuidHash, out var stats))
             {
                 stats = new PlayerWeaponStats();
-                weaponsStats[weapon] = stats;
+                weaponsStats[weapon.GuidHash] = stats;
             }
 
             // Choose a stat for the specific weapon stats instance
@@ -89,7 +89,7 @@ namespace Cobalt.Core.Commands
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
 
-            if (DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats) && weaponsStats.TryGetValue(weapon, out var stats))
+            if (DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats) && weaponsStats.TryGetValue(weapon.GuidHash, out var stats))
             {
                 stats.ResetChosenStats();
                 DataStructures.SavePlayerWeaponStats();
