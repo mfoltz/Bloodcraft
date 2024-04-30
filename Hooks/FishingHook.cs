@@ -62,7 +62,7 @@ public class FishingSystemPatch
                             }
                         }
                     }
-                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "fishing");
+                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "");
                     int multiplier = ProfessionUtilities.GetFishingModifier(toProcess);
 
                     if (handler != null)

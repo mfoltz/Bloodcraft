@@ -62,7 +62,7 @@ namespace Cobalt.Systems
 
         private static bool IsVBlood(EntityManager entityManager, Entity victimEntity)
         {
-            return entityManager.HasComponent<BloodConsumeSource>(victimEntity) && entityManager.GetComponentData<BloodConsumeSource>(victimEntity).UnitBloodType.Equals(vBloodType);
+            return entityManager.HasComponent<VBloodConsumeSource>(victimEntity);
         }
 
         private static int CalculateExperienceGained(int victimLevel, bool isVBlood)

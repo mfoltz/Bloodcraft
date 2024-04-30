@@ -30,7 +30,20 @@ namespace Cobalt.Core
         public static readonly string PlayerFishingJson = Path.Combine(Plugin.ConfigPath, "player_fishing.json");
         public static readonly string PlayerBlacksmithingJson = Path.Combine(Plugin.ConfigPath, "player_blacksmithing.json");
         public static readonly string PlayerTailoringJson = Path.Combine(Plugin.ConfigPath, "player_tailoring.json");
-        public static readonly string PlayerCombatMasteryJson = Path.Combine(Plugin.ConfigPath, "player_mastery.json");
+        public static readonly string PlayerJewelcraftingJson = Path.Combine(Plugin.ConfigPath, "player_jewelcrafting.json");
+        public static readonly string PlayerAlchemyJson = Path.Combine(Plugin.ConfigPath, "player_alchemy.json");
+        public static readonly string PlayerHarvestingJson = Path.Combine(Plugin.ConfigPath, "player_harvesting.json");
+        public static readonly string PlayerSwordMasteryJson = Path.Combine(Plugin.ConfigPath, "player_sword.json");
+        public static readonly string PlayerAxeMasteryJson = Path.Combine(Plugin.ConfigPath, "player_axe.json");
+        public static readonly string PlayerMaceMasteryJson = Path.Combine(Plugin.ConfigPath, "player_mace.json");
+        public static readonly string PlayerSpearMasteryJson = Path.Combine(Plugin.ConfigPath, "player_spear.json");
+        public static readonly string PlayerCrossbowMasteryJson = Path.Combine(Plugin.ConfigPath, "player_crossbow.json");
+        public static readonly string PlayerGreatSwordMastery = Path.Combine(Plugin.ConfigPath, "player_greatsword.json");
+        public static readonly string PlayerSlashersMasteryJson = Path.Combine(Plugin.ConfigPath, "player_slashers.json");
+        public static readonly string PlayerPistolsMasteryJson = Path.Combine(Plugin.ConfigPath, "player_pistols.json");
+        public static readonly string PlayerReaperMastery = Path.Combine(Plugin.ConfigPath, "player_reaper.json");
+        public static readonly string PlayerLongbowMasteryJson = Path.Combine(Plugin.ConfigPath, "player_longbow.json");
+        public static readonly string PlayerWhipMasteryJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
         public static readonly string PlayerBloodMasteryJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
         public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
         public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.ConfigPath, "player_blood_stats.json");
@@ -75,32 +88,74 @@ namespace Cobalt.Core
 
         private static void SaveAllData()
         {
-            DataStructures.SavePlayerExperience();
-            DataStructures.SavePlayerBools();
-            DataStructures.SavePlayerWoodcutting();
-            DataStructures.SavePlayerMining();
-            DataStructures.SavePlayerFishing();
-            DataStructures.SavePlayerBloodline();
-            DataStructures.SavePlayerMastery();
-            DataStructures.SavePlayerWeaponStats();
-            DataStructures.SavePlayerBloodlineStats();
+            foreach (var saveFunction in saveFunctions)
+            {
+                saveFunction();
+            }
         }
 
         private static void LoadAllData()
         {
-            DataStructures.LoadPlayerExperience();
-            DataStructures.LoadPlayerBools();
-            DataStructures.LoadPlayerWoodcutting();
-            DataStructures.LoadPlayerMining();
-            DataStructures.LoadPlayerFishing();
-            DataStructures.LoadPlayerBlacksmithing();
-            DataStructures.LoadPlayerTailoring();
-            DataStructures.LoadPlayerBloodMastery();
-            DataStructures.LoadPlayerCombatMastery();
-            DataStructures.LoadPlayerWeaponStats();
-            DataStructures.LoadPlayerBloodStats();
+            foreach (var loadFunction in loadFunctions)
+            {
+                loadFunction();
+            }
         }
+        private static readonly Action[] saveFunctions =
+        [
+            DataStructures.SavePlayerExperience,
+            DataStructures.SavePlayerBools,
+            DataStructures.SavePlayerWoodcutting,
+            DataStructures.SavePlayerMining,
+            DataStructures.SavePlayerFishing,
+            DataStructures.SavePlayerBlacksmithing,
+            DataStructures.SavePlayerTailoring,
+            DataStructures.SavePlayerJewelcrafting,
+            DataStructures.SavePlayerAlchemy,
+            DataStructures.SavePlayerHarvesting,
+            DataStructures.SavePlayerSwordMastery,
+            DataStructures.SavePlayerAxeMastery,
+            DataStructures.SavePlayerMaceMastery,
+            DataStructures.SavePlayerSpearMastery,
+            DataStructures.SavePlayerCrossbowMastery,
+            DataStructures.SavePlayerGreatSwordMastery,
+            DataStructures.SavePlayerSlashersMastery,
+            DataStructures.SavePlayerPistolsMastery,
+            DataStructures.SavePlayerReaperMastery,
+            DataStructures.SavePlayerLongbowMastery,
+            DataStructures.SavePlayerWhipMastery,
+            DataStructures.SavePlayerBloodMastery,
+            DataStructures.SavePlayerWeaponStats,
+            DataStructures.SavePlayerBloodStats
+        ];
 
+        private static readonly Action[] loadFunctions =
+        [
+            DataStructures.LoadPlayerExperience,
+            DataStructures.LoadPlayerBools,
+            DataStructures.LoadPlayerWoodcutting,
+            DataStructures.LoadPlayerMining,
+            DataStructures.LoadPlayerFishing,
+            DataStructures.LoadPlayerBlacksmithing,
+            DataStructures.LoadPlayerTailoring,
+            DataStructures.LoadPlayerJewelcrafting,
+            DataStructures.LoadPlayerAlchemy,
+            DataStructures.LoadPlayerHarvesting,
+            DataStructures.LoadPlayerBloodMastery,
+            DataStructures.LoadPlayerSwordMastery,
+            DataStructures.LoadPlayerAxeMastery,
+            DataStructures.LoadPlayerMaceMastery,
+            DataStructures.LoadPlayerSpearMastery,
+            DataStructures.LoadPlayerCrossbowMastery,
+            DataStructures.LoadPlayerGreatSwordMastery,
+            DataStructures.LoadPlayerSlashersMastery,
+            DataStructures.LoadPlayerPistolsMastery,
+            DataStructures.LoadPlayerReaperMastery,
+            DataStructures.LoadPlayerLongbowMastery,
+            DataStructures.LoadPlayerWhipMastery,
+            DataStructures.LoadPlayerWeaponStats,
+            DataStructures.LoadPlayerBloodStats
+        ];
         public void OnGameInitialized()
         {
         }

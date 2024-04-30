@@ -9,13 +9,54 @@ namespace Cobalt.Systems.Weapon
 {
     public class CombatMasterySystem
     {
-        private static readonly float MasteryMultiplier = 1; // mastery points multiplier from normal units
-        private static readonly int MaxMastery = 10000; // maximum stored mastery points
+        private static readonly float CombatMasteryMultiplier = 1; // mastery points multiplier from normal units
+        private static readonly float CombatValueModifier = 4f;
+        private static readonly int MaxCombatMastery = 10000; // maximum stored mastery points
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
+        public enum WeaponType
+        {
+            Sword,
+            Axe,
+            Mace,
+            Spear,
+            Crossbow,
+            GreatSword,
+            Slashers,
+            Pistols,
+            Reaper,
+            Longbow,
+            Whip
+        }
+        private static readonly Dictionary<WeaponType, string> masteryToFileKey = new()
+        {
+            { WeaponType.Sword, "SwordMastery" },
+            { WeaponType.Axe, "AxeMastery" },
+            { WeaponType.Mace, "MaceMastery" },
+            { WeaponType.Spear, "SpearMastery" },
+            { WeaponType.Crossbow, "CrossbowMastery" },
+            { WeaponType.GreatSword, "GreatSwordMastery" },
+            { WeaponType.Slashers, "SlashersMastery" },
+            { WeaponType.Pistols, "PistolsMastery" },
+            { WeaponType.Reaper, "ReaperMastery" },
+            { WeaponType.Longbow, "LongbowMastery" },
+            { WeaponType.Whip, "WhipMastery" }
+        };
 
-        private static PrefabGUID vBloodType = new(1557174542);
-
-        public static void UpdateMastery(Entity Killer, Entity Victim)
+        public static readonly Dictionary<WeaponType, Dictionary<ulong, KeyValuePair<int, float>>> weaponMasteries = new()
+        {
+            { WeaponType.Sword, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Axe, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Mace, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Spear, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Crossbow, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.GreatSword, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Slashers, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Pistols, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Reaper, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Longbow, new Dictionary<ulong, KeyValuePair<int, float>>() },
+            { WeaponType.Whip, new Dictionary<ulong, KeyValuePair<int, float>>() }
+        };
+        public static void UpdateCombatMastery(Entity Killer, Entity Victim)
         {
             EntityManager entityManager = VWorld.Server.EntityManager;
             if (Killer == Victim) return;
@@ -24,28 +65,29 @@ namespace Cobalt.Systems.Weapon
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User User = entityManager.GetComponentData<User>(userEntity);
             ulong SteamID = User.PlatformId;
-
+            PrefabGUID weapon = Killer.Read<Equipment>().WeaponSlotEntity._Entity.Read<PrefabGUID>();
+            WeaponType weaponType = GetWeaponTypeFromPrefab(weapon);
             var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
 
             bool isVBlood;
-            if (entityManager.HasComponent<BloodConsumeSource>(Victim))
+            if (entityManager.HasComponent<VBloodConsumeSource>(Victim))
             {
-                BloodConsumeSource BloodSource = entityManager.GetComponentData<BloodConsumeSource>(Victim);
-                isVBlood = BloodSource.UnitBloodType.Equals(vBloodType);
+
+                isVBlood = true;
             }
             else
             {
                 isVBlood = false;
             }
-            int MasteryValue = (int)((VictimStats.SpellPower + VictimStats.PhysicalPower) / 4);
-            if (isVBlood) MasteryValue *= (int)VBloodMultiplier;
+            float CombatMasteryValue = (int)((VictimStats.SpellPower + VictimStats.PhysicalPower) / CombatValueModifier);
+            if (isVBlood) CombatMasteryValue *= VBloodMultiplier;
 
-            MasteryValue = (int)(MasteryValue * MasteryMultiplier);
-            SetMastery(SteamID, MasteryValue);
+            CombatMasteryValue *= CombatMasteryMultiplier;
+            SetCombatMastery(SteamID, CombatMasteryValue, weaponType);
 
-            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["MasteryLogging"])
+            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["CombatLogging"])
             {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"+<color=yellow>{MasteryValue}</color> <color=#00FFFF>bladework</color>");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, User, $"+<color=yellow>{CombatMasteryValue}</color> <color=white>{weaponType}</color> <color=#BDD0D7>proficiency</color>");
             }
             HandleUpdate(Killer, entityManager);
         }
@@ -53,36 +95,55 @@ namespace Cobalt.Systems.Weapon
         public static void HandleUpdate(Entity player, EntityManager entityManager)
         {
             if (!entityManager.HasComponent<PlayerCharacter>(player)) return;
-
+            Equipment equipment = player.Read<Equipment>();
+            PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
             var userEntity = player.Read<PlayerCharacter>().UserEntity;
             var steamId = userEntity.Read<User>().PlatformId;
 
             UnitStats stats = entityManager.GetComponentData<UnitStats>(player);
             Health health = entityManager.GetComponentData<Health>(player);
-            UpdateStats(player, stats, health, steamId, entityManager);
+            UpdateStats(player, stats, health, steamId, weapon);
         }
 
-        public static void UpdateStats(Entity player, UnitStats stats, Health health, ulong steamId, EntityManager entityManager)
+        public static void UpdateStats(Entity player, UnitStats unitStats, Health health, ulong steamId, PrefabGUID weapon)
         {
-            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out PlayerWeaponStats masteryStats))
+            if (!player.Has<PlayerCharacter>())
             {
+                Plugin.Log.LogInfo("No player character found for stats modifying...");
+                return;
+            }
+
+            Equipment equipment = player.Read<Equipment>();
+            PrefabGUID weaponGUID = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
+
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.TryGetValue(weaponGUID, out var masteryStats))
+            {
+                Plugin.Log.LogInfo("No stats found for this weapon.");
                 return; // No mastery stats to check
             }
 
-            UpdateStatIfIncreased(player, entityManager, ref health.MaxHealth, masteryStats.MaxHealth, health.MaxHealth._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.AttackSpeed, masteryStats.CastSpeed, stats.AttackSpeed._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PrimaryAttackSpeed, masteryStats.AttackSpeed, stats.PrimaryAttackSpeed._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalPower, masteryStats.PhysicalPower, stats.PhysicalPower._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.SpellPower, masteryStats.SpellPower, stats.SpellPower._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalCriticalStrikeChance, masteryStats.PhysicalCritChance, stats.PhysicalCriticalStrikeChance._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.PhysicalCriticalStrikeDamage, masteryStats.PhysicalCritDamage, stats.PhysicalCriticalStrikeDamage._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.SpellCriticalStrikeChance, masteryStats.SpellCritChance, stats.SpellCriticalStrikeChance._Value);
-            UpdateStatIfIncreased(player, entityManager, ref stats.SpellCriticalStrikeDamage, masteryStats.SpellCritDamage, stats.SpellCriticalStrikeDamage._Value);
-
-            player.Write(stats); // Assuming there's at least one stat update
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth))
+                UpdateStatIfIncreased(ref health.MaxHealth, masteryStats.MaxHealth, health.MaxHealth._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed))
+                UpdateStatIfIncreased(ref unitStats.AttackSpeed, masteryStats.AttackSpeed, unitStats.AttackSpeed._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed))
+                UpdateStatIfIncreased(ref unitStats.PrimaryAttackSpeed, masteryStats.CastSpeed, unitStats.PrimaryAttackSpeed._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower))
+                UpdateStatIfIncreased(ref unitStats.PhysicalPower, masteryStats.PhysicalPower, unitStats.PhysicalPower._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower))
+                UpdateStatIfIncreased(ref unitStats.SpellPower, masteryStats.SpellPower, unitStats.SpellPower._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance))
+                UpdateStatIfIncreased(ref unitStats.PhysicalCriticalStrikeChance, masteryStats.PhysicalCritChance, unitStats.PhysicalCriticalStrikeChance._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage))
+                UpdateStatIfIncreased(ref unitStats.PhysicalCriticalStrikeDamage, masteryStats.PhysicalCritDamage, unitStats.PhysicalCriticalStrikeDamage._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance))
+                UpdateStatIfIncreased(ref unitStats.SpellCriticalStrikeChance, masteryStats.SpellCritChance, unitStats.SpellCriticalStrikeChance._Value);
+            if (masteryStats.ChosenStats.Contains(WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage))
+                UpdateStatIfIncreased(ref unitStats.SpellCriticalStrikeDamage, masteryStats.SpellCritDamage, unitStats.SpellCriticalStrikeDamage._Value);
+            player.Write(unitStats); // Assuming there's at least one stat update
         }
 
-        public static void UpdateStatIfIncreased(Entity player, EntityManager entityManager, ref ModifiableFloat currentStat, float masteryIncrease, float currentStatValue)
+        public static void UpdateStatIfIncreased(ref ModifiableFloat currentStat, float masteryIncrease, float currentStatValue)
         {
             float newStatValue = currentStatValue + masteryIncrease;
             if (newStatValue > currentStat._Value)
@@ -91,29 +152,41 @@ namespace Cobalt.Systems.Weapon
             }
         }
 
-        public static void SetMastery(ulong SteamID, int Value)
+        public static void SetCombatMastery(ulong steamID, float value, WeaponType weaponType)
         {
-            bool isPlayerFound = DataStructures.PlayerCombatMastery.TryGetValue(SteamID, out var Mastery);
-            if (isPlayerFound)
+            if (weaponMasteries.TryGetValue(weaponType, out var masteryDictionary))
             {
-                if (Value + Mastery.Key > MaxMastery)
+                bool isPlayerFound = masteryDictionary.TryGetValue(steamID, out var mastery);
+                if (isPlayerFound)
                 {
-                    KeyValuePair<int, float> WeaponMastery = new(MaxMastery, 0f);
-                    DataStructures.PlayerCombatMastery[SteamID] = WeaponMastery;
+                    float newValue = value + mastery.Value;
+                    if (newValue > MaxCombatMastery)
+                    {
+                        newValue = MaxCombatMastery;
+                    }
+                    masteryDictionary[steamID] = new KeyValuePair<int, float>(mastery.Key, newValue);
                 }
                 else
                 {
-                    KeyValuePair<int, float> WeaponMastery = new(Value + Mastery.Key, 0f);
-                    DataStructures.PlayerCombatMastery[SteamID] = WeaponMastery;
+                    masteryDictionary.Add(steamID, new KeyValuePair<int, float>(0, value));
+                }
+
+                // Save the updated mastery data to the appropriate JSON file
+                DataStructures.SaveData(masteryDictionary, masteryToFileKey[weaponType]);
+            }
+        }
+        public static WeaponType GetWeaponTypeFromPrefab(PrefabGUID weapon)
+        {
+            string weaponCheck = weapon.ToString().ToLower();
+            foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
+            {
+                // Convert the enum name to lower case and check if it is contained in the weapon GUID string
+                if (weaponCheck.Contains(type.ToString().ToLower()))
+                {
+                    return type;
                 }
             }
-            else
-            {
-                KeyValuePair<int, float> WeaponMastery = new(Value, 0f);
-                DataStructures.PlayerCombatMastery.Add(SteamID, WeaponMastery);
-            }
-
-            DataStructures.SavePlayerMastery();
+            return WeaponType.Sword; // Return Unknown if no match is found
         }
     }
 }

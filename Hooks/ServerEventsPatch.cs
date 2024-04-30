@@ -40,10 +40,10 @@ namespace Cobalt.Hooks
                 DataStructures.SavePlayerWoodcutting();
                 DataStructures.SavePlayerBlacksmithing();
                 DataStructures.SavePlayerTailoring();
-                DataStructures.SavePlayerMastery();
-                DataStructures.SavePlayerBloodline();
+                DataStructures.SavePlayerCombatMastery();
+                DataStructures.SavePlayerBloodMastery();
                 DataStructures.SavePlayerWeaponStats();
-                DataStructures.SavePlayerBloodlineStats();
+                DataStructures.SavePlayerBloodStats();
             }
         }
     }

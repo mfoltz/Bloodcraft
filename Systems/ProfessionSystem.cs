@@ -64,10 +64,11 @@ namespace Cobalt.Systems
 
             if (handler != null)
             {
-                if (handler.GetProfessionName().Equals("Woodcutting"))
+                if (handler.GetProfessionName().ToLower().Contains("woodcutting"))
                 {
                     ProfessionValue *= GetWoodcuttingModifier(prefabGUID);
                 }
+                
                 SetProfession(user, SteamID, ProfessionValue, handler);
             }
             else
@@ -181,6 +182,18 @@ namespace Cobalt.Systems
             { "cursed", 4 }
            
         };
+        private static readonly Dictionary<string, int> TierMultiplier = new()
+        {
+            { "t01", 1 },
+            { "t02", 2 },
+            { "t03", 3 },
+            { "t04", 4 },
+            { "t05", 5 },
+            { "t06", 6 },
+            { "t07", 7 },
+            { "t08", 8 },
+            { "t09", 9 },
+        };
         public static int GetFishingModifier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> location in FishingMultipliers)
@@ -199,6 +212,17 @@ namespace Cobalt.Systems
                 if (prefab.LookupName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
+                }
+            }
+            return 1;
+        }
+        public static int GetTierMultiplier(PrefabGUID prefab)
+        {
+            foreach (KeyValuePair<string, int> tier in TierMultiplier)
+            {
+                if (prefab.LookupName().ToLower().Contains(tier.Key))
+                {
+                    return tier.Value;
                 }
             }
             return 1;
@@ -226,19 +250,25 @@ namespace Cobalt.Systems
                 // Check context to decide on a handler
                 switch (context)
                 {
-                    case "fishing":
-                        return new FishingHandler();
-                    case "blacksmithing":
-                        return new BlacksmithingHandler();
-                    case "tailoring":
-                        return new TailoringHandler();
-
+           
                     default:
                         // Fall back to type checks for other professions
                         if (itemTypeName.Contains("wood"))
                             return new WoodcuttingHandler();
-                        if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone"))
+                        if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") && !itemTypeName.Contains("magicsource"))
                             return new MiningHandler();
+                        if (itemTypeName.Contains("weapon"))
+                            return new BlacksmithingHandler();
+                        if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag"))
+                            return new TailoringHandler();
+                        if (itemTypeName.Contains("fishing"))
+                            return new FishingHandler();
+                        if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask"))
+                            return new AlchemyHandler();
+                        if (itemTypeName.Contains("plant"))
+                            return new HarvestingHandler();
+                        if (itemTypeName.Contains("gem") || itemTypeName.Contains("jewel") || itemTypeName.Contains("magicsource"))
+                            return new JewelcraftingHandler();
                         else
                             return null;
                 }
@@ -278,6 +308,52 @@ namespace Cobalt.Systems
             public abstract string GetProfessionName();
         }
 
+        public class JewelcraftingHandler : BaseProfessionHandler
+        {
+            // Override the DataStructure to provide the specific dictionary for woodcutting.
+            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerJewelcrafting;
+
+            public override void SaveChanges()
+            {
+                DataStructures.SavePlayerJewelcrafting();
+            }
+
+            public override string GetProfessionName()
+            {
+                return "<color=#7E22CE>Jewelcrafting</color>";
+            }
+        }
+        public class AlchemyHandler : BaseProfessionHandler
+        {
+            // Override the DataStructure to provide the specific dictionary for woodcutting.
+            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerAlchemy;
+
+            public override void SaveChanges()
+            {
+                DataStructures.SavePlayerAlchemy();
+            }
+
+            public override string GetProfessionName()
+            {
+                return "<color=#12D4A2>Alchemy</color>";
+            }
+        }
+
+        public class HarvestingHandler : BaseProfessionHandler
+        {
+            // Override the DataStructure to provide the specific dictionary for woodcutting.
+            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerHarvesting;
+
+            public override void SaveChanges()
+            {
+                DataStructures.SavePlayerHarvesting();
+            }
+
+            public override string GetProfessionName()
+            {
+                return "<color=#008000>Harvesting</color>";
+            }
+        }
         public class BlacksmithingHandler : BaseProfessionHandler
         {
             // Override the DataStructure to provide the specific dictionary for woodcutting.
@@ -296,7 +372,7 @@ namespace Cobalt.Systems
         public class TailoringHandler : BaseProfessionHandler
         {
             // Override the DataStructure to provide the specific dictionary for woodcutting.
-            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerWoodcutting;
+            protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerTailoring;
 
             public override void SaveChanges()
             {

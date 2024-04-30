@@ -1,6 +1,6 @@
 ﻿using ProjectM;
 using System.Text.Json;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodMasteryStatsSystem;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 
 namespace Cobalt.Core
@@ -24,10 +24,23 @@ namespace Cobalt.Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerFishing = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerBlacksmithing = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerTailoring = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerBloodline = [];
-        private static Dictionary<ulong, PlayerWeaponStats> playerWeaponStats = [];
-        private static Dictionary<ulong, PlayerBloodlineStats> playerBloodlineStats = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerJewelcrafting = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerAlchemy = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerHarvesting = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSwordMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerAxeMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerMaceMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSpearMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerCrossbowMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerGreatSwordMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSlashersMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerPistolsMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerBloodMastery = [];
+        private static Dictionary<ulong, Dictionary<PrefabGUID, PlayerWeaponStats>> playerWeaponStats = [];
+        private static Dictionary<ulong, BloodMasteryStats> playerBloodlineStats = [];
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
         {
@@ -71,25 +84,103 @@ namespace Cobalt.Core
             set => playerTailoring = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCombatMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerJewelcrafting
         {
-            get => playerMastery;
-            set => playerMastery = value;
+            get => playerJewelcrafting;
+            set => playerJewelcrafting = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAlchemy
+        {
+            get => playerAlchemy;
+            set => playerAlchemy = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerHarvesting
+        {
+            get => playerHarvesting;
+            set => playerHarvesting = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSwordMastery
+        {
+            get => playerSwordMastery;
+            set => playerSwordMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAxeMastery
+        {
+            get => playerAxeMastery;
+            set => playerAxeMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMaceMastery
+        {
+            get => playerMaceMastery;
+            set => playerMaceMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSpearMastery
+        {
+            get => playerSpearMastery;
+            set => playerSpearMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCrossbowMastery
+        {
+            get => playerCrossbowMastery;
+            set => playerCrossbowMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerGreatSwordMastery
+        {
+            get => playerGreatSwordMastery;
+            set => playerGreatSwordMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSlashersMastery
+        {
+            get => playerSlashersMastery;
+            set => playerSlashersMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerPistolsMastery
+        {
+            get => playerPistolsMastery;
+            set => playerPistolsMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerReaperMastery
+        {
+            get => playerReaperMastery;
+            set => playerReaperMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerLongbowMastery
+        {
+            get => playerLongbowMastery;
+            set => playerLongbowMastery = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWhipMastery
+        {
+            get => playerWhipMastery;
+            set => playerWhipMastery = value;
         }
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerBloodMastery
         {
-            get => playerBloodline;
-            set => playerBloodline = value;
+            get => playerBloodMastery;
+            set => playerBloodMastery = value;
         }
 
-        public static Dictionary<ulong, PlayerWeaponStats> PlayerWeaponStats
+        public static Dictionary<ulong, Dictionary<PrefabGUID, PlayerWeaponStats>> PlayerWeaponStats
         {
             get => playerWeaponStats;
             set => playerWeaponStats = value;
         }
 
-        public static Dictionary<ulong, PlayerBloodlineStats> PlayerBloodStats
+        public static Dictionary<ulong, BloodMasteryStats> PlayerBloodStats
         {
             get => playerBloodlineStats;
             set => playerBloodlineStats = value;
@@ -114,7 +205,20 @@ namespace Cobalt.Core
             {"Fishing", Plugin.PlayerFishingJson},
             {"Blacksmithing", Plugin.PlayerBlacksmithingJson},
             {"Tailoring", Plugin.PlayerTailoringJson},
-            {"CombatMastery", Plugin.PlayerCombatMasteryJson},
+            {"Jewelcrafting", Plugin.PlayerJewelcraftingJson},
+            {"Alchemy", Plugin.PlayerAlchemyJson},
+            {"Harvesting", Plugin.PlayerHarvestingJson},
+            {"SwordMastery", Plugin.PlayerSwordMasteryJson },
+            {"AxeMastery", Plugin.PlayerAxeMasteryJson},
+            {"MaceMastery", Plugin.PlayerMaceMasteryJson},
+            {"SpearMastery", Plugin.PlayerSpearMasteryJson},
+            {"CrossbowMastery", Plugin.PlayerCrossbowMasteryJson},
+            {"GreatSwordMastery", Plugin.PlayerGreatSwordMastery},
+            {"SlashersMastery", Plugin.PlayerSlashersMasteryJson},
+            {"PistolsMastery", Plugin.PlayerPistolsMasteryJson},
+            {"ReaperMastery", Plugin.PlayerReaperMastery},
+            {"LongbowMastery", Plugin.PlayerLongbowMasteryJson},
+            {"WhipMastery", Plugin.PlayerWhipMasteryJson},
             {"BloodMastery", Plugin.PlayerBloodMasteryJson},
             {"WeaponStats", Plugin.PlayerWeaponStatsJson},
             {"BloodStats", Plugin.PlayerBloodStatsJson}
@@ -167,9 +271,35 @@ namespace Cobalt.Core
 
         public static void LoadPlayerTailoring() => LoadData(ref playerTailoring, "Tailoring");
 
-        public static void LoadPlayerCombatMastery() => LoadData(ref playerMastery, "CombatMastery");
+        public static void LoadPlayerJewelcrafting() => LoadData(ref playerJewelcrafting, "Jewelcrafting");
 
-        public static void LoadPlayerBloodMastery() => LoadData(ref playerBloodline, "BloodMastery");
+        public static void LoadPlayerAlchemy() => LoadData(ref playerAlchemy, "Alchemy");
+
+        public static void LoadPlayerHarvesting() => LoadData(ref playerHarvesting, "Harvesting");
+
+        public static void LoadPlayerSwordMastery() => LoadData(ref playerSwordMastery, "SwordMastery");
+
+        public static void LoadPlayerAxeMastery() => LoadData(ref playerAxeMastery, "AxeMastery");
+
+        public static void LoadPlayerMaceMastery() => LoadData(ref playerMaceMastery, "MaceMastery");
+
+        public static void LoadPlayerSpearMastery() => LoadData(ref playerSpearMastery, "SpearMastery");
+
+        public static void LoadPlayerCrossbowMastery() => LoadData(ref playerCrossbowMastery, "CrossbowMastery");
+
+        public static void LoadPlayerGreatSwordMastery() => LoadData(ref playerGreatSwordMastery, "GreatSwordMastery");
+
+        public static void LoadPlayerSlashersMastery() => LoadData(ref playerSlashersMastery, "SlashersMastery");
+
+        public static void LoadPlayerPistolsMastery() => LoadData(ref playerPistolsMastery, "PistolsMastery");
+
+        public static void LoadPlayerReaperMastery() => LoadData(ref playerReaperMastery, "ReaperMastery");
+
+        public static void LoadPlayerLongbowMastery() => LoadData(ref playerLongbowMastery, "LongbowMastery");
+
+        public static void LoadPlayerWhipMastery() => LoadData(ref playerWhipMastery, "WhipMastery");
+
+        public static void LoadPlayerBloodMastery() => LoadData(ref playerBloodMastery, "BloodMastery");
 
         public static void LoadPlayerWeaponStats() => LoadData(ref playerWeaponStats, "WeaponStats");
 
@@ -208,12 +338,38 @@ namespace Cobalt.Core
 
         public static void SavePlayerTailoring() => SaveData(PlayerTailoring, "Tailoring");
 
-        public static void SavePlayerMastery() => SaveData(PlayerCombatMastery, "CombatMastery");
+        public static void SavePlayerJewelcrafting() => SaveData(PlayerJewelcrafting, "Jewelcrafting");
 
-        public static void SavePlayerBloodline() => SaveData(PlayerBloodMastery, "BloodMastery");
+        public static void SavePlayerAlchemy() => SaveData(PlayerAlchemy, "Alchemy");
+
+        public static void SavePlayerHarvesting() => SaveData(PlayerHarvesting, "Harvesting");
+
+        public static void SavePlayerSwordMastery() => SaveData(PlayerSwordMastery, "SwordMastery");
+
+        public static void SavePlayerAxeMastery() => SaveData(PlayerAxeMastery, "AxeMastery");
+
+        public static void SavePlayerMaceMastery() => SaveData(PlayerMaceMastery, "MaceMastery");
+
+        public static void SavePlayerSpearMastery() => SaveData(PlayerSpearMastery, "SpearMastery");
+
+        public static void SavePlayerCrossbowMastery() => SaveData(PlayerCrossbowMastery, "CrossbowMastery");
+
+        public static void SavePlayerGreatSwordMastery() => SaveData(PlayerGreatSwordMastery, "GreatSwordMastery");
+
+        public static void SavePlayerSlashersMastery() => SaveData(PlayerSlashersMastery, "SlashersMastery");
+
+        public static void SavePlayerPistolsMastery() => SaveData(PlayerPistolsMastery, "PistolsMastery");
+
+        public static void SavePlayerReaperMastery() => SaveData(PlayerReaperMastery, "ReaperMastery");
+
+        public static void SavePlayerLongbowMastery() => SaveData(PlayerLongbowMastery, "LongbowMastery");
+
+        public static void SavePlayerWhipMastery() => SaveData(PlayerWhipMastery, "WhipMastery");
+
+        public static void SavePlayerBloodMastery() => SaveData(PlayerBloodMastery, "BloodMastery");
 
         public static void SavePlayerWeaponStats() => SaveData(PlayerWeaponStats, "WeaponStats");
 
-        public static void SavePlayerBloodlineStats() => SaveData(PlayerBloodStats, "BloodStats");
+        public static void SavePlayerBloodStats() => SaveData(PlayerBloodStats, "BloodStats");
     }
 }

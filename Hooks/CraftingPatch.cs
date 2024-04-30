@@ -14,6 +14,9 @@ using ProjectM.UI;
 using System.Reflection.Metadata.Ecma335;
 using Unity.Collections;
 using Unity.Entities;
+using static Cobalt.Systems.ProfessionUtilities;
+using static VCF.Core.Basics.RoleCommands;
+using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks;
 
@@ -22,6 +25,9 @@ public class CraftingPatch
     [HarmonyPatch(typeof(UpdateCraftingSystem), nameof(UpdateCraftingSystem.OnUpdate))]
     public static class UpdateCraftingSystemPatch
     {
+        private static readonly float BaseCraftingXP = 50;
+        private static readonly float craftRate = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>()._Settings.CraftRateModifier;
+
         public static void Prefix(UpdateCraftingSystem __instance)
         {
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
@@ -31,26 +37,42 @@ public class CraftingPatch
                 foreach (Entity entity in entities)
                 {
                     if (entity.Equals(Entity.Null) || !entity.Has<CastleAreaRequirement>() || !entity.Has<QueuedWorkstationCraftAction>()) continue;
-                    var listeners = entity.ReadBuffer<GameplayEventListeners>();
-                    if (!listeners.IsEmpty || listeners.IsCreated)
-                    {
-                        foreach(var listener in listeners)
-                        {
-                            Plugin.Log.LogInfo(listener.GameplayEventType.ToString());
-                        }
-                    }
 
                     var actions = entity.ReadBuffer<QueuedWorkstationCraftAction>();
                     if (actions.IsEmpty || !actions.IsCreated) continue;
                     foreach (var action in actions)
                     {
-                        ulong steamId = action.InitiateUser.Read<User>().PlatformId;
+                        User user = action.InitiateUser.Read<User>();
+                        ulong steamId = user.PlatformId;
                         if (DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var jobs) && jobs.ContainsKey(action.RecipeGuid) && jobs[action.RecipeGuid])
                         {
-                            Plugin.Log.LogInfo(action.ProgressTime);
+                            //Plugin.Log.LogInfo(action.ProgressTime);
+                            RecipeData recipeData = prefabCollectionSystem._PrefabGuidToEntityMap[action.RecipeGuid].Read<RecipeData>();
+                            float delta = (recipeData.CraftDuration / craftRate) - action.ProgressTime;
+                            //Plugin.Log.LogInfo($"{recipeData.CraftDuration} | {action.ProgressTime} | {delta}");
+                            if (delta < 0.1)
+                            {
+                                //Plugin.Log.LogInfo("CraftingXP");
+
+                                Entity recipe = prefabCollectionSystem._PrefabGuidToEntityMap[action.RecipeGuid];
+                                //CastleWorkstation workstation = entity.Read<CastleWorkstation>();
+                                //ServantType servantType = workstation.BonusServantType;
+                                //Plugin.Log.LogInfo(servantType.ToString());
+                                var recipeOutput = recipe.ReadBuffer<RecipeOutputBuffer>();
+                                PrefabGUID itemPrefab = recipeOutput[0].Guid;
+                                Entity item = prefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
+                                float ProfessionValue = BaseCraftingXP;
+                                // t01 etc multiplier
+                                ProfessionValue *= GetTierMultiplier(action.RecipeGuid);
+                                IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(action.RecipeGuid, "");
+                                if (handler != null)
+                                {
+                                    ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
+                                }
+                                jobs.Remove(action.RecipeGuid);
+                            }
                         }
                     }
-
                 }
             }
             catch (Exception e)
@@ -63,6 +85,7 @@ public class CraftingPatch
             }
         }
     }
+
     [HarmonyPatch(typeof(StartCraftingSystem), nameof(StartCraftingSystem.OnUpdate))]
     public static class StartCraftingSystemPatch
     {
@@ -85,13 +108,8 @@ public class CraftingPatch
                     if (DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var jobs) && !jobs.ContainsKey(prefabGUID))
                     {
                         // if crafting job not already present, add to cache
+                        Plugin.Log.LogInfo($"Active Craft: {prefabGUID.LookupName()}");
                         jobs.Add(prefabGUID, true);
-                    }
-                    else
-                    {
-                        // if crafting job already present, set to active
-                        jobs[prefabGUID] = true;
-
                     }
                 }
             }
@@ -105,6 +123,7 @@ public class CraftingPatch
             }
         }
     }
+
     [HarmonyPatch(typeof(StopCraftingSystem), nameof(StopCraftingSystem.OnUpdate))]
     public static class StopCraftingSystemPatch
     {
@@ -126,11 +145,10 @@ public class CraftingPatch
                     PrefabGUID prefabGUID = stopCraftItemEvent.RecipeGuid;
                     if (DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var jobs) && jobs.ContainsKey(prefabGUID))
                     {
-                        // if crafting job is active, set to inactive
-                        jobs[prefabGUID] = false;
+                        // if crafting job is active, remove
+                        Plugin.Log.LogInfo($"Inactive Craft: {prefabGUID.LookupName()}");
+                        jobs.Remove(prefabGUID);
                     }
-                    
-
                 }
             }
             catch (Exception e)

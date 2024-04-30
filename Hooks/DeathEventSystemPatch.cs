@@ -23,8 +23,7 @@ public class DeathEventListenerSystem_Patch
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
                     ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
-                    CombatMasterySystem.UpdateMastery(ev.Killer, ev.Died);
-                    ev.Source.LogComponentTypes();
+                    CombatMasterySystem.UpdateCombatMastery(ev.Killer, ev.Died);
                     BloodMasterySystem.UpdateBloodMastery(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
