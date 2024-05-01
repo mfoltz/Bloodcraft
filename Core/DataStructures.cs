@@ -37,9 +37,11 @@ namespace Cobalt.Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerPistolsMastery = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperMastery = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedMastery = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipMastery = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerBloodMastery = [];
-        private static Dictionary<ulong, PlayerWeaponData> playerWeaponStats = [];
+        private static Dictionary<ulong, Dictionary<string, Dictionary<string, float>>> playerWeaponStats = [];
+        private static Dictionary<ulong, Dictionary<string, List<string>>> playerWeaponStatChoices = [];
         private static Dictionary<ulong, BloodMasteryStats> playerBloodlineStats = [];
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
@@ -168,16 +170,28 @@ namespace Cobalt.Core
             set => playerWhipMastery = value;
         }
 
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerUnarmedMastery
+        {
+            get => playerUnarmedMastery;
+            set => playerUnarmedMastery = value;
+        }
+
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerBloodMastery
         {
             get => playerBloodMastery;
             set => playerBloodMastery = value;
         }
 
-        public static Dictionary<ulong, PlayerWeaponData> PlayerWeaponStats
+        public static Dictionary<ulong, Dictionary<string, Dictionary<string, float>>> PlayerWeaponStats // bonus stats for easy retrieval to add/remove
         {
             get => playerWeaponStats;
             set => playerWeaponStats = value;
+        }
+
+        public static Dictionary<ulong, Dictionary<string, List<string>>> PlayerWeaponStatChoices // weapon, then list of stats for the weapon in string form
+        {
+            get => playerWeaponStatChoices;
+            set => playerWeaponStatChoices = value;
         }
 
         public static Dictionary<ulong, BloodMasteryStats> PlayerBloodStats
@@ -189,10 +203,18 @@ namespace Cobalt.Core
         // cache-only
         private static Dictionary<ulong, Dictionary<PrefabGUID, bool>> playerCraftingJobs = [];
 
+        private static Dictionary<ulong, Tuple<string, string>> playerWeapons = [];
+
         public static Dictionary<ulong, Dictionary<PrefabGUID, bool>> PlayerCraftingJobs
         {
             get => playerCraftingJobs;
             set => playerCraftingJobs = value;
+        }
+
+        public static Dictionary<ulong, Tuple<string, string>> PlayerWeapons
+        {
+            get => playerWeapons;
+            set => playerWeapons = value;
         }
 
         // file paths dictionary
@@ -219,12 +241,58 @@ namespace Cobalt.Core
             {"ReaperMastery", Plugin.PlayerReaperMastery},
             {"LongbowMastery", Plugin.PlayerLongbowMasteryJson},
             {"WhipMastery", Plugin.PlayerWhipMasteryJson},
+            {"UnarmedMastery", Plugin.PlayerUnarmedMasteryJson},
             {"BloodMastery", Plugin.PlayerSanguimancyJson},
             {"WeaponStats", Plugin.PlayerWeaponStatsJson},
+            {"WeaponChoices", Plugin.PlayerWeaponChoicesJson},
             {"BloodStats", Plugin.PlayerBloodStatsJson}
         };
 
+        public static readonly Dictionary<string, Dictionary<ulong, KeyValuePair<int, float>>> professionMap = new()
+        {
+            {"Woodcutting", PlayerWoodcutting},
+            {"Mining", PlayerMining},
+            {"Fishing", PlayerFishing},
+            {"Blacksmithing", PlayerBlacksmithing},
+            {"Tailoring", PlayerTailoring},
+            {"Jewelcrafting", PlayerJewelcrafting},
+            {"Alchemy", PlayerAlchemy},
+            {"Harvesting", PlayerHarvesting }
+        };
+
+        public static readonly Dictionary<string, Dictionary<ulong, KeyValuePair<int, float>>> weaponMasteryMap = new()
+        {
+            {"Sword", PlayerSwordMastery},
+            {"Axe", PlayerAxeMastery},
+            {"Mace", PlayerMaceMastery},
+            {"Spear", PlayerSpearMastery},
+            {"Crossbow", PlayerCrossbowMastery},
+            {"GreatSword", PlayerGreatSwordMastery},
+            {"Slashers", PlayerSlashersMastery},
+            {"Pistols", PlayerPistolsMastery},
+            {"Reaper", PlayerReaperMastery},
+            {"Longbow", PlayerLongbowMastery},
+            {"Whip", PlayerWhipMastery},
+            {"Unarmed", PlayerUnarmedMastery},
+        };
+
         // Generic method to save any type of dictionary.
+        public static readonly Dictionary<string, Action> saveActions = new()
+        {
+            {"Sword", SavePlayerSwordMastery},
+            {"Axe", SavePlayerAxeMastery},
+            {"Mace", SavePlayerMaceMastery},
+            {"Spear", SavePlayerSpearMastery},
+            {"Crossbow", SavePlayerCrossbowMastery},
+            {"GreatSword", SavePlayerGreatSwordMastery},
+            {"Slashers", SavePlayerSlashersMastery},
+            {"Pistols", SavePlayerPistolsMastery},
+            {"Reaper", SavePlayerReaperMastery},
+            {"Longbow", SavePlayerLongbowMastery},
+            {"Whip", SavePlayerWhipMastery},
+            {"Unarmed", SavePlayerUnarmedMastery},
+            // Add other mastery types as needed
+        };
 
         public static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
         {
@@ -299,9 +367,13 @@ namespace Cobalt.Core
 
         public static void LoadPlayerWhipMastery() => LoadData(ref playerWhipMastery, "WhipMastery");
 
+        public static void LoadPlayerUnarmedMastery() => LoadData(ref playerUnarmedMastery, "UnarmedMastery");
+
         public static void LoadPlayerBloodMastery() => LoadData(ref playerBloodMastery, "BloodMastery");
 
         public static void LoadPlayerWeaponStats() => LoadData(ref playerWeaponStats, "WeaponStats");
+
+        public static void LoadPlayerWeaponChoices() => LoadData(ref playerWeaponStatChoices, "WeaponChoices");
 
         public static void LoadPlayerBloodStats() => LoadData(ref playerBloodlineStats, "BloodStats");
 
@@ -366,9 +438,13 @@ namespace Cobalt.Core
 
         public static void SavePlayerWhipMastery() => SaveData(PlayerWhipMastery, "WhipMastery");
 
+        public static void SavePlayerUnarmedMastery() => SaveData(PlayerUnarmedMastery, "UnarmedMastery");
+
         public static void SavePlayerBloodMastery() => SaveData(PlayerBloodMastery, "BloodMastery");
 
         public static void SavePlayerWeaponStats() => SaveData(PlayerWeaponStats, "WeaponStats");
+
+        public static void SavePlayerWeaponChoices() => SaveData(PlayerWeaponStatChoices, "WeaponChoices");
 
         public static void SavePlayerBloodStats() => SaveData(PlayerBloodStats, "BloodStats");
     }

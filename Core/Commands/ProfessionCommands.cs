@@ -1,10 +1,12 @@
+using Bloodstone.API;
+using ProjectM.Network;
+using ProjectM;
 using VampireCommandFramework;
 
 namespace Cobalt.Core.Commands
 {
     public static class ProfessionCommands
     {
-
         [Command(name: "logProfessionProgress", shortHand: "lpp", adminOnly: false, usage: ".lpp", description: "Toggles profession progress logging.")]
         public static void LogMasteryCommand(ChatCommandContext ctx)
         {
@@ -17,8 +19,29 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Profession progress logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-       
+        public class BuildingCostsToggle
+        {
+            private static bool buildingCostsFlag = false;
 
+            private static SetDebugSettingEvent BuildingCostsDebugSetting = new()
+            {
+                SettingType = (DebugSettingType)5, // Assuming this is the correct DebugSettingType for building costs
+                Value = false
+            };
 
+            [Command(name: "toggleBuildingCosts", shortHand: "tbc", adminOnly: true, usage: ".tbc", description: "Toggles building costs, useful for setting up a castle linked to your heart easily.")]
+            public static void ToggleBuildingCostsCommand(ChatCommandContext ctx)
+            {
+                User user = ctx.Event.User;
+
+                DebugEventsSystem existingSystem = VWorld.Server.GetExistingSystem<DebugEventsSystem>();
+                buildingCostsFlag = !buildingCostsFlag; // Toggle the flag
+
+                BuildingCostsDebugSetting.Value = buildingCostsFlag;
+                existingSystem.SetDebugSetting(user.Index, ref BuildingCostsDebugSetting);
+
+                ctx.Reply($"BuildingCostsDisabled: {BuildingCostsDebugSetting.Value}");
+            }
+        }
     }
 }

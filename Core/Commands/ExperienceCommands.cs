@@ -1,7 +1,9 @@
 using Bloodstone.API;
+using Cobalt.Systems;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
+using UnityEngine.Rendering.HighDefinition;
 using VampireCommandFramework;
 using VRising.GameData.Utils;
 
@@ -9,21 +11,6 @@ namespace Cobalt.Core.Commands
 {
     public static class ExperienceCommands
     {
-
-        [Command(name: "getExperienceProgress", shortHand: "gep", adminOnly: false, usage: ".gep", description: "Display your current experience progress.")]
-        public static void GetExperienceCommand(ChatCommandContext ctx)
-        {
-            var SteamID = ctx.Event.User.PlatformId;
-            if (DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
-            {
-                ctx.Reply($"You have <color=white>{xpData.Key}</color> experience points.");
-            }
-            else
-            {
-                ctx.Reply("You haven't earned any mastery points yet.");
-            }
-        }
-
         [Command(name: "logExperienceProgress", shortHand: "lep", adminOnly: false, usage: ".lep", description: "Toggles experience progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
         {
@@ -36,52 +23,25 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Experience progress logging is now {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "setExperiencePoints", shortHand: "sep", adminOnly: true, usage: ".sep [Player] [ExperiencePoints]", description: "Sets player experience points.")]
-        public static void MasterySetCommand(ChatCommandContext ctx, string name, int value)
+        [Command(name: "setLevel", shortHand: "sl", adminOnly: true, usage: ".sl [Level]", description: "Sets your level.")]
+        public static void SetLevelCommand(ChatCommandContext ctx, int level)
         {
-
-        }
-
-        [Command(name: "logPrefabComponents", shortHand: "logprefab", adminOnly: true, usage: ".logprefab [#]", description: "WIP")]
-        public static void LogUnitStats(ChatCommandContext ctx, int prefab)
-        {
-            PrefabGUID toLog = new(prefab);
-        
-            Entity entity = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>()._PrefabGuidToEntityMap[toLog];
-            if (entity == Entity.Null)
+            if (level < 0 || level > ExperienceSystem.MaxLevel)
             {
-                ctx.Reply("Entity not found.");
+                ctx.Reply($"Level must be between 0 and {ExperienceSystem.MaxLevel}.");
                 return;
+            }
+            ulong steamId = ctx.Event.User.PlatformId;
+            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var _))
+            {
+                var xpData = new KeyValuePair<int, float>(level, ExperienceSystem.ConvertLevelToXp(level));
+                DataStructures.PlayerExperience[steamId] = xpData;
+                DataStructures.SavePlayerExperience();
+                ctx.Reply($"Level set to {level}.");
             }
             else
             {
-                entity.LogComponentTypes();
-                ctx.Reply("Components logged.");
-            }
-            
-        }
-        public class BuildingCostsToggle
-        {
-            private static bool buildingCostsFlag = false;
-
-            private static SetDebugSettingEvent BuildingCostsDebugSetting = new()
-            {
-                SettingType = (DebugSettingType)5, // Assuming this is the correct DebugSettingType for building costs
-                Value = false
-            };
-
-            [Command(name: "toggleBuildingCosts", shortHand: "tbc", adminOnly: true, usage: ".tbc", description: "Toggles building costs, useful for setting up a castle linked to your heart easily.")]
-            public static void ToggleBuildingCostsCommand(ChatCommandContext ctx)
-            {
-                User user = ctx.Event.User;
-
-                DebugEventsSystem existingSystem = VWorld.Server.GetExistingSystem<DebugEventsSystem>();
-                buildingCostsFlag = !buildingCostsFlag; // Toggle the flag
-
-                BuildingCostsDebugSetting.Value = buildingCostsFlag;
-                existingSystem.SetDebugSetting(user.Index, ref BuildingCostsDebugSetting);
-          
-                ctx.Reply($"BuildingCostsDisabled: {BuildingCostsDebugSetting.Value}");
+                ctx.Reply("No experience data found.");
             }
         }
     }

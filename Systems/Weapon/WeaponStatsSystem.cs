@@ -1,105 +1,38 @@
 ﻿using Bloodstone.API;
+using Cobalt.Core;
 using ProjectM;
+using Steamworks;
 
 namespace Cobalt.Systems.Weapon
 {
     public class WeaponStatsSystem
     {
-        public class PlayerWeaponData
+        public class PlayerWeaponUtilities
         {
-            public CombatMasterySystem.WeaponType CurrentWeapon { get; set; }
-            public CombatMasterySystem.WeaponType PreviousWeapon { get; set; }
-            public Dictionary<CombatMasterySystem.WeaponType, PlayerWeaponStats> Weapons { get; set; }
-        }
-
-        public class PlayerWeaponStats
-        {
-            public float MaxHealth { get; set; }
-            public float CastSpeed { get; set; }
-            public float AttackSpeed { get; set; }
-            public float PhysicalPower { get; set; }
-            public float SpellPower { get; set; }
-            public float PhysicalCritChance { get; set; }
-            public float PhysicalCritDamage { get; set; }
-            public float SpellCritChance { get; set; }
-            public float SpellCritDamage { get; set; }
-
-            // Instance variable to track chosen stats for each weapon stats object
-            public HashSet<WeaponStatManager.WeaponFocusSystem.WeaponStatType> ChosenStats = [];
-
-            public void ChooseStat(WeaponStatManager.WeaponFocusSystem.WeaponStatType statType)
+            public static bool ChooseStat(ulong steamId, string weaponType, string statType)
             {
-                if (ChosenStats.Count >= 2)
+                if (!DataStructures.PlayerWeaponStatChoices.ContainsKey(steamId))
+                    DataStructures.PlayerWeaponStatChoices[steamId] = [];
+
+                if (!DataStructures.PlayerWeaponStatChoices[steamId].ContainsKey(weaponType))
+                    DataStructures.PlayerWeaponStatChoices[steamId][weaponType] = [];
+
+                if (DataStructures.PlayerWeaponStatChoices[steamId][weaponType].Count >= 2)
                 {
-                    throw new InvalidOperationException("Cannot choose more than two stats for this weapon.");
+                    return false; // Only allow 2 stats to be chosen
                 }
 
-                ChosenStats.Add(statType);
+                DataStructures.PlayerWeaponStatChoices[steamId][weaponType].Add(statType);
+                DataStructures.SavePlayerWeaponChoices();
+                return true;
             }
 
-            public void ResetChosenStats()
+            public static void ResetChosenStats(ulong steamId, string weaponType)
             {
-                ChosenStats.Clear();
-            }
-
-            public int StatsChosen => ChosenStats.Count;
-
-            public float GetStatValue(WeaponStatManager.WeaponFocusSystem.WeaponStatType statType)
-            {
-                return statType switch
+                if (DataStructures.PlayerWeaponStatChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
                 {
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth => MaxHealth,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed => CastSpeed,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed => AttackSpeed,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower => PhysicalPower,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower => SpellPower,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance => PhysicalCritChance,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage => PhysicalCritDamage,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance => SpellCritChance,
-                    WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage => SpellCritDamage,
-                    _ => throw new ArgumentException("Unknown weapon stat type"),
-                };
-            }
-
-            public void SetStatValue(float value, WeaponStatManager.WeaponFocusSystem.WeaponStatType statType)
-            {
-                switch (statType)
-                {
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth:
-                        MaxHealth = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.CastSpeed:
-                        CastSpeed = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.AttackSpeed:
-                        AttackSpeed = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalPower:
-                        PhysicalPower = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellPower:
-                        SpellPower = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritChance:
-                        PhysicalCritChance = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.PhysicalCritDamage:
-                        PhysicalCritDamage = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritChance:
-                        SpellCritChance = value;
-                        break;
-
-                    case WeaponStatManager.WeaponFocusSystem.WeaponStatType.SpellCritDamage:
-                        SpellCritDamage = value;
-                        break;
+                    choices.Clear();
+                    DataStructures.SavePlayerWeaponChoices();
                 }
             }
         }
@@ -136,15 +69,15 @@ namespace Cobalt.Systems.Weapon
 
                 private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
-                    {WeaponStatType.MaxHealth, 1000f},
-                    {WeaponStatType.CastSpeed, 1f},
-                    {WeaponStatType.AttackSpeed, 1f},
-                    {WeaponStatType.PhysicalPower, 50},
-                    {WeaponStatType.SpellPower, 50},
-                    {WeaponStatType.PhysicalCritChance, 0.5f},
-                    {WeaponStatType.PhysicalCritDamage, 2f},
-                    {WeaponStatType.SpellCritChance, 0.5f},
-                    {WeaponStatType.SpellCritDamage, 2f}
+                    {WeaponStatType.MaxHealth, 150},
+                    {WeaponStatType.CastSpeed, 0.15f},
+                    {WeaponStatType.AttackSpeed, 0.15f},
+                    {WeaponStatType.PhysicalPower, 15},
+                    {WeaponStatType.SpellPower, 15},
+                    {WeaponStatType.PhysicalCritChance, 0.15f},
+                    {WeaponStatType.PhysicalCritDamage, 0.75f},
+                    {WeaponStatType.SpellCritChance, 0.15f},
+                    {WeaponStatType.SpellCritDamage, 0.75f}
                 };
 
                 public static Dictionary<WeaponStatType, float> BaseCaps

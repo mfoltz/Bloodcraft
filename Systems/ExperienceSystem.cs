@@ -151,13 +151,13 @@ namespace Cobalt.Systems
             }
         }
 
-        private static int ConvertXpToLevel(float xp)
+        public static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion
             return (int)(EXPConstant * Math.Sqrt(xp));
         }
 
-        private static int ConvertLevelToXp(int level)
+        public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
             return (int)Math.Pow(level / EXPConstant, EXPPower);

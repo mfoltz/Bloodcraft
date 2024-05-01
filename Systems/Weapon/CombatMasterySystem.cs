@@ -2,6 +2,7 @@
 using Cobalt.Core;
 using ProjectM;
 using ProjectM.Network;
+using Steamworks;
 using Unity.Entities;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 
@@ -11,7 +12,7 @@ namespace Cobalt.Systems.Weapon
     {
         private static readonly float CombatMasteryMultiplier = 1; // mastery points multiplier from normal units
         private static readonly float CombatValueModifier = 4f;
-        private static readonly float MaxCombatMasteryLevel = 99; // maximum level
+        public static readonly float MaxCombatMasteryLevel = 99; // maximum level
         private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
         private static readonly float CombatMasteryConstant = 0.1f; // constant for calculating level from xp
         private static readonly int CombatMasteryXPPower = 2; // power for calculating level from xp
@@ -48,6 +49,7 @@ namespace Cobalt.Systems.Weapon
             { WeaponType.Unarmed, "UnarmedMastery" }
         };
 
+        /*
         public static readonly Dictionary<WeaponType, Dictionary<ulong, KeyValuePair<int, float>>> weaponMasteries = new()
         {
             { WeaponType.Sword, new Dictionary<ulong, KeyValuePair<int, float>>() },
@@ -63,6 +65,7 @@ namespace Cobalt.Systems.Weapon
             { WeaponType.Whip, new Dictionary<ulong, KeyValuePair<int, float>>() },
             { WeaponType.Unarmed, new Dictionary<ulong, KeyValuePair<int, float>>() }
         };
+        */
 
         public static void UpdateCombatMastery(Entity Killer, Entity Victim)
         {
@@ -74,7 +77,7 @@ namespace Cobalt.Systems.Weapon
             User User = entityManager.GetComponentData<User>(userEntity);
             ulong SteamID = User.PlatformId;
             PrefabGUID weapon = Killer.Read<Equipment>().WeaponSlotEntity._Entity.Read<PrefabGUID>();
-            WeaponType weaponType = GetWeaponTypeFromPrefab(weapon);
+            string weaponType = GetWeaponTypeFromPrefab(weapon).ToString();
             var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
 
             bool isVBlood;
@@ -111,34 +114,36 @@ namespace Cobalt.Systems.Weapon
         public static void UpdateStats(Entity player, UnitStats unitStats, Health health, ulong steamId, PrefabGUID weapon)
         {
             CombatMasterySystem.WeaponType weaponType = GetWeaponTypeFromPrefab(weapon);
+            string weaponString = weaponType.ToString().ToLower();
             if (!player.Has<PlayerCharacter>())
             {
                 Plugin.Log.LogInfo("No player character found for stats modifying...");
                 return;
             }
 
-            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.Weapons.TryGetValue(weaponType, out var masteryStats))
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponsStats) || !weaponsStats.TryGetValue(weaponString, out var masteryStats))
             {
                 Plugin.Log.LogInfo("No stats found for this weapon.");
                 return; // No mastery stats to check
             }
 
-            if (weaponMasteries.TryGetValue(WeaponType.Sword, out var masteryDictionary) && masteryDictionary.TryGetValue(steamId, out var mastery))
+            if (DataStructures.weaponMasteryMap.TryGetValue(weaponString, out var playerMastery) && playerMastery.TryGetValue(steamId, out var mastery))
             {
                 int playerLevel = ConvertXpToLevel(mastery.Value);
                 float levelPercentage = playerLevel / MaxCombatMasteryLevel; // Calculate the percentage of the max level (99)
 
-                foreach (var statType in masteryStats.ChosenStats)
+                foreach (var statType in masteryStats)
                 {
-                    float baseCap = WeaponStatManager.WeaponFocusSystem.BaseCaps[statType];
+                    WeaponStatManager.WeaponFocusSystem.WeaponStatType stat = GetStatTypeFromString(statType.Key);
+                    float baseCap = WeaponStatManager.WeaponFocusSystem.BaseCaps[stat];
                     float scaledCap = baseCap * levelPercentage; // Scale cap based on the player's level
-                    float currentStatValue = masteryStats.GetStatValue(statType);
+                    float currentStatValue = masteryStats[statType.Key];
                     if (scaledCap > currentStatValue)
                     {
                         currentStatValue += scaledCap;
-                        weaponsStats.Weapons[weaponType].SetStatValue(currentStatValue, statType);
+                        weaponsStats[weaponString][statType.Key] = currentStatValue;
                         DataStructures.SavePlayerWeaponStats();
-                        ApplyStatIncrease(health, unitStats, statType, scaledCap);
+                        ApplyStatIncrease(health, unitStats, stat, scaledCap);
                     }
                 }
             }
@@ -192,14 +197,16 @@ namespace Cobalt.Systems.Weapon
             }
         }
 
-        public static void SetCombatMastery(ulong steamID, float value, WeaponType weaponType, EntityManager entityManager, User user)
+        public static void SetCombatMastery(ulong steamID, float value, string weaponType, EntityManager entityManager, User user)
         {
-            if (weaponMasteries.TryGetValue(weaponType, out var masteryDictionary))
+            Plugin.Log.LogInfo($"{weaponType}");
+            ulong steamId = user.PlatformId;
+            if (DataStructures.weaponMasteryMap.TryGetValue(weaponType, out var playerMastery) && playerMastery.TryGetValue(steamId, out var mastery))
             {
-                bool isPlayerFound = masteryDictionary.TryGetValue(steamID, out var mastery);
-                float newExperience = value + (isPlayerFound ? mastery.Value : 0);
+                //bool isPlayerFound = masteryDictionary.TryGetValue(steamID, out var mastery);
+                float newExperience = value + mastery.Value;
                 int newLevel = ConvertXpToLevel(newExperience);
-                bool leveledUp = isPlayerFound && newLevel > mastery.Key;
+                bool leveledUp = newLevel > mastery.Key;
 
                 if (leveledUp)
                 {
@@ -210,40 +217,43 @@ namespace Cobalt.Systems.Weapon
                     }
                 }
 
-                masteryDictionary[steamID] = new KeyValuePair<int, float>(newLevel, newExperience);
-                DataStructures.SaveData(masteryDictionary, masteryToFileKey[weaponType]);
+                playerMastery[steamID] = new KeyValuePair<int, float>(newLevel, newExperience);
+                DataStructures.saveActions[weaponType]();
 
                 NotifyPlayer(entityManager, user, weaponType, value, leveledUp, newLevel);
             }
+            else
+            {
+                Plugin.Log.LogInfo($"Unable to update experience for {weaponType}");
+            }
         }
 
-        public static void NotifyPlayer(EntityManager entityManager, User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel)
+        public static void NotifyPlayer(EntityManager entityManager, User user, string weaponType, float gainedXP, bool leveledUp, int newLevel)
         {
             ulong steamID = user.PlatformId;
             gainedXP = (int)gainedXP;  // Convert to integer if necessary
             int levelProgress = GetLevelProgress(steamID, weaponType);  // Calculate the current progress to the next level
 
-            string weaponName = weaponType.ToString();  // Get a human-readable weapon name
             string message;
 
             if (leveledUp)
             {
-                message = $"{weaponName} improved to [<color=white>{newLevel}</color>]";
+                message = $"{weaponType} improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
             {
                 if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["CombatLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> {weaponName.ToLower()} mastery (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> {weaponType.ToLower()} mastery (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }
         }
 
-        private static int GetLevelProgress(ulong steamID, WeaponType weaponType)
+        private static int GetLevelProgress(ulong steamID, string weaponType)
         {
-            if (weaponMasteries.TryGetValue(weaponType, out var masteryDictionary) && masteryDictionary.TryGetValue(steamID, out var mastery))
+            if (DataStructures.weaponMasteryMap.TryGetValue(weaponType, out var masteryDictionary) && masteryDictionary.TryGetValue(steamID, out var mastery))
             {
                 float currentXP = mastery.Value;
                 int currentLevel = ConvertXpToLevel(currentXP);
@@ -255,6 +265,7 @@ namespace Cobalt.Systems.Weapon
 
         public static WeaponType GetWeaponTypeFromPrefab(PrefabGUID weapon)
         {
+            if (weapon.GuidHash.Equals(0)) return WeaponType.Unarmed; // Return Unarmed if no weapon is equipped
             string weaponCheck = weapon.LookupName().ToString().ToLower();
             foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
             {
@@ -272,17 +283,32 @@ namespace Cobalt.Systems.Weapon
                     }
                 }
             }
-            return WeaponType.Sword; // Return Unknown if no match is found
+            return WeaponType.Unarmed; // Return Unknown if no match is found
         }
 
-        private static int ConvertXpToLevel(float xp)
+        public static WeaponStatManager.WeaponFocusSystem.WeaponStatType GetStatTypeFromString(string statType)
+        {
+            string statCheck = statType.ToLower();
+            foreach (WeaponStatManager.WeaponFocusSystem.WeaponStatType type in Enum.GetValues(typeof(WeaponStatManager.WeaponFocusSystem.WeaponStatType)))
+            {
+                //Plugin.Log.LogInfo($"{weaponCheck}|{type.ToString().ToLower()}");
+                // Convert the enum name to lower case and check if it is contained in the weapon GUID string
+                if (statCheck.Contains(type.ToString().ToLower()))
+                {
+                    return type;
+                }
+            }
+            return WeaponStatManager.WeaponFocusSystem.WeaponStatType.MaxHealth; // Return Unknown if no match is found
+        }
+
+        public static int ConvertXpToLevel(float xp)
         {
             // Using a hypothetical formula: level = constant * sqrt(xp)
             // You might need to adjust this based on your game's leveling curve
             return (int)(CombatMasteryConstant * Math.Sqrt(xp));
         }
 
-        private static float ConvertLevelToXp(int level)
+        public static float ConvertLevelToXp(int level)
         {
             // Reverse the formula used in ConvertXpToLevel
             return (float)Math.Pow(level / CombatMasteryConstant, CombatMasteryXPPower);

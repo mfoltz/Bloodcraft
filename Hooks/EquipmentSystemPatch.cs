@@ -26,7 +26,14 @@ namespace Cobalt.Hooks
                     else
                     {
                         GearOverride.SetLevel(character);
-                        UnitStatsOverride.UpdatePlayerStats(character);
+                        try
+                        {
+                            UnitStatsOverride.UpdatePlayerStats(character);
+                        }
+                        catch (System.Exception e)
+                        {
+                            Plugin.Log.LogError($"Error updating player stats: {e}");
+                        }
                     }
                 }
             }
@@ -43,55 +50,55 @@ namespace Cobalt.Hooks
 
     public static class UnitStatsOverride
     {
-        private static PlayerWeaponStats GetPlayerWeaponStats(Entity character, CombatMasterySystem.WeaponType weaponType)
+        private static Dictionary<string, float> GetPlayerWeaponStats(Entity character, string weaponType)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
             {
-                if (weaponData.Weapons.TryGetValue(weaponType, out var stats))
+                if (weaponData.TryGetValue(weaponType, out var stats))
                 {
                     return stats;  // Return stats if available
                 }
             }
-            return new PlayerWeaponStats();  // Return a new instance with default stats if not found
+            return [];// return empty array if no stats found
         }
 
-        private static void ApplyStatBonuses(Entity character, CombatMasterySystem.WeaponType weaponType)
+        private static void ApplyStatBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
             var health = character.Read<Health>();  // Assuming there's a Health component
             var bonuses = GetPlayerWeaponStats(character, weaponType);
-            if (bonuses == null) return;
+            if (bonuses.Count == 0) return;  // No bonuses to apply
             // Add the bonuses
-            health.MaxHealth._Value += bonuses.MaxHealth;
-            stats.AttackSpeed._Value += bonuses.AttackSpeed;
-            stats.PrimaryAttackSpeed._Value += bonuses.AttackSpeed;
-            stats.PhysicalPower._Value += bonuses.PhysicalPower;
-            stats.SpellPower._Value += bonuses.SpellPower;
-            stats.PhysicalCriticalStrikeChance._Value += bonuses.PhysicalCritChance;
-            stats.PhysicalCriticalStrikeDamage._Value += bonuses.PhysicalCritDamage;
-            stats.SpellCriticalStrikeChance._Value += bonuses.SpellCritChance;
-            stats.SpellCriticalStrikeDamage._Value += bonuses.SpellCritDamage;
+            health.MaxHealth._Value += bonuses["MaxHealth"];
+            stats.AttackSpeed._Value += bonuses["CastSpeed"];
+            stats.PrimaryAttackSpeed._Value += bonuses["AttackSpeed"];
+            stats.PhysicalPower._Value += bonuses["PhysicalPower"];
+            stats.SpellPower._Value += bonuses["SpellPower"];
+            stats.PhysicalCriticalStrikeChance._Value += bonuses["PhysicalCritChance"];
+            stats.PhysicalCriticalStrikeDamage._Value += bonuses["PhysicalCritDamage"];
+            stats.SpellCriticalStrikeChance._Value += bonuses["SpellCritChance"];
+            stats.SpellCriticalStrikeDamage._Value += bonuses["SpellCritDamage"];
 
             character.Write(stats);
             character.Write(health);
         }
 
-        public static void RemoveStatBonuses(Entity character, CombatMasterySystem.WeaponType weaponType)
+        public static void RemoveStatBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
             var health = character.Read<Health>();
             var bonuses = GetPlayerWeaponStats(character, weaponType);
             // Subtract the bonuses
-            health.MaxHealth._Value -= bonuses.MaxHealth;
-            stats.AttackSpeed._Value -= bonuses.AttackSpeed;
-            stats.PrimaryAttackSpeed._Value -= bonuses.AttackSpeed;
-            stats.PhysicalPower._Value -= bonuses.PhysicalPower;
-            stats.SpellPower._Value -= bonuses.SpellPower;
-            stats.PhysicalCriticalStrikeChance._Value -= bonuses.PhysicalCritChance;
-            stats.PhysicalCriticalStrikeDamage._Value -= bonuses.PhysicalCritDamage;
-            stats.SpellCriticalStrikeChance._Value -= bonuses.SpellCritChance;
-            stats.SpellCriticalStrikeDamage._Value -= bonuses.SpellCritDamage;
+            health.MaxHealth._Value -= bonuses["MaxHealth"];
+            stats.AttackSpeed._Value -= bonuses["CastSpeed"];
+            stats.PrimaryAttackSpeed._Value -= bonuses["AttackSpeed"];
+            stats.PhysicalPower._Value -= bonuses["PhysicalPower"];
+            stats.SpellPower._Value -= bonuses["SpellPower"];
+            stats.PhysicalCriticalStrikeChance._Value -= bonuses["PhysicalCritChance"];
+            stats.PhysicalCriticalStrikeDamage._Value -= bonuses["PhysicalCritDamage"];
+            stats.SpellCriticalStrikeChance._Value -= bonuses["SpellCritChance"];
+            stats.SpellCriticalStrikeDamage._Value -= bonuses["SpellCritDamage"];
 
             character.Write(stats);
             character.Write(health);
@@ -100,7 +107,9 @@ namespace Cobalt.Hooks
         public static CombatMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             // Assuming an implementation to retrieve the current weapon type
-            return CombatMasterySystem.GetWeaponTypeFromPrefab(character.Read<Equipment>().WeaponSlotEntity._Entity.Read<PrefabGUID>());
+            Entity weapon = character.Read<Equipment>().WeaponSlotEntity._Entity;
+            if (weapon.Equals(Entity.Null)) return CombatMasterySystem.WeaponType.Unarmed;
+            return CombatMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 
         public static void UpdatePlayerStats(Entity character)
@@ -116,14 +125,21 @@ namespace Cobalt.Hooks
             CombatMasterySystem.WeaponType currentWeapon = GetCurrentWeaponType(character);
 
             // Check if weapon has changed
-            if (weaponData.CurrentWeapon != currentWeapon)
+            if (DataStructures.PlayerWeapons.TryGetValue(steamId, out var weaponsTuple))
             {
-                RemoveStatBonuses(character, weaponData.PreviousWeapon);  // Remove bonuses from the previous weapon
-                ApplyStatBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
+                string newCurrentWeapon = currentWeapon.ToString();  // Assuming `currentWeapon` is an enum or similar and needs to be converted to string for comparison.
+                string previousWeapon = weaponsTuple.Item2;
 
-                // Update weapon data
-                weaponData.PreviousWeapon = weaponData.CurrentWeapon;
-                weaponData.CurrentWeapon = currentWeapon;
+                // Check if the current weapon has changed.
+                if (weaponsTuple.Item1 != newCurrentWeapon)
+                {
+                    // Apply and remove stat bonuses based on weapon change.
+                    RemoveStatBonuses(character, previousWeapon);  // Remove bonuses from the previous weapon
+                    ApplyStatBonuses(character, newCurrentWeapon);  // Apply bonuses from the new weapon
+
+                    // Update the tuple to reflect the new current and previous weapons.
+                    DataStructures.PlayerWeapons[steamId] = new(newCurrentWeapon, weaponsTuple.Item1);  // Here weaponsTuple.Item1 becomes the new previous weapon
+                }
             }
         }
     }

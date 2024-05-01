@@ -1,4 +1,5 @@
 ﻿using Cobalt.Core;
+using Cobalt.Systems.Weapon;
 using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
@@ -139,9 +140,19 @@ namespace Cobalt.Hooks
             }
             if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
             {
-                DataStructures.PlayerWeaponStats.Add(steamId, new());
+                DataStructures.PlayerWeaponStats.Add(steamId, []);
                 DataStructures.SavePlayerWeaponStats();
             }
+            if (!DataStructures.PlayerWeaponStatChoices.ContainsKey(steamId))
+            {
+                var weaponStats = new Dictionary<string, Dictionary<string, float>>();
+                foreach (CombatMasterySystem.WeaponType weaponType in Enum.GetValues(typeof(CombatMasterySystem.WeaponType)))
+                {
+                }
+                DataStructures.PlayerWeaponStatChoices.Add(steamId, []);
+                DataStructures.SavePlayerWeaponChoices();
+            }
+
             if (!DataStructures.PlayerBloodStats.ContainsKey(steamId))
             {
                 DataStructures.PlayerBloodStats.Add(steamId, new BloodMasteryStats());
@@ -150,6 +161,10 @@ namespace Cobalt.Hooks
             if (!DataStructures.PlayerCraftingJobs.ContainsKey(steamId))
             {
                 DataStructures.PlayerCraftingJobs.Add(steamId, []);
+            }
+            if (!DataStructures.PlayerWeapons.ContainsKey(steamId))
+            {
+                DataStructures.PlayerWeapons.Add(steamId, new("", ""));
             }
         }
     }
