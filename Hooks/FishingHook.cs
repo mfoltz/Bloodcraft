@@ -1,14 +1,11 @@
-using Bloodstone.API;
 using Cobalt.Core;
 using Cobalt.Systems;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Systems.ProfessionUtilities;
 
 namespace Cobalt.Hooks;
 
@@ -28,8 +25,8 @@ public class FishingSystemPatch
                 {
                     if (entity.Equals(Entity.Null)) continue;
                     if (!entity.Has<Buff>()) continue;
-                    PrefabGUID prefabGUID = entity.Read<PrefabGUID>();                    
-                    
+                    PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+
                     if (!prefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
                     {
                         continue;
@@ -40,7 +37,7 @@ public class FishingSystemPatch
                     ulong steamId = user.PlatformId;
                     PrefabGUID toProcess = new(0);
                     Entity target = entity.Read<Buff>().Target;
-                    
+
                     if (!target.Equals(Entity.Null))
                     {
                         //target.LogComponentTypes();

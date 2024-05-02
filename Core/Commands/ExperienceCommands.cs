@@ -1,5 +1,5 @@
 using Bloodstone.API;
-using Cobalt.Systems;
+using Cobalt.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;

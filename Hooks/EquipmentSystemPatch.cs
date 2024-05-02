@@ -1,11 +1,13 @@
 ﻿using Cobalt.Core;
 using Cobalt.Systems.Weapon;
+using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Hooks
 {
@@ -50,79 +52,174 @@ namespace Cobalt.Hooks
 
     public static class UnitStatsOverride
     {
-        private static Dictionary<string, float> GetPlayerWeaponStats(Entity character, string weaponType)
-        {
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
-            {
-                if (weaponData.TryGetValue(weaponType, out var stats))
-                {
-                    return stats;  // Return stats if available
-                }
-            }
-            return [];// return empty array if no stats found
-        }
-
         private static void ApplyStatBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
             var health = character.Read<Health>();  // Assuming there's a Health component
-            var bonuses = GetPlayerWeaponStats(character, weaponType);
-            if (bonuses.Count == 0) return;  // No bonuses to apply
-            // Add the bonuses
-            health.MaxHealth._Value += bonuses["MaxHealth"];
-            stats.AttackSpeed._Value += bonuses["CastSpeed"];
-            stats.PrimaryAttackSpeed._Value += bonuses["AttackSpeed"];
-            stats.PhysicalPower._Value += bonuses["PhysicalPower"];
-            stats.SpellPower._Value += bonuses["SpellPower"];
-            stats.PhysicalCriticalStrikeChance._Value += bonuses["PhysicalCritChance"];
-            stats.PhysicalCriticalStrikeDamage._Value += bonuses["PhysicalCritDamage"];
-            stats.SpellCriticalStrikeChance._Value += bonuses["SpellCritChance"];
-            stats.SpellCriticalStrikeDamage._Value += bonuses["SpellCritDamage"];
 
-            character.Write(stats);
-            character.Write(health);
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+            {
+                IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+                if (weaponData.TryGetValue(weaponType, out var bonuses))
+                {
+                    foreach (var bonus in bonuses)
+                    {
+                        WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus.Key);
+                        float scaledBonus = CalculateScaledBonus(handler, steamId, weaponStatType);
+                        switch (weaponStatType)
+                        {
+                            case WeaponStatType.MaxHealth:
+                                health.MaxHealth._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.CastSpeed:
+                                stats.AttackSpeed._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.AttackSpeed:
+                                stats.PrimaryAttackSpeed._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.PhysicalPower:
+                                stats.PhysicalPower._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.SpellPower:
+                                stats.SpellPower._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.PhysicalCritChance:
+                                stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.PhysicalCritDamage:
+                                stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.SpellCritChance:
+                                stats.SpellCriticalStrikeChance._Value += scaledBonus;
+                                break;
+
+                            case WeaponStatType.SpellCritDamage:
+                                stats.SpellCriticalStrikeDamage._Value += scaledBonus;
+                                break;
+                        }
+                    }
+
+                    character.Write(stats);
+                    character.Write(health);
+                }
+            }
+
+            // Add the bonuses
         }
 
         public static void RemoveStatBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
             var health = character.Read<Health>();
-            var bonuses = GetPlayerWeaponStats(character, weaponType);
-            // Subtract the bonuses
-            health.MaxHealth._Value -= bonuses["MaxHealth"];
-            stats.AttackSpeed._Value -= bonuses["CastSpeed"];
-            stats.PrimaryAttackSpeed._Value -= bonuses["AttackSpeed"];
-            stats.PhysicalPower._Value -= bonuses["PhysicalPower"];
-            stats.SpellPower._Value -= bonuses["SpellPower"];
-            stats.PhysicalCriticalStrikeChance._Value -= bonuses["PhysicalCritChance"];
-            stats.PhysicalCriticalStrikeDamage._Value -= bonuses["PhysicalCritDamage"];
-            stats.SpellCriticalStrikeChance._Value -= bonuses["SpellCritChance"];
-            stats.SpellCriticalStrikeDamage._Value -= bonuses["SpellCritDamage"];
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            character.Write(stats);
-            character.Write(health);
+            if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+            {
+                IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+                if (weaponData.TryGetValue(weaponType, out var bonuses))
+                {
+                    foreach (var bonus in bonuses)
+                    {
+                        WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus.Key);
+                        float scaledBonus = CalculateScaledBonus(handler, steamId, weaponStatType);
+                        switch (weaponStatType)
+                        {
+                            case WeaponStatType.MaxHealth:
+                                health.MaxHealth._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.CastSpeed:
+                                stats.AttackSpeed._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.AttackSpeed:
+                                stats.PrimaryAttackSpeed._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.PhysicalPower:
+                                stats.PhysicalPower._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.SpellPower:
+                                stats.SpellPower._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.PhysicalCritChance:
+                                stats.PhysicalCriticalStrikeChance._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.PhysicalCritDamage:
+                                stats.PhysicalCriticalStrikeDamage._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.SpellCritChance:
+                                stats.SpellCriticalStrikeChance._Value -= scaledBonus;
+                                break;
+
+                            case WeaponStatType.SpellCritDamage:
+                                stats.SpellCriticalStrikeDamage._Value -= scaledBonus;
+                                break;
+                        }
+                    }
+
+                    character.Write(stats);
+                    character.Write(health);
+                }
+                else
+                {
+                    return;  // No bonuses to subtract
+                }
+            }
+            else
+            {
+                return;  // No weapon data to apply
+            }
+            // Subtract the bonuses
         }
 
-        public static CombatMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
+        public static float CalculateScaledBonus(IWeaponMasteryHandler handler, ulong steamId, WeaponStatType statType)
+        {
+            if (handler != null)
+            {
+                var xpData = handler.GetExperienceData(steamId);
+                int currentLevel = WeaponMasterySystem.ConvertXpToLevel(xpData.Value);
+
+                float maxBonus = WeaponStatManager.BaseCaps[statType];
+                float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
+
+                return scaledBonus;
+            }
+
+            return 0; // Return 0 if no handler is found or other error
+        }
+
+        public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             // Assuming an implementation to retrieve the current weapon type
             Entity weapon = character.Read<Equipment>().WeaponSlotEntity._Entity;
-            if (weapon.Equals(Entity.Null)) return CombatMasterySystem.WeaponType.Unarmed;
-            return CombatMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
+            if (weapon.Equals(Entity.Null)) return WeaponMasterySystem.WeaponType.Unarmed;
+            return WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 
         public static void UpdatePlayerStats(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var _))
             {
                 return;  // No weapon data to update
             }
 
             // Get the current weapon type
-            CombatMasterySystem.WeaponType currentWeapon = GetCurrentWeaponType(character);
+            WeaponMasterySystem.WeaponType currentWeapon = GetCurrentWeaponType(character);
 
             // Check if weapon has changed
             if (DataStructures.PlayerWeapons.TryGetValue(steamId, out var weaponsTuple))

@@ -39,22 +39,20 @@ namespace Cobalt.Systems.Weapon
 
         public class WeaponStatManager
         {
-            public class WeaponFocusSystem
+            public enum WeaponStatType
             {
-                public enum WeaponStatType
-                {
-                    MaxHealth,
-                    CastSpeed,
-                    AttackSpeed,
-                    PhysicalPower,
-                    SpellPower,
-                    PhysicalCritChance,
-                    PhysicalCritDamage,
-                    SpellCritChance,
-                    SpellCritDamage
-                }
+                MaxHealth,
+                CastSpeed,
+                AttackSpeed,
+                PhysicalPower,
+                SpellPower,
+                PhysicalCritChance,
+                PhysicalCritDamage,
+                SpellCritChance,
+                SpellCritDamage
+            }
 
-                public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
+            public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
                 {
                     { 0, WeaponStatType.MaxHealth },
                     { 1, WeaponStatType.CastSpeed },
@@ -67,7 +65,7 @@ namespace Cobalt.Systems.Weapon
                     { 8, WeaponStatType.SpellCritDamage }
                 };
 
-                private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
+            private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
                     {WeaponStatType.MaxHealth, 150},
                     {WeaponStatType.CastSpeed, 0.15f},
@@ -80,10 +78,9 @@ namespace Cobalt.Systems.Weapon
                     {WeaponStatType.SpellCritDamage, 0.75f}
                 };
 
-                public static Dictionary<WeaponStatType, float> BaseCaps
-                {
-                    get => baseCaps;
-                }
+            public static Dictionary<WeaponStatType, float> BaseCaps
+            {
+                get => baseCaps;
             }
         }
     }

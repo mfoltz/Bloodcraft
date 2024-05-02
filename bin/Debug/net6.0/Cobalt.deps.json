@@ -1481,8 +1481,8 @@
       "VRising.VampireCommandFramework/0.8.2": {
         "runtime": {
           "lib/net6.0/VampireCommandFramework.dll": {
-            "assemblyVersion": "0.8.2.0",
-            "fileVersion": "0.8.2.0"
+            "assemblyVersion": "0.0.999.0",
+            "fileVersion": "0.0.999.0"
           }
         }
       },

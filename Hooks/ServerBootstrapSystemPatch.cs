@@ -140,15 +140,21 @@ namespace Cobalt.Hooks
             }
             if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
             {
-                DataStructures.PlayerWeaponStats.Add(steamId, []);
+                var weaponStats = new Dictionary<string, Dictionary<string, float>>();
+                foreach (WeaponMasterySystem.WeaponType weaponType in Enum.GetValues(typeof(WeaponMasterySystem.WeaponType)))
+                {
+                    var stats = new Dictionary<string, float>();
+                    foreach (WeaponStatManager.WeaponStatType statType in Enum.GetValues(typeof(WeaponStatManager.WeaponStatType)))
+                    {
+                        stats.Add(statType.ToString(), 0f);
+                    }
+                    weaponStats.Add(weaponType.ToString(), stats);
+                }
+                DataStructures.PlayerWeaponStats.Add(steamId, weaponStats);
                 DataStructures.SavePlayerWeaponStats();
             }
             if (!DataStructures.PlayerWeaponStatChoices.ContainsKey(steamId))
             {
-                var weaponStats = new Dictionary<string, Dictionary<string, float>>();
-                foreach (CombatMasterySystem.WeaponType weaponType in Enum.GetValues(typeof(CombatMasterySystem.WeaponType)))
-                {
-                }
                 DataStructures.PlayerWeaponStatChoices.Add(steamId, []);
                 DataStructures.SavePlayerWeaponChoices();
             }

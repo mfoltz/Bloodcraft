@@ -4,7 +4,7 @@ using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 
-namespace Cobalt.Systems
+namespace Cobalt.Systems.Experience
 {
     public class ExperienceSystem
     {
@@ -126,8 +126,6 @@ namespace Cobalt.Systems
             int newLevel = ConvertXpToLevel(DataStructures.PlayerExperience[SteamID].Value);
             if (newLevel > currentLevel)
             {
-                //DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, DataStructures.PlayerExperience[SteamID].Value);
-
                 return true;
             }
             return false;

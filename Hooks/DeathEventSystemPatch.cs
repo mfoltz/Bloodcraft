@@ -1,10 +1,12 @@
 using Cobalt.Core;
 using Cobalt.Systems;
 using Cobalt.Systems.Bloodline;
+using Cobalt.Systems.Experience;
 using Cobalt.Systems.Weapon;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
+using ProfessionSystem = Cobalt.Systems.ProfessionSystem;
 
 namespace Cobalt.Hooks;
 
@@ -23,7 +25,7 @@ public class DeathEventListenerSystem_Patch
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
                     ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
-                    CombatMasterySystem.UpdateCombatMastery(ev.Killer, ev.Died);
+                    WeaponMasterySystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
                     BloodMasterySystem.UpdateBloodMastery(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
@@ -42,5 +44,4 @@ public class DeathEventListenerSystem_Patch
             deathEvents.Dispose();
         }
     }
-    
 }
