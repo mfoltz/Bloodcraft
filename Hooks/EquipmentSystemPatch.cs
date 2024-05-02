@@ -67,6 +67,7 @@ namespace Cobalt.Hooks
                     {
                         WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus.Key);
                         float scaledBonus = CalculateScaledBonus(handler, steamId, weaponStatType);
+                        Plugin.Log.LogInfo($"{bonus.Key}, {bonus.Value} | {scaledBonus}");
                         switch (weaponStatType)
                         {
                             case WeaponStatType.MaxHealth:
@@ -110,6 +111,14 @@ namespace Cobalt.Hooks
                     character.Write(stats);
                     character.Write(health);
                 }
+                else
+                {
+                    Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
+                }
+            }
+            else
+            {
+                Plugin.Log.LogInfo($"No weapon bonus data found for {steamId}...");
             }
 
             // Add the bonuses

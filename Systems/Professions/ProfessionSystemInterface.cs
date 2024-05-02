@@ -26,7 +26,6 @@ namespace Cobalt.Systems
             switch (context)
             {
                 default:
-                    // Fall back to type checks for other professions
                     if (itemTypeName.Contains("wood"))
                         return new WoodcuttingHandler();
                     if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") && !itemTypeName.Contains("magicsource"))

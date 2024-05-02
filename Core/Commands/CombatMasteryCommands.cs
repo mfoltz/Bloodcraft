@@ -109,7 +109,7 @@ namespace Cobalt.Core.Commands
             }
         }
 
-        [Command(name: "setWeaponMastery", shortHand: "swm", adminOnly: true, usage: ".swm [Level]", description: "Sets your weapon mastery level.")]
+        [Command(name: "setWeaponMastery", shortHand: "swm", adminOnly: true, usage: ".swm [Weapon] [Level]", description: "Sets your weapon mastery level.")]
         public static void MasterySetCommand(ChatCommandContext ctx, string weaponType, int level)
         {
             if (level < 0 || level > WeaponMasterySystem.MaxCombatMasteryLevel)
@@ -118,7 +118,7 @@ namespace Cobalt.Core.Commands
                 return;
             }
             ulong steamId = ctx.Event.User.PlatformId;
-            if (!DataStructures.weaponMasteryMap.TryGetValue(weaponType.ToLower(), out var masteryDict))
+            if (!DataStructures.weaponMasteryMap.TryGetValue(weaponType, out var masteryDict))
             {
                 ctx.Reply("Invalid weapon type.");
                 return;
@@ -132,7 +132,7 @@ namespace Cobalt.Core.Commands
             // Update mastery level and XP
             var xpData = new KeyValuePair<int, float>(level, WeaponMasterySystem.ConvertLevelToXp(level));
             masteryDict[steamId] = xpData;
-            if (DataStructures.saveActions.TryGetValue(weaponType.ToLower(), out var saveAction))
+            if (DataStructures.saveActions.TryGetValue(weaponType, out var saveAction))
             {
                 saveAction();
                 ctx.Reply($"Mastery level for {weaponType} set to {level}.");
