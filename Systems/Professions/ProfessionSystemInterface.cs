@@ -1,9 +1,5 @@
-﻿using Bloodstone.API;
-using Cobalt.Core;
+﻿using Cobalt.Core;
 using ProjectM;
-using Unity.Entities;
-using static Cobalt.Systems.ProfessionUtilities;
-using User = ProjectM.Network.User;
 
 namespace Cobalt.Systems
 {
