@@ -1,4 +1,5 @@
 ﻿using Cobalt.Core;
+using Cobalt.Systems.Bloodline;
 using Cobalt.Systems.Weapon;
 using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
@@ -6,6 +7,8 @@ using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
 
@@ -52,149 +55,246 @@ namespace Cobalt.Hooks
 
     public static class UnitStatsOverride
     {
-        private static void ApplyStatBonuses(Entity character, string weaponType)
+        private static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
             var health = character.Read<Health>();  // Assuming there's a Health component
 
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+
+            IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+            if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
-                IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
-                if (weaponData.TryGetValue(weaponType, out var bonuses))
+                foreach (var bonus in bonuses)
                 {
-                    foreach (var bonus in bonuses)
+                    WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus);
+                    float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
+                    Plugin.Log.LogInfo($"Applying {bonus} | {scaledBonus}");
+                    switch (weaponStatType)
                     {
-                        WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus.Key);
-                        float scaledBonus = CalculateScaledBonus(handler, steamId, weaponStatType);
-                        Plugin.Log.LogInfo($"{bonus.Key}, {bonus.Value} | {scaledBonus}");
-                        switch (weaponStatType)
-                        {
-                            case WeaponStatType.MaxHealth:
-                                health.MaxHealth._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.MaxHealth:
+                            health.MaxHealth._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.CastSpeed:
-                                stats.AttackSpeed._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.CastSpeed:
+                            stats.AttackSpeed._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.AttackSpeed:
-                                stats.PrimaryAttackSpeed._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.AttackSpeed:
+                            stats.PrimaryAttackSpeed._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.PhysicalPower:
-                                stats.PhysicalPower._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.PhysicalPower:
+                            stats.PhysicalPower._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.SpellPower:
-                                stats.SpellPower._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.SpellPower:
+                            stats.SpellPower._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.PhysicalCritChance:
-                                stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.PhysicalCritChance:
+                            stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.PhysicalCritDamage:
-                                stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.PhysicalCritDamage:
+                            stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.SpellCritChance:
-                                stats.SpellCriticalStrikeChance._Value += scaledBonus;
-                                break;
+                        case WeaponStatType.SpellCritChance:
+                            stats.SpellCriticalStrikeChance._Value += scaledBonus;
+                            break;
 
-                            case WeaponStatType.SpellCritDamage:
-                                stats.SpellCriticalStrikeDamage._Value += scaledBonus;
-                                break;
-                        }
+                        case WeaponStatType.SpellCritDamage:
+                            stats.SpellCriticalStrikeDamage._Value += scaledBonus;
+                            break;
                     }
+                }
 
-                    character.Write(stats);
-                    character.Write(health);
-                }
-                else
-                {
-                    Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
-                }
+                character.Write(stats);
+                character.Write(health);
             }
             else
             {
-                Plugin.Log.LogInfo($"No weapon bonus data found for {steamId}...");
+                Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
 
             // Add the bonuses
         }
 
-        public static void RemoveStatBonuses(Entity character, string weaponType)
+        public static void RemoveWeaponBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
             var health = character.Read<Health>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            if (DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponData))
+            IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+            if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
-                IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
-                if (weaponData.TryGetValue(weaponType, out var bonuses))
+                foreach (var bonus in bonuses)
                 {
-                    foreach (var bonus in bonuses)
+                    WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus);
+                    float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
+                    Plugin.Log.LogInfo($"Removing weapon stats: {bonus} | {scaledBonus}");
+                    switch (weaponStatType)
                     {
-                        WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus.Key);
-                        float scaledBonus = CalculateScaledBonus(handler, steamId, weaponStatType);
-                        switch (weaponStatType)
-                        {
-                            case WeaponStatType.MaxHealth:
-                                health.MaxHealth._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.MaxHealth:
+                            health.MaxHealth._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.CastSpeed:
-                                stats.AttackSpeed._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.CastSpeed:
+                            stats.AttackSpeed._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.AttackSpeed:
-                                stats.PrimaryAttackSpeed._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.AttackSpeed:
+                            stats.PrimaryAttackSpeed._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.PhysicalPower:
-                                stats.PhysicalPower._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.PhysicalPower:
+                            stats.PhysicalPower._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.SpellPower:
-                                stats.SpellPower._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.SpellPower:
+                            stats.SpellPower._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.PhysicalCritChance:
-                                stats.PhysicalCriticalStrikeChance._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.PhysicalCritChance:
+                            stats.PhysicalCriticalStrikeChance._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.PhysicalCritDamage:
-                                stats.PhysicalCriticalStrikeDamage._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.PhysicalCritDamage:
+                            stats.PhysicalCriticalStrikeDamage._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.SpellCritChance:
-                                stats.SpellCriticalStrikeChance._Value -= scaledBonus;
-                                break;
+                        case WeaponStatType.SpellCritChance:
+                            stats.SpellCriticalStrikeChance._Value -= scaledBonus;
+                            break;
 
-                            case WeaponStatType.SpellCritDamage:
-                                stats.SpellCriticalStrikeDamage._Value -= scaledBonus;
-                                break;
-                        }
+                        case WeaponStatType.SpellCritDamage:
+                            stats.SpellCriticalStrikeDamage._Value -= scaledBonus;
+                            break;
                     }
+                }
 
-                    character.Write(stats);
-                    character.Write(health);
-                }
-                else
-                {
-                    return;  // No bonuses to subtract
-                }
+                character.Write(stats);
+                character.Write(health);
             }
             else
             {
-                return;  // No weapon data to apply
+                Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
+
             // Subtract the bonuses
         }
 
-        public static float CalculateScaledBonus(IWeaponMasteryHandler handler, ulong steamId, WeaponStatType statType)
+        public static void ApplyBloodBonuses(Entity character)
+        {
+            var stats = character.Read<UnitStats>();
+            var health = character.Read<Health>();
+
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+            if (DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
+            {
+                foreach (var bonus in bonuses)
+                {
+                    BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
+                    float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
+                    Plugin.Log.LogInfo($"Applying blood stats: {bonus} | {scaledBonus}");
+                    switch (bloodStatType)
+                    {
+                        case BloodStatType.ResourceYield:
+                            stats.ResourceYieldModifier._Value += scaledBonus;
+                            break;
+
+                        case BloodStatType.PhysicalResistance:
+                            stats.PhysicalResistance._Value += scaledBonus;
+                            break;
+
+                        case BloodStatType.SpellResistance:
+                            stats.SpellResistance._Value += scaledBonus;
+                            break;
+
+                        case BloodStatType.SunResistance:
+                            stats.SunResistance._Value += (int)scaledBonus;
+                            break;
+
+                        case BloodStatType.FireResistance:
+                            stats.FireResistance._Value += (int)scaledBonus;
+                            break;
+
+                        case BloodStatType.HolyResistance:
+                            stats.HolyResistance._Value += (int)scaledBonus;
+                            break;
+
+                        case BloodStatType.SilverResistance:
+                            stats.SilverResistance._Value += (int)scaledBonus;
+                            break;
+
+                        case BloodStatType.PassiveHealthRegen:
+                            stats.PassiveHealthRegen._Value += scaledBonus;
+                            break;
+                    }
+                }
+                character.Write(stats);
+                character.Write(health);
+            }
+        }
+
+        public static void RemoveBloodBonuses(Entity character)
+        {
+            var stats = character.Read<UnitStats>();
+            var health = character.Read<Health>();
+
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+            if (DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
+            {
+                foreach (var bonus in bonuses)
+                {
+                    BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
+                    float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
+                    Plugin.Log.LogInfo($"Removing blood stats: {bonus} | {scaledBonus}");
+                    switch (bloodStatType)
+                    {
+                        case BloodStatType.ResourceYield:
+                            stats.ResourceYieldModifier._Value -= scaledBonus;
+                            break;
+
+                        case BloodStatType.PhysicalResistance:
+                            stats.PhysicalResistance._Value -= scaledBonus;
+                            break;
+
+                        case BloodStatType.SpellResistance:
+                            stats.SpellResistance._Value -= scaledBonus;
+                            break;
+
+                        case BloodStatType.SunResistance:
+                            stats.SunResistance._Value -= (int)Math.Round(scaledBonus);
+                            break;
+
+                        case BloodStatType.FireResistance:
+                            stats.FireResistance._Value -= (int)Math.Round(scaledBonus);
+                            break;
+
+                        case BloodStatType.HolyResistance:
+                            stats.HolyResistance._Value -= (int)Math.Round(scaledBonus);
+                            break;
+
+                        case BloodStatType.SilverResistance:
+                            stats.SilverResistance._Value -= (int)Math.Round(scaledBonus);
+                            break;
+
+                        case BloodStatType.PassiveHealthRegen:
+                            stats.PassiveHealthRegen._Value -= scaledBonus;
+                            break;
+                    }
+                }
+                character.Write(stats);
+                character.Write(health);
+            }
+        }
+
+        public static float CalculateScaledWeaponBonus(IWeaponMasteryHandler handler, ulong steamId, WeaponStatType statType)
         {
             if (handler != null)
             {
@@ -203,11 +303,34 @@ namespace Cobalt.Hooks
 
                 float maxBonus = WeaponStatManager.BaseCaps[statType];
                 float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
-
+                Plugin.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
                 return scaledBonus;
+            }
+            else
+            {
+                Plugin.Log.LogInfo("Handler is null...");
             }
 
             return 0; // Return 0 if no handler is found or other error
+        }
+
+        public static float CalculateScaledBloodBonus(ulong steamId, BloodStatType statType)
+        {
+            if (DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var sanguimancy))
+            {
+                int currentLevel = sanguimancy.Key;
+
+                float maxBonus = BloodStatManager.BaseCaps[statType];
+                float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
+                Plugin.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
+                return scaledBonus;
+            }
+            else
+            {
+                Plugin.Log.LogInfo("No blood stats found...");
+            }
+
+            return 0; // Return 0 if no blood stats are found
         }
 
         public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
@@ -222,31 +345,35 @@ namespace Cobalt.Hooks
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            if (!DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var _))
+            // Get the current weapon type
+            string currentWeapon = GetCurrentWeaponType(character).ToString();
+
+            // Initialize player's weapon dictionary if it doesn't exist
+            if (!DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))
             {
-                return;  // No weapon data to update
+                DataStructures.PlayerEquippedWeapon[steamId] = [];
             }
 
-            // Get the current weapon type
-            WeaponMasterySystem.WeaponType currentWeapon = GetCurrentWeaponType(character);
+            var equippedWeapons = DataStructures.PlayerEquippedWeapon[steamId];
 
             // Check if weapon has changed
-            if (DataStructures.PlayerWeapons.TryGetValue(steamId, out var weaponsTuple))
+            if (!equippedWeapons.TryGetValue(currentWeapon, out var isCurrentWeaponEquipped) || !isCurrentWeaponEquipped)
             {
-                string newCurrentWeapon = currentWeapon.ToString();  // Assuming `currentWeapon` is an enum or similar and needs to be converted to string for comparison.
-                string previousWeapon = weaponsTuple.Item2;
-
-                // Check if the current weapon has changed.
-                if (weaponsTuple.Item1 != newCurrentWeapon)
+                // Find the previous weapon (the one that is set to true)
+                string previousWeapon = equippedWeapons.FirstOrDefault(w => w.Value).Key;
+                Plugin.Log.LogInfo($"Previous: {previousWeapon} | Current: {currentWeapon}");
+                // Apply and remove stat bonuses based on weapon change.
+                if (previousWeapon != null)
                 {
-                    // Apply and remove stat bonuses based on weapon change.
-                    RemoveStatBonuses(character, previousWeapon);  // Remove bonuses from the previous weapon
-                    ApplyStatBonuses(character, newCurrentWeapon);  // Apply bonuses from the new weapon
-
-                    // Update the tuple to reflect the new current and previous weapons.
-                    DataStructures.PlayerWeapons[steamId] = new(newCurrentWeapon, weaponsTuple.Item1);  // Here weaponsTuple.Item1 becomes the new previous weapon
+                    Plugin.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
+                    RemoveWeaponBonuses(character, previousWeapon);  // Remove bonuses from the previous weapon
+                    equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
                 }
+                Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
+                ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
+                equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
             }
+            ApplyBloodBonuses(character);
         }
     }
 

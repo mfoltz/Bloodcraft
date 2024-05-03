@@ -4,7 +4,7 @@ using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Bloodline.BloodMasteryStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 using User = ProjectM.Network.User;
 
@@ -78,9 +78,9 @@ namespace Cobalt.Hooks
                 DataStructures.PlayerJewelcrafting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerJewelcrafting();
             }
-            if (!DataStructures.PlayerBloodMastery.ContainsKey(steamId))
+            if (!DataStructures.PlayerSanguimancy.ContainsKey(steamId))
             {
-                DataStructures.PlayerBloodMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerBloodMastery();
             }
             if (!DataStructures.PlayerSwordMastery.ContainsKey(steamId))
@@ -138,6 +138,7 @@ namespace Cobalt.Hooks
                 DataStructures.PlayerWhipMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerWhipMastery();
             }
+            /*
             if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
             {
                 var weaponStats = new Dictionary<string, Dictionary<string, float>>();
@@ -153,24 +154,25 @@ namespace Cobalt.Hooks
                 DataStructures.PlayerWeaponStats.Add(steamId, weaponStats);
                 DataStructures.SavePlayerWeaponStats();
             }
-            if (!DataStructures.PlayerWeaponStatChoices.ContainsKey(steamId))
+            */
+            if (!DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
             {
-                DataStructures.PlayerWeaponStatChoices.Add(steamId, []);
+                DataStructures.PlayerWeaponChoices.Add(steamId, []);
                 DataStructures.SavePlayerWeaponChoices();
             }
 
-            if (!DataStructures.PlayerBloodStats.ContainsKey(steamId))
+            if (!DataStructures.PlayerBloodChoices.ContainsKey(steamId))
             {
-                DataStructures.PlayerBloodStats.Add(steamId, new BloodMasteryStats());
-                DataStructures.SavePlayerBloodStats();
+                DataStructures.PlayerBloodChoices.Add(steamId, []);
+                DataStructures.SavePlayerBloodChoices();
             }
             if (!DataStructures.PlayerCraftingJobs.ContainsKey(steamId))
             {
                 DataStructures.PlayerCraftingJobs.Add(steamId, []);
             }
-            if (!DataStructures.PlayerWeapons.ContainsKey(steamId))
+            if (!DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))
             {
-                DataStructures.PlayerWeapons.Add(steamId, new("", ""));
+                DataStructures.PlayerEquippedWeapon.Add(steamId, []);
             }
         }
     }

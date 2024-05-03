@@ -11,25 +11,25 @@ namespace Cobalt.Systems.Weapon
         {
             public static bool ChooseStat(ulong steamId, string weaponType, string statType)
             {
-                if (!DataStructures.PlayerWeaponStatChoices.ContainsKey(steamId))
-                    DataStructures.PlayerWeaponStatChoices[steamId] = [];
+                if (!DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
+                    DataStructures.PlayerWeaponChoices[steamId] = [];
 
-                if (!DataStructures.PlayerWeaponStatChoices[steamId].ContainsKey(weaponType))
-                    DataStructures.PlayerWeaponStatChoices[steamId][weaponType] = [];
+                if (!DataStructures.PlayerWeaponChoices[steamId].ContainsKey(weaponType))
+                    DataStructures.PlayerWeaponChoices[steamId][weaponType] = [];
 
-                if (DataStructures.PlayerWeaponStatChoices[steamId][weaponType].Count >= 2)
+                if (DataStructures.PlayerWeaponChoices[steamId][weaponType].Count >= 2)
                 {
                     return false; // Only allow 2 stats to be chosen
                 }
 
-                DataStructures.PlayerWeaponStatChoices[steamId][weaponType].Add(statType);
+                DataStructures.PlayerWeaponChoices[steamId][weaponType].Add(statType);
                 DataStructures.SavePlayerWeaponChoices();
                 return true;
             }
 
             public static void ResetChosenStats(ulong steamId, string weaponType)
             {
-                if (DataStructures.PlayerWeaponStatChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
+                if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
                 {
                     choices.Clear();
                     DataStructures.SavePlayerWeaponChoices();

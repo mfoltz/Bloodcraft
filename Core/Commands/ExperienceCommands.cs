@@ -1,5 +1,6 @@
 using Bloodstone.API;
 using Cobalt.Systems.Experience;
+using Cobalt.Systems.Weapon;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;

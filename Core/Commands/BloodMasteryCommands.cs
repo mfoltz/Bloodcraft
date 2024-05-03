@@ -1,23 +1,26 @@
+using Cobalt.Hooks;
 using Cobalt.Systems.Bloodline;
+using Steamworks;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.Bloodline.BloodMasteryStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 
 namespace Cobalt.Core.Commands
 {
     public static class BloodMasteryCommands
     {
-        [Command(name: "getBloodlineProgress", shortHand: "gbp", adminOnly: false, usage: ".gbp", description: "Display your current bloodline progress.")]
+        [Command(name: "getSanguimancyProgress", shortHand: "gsp", adminOnly: false, usage: ".gsp", description: "Display your current sanguimancy progress.")]
         public static void GetMasteryCommand(ChatCommandContext ctx)
         {
             var SteamID = ctx.Event.User.PlatformId;
-            if (DataStructures.PlayerBloodMastery.TryGetValue(SteamID, out var mastery))
+            if (DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var mastery))
             {
-                ctx.Reply($"You have <color=white>{mastery.Value}</color> blood mastery points.");
+                ctx.Reply($"You are level <color=white>{mastery.Key}</color> in <color=red>sanguimancy</color>.");
             }
             else
             {
-                ctx.Reply("You haven't earned any blood points yet.");
+                ctx.Reply("You haven't gained any sanguimancy  ");
             }
         }
 
@@ -33,32 +36,31 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Sanguimancy progress logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "setBloodStat", shortHand: "sbs", adminOnly: true, usage: ".sbs <Stat>", description: "Choose a bloodline stat to enhance based on your mastery.")]
-        public static void SetBloodlineStatCommand(ChatCommandContext ctx, string stat)
+        [Command(name: "chooseBloodStat", shortHand: "cbs", adminOnly: true, usage: ".cbs <Stat>", description: "Choose a bloodline stat to enhance based on your mastery.")]
+        public static void SetBloodlineStatCommand(ChatCommandContext ctx, string statChoice)
         {
             ulong steamId = ctx.Event.User.PlatformId;
-
-            if (!DataStructures.PlayerBloodStats.TryGetValue(steamId, out var stats))
+            string statType = statChoice.ToLower();
+            // try to parse statType from choice string
+            if (!Enum.TryParse<BloodStatManager.BloodStatType>(statType, true, out _))
             {
-                ctx.Reply("No blood mastery found for this SteamID.");
+                ctx.Reply("Invalid bloodStat type.");
                 return;
             }
-
-            if (stats.StatsChosen >= 2)
+            if (!DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var _))
             {
-                ctx.Reply("You have already chosen two blood mastery stats. Please reset to choose new ones.");
-                return;
+                List<string> bloodStats = [];
+                DataStructures.PlayerBloodChoices[steamId] = bloodStats;
             }
 
-            if (Enum.TryParse(stat, out BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType))
+            if (PlayerBloodUtilities.ChooseStat(steamId, statType))
             {
-                stats.ChooseStat(statType);
-                ctx.Reply($"Blood stat added: {stat}");
-                DataStructures.SavePlayerBloodStats();
+                ctx.Reply($"Stat {statType} has been chosen for Sanguimancy.");
+                DataStructures.SavePlayerBloodChoices();
             }
             else
             {
-                ctx.Reply("Invalid stat name. Please check and try again.");
+                ctx.Reply("You have already chosen two stats for this weapon.");
             }
         }
 
@@ -67,14 +69,14 @@ namespace Cobalt.Core.Commands
         {
             ulong steamId = ctx.Event.User.PlatformId;
             Entity character = ctx.Event.SenderCharacterEntity;
-            if (!DataStructures.PlayerBloodStats.TryGetValue(steamId, out var stats))
+            if (!DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var stats))
             {
-                ctx.Reply("No blood mastery found for this SteamID.");
+                ctx.Reply("No blood choices found for this SteamID.");
                 return;
             }
-            stats.ResetChosenStats();
-            BloodMasterySystem.RemoveAllStatBonuses(character, steamId);
-            DataStructures.SavePlayerBloodStats();
+            stats.Clear();
+            UnitStatsOverride.RemoveBloodBonuses(character);
+            PlayerBloodUtilities.ResetChosenStats(steamId);
             ctx.Reply($"Blood stat choices reset.");
         }
     }

@@ -2,6 +2,9 @@ using Bloodstone.API;
 using ProjectM.Network;
 using ProjectM;
 using VampireCommandFramework;
+using static Cobalt.Systems.Weapon.WeaponMasterySystem;
+using Unity.Entities;
+using Cobalt.Systems;
 
 namespace Cobalt.Core.Commands
 {
@@ -17,6 +20,28 @@ namespace Cobalt.Core.Commands
                 bools["ProfessionLogging"] = !bools["ProfessionLogging"];
             }
             ctx.Reply($"Profession progress logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        }
+
+        [Command(name: "getProfessionProgress", shortHand: "gpp", adminOnly: false, usage: ".gpp [Profession]", description: "Display your current mastery progress.")]
+        public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
+        {
+            Entity character = ctx.Event.SenderCharacterEntity;
+            ulong steamID = ctx.Event.User.PlatformId;
+            PrefabGUID empty = new(0);
+            IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(empty, profession.ToLower());
+            if (professionHandler == null)
+            {
+                ctx.Reply("Invalid profession.");
+                return;
+            }
+            if (DataStructures.professionMap.TryGetValue(profession, out var professionDictionary) && professionDictionary.TryGetValue(steamID, out var prof))
+            {
+                ctx.Reply($"You are level <color=white>{prof.Key}</color> in {professionHandler.GetProfessionName()}.");
+            }
+            else
+            {
+                ctx.Reply($"You haven't gained any expertise for {professionHandler.GetProfessionName()} yet. ");
+            }
         }
 
         public class BuildingCostsToggle

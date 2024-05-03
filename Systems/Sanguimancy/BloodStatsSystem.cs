@@ -1,6 +1,8 @@
-﻿namespace Cobalt.Systems.Bloodline
+﻿using Cobalt.Core;
+
+namespace Cobalt.Systems.Bloodline
 {
-    public class BloodMasteryStatsSystem
+    public class BloodStatsSystem
     {
         public class BloodMasteryStats
         {
@@ -16,126 +18,75 @@
             public float PassiveHealthRegen { get; set; }
 
             // Tracking which stats have been chosen (not the actual values)
-            public HashSet<BloodMasteryStatManager.BloodFocusSystem.BloodStatType> ChosenStats { get; private set; } = [];
-
-            public void ChooseStat(BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType)
-            {
-                if (ChosenStats.Count >= 2)
-                {
-                    throw new InvalidOperationException("Cannot choose more than two stats without resetting.");
-                }
-
-                ChosenStats.Add(statType);
-            }
-
-            public void ResetChosenStats()
-            {
-                ChosenStats.Clear();
-            }
-
-            public float GetStatValue(BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType)
-            {
-                return statType switch
-                {
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.ResourceYield => ResourceYield,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PhysicalResistance => PhysicalResistance,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SpellResistance => SpellResistance,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SunResistance => SunResistance,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.FireResistance => FireResistance,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.HolyResistance => HolyResistance,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SilverResistance => SilverResistance,
-                    BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PassiveHealthRegen => PassiveHealthRegen,
-                    _ => throw new InvalidOperationException("Unknown stat type"),
-                };
-            }
-
-            public void SetStatValue(float value, BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType)
-            {
-                switch (statType)
-                {
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.ResourceYield:
-                        ResourceYield = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PhysicalResistance:
-                        PhysicalResistance = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SpellResistance:
-                        SpellResistance = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SunResistance:
-                        SunResistance = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.FireResistance:
-                        FireResistance = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.HolyResistance:
-                        HolyResistance = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SilverResistance:
-                        SilverResistance = value;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PassiveHealthRegen:
-                        PassiveHealthRegen = value;
-                        break;
-
-                    default:
-                        throw new ArgumentException("Unknown blood stat type");
-                }
-            }
-
-            public int StatsChosen => ChosenStats.Count;
         }
 
-        public class BloodMasteryStatManager
+        public class PlayerBloodUtilities
         {
-            public class BloodFocusSystem
+            public static bool ChooseStat(ulong steamId, string statType)
             {
-                public enum BloodStatType
+                if (!DataStructures.PlayerBloodChoices.ContainsKey(steamId))
+                    DataStructures.PlayerBloodChoices[steamId] = [];
+
+                if (DataStructures.PlayerBloodChoices[steamId].Count >= 3)
                 {
-                    ResourceYield,
-                    PhysicalResistance,
-                    SpellResistance,
-                    SunResistance,
-                    FireResistance,
-                    HolyResistance,
-                    SilverResistance,
-                    PassiveHealthRegen
+                    return false; // Only allow 3 stats to be chosen
                 }
 
-                public static readonly Dictionary<int, BloodStatType> BloodStatMap = new()
-                {
-                    { 0, BloodStatType.ResourceYield },
-                    { 1, BloodStatType.PhysicalResistance },
-                    { 2, BloodStatType.SpellResistance },
-                    { 3, BloodStatType.SunResistance },
-                    { 4, BloodStatType.FireResistance },
-                    { 5, BloodStatType.HolyResistance },
-                    { 6, BloodStatType.SilverResistance },
-                    { 7, BloodStatType.PassiveHealthRegen }
-                };
+                DataStructures.PlayerBloodChoices[steamId].Add(statType);
+                DataStructures.SavePlayerBloodChoices();
+                return true;
+            }
 
-                private static readonly Dictionary<BloodStatType, float> baseCaps = new()
+            public static void ResetChosenStats(ulong steamId)
+            {
+                if (DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bloodChoices))
                 {
-                    {BloodStatType.ResourceYield, 1f},
-                    {BloodStatType.PhysicalResistance, 0.25f},
-                    {BloodStatType.SpellResistance, 0.25f},
-                    {BloodStatType.SunResistance, 100f},
-                    {BloodStatType.FireResistance, 100f},
-                    {BloodStatType.HolyResistance, 100f},
-                    {BloodStatType.SilverResistance, 100f},
-                };
-
-                public static Dictionary<BloodStatType, float> BaseCaps
-                {
-                    get => baseCaps;
+                    bloodChoices.Clear();
+                    DataStructures.SavePlayerBloodChoices();
                 }
+            }
+        }
+
+        public class BloodStatManager
+        {
+            public enum BloodStatType
+            {
+                ResourceYield,
+                PhysicalResistance,
+                SpellResistance,
+                SunResistance,
+                FireResistance,
+                HolyResistance,
+                SilverResistance,
+                PassiveHealthRegen
+            }
+
+            public static readonly Dictionary<int, BloodStatType> BloodStatMap = new()
+            {
+                { 0, BloodStatType.ResourceYield },
+                { 1, BloodStatType.PhysicalResistance },
+                { 2, BloodStatType.SpellResistance },
+                { 3, BloodStatType.SunResistance },
+                { 4, BloodStatType.FireResistance },
+                { 5, BloodStatType.HolyResistance },
+                { 6, BloodStatType.SilverResistance },
+                { 7, BloodStatType.PassiveHealthRegen }
+            };
+
+            private static readonly Dictionary<BloodStatType, float> baseCaps = new()
+            {
+                {BloodStatType.ResourceYield, 1f},
+                {BloodStatType.PhysicalResistance, 0.25f},
+                {BloodStatType.SpellResistance, 0.25f},
+                {BloodStatType.SunResistance, 100f},
+                {BloodStatType.FireResistance, 100f},
+                {BloodStatType.HolyResistance, 100f},
+                {BloodStatType.SilverResistance, 100f},
+            };
+
+            public static Dictionary<BloodStatType, float> BaseCaps
+            {
+                get => baseCaps;
             }
         }
     }

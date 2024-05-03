@@ -25,6 +25,30 @@ namespace Cobalt.Systems
             // Check context to decide on a handler
             switch (context)
             {
+                case "woodcutting":
+                    return new WoodcuttingHandler();
+
+                case "mining":
+                    return new MiningHandler();
+
+                case "blacksmithing":
+                    return new BlacksmithingHandler();
+
+                case "tailoring":
+                    return new TailoringHandler();
+
+                case "fishing":
+                    return new FishingHandler();
+
+                case "alchemy":
+                    return new AlchemyHandler();
+
+                case "harvesting":
+                    return new HarvestingHandler();
+
+                case "jewelcrafting":
+                    return new JewelcraftingHandler();
+
                 default:
                     if (itemTypeName.Contains("wood"))
                         return new WoodcuttingHandler();

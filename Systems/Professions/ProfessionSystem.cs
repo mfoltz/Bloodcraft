@@ -56,7 +56,7 @@ namespace Cobalt.Systems
 
             if (handler != null)
             {
-                if (handler.GetProfessionName().ToLower().Contains("woodcutting"))
+                if (handler.GetProfessionName().Contains("Woodcutting"))
                 {
                     ProfessionValue *= ProfessionUtilities.GetWoodcuttingModifier(prefabGUID);
                 }

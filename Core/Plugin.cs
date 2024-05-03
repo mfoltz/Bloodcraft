@@ -46,9 +46,12 @@ namespace Cobalt.Core
         public static readonly string PlayerUnarmedMasteryJson = Path.Combine(Plugin.ConfigPath, "player_unarmed.json");
         public static readonly string PlayerWhipMasteryJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
-        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
+
+        //public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
+        public static readonly string PlayerEquippedWeaponJson = Path.Combine(Plugin.ConfigPath, "player_equipped_weapon.json");
+
         public static readonly string PlayerWeaponChoicesJson = Path.Combine(Plugin.ConfigPath, "player_weapon_choices.json");
-        public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.ConfigPath, "player_blood_stats.json");
+        public static readonly string PlayerBloodChoicesJson = Path.Combine(Plugin.ConfigPath, "player_blood_choices.json");
 
         public override void Load()
         {
@@ -126,9 +129,9 @@ namespace Cobalt.Core
             DataStructures.SavePlayerWhipMastery,
             DataStructures.SavePlayerUnarmedMastery,
             DataStructures.SavePlayerBloodMastery,
-            DataStructures.SavePlayerWeaponStats,
+            //DataStructures.SavePlayerWeaponStats,
             DataStructures.SavePlayerWeaponChoices,
-            DataStructures.SavePlayerBloodStats
+            DataStructures.SavePlayerBloodChoices
         ];
 
         private static readonly Action[] loadFunctions =
@@ -156,7 +159,7 @@ namespace Cobalt.Core
             DataStructures.LoadPlayerLongbowMastery,
             DataStructures.LoadPlayerWhipMastery,
             DataStructures.LoadPlayerUnarmedMastery,
-            DataStructures.LoadPlayerWeaponStats,
+            //DataStructures.LoadPlayerWeaponStats,
             DataStructures.LoadPlayerWeaponChoices,
             DataStructures.LoadPlayerBloodStats
         ];

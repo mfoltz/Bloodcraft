@@ -3,7 +3,9 @@ using Cobalt.Core;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Bloodline.BloodMasteryStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem;
+using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
+using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Systems.Bloodline
 {
@@ -48,102 +50,12 @@ namespace Cobalt.Systems.Bloodline
                 BloodMasteryValue += BaseBloodMastery;
             }
             SetBloodMastery(User, BloodMasteryValue, entityManager);
-
-            HandleUpdate(Killer, entityManager);
-        }
-
-        public static void HandleUpdate(Entity player, EntityManager entityManager)
-        {
-            if (!entityManager.HasComponent<PlayerCharacter>(player))
-            {
-                Plugin.Log.LogInfo("No player character found for stats modifying...");
-                return;
-            }
-
-            var userEntity = player.Read<PlayerCharacter>().UserEntity;
-            var steamId = userEntity.Read<User>().PlatformId;
-
-            UnitStats stats = entityManager.GetComponentData<UnitStats>(player);
-            UpdateStats(player, stats, steamId, entityManager);
-        }
-
-        public static void UpdateStats(Entity player, UnitStats stats, ulong steamId, EntityManager entityManager)
-        {
-            if (!DataStructures.PlayerBloodStats.TryGetValue(steamId, out BloodMasteryStats bloodStats))
-            {
-                return; // No bloodline stats to check
-            }
-
-            if (!DataStructures.PlayerBloodMastery.TryGetValue(steamId, out var mastery))
-            {
-                return; // No mastery data found
-            }
-
-            int playerLevel = ConvertXpToLevel(mastery.Value);
-            float levelPercentage = playerLevel / MaxBloodMasteryLevel; // Calculate the percentage of the max level (99)
-
-            foreach (var statType in bloodStats.ChosenStats)
-            {
-                float baseCap = BloodMasteryStatManager.BloodFocusSystem.BaseCaps[statType];
-                float scaledCap = baseCap * levelPercentage; // Scale cap based on the player's level
-                float currentStatValue = bloodStats.GetStatValue(statType);
-                if (scaledCap > currentStatValue)
-                {
-                    currentStatValue += scaledCap;
-                    bloodStats.SetStatValue(currentStatValue, statType);
-                    DataStructures.SavePlayerBloodStats();
-                    ApplyStatIncrease(stats, statType, scaledCap);
-                }
-            }
-
-            player.Write(stats); // Update player stats
-        }
-
-        private static void ApplyStatIncrease(UnitStats stats, BloodMasteryStatManager.BloodFocusSystem.BloodStatType statType, float increase)
-        {
-            switch (statType)
-            {
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.ResourceYield:
-                    stats.ResourceYieldModifier._Value += increase; // Simply add increase
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PhysicalResistance:
-                    stats.PhysicalResistance._Value += increase; // Simply add increase
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SpellResistance:
-                    stats.SpellResistance._Value += increase; // Simply add increase
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SunResistance:
-                    stats.SunResistance._Value += (int)increase; // Simply add increase and cast to int
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.FireResistance:
-                    stats.FireResistance._Value += (int)increase; // Simply add increase and cast to int
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.HolyResistance:
-                    stats.HolyResistance._Value += (int)increase; // Simply add increase and cast to int
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SilverResistance:
-                    stats.SilverResistance._Value += (int)increase; // Simply add increase and cast to int
-                    break;
-
-                case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PassiveHealthRegen:
-                    stats.PassiveHealthRegen._Value += increase; // Simply add increase
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Unknown stat type to apply");
-            }
         }
 
         public static void SetBloodMastery(User user, float Value, EntityManager entityManager)
         {
             ulong SteamID = user.PlatformId;
-            bool isPlayerFound = DataStructures.PlayerBloodMastery.TryGetValue(SteamID, out var Mastery);
+            bool isPlayerFound = DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var Mastery);
             float newExperience = Value + (isPlayerFound ? Mastery.Value : 0);
             int newLevel = ConvertXpToLevel(newExperience);
             bool leveledUp = isPlayerFound && newLevel > Mastery.Key;
@@ -157,11 +69,11 @@ namespace Cobalt.Systems.Bloodline
             KeyValuePair<int, float> newMastery = new(newLevel, newExperience);
             if (isPlayerFound)
             {
-                DataStructures.PlayerBloodMastery[SteamID] = newMastery;
+                DataStructures.PlayerSanguimancy[SteamID] = newMastery;
             }
             else
             {
-                DataStructures.PlayerBloodMastery.Add(SteamID, newMastery);
+                DataStructures.PlayerSanguimancy.Add(SteamID, newMastery);
             }
 
             DataStructures.SavePlayerBloodMastery();
@@ -200,7 +112,7 @@ namespace Cobalt.Systems.Bloodline
 
         private static int GetLevelProgress(ulong steamID)
         {
-            if (!DataStructures.PlayerBloodMastery.TryGetValue(steamID, out var mastery))
+            if (!DataStructures.PlayerSanguimancy.TryGetValue(steamID, out var mastery))
                 return 0; // Return 0 if no mastery data found
 
             float currentXP = mastery.Value;
@@ -211,58 +123,16 @@ namespace Cobalt.Systems.Bloodline
             return percent;
         }
 
-        public static void RemoveAllStatBonuses(Entity character, ulong steamId)
+        public static BloodStatType GetBloodStatTypeFromString(string statType)
         {
-            if (!DataStructures.PlayerBloodStats.TryGetValue(steamId, out var stats))
+            foreach (BloodStatType type in Enum.GetValues(typeof(BloodStatType)))
             {
-                return; // Handle case where no stats are found, maybe log this as an error or warning
-            }
-
-            var unitStats = character.Read<UnitStats>(); // Assuming there is a UnitStats component
-            var health = character.Read<Health>(); // Assuming there is a Health component
-
-            // Iterate over all possible stat types and reset them
-            foreach (var statType in Enum.GetValues(typeof(BloodMasteryStatManager.BloodFocusSystem.BloodStatType)))
-            {
-                float currentValue = stats.GetStatValue((BloodMasteryStatManager.BloodFocusSystem.BloodStatType)statType);
-                switch (statType)
+                if (statType.ToLower().Contains(type.ToString().ToLower()))
                 {
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.ResourceYield:
-                        unitStats.ResourceYieldModifier._Value -= currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PhysicalResistance:
-                        unitStats.PhysicalResistance._Value -= currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SpellResistance:
-                        unitStats.SpellResistance._Value -= currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SunResistance:
-                        unitStats.SunResistance._Value -= (int)currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.FireResistance:
-                        unitStats.FireResistance._Value -= (int)currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.HolyResistance:
-                        unitStats.HolyResistance._Value -= (int)currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.SilverResistance:
-                        unitStats.SilverResistance._Value -= (int)currentValue;
-                        break;
-
-                    case BloodMasteryStatManager.BloodFocusSystem.BloodStatType.PassiveHealthRegen:
-                        unitStats.PassiveHealthRegen._Value -= currentValue;
-                        break;
+                    return type;
                 }
             }
-
-            character.Write(unitStats);
-            character.Write(health);
+            return BloodStatType.SunResistance;
         }
     }
 }
