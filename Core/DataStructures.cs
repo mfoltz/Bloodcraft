@@ -365,13 +365,13 @@ namespace Cobalt.Core
 
         public static void LoadPlayerUnarmedMastery() => LoadData(ref playerUnarmedMastery, "UnarmedMastery");
 
-        public static void LoadPlayerBloodMastery() => LoadData(ref playerSanguimancy, "BloodMastery");
+        public static void LoadPlayerBloodMastery() => LoadData(ref playerSanguimancy, "Sanguimancy");
 
         public static void LoadPlayerEquippedWeapon() => LoadData(ref playerEquippedWeapon, "EquippedWeapon");
 
         public static void LoadPlayerWeaponChoices() => LoadData(ref playerWeaponChoices, "WeaponChoices");
 
-        public static void LoadPlayerBloodStats() => LoadData(ref playerBloodChoices, "BloodStats");
+        public static void LoadPlayerBloodStats() => LoadData(ref playerBloodChoices, "BloodChoices");
 
         public static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
@@ -436,12 +436,12 @@ namespace Cobalt.Core
 
         public static void SavePlayerUnarmedMastery() => SaveData(PlayerUnarmedMastery, "UnarmedMastery");
 
-        public static void SavePlayerBloodMastery() => SaveData(PlayerSanguimancy, "BloodMastery");
+        public static void SavePlayerBloodMastery() => SaveData(PlayerSanguimancy, "Sanguimancy");
 
         public static void SavePlayerEquippedWeapon() => SaveData(PlayerEquippedWeapon, "EquippedWeapon");
 
         public static void SavePlayerWeaponChoices() => SaveData(PlayerWeaponChoices, "WeaponChoices");
 
-        public static void SavePlayerBloodChoices() => SaveData(PlayerBloodChoices, "BloodStats");
+        public static void SavePlayerBloodChoices() => SaveData(PlayerBloodChoices, "BloodChoices");
     }
 }

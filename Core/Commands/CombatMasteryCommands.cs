@@ -54,15 +54,23 @@ namespace Cobalt.Core.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
-
+            Entity weapon = equipment.WeaponSlotEntity._Entity;
+            PrefabGUID prefabGUID;
+            if (weapon.Equals(Entity.Null))
+            {
+                prefabGUID = new(0);
+            }
+            else
+            {
+                prefabGUID = weapon.Read<PrefabGUID>();
+            }
             // Ensure that there is a dictionary for the player's stats
             if (!DataStructures.PlayerWeaponChoices.TryGetValue(steamID, out var _))
             {
                 Dictionary<string, List<string>> weaponsStats = [];
                 DataStructures.PlayerWeaponChoices[steamID] = weaponsStats;
             }
-            string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon).ToString();
+            string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(prefabGUID).ToString();
             // Ensure that there are stats registered for the specific weapon
 
             // Choose a stat for the specific weapon stats instance
@@ -110,11 +118,6 @@ namespace Cobalt.Core.Commands
 
             ulong steamId = ctx.Event.User.PlatformId;
             var xpData = masteryHandler.GetExperienceData(steamId);
-            if (xpData.Key == 0 && xpData.Value == 0) // Assumes that default KeyValuePair is returned when not found
-            {
-                ctx.Reply("No existing mastery data found for this weapon.");
-                return;
-            }
 
             // Update mastery level and XP
             xpData = new KeyValuePair<int, float>(level, WeaponMasterySystem.ConvertLevelToXp(level));

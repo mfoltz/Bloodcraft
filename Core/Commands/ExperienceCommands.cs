@@ -1,12 +1,5 @@
-using Bloodstone.API;
 using Cobalt.Systems.Experience;
-using Cobalt.Systems.Weapon;
-using ProjectM;
-using ProjectM.Network;
-using Unity.Entities;
-using UnityEngine.Rendering.HighDefinition;
 using VampireCommandFramework;
-using VRising.GameData.Utils;
 
 namespace Cobalt.Core.Commands
 {

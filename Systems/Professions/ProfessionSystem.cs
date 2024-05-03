@@ -62,6 +62,8 @@ namespace Cobalt.Systems
                 }
 
                 SetProfession(user, SteamID, ProfessionValue, handler);
+                // how to add bonuses to professions? woodcutting, mining, harvesting are easy enough to do yield increases in the form of adding
+                // the right item to the player inventory but unsure about the rest, maybe fishing could be some random thing from the relevant location drop table
             }
             else
             {
