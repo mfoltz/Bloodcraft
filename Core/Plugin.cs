@@ -93,7 +93,7 @@ namespace Cobalt.Core
         {
             Config.Clear();
             _harmony.UnpatchSelf();
-            SaveAllData();  // Call a method that saves all data types.
+            //SaveAllData();  // Call a method that saves all data types.
             return true;
         }
 

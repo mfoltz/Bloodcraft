@@ -23,7 +23,7 @@ namespace Cobalt.Systems
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong SteamID = user.PlatformId;
-            if (!Victim.Has<UnitLevel>()) return;
+            if (!Victim.Has<UnitLevel>() || Victim.Has<Movement>()) return;
             //var VictimLevel = entityManager.GetComponentData<UnitLevel>(Victim);
 
             PrefabGUID prefabGUID = new(0);

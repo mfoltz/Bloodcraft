@@ -68,8 +68,24 @@ namespace Cobalt.Hooks
 
         public static void Prefix(EquipmentSystem __instance)
         {
-            //Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__query_1269768774_1.ToEntityArray(Unity.Collections.Allocator.Temp);
+            Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
+            NativeArray<Entity> entities = __instance.__query_1269768774_0.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_1.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_2.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_3.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_4.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+        }
+    }
+
+    public static class UnitStatsOverride
+    {
+        public static void HandleUpdates(NativeArray<Entity> entities)
+        {
             try
             {
                 foreach (var entity in entities)
@@ -102,10 +118,6 @@ namespace Cobalt.Hooks
                 entities.Dispose();
             }
         }
-    }
-
-    public static class UnitStatsOverride
-    {
         private static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();

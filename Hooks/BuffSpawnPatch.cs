@@ -4,7 +4,7 @@ using ProjectM;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-
+/*
 namespace Lapis.Hooks
 {
     [HarmonyPatch]
@@ -49,3 +49,4 @@ namespace Lapis.Hooks
         }
     }
 }
+*/

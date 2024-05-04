@@ -33,7 +33,7 @@ namespace Cobalt.Hooks
         {
             public static void Prefix()
             {
-                Plugin.SaveAllData();
+                //Plugin.SaveAllData();
             }
         }
     }
