@@ -1,10 +1,10 @@
 using Cobalt.Hooks;
-using Cobalt.Systems.Weapon;
+using Cobalt.Systems.Expertise;
 using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 
 namespace Cobalt.Core.Commands
 {
@@ -14,18 +14,28 @@ namespace Cobalt.Core.Commands
         public static void GetMasteryCommand(ChatCommandContext ctx)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
-            ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
-            WeaponMasterySystem.WeaponType weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon);
-            string weaponString = weaponType.ToString();
-            if (DataStructures.weaponMasteryMap.TryGetValue(weaponString, out var masteryDictionary) && masteryDictionary.TryGetValue(steamID, out var mastery))
+            PrefabGUID weaponGuid = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
+            string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weaponGuid).ToString();
+
+            IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+            if (handler == null)
             {
-                ctx.Reply($"You are level <color=white>{mastery.Key}</color> in {weaponType}.");
+                ctx.Reply($"No mastery handler found for {weaponType}.");
+                return;
+            }
+
+            ulong steamID = ctx.Event.User.PlatformId;
+            var masteryData = handler.GetExperienceData(steamID);
+
+            // masteryData.Key represents the level, and masteryData.Value represents the experience.
+            if (masteryData.Key > 0 || masteryData.Value > 0)
+            {
+                ctx.Reply($"Your expertise is <color=yellow>{masteryData.Key}</color> (<color=white>{WeaponMasterySystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}.");
             }
             else
             {
-                ctx.Reply($"You haven't gained any expertise for {weaponType} yet. ");
+                ctx.Reply($"You haven't gained any expertise for {weaponType} yet.");
             }
         }
 
@@ -41,7 +51,7 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Combat mastery logging is now {(bools["CombatLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "chooseWeaponStat", shortHand: "sws", adminOnly: true, usage: ".cws <Stat>", description: "Choose a weapon stat to enhance based on your weapon mastery.")]
+        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: true, usage: ".cws <Stat>", description: "Choose a weapon stat to enhance based on your weapon mastery.")]
         public static void ChooseWeaponStat(ChatCommandContext ctx, string statChoice)
         {
             string statType = statChoice.ToLower();

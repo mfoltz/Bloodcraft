@@ -4,22 +4,6 @@ namespace Cobalt.Systems.Bloodline
 {
     public class BloodStatsSystem
     {
-        public class BloodMasteryStats
-        {
-            // Stat properties
-            public float ResourceYield { get; set; }
-
-            public float PhysicalResistance { get; set; }
-            public float SpellResistance { get; set; }
-            public float SunResistance { get; set; }
-            public float FireResistance { get; set; }
-            public float HolyResistance { get; set; }
-            public float SilverResistance { get; set; }
-            public float PassiveHealthRegen { get; set; }
-
-            // Tracking which stats have been chosen (not the actual values)
-        }
-
         public class PlayerBloodUtilities
         {
             public static bool ChooseStat(ulong steamId, string statType)
@@ -27,7 +11,7 @@ namespace Cobalt.Systems.Bloodline
                 if (!DataStructures.PlayerBloodChoices.ContainsKey(steamId))
                     DataStructures.PlayerBloodChoices[steamId] = [];
 
-                if (DataStructures.PlayerBloodChoices[steamId].Count >= 3)
+                if (DataStructures.PlayerBloodChoices[steamId].Count >= 2)
                 {
                     return false; // Only allow 3 stats to be chosen
                 }
@@ -51,9 +35,6 @@ namespace Cobalt.Systems.Bloodline
         {
             public enum BloodStatType
             {
-                ResourceYield,
-                PhysicalResistance,
-                SpellResistance,
                 SunResistance,
                 FireResistance,
                 HolyResistance,
@@ -63,25 +44,20 @@ namespace Cobalt.Systems.Bloodline
 
             public static readonly Dictionary<int, BloodStatType> BloodStatMap = new()
             {
-                { 0, BloodStatType.ResourceYield },
-                { 1, BloodStatType.PhysicalResistance },
-                { 2, BloodStatType.SpellResistance },
-                { 3, BloodStatType.SunResistance },
-                { 4, BloodStatType.FireResistance },
-                { 5, BloodStatType.HolyResistance },
-                { 6, BloodStatType.SilverResistance },
-                { 7, BloodStatType.PassiveHealthRegen }
+                { 0, BloodStatType.SunResistance },
+                { 1, BloodStatType.FireResistance },
+                { 2, BloodStatType.HolyResistance },
+                { 3, BloodStatType.SilverResistance },
+                { 4, BloodStatType.PassiveHealthRegen }
             };
 
             private static readonly Dictionary<BloodStatType, float> baseCaps = new()
             {
-                {BloodStatType.ResourceYield, 1f},
-                {BloodStatType.PhysicalResistance, 0.25f},
-                {BloodStatType.SpellResistance, 0.25f},
-                {BloodStatType.SunResistance, 100f},
-                {BloodStatType.FireResistance, 100f},
-                {BloodStatType.HolyResistance, 100f},
-                {BloodStatType.SilverResistance, 100f},
+                {BloodStatType.SunResistance, 75f},
+                {BloodStatType.FireResistance, 75f},
+                {BloodStatType.HolyResistance, 75f},
+                {BloodStatType.SilverResistance, 75f},
+                {BloodStatType.PassiveHealthRegen, 0.19f}
             };
 
             public static Dictionary<BloodStatType, float> BaseCaps

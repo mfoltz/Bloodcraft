@@ -8,6 +8,7 @@ using ProjectM;
 using System.Reflection;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Core
 {
@@ -24,6 +25,7 @@ namespace Cobalt.Core
 
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.ConfigPath, "player_experience.json");
+        public static readonly string PlayerPrestigeJson = Path.Combine(Plugin.ConfigPath, "player_prestige.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.ConfigPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.ConfigPath, "player_mining.json");
@@ -65,8 +67,16 @@ namespace Cobalt.Core
             LoadAllData();
             //UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
+            UpdateBaseStats();
         }
 
+        private static void UpdateBaseStats()
+        {
+            VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
+            EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
+            EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
+            EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
+        }
         private void GameDataOnInitialize(World world)
         {
         }
@@ -107,6 +117,7 @@ namespace Cobalt.Core
         private static readonly Action[] saveFunctions =
         [
             DataStructures.SavePlayerExperience,
+            DataStructures.SavePlayerPrestige,
             DataStructures.SavePlayerBools,
             DataStructures.SavePlayerWoodcutting,
             DataStructures.SavePlayerMining,
@@ -130,12 +141,14 @@ namespace Cobalt.Core
             DataStructures.SavePlayerUnarmedMastery,
             DataStructures.SavePlayerSanguimancy,
             DataStructures.SavePlayerWeaponChoices,
+            DataStructures.SavePlayerEquippedWeapon,
             DataStructures.SavePlayerBloodChoices
         ];
 
         private static readonly Action[] loadFunctions =
         [
             DataStructures.LoadPlayerExperience,
+            DataStructures.LoadPlayerPrestige,
             DataStructures.LoadPlayerBools,
             DataStructures.LoadPlayerWoodcutting,
             DataStructures.LoadPlayerMining,
@@ -159,6 +172,7 @@ namespace Cobalt.Core
             DataStructures.LoadPlayerWhipMastery,
             DataStructures.LoadPlayerUnarmedMastery,
             DataStructures.LoadPlayerWeaponChoices,
+            DataStructures.LoadPlayerEquippedWeapon,
             DataStructures.LoadPlayerBloodStats
         ];
 

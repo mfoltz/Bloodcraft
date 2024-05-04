@@ -1,11 +1,11 @@
 ﻿using Cobalt.Core;
-using Cobalt.Systems.Weapon;
+using Cobalt.Systems.Expertise;
 using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks
@@ -30,7 +30,6 @@ namespace Cobalt.Hooks
                     { "ExperienceLogging", false },
                     { "ExperienceShare", false },
                     { "ProfessionLogging", false },
-                    { "FishingFlag", false },
                     { "BloodLogging", false },
                     { "CombatLogging", false }
                 });
@@ -41,6 +40,11 @@ namespace Cobalt.Hooks
             {
                 DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerExperience();
+            }
+            if (!DataStructures.PlayerPrestige.ContainsKey(steamId))
+            {
+                DataStructures.PlayerPrestige.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerPrestige();
             }
 
             if (!DataStructures.PlayerWoodcutting.ContainsKey(steamId))
@@ -143,23 +147,18 @@ namespace Cobalt.Hooks
                 DataStructures.PlayerUnarmedMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerUnarmedMastery();
             }
-            /*
-            if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))
+            
+            if (!DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))
             {
-                var weaponStats = new Dictionary<string, Dictionary<string, float>>();
+                var weapons = new Dictionary<string, bool>();
                 foreach (WeaponMasterySystem.WeaponType weaponType in Enum.GetValues(typeof(WeaponMasterySystem.WeaponType)))
                 {
-                    var stats = new Dictionary<string, float>();
-                    foreach (WeaponStatManager.WeaponStatType statType in Enum.GetValues(typeof(WeaponStatManager.WeaponStatType)))
-                    {
-                        stats.Add(statType.ToString(), 0f);
-                    }
-                    weaponStats.Add(weaponType.ToString(), stats);
+                    weapons.Add(weaponType.ToString(), false);
                 }
-                DataStructures.PlayerWeaponStats.Add(steamId, weaponStats);
-                DataStructures.SavePlayerWeaponStats();
+                DataStructures.PlayerEquippedWeapon.Add(steamId, weapons);
+                DataStructures.SavePlayerEquippedWeapon();
             }
-            */
+            
             if (!DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
             {
                 DataStructures.PlayerWeaponChoices.Add(steamId, []);

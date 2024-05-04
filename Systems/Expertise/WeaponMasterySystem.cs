@@ -3,13 +3,13 @@ using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
-namespace Cobalt.Systems.Weapon
+namespace Cobalt.Systems.Expertise
 {
     public class WeaponMasterySystem
     {
-        private static readonly float CombatMasteryMultiplier = 1; // mastery points multiplier from normal units
+        private static readonly float CombatMasteryMultiplier = 15; // mastery points multiplier from normal units
         public static readonly int MaxCombatMasteryLevel = 99; // maximum level
         private static readonly float VBloodMultiplier = 15; // mastery points multiplier from VBlood units
         private static readonly float CombatMasteryConstant = 0.1f; // constant for calculating level from xp
@@ -112,7 +112,7 @@ namespace Cobalt.Systems.Weapon
             }
         }
 
-        private static int GetLevelProgress(ulong steamID, IWeaponMasteryHandler handler)
+        public static int GetLevelProgress(ulong steamID, IWeaponMasteryHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
             int currentLevel = GetLevel(steamID, handler);

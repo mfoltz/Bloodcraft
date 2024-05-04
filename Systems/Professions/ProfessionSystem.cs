@@ -1,6 +1,7 @@
 ﻿using Bloodstone.API;
 using Cobalt.Core;
 using ProjectM;
+using ProjectM.Scripting;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
@@ -62,12 +63,43 @@ namespace Cobalt.Systems
                 }
 
                 SetProfession(user, SteamID, ProfessionValue, handler);
-                // how to add bonuses to professions? woodcutting, mining, harvesting are easy enough to do yield increases in the form of adding
-                // the right item to the player inventory but unsure about the rest, maybe fishing could be some random thing from the relevant location drop table
+                // retrieve level and award bonus drop table item to inventory every 10 levels?
+                GiveProfessionBonus(prefabGUID, Killer, user, SteamID, handler);
             }
             else
             {
                 //Plugin.Log.LogError($"No handler found for profession...");
+            }
+        }
+
+        public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer,User user, ulong SteamID, IProfessionHandler handler)
+        {
+            EntityManager entityManager = VWorld.Server.EntityManager;
+            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
+            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
+            Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
+            int level = GetLevel(SteamID, handler);
+            if (!prefabEntity.Has<DropTableBuffer>())
+            {
+                Plugin.Log.LogError($"No DropTableBuffer found on {prefab.LookupName()}...");
+            }
+            else
+            {
+                var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();// for woodcutting more wood, for mining more ore chances for gems, harvesting greater chance for seeds?
+                // for level 10 wc 10% more wood, for level 10 mining drop at least 1 of the on destroy items, for level 10 harvesting 1 seed if present
+                foreach (var drop in dropTableBuffer)
+                {
+                    Plugin.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
+                    switch (drop.DropTrigger)
+                    {
+                        case DropTriggerType.YieldResourceOnDamageTaken:
+                            if (serverGameManager.TryAddInventoryItem(Killer, drop.DropTableGuid, level))
+                            {
+                                ServerChatUtils.SendSystemMessageToClient(entityManager, user,$"You received bonus {drop.DropTableGuid.LookupName()} x{level} from {handler.GetProfessionName()}");
+                            }
+                            break;
+                    }
+                }
             }
         }
 
@@ -148,7 +180,7 @@ namespace Cobalt.Systems
             return ConvertXpToLevel(GetXp(steamID, handler));
         }
 
-        private static int GetLevelProgress(ulong steamID, IProfessionHandler handler)
+        public static int GetLevelProgress(ulong steamID, IProfessionHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
             int currentLevel = GetLevel(steamID, handler);

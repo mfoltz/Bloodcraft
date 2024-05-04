@@ -1,6 +1,6 @@
 ﻿using Cobalt.Core;
 using Cobalt.Systems.Bloodline;
-using Cobalt.Systems.Weapon;
+using Cobalt.Systems.Expertise;
 using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
@@ -9,14 +9,62 @@ using Unity.Collections;
 using Unity.Entities;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
+using static Cobalt.Hooks.EquipmentSystemPatch;
 
 namespace Cobalt.Hooks
 {
     [HarmonyPatch(typeof(EquipmentSystem), nameof(EquipmentSystem.OnUpdate))]
     public static class EquipmentSystemPatch
     {
+        private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
+        {
+            { WeaponStatType.MaxHealth, 125f },
+            { WeaponStatType.AttackSpeed, 0f },
+            { WeaponStatType.PhysicalPower, 10f },
+            { WeaponStatType.SpellPower, 10f },
+            { WeaponStatType.PhysicalCritChance, 0.05f },
+            { WeaponStatType.PhysicalCritDamage, 1.5f },
+            { WeaponStatType.SpellCritChance, 0.05f },
+            { WeaponStatType.SpellCritDamage, 1.5f }
+        };
+
+        public static Dictionary<WeaponStatType, float> BaseWeaponStats
+        {
+            get => baseWeaponStats;
+            set => baseWeaponStats = value;
+        }
+
+        private static Dictionary<BloodStatType, float> baseBloodStats = new()
+        {
+            { BloodStatType.SunResistance, 0f },
+            { BloodStatType.FireResistance, 0f },
+            { BloodStatType.HolyResistance, 0f },
+            { BloodStatType.SilverResistance, 0f },
+            { BloodStatType.PassiveHealthRegen, 0.01f }
+        };
+
+        public static Dictionary<BloodStatType, float> BaseBloodStats
+        {
+            get => baseBloodStats;
+            set => baseBloodStats = value;
+        }
+
+        private static Dictionary<PrestigeStatType, float> basePrestigeStats = new()
+        {
+            { PrestigeStatType.PhysicalResistance, 0f },
+            { PrestigeStatType.SpellResistance, 0f },
+            { PrestigeStatType.MovementSpeed, 0f }
+        };
+
+        public static Dictionary<PrestigeStatType, float> BasePrestigeStats
+        {
+            get => basePrestigeStats;
+            set => basePrestigeStats = value;
+        }
+
         public static void Prefix(EquipmentSystem __instance)
         {
             //Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
@@ -33,7 +81,7 @@ namespace Cobalt.Hooks
                         GearOverride.SetLevel(character);
                         try
                         {
-                            Plugin.Log.LogInfo("Updating player stats...");
+                            //Plugin.Log.LogInfo("Updating player stats...");
                             UnitStatsOverride.UpdatePlayerStats(character);
                         }
                         catch (System.Exception e)
@@ -75,10 +123,6 @@ namespace Cobalt.Hooks
                     {
                         case WeaponStatType.MaxHealth:
                             health.MaxHealth._Value += scaledBonus;
-                            break;
-
-                        case WeaponStatType.CastSpeed:
-                            stats.AttackSpeed._Value += scaledBonus;
                             break;
 
                         case WeaponStatType.AttackSpeed:
@@ -128,54 +172,48 @@ namespace Cobalt.Hooks
             var health = character.Read<Health>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+            //IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
             if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
                     WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus);
-                    float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    Plugin.Log.LogInfo($"Removing weapon stats: {bonus} | {scaledBonus}");
+                    Plugin.Log.LogInfo($"Resetting {weaponStatType} to {BaseWeaponStats[weaponStatType]}");
                     switch (weaponStatType)
                     {
                         case WeaponStatType.MaxHealth:
-                            health.MaxHealth._Value -= scaledBonus;
-                            break;
-
-                        case WeaponStatType.CastSpeed:
-                            stats.AttackSpeed._Value -= scaledBonus;
+                            health.MaxHealth._Value = BaseWeaponStats[WeaponStatType.MaxHealth];
                             break;
 
                         case WeaponStatType.AttackSpeed:
-                            stats.PrimaryAttackSpeed._Value -= scaledBonus;
+                            stats.PrimaryAttackSpeed._Value = BaseWeaponStats[WeaponStatType.AttackSpeed];
                             break;
 
                         case WeaponStatType.PhysicalPower:
-                            stats.PhysicalPower._Value -= scaledBonus;
+                            stats.PhysicalPower._Value = BaseWeaponStats[WeaponStatType.PhysicalPower];
                             break;
 
                         case WeaponStatType.SpellPower:
-                            stats.SpellPower._Value -= scaledBonus;
+                            stats.SpellPower._Value = BaseWeaponStats[WeaponStatType.SpellPower];
                             break;
 
                         case WeaponStatType.PhysicalCritChance:
-                            stats.PhysicalCriticalStrikeChance._Value -= scaledBonus;
+                            stats.PhysicalCriticalStrikeChance._Value = BaseWeaponStats[WeaponStatType.PhysicalCritChance];
                             break;
 
                         case WeaponStatType.PhysicalCritDamage:
-                            stats.PhysicalCriticalStrikeDamage._Value -= scaledBonus;
+                            stats.PhysicalCriticalStrikeDamage._Value = BaseWeaponStats[WeaponStatType.PhysicalCritDamage];
                             break;
 
                         case WeaponStatType.SpellCritChance:
-                            stats.SpellCriticalStrikeChance._Value -= scaledBonus;
+                            stats.SpellCriticalStrikeChance._Value = BaseWeaponStats[WeaponStatType.SpellCritChance];
                             break;
 
                         case WeaponStatType.SpellCritDamage:
-                            stats.SpellCriticalStrikeDamage._Value -= scaledBonus;
+                            stats.SpellCriticalStrikeDamage._Value = BaseWeaponStats[WeaponStatType.SpellCritDamage];
                             break;
                     }
                 }
-
                 character.Write(stats);
                 character.Write(health);
             }
@@ -190,7 +228,6 @@ namespace Cobalt.Hooks
         public static void ApplyBloodBonuses(Entity character)
         {
             var stats = character.Read<UnitStats>();
-            var health = character.Read<Health>();
 
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
@@ -200,51 +237,38 @@ namespace Cobalt.Hooks
                 {
                     BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
+                    
                     Plugin.Log.LogInfo($"Applying blood stats: {bonus} | {scaledBonus}");
                     switch (bloodStatType)
                     {
-                        case BloodStatType.ResourceYield:
-                            stats.ResourceYieldModifier._Value += scaledBonus;
-                            break;
-
-                        case BloodStatType.PhysicalResistance:
-                            stats.PhysicalResistance._Value += scaledBonus;
-                            break;
-
-                        case BloodStatType.SpellResistance:
-                            stats.SpellResistance._Value += scaledBonus;
-                            break;
-
                         case BloodStatType.SunResistance:
-                            stats.SunResistance._Value += (int)scaledBonus;
+                            stats.SunResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.SunResistance]);
                             break;
 
                         case BloodStatType.FireResistance:
-                            stats.FireResistance._Value += (int)scaledBonus;
+                            stats.FireResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.FireResistance]);
                             break;
 
                         case BloodStatType.HolyResistance:
-                            stats.HolyResistance._Value += (int)scaledBonus;
+                            stats.HolyResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.HolyResistance]);
                             break;
 
                         case BloodStatType.SilverResistance:
-                            stats.SilverResistance._Value += (int)scaledBonus;
+                            stats.SilverResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.SilverResistance]);
                             break;
 
                         case BloodStatType.PassiveHealthRegen:
-                            stats.PassiveHealthRegen._Value += scaledBonus;
+                            stats.PassiveHealthRegen._Value = scaledBonus + BaseBloodStats[BloodStatType.PassiveHealthRegen];
                             break;
                     }
                 }
                 character.Write(stats);
-                character.Write(health);
             }
         }
 
         public static void RemoveBloodBonuses(Entity character)
         {
             var stats = character.Read<UnitStats>();
-            var health = character.Read<Health>();
 
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
@@ -253,45 +277,31 @@ namespace Cobalt.Hooks
                 foreach (var bonus in bonuses)
                 {
                     BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
-                    float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
-                    Plugin.Log.LogInfo($"Removing blood stats: {bonus} | {scaledBonus}");
+                    Plugin.Log.LogInfo($"Resetting {bloodStatType} to {BaseBloodStats[bloodStatType]}");
                     switch (bloodStatType)
                     {
-                        case BloodStatType.ResourceYield:
-                            stats.ResourceYieldModifier._Value -= scaledBonus;
-                            break;
-
-                        case BloodStatType.PhysicalResistance:
-                            stats.PhysicalResistance._Value -= scaledBonus;
-                            break;
-
-                        case BloodStatType.SpellResistance:
-                            stats.SpellResistance._Value -= scaledBonus;
-                            break;
-
                         case BloodStatType.SunResistance:
-                            stats.SunResistance._Value -= (int)Math.Round(scaledBonus);
+                            stats.SunResistance._Value = (int)BaseBloodStats[BloodStatType.SunResistance];
                             break;
 
                         case BloodStatType.FireResistance:
-                            stats.FireResistance._Value -= (int)Math.Round(scaledBonus);
+                            stats.FireResistance._Value = (int)BaseBloodStats[BloodStatType.FireResistance];
                             break;
 
                         case BloodStatType.HolyResistance:
-                            stats.HolyResistance._Value -= (int)Math.Round(scaledBonus);
+                            stats.HolyResistance._Value = (int)BaseBloodStats[BloodStatType.HolyResistance];
                             break;
 
                         case BloodStatType.SilverResistance:
-                            stats.SilverResistance._Value -= (int)Math.Round(scaledBonus);
+                            stats.SilverResistance._Value = (int)BaseBloodStats[BloodStatType.SilverResistance];
                             break;
 
                         case BloodStatType.PassiveHealthRegen:
-                            stats.PassiveHealthRegen._Value -= scaledBonus;
+                            stats.PassiveHealthRegen._Value = BaseBloodStats[BloodStatType.PassiveHealthRegen];
                             break;
                     }
                 }
                 character.Write(stats);
-                character.Write(health);
             }
         }
 
@@ -334,6 +344,75 @@ namespace Cobalt.Hooks
             return 0; // Return 0 if no blood stats are found
         }
 
+        private static void ApplyPrestigeBonuses(Entity character)
+        {
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            if (DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && prestigeData.Key > 0)
+            {
+                UnitStats stats = character.Read<UnitStats>();
+                Movement movement = character.Read<Movement>();
+                foreach (var stat in BasePrestigeStats)
+                {
+                    float scaledBonus = CalculateScaledPrestigeBonus(prestigeData.Key, stat.Key);
+                    switch (stat.Key)
+                    {
+                        case PrestigeStatType.PhysicalResistance:
+                            stats.PhysicalResistance._Value += scaledBonus;
+                            break;
+
+                        case PrestigeStatType.SpellResistance:
+                            stats.SpellResistance._Value += scaledBonus;
+                            break;
+
+                        case PrestigeStatType.MovementSpeed:
+                            movement.Speed._Value += scaledBonus;
+                            break;
+                    }
+                }
+                character.Write(stats);
+                character.Write(movement);
+            }
+        }
+
+        private static void RemovePrestigeBonuses(Entity character)
+        {
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            if (DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && !prestigeData.Key.Equals(0))
+            {
+                UnitStats stats = character.Read<UnitStats>();
+                Movement movement = character.Read<Movement>();
+                foreach (var stat in BasePrestigeStats)
+                {
+                    switch (stat.Key)
+                    {
+                        case PrestigeStatType.PhysicalResistance:
+                            stats.PhysicalResistance._Value = BasePrestigeStats[PrestigeStatType.PhysicalResistance];
+                            break;
+
+                        case PrestigeStatType.SpellResistance:
+                            stats.SpellResistance._Value = BasePrestigeStats[PrestigeStatType.SpellResistance];
+                            break;
+
+                        case PrestigeStatType.MovementSpeed:
+                            movement.Speed._Value = BasePrestigeStats[PrestigeStatType.MovementSpeed];
+                            break;
+                    }
+                }
+                character.Write(stats);
+                character.Write(movement);
+            }
+        }
+
+        private static float CalculateScaledPrestigeBonus(int prestigeLevel, PrestigeStatType statType)
+        {
+            // Scaling factor of 0.01f per level of prestige
+            if (statType.Equals(PrestigeStatType.MovementSpeed))
+            {
+                return 0.1f; // Movement speed is a flat bonus, current intention is 15 levels of prestige
+            }
+            return 0.01f;
+        }
+
         public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             // Assuming an implementation to retrieve the current weapon type
@@ -348,12 +427,8 @@ namespace Cobalt.Hooks
 
             // Get the current weapon type
             string currentWeapon = GetCurrentWeaponType(character).ToString();
-
+            Plugin.Log.LogInfo($"{currentWeapon}");
             // Initialize player's weapon dictionary if it doesn't exist
-            if (!DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))
-            {
-                DataStructures.PlayerEquippedWeapon[steamId] = [];
-            }
 
             var equippedWeapons = DataStructures.PlayerEquippedWeapon[steamId];
 
@@ -373,6 +448,7 @@ namespace Cobalt.Hooks
                 Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
                 ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
                 equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
+                DataStructures.SavePlayerEquippedWeapon();
             }
             ApplyBloodBonuses(character);
         }

@@ -2,7 +2,7 @@ using Cobalt.Core;
 using Cobalt.Systems;
 using Cobalt.Systems.Bloodline;
 using Cobalt.Systems.Experience;
-using Cobalt.Systems.Weapon;
+using Cobalt.Systems.Expertise;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;

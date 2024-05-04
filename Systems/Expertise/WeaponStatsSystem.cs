@@ -3,7 +3,7 @@ using Cobalt.Core;
 using ProjectM;
 using Steamworks;
 
-namespace Cobalt.Systems.Weapon
+namespace Cobalt.Systems.Expertise
 {
     public class WeaponStatsSystem
     {
@@ -42,7 +42,6 @@ namespace Cobalt.Systems.Weapon
             public enum WeaponStatType
             {
                 MaxHealth,
-                CastSpeed,
                 AttackSpeed,
                 PhysicalPower,
                 SpellPower,
@@ -55,20 +54,18 @@ namespace Cobalt.Systems.Weapon
             public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
                 {
                     { 0, WeaponStatType.MaxHealth },
-                    { 1, WeaponStatType.CastSpeed },
-                    { 2, WeaponStatType.AttackSpeed },
-                    { 3, WeaponStatType.PhysicalPower },
-                    { 4, WeaponStatType.SpellPower },
-                    { 5, WeaponStatType.PhysicalCritChance },
-                    { 6, WeaponStatType.PhysicalCritDamage },
-                    { 7, WeaponStatType.SpellCritChance },
-                    { 8, WeaponStatType.SpellCritDamage }
+                    { 1, WeaponStatType.AttackSpeed },
+                    { 2, WeaponStatType.PhysicalPower },
+                    { 3, WeaponStatType.SpellPower },
+                    { 4, WeaponStatType.PhysicalCritChance },
+                    { 5, WeaponStatType.PhysicalCritDamage },
+                    { 6, WeaponStatType.SpellCritChance },
+                    { 7, WeaponStatType.SpellCritDamage }
                 };
 
             private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
                     {WeaponStatType.MaxHealth, 150},
-                    {WeaponStatType.CastSpeed, 0.15f},
                     {WeaponStatType.AttackSpeed, 0.15f},
                     {WeaponStatType.PhysicalPower, 15},
                     {WeaponStatType.SpellPower, 15},

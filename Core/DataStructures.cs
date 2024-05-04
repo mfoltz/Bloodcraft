@@ -1,7 +1,7 @@
 ﻿using ProjectM;
 using System.Text.Json;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 
 namespace Cobalt.Core
 {
@@ -18,6 +18,7 @@ namespace Cobalt.Core
         // structures to write to json for permanence
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerPrestige = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWoodcutting = [];
@@ -46,11 +47,17 @@ namespace Cobalt.Core
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = [];
         private static Dictionary<ulong, List<string>> playerBloodChoices = [];
-
+        
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
         {
             get => playerExperience;
             set => playerExperience = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerPrestige
+        {
+            get => playerPrestige;
+            set => playerPrestige = value;
         }
 
         public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
@@ -206,7 +213,6 @@ namespace Cobalt.Core
         // cache-only
 
         private static Dictionary<ulong, Dictionary<PrefabGUID, bool>> playerCraftingJobs = [];
-
         public static Dictionary<ulong, Dictionary<PrefabGUID, bool>> PlayerCraftingJobs
         {
             get => playerCraftingJobs;
@@ -217,6 +223,7 @@ namespace Cobalt.Core
         private static readonly Dictionary<string, string> filePaths = new()
         {
             {"Experience", Plugin.PlayerExperienceJson},
+            {"Prestige", Plugin.PlayerPrestigeJson },
             {"PlayerBools", Plugin.PlayerBoolsJson},
             {"Woodcutting", Plugin.PlayerWoodcuttingJson},
             {"Mining", Plugin.PlayerMiningJson},
@@ -323,6 +330,8 @@ namespace Cobalt.Core
 
         public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
 
+        public static void LoadPlayerPrestige() => LoadData(ref playerPrestige, "Prestige");
+
         public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
 
         public static void LoadPlayerWoodcutting() => LoadData(ref playerWoodcutting, "Woodcutting");
@@ -393,6 +402,8 @@ namespace Cobalt.Core
         }
 
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
+
+        public static void SavePlayerPrestige() => SaveData(PlayerPrestige, "Prestige");
 
         public static void SavePlayerBools() => SaveData(PlayerBools, "PlayerBools");
 

@@ -4,7 +4,7 @@ using Steamworks;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 
 namespace Cobalt.Core.Commands
 {
@@ -36,7 +36,7 @@ namespace Cobalt.Core.Commands
             ctx.Reply($"Sanguimancy progress logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "chooseBloodStat", shortHand: "cbs", adminOnly: true, usage: ".cbs <Stat>", description: "Choose a bloodline stat to enhance based on your mastery.")]
+        [Command(name: "chooseBloodStat", shortHand: "cbs", adminOnly: false, usage: ".cbs <Stat>", description: "Choose a bloodline stat to enhance based on your mastery.")]
         public static void SetBloodlineStatCommand(ChatCommandContext ctx, string statChoice)
         {
             ulong steamId = ctx.Event.User.PlatformId;
@@ -64,7 +64,7 @@ namespace Cobalt.Core.Commands
             }
         }
 
-        [Command(name: "resetBloodStats", shortHand: "rbs", adminOnly: true, usage: ".rbs", description: "Reset the stat choices for a player's bloodline stats.")]
+        [Command(name: "resetBloodStats", shortHand: "rbs", adminOnly: false, usage: ".rbs", description: "Reset the stat choices for a player's bloodline stats.")]
         public static void ResetBloodlineStatsCommand(ChatCommandContext ctx)
         {
             ulong steamId = ctx.Event.User.PlatformId;
@@ -74,9 +74,10 @@ namespace Cobalt.Core.Commands
                 ctx.Reply("No blood choices found for this SteamID.");
                 return;
             }
-            stats.Clear();
             UnitStatsOverride.RemoveBloodBonuses(character);
-            PlayerBloodUtilities.ResetChosenStats(steamId);
+            //PlayerBloodUtilities.ResetChosenStats(steamId);
+            stats.Clear();
+            DataStructures.SavePlayerBloodChoices();
             ctx.Reply($"Blood stat choices reset.");
         }
     }

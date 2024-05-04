@@ -5,14 +5,13 @@ using ProjectM.Network;
 using Unity.Entities;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Systems.Bloodline
 {
     public class BloodMasterySystem
     {
         private static readonly float BloodMasteryMultiplier = 1f; // mastery points multiplier from normal units
-        private static readonly float BloodValueModifier = 1f;
         private static readonly float BaseBloodMastery = 5; // base mastery points
         private static readonly int MaxBloodMasteryLevel = 99; // maximum level
         private static readonly float BloodMasteryConstant = 0.1f; // constant for calculating level from xp
@@ -41,7 +40,7 @@ namespace Cobalt.Systems.Bloodline
             {
                 isVBlood = false;
             }
-            float BloodMasteryValue = bloodConsumeSource.BloodQuality / BloodValueModifier;
+            float BloodMasteryValue = bloodConsumeSource.BloodQuality * bloodConsumeSource.BloodQuality;
             if (isVBlood) BloodMasteryValue *= VBloodMultiplier;
 
             BloodMasteryValue *= BloodMasteryMultiplier;
@@ -132,7 +131,7 @@ namespace Cobalt.Systems.Bloodline
                     return type;
                 }
             }
-            return BloodStatType.SunResistance;
+            return BloodStatType.PassiveHealthRegen;
         }
     }
 }

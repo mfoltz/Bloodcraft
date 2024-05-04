@@ -2,7 +2,7 @@ using Bloodstone.API;
 using ProjectM.Network;
 using ProjectM;
 using VampireCommandFramework;
-using static Cobalt.Systems.Weapon.WeaponMasterySystem;
+using static Cobalt.Systems.Expertise.WeaponMasterySystem;
 using Unity.Entities;
 using Cobalt.Systems;
 
@@ -25,7 +25,6 @@ namespace Cobalt.Core.Commands
         [Command(name: "getProfessionProgress", shortHand: "gpp", adminOnly: false, usage: ".gpp [Profession]", description: "Display your current mastery progress.")]
         public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
         {
-            Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             PrefabGUID empty = new(0);
             IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(empty, profession.ToLower());
@@ -36,11 +35,11 @@ namespace Cobalt.Core.Commands
             }
             if (DataStructures.professionMap.TryGetValue(profession, out var professionDictionary) && professionDictionary.TryGetValue(steamID, out var prof))
             {
-                ctx.Reply($"You are level <color=white>{prof.Key}</color> in {professionHandler.GetProfessionName()}.");
+                ctx.Reply($"You are level [<color=yellow>{prof.Key}</color>] (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
             }
             else
             {
-                ctx.Reply($"You haven't gained any expertise for {professionHandler.GetProfessionName()} yet. ");
+                ctx.Reply($"You haven't gained any levels in {professionHandler.GetProfessionName()} yet. ");
             }
         }
 

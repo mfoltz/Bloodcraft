@@ -43,7 +43,7 @@ public class FishingSystemPatch
                         //target.LogComponentTypes();
                         if (!target.Has<DropTableBuffer>())
                         {
-                            Plugin.Log.LogInfo("No DropTableBuffer found on parent entity...");
+                            Plugin.Log.LogInfo("No DropTableBuffer found on entity...");
                         }
                         else
                         {
