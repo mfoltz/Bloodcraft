@@ -15,6 +15,7 @@ using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 using static Cobalt.Hooks.BaseStats;
+using static Cobalt.Hooks.UnitStatsOverride;
 
 namespace Cobalt.Hooks
 {
@@ -50,6 +51,8 @@ namespace Cobalt.Hooks
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
                         Entity character = fromCharacter.Character;
 
+                        //string currentWeapon = GetCurrentWeaponType(character).ToString();
+
                         GearOverride.SetLevel(character);
                         UnitStatsOverride.UpdatePlayerStats(character);
                     }
@@ -57,6 +60,8 @@ namespace Cobalt.Hooks
                     {
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
                         Entity character = fromCharacter.Character;
+
+                        //string currentWeapon = GetCurrentWeaponType(character).ToString();
 
                         GearOverride.SetLevel(character);
                         UnitStatsOverride.UpdatePlayerStats(character);
@@ -94,6 +99,16 @@ namespace Cobalt.Hooks
                     switch (weaponStatType)
                     {
                         case WeaponStatType.MaxHealth:
+                            ModifyUnitStatBuff_DOTS modifyUnitStatBuff_DOTS = new()
+                            {
+                                StatType = UnitStatType.MaxHealth,
+                                Value = scaledBonus + BaseWeaponStats[WeaponStatType.MaxHealth],
+                                ModificationType = ModificationType.Set,
+                                Modifier = 1,
+                                Id = ModificationId.NewId(5)
+                            };
+                            var musb_dots_buffer = character.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+                            musb_dots_buffer.Add(modifyUnitStatBuff_DOTS);
                             health.MaxHealth._Value += scaledBonus;
                             break;
 
@@ -150,6 +165,16 @@ namespace Cobalt.Hooks
                     switch (weaponStatType)
                     {
                         case WeaponStatType.MaxHealth:
+                            ModifyUnitStatBuff_DOTS modifyUnitStatBuff_DOTS = new()
+                            {
+                                StatType = UnitStatType.MaxHealth,
+                                Value = BaseWeaponStats[WeaponStatType.MaxHealth],
+                                ModificationType = ModificationType.Set,
+                                Modifier = 1,
+                                Id = ModificationId.NewId(5)
+                            };
+                            var musb_dots_buffer = character.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+                            musb_dots_buffer.Add(modifyUnitStatBuff_DOTS);
                             health.MaxHealth._Value = BaseWeaponStats[WeaponStatType.MaxHealth];
                             break;
 
@@ -406,11 +431,11 @@ namespace Cobalt.Hooks
                 if (previousWeapon != null)
                 {
                     Plugin.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
-                    RemoveWeaponBonuses(character, previousWeapon);  // Remove bonuses from the previous weapon
+                    RemoveWeaponBonuses(character, currentWeapon);  // Remove bonuses from the previous weapon
                     equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
                 }
                 Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
-                ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
+                ApplyWeaponBonuses(character, previousWeapon);  // Apply bonuses from the new weapon
                 equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
                 DataStructures.SavePlayerEquippedWeapon();
             }

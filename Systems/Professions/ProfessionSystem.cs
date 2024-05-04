@@ -94,6 +94,7 @@ namespace Cobalt.Systems
                     {
                         Plugin.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
                         prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
+                        if (!prefabEntity.Has<ItemDataDropGroupBuffer>()) continue;
                         var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
                         foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
                         {
@@ -119,7 +120,7 @@ namespace Cobalt.Systems
                                 {
                                     if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, level))
                                     {
-                                        ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received {dropTableData.ItemGuid.LookupName()}x{level} from {handler.GetProfessionName()}");
+                                        ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received {dropTableData.ItemGuid.LookupName()}x<color=white>{level}</color> from {handler.GetProfessionName()}");
                                         break;
                                     }
                                 }
@@ -132,7 +133,7 @@ namespace Cobalt.Systems
                             foreach (var dropTableData in dropTableDataBuffer)
                             {
                                 prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
-                                //prefabEntity.LogComponentTypes();
+                                if (!prefabEntity.Has<ItemDataDropGroupBuffer>()) continue;
                                 var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
                                 foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
                                 {
