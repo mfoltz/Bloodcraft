@@ -500,8 +500,8 @@ namespace Cobalt.Hooks
             if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
                 Equipment equipment = player.Read<Equipment>();
-                RemoveItemLevels(equipment);
-
+                RemoveItemLevelSources(player, equipment);
+                //RemoveItemLevels(player, equipment);
                 if (equipment.SpellLevel._Value.Equals(xpData.Key) && equipment.ArmorLevel._Value.Equals(0f) && equipment.WeaponLevel._Value.Equals(0f))
                 {
                     return;
@@ -517,14 +517,16 @@ namespace Cobalt.Hooks
             }
         }
 
-        public static void RemoveItemLevels(Equipment equipment)
+        public static void RemoveItemLevelSources(Entity character, Equipment equipment)
         {
             // Reset level for Armor Chest Slot
+            Plugin.Log.LogInfo($"Removing item levels...");
             if (!equipment.ArmorChestSlot.SlotEntity.Equals(Entity.Null) && !equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
                 ArmorLevelSource chestLevel = equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 chestLevel.Level = 0f;
                 equipment.ArmorChestSlot.SlotEntity._Entity.Write(chestLevel);
+                character.Write(equipment);
             }
 
             // Reset level for Armor Footgear Slot
@@ -533,6 +535,7 @@ namespace Cobalt.Hooks
                 ArmorLevelSource footgearLevel = equipment.ArmorFootgearSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 footgearLevel.Level = 0f;
                 equipment.ArmorFootgearSlot.SlotEntity._Entity.Write(footgearLevel);
+                character.Write(equipment);
             }
 
             // Reset level for Armor Gloves Slot
@@ -541,6 +544,7 @@ namespace Cobalt.Hooks
                 ArmorLevelSource glovesLevel = equipment.ArmorGlovesSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 glovesLevel.Level = 0f;
                 equipment.ArmorGlovesSlot.SlotEntity._Entity.Write(glovesLevel);
+                character.Write(equipment);
             }
 
             // Reset level for Armor Legs Slot
@@ -549,6 +553,7 @@ namespace Cobalt.Hooks
                 ArmorLevelSource legsLevel = equipment.ArmorLegsSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 legsLevel.Level = 0f;
                 equipment.ArmorLegsSlot.SlotEntity._Entity.Write(legsLevel);
+                character.Write(equipment);
             }
 
             // Reset level for Grimoire Slot (Spell Level)
@@ -557,7 +562,9 @@ namespace Cobalt.Hooks
                 SpellLevelSource spellLevel = equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>();
                 spellLevel.Level = 0f;
                 equipment.GrimoireSlot.SlotEntity._Entity.Write(spellLevel);
+                character.Write(equipment);
             }
         }
+        
     }
 }
