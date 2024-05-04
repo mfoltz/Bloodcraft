@@ -502,8 +502,9 @@ namespace Cobalt.Hooks
                 Equipment equipment = player.Read<Equipment>();
                 RemoveItemLevelSources(player, equipment);
                 //RemoveItemLevels(player, equipment);
-                if (equipment.SpellLevel._Value.Equals(xpData.Key) && equipment.ArmorLevel._Value.Equals(0f) && equipment.WeaponLevel._Value.Equals(0f))
+                if (equipment.WeaponLevel._Value.Equals(xpData.Key) && equipment.ArmorLevel._Value.Equals(0f) && equipment.SpellLevel._Value.Equals(0f))
                 {
+                    Plugin.Log.LogInfo($"GearScore already set to {xpData.Key}.");
                     return;
                 }
 
