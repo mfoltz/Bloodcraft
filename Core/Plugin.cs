@@ -6,6 +6,7 @@ using HarmonyLib;
 using ProjectM;
 using System.Reflection;
 using Unity.Entities;
+using VampireCommandFramework;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Core
@@ -61,6 +62,7 @@ namespace Cobalt.Core
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             InitConfig();
             ServerEventsPatches.OnGameDataInitialized += GameDataOnInitialize;
+            CommandRegistry.RegisterAll();
             LoadAllData();
             //UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");

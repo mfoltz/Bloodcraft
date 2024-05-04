@@ -1,4 +1,13 @@
-/*
+
+using Cobalt.Hooks;
+using Cobalt.Systems.Expertise;
+using Cobalt.Systems.WeaponMastery;
+using ProjectM;
+using Stunlock.Core;
+using Unity.Entities;
+using VampireCommandFramework;
+using static Cobalt.Systems.Expertise.WeaponStatsSystem;
+
 namespace Cobalt.Core.Commands
 {
     public static class CombatMasteryCommands
@@ -8,7 +17,7 @@ namespace Cobalt.Core.Commands
         {
             Entity character = ctx.Event.SenderCharacterEntity;
             Equipment equipment = character.Read<Equipment>();
-            PrefabGUID weaponGuid = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
+            PrefabGUID weaponGuid = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
             string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weaponGuid).ToString();
 
             IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
@@ -57,7 +66,7 @@ namespace Cobalt.Core.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            Entity weapon = equipment.WeaponSlotEntity._Entity;
+            Entity weapon = equipment.WeaponSlot.SlotEntity._Entity;
             PrefabGUID prefabGUID;
             if (weapon.Equals(Entity.Null))
             {
@@ -94,7 +103,7 @@ namespace Cobalt.Core.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            PrefabGUID weapon = equipment.WeaponSlotEntity._Entity.Read<PrefabGUID>();
+            PrefabGUID weapon = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
             string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon).ToString();
 
             UnitStatsOverride.RemoveWeaponBonuses(character, weaponType);
@@ -130,4 +139,3 @@ namespace Cobalt.Core.Commands
         }
     }
 }
-*/

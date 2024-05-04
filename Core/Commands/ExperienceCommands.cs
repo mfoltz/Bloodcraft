@@ -1,4 +1,7 @@
-/*
+
+using Cobalt.Systems.Experience;
+using VampireCommandFramework;
+
 namespace Cobalt.Core.Commands
 {
     public static class ExperienceCommands
@@ -38,4 +41,3 @@ namespace Cobalt.Core.Commands
         }
     }
 }
-*/

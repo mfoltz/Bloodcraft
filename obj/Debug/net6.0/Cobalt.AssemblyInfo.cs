@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Cobalt")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b89001cc06cda94c77552109bc5f1ef5aa958c7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b6238882bb482bf0c369482c8f9b35b40f52f5a1")]
 [assembly: System.Reflection.AssemblyProductAttribute("Cobalt")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Cobalt")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

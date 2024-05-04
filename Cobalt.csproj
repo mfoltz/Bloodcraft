@@ -26,7 +26,13 @@
     <PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
     <PackageReference Include="HarmonyX" Version="2.10.1" />
-    <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.10.631470001" />
+    <PackageReference Include="Package" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="VampireCommandFramework">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VRisingBeta\VRising_Server\BepInEx\plugins\VampireCommandFramework.dll</HintPath>
+    </Reference>
   </ItemGroup>
 	<Target Name="CopyDLLsServer" AfterTargets="Build">
 		<Message Text="DLL to V Rising Server" Importance="High" />

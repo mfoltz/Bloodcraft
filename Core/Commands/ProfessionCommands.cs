@@ -1,4 +1,10 @@
-/*
+
+using Cobalt.Systems;
+using ProjectM;
+using ProjectM.Network;
+using Stunlock.Core;
+using VampireCommandFramework;
+
 namespace Cobalt.Core.Commands
 {
     public static class ProfessionCommands
@@ -51,7 +57,7 @@ namespace Cobalt.Core.Commands
             {
                 User user = ctx.Event.User;
 
-                DebugEventsSystem existingSystem = VWorld.Server.GetExistingSystem<DebugEventsSystem>();
+                DebugEventsSystem existingSystem = VWorld.Server.GetExistingSystemManaged<DebugEventsSystem>();
                 buildingCostsFlag = !buildingCostsFlag; // Toggle the flag
 
                 BuildingCostsDebugSetting.Value = buildingCostsFlag;
@@ -62,4 +68,3 @@ namespace Cobalt.Core.Commands
         }
     }
 }
-*/
