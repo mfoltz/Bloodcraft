@@ -17,9 +17,11 @@ using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Hooks
 {
+    
     [HarmonyPatch(typeof(EquipmentSystem), nameof(EquipmentSystem.OnUpdate))]
     public static class EquipmentSystemPatch
     {
+        
         public static void Prefix(EquipmentSystem __instance)
         {
             Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
