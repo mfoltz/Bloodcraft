@@ -14,84 +14,68 @@ using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
 using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
-using static Cobalt.Hooks.EquipItemFromInventorySystemPatch;
-using ProjectM.Gameplay.Systems;
+using static Cobalt.Hooks.BaseStats;
 
 namespace Cobalt.Hooks
 {
-    
-    [HarmonyPatch(typeof(EquipItemFromInventorySystem), nameof(EquipItemFromInventorySystem.OnUpdate))]
-    public static class EquipItemFromInventorySystemPatch
+    [HarmonyPatch]
+    public class EquipmentPatch
     {
-        public static void Prefix(EquipItemFromInventorySystem __instance)
+        [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
+        [HarmonyPrefix]
+        private static void EquipItemSystemPrefix(EquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("EquipItemFromInventorySystem Prefix called...");
-            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Unity.Collections.Allocator.Temp);
+            Plugin.Log.LogInfo("EquipItemSystem Prefix...");
+            NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
+            HandleEquipmentEvent(entities);
+        }
+
+        [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
+        [HarmonyPrefix]
+        private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
+        {
+            Plugin.Log.LogInfo("UnEquipItemSystem Prefix...");
+            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+            HandleEquipmentEvent(entities);
+        }
+
+        private static void HandleEquipmentEvent(NativeArray<Entity> entities)
+        {
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    entity.LogComponentTypes();
+                    if (entity.Has<EquipItemEvent>())
+                    {
+                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
+                        Entity character = fromCharacter.Character;
+
+                        GearOverride.SetLevel(character);
+                        UnitStatsOverride.UpdatePlayerStats(character);
+                    }
+                    else if (entity.Has<UnequipItemEvent>())
+                    {
+                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
+                        Entity character = fromCharacter.Character;
+
+                        GearOverride.SetLevel(character);
+                        UnitStatsOverride.UpdatePlayerStats(character);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Exited HandleEquipment early: {e}");
             }
             finally
             {
                 entities.Dispose();
             }
-
         }
-        private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
-        {
-            { WeaponStatType.MaxHealth, 125f },
-            { WeaponStatType.AttackSpeed, 0f },
-            { WeaponStatType.PhysicalPower, 10f },
-            { WeaponStatType.SpellPower, 10f },
-            { WeaponStatType.PhysicalCritChance, 0.05f },
-            { WeaponStatType.PhysicalCritDamage, 1.5f },
-            { WeaponStatType.SpellCritChance, 0.05f },
-            { WeaponStatType.SpellCritDamage, 1.5f }
-        };
-
-        public static Dictionary<WeaponStatType, float> BaseWeaponStats
-        {
-            get => baseWeaponStats;
-            set => baseWeaponStats = value;
-        }
-
-        private static Dictionary<BloodStatType, float> baseBloodStats = new()
-        {
-            { BloodStatType.SunResistance, 0f },
-            { BloodStatType.FireResistance, 0f },
-            { BloodStatType.HolyResistance, 0f },
-            { BloodStatType.SilverResistance, 0f },
-            { BloodStatType.PassiveHealthRegen, 0.01f }
-        };
-
-        public static Dictionary<BloodStatType, float> BaseBloodStats
-        {
-            get => baseBloodStats;
-            set => baseBloodStats = value;
-        }
-
-        private static Dictionary<PrestigeStatType, float> basePrestigeStats = new()
-        {
-            { PrestigeStatType.PhysicalResistance, 0f },
-            { PrestigeStatType.SpellResistance, 0f },
-            { PrestigeStatType.MovementSpeed, 0f }
-        };
-
-        public static Dictionary<PrestigeStatType, float> BasePrestigeStats
-        {
-            get => basePrestigeStats;
-            set => basePrestigeStats = value;
-        }
-
-        
     }
 
     public static class UnitStatsOverride
     {
-       
         private static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
@@ -431,6 +415,55 @@ namespace Cobalt.Hooks
                 DataStructures.SavePlayerEquippedWeapon();
             }
             ApplyBloodBonuses(character);
+        }
+    }
+
+    public static class BaseStats
+    {
+        private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
+        {
+            { WeaponStatType.MaxHealth, 125f },
+            { WeaponStatType.AttackSpeed, 0f },
+            { WeaponStatType.PhysicalPower, 10f },
+            { WeaponStatType.SpellPower, 10f },
+            { WeaponStatType.PhysicalCritChance, 0.05f },
+            { WeaponStatType.PhysicalCritDamage, 1.5f },
+            { WeaponStatType.SpellCritChance, 0.05f },
+            { WeaponStatType.SpellCritDamage, 1.5f }
+        };
+
+        public static Dictionary<WeaponStatType, float> BaseWeaponStats
+        {
+            get => baseWeaponStats;
+            set => baseWeaponStats = value;
+        }
+
+        private static Dictionary<BloodStatType, float> baseBloodStats = new()
+        {
+            { BloodStatType.SunResistance, 0f },
+            { BloodStatType.FireResistance, 0f },
+            { BloodStatType.HolyResistance, 0f },
+            { BloodStatType.SilverResistance, 0f },
+            { BloodStatType.PassiveHealthRegen, 0.01f }
+        };
+
+        public static Dictionary<BloodStatType, float> BaseBloodStats
+        {
+            get => baseBloodStats;
+            set => baseBloodStats = value;
+        }
+
+        private static Dictionary<PrestigeStatType, float> basePrestigeStats = new()
+        {
+            { PrestigeStatType.PhysicalResistance, 0f },
+            { PrestigeStatType.SpellResistance, 0f },
+            { PrestigeStatType.MovementSpeed, 0f }
+        };
+
+        public static Dictionary<PrestigeStatType, float> BasePrestigeStats
+        {
+            get => basePrestigeStats;
+            set => basePrestigeStats = value;
         }
     }
 

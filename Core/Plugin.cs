@@ -8,7 +8,7 @@ using System.Reflection;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
-using static Cobalt.Hooks.EquipItemFromInventorySystemPatch;
+using static Cobalt.Hooks.BaseStats;
 
 namespace Cobalt.Core
 {

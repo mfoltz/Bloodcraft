@@ -125,6 +125,7 @@ namespace Cobalt.Systems
                                 }
                             }
                             break;
+
                         case DropTriggerType.OnDeath:
                             dropTable = prefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
                             dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
@@ -137,7 +138,6 @@ namespace Cobalt.Systems
                                 {
                                     Plugin.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                                 }
-
                             }
                             break;
                     }
