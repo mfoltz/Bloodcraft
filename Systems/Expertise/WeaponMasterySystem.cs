@@ -4,14 +4,12 @@ using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using static Cobalt.Systems.Weapon.WeaponStatsSystem.WeaponStatManager;
-using static Cobalt.Systems.Weapon.WeaponStatsSystem;
 
 namespace Cobalt.Systems.Weapon
 {
     public class WeaponMasterySystem
     {
         private static readonly float CombatMasteryMultiplier = 1; // mastery points multiplier from normal units
-        private static readonly float UnitMultiplier = 6f; // exp gain from normal units
         public static readonly int MaxCombatMasteryLevel = 99; // maximum level
         private static readonly float VBloodMultiplier = 15; // mastery points multiplier from VBlood units
         private static readonly float CombatMasteryConstant = 0.1f; // constant for calculating level from xp
@@ -40,8 +38,14 @@ namespace Cobalt.Systems.Weapon
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
-            PrefabGUID weaponPrefab = entityManager.GetComponentData<Equipment>(Killer).WeaponSlotEntity._Entity.Read<PrefabGUID>();
-            string weaponType = GetWeaponTypeFromPrefab(weaponPrefab).ToString();
+            Entity weapon = entityManager.GetComponentData<Equipment>(Killer).WeaponSlotEntity._Entity;
+            PrefabGUID prefabGUID = new(0);
+            if (!weapon.Equals(Entity.Null))
+            {
+                prefabGUID = entityManager.GetComponentData<Equipment>(Killer).WeaponSlotEntity._Entity.Read<PrefabGUID>();
+
+            }
+            string weaponType = GetWeaponTypeFromPrefab(prefabGUID).ToString();
 
             if (entityManager.HasComponent<UnitStats>(Victim))
             {
@@ -76,10 +80,11 @@ namespace Cobalt.Systems.Weapon
 
         private static float CalculateMasteryValue(UnitStats VictimStats, bool isVBlood)
         {
-            float CombatMasteryValue = (VictimStats.SpellPower + VictimStats.PhysicalPower) / UnitMultiplier;
+            float CombatMasteryValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
             if (isVBlood)
             {
                 CombatMasteryValue *= VBloodMultiplier;
+
             }
             return CombatMasteryValue * CombatMasteryMultiplier;
         }

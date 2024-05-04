@@ -365,7 +365,7 @@ namespace Cobalt.Core
 
         public static void LoadPlayerUnarmedMastery() => LoadData(ref playerUnarmedMastery, "UnarmedMastery");
 
-        public static void LoadPlayerBloodMastery() => LoadData(ref playerSanguimancy, "Sanguimancy");
+        public static void LoadPlayerSanguimancy() => LoadData(ref playerSanguimancy, "Sanguimancy");
 
         public static void LoadPlayerEquippedWeapon() => LoadData(ref playerEquippedWeapon, "EquippedWeapon");
 
@@ -436,7 +436,7 @@ namespace Cobalt.Core
 
         public static void SavePlayerUnarmedMastery() => SaveData(PlayerUnarmedMastery, "UnarmedMastery");
 
-        public static void SavePlayerBloodMastery() => SaveData(PlayerSanguimancy, "Sanguimancy");
+        public static void SavePlayerSanguimancy() => SaveData(PlayerSanguimancy, "Sanguimancy");
 
         public static void SavePlayerEquippedWeapon() => SaveData(PlayerEquippedWeapon, "EquippedWeapon");
 

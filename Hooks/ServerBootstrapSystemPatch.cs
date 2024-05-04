@@ -81,7 +81,7 @@ namespace Cobalt.Hooks
             if (!DataStructures.PlayerSanguimancy.ContainsKey(steamId))
             {
                 DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                DataStructures.SavePlayerBloodMastery();
+                DataStructures.SavePlayerSanguimancy();
             }
             if (!DataStructures.PlayerSwordMastery.ContainsKey(steamId))
             {
@@ -137,6 +137,11 @@ namespace Cobalt.Hooks
             {
                 DataStructures.PlayerWhipMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 DataStructures.SavePlayerWhipMastery();
+            }
+            if (!DataStructures.PlayerUnarmedMastery.ContainsKey(steamId))
+            {
+                DataStructures.PlayerUnarmedMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                DataStructures.SavePlayerUnarmedMastery();
             }
             /*
             if (!DataStructures.PlayerWeaponStats.ContainsKey(steamId))

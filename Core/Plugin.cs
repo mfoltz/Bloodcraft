@@ -128,8 +128,7 @@ namespace Cobalt.Core
             DataStructures.SavePlayerLongbowMastery,
             DataStructures.SavePlayerWhipMastery,
             DataStructures.SavePlayerUnarmedMastery,
-            DataStructures.SavePlayerBloodMastery,
-            //DataStructures.SavePlayerWeaponStats,
+            DataStructures.SavePlayerSanguimancy,
             DataStructures.SavePlayerWeaponChoices,
             DataStructures.SavePlayerBloodChoices
         ];
@@ -146,7 +145,7 @@ namespace Cobalt.Core
             DataStructures.LoadPlayerJewelcrafting,
             DataStructures.LoadPlayerAlchemy,
             DataStructures.LoadPlayerHarvesting,
-            DataStructures.LoadPlayerBloodMastery,
+            DataStructures.LoadPlayerSanguimancy,
             DataStructures.LoadPlayerSwordMastery,
             DataStructures.LoadPlayerAxeMastery,
             DataStructures.LoadPlayerMaceMastery,
@@ -159,7 +158,6 @@ namespace Cobalt.Core
             DataStructures.LoadPlayerLongbowMastery,
             DataStructures.LoadPlayerWhipMastery,
             DataStructures.LoadPlayerUnarmedMastery,
-            //DataStructures.LoadPlayerWeaponStats,
             DataStructures.LoadPlayerWeaponChoices,
             DataStructures.LoadPlayerBloodStats
         ];

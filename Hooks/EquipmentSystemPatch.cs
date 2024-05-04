@@ -33,6 +33,7 @@ namespace Cobalt.Hooks
                         GearOverride.SetLevel(character);
                         try
                         {
+                            Plugin.Log.LogInfo("Updating player stats...");
                             UnitStatsOverride.UpdatePlayerStats(character);
                         }
                         catch (System.Exception e)

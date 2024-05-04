@@ -76,7 +76,7 @@ namespace Cobalt.Systems.Bloodline
                 DataStructures.PlayerSanguimancy.Add(SteamID, newMastery);
             }
 
-            DataStructures.SavePlayerBloodMastery();
+            DataStructures.SavePlayerSanguimancy();
             NotifyPlayer(entityManager, user, Value, leveledUp, newLevel);
         }
 

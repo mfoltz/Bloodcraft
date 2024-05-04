@@ -8,8 +8,8 @@ namespace Cobalt.Systems.Experience
 {
     public class ExperienceSystem
     {
-        public static readonly float EXPMultiplier = 3; // multipler for normal units
-        public static readonly float VBloodMultiplier = 10; // multiplier for VBlood units
+        public static readonly float EXPMultiplier = 5; // multipler for normal units
+        public static readonly float VBloodMultiplier = 15; // multiplier for VBlood units
         public static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
         public static readonly int EXPPower = 2; // power for calculating level from xp
         public static readonly int MaxLevel = 90; // maximum level
