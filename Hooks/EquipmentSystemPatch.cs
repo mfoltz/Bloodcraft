@@ -5,14 +5,15 @@ using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Cobalt.Hooks.EquipmentSystemPatch;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
+using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
-using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
-using static Cobalt.Hooks.EquipmentSystemPatch;
 
 namespace Cobalt.Hooks
 {
@@ -68,7 +69,7 @@ namespace Cobalt.Hooks
         public static void Prefix(EquipmentSystem __instance)
         {
             //Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob1_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+            NativeArray<Entity> entities = __instance.__query_1269768774_0.ToEntityArray(Unity.Collections.Allocator.Temp);
             try
             {
                 foreach (var entity in entities)
@@ -123,10 +124,6 @@ namespace Cobalt.Hooks
                     {
                         case WeaponStatType.MaxHealth:
                             health.MaxHealth._Value += scaledBonus;
-                            break;
-
-                        case WeaponStatType.AttackSpeed:
-                            stats.PrimaryAttackSpeed._Value += scaledBonus;
                             break;
 
                         case WeaponStatType.PhysicalPower:
@@ -185,10 +182,6 @@ namespace Cobalt.Hooks
                             health.MaxHealth._Value = BaseWeaponStats[WeaponStatType.MaxHealth];
                             break;
 
-                        case WeaponStatType.AttackSpeed:
-                            stats.PrimaryAttackSpeed._Value = BaseWeaponStats[WeaponStatType.AttackSpeed];
-                            break;
-
                         case WeaponStatType.PhysicalPower:
                             stats.PhysicalPower._Value = BaseWeaponStats[WeaponStatType.PhysicalPower];
                             break;
@@ -237,7 +230,7 @@ namespace Cobalt.Hooks
                 {
                     BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
-                    
+
                     Plugin.Log.LogInfo($"Applying blood stats: {bonus} | {scaledBonus}");
                     switch (bloodStatType)
                     {
@@ -416,7 +409,7 @@ namespace Cobalt.Hooks
         public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             // Assuming an implementation to retrieve the current weapon type
-            Entity weapon = character.Read<Equipment>().WeaponSlotEntity._Entity;
+            Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
             if (weapon.Equals(Entity.Null)) return WeaponMasterySystem.WeaponType.Unarmed;
             return WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
@@ -427,7 +420,7 @@ namespace Cobalt.Hooks
 
             // Get the current weapon type
             string currentWeapon = GetCurrentWeaponType(character).ToString();
-            Plugin.Log.LogInfo($"{currentWeapon}");
+            //Plugin.Log.LogInfo($"{currentWeapon}");
             // Initialize player's weapon dictionary if it doesn't exist
 
             var equippedWeapons = DataStructures.PlayerEquippedWeapon[steamId];
@@ -482,43 +475,43 @@ namespace Cobalt.Hooks
         public static void RemoveItemLevels(Equipment equipment)
         {
             // Reset level for Armor Chest Slot
-            if (!equipment.ArmorChestSlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorChestSlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
+            if (!equipment.ArmorChestSlot.SlotEntity.Equals(Entity.Null) && !equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
-                ArmorLevelSource chestLevel = equipment.ArmorChestSlotEntity._Entity.Read<ArmorLevelSource>();
+                ArmorLevelSource chestLevel = equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 chestLevel.Level = 0f;
-                equipment.ArmorChestSlotEntity._Entity.Write(chestLevel);
+                equipment.ArmorChestSlot.SlotEntity._Entity.Write(chestLevel);
             }
 
             // Reset level for Armor Footgear Slot
-            if (!equipment.ArmorFootgearSlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorFootgearSlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
+            if (!equipment.ArmorFootgearSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorFootgearSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
-                ArmorLevelSource footgearLevel = equipment.ArmorFootgearSlotEntity._Entity.Read<ArmorLevelSource>();
+                ArmorLevelSource footgearLevel = equipment.ArmorFootgearSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 footgearLevel.Level = 0f;
-                equipment.ArmorFootgearSlotEntity._Entity.Write(footgearLevel);
+                equipment.ArmorFootgearSlot.SlotEntity._Entity.Write(footgearLevel);
             }
 
             // Reset level for Armor Gloves Slot
-            if (!equipment.ArmorGlovesSlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorGlovesSlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
+            if (!equipment.ArmorGlovesSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorGlovesSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
-                ArmorLevelSource glovesLevel = equipment.ArmorGlovesSlotEntity._Entity.Read<ArmorLevelSource>();
+                ArmorLevelSource glovesLevel = equipment.ArmorGlovesSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 glovesLevel.Level = 0f;
-                equipment.ArmorGlovesSlotEntity._Entity.Write(glovesLevel);
+                equipment.ArmorGlovesSlot.SlotEntity._Entity.Write(glovesLevel);
             }
 
             // Reset level for Armor Legs Slot
-            if (!equipment.ArmorLegsSlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorLegsSlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
+            if (!equipment.ArmorLegsSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorLegsSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
-                ArmorLevelSource legsLevel = equipment.ArmorLegsSlotEntity._Entity.Read<ArmorLevelSource>();
+                ArmorLevelSource legsLevel = equipment.ArmorLegsSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 legsLevel.Level = 0f;
-                equipment.ArmorLegsSlotEntity._Entity.Write(legsLevel);
+                equipment.ArmorLegsSlot.SlotEntity._Entity.Write(legsLevel);
             }
 
             // Reset level for Grimoire Slot (Spell Level)
-            if (!equipment.GrimoireSlotEntity._Entity.Equals(Entity.Null) && !equipment.GrimoireSlotEntity._Entity.Read<SpellLevelSource>().Level.Equals(0f))
+            if (!equipment.GrimoireSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>().Level.Equals(0f))
             {
-                SpellLevelSource spellLevel = equipment.GrimoireSlotEntity._Entity.Read<SpellLevelSource>();
+                SpellLevelSource spellLevel = equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>();
                 spellLevel.Level = 0f;
-                equipment.GrimoireSlotEntity._Entity.Write(spellLevel);
+                equipment.GrimoireSlot.SlotEntity._Entity.Write(spellLevel);
             }
         }
     }

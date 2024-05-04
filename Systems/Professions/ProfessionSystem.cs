@@ -1,7 +1,8 @@
-﻿using Bloodstone.API;
-using Cobalt.Core;
+﻿using Cobalt.Core;
 using ProjectM;
 using ProjectM.Scripting;
+using ProjectM.Shared;
+using Stunlock.Core;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
@@ -45,7 +46,7 @@ namespace Cobalt.Systems
             {
                 ProfessionValue = Victim.Read<UnitLevel>().Level;
             }
-            Plugin.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {prefabGUID.LookupName()}");
+            //Plugin.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {Victim.Read<PrefabGUID>().LookupName()}");
             if (ProfessionValue.Equals(0))
             {
                 ProfessionValue = 10;
@@ -64,7 +65,7 @@ namespace Cobalt.Systems
 
                 SetProfession(user, SteamID, ProfessionValue, handler);
                 // retrieve level and award bonus drop table item to inventory every 10 levels?
-                GiveProfessionBonus(prefabGUID, Killer, user, SteamID, handler);
+                GiveProfessionBonus(Victim.Read<PrefabGUID>(), Killer, user, SteamID, handler);
             }
             else
             {
@@ -72,30 +73,71 @@ namespace Cobalt.Systems
             }
         }
 
-        public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer,User user, ulong SteamID, IProfessionHandler handler)
+        public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer, User user, ulong SteamID, IProfessionHandler handler)
         {
             EntityManager entityManager = VWorld.Server.EntityManager;
-            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
-            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
+            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
             Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             int level = GetLevel(SteamID, handler);
             if (!prefabEntity.Has<DropTableBuffer>())
             {
-                Plugin.Log.LogError($"No DropTableBuffer found on {prefab.LookupName()}...");
+                if (!prefabEntity.Has<DropTableDataBuffer>())
+                {
+                    Plugin.Log.LogInfo("No DropTableDataBuffer or DropTableBuffer found on entity...");
+                }
+                else
+                {
+                    //process fish drop table here since prefab enters as a DropTableGuid
+                    var dropTableDataBuffer = prefabEntity.ReadBuffer<DropTableDataBuffer>();
+                    foreach (var dropTableData in dropTableDataBuffer)
+                    {
+                        Plugin.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
+                        prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
+                        var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
+                        foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
+                        {
+                            Plugin.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
+                        }
+                    }
+                }
             }
             else
             {
-                var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();// for woodcutting more wood, for mining more ore chances for gems, harvesting greater chance for seeds?
-                // for level 10 wc 10% more wood, for level 10 mining drop at least 1 of the on destroy items, for level 10 harvesting 1 seed if present
+                var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();
                 foreach (var drop in dropTableBuffer)
                 {
                     Plugin.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
                     switch (drop.DropTrigger)
                     {
                         case DropTriggerType.YieldResourceOnDamageTaken:
-                            if (serverGameManager.TryAddInventoryItem(Killer, drop.DropTableGuid, level))
+                            Entity dropTable = prefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
+                            var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
+                            foreach (var dropTableData in dropTableDataBuffer)
                             {
-                                ServerChatUtils.SendSystemMessageToClient(entityManager, user,$"You received bonus {drop.DropTableGuid.LookupName()} x{level} from {handler.GetProfessionName()}");
+                                if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
+                                {
+                                    if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, level))
+                                    {
+                                        ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received {dropTableData.ItemGuid.LookupName()}x{level} from {handler.GetProfessionName()}");
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        case DropTriggerType.OnDeath:
+                            dropTable = prefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
+                            dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
+                            foreach (var dropTableData in dropTableDataBuffer)
+                            {
+                                prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
+                                //prefabEntity.LogComponentTypes();
+                                var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
+                                foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
+                                {
+                                    Plugin.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
+                                }
+
                             }
                             break;
                     }

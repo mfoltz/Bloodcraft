@@ -4,6 +4,8 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Shared;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -18,7 +20,7 @@ public class FishingSystemPatch
 
         public static void Prefix(CreateGameplayEventOnDestroySystem __instance)
         {
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
+            NativeArray<Entity> entities = __instance.__query_1297357609_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -55,7 +57,7 @@ public class FishingSystemPatch
                             else
                             {
                                 toProcess = dropTableBuffer[0].DropTableGuid;
-                                //Plugin.Log.LogInfo($"{toProcess.LookupName()}");
+                                Plugin.Log.LogInfo($"{toProcess.LookupName()}");
                             }
                         }
                     }
@@ -65,6 +67,7 @@ public class FishingSystemPatch
                     if (handler != null)
                     {
                         ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
+                        ProfessionSystem.GiveProfessionBonus(toProcess, target, user, steamId, handler);
                     }
                 }
             }

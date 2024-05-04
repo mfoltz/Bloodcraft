@@ -1,21 +1,19 @@
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using Bloodstone.API;
 using Cobalt.Hooks;
 using HarmonyLib;
 using ProjectM;
 using System.Reflection;
 using Unity.Entities;
-using VampireCommandFramework;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Core
 {
-    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    [BepInDependency("gg.deca.Bloodstone")]
-    [BepInDependency("gg.deca.VampireCommandFramework")]
-    public class Plugin : BasePlugin, IRunOnInitialized
+    [BepInPlugin(Cobalt.MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+    //[BepInDependency("gg.deca.Bloodstone")]
+    //[BepInDependency("gg.deca.VampireCommandFramework")]
+    public class Plugin : BasePlugin
     {
         private Harmony _harmony;
         internal static Plugin Instance { get; private set; }
@@ -61,18 +59,17 @@ namespace Cobalt.Core
             Logger = base.Log;
 
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
-            CommandRegistry.RegisterAll();
             InitConfig();
             ServerEventsPatches.OnGameDataInitialized += GameDataOnInitialize;
             LoadAllData();
             //UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
-            UpdateBaseStats();
+
         }
 
         private static void UpdateBaseStats()
         {
-            VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
+            VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
             EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
             EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
             EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
@@ -178,6 +175,7 @@ namespace Cobalt.Core
 
         public void OnGameInitialized()
         {
+            UpdateBaseStats();
         }
     }
 }

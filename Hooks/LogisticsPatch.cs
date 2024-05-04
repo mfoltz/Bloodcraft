@@ -1,4 +1,3 @@
-using Bloodstone.API;
 using Cobalt.Core;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
@@ -6,6 +5,7 @@ using ProjectM;
 using ProjectM.CastleBuilding;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -19,9 +19,9 @@ public class LogisticsPatches
         public static void Prefix(UpdateRefiningSystem __instance)
         {
             EntityManager entityManager = VWorld.Server.EntityManager;
-            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
-            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
-            GameDataSystem gameDataSystem = VWorld.Server.GetExistingSystem<GameDataSystem>();
+            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            GameDataSystem gameDataSystem = VWorld.Server.GetExistingSystemManaged<GameDataSystem>();
 
             EntityQuery stationsQuery = entityManager.CreateEntityQuery(LogisticsUtilities.RefinementStationQuery);
             NativeArray<Entity> stations = stationsQuery.ToEntityArray(Allocator.TempJob);
@@ -35,7 +35,7 @@ public class LogisticsPatches
                     if (!entityManager.Exists(station) || !station.Has<Refinementstation>() || !station.Read<NameableInteractable>().Name.ToString().ToLower().Contains("receiver")) continue;
 
                     var refinementStation = station.Read<Refinementstation>();
-                    if (!refinementStation.Active) continue;
+                    if (!refinementStation.IsWorking) continue;
 
                     var recipesBuffer = station.ReadBuffer<RefinementstationRecipesBuffer>();
                     foreach (var recipe in recipesBuffer)
@@ -72,7 +72,7 @@ public class LogisticsPatches
                     if (!entityManager.Exists(provider) || !provider.Has<Refinementstation>() || !provider.Read<NameableInteractable>().Name.ToString().ToLower().Contains("provider")) continue;
 
                     var refinementStation = provider.Read<Refinementstation>();
-                    if (!refinementStation.Active || !refinementStation.IsWorking) continue;
+                    if (!refinementStation.IsWorking) continue;
 
                     Entity outputInventory = refinementStation.OutputInventoryEntity._Entity;
                     foreach (var needKey in needs.Keys)
@@ -168,8 +168,8 @@ public class LogisticsPatches
             else
             {
                 Plugin.Log.LogInfo($"Inventory Items: {buffer.Length.ToString()}");
-                GameDataSystem gameDataSystem = VWorld.Server.GetExistingSystem<GameDataSystem>();
-                ServerGameManager serverGameManager = VWorld.Server.GetExistingSystem<ServerScriptMapper>()._ServerGameManager;
+                GameDataSystem gameDataSystem = VWorld.Server.GetExistingSystemManaged<GameDataSystem>();
+                ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
                 EntityManager entityManager = VWorld.Server.EntityManager;
                 if (InventoryUtilities.TryGetInventoryEntity(entityManager, servant, out Entity inventory))
                 {

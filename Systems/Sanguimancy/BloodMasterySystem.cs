@@ -1,11 +1,8 @@
-﻿using Bloodstone.API;
-using Cobalt.Core;
+﻿using Cobalt.Core;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
-using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
 namespace Cobalt.Systems.Bloodline
 {

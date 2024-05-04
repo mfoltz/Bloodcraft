@@ -1,21 +1,12 @@
-using Bloodstone.API;
 using Cobalt.Core;
 using Cobalt.Systems;
 using HarmonyLib;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.CastleBuilding;
-using ProjectM.Gameplay;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Scripting;
-using ProjectM.Shared.Systems;
-using ProjectM.UI;
-using System.Reflection.Metadata.Ecma335;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Cobalt.Systems.ProfessionUtilities;
-using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks;
@@ -26,12 +17,12 @@ public class CraftingPatch
     public static class UpdateCraftingSystemPatch
     {
         private static readonly float BaseCraftingXP = 50;
-        private static readonly float craftRate = VWorld.Server.GetExistingSystem<ServerGameSettingsSystem>()._Settings.CraftRateModifier;
+        private static readonly float craftRate = VWorld.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.CraftRateModifier;
 
         public static void Prefix(UpdateCraftingSystem __instance)
         {
-            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
+            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            NativeArray<Entity> entities = __instance.__query_1831452858_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -91,7 +82,7 @@ public class CraftingPatch
     {
         public static void Prefix(StartCraftingSystem __instance)
         {
-            NativeArray<Entity> entities = __instance.__StartCraftingJob_entityQuery.ToEntityArray(Allocator.Temp);
+            NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -129,7 +120,7 @@ public class CraftingPatch
     {
         public static void Prefix(StopCraftingSystem __instance)
         {
-            NativeArray<Entity> entities = __instance.__StopCraftingJob_entityQuery.ToEntityArray(Allocator.Temp);
+            NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);// double check this
             try
             {
                 foreach (Entity entity in entities)

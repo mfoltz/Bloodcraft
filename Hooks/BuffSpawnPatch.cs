@@ -1,11 +1,9 @@
-﻿using Bloodstone.API;
-using Cobalt.Core;
-using Cobalt.Hooks;
+﻿using Cobalt.Core;
 using HarmonyLib;
 using ProjectM;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine.Jobs;
 
 namespace Lapis.Hooks
 {
@@ -17,7 +15,7 @@ namespace Lapis.Hooks
         [HarmonyPostfix]
         private static void OnUpdatePostfix(BuffSystem_Spawn_Server __instance)
         {
-            NativeArray<Entity> entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
+            NativeArray<Entity> entities = __instance.__query_401358634_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -32,6 +30,10 @@ namespace Lapis.Hooks
                         if (entity.Read<PrefabGUID>().Equals(unarmedBuff))
                         {
                             Cobalt.Hooks.UnitStatsOverride.UpdatePlayerStats(buff.Target);
+                        }
+                        else
+                        {
+                            //Plugin.Log.LogInfo("Not unarmed...");
                         }
                     }
                 }

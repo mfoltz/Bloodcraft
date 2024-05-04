@@ -2,6 +2,7 @@
 using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using ProjectM.Network;
+using Stunlock.Core;
 using Unity.Entities;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
@@ -38,11 +39,11 @@ namespace Cobalt.Systems.Expertise
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
-            Entity weapon = entityManager.GetComponentData<Equipment>(Killer).WeaponSlotEntity._Entity;
+            Entity weapon = entityManager.GetComponentData<Equipment>(Killer).WeaponSlot.SlotEntity._Entity;
             PrefabGUID prefabGUID = new(0);
             if (!weapon.Equals(Entity.Null))
             {
-                prefabGUID = entityManager.GetComponentData<Equipment>(Killer).WeaponSlotEntity._Entity.Read<PrefabGUID>();
+                prefabGUID = entityManager.GetComponentData<Equipment>(Killer).WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
 
             }
             string weaponType = GetWeaponTypeFromPrefab(prefabGUID).ToString();

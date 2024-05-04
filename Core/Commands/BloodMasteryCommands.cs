@@ -1,11 +1,4 @@
-using Cobalt.Hooks;
-using Cobalt.Systems.Bloodline;
-using Steamworks;
-using Unity.Entities;
-using VampireCommandFramework;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem;
-using static Cobalt.Systems.Expertise.WeaponStatsSystem;
-
+/*
 namespace Cobalt.Core.Commands
 {
     public static class BloodMasteryCommands
@@ -82,3 +75,4 @@ namespace Cobalt.Core.Commands
         }
     }
 }
+*/

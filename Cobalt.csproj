@@ -26,13 +26,11 @@
     <PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
     <PackageReference Include="HarmonyX" Version="2.10.1" />
-    <PackageReference Include="VRising.Bloodstone" Version="0.1.6" />
-    <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.5.57575090" />
-    <PackageReference Include="VRising.VampireCommandFramework" Version="0.8.2" />
+    <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.10.631470001" />
   </ItemGroup>
 	<Target Name="CopyDLLsServer" AfterTargets="Build">
 		<Message Text="DLL to V Rising Server" Importance="High" />
-		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />
+		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingBeta\VRising_Server\BepInEx\plugins" />
 		<Message Text="DLL Server Copied OK" Importance="High" />
 	</Target>
 	

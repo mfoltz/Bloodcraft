@@ -13,9 +13,7 @@
           "BepInEx.Unity.Common": "6.0.0-be.668",
           "BepInEx.Unity.IL2CPP": "6.0.0-be.668",
           "HarmonyX": "2.10.1",
-          "VRising.Bloodstone": "0.1.6",
-          "VRising.Unhollowed.Client": "0.6.5.57575090",
-          "VRising.VampireCommandFramework": "0.8.2"
+          "VRising.Unhollowed.Client": "0.6.10.631470001"
         },
         "runtime": {
           "Cobalt.dll": {}
@@ -124,7 +122,6 @@
           }
         }
       },
-      "Fody/6.6.2": {},
       "HarmonyX/2.10.1": {
         "dependencies": {
           "MonoMod.RuntimeDetour": "22.5.1.1",
@@ -833,23 +830,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "VRising.Bloodstone/0.1.6": {
-        "dependencies": {
-          "BepInEx.PluginInfoProps": "2.1.0",
-          "BepInEx.Unity.IL2CPP": "6.0.0-be.668",
-          "Fody": "6.6.2",
-          "Iced": "1.18.0",
-          "System.Text.Json": "6.0.7",
-          "VRising.Unhollowed.Client": "0.6.5.57575090"
-        },
-        "runtime": {
-          "lib/net6.0/Bloodstone.dll": {
-            "assemblyVersion": "0.1.6.0",
-            "fileVersion": "0.1.6.0"
-          }
-        }
-      },
-      "VRising.Unhollowed.Client/0.6.5.57575090": {
+      "VRising.Unhollowed.Client/0.6.10.631470001": {
         "runtime": {
           "lib/net6.0/Backtrace.Unity.dll": {
             "assemblyVersion": "0.0.0.0",
@@ -1476,14 +1457,6 @@
             "fileVersion": "0.0.0.0"
           }
         }
-      },
-      "VRising.VampireCommandFramework/0.8.2": {
-        "runtime": {
-          "lib/net6.0/VampireCommandFramework.dll": {
-            "assemblyVersion": "0.0.999.0",
-            "fileVersion": "0.0.999.0"
-          }
-        }
       }
     }
   },
@@ -1562,13 +1535,6 @@
       "sha512": "sha512-YnZEbRGr0nG+N3G8WbRQ4Lkg8dTD3oso9iJlCVBmyhEyhLyqs+drBs1kWQbQqFPnb9mi/RJ++R9bPb+L3HF03Q==",
       "path": "disarm/2022.1.0-master.26",
       "hashPath": "disarm.2022.1.0-master.26.nupkg.sha512"
-    },
-    "Fody/6.6.2": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-/PISk/t+lnNm0tiAc3xer3wp7HVnDCkX7gyTzljbC9kygUBJpYU2V1P/MjJeu/C6JhR40QXr9XdoxvqRmaHlhg==",
-      "path": "fody/6.6.2",
-      "hashPath": "fody.6.6.2.nupkg.sha512"
     },
     "HarmonyX/2.10.1": {
       "type": "package",
@@ -2116,26 +2082,12 @@
       "path": "system.threading.tasks/4.3.0",
       "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
     },
-    "VRising.Bloodstone/0.1.6": {
+    "VRising.Unhollowed.Client/0.6.10.631470001": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-PKiq6w0scM//yDijGQaiXHjjO1HDOJzabRAbE06e64b6D2dVgvgVkdtKK1iBAx/72MnSrad9iJtPOGAvpyo42A==",
-      "path": "vrising.bloodstone/0.1.6",
-      "hashPath": "vrising.bloodstone.0.1.6.nupkg.sha512"
-    },
-    "VRising.Unhollowed.Client/0.6.5.57575090": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-/u5glepga5dXP5wPDqL4R+93ENLQba70vMezo4woOg++GyZwMfNNjR60aen9jNz/2qMOp/6EnN6IlMlf3Xju7Q==",
-      "path": "vrising.unhollowed.client/0.6.5.57575090",
-      "hashPath": "vrising.unhollowed.client.0.6.5.57575090.nupkg.sha512"
-    },
-    "VRising.VampireCommandFramework/0.8.2": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-VXLAtMTaTfGdcTC0/a9KZzYhMqRmrCLNAb5LCuT8GKaR6SlkU95a7eDEvlsR9cp5aHKPw3eu44uVZN3oH+qOtw==",
-      "path": "vrising.vampirecommandframework/0.8.2",
-      "hashPath": "vrising.vampirecommandframework.0.8.2.nupkg.sha512"
+      "sha512": "sha512-34kuvmnqOCINmXXGzFx9lv8y0tV+WXAQPnbr8ColglV/4GktI0vmzS1qQDs4Cq9ALm7yLGnJA2E77q/i6IRRbw==",
+      "path": "vrising.unhollowed.client/0.6.10.631470001",
+      "hashPath": "vrising.unhollowed.client.0.6.10.631470001.nupkg.sha512"
     }
   }
 }

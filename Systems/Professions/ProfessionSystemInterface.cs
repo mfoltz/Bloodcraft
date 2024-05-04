@@ -1,5 +1,6 @@
 ﻿using Cobalt.Core;
 using ProjectM;
+using Stunlock.Core;
 
 namespace Cobalt.Systems
 {
@@ -58,7 +59,7 @@ namespace Cobalt.Systems
                         return new BlacksmithingHandler();
                     if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag"))
                         return new TailoringHandler();
-                    if (itemTypeName.Contains("fishing"))
+                    if (itemTypeName.Contains("fish"))
                         return new FishingHandler();
                     if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask"))
                         return new AlchemyHandler();

@@ -1,11 +1,4 @@
-using Bloodstone.API;
-using ProjectM.Network;
-using ProjectM;
-using VampireCommandFramework;
-using static Cobalt.Systems.Expertise.WeaponMasterySystem;
-using Unity.Entities;
-using Cobalt.Systems;
-
+/*
 namespace Cobalt.Core.Commands
 {
     public static class ProfessionCommands
@@ -69,3 +62,4 @@ namespace Cobalt.Core.Commands
         }
     }
 }
+*/

@@ -1,7 +1,6 @@
 ﻿using ProjectM;
+using Stunlock.Core;
 using System.Text.Json;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem;
-using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 
 namespace Cobalt.Core
 {
@@ -47,7 +46,7 @@ namespace Cobalt.Core
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = [];
         private static Dictionary<ulong, List<string>> playerBloodChoices = [];
-        
+
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
         {
             get => playerExperience;

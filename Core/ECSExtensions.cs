@@ -1,6 +1,6 @@
-using Bloodstone.API;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using Stunlock.Core;
 using System.Runtime.InteropServices;
 using Unity.Entities;
 
@@ -9,7 +9,7 @@ namespace Cobalt.Core;
 public static class ECSExtensions
 {
     private static EntityManager EntityManager { get; } = VWorld.Server.EntityManager;
-
+   
     public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -70,7 +70,7 @@ public static class ECSExtensions
 
     public static string LookupName(this PrefabGUID prefabGuid)
     {
-        var prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
+        var prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
             ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
     }
