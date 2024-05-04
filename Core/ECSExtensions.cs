@@ -2,6 +2,7 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using Stunlock.Core;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Cobalt.Core;
@@ -73,6 +74,17 @@ public static class ECSExtensions
         var prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
             ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
+    }
+    public static void LogComponentTypes(this Entity entity)
+    {
+        NativeArray<ComponentType>.Enumerator enumerator = VWorld.Server.EntityManager.GetComponentTypes(entity).GetEnumerator();
+        Plugin.Log.LogInfo("===");
+        while (enumerator.MoveNext())
+        {
+            ComponentType current = enumerator.Current;
+            Plugin.Log.LogInfo($"{current}");
+        }
+        Plugin.Log.LogInfo("===");
     }
 
     public static void Add<T>(this Entity entity)

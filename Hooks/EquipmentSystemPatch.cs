@@ -69,20 +69,21 @@ namespace Cobalt.Hooks
         public static void Prefix(EquipmentSystem __instance)
         {
             //Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__query_1269768774_0.ToEntityArray(Unity.Collections.Allocator.Temp);
+            NativeArray<Entity> entities = __instance.__query_1269768774_1.ToEntityArray(Unity.Collections.Allocator.Temp);
             try
             {
                 foreach (var entity in entities)
                 {
-                    //entity.LogComponentTypes();
+                    entity.LogComponentTypes();
                     Entity character = entity.Read<Equippable>().EquipTarget._Entity;
                     if (character.Equals(Entity.Null) || !character.Has<PlayerCharacter>()) continue;
                     else
                     {
+                        Plugin.Log.LogInfo("Updating player level...");
                         GearOverride.SetLevel(character);
                         try
                         {
-                            //Plugin.Log.LogInfo("Updating player stats...");
+                            Plugin.Log.LogInfo("Updating player stats...");
                             UnitStatsOverride.UpdatePlayerStats(character);
                         }
                         catch (System.Exception e)
