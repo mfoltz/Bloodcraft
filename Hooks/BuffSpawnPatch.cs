@@ -11,17 +11,39 @@ namespace Lapis.Hooks
     public class BuffPatch
     {
         private static readonly PrefabGUID unarmedBuff = new(-2075546002);
-        [HarmonyPatch(typeof(EquipmentSyncSystem), nameof(EquipmentSyncSystem.OnUpdate))]
+        [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPrefix]
-        private static void Prefix(EquipmentSyncSystem __instance)
+        private static void Prefix(EquipItemSystem __instance)
         {
-            NativeArray<Entity> entities = __instance.__query_710171128_0.ToEntityArray(Allocator.Temp);
+            NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
                     entity.LogComponentTypes();
                     
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Plugin.Log.LogError(ex);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+        [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
+        [HarmonyPrefix]
+        private static void Prefix(UnEquipItemSystem __instance)
+        {
+            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    entity.LogComponentTypes();
+
                 }
             }
             catch (System.Exception ex)

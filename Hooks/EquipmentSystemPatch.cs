@@ -4,37 +4,41 @@ using Cobalt.Systems.Expertise;
 using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Hybrid;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Hooks.EquipmentSystemPatch;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
 using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Hooks.EquipItemFromInventorySystemPatch;
+using ProjectM.Gameplay.Systems;
 
 namespace Cobalt.Hooks
 {
     
-    [HarmonyPatch(typeof(EquipmentSystem), nameof(EquipmentSystem.OnUpdate))]
-    public static class EquipmentSystemPatch
+    [HarmonyPatch(typeof(EquipItemFromInventorySystem), nameof(EquipItemFromInventorySystem.OnUpdate))]
+    public static class EquipItemFromInventorySystemPatch
     {
-        
-        public static void Prefix(EquipmentSystem __instance)
+        public static void Prefix(EquipItemFromInventorySystem __instance)
         {
-            Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__query_1269768774_0.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_1.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_2.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_3.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_4.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
+            Plugin.Log.LogInfo("EquipItemFromInventorySystem Prefix called...");
+            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Unity.Collections.Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    entity.LogComponentTypes();
+                }
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+
         }
         private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
         {
@@ -87,40 +91,7 @@ namespace Cobalt.Hooks
 
     public static class UnitStatsOverride
     {
-        public static void HandleUpdates(NativeArray<Entity> entities)
-        {
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    entity.LogComponentTypes();
-                    Entity character = entity.Read<Equippable>().EquipTarget._Entity;
-                    if (character.Equals(Entity.Null) || !character.Has<PlayerCharacter>()) continue;
-                    else
-                    {
-                        Plugin.Log.LogInfo("Updating player level...");
-                        GearOverride.SetLevel(character);
-                        try
-                        {
-                            Plugin.Log.LogInfo("Updating player stats...");
-                            UnitStatsOverride.UpdatePlayerStats(character);
-                        }
-                        catch (System.Exception e)
-                        {
-                            Plugin.Log.LogError($"Error updating player stats: {e}");
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogError($"Exited EquipmentSystem hook early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
+       
         private static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();

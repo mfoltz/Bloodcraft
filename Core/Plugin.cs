@@ -8,6 +8,7 @@ using System.Reflection;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Hooks.EquipItemFromInventorySystemPatch;
 
 namespace Cobalt.Core
 {
@@ -72,9 +73,9 @@ namespace Cobalt.Core
         private static void UpdateBaseStats()
         {
             VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
-            EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
-            EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
-            EquipmentSystemPatch.BaseWeaponStats[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
+            BaseWeaponStats[WeaponStatType.MaxHealth] *= vampireStatModifiers.MaxHealthModifier;
+            BaseWeaponStats[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
+            BaseWeaponStats[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
         }
         private void GameDataOnInitialize(World world)
         {
