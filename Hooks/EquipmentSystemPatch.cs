@@ -20,6 +20,20 @@ namespace Cobalt.Hooks
     [HarmonyPatch(typeof(EquipmentSystem), nameof(EquipmentSystem.OnUpdate))]
     public static class EquipmentSystemPatch
     {
+        public static void Prefix(EquipmentSystem __instance)
+        {
+            Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
+            NativeArray<Entity> entities = __instance.__query_1269768774_0.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_1.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_2.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_3.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+            entities = __instance.__query_1269768774_4.ToEntityArray(Unity.Collections.Allocator.Temp);
+            UnitStatsOverride.HandleUpdates(entities);
+        }
         private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
         {
             { WeaponStatType.MaxHealth, 125f },
@@ -66,20 +80,7 @@ namespace Cobalt.Hooks
             set => basePrestigeStats = value;
         }
 
-        public static void Prefix(EquipmentSystem __instance)
-        {
-            Plugin.Log.LogInfo("EquipmentSystem Prefix called...");
-            NativeArray<Entity> entities = __instance.__query_1269768774_0.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_1.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_2.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_3.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-            entities = __instance.__query_1269768774_4.ToEntityArray(Unity.Collections.Allocator.Temp);
-            UnitStatsOverride.HandleUpdates(entities);
-        }
+        
     }
 
     public static class UnitStatsOverride
