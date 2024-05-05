@@ -66,7 +66,7 @@ public class FishingSystemPatch
 
                     if (handler != null)
                     {
-                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
+                        ProfessionSystem.SetProfession(toProcess, user, steamId, BaseFishingXP * multiplier, handler);
                         ProfessionSystem.GiveProfessionBonus(toProcess, target, user, steamId, handler);
                     }
                 }

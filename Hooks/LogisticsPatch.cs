@@ -18,6 +18,7 @@ public class LogisticsPatches
     {
         public static void Prefix(UpdateRefiningSystem __instance)
         {
+            Plugin.Log.LogInfo("Running UpdateRefiningSystem hook...");
             EntityManager entityManager = VWorld.Server.EntityManager;
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;

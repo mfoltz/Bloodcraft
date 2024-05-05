@@ -100,13 +100,14 @@ namespace Cobalt.Core.Commands
         [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: true, usage: ".rws", description: "Reset the stat choices for a player's currently equipped weapon stats.")]
         public static void ResetWeaponStats(ChatCommandContext ctx)
         {
+            EntityManager entityManager = VWorld.Server.EntityManager;
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weapon = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
             string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon).ToString();
 
-            UnitStatsOverride.RemoveWeaponBonuses(character, weaponType);
+            UnitStatsOverride.RemoveWeaponBonuses(entityManager,character, weaponType);
             PlayerWeaponUtilities.ResetChosenStats(steamID, weaponType);
             //DataStructures.SavePlayerWeaponChoices();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");

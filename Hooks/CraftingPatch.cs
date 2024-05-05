@@ -58,7 +58,7 @@ public class CraftingPatch
                                 IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(action.RecipeGuid, "");
                                 if (handler != null)
                                 {
-                                    ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
+                                    ProfessionSystem.SetProfession(itemPrefab,user, steamId, ProfessionValue, handler);
                                 }
                                 jobs.Remove(action.RecipeGuid);
                             }

@@ -3,7 +3,9 @@ using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Transforms;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Systems
@@ -63,7 +65,7 @@ namespace Cobalt.Systems
                     ProfessionValue *= ProfessionUtilities.GetWoodcuttingModifier(prefabGUID);
                 }
 
-                SetProfession(user, SteamID, ProfessionValue, handler);
+                SetProfession(prefabGUID, user, SteamID, ProfessionValue, handler);
                 // retrieve level and award bonus drop table item to inventory every 10 levels?
                 GiveProfessionBonus(Victim.Read<PrefabGUID>(), Killer, user, SteamID, handler);
             }
@@ -146,7 +148,7 @@ namespace Cobalt.Systems
             }
         }
 
-        public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
+        public static void SetProfession(PrefabGUID prefabGUID, User user, ulong steamID, float value, IProfessionHandler handler)
         {
             EntityManager entityManager = VWorld.Server.EntityManager;
 
@@ -154,10 +156,10 @@ namespace Cobalt.Systems
             handler.SaveChanges();
 
             var xpData = handler.GetExperienceData(steamID);
-            UpdatePlayerExperience(entityManager, user, steamID, xpData, value, handler);
+            UpdatePlayerExperience(prefabGUID, entityManager, user, steamID, xpData, value, handler);
         }
 
-        private static void UpdatePlayerExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
+        private static void UpdatePlayerExperience(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
         {
             float newExperience = xpData.Value + gainedXP;
             int newLevel = ConvertXpToLevel(newExperience);
@@ -178,12 +180,14 @@ namespace Cobalt.Systems
             handler.UpdateExperienceData(steamID, updatedXPData);
 
             // Notify player about the changes
-            NotifyPlayer(entityManager, user, steamID, gainedXP, leveledUp, handler);
+            NotifyPlayer(prefabGUID, entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
 
-        private static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+        private static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
-            gainedXP = (int)gainedXP;
+            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            PrefabGUID sctType = serverGameManager.SCTTypes.Generic_Type;
+            LocalToWorld localToWorld = user.LocalCharacter._Entity.Read<LocalToWorld>();
             string professionName = handler.GetProfessionName();
             if (leveledUp)
             {
@@ -195,7 +199,9 @@ namespace Cobalt.Systems
                 if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
+                    serverGameManager.CreateScrollingCombatText(gainedXP, sctType, localToWorld.Up, user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
+                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
+
                 }
             }
         }
