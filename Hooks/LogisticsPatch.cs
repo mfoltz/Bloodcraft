@@ -18,7 +18,7 @@ public class LogisticsPatches
     {
         public static void Prefix(UpdateRefiningSystem __instance)
         {
-            Plugin.Log.LogInfo("Running UpdateRefiningSystem hook...");
+            //Plugin.Log.LogInfo("Running UpdateRefiningSystem hook...");
             EntityManager entityManager = VWorld.Server.EntityManager;
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
@@ -27,7 +27,6 @@ public class LogisticsPatches
             EntityQuery stationsQuery = entityManager.CreateEntityQuery(LogisticsUtilities.RefinementStationQuery);
             NativeArray<Entity> stations = stationsQuery.ToEntityArray(Allocator.TempJob);
             var needs = new Dictionary<PrefabGUID, List<(Entity station, int amount)>>();
-
             // First, assess the needs of each station
             try
             {
@@ -36,7 +35,6 @@ public class LogisticsPatches
                     if (!entityManager.Exists(station) || !station.Has<Refinementstation>() || !station.Read<NameableInteractable>().Name.ToString().ToLower().Contains("receiver")) continue;
 
                     var refinementStation = station.Read<Refinementstation>();
-                    if (!refinementStation.IsWorking) continue;
 
                     var recipesBuffer = station.ReadBuffer<RefinementstationRecipesBuffer>();
                     foreach (var recipe in recipesBuffer)
@@ -63,7 +61,6 @@ public class LogisticsPatches
                 stationsQuery.Dispose();
                 stations.Dispose();
             }
-
             // Process each station's output to see if it can fulfill any other station's needs
             var providers = __instance._Query.ToEntityArray(Allocator.TempJob);
             try
@@ -71,14 +68,15 @@ public class LogisticsPatches
                 foreach (var provider in providers)
                 {
                     if (!entityManager.Exists(provider) || !provider.Has<Refinementstation>() || !provider.Read<NameableInteractable>().Name.ToString().ToLower().Contains("provider")) continue;
-
+                    //provider.LogComponentTypes();
                     var refinementStation = provider.Read<Refinementstation>();
-                    if (!refinementStation.IsWorking) continue;
 
                     Entity outputInventory = refinementStation.OutputInventoryEntity._Entity;
                     foreach (var needKey in needs.Keys)
                     {
-                        int availableAmount = InventoryUtilities.GetItemAmount(entityManager, outputInventory, needKey);
+                        int availableAmount = serverGameManager.GetInventoryItemCount(outputInventory, needKey);
+                        //int availableAmount = InventoryUtilities.GetItemAmount(entityManager, outputInventory, needKey);
+                        Plugin.Log.LogInfo($"{availableAmount.ToString()} | {needKey.LookupName()}");
                         if (availableAmount <= 0) continue;
 
                         foreach (var (station, amount) in needs[needKey])
@@ -100,6 +98,10 @@ public class LogisticsPatches
                                     transferAmount--;
                                     availableAmount--;
                                     if (availableAmount <= 0) break; // No more items available to move
+                                }
+                                else
+                                {
+                                    Plugin.Log.LogInfo($"Failed to move {needKey.LookupName()} in {slot} from provider to receiver.");
                                 }
                             }
                         }
@@ -225,13 +227,13 @@ public class LogisticsPatches
             }
         }
 
-        public static bool SameTerritory(Entity stash, Entity servant)
+        public static bool SameTerritory(Entity input, Entity ouput)
         {
-            if (stash.Has<CastleHeartConnection>() && servant.Has<CastleHeartConnection>())
+            if (input.Has<CastleHeartConnection>() && ouput.Has<CastleHeartConnection>())
             {
-                Entity stashHeart = stash.Read<CastleHeartConnection>().CastleHeartEntity._Entity;
-                Entity servantHeart = servant.Read<CastleHeartConnection>().CastleHeartEntity._Entity;
-                if (stashHeart.Equals(servantHeart)) return true;
+                Entity inputHeart = input.Read<CastleHeartConnection>().CastleHeartEntity._Entity;
+                Entity outputHeart = ouput.Read<CastleHeartConnection>().CastleHeartEntity._Entity;
+                if (inputHeart.Equals(outputHeart)) return true;
             }
             return false;
         }

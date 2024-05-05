@@ -451,19 +451,16 @@ namespace Cobalt.Hooks
                 // Apply and remove stat bonuses based on weapon change.
                 if (previousWeapon != null)
                 {
-                    Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
-                    ApplyWeaponBonuses(entityManager, character, currentWeapon);  // Apply bonuses from the new weapon
+                    //Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
+                    //ApplyWeaponBonuses(entityManager, character, currentWeapon);  // Apply bonuses from the new weapon
 
                     Plugin.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
                     RemoveWeaponBonuses(entityManager, character, previousWeapon);  // Remove bonuses from the previous weapon
-
-                    equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
-                }
-                else
-                {
                     Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
                     ApplyWeaponBonuses(entityManager, character, currentWeapon);  // Apply bonuses from the new weapon
+                    equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
                 }
+                
 
                 equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
                 DataStructures.SavePlayerEquippedWeapon();
@@ -552,6 +549,7 @@ namespace Cobalt.Hooks
         {
             // Reset level for Armor Chest Slot
             Plugin.Log.LogInfo($"Removing item levels...");
+            equipment.ArmorChestSlot.SlotEntity._Entity.LogComponentTypes();
             if (!equipment.ArmorChestSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
                 ArmorLevelSource chestLevel = equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
@@ -593,6 +591,13 @@ namespace Cobalt.Hooks
                 SpellLevelSource spellLevel = equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>();
                 spellLevel.Level = 0f;
                 equipment.GrimoireSlot.SlotEntity._Entity.Write(spellLevel);
+                character.Write(equipment);
+            }
+            if (!equipment.WeaponSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>().Level.Equals(0f));
+            {
+                WeaponLevelSource weaponLevel = equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>();
+                weaponLevel.Level = 0f;
+                equipment.WeaponSlot.SlotEntity._Entity.Write(weaponLevel);
                 character.Write(equipment);
             }
         }

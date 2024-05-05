@@ -3,6 +3,7 @@ using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using StunShared.UI;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
@@ -183,7 +184,7 @@ namespace Cobalt.Systems
             NotifyPlayer(prefabGUID, entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
 
-        private static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+        private  static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
             PrefabGUID sctType = serverGameManager.SCTTypes.Generic_Type;
@@ -199,7 +200,9 @@ namespace Cobalt.Systems
                 if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
-                    serverGameManager.CreateScrollingCombatText(gainedXP, sctType, localToWorld.Up, user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
+                    string floating = gainedXP.ToString()+" "+professionName.ToLower();
+                    ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter._Entity, gainedXP, sctType);
+                    //serverGameManager.CreateScrollingCombatText(gainedXP, sctType, , user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
 
                 }
