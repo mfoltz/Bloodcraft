@@ -16,17 +16,24 @@ public class LogisticsPatches
     [HarmonyPatch(typeof(UpdateRefiningSystem), nameof(UpdateRefiningSystem.OnUpdate))]
     public static class UpdateRefiningSystemPatch
     {
+        private static EntityQuery stationsQuery;
+
+        static UpdateRefiningSystemPatch()
+        {
+            EntityManager entityManager = VWorld.Server.EntityManager;
+            stationsQuery = entityManager.CreateEntityQuery(LogisticsUtilities.RefinementStationQuery);
+        }
+
         public static void Prefix(UpdateRefiningSystem __instance)
         {
             //Plugin.Log.LogInfo("Running UpdateRefiningSystem hook...");
             EntityManager entityManager = VWorld.Server.EntityManager;
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
-            GameDataSystem gameDataSystem = VWorld.Server.GetExistingSystemManaged<GameDataSystem>();
 
-            EntityQuery stationsQuery = entityManager.CreateEntityQuery(LogisticsUtilities.RefinementStationQuery);
+            //EntityQuery stationsQuery = entityManager.CreateEntityQuery(LogisticsUtilities.RefinementStationQuery);
             NativeArray<Entity> stations = stationsQuery.ToEntityArray(Allocator.TempJob);
-            var needs = new Dictionary<PrefabGUID, List<(Entity station, int amount)>>();
+            var needs = new Dictionary<PrefabGUID, List<(Entity station, int amount)>>(capacity: 10);
             // First, assess the needs of each station
             try
             {
@@ -43,8 +50,7 @@ public class LogisticsPatches
                         var requirements = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
                         foreach (var requirement in requirements)
                         {
-                            if (!needs.ContainsKey(requirement.Guid))
-                                needs[requirement.Guid] = [];
+                            if (!needs.ContainsKey(requirement.Guid)) needs[requirement.Guid] = [];
 
                             needs[requirement.Guid].Add((station, requirement.Amount));
                         }
@@ -57,8 +63,7 @@ public class LogisticsPatches
             }
             finally
             {
-                //Plugin.Log.LogInfo("Disposing station query...");
-                stationsQuery.Dispose();
+                //stationsQuery.Dispose();
                 stations.Dispose();
             }
             // Process each station's output to see if it can fulfill any other station's needs
@@ -82,28 +87,14 @@ public class LogisticsPatches
                         foreach (var (station, amount) in needs[needKey])
                         {
                             if (!serverGameManager.IsAllies(provider, station) || !LogisticsUtilities.SameTerritory(provider, station)) continue;
+
                             Refinementstation receivingStation = station.Read<Refinementstation>();
                             Entity inputInventory = receivingStation.InputInventoryEntity._Entity;
 
                             var transferAmount = Math.Min(amount, availableAmount);
-                          
-                            // need to use try remove then try add instead of inventoryUtilitiesServer.TryMoveItem
-                            if (serverGameManager.TryRemoveInventoryItem(outputInventory, needKey, transferAmount))
-                            {
-                                if (serverGameManager.TryAddInventoryItem(inputInventory, needKey, transferAmount))
-                                {
-                                    Plugin.Log.LogInfo($"Moved {transferAmount.ToString()} of {needKey.LookupName()} from {provider.Read<NameableInteractable>().Name} to {station.Read<NameableInteractable>().Name}");
-                                }
-                                else
-                                {
-                                    Plugin.Log.LogInfo($"Failed to add {needKey.LookupName()}x{transferAmount} from provider to receiver.");
-                                }
-                            }
-                            else
-                            {
-                                Plugin.Log.LogInfo($"Failed to remove {needKey.LookupName()}x{transferAmount} from provider.");
-                            }
 
+                            // need to use try remove then try add instead of inventoryUtilitiesServer.TryMoveItem
+                            LogisticsUtilities.TransferItems(serverGameManager, outputInventory, inputInventory, needKey, transferAmount);
                         }
                     }
                 }
@@ -199,18 +190,7 @@ public class LogisticsPatches
                                 PrefabGUID item = buffer[i].ItemType;
                                 //var itemCount = InventoryUtilities.GetItemAmount(entityManager, inventory, item);
                                 var itemCount = serverGameManager.GetInventoryItemCount(inventory, item);
-                                if (serverGameManager.TryRemoveInventoryItem(inventory, item, itemCount))
-                                {
-                                    if (serverGameManager.TryAddInventoryItem(stashInventory, item, itemCount))
-                                    {
-                                        Plugin.Log.LogInfo($"Moved {item.LookupName()}x{itemCount} to {stash.Read<NameableInteractable>().Name} from servant.");
-                                    }
-                                    else
-                                    {
-                                        Plugin.Log.LogInfo($"Failed to add {item.LookupName()}x{itemCount} to {stash.Read<NameableInteractable>().Name} after removing from servant.");
-                                    }
-                                }
-
+                                TransferItems(serverGameManager, inventory, stashInventory, item, itemCount);
                             }
                         }
                     }
@@ -235,6 +215,24 @@ public class LogisticsPatches
                 if (inputHeart.Equals(outputHeart)) return true;
             }
             return false;
+        }
+        public static void TransferItems(ServerGameManager serverGameManager, Entity outputInventory, Entity inputInventory, PrefabGUID itemGuid, int transferAmount)
+        {
+            if (serverGameManager.TryRemoveInventoryItem(outputInventory, itemGuid, transferAmount))
+            {
+                if (serverGameManager.TryAddInventoryItem(inputInventory, itemGuid, transferAmount))
+                {
+                    Plugin.Log.LogInfo($"Moved {transferAmount} of {itemGuid.LookupName()} from Provider to Receiver");
+                }
+                else
+                {
+                    Plugin.Log.LogInfo($"Failed to add {itemGuid.LookupName()}x{transferAmount} from Provider to Receiver");
+                }
+            }
+            else
+            {
+                Plugin.Log.LogInfo($"Failed to remove {itemGuid.LookupName()}x{transferAmount} from Provider");
+            }
         }
     }
 }
