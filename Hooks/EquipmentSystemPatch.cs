@@ -593,7 +593,7 @@ namespace Cobalt.Hooks
                 equipment.GrimoireSlot.SlotEntity._Entity.Write(spellLevel);
                 character.Write(equipment);
             }
-            if (!equipment.WeaponSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>().Level.Equals(0f));
+            if (!equipment.WeaponSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>().Level.Equals(0f))
             {
                 WeaponLevelSource weaponLevel = equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>();
                 weaponLevel.Level = 0f;

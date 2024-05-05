@@ -82,16 +82,11 @@ public class LogisticsPatches
                         foreach (var (station, amount) in needs[needKey])
                         {
                             if (!serverGameManager.IsAllies(provider, station) || !LogisticsUtilities.SameTerritory(provider, station)) continue;
-                            BuffUtility.TryGetBuff
                             Refinementstation receivingStation = station.Read<Refinementstation>();
                             Entity inputInventory = receivingStation.InputInventoryEntity._Entity;
 
                             var transferAmount = Math.Min(amount, availableAmount);
-                            
-                            //int slot = InventoryUtilities.GetItemSlot(entityManager, outputInventory, needKey);
-                            //if (slot == -1) break; // No more items to move
-
-
+                          
                             // need to use try remove then try add instead of inventoryUtilitiesServer.TryMoveItem
                             if (serverGameManager.TryRemoveInventoryItem(outputInventory, needKey, transferAmount))
                             {
@@ -101,7 +96,7 @@ public class LogisticsPatches
                                 }
                                 else
                                 {
-                                    Plugin.Log.LogInfo($"Failed to move {needKey.LookupName()} in {slot} from provider to receiver.");
+                                    Plugin.Log.LogInfo($"Failed to add {needKey.LookupName()}x{transferAmount} from provider to receiver.");
                                 }
                             }
                             else
@@ -202,21 +197,20 @@ public class LogisticsPatches
                             {
                                 // Try to move the item at index i to the stash
                                 PrefabGUID item = buffer[i].ItemType;
-                                var itemCount = InventoryUtilities.GetItemAmount(entityManager, inventory, item);
-
-                                for (int count = 0; count < itemCount; count++)
+                                //var itemCount = InventoryUtilities.GetItemAmount(entityManager, inventory, item);
+                                var itemCount = serverGameManager.GetInventoryItemCount(inventory, item);
+                                if (serverGameManager.TryRemoveInventoryItem(inventory, item, itemCount))
                                 {
-                                    int slot = InventoryUtilities.GetItemSlot(entityManager, inventory, item);
-                                    if (slot == -1) break; // No more of this item to move
-
-                                    bool moved = InventoryUtilitiesServer.TryMoveItem(entityManager, gameDataSystem.ItemHashLookupMap, inventory, slot, stashInventory);
-                                    if (!moved)
+                                    if (serverGameManager.TryAddInventoryItem(stashInventory, item, itemCount))
                                     {
-                                        Plugin.Log.LogInfo($"Failed to move item from slot {slot} from servant to stash.");
-                                        break;
+                                        Plugin.Log.LogInfo($"Moved {item.LookupName()}x{itemCount} to {stash.Read<NameableInteractable>().Name} from servant.");
                                     }
-                                    Plugin.Log.LogInfo($"Moved item from slot {slot} from servant to stash.");
+                                    else
+                                    {
+                                        Plugin.Log.LogInfo($"Failed to add {item.LookupName()}x{itemCount} to {stash.Read<NameableInteractable>().Name} after removing from servant.");
+                                    }
                                 }
+
                             }
                         }
                     }
