@@ -76,34 +76,39 @@ public class LogisticsPatches
                     {
                         int availableAmount = serverGameManager.GetInventoryItemCount(outputInventory, needKey);
                         //int availableAmount = InventoryUtilities.GetItemAmount(entityManager, outputInventory, needKey);
-                        Plugin.Log.LogInfo($"{availableAmount.ToString()} | {needKey.LookupName()}");
+                        //Plugin.Log.LogInfo($"{availableAmount.ToString()} | {needKey.LookupName()}");
                         if (availableAmount <= 0) continue;
 
                         foreach (var (station, amount) in needs[needKey])
                         {
                             if (!serverGameManager.IsAllies(provider, station) || !LogisticsUtilities.SameTerritory(provider, station)) continue;
-
+                            BuffUtility.TryGetBuff
                             Refinementstation receivingStation = station.Read<Refinementstation>();
                             Entity inputInventory = receivingStation.InputInventoryEntity._Entity;
 
                             var transferAmount = Math.Min(amount, availableAmount);
-                            while (transferAmount > 0)
-                            {
-                                int slot = InventoryUtilities.GetItemSlot(entityManager, outputInventory, needKey);
-                                if (slot == -1) break; // No more items to move
+                            
+                            //int slot = InventoryUtilities.GetItemSlot(entityManager, outputInventory, needKey);
+                            //if (slot == -1) break; // No more items to move
 
-                                if (InventoryUtilitiesServer.TryMoveItem(entityManager, gameDataSystem.ItemHashLookupMap, outputInventory, slot, inputInventory))
+
+                            // need to use try remove then try add instead of inventoryUtilitiesServer.TryMoveItem
+                            if (serverGameManager.TryRemoveInventoryItem(outputInventory, needKey, transferAmount))
+                            {
+                                if (serverGameManager.TryAddInventoryItem(inputInventory, needKey, transferAmount))
                                 {
-                                    Plugin.Log.LogInfo($"Moved 1 of {needKey.LookupName()} from {provider.Read<NameableInteractable>().Name} to {station.Read<NameableInteractable>().Name}");
-                                    transferAmount--;
-                                    availableAmount--;
-                                    if (availableAmount <= 0) break; // No more items available to move
+                                    Plugin.Log.LogInfo($"Moved {transferAmount.ToString()} of {needKey.LookupName()} from {provider.Read<NameableInteractable>().Name} to {station.Read<NameableInteractable>().Name}");
                                 }
                                 else
                                 {
                                     Plugin.Log.LogInfo($"Failed to move {needKey.LookupName()} in {slot} from provider to receiver.");
                                 }
                             }
+                            else
+                            {
+                                Plugin.Log.LogInfo($"Failed to remove {needKey.LookupName()}x{transferAmount} from provider.");
+                            }
+
                         }
                     }
                 }
