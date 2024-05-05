@@ -24,7 +24,7 @@ namespace Cobalt.Hooks
     public class EquipmentPatch
     {
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         private static void EquipItemSystemPrefix(EquipItemSystem __instance)
         {
             Plugin.Log.LogInfo("EquipItemSystem Prefix...");
@@ -33,7 +33,7 @@ namespace Cobalt.Hooks
         }
 
         [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
         {
             Plugin.Log.LogInfo("UnEquipItemSystem Prefix...");
@@ -49,7 +49,7 @@ namespace Cobalt.Hooks
                 {
                     if (entity.Has<EquipItemEvent>())
                     {
-                        entity.LogComponentTypes();
+                        //entity.LogComponentTypes();
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
                         Entity character = fromCharacter.Character;
 
@@ -60,7 +60,7 @@ namespace Cobalt.Hooks
                     }
                     else if (entity.Has<UnequipItemEvent>())
                     {
-                        entity.LogComponentTypes();
+                        //entity.LogComponentTypes();
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
                         Entity character = fromCharacter.Character;
 
@@ -108,7 +108,7 @@ namespace Cobalt.Hooks
                                 Value = scaledBonus + BaseWeaponStats[WeaponStatType.MaxHealth],
                                 ModificationType = ModificationType.Set,
                                 Modifier = 1,
-                                Id = ModificationId.NewId(5)
+                                Id = ModificationId.NewId(9)
                             };
                             if (!character.Has<ModifyUnitStatBuff_DOTS>())
                             {
@@ -192,7 +192,13 @@ namespace Cobalt.Hooks
                             else
                             {
                                 var musb_dots_buffer = character.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-                                musb_dots_buffer.Add(modifyUnitStatBuff_DOTS);
+                                for (int i = 0; i < musb_dots_buffer.Length; i++)
+                                {
+                                    if (musb_dots_buffer[i].Id.Id.Equals(9))
+                                    {
+                                        musb_dots_buffer.RemoveAt(i);
+                                    }
+                                }
                             }
                             health.MaxHealth._Value = BaseWeaponStats[WeaponStatType.MaxHealth];
                             break;
@@ -535,13 +541,13 @@ namespace Cobalt.Hooks
                     return;
                 }
 
-                float playerLevel = xpData.Key;
+                int playerLevel = xpData.Key;
                 equipment.ArmorLevel._Value = 0f;
                 equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
-
+                
                 player.Write(equipment);
-                //Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
+                Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
             }
         }
 
@@ -549,13 +555,11 @@ namespace Cobalt.Hooks
         {
             // Reset level for Armor Chest Slot
             Plugin.Log.LogInfo($"Removing item levels...");
-            equipment.ArmorChestSlot.SlotEntity._Entity.LogComponentTypes();
             if (!equipment.ArmorChestSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
             {
                 ArmorLevelSource chestLevel = equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 chestLevel.Level = 0f;
                 equipment.ArmorChestSlot.SlotEntity._Entity.Write(chestLevel);
-                character.Write(equipment);
             }
 
             // Reset level for Armor Footgear Slot
@@ -564,7 +568,6 @@ namespace Cobalt.Hooks
                 ArmorLevelSource footgearLevel = equipment.ArmorFootgearSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 footgearLevel.Level = 0f;
                 equipment.ArmorFootgearSlot.SlotEntity._Entity.Write(footgearLevel);
-                character.Write(equipment);
             }
 
             // Reset level for Armor Gloves Slot
@@ -573,7 +576,6 @@ namespace Cobalt.Hooks
                 ArmorLevelSource glovesLevel = equipment.ArmorGlovesSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 glovesLevel.Level = 0f;
                 equipment.ArmorGlovesSlot.SlotEntity._Entity.Write(glovesLevel);
-                character.Write(equipment);
             }
 
             // Reset level for Armor Legs Slot
@@ -582,7 +584,6 @@ namespace Cobalt.Hooks
                 ArmorLevelSource legsLevel = equipment.ArmorLegsSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
                 legsLevel.Level = 0f;
                 equipment.ArmorLegsSlot.SlotEntity._Entity.Write(legsLevel);
-                character.Write(equipment);
             }
 
             // Reset level for Grimoire Slot (Spell Level)
@@ -591,14 +592,12 @@ namespace Cobalt.Hooks
                 SpellLevelSource spellLevel = equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>();
                 spellLevel.Level = 0f;
                 equipment.GrimoireSlot.SlotEntity._Entity.Write(spellLevel);
-                character.Write(equipment);
             }
             if (!equipment.WeaponSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>().Level.Equals(0f))
             {
                 WeaponLevelSource weaponLevel = equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>();
                 weaponLevel.Level = 0f;
                 equipment.WeaponSlot.SlotEntity._Entity.Write(weaponLevel);
-                character.Write(equipment);
             }
         }
     }
