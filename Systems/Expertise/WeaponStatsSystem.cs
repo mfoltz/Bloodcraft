@@ -38,7 +38,6 @@ namespace Cobalt.Systems.Expertise
         {
             public enum WeaponStatType
             {
-                MaxHealth,
                 AttackSpeed,
                 PhysicalPower,
                 SpellPower,
@@ -50,7 +49,6 @@ namespace Cobalt.Systems.Expertise
 
             public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
                 {
-                    { 0, WeaponStatType.MaxHealth },
                     { 1, WeaponStatType.AttackSpeed },
                     { 2, WeaponStatType.PhysicalPower },
                     { 3, WeaponStatType.SpellPower },
@@ -62,7 +60,6 @@ namespace Cobalt.Systems.Expertise
 
             private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
-                    {WeaponStatType.MaxHealth, 150},
                     {WeaponStatType.AttackSpeed, 0.15f},
                     {WeaponStatType.PhysicalPower, 15},
                     {WeaponStatType.SpellPower, 15},

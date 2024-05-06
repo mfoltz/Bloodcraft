@@ -187,6 +187,8 @@ namespace Cobalt.Systems
         private  static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            //EntityCommandBufferSystem entityCommandBufferSystem = VWorld.Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
+            //EntityCommandBuffer entityCommandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
             PrefabGUID sctType = serverGameManager.SCTTypes.Generic_Type;
             LocalToWorld localToWorld = user.LocalCharacter._Entity.Read<LocalToWorld>();
             string professionName = handler.GetProfessionName();
@@ -201,7 +203,9 @@ namespace Cobalt.Systems
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
                     string floating = gainedXP.ToString()+" "+professionName.ToLower();
-                    ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter._Entity, gainedXP, sctType);
+                    Entity sct = ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter._Entity, gainedXP, sctType);
+                    entityManager.Instantiate(sct);
+                    Plugin.Log.LogInfo("Attempted to create scrolling combat text...");
                     //serverGameManager.CreateScrollingCombatText(gainedXP, sctType, , user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
 

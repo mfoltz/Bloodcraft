@@ -3,6 +3,7 @@ using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
 
@@ -178,7 +179,7 @@ namespace Cobalt.Systems.Expertise
                     return type;
                 }
             }
-            return WeaponStatType.MaxHealth;
+            return WeaponStatType.AttackSpeed;
         }
     }
 }

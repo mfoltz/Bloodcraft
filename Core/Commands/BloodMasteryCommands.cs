@@ -1,5 +1,7 @@
-
 using Cobalt.Hooks;
+using ProjectM;
+using ProjectM.Scripting;
+using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
@@ -8,6 +10,8 @@ namespace Cobalt.Core.Commands
 {
     public static class BloodMasteryCommands
     {
+        private static PrefabGUID holder;
+
         [Command(name: "getSanguimancyProgress", shortHand: "gsp", adminOnly: false, usage: ".gsp", description: "Display your current sanguimancy progress.")]
         public static void GetMasteryCommand(ChatCommandContext ctx)
         {
@@ -77,6 +81,35 @@ namespace Cobalt.Core.Commands
             stats.Clear();
             DataStructures.SavePlayerBloodChoices();
             ctx.Reply($"Blood stat choices reset.");
+        }
+
+        [Command(name: "addAbility", shortHand: "ability", adminOnly: false, usage: ".ability [AbilityGroupName] [Slot]", description: "Puts prefab ability group on shift.")]
+        public static void AbilityTestCommand(ChatCommandContext ctx, string abilityGroup, int slot)
+        {
+            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            Entity character = ctx.Event.SenderCharacterEntity;
+            
+            if (slot == 1 || slot == 4)
+            {
+                ctx.Reply("Invalid slot number.");
+                return;
+            }
+            if (serverGameManager.TryGetBuff(character, UnitStatsOverride.unarmed.ToIdentifier(), out Entity buff))
+            {
+                if (prefabCollectionSystem.NameToPrefabGuidDictionary.TryGetValue(abilityGroup, out PrefabGUID prefabGUID))
+                {
+                    serverGameManager.ModifyAbilityGroupOnSlot(buff, character, slot, prefabGUID);
+                }
+                else
+                {
+                    ctx.Reply("Invalid ability group.");
+                }
+            }
+            else
+            {
+                ctx.Reply("You must have the unarmed buff to use this command.");
+            }
         }
     }
 }

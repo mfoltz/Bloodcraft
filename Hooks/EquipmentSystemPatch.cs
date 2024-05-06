@@ -4,19 +4,18 @@ using Cobalt.Systems.Expertise;
 using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Hybrid;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine.TextCore.Text;
+using static Cobalt.Hooks.BaseStats;
+using static Cobalt.Hooks.UnitStatsOverride;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem;
 using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
 using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
-using static Cobalt.Hooks.BaseStats;
-using static Cobalt.Hooks.UnitStatsOverride;
-using ProjectM.Terrain;
 
 namespace Cobalt.Hooks
 {
@@ -25,18 +24,18 @@ namespace Cobalt.Hooks
     {
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPostfix]
-        private static void EquipItemSystemPrefix(EquipItemSystem __instance)
+        private static void EquipItemSystemPostfix(EquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("EquipItemSystem Prefix...");
+            Plugin.Log.LogInfo("EquipItemSystem Postfix...");
             NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
         }
 
         [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
         [HarmonyPostfix]
-        private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
+        private static void UnEquipItemSystemPostfix(UnEquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("UnEquipItemSystem Prefix...");
+            Plugin.Log.LogInfo("UnEquipItemSystem Postfix...");
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
         }
@@ -47,28 +46,10 @@ namespace Cobalt.Hooks
             {
                 foreach (Entity entity in entities)
                 {
-                    if (entity.Has<EquipItemEvent>())
-                    {
-                        //entity.LogComponentTypes();
-                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                        Entity character = fromCharacter.Character;
-
-                        //string currentWeapon = GetCurrentWeaponType(character).ToString();
-                        //Plugin.Log.LogInfo($"{currentWeapon}");
-                        GearOverride.SetLevel(character);
-                        UnitStatsOverride.UpdatePlayerStats(character);
-                    }
-                    else if (entity.Has<UnequipItemEvent>())
-                    {
-                        //entity.LogComponentTypes();
-                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                        Entity character = fromCharacter.Character;
-
-                        //string currentWeapon = GetCurrentWeaponType(character).ToString();
-                        //Plugin.Log.LogInfo($"{currentWeapon}");
-                        GearOverride.SetLevel(character);
-                        UnitStatsOverride.UpdatePlayerStats(character);
-                    }
+                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
+                    Entity character = fromCharacter.Character;
+                    UpdatePlayerStats(character);
+                    
                 }
             }
             catch (Exception e)
@@ -84,14 +65,16 @@ namespace Cobalt.Hooks
 
     public static class UnitStatsOverride
     {
-        private static void ApplyWeaponBonuses(EntityManager entityManager, Entity character, string weaponType)
+        public static readonly PrefabGUID unarmed = new(-2075546002);
+
+        private static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
-            var stats = character.Read<UnitStats>();
-            var health = character.Read<Health>();  // Assuming there's a Health component
-
+            UnitStats stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
             IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+
+            GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), handler.GetExperienceData(steamId).Key);
+            GearOverride.SetLevel(character, "weapon");
             if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
@@ -101,28 +84,6 @@ namespace Cobalt.Hooks
                     Plugin.Log.LogInfo($"Applying {bonus} | {scaledBonus}");
                     switch (weaponStatType)
                     {
-                        case WeaponStatType.MaxHealth:
-                            ModifyUnitStatBuff_DOTS modifyUnitStatBuff_DOTS = new()
-                            {
-                                StatType = UnitStatType.MaxHealth,
-                                Value = scaledBonus + BaseWeaponStats[WeaponStatType.MaxHealth],
-                                ModificationType = ModificationType.Set,
-                                Modifier = 1,
-                                Id = ModificationId.NewId(9)
-                            };
-                            if (!character.Has<ModifyUnitStatBuff_DOTS>())
-                            {
-                                var buffer = entityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(character);
-                                buffer.Add(modifyUnitStatBuff_DOTS);
-                            }
-                            else
-                            {
-                                var buffer = character.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-                                buffer.Add(modifyUnitStatBuff_DOTS);
-                            }
-                            health.MaxHealth._Value += scaledBonus;
-                            break;
-
                         case WeaponStatType.PhysicalPower:
                             stats.PhysicalPower._Value += scaledBonus;
                             break;
@@ -150,20 +111,16 @@ namespace Cobalt.Hooks
                 }
 
                 character.Write(stats);
-                character.Write(health);
             }
             else
             {
                 Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
-
-            // Add the bonuses
         }
 
-        public static void RemoveWeaponBonuses(EntityManager entityManager, Entity character, string weaponType)
+        public static void RemoveWeaponBonuses(Entity character, string weaponType)
         {
             var stats = character.Read<UnitStats>();
-            var health = character.Read<Health>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
             //IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
@@ -175,34 +132,6 @@ namespace Cobalt.Hooks
                     Plugin.Log.LogInfo($"Resetting {weaponStatType} to {BaseWeaponStats[weaponStatType]}");
                     switch (weaponStatType)
                     {
-                        case WeaponStatType.MaxHealth:
-                            ModifyUnitStatBuff_DOTS modifyUnitStatBuff_DOTS = new()
-                            {
-                                StatType = UnitStatType.MaxHealth,
-                                Value = BaseWeaponStats[WeaponStatType.MaxHealth],
-                                ModificationType = ModificationType.Set,
-                                Modifier = 1,
-                                Id = ModificationId.NewId(5)
-                            };
-                            if (!character.Has<ModifyUnitStatBuff_DOTS>())
-                            {
-                                var buffer = entityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(character);
-                                buffer.Add(modifyUnitStatBuff_DOTS);
-                            }
-                            else
-                            {
-                                var musb_dots_buffer = character.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-                                for (int i = 0; i < musb_dots_buffer.Length; i++)
-                                {
-                                    if (musb_dots_buffer[i].Id.Id.Equals(9))
-                                    {
-                                        musb_dots_buffer.RemoveAt(i);
-                                    }
-                                }
-                            }
-                            health.MaxHealth._Value = BaseWeaponStats[WeaponStatType.MaxHealth];
-                            break;
-
                         case WeaponStatType.PhysicalPower:
                             stats.PhysicalPower._Value = BaseWeaponStats[WeaponStatType.PhysicalPower];
                             break;
@@ -229,7 +158,6 @@ namespace Cobalt.Hooks
                     }
                 }
                 character.Write(stats);
-                character.Write(health);
             }
             else
             {
@@ -239,7 +167,7 @@ namespace Cobalt.Hooks
             // Subtract the bonuses
         }
 
-        public static void ApplyBloodBonuses(Entity character)
+        public static void ApplyBloodBonuses(Entity character) // tie extra spell slots to sanguimancy
         {
             var stats = character.Read<UnitStats>();
 
@@ -325,7 +253,8 @@ namespace Cobalt.Hooks
             {
                 var xpData = handler.GetExperienceData(steamId);
                 int currentLevel = WeaponMasterySystem.ConvertXpToLevel(xpData.Value);
-
+                //Equipment equipment = character.Read<Equipment>();
+                //GearOverride.SetWeaponItemLevel(equipment, currentLevel);
                 float maxBonus = WeaponStatManager.BaseCaps[statType];
                 float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
                 Plugin.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
@@ -358,6 +287,119 @@ namespace Cobalt.Hooks
             return 0; // Return 0 if no blood stats are found
         }
 
+        public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
+        {
+            Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
+            if (!VWorld.Server.EntityManager.Exists(weapon))
+            {
+                return WeaponMasterySystem.WeaponType.Unarmed;
+            }
+            return WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
+        }
+
+        public static void UpdatePlayerStats(Entity character)
+        {
+            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            EntityManager entityManager = VWorld.Server.EntityManager;
+
+            // Get the current weapon type
+            string currentWeapon = GetCurrentWeaponType(character).ToString();
+            if (currentWeapon.Equals("Unarmed"))
+            {
+                GearOverride.SetLevel(character, "spell");
+            }
+            else
+            {
+                GearOverride.SetLevel(character, "armor");
+            }
+
+            // Initialize player's weapon dictionary if it doesn't exist
+            if (!DataStructures.PlayerEquippedWeapon.TryGetValue(steamId, out var equippedWeapons))
+            {
+                equippedWeapons = [];
+                DataStructures.PlayerEquippedWeapon[steamId] = equippedWeapons;
+            }
+
+            // Check if weapon has changed
+            if (!equippedWeapons.TryGetValue(currentWeapon, out var isCurrentWeaponEquipped) || !isCurrentWeaponEquipped)
+            {
+                // Find the previous weapon (the one that is set to true)
+                string previousWeapon = equippedWeapons.FirstOrDefault(w => w.Value).Key;
+
+                Plugin.Log.LogInfo($"Previous: {previousWeapon} | Current: {currentWeapon}");
+
+                // Apply and remove stat bonuses based on weapon change
+                if (!string.IsNullOrEmpty(previousWeapon))
+                {
+                    Plugin.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
+                    RemoveWeaponBonuses(character, previousWeapon);  // Remove bonuses from the previous weapon
+                    equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
+                }
+
+                Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
+                ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
+                equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
+
+                // Save the player's weapon state
+                DataStructures.SavePlayerEquippedWeapon();
+            }
+
+            ApplyBloodBonuses(character);
+            
+        }
+    }
+
+    public static class GearOverride
+    {
+        public static void SetLevel(Entity player, string context)
+        {
+            //player.LogComponentTypes();
+            ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
+            {
+                Equipment equipment = player.Read<Equipment>();
+
+                int playerLevel = xpData.Key;
+                if (context.Equals("spell"))
+                {
+                    equipment.WeaponLevel._Value = 0f;
+                    equipment.ArmorLevel._Value = 0f;
+                    equipment.SpellLevel._Value = playerLevel;
+                }
+                else if (context.Equals("armor"))
+                {
+                    equipment.WeaponLevel._Value = 0f;
+                    equipment.SpellLevel._Value = 0f;
+                    equipment.ArmorLevel._Value = playerLevel;
+                }
+                else if (context.Equals("weapon"))
+                {
+                    equipment.ArmorLevel._Value = 0f;
+                    equipment.SpellLevel._Value = 0f;
+                    equipment.WeaponLevel._Value = playerLevel;
+                }
+                // weapon level of the weapon mirrors player weapon level if higher?
+
+                player.Write(equipment);
+
+                Plugin.Log.LogInfo($"Set gearScore to {playerLevel} with {context}");
+            }
+        }
+
+        public static void SetWeaponItemLevel(Equipment equipment, int level)
+        {
+            if (!equipment.WeaponSlot.SlotEntity._Entity.Equals(Entity.Null))
+            {
+                WeaponLevelSource weaponLevel = equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>();
+                weaponLevel.Level = level * 10 / 3;
+                equipment.WeaponSlot.SlotEntity._Entity.Write(weaponLevel);
+                Plugin.Log.LogInfo($"Set weapon level source to {level}.");
+            }
+        }
+    }
+
+    public static class BaseStats
+    {
         private static void ApplyPrestigeBonuses(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
@@ -427,60 +469,8 @@ namespace Cobalt.Hooks
             return 0.01f;
         }
 
-        public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
-        {
-            // Assuming an implementation to retrieve the current weapon type
-            Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-            if (!weapon.Has<WeaponLevelSource>()) return WeaponMasterySystem.WeaponType.Unarmed;
-            else return WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
-        }
-
-        public static void UpdatePlayerStats(Entity character)
-        {
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            EntityManager entityManager = VWorld.Server.EntityManager;
-
-            // Get the current weapon type
-            string currentWeapon = GetCurrentWeaponType(character).ToString();
-
-            // Initialize player's weapon dictionary if it doesn't exist
-            var equippedWeapons = DataStructures.PlayerEquippedWeapon[steamId];
-
-            // Check if weapon has changed
-            if (!equippedWeapons.TryGetValue(currentWeapon, out var isCurrentWeaponEquipped) || !isCurrentWeaponEquipped)
-            {
-                // Find the previous weapon (the one that is set to true)
-                string previousWeapon = equippedWeapons.FirstOrDefault(w => w.Value).Key;
-
-                Plugin.Log.LogInfo($"Previous: {previousWeapon} | Current: {currentWeapon}");
-
-                // Apply and remove stat bonuses based on weapon change.
-                if (previousWeapon != null)
-                {
-                    //Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
-                    //ApplyWeaponBonuses(entityManager, character, currentWeapon);  // Apply bonuses from the new weapon
-
-                    Plugin.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
-                    RemoveWeaponBonuses(entityManager, character, previousWeapon);  // Remove bonuses from the previous weapon
-                    Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
-                    ApplyWeaponBonuses(entityManager, character, currentWeapon);  // Apply bonuses from the new weapon
-                    equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
-                }
-                
-
-                equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
-                DataStructures.SavePlayerEquippedWeapon();
-            }
-
-            ApplyBloodBonuses(character);
-        }
-    }
-
-    public static class BaseStats
-    {
         private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
         {
-            { WeaponStatType.MaxHealth, 125f },
             { WeaponStatType.AttackSpeed, 0f },
             { WeaponStatType.PhysicalPower, 10f },
             { WeaponStatType.SpellPower, 10f },
@@ -522,83 +512,6 @@ namespace Cobalt.Hooks
         {
             get => basePrestigeStats;
             set => basePrestigeStats = value;
-        }
-    }
-
-    public static class GearOverride
-    {
-        public static void SetLevel(Entity player)
-        {
-            ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
-            {
-                Equipment equipment = player.Read<Equipment>();
-                RemoveItemLevelSources(player, equipment);
-                //RemoveItemLevels(player, equipment);
-                if (equipment.WeaponLevel._Value.Equals(xpData.Key) && equipment.ArmorLevel._Value.Equals(0f) && equipment.SpellLevel._Value.Equals(0f))
-                {
-                    Plugin.Log.LogInfo($"GearScore already set to {xpData.Key}.");
-                    return;
-                }
-
-                int playerLevel = xpData.Key;
-                equipment.ArmorLevel._Value = 0f;
-                equipment.SpellLevel._Value = 0f;
-                equipment.WeaponLevel._Value = playerLevel;
-                
-                player.Write(equipment);
-                Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
-            }
-        }
-
-        public static void RemoveItemLevelSources(Entity character, Equipment equipment)
-        {
-            // Reset level for Armor Chest Slot
-            Plugin.Log.LogInfo($"Removing item levels...");
-            if (!equipment.ArmorChestSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
-            {
-                ArmorLevelSource chestLevel = equipment.ArmorChestSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
-                chestLevel.Level = 0f;
-                equipment.ArmorChestSlot.SlotEntity._Entity.Write(chestLevel);
-            }
-
-            // Reset level for Armor Footgear Slot
-            if (!equipment.ArmorFootgearSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorFootgearSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
-            {
-                ArmorLevelSource footgearLevel = equipment.ArmorFootgearSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
-                footgearLevel.Level = 0f;
-                equipment.ArmorFootgearSlot.SlotEntity._Entity.Write(footgearLevel);
-            }
-
-            // Reset level for Armor Gloves Slot
-            if (!equipment.ArmorGlovesSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorGlovesSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
-            {
-                ArmorLevelSource glovesLevel = equipment.ArmorGlovesSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
-                glovesLevel.Level = 0f;
-                equipment.ArmorGlovesSlot.SlotEntity._Entity.Write(glovesLevel);
-            }
-
-            // Reset level for Armor Legs Slot
-            if (!equipment.ArmorLegsSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.ArmorLegsSlot.SlotEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0f))
-            {
-                ArmorLevelSource legsLevel = equipment.ArmorLegsSlot.SlotEntity._Entity.Read<ArmorLevelSource>();
-                legsLevel.Level = 0f;
-                equipment.ArmorLegsSlot.SlotEntity._Entity.Write(legsLevel);
-            }
-
-            // Reset level for Grimoire Slot (Spell Level)
-            if (!equipment.GrimoireSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>().Level.Equals(0f))
-            {
-                SpellLevelSource spellLevel = equipment.GrimoireSlot.SlotEntity._Entity.Read<SpellLevelSource>();
-                spellLevel.Level = 0f;
-                equipment.GrimoireSlot.SlotEntity._Entity.Write(spellLevel);
-            }
-            if (!equipment.WeaponSlot.SlotEntity._Entity.Equals(Entity.Null) && !equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>().Level.Equals(0f))
-            {
-                WeaponLevelSource weaponLevel = equipment.WeaponSlot.SlotEntity._Entity.Read<WeaponLevelSource>();
-                weaponLevel.Level = 0f;
-                equipment.WeaponSlot.SlotEntity._Entity.Write(weaponLevel);
-            }
         }
     }
 }

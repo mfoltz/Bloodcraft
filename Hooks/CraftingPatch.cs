@@ -3,6 +3,7 @@ using Cobalt.Systems;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -18,7 +19,7 @@ public class CraftingPatch
     {
         private static readonly float BaseCraftingXP = 50;
         private static readonly float craftRate = VWorld.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.CraftRateModifier;
-
+        
         public static void Prefix(UpdateCraftingSystem __instance)
         {
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();

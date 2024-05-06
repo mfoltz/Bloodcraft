@@ -107,7 +107,7 @@ namespace Cobalt.Core.Commands
             PrefabGUID weapon = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
             string weaponType = WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon).ToString();
 
-            UnitStatsOverride.RemoveWeaponBonuses(entityManager,character, weaponType);
+            UnitStatsOverride.RemoveWeaponBonuses(character, weaponType);
             PlayerWeaponUtilities.ResetChosenStats(steamID, weaponType);
             //DataStructures.SavePlayerWeaponChoices();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
@@ -130,13 +130,29 @@ namespace Cobalt.Core.Commands
             }
 
             ulong steamId = ctx.Event.User.PlatformId;
-            var xpData = masteryHandler.GetExperienceData(steamId);
+            //var xpData = masteryHandler.GetExperienceData(steamId);
 
             // Update mastery level and XP
-            xpData = new KeyValuePair<int, float>(level, WeaponMasterySystem.ConvertLevelToXp(level));
+            var xpData = new KeyValuePair<int, float>(level, WeaponMasterySystem.ConvertLevelToXp(level));
             masteryHandler.UpdateExperienceData(steamId, xpData);
             masteryHandler.SaveChanges();
+
             ctx.Reply($"Mastery level for {masteryHandler.GetWeaponType()} set to {level}.");
         }
+        
+        [Command(name: "setLevelSource", shortHand: "source", adminOnly: true, usage: ".source [Level]", description: "Sets level source of weapon for testing.")]
+        public static void SetLevelSource(ChatCommandContext ctx, int level)
+        {
+            Entity character = ctx.Event.SenderCharacterEntity;
+            Equipment equipment = character.Read<Equipment>();
+            GearOverride.SetWeaponItemLevel(equipment, level);
+        }
+        [Command(name: "setLevelTest", shortHand: ".level", adminOnly: true, usage: ".level [Level]", description: "Sets level source of weapon for testing.")]
+        public static void SetLevel(ChatCommandContext ctx, string context)
+        {
+            Entity character = ctx.Event.SenderCharacterEntity;
+            GearOverride.SetLevel(character, context);
+        }
+        
     }
 }

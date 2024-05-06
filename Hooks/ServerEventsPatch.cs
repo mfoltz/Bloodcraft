@@ -20,6 +20,7 @@ namespace Cobalt.Hooks
                 if (loadState == ServerStartupState.State.SuccessfulStartup)
                 {
                     OnGameDataInitialized?.Invoke(__instance.World);
+                    
                 }
             }
             catch (Exception ex)
