@@ -1,5 +1,6 @@
 ﻿using Cobalt.Core;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -202,13 +203,13 @@ namespace Cobalt.Systems
                 if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
-                    string floating = gainedXP.ToString()+" "+professionName.ToLower();
-                    Entity sct = ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter._Entity, gainedXP, sctType);
-                    entityManager.Instantiate(sct);
-                    Plugin.Log.LogInfo("Attempted to create scrolling combat text...");
-                    //serverGameManager.CreateScrollingCombatText(gainedXP, sctType, , user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
+                    //string floating = gainedXP.ToString()+" "+professionName.ToLower();
+                    //Entity sct = ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter, gainedXP, sctType);
+                    //entityManager.Instantiate(sct);
+                    //Plugin.Log.LogInfo("Attempted to create scrolling combat text...");
+                    serverGameManager.CommandBuffer.AllocateIfNotCreated(Allocator.Temp);
+                    serverGameManager.CreateScrollingCombatText(gainedXP, sctType, localToWorld.Up, user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
-
                 }
             }
         }

@@ -145,13 +145,13 @@ namespace Cobalt.Core.Commands
         {
             Entity character = ctx.Event.SenderCharacterEntity;
             Equipment equipment = character.Read<Equipment>();
-            GearOverride.SetWeaponItemLevel(equipment, level);
+            //GearOverride.SetWeaponItemLevel(equipment, level);
         }
         [Command(name: "setLevelTest", shortHand: ".level", adminOnly: true, usage: ".level [Level]", description: "Sets level source of weapon for testing.")]
         public static void SetLevel(ChatCommandContext ctx, string context)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
-            GearOverride.SetLevel(character, context);
+            GearOverride.SetLevel(character, VWorld.Server.EntityManager);
         }
         
     }

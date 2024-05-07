@@ -22,6 +22,7 @@ public class CraftingPatch
         
         public static void Prefix(UpdateCraftingSystem __instance)
         {
+            Plugin.Log.LogInfo("UpdateCraftingSystemPrefix called...");
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
             NativeArray<Entity> entities = __instance.__query_1831452858_0.ToEntityArray(Allocator.Temp);
             try

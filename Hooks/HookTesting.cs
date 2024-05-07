@@ -22,12 +22,12 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class TestPatchesPleaseIgnore
     {
-        [HarmonyPatch(typeof(ClaimedAchievementsClientSystem), nameof(ClaimedAchievementsClientSystem.OnUpdate))]
+        [HarmonyPatch(typeof(ChatMessageSystem), nameof(InteractSystemHUD.OnUpdate))]
         [HarmonyPrefix]
-        private static void AchievementPrefix(ClaimedAchievementsClientSystem __instance)
+        private static void InteractSystemHUDPrefix(InteractSystemHUD __instance)
         {
-            Plugin.Log.LogInfo("AchievementPrefix...");
-            NativeArray<Entity> entities = __instance.__query_2001856168_0.ToEntityArray(Allocator.Temp);
+            Plugin.Log.LogInfo("InteractSystemHUDPrefix...");
+            NativeArray<Entity> entities = __instance.__query_611024430_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -39,7 +39,19 @@ namespace Cobalt.Hooks
             {
                 entities.Dispose();
             }
-            entities = __instance.__query_2001856168_1.ToEntityArray(Allocator.Temp);
+            entities = __instance.__query_611024430_1.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    entity.LogComponentTypes();
+                }
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+            entities = __instance.__query_611024430_2.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -53,71 +65,5 @@ namespace Cobalt.Hooks
             }
         }
         
-        [HarmonyPatch(typeof(CommonClientDataSystem), nameof(CommonClientDataSystem.OnUpdate))]
-        [HarmonyPrefix]
-        private static void CommonClientDataSystemPrefix(CommonClientDataSystem __instance)
-        {
-            Plugin.Log.LogInfo("AchievementPrefix...");
-            NativeArray<Entity> entities = __instance.__query_1840110765_0.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-            entities = __instance.__query_1840110765_1.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-            entities = __instance.__query_1840110765_2.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-            entities = __instance.__query_1840110765_3.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-            entities = __instance.__query_1840110765_4.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
     }
 }

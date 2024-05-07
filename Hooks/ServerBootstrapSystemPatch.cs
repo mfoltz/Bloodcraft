@@ -12,16 +12,10 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class ServerBootstrapPatches
     {
-        private static bool flag = false;
         [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
         [HarmonyPrefix]
         private static unsafe void OnUserConnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
         {
-            if (!flag)
-            {
-                Plugin.UpdateBaseStats();
-                flag = true;
-            }
             int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
             ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
             Entity userEntity = serverClient.UserEntity;
