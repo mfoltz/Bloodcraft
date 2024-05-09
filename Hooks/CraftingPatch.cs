@@ -20,11 +20,11 @@ public class CraftingPatch
         private static readonly float BaseCraftingXP = 50;
         private static readonly float craftRate = VWorld.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.CraftRateModifier;
         
-        public static void Prefix(UpdateCraftingSystem __instance)
+        public static void Postfix(UpdateCraftingSystem __instance)
         {
-            Plugin.Log.LogInfo("UpdateCraftingSystemPrefix called...");
+            //Plugin.Log.LogInfo("UpdateCraftingSystemPrefix called...");
             PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
-            NativeArray<Entity> entities = __instance.__query_1831452858_0.ToEntityArray(Allocator.Temp);
+            NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -76,6 +76,7 @@ public class CraftingPatch
             {
                 entities.Dispose();
             }
+            
         }
     }
 
@@ -84,6 +85,7 @@ public class CraftingPatch
     {
         public static void Prefix(StartCraftingSystem __instance)
         {
+            Plugin.Log.LogInfo("StartCraftingSystemPrefix called...");
             NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
             try
             {
@@ -122,6 +124,7 @@ public class CraftingPatch
     {
         public static void Prefix(StopCraftingSystem __instance)
         {
+            Plugin.Log.LogInfo("StopCraftingSystemPrefix called...");
             NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);// double check this
             try
             {

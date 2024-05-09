@@ -1,4 +1,5 @@
 ﻿using Cobalt.Core;
+using Cobalt.Hooks;
 using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using ProjectM.Network;
@@ -101,7 +102,11 @@ namespace Cobalt.Systems.Expertise
 
             if (leveledUp)
             {
+                Entity character = user.LocalCharacter._Entity;
+                Equipment equipment = character.Read<Equipment>();
                 message = $"{weaponType} improved to [<color=white>{newLevel}</color>]";
+                GearOverride.SetWeaponItemLevel(equipment, newLevel * 10 / 3, VWorld.Server.EntityManager);
+                GearOverride.SetLevel(user.LocalCharacter._Entity, VWorld.Server.EntityManager);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
@@ -112,6 +117,7 @@ namespace Cobalt.Systems.Expertise
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }
+            
         }
 
         public static int GetLevelProgress(ulong steamID, IWeaponMasteryHandler handler)

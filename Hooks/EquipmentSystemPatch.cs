@@ -23,12 +23,13 @@ namespace Cobalt.Hooks
     public class EquipmentPatch
     {
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         private static void EquipItemSystemPostfix(EquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("EquipItemSystem Postfix...");
+            Plugin.Log.LogInfo("EquipItemSystem Postfix..."); // remove armor and spell level sources
             NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
-            HandleEquipmentEvent(__instance.EntityManager, entities);
+            HandleEquipmentEvent(entities);
+            GearOverride.HandleArmorSpellSources(entities);
         }
 
         [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
@@ -37,10 +38,10 @@ namespace Cobalt.Hooks
         {
             Plugin.Log.LogInfo("UnEquipItemSystem Postfix...");
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-            HandleEquipmentEvent(__instance.EntityManager, entities);
+            HandleEquipmentEvent(entities);
         }
 
-        private static void HandleEquipmentEvent(EntityManager entityManager, NativeArray<Entity> entities)
+        private static void HandleEquipmentEvent(NativeArray<Entity> entities)
         {
             try
             {
@@ -48,7 +49,7 @@ namespace Cobalt.Hooks
                 {
                     FromCharacter fromCharacter = entity.Read<FromCharacter>();
                     Entity character = fromCharacter.Character;
-                    UpdatePlayerStats(character, entityManager);
+                    UpdatePlayerStats(character);
                 }
             }
             catch (Exception e)
@@ -66,13 +67,12 @@ namespace Cobalt.Hooks
     {
         public static readonly PrefabGUID unarmed = new(-2075546002);
 
-        private static void ApplyWeaponBonuses(Entity character, string weaponType, EntityManager entityManager)
+        private static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
             UnitStats stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
 
-            GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), handler.GetExperienceData(steamId).Key, entityManager);
             if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
@@ -295,7 +295,7 @@ namespace Cobalt.Hooks
             return WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 
-        public static void UpdatePlayerStats(Entity character, EntityManager entityManager)
+        public static void UpdatePlayerStats(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             //EntityManager entityManager = VWorld.Server.EntityManager;
@@ -327,7 +327,7 @@ namespace Cobalt.Hooks
                 }
 
                 Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
-                ApplyWeaponBonuses(character, currentWeapon, entityManager);  // Apply bonuses from the new weapon
+                ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
                 equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
 
                 // Save the player's weapon state
@@ -335,7 +335,7 @@ namespace Cobalt.Hooks
             }
 
             ApplyBloodBonuses(character);
-            GearOverride.SetLevel(character, entityManager);
+            //GearOverride.SetLevel(character, entityManager);
         }
     }
 
@@ -359,6 +359,57 @@ namespace Cobalt.Hooks
                 entityManager.SetComponentData(player, equipment);
 
                 Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
+            }
+        }
+        public static void HandleArmorSpellSources(NativeArray<Entity> entities)
+        {
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
+                    Entity character = fromCharacter.Character;
+                    Equipment equipment = character.Read<Equipment>();
+                    RemoveArmorSpellSources(equipment);
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Exited RemoveArmorSpellSources early: {e}");
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+        public static void RemoveArmorSpellSources(Equipment equipment)
+        {
+            EntityManager entityManager = VWorld.Server.EntityManager;
+            List<Entity> entities =
+            [
+                equipment.ArmorChestSlot.SlotEntity._Entity,
+                equipment.ArmorFootgearSlot.SlotEntity._Entity,
+                equipment.ArmorGlovesSlot.SlotEntity._Entity,
+                equipment.ArmorLegsSlot.SlotEntity._Entity,
+                equipment.GrimoireSlot.SlotEntity._Entity
+            ];
+            foreach (Entity entity in entities)
+            {
+                if (entityManager.Exists(entity))
+                {
+                    if (entity.Has<ArmorLevelSource>())
+                    {
+                        ArmorLevelSource armorLevel = entity.Read<ArmorLevelSource>();
+                        armorLevel.Level = 0;
+                        entity.Write(armorLevel);
+                    }
+                    else if (entity.Has<SpellLevelSource>())
+                    {
+                        SpellLevelSource spellLevel = entity.Read<SpellLevelSource>();
+                        spellLevel.Level = 0;
+                        entity.Write(spellLevel);
+                    }
+                }
             }
         }
 

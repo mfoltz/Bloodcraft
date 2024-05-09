@@ -23,8 +23,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files (x86)\\Steam\\steamapps\\common\\VRisingBeta\\VRising_Server\\BepInEx\\interop": {},
-          "C:\\Users\\mitch\\.nuget\\RPDAddOnsPackages": {},
+          "C:\\Program Files (x86)\\Steam\\steamapps\\common\\VRising\\VRising_Server\\BepInEx\\interop": {},
           "https://api.nuget.org/v3/index.json": {},
           "https://nuget.bepinex.dev/v3/index.json": {},
           "https://nuget.samboy.dev/v3/index.json": {}
