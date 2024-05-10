@@ -18,7 +18,7 @@ namespace Cobalt.Hooks
             {
                 foreach(Entity entity in entities)
                 {
-                    //entity.LogComponentTypes();
+                    entity.LogComponentTypes();
                 }
             }
             finally

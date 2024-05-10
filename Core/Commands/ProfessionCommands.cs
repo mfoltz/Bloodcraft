@@ -41,6 +41,11 @@ namespace Cobalt.Core.Commands
                 ctx.Reply($"You haven't gained any levels in {professionHandler.GetProfessionName()} yet. ");
             }
         }
+        [Command(name: "teststrip", shortHand: "teststrip", adminOnly: false, usage: ".teststrip", description: "tes")]
+        public static void TestCommand(ChatCommandContext ctx)
+        {
+            Plugin.StripLevelSources();
+        }
 
         public class BuildingCostsToggle
         {

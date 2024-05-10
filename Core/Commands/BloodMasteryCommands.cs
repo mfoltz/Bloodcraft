@@ -10,7 +10,6 @@ namespace Cobalt.Core.Commands
 {
     public static class BloodMasteryCommands
     {
-        private static PrefabGUID holder;
 
         [Command(name: "getSanguimancyProgress", shortHand: "gsp", adminOnly: false, usage: ".gsp", description: "Display your current sanguimancy progress.")]
         public static void GetMasteryCommand(ChatCommandContext ctx)

@@ -67,7 +67,6 @@ namespace Cobalt.Core
 
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             InitConfig();
-            ServerEventsPatches.OnGameDataInitialized += GameDataOnInitialize;
             CommandRegistry.RegisterAll();
             LoadAllData();
             //UpdateStats();
@@ -78,7 +77,8 @@ namespace Cobalt.Core
         
         private void GameDataOnInitialize(World world)
         {
-            
+            // entity modifications go here?
+
         }
 
         private static void InitConfig()
@@ -189,7 +189,58 @@ namespace Cobalt.Core
             
         }
 
-       
+        public static void StripLevelSources()
+        {
+            EntityQuery equippablesQuery = VWorld.Server.EntityManager.CreateEntityQuery(new EntityQueryDesc()
+            {
+                All = new ComponentType[] {
+                    ComponentType.ReadOnly<Equippable>(),
+                },
+                Options = EntityQueryOptions.IncludeAll
+            });
+            NativeArray<Entity> equippables = equippablesQuery.ToEntityArray(Allocator.TempJob);
+            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            try
+            {
+                foreach (var equippable in equippables)
+                {
+                    if (!equippable.Has<PrefabGUID>()) continue;
+                    Plugin.Log.LogInfo($"Removing level source from {equippable.Read<PrefabGUID>().LookupName()}...");
+                    PrefabGUID equippablePrefab = equippable.Read<PrefabGUID>();
+                    Entity entity = prefabCollectionSystem._PrefabGuidToEntityMap[equippablePrefab];
+                    if (entity.Has<ArmorLevelSource>())
+                    {
+                        ArmorLevelSource armorLevelSource = entity.Read<ArmorLevelSource>();
+                        armorLevelSource.Level = 0f;
+                        entity.Write(armorLevelSource);
+                    }
+                    else if (entity.Has<SpellLevelSource>())
+                    {
+                        SpellLevelSource spellLevelSource = entity.Read<SpellLevelSource>();
+                        spellLevelSource.Level = 0f;
+                        entity.Write(spellLevelSource);
+                    }
+                    else if (entity.Has<WeaponLevelSource>())
+                    {
+                        WeaponLevelSource weaponLevelSource = entity.Read<WeaponLevelSource>();
+                        weaponLevelSource.Level = 0f;
+                        entity.Write(weaponLevelSource);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError(ex);
+            }
+            finally
+            {
+                equippablesQuery.Dispose();
+                equippables.Dispose();
+            }
+
+        }
+
+        
 
         
     }

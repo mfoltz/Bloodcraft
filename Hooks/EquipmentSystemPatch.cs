@@ -40,6 +40,55 @@ namespace Cobalt.Hooks
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
         }
+        [HarmonyPatch(typeof(EquipmentSystem_Client), nameof(EquipmentSystem_Client.OnUpdate))]
+        [HarmonyPrefix]
+        private static void Prefix(EquipmentSystem_Client __instance)
+        {
+            Plugin.Log.LogInfo("EquipmentSystem_Client Prefix...");
+            NativeArray<Entity> entities = __instance.__query_1577456885_0.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    entity.LogComponentTypes();
+                }
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+            entities = __instance.__query_1577456885_1.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    entity.LogComponentTypes();
+                }
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+        [HarmonyPatch(typeof(EquipmentTransferSystem), nameof(EquipmentTransferSystem.OnUpdate))]
+        [HarmonyPrefix]
+        private static void Prefix(EquipmentTransferSystem __instance)
+        {
+            Plugin.Log.LogInfo("EquipmentTransferSystem Prefix...");
+            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    entity.LogComponentTypes();
+                }
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+            
+        }
 
         private static void HandleEquipmentEvent(NativeArray<Entity> entities)
         {
