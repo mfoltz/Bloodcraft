@@ -151,7 +151,7 @@ namespace Cobalt.Core.Commands
         public static void SetLevel(ChatCommandContext ctx, string context)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
-            GearOverride.SetLevel(character, VWorld.Server.EntityManager);
+            GearOverride.SetLevel(character);
         }
         
     }

@@ -4,6 +4,7 @@ using Cobalt.Systems.Expertise;
 using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
@@ -24,71 +25,48 @@ namespace Cobalt.Hooks
     {
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPrefix]
-        private static void EquipItemSystemPostfix(EquipItemSystem __instance)
+        private static void EquipItemSystemPrefix(EquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("EquipItemSystem Postfix..."); // remove armor and spell level sources
+            Plugin.Log.LogInfo("EquipItemSystem Prefix..."); //prefix here to properly catch previous weapon
             NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
-            GearOverride.HandleArmorSpellSources(entities);
+
         }
 
         [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
-        [HarmonyPostfix]
-        private static void UnEquipItemSystemPostfix(UnEquipItemSystem __instance)
+        [HarmonyPrefix]
+        private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("UnEquipItemSystem Postfix...");
+            Plugin.Log.LogInfo("UnEquipItemSystem Postfix..."); //should this be postfix?
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
         }
-        [HarmonyPatch(typeof(EquipmentSystem_Client), nameof(EquipmentSystem_Client.OnUpdate))]
-        [HarmonyPrefix]
-        private static void Prefix(EquipmentSystem_Client __instance)
+        
+        [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
+        [HarmonyPostfix]
+        private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
         {
-            Plugin.Log.LogInfo("EquipmentSystem_Client Prefix...");
-            NativeArray<Entity> entities = __instance.__query_1577456885_0.ToEntityArray(Allocator.TempJob);
+            Plugin.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
+            NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    entity.LogComponentTypes();
+                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
+                    EntityOwner entityOwner = entity.Read<EntityOwner>();
+                    GearOverride.SetLevel(entityOwner.Owner);
                 }
             }
-            finally
+            catch (Exception e)
             {
-                entities.Dispose();
-            }
-            entities = __instance.__query_1577456885_1.ToEntityArray(Allocator.TempJob);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
+                Plugin.Log.LogError($"Exited LevelPrefix early: {e}");
             }
             finally
             {
                 entities.Dispose();
             }
         }
-        [HarmonyPatch(typeof(EquipmentTransferSystem), nameof(EquipmentTransferSystem.OnUpdate))]
-        [HarmonyPrefix]
-        private static void Prefix(EquipmentTransferSystem __instance)
-        {
-            Plugin.Log.LogInfo("EquipmentTransferSystem Prefix...");
-            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-            
-        }
+
 
         private static void HandleEquipmentEvent(NativeArray<Entity> entities)
         {
@@ -99,6 +77,7 @@ namespace Cobalt.Hooks
                     FromCharacter fromCharacter = entity.Read<FromCharacter>();
                     Entity character = fromCharacter.Character;
                     UpdatePlayerStats(character);
+                    //GearOverride.SetLevel(character, VWorld.Server.EntityManager);
                 }
             }
             catch (Exception e)
@@ -390,77 +369,27 @@ namespace Cobalt.Hooks
 
     public static class GearOverride
     {
-        public static void SetLevel(Entity player, EntityManager entityManager)
+        public static void SetLevel(Entity player)
         {
             //player.LogComponentTypes();
             ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
                 int playerLevel = xpData.Key;
-                Equipment equipment = entityManager.GetComponentData<Equipment>(player);
-                equipment.ArmorLevel._Value = 0f;
-                equipment.SpellLevel._Value = 0f;
+                Equipment equipment = player.Read<Equipment>();
+                //equipment.ArmorLevel._Value = 0f;
+                //equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
                 
 
                 // weapon level of the weapon mirrors player weapon level if higher?
 
-                entityManager.SetComponentData(player, equipment);
+                player.Write(equipment);
 
-                Plugin.Log.LogInfo($"Set gearScore to {playerLevel}.");
+                Plugin.Log.LogInfo($"Set GearScore to {playerLevel}.");
             }
         }
-        public static void HandleArmorSpellSources(NativeArray<Entity> entities)
-        {
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                    Entity character = fromCharacter.Character;
-                    Equipment equipment = character.Read<Equipment>();
-                    RemoveArmorSpellSources(equipment);
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogError($"Exited RemoveArmorSpellSources early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-        public static void RemoveArmorSpellSources(Equipment equipment)
-        {
-            EntityManager entityManager = VWorld.Server.EntityManager;
-            List<Entity> entities =
-            [
-                equipment.ArmorChestSlot.SlotEntity._Entity,
-                equipment.ArmorFootgearSlot.SlotEntity._Entity,
-                equipment.ArmorGlovesSlot.SlotEntity._Entity,
-                equipment.ArmorLegsSlot.SlotEntity._Entity,
-                equipment.GrimoireSlot.SlotEntity._Entity
-            ];
-            foreach (Entity entity in entities)
-            {
-                if (entityManager.Exists(entity))
-                {
-                    if (entity.Has<ArmorLevelSource>())
-                    {
-                        ArmorLevelSource armorLevel = entity.Read<ArmorLevelSource>();
-                        armorLevel.Level = 0;
-                        entity.Write(armorLevel);
-                    }
-                    else if (entity.Has<SpellLevelSource>())
-                    {
-                        SpellLevelSource spellLevel = entity.Read<SpellLevelSource>();
-                        spellLevel.Level = 0;
-                        entity.Write(spellLevel);
-                    }
-                }
-            }
-        }
+       
 
         public static void SetWeaponItemLevel(Equipment equipment, int level, EntityManager entityManager)
         {
@@ -468,7 +397,7 @@ namespace Cobalt.Hooks
             if (!weaponEntity.Equals(Entity.Null) && entityManager.HasComponent<WeaponLevelSource>(weaponEntity))
             {
                 WeaponLevelSource weaponLevel = entityManager.GetComponentData<WeaponLevelSource>(weaponEntity);
-                weaponLevel.Level = level * 10 / 3;
+                weaponLevel.Level = level;
                 entityManager.SetComponentData(weaponEntity, weaponLevel);
                 Plugin.Log.LogInfo($"Set weapon level source to {level}.");
             }

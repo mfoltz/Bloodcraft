@@ -135,7 +135,7 @@ namespace Cobalt.Systems.Experience
             if (leveledUp)
             {
                 int newLevel = DataStructures.PlayerExperience[SteamID].Key;
-                GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity, entityManager);
+                GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
             else

@@ -18,8 +18,6 @@ using ProjectM.UI;
 namespace Cobalt.Core
 {
     [BepInPlugin(Cobalt.MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    //[BepInDependency("gg.deca.Bloodstone")]
-    //[BepInDependency("gg.deca.VampireCommandFramework")]
     public class Plugin : BasePlugin
     {
         private Harmony _harmony;
@@ -71,14 +69,11 @@ namespace Cobalt.Core
             LoadAllData();
             //UpdateStats();
             Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
-
         }
 
-        
         private void GameDataOnInitialize(World world)
         {
             // entity modifications go here?
-
         }
 
         private static void InitConfig()
@@ -178,7 +173,6 @@ namespace Cobalt.Core
 
         public static void OnGameInitialized()
         {
-            
         }
 
         public static void UpdateBaseStats()
@@ -186,7 +180,6 @@ namespace Cobalt.Core
             VampireStatModifiers vampireStatModifiers = VWorld.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
             BaseWeaponStats[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
             BaseWeaponStats[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
-            
         }
 
         public static void StripLevelSources()
@@ -220,12 +213,15 @@ namespace Cobalt.Core
                         spellLevelSource.Level = 0f;
                         entity.Write(spellLevelSource);
                     }
+                    /*
                     else if (entity.Has<WeaponLevelSource>())
                     {
                         WeaponLevelSource weaponLevelSource = entity.Read<WeaponLevelSource>();
                         weaponLevelSource.Level = 0f;
                         entity.Write(weaponLevelSource);
                     }
+                    */
+                    
                 }
             }
             catch (Exception ex)
@@ -237,11 +233,6 @@ namespace Cobalt.Core
                 equippablesQuery.Dispose();
                 equippables.Dispose();
             }
-
         }
-
-        
-
-        
     }
 }
