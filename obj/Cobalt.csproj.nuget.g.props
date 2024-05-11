@@ -15,7 +15,4 @@
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)bepinex.plugininfoprops\2.1.0\build\BepInEx.PluginInfoProps.props" Condition="Exists('$(NuGetPackageRoot)bepinex.plugininfoprops\2.1.0\build\BepInEx.PluginInfoProps.props')" />
   </ImportGroup>
-  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgjQuery Condition=" '$(PkgjQuery)' == '' ">C:\Users\mitch\.nuget\packages\jquery\2.1.1</PkgjQuery>
-  </PropertyGroup>
 </Project>

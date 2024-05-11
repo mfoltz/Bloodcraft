@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mitch\\source\\Repos\\Cobalt\\Cobalt.csproj": {}
+    "C:\\Users\\mitch\\Source\\Repos\\Cobalt\\Cobalt.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mitch\\source\\Repos\\Cobalt\\Cobalt.csproj": {
+    "C:\\Users\\mitch\\Source\\Repos\\Cobalt\\Cobalt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mitch\\source\\Repos\\Cobalt\\Cobalt.csproj",
+        "projectUniqueName": "C:\\Users\\mitch\\Source\\Repos\\Cobalt\\Cobalt.csproj",
         "projectName": "Cobalt",
-        "projectPath": "C:\\Users\\mitch\\source\\Repos\\Cobalt\\Cobalt.csproj",
+        "projectPath": "C:\\Users\\mitch\\Source\\Repos\\Cobalt\\Cobalt.csproj",
         "packagesPath": "C:\\Users\\mitch\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mitch\\source\\Repos\\Cobalt\\obj\\",
+        "outputPath": "C:\\Users\\mitch\\Source\\Repos\\Cobalt\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mitch\\AppData\\Roaming\\NuGet\\NuGet.Config",
