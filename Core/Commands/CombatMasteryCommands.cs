@@ -1,7 +1,6 @@
 
 using Cobalt.Hooks;
 using Cobalt.Systems.Expertise;
-using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;

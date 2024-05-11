@@ -25,8 +25,8 @@
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
     <PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
+    <PackageReference Include="ClientUnhollowed" Version="1.0.0" />
     <PackageReference Include="HarmonyX" Version="2.10.1" />
-    <PackageReference Include="Package" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

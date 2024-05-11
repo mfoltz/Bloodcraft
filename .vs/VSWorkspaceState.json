@@ -1,13 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Core",
-    "\\Core\\Commands",
-    "\\Hooks",
-    "\\Systems",
-    "\\Systems\\Experience",
-    "\\Systems\\Expertise",
-    "\\Systems\\Professions"
+    "\\Core"
   ],
   "SelectedNode": "\\Cobalt.sln",
   "PreviewInSolutionExplorer": false

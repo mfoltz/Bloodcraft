@@ -2,7 +2,7 @@
 using ProjectM;
 using Stunlock.Core;
 
-namespace Cobalt.Systems
+namespace Cobalt.Systems.Professions
 {
     public interface IProfessionHandler
     {

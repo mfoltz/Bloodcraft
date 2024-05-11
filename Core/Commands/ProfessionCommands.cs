@@ -1,5 +1,4 @@
-
-using Cobalt.Systems;
+using Cobalt.Systems.Professions;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;

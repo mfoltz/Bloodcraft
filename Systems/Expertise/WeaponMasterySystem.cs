@@ -1,6 +1,5 @@
 ﻿using Cobalt.Core;
 using Cobalt.Hooks;
-using Cobalt.Systems.WeaponMastery;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;

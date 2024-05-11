@@ -1,5 +1,5 @@
 using Cobalt.Core;
-using Cobalt.Systems;
+using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -7,7 +7,7 @@ using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Systems.ProfessionUtilities;
+using static Cobalt.Systems.Professions.ProfessionUtilities;
 using User = ProjectM.Network.User;
 
 namespace Cobalt.Hooks;

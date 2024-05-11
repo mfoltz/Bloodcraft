@@ -10,7 +10,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using User = ProjectM.Network.User;
 
-namespace Cobalt.Systems
+namespace Cobalt.Systems.Professions
 {
     public class ProfessionSystem
     {
@@ -185,7 +185,7 @@ namespace Cobalt.Systems
             NotifyPlayer(prefabGUID, entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
 
-        private  static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+        private static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
             ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
             //EntityCommandBufferSystem entityCommandBufferSystem = VWorld.Server.GetExistingSystemManaged<EntityCommandBufferSystem>();

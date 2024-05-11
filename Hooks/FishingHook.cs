@@ -1,5 +1,5 @@
 using Cobalt.Core;
-using Cobalt.Systems;
+using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;

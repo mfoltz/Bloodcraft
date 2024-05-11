@@ -2,9 +2,9 @@
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
+using static Cobalt.Systems.Sanguimancy.BloodStatsSystem.BloodStatManager;
 
-namespace Cobalt.Systems.Bloodline
+namespace Cobalt.Systems.Sanguimancy
 {
     public class BloodMasterySystem
     {

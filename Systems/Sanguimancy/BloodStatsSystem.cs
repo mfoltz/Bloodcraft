@@ -1,6 +1,6 @@
 ﻿using Cobalt.Core;
 
-namespace Cobalt.Systems.Bloodline
+namespace Cobalt.Systems.Sanguimancy
 {
     public class BloodStatsSystem
     {

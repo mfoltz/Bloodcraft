@@ -1,7 +1,5 @@
 ﻿using Cobalt.Core;
-using Cobalt.Systems.Bloodline;
 using Cobalt.Systems.Expertise;
-using Cobalt.Systems.WeaponMastery;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -12,11 +10,12 @@ using Unity.Entities;
 using UnityEngine.TextCore.Text;
 using static Cobalt.Hooks.BaseStats;
 using static Cobalt.Hooks.UnitStatsOverride;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem.BloodStatManager;
+using static Cobalt.Systems.Sanguimancy.BloodStatsSystem;
+using static Cobalt.Systems.Sanguimancy.BloodStatsSystem.BloodStatManager;
 using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem;
 using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
+using Cobalt.Systems.Sanguimancy;
 
 namespace Cobalt.Hooks
 {

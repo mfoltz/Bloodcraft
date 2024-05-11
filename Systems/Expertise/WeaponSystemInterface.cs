@@ -1,6 +1,6 @@
 ﻿using Cobalt.Core;
 
-namespace Cobalt.Systems.WeaponMastery
+namespace Cobalt.Systems.Expertise
 {
     public interface IWeaponMasteryHandler
     {

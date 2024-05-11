@@ -1,11 +1,11 @@
 using Cobalt.Core;
-using Cobalt.Systems.Bloodline;
 using Cobalt.Systems.Experience;
 using Cobalt.Systems.Expertise;
+using Cobalt.Systems.Sanguimancy;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
-using ProfessionSystem = Cobalt.Systems.ProfessionSystem;
+using ProfessionSystem = Cobalt.Systems.Professions.ProfessionSystem;
 
 namespace Cobalt.Hooks;
 

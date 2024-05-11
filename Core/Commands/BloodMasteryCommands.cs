@@ -4,7 +4,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.Bloodline.BloodStatsSystem;
+using static Cobalt.Systems.Sanguimancy.BloodStatsSystem;
 
 namespace Cobalt.Core.Commands
 {

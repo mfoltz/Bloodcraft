@@ -14,7 +14,6 @@
         "outputPath": "C:\\Users\\mitch\\source\\Repos\\Cobalt\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\mitch\\source\\Repos\\Cobalt\\NuGet.Config",
           "C:\\Users\\mitch\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -23,10 +22,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files (x86)\\Steam\\steamapps\\common\\VRising\\VRising_Server\\BepInEx\\interop": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.bepinex.dev/v3/index.json": {},
-          "https://nuget.samboy.dev/v3/index.json": {}
+          "C:\\Users\\mitch\\OneDrive\\Documents\\ClientUnhollowed": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net6.0": {
@@ -65,13 +62,13 @@
               "target": "Package",
               "version": "[6.0.0-be.668, )"
             },
+            "ClientUnhollowed": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
             "HarmonyX": {
               "target": "Package",
               "version": "[2.10.1, )"
-            },
-            "Package": {
-              "target": "Package",
-              "version": "[1.0.0, )"
             }
           },
           "imports": [
