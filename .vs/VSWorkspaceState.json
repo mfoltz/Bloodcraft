@@ -1,8 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Core"
+    "\\Core",
+    "\\Hooks",
+    "\\Systems",
+    "\\Systems\\Expertise",
+    "\\Systems\\Professions"
   ],
-  "SelectedNode": "\\Cobalt.sln",
+  "SelectedNode": "\\Core\\DataStructures.cs",
   "PreviewInSolutionExplorer": false
 }
