@@ -8,7 +8,7 @@ using static Cobalt.Systems.Expertise.WeaponStats;
 
 namespace Cobalt.Commands
 {
-    public static class CombatMasteryCommands
+    public static class ExpertiseCommands
     {
         [Command(name: "getMasteryProgress", shortHand: "gmp", adminOnly: false, usage: ".gmp", description: "Display your current mastery progress.")]
         public static void GetMasteryCommand(ChatCommandContext ctx)

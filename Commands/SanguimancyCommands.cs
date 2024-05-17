@@ -8,7 +8,7 @@ using static Cobalt.Systems.Sanguimancy.BloodStats;
 
 namespace Cobalt.Commands
 {
-    public static class BloodMasteryCommands
+    public static class SanguimancyCommands
     {
         [Command(name: "getSanguimancyProgress", shortHand: "gsp", adminOnly: false, usage: ".gsp", description: "Display your current sanguimancy progress.")]
         public static void GetMasteryCommand(ChatCommandContext ctx)

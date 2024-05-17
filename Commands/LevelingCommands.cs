@@ -3,7 +3,7 @@ using VampireCommandFramework;
 
 namespace Cobalt.Commands
 {
-    public static class ExperienceCommands
+    public static class LevelingCommands
     {
         [Command(name: "logExperienceProgress", shortHand: "lep", adminOnly: false, usage: ".lep", description: "Toggles experience progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
