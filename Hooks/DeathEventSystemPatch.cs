@@ -22,14 +22,14 @@ public class DeathEventListenerSystem_Patch
             {
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
-                    LevelingSystem.EXPMonitor(ev.Killer, ev.Died);
-                    ExpertiseSystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
-                    BloodSystem.UpdateBloodMastery(ev.Killer, ev.Died);
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.EXPMonitor(ev.Killer, ev.Died);
+                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
+                    if (Plugin.BloodSystem.Value) BloodSystem.UpdateSanguimancy(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
                 {
                     //ev.Died.LogComponentTypes();
-                    ProfessionSystem.UpdateProfessions(ev.Killer, ev.Died);
+                    if (Plugin.ProfessionSystem.Value) ProfessionSystem.UpdateProfessions(ev.Killer, ev.Died);
                 }
             }
         }

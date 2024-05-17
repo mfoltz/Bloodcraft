@@ -121,7 +121,7 @@ namespace Cobalt.Systems.Professions
                                 {
                                     if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, level))
                                     {
-                                        ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received {dropTableData.ItemGuid.LookupName()}x<color=white>{level}</color> from {handler.GetProfessionName()}");
+                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received {dropTableData.ItemGuid.LookupName()}x<color=white>{level}</color> from {handler.GetProfessionName()}");
                                         break;
                                     }
                                 }
@@ -204,8 +204,6 @@ namespace Cobalt.Systems.Professions
                     //Entity sct = ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter, gainedXP, sctType);
                     //entityManager.Instantiate(sct);
                     //Core.Log.LogInfo("Attempted to create scrolling combat text...");
-                    serverGameManager.CommandBuffer.AllocateIfNotCreated(Allocator.Temp);
-                    serverGameManager.CreateScrollingCombatText(gainedXP, sctType, localToWorld.Up, user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
                 }
             }

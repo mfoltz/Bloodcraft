@@ -25,7 +25,6 @@ namespace Cobalt.Hooks
                 Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
             {
                 { "ExperienceLogging", true },
-                { "ExperienceShare", false },
                 { "ProfessionLogging", true },
                 { "BloodLogging", true },
                 { "CombatLogging", true }

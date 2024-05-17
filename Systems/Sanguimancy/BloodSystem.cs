@@ -13,7 +13,7 @@ namespace Cobalt.Systems.Sanguimancy
         private static readonly int BloodXPPower = 2; // power for calculating level from xp
         private static readonly int VBloodMultiplier = Plugin.VBloodBloodMultiplier.Value; // mastery points multiplier from VBlood units
 
-        public static void UpdateBloodMastery(Entity Killer, Entity Victim)
+        public static void UpdateSanguimancy(Entity Killer, Entity Victim)
         {
             EntityManager entityManager = Core.Server.EntityManager;
             if (Killer == Victim) return;

@@ -24,6 +24,7 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void EquipItemSystemPrefix(EquipItemSystem __instance)
         {
+            if (!Plugin.ExpertiseSystem.Value) return;
             Core.Log.LogInfo("EquipItemSystem Prefix..."); //prefix here to properly catch previous weapon
             NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
@@ -33,6 +34,7 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
         {
+            if (!Plugin.ExpertiseSystem.Value) return;
             Core.Log.LogInfo("UnEquipItemSystem Postfix..."); //should this be postfix?
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
@@ -43,6 +45,7 @@ namespace Cobalt.Hooks
         private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
         {
             //Plugin.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
+            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
             try
             {
@@ -68,6 +71,7 @@ namespace Cobalt.Hooks
         private static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
         {
             //Plugin.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
+            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
             try
             {
@@ -93,6 +97,7 @@ namespace Cobalt.Hooks
         private static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
         {
             //Plugin.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
+            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
             try
             {
@@ -117,6 +122,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
         {
+            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
             try
             {

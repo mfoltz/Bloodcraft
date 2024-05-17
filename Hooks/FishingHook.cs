@@ -19,6 +19,7 @@ public class FishingSystemPatch
 
         public static void Prefix(CreateGameplayEventOnDestroySystem __instance)
         {
+            if (!Plugin.ProfessionSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1297357609_0.ToEntityArray(Allocator.Temp);
             try
             {

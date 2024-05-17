@@ -3,7 +3,7 @@ using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
 
-/*
+/* need to do this for extra spell slots earned from sanguimancy
 namespace Cobalt.Hooks
 {
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), "OnUpdate")]

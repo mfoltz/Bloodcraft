@@ -20,6 +20,7 @@ public class CraftingPatch
 
         public static void Postfix(UpdateCraftingSystem __instance)
         {
+            if (!Plugin.ProfessionSystem.Value) return;
             //Core.Log.LogInfo("UpdateCraftingSystemPrefix called...");
             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
             NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
