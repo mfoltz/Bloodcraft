@@ -5,6 +5,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Expertise.WeaponStats;
+using static Cobalt.Systems.Sanguimancy.BloodStats;
 
 namespace Cobalt.Commands
 {
@@ -39,7 +40,7 @@ namespace Cobalt.Commands
             }
         }
 
-        [Command(name: "logMasteryProgress", shortHand: "lmp", adminOnly: false, usage: ".lmp", description: "Toggles mastery progress logging.")]
+        [Command(name: "logExpertiseProgress", shortHand: "lep", adminOnly: false, usage: ".lep", description: "Toggles mastery progress logging.")]
         public static void LogMasteryCommand(ChatCommandContext ctx)
         {
             var SteamID = ctx.Event.User.PlatformId;
@@ -48,7 +49,7 @@ namespace Cobalt.Commands
             {
                 bools["CombatLogging"] = !bools["CombatLogging"];
             }
-            ctx.Reply($"Combat mastery logging is now {(bools["CombatLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            ctx.Reply($"Weapon expertise logging is now {(bools["CombatLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
         [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: true, usage: ".cws <Stat>", description: "Choose a weapon stat to enhance based on your weapon mastery.")]
@@ -58,7 +59,7 @@ namespace Cobalt.Commands
             // If not, try parsing it from the string representation
             if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out _))
             {
-                ctx.Reply("Invalid weaponStat type.");
+                ctx.Reply("Invalid weapon stat choice, use .lws to see options.");
                 return;
             }
             Entity character = ctx.Event.SenderCharacterEntity;
@@ -95,10 +96,9 @@ namespace Cobalt.Commands
             }
         }
 
-        [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: true, usage: ".rws", description: "Reset the stat choices for a player's currently equipped weapon stats.")]
+        [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stat choices for a player's currently equipped weapon stats.")]
         public static void ResetWeaponStats(ChatCommandContext ctx)
         {
-            EntityManager entityManager = Core.Server.EntityManager;
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
@@ -135,22 +135,14 @@ namespace Cobalt.Commands
             masteryHandler.UpdateExperienceData(steamId, xpData);
             masteryHandler.SaveChanges();
 
-            ctx.Reply($"Mastery level for {masteryHandler.GetWeaponType()} set to {level}.");
+            ctx.Reply($"Expertise for {masteryHandler.GetWeaponType()} set to {level}.");
         }
 
-        [Command(name: "setLevelSource", shortHand: "source", adminOnly: true, usage: ".source [Level]", description: "Sets level source of weapon for testing.")]
-        public static void SetLevelSource(ChatCommandContext ctx, int level)
+        [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat choices.")]
+        public static void ListBloodStatsCommand(ChatCommandContext ctx)
         {
-            Entity character = ctx.Event.SenderCharacterEntity;
-            Equipment equipment = character.Read<Equipment>();
-            //GearOverride.SetWeaponItemLevel(equipment, level);
-        }
-
-        [Command(name: "setLevelTest", shortHand: ".level", adminOnly: true, usage: ".level [Level]", description: "Sets level source of weapon for testing.")]
-        public static void SetLevel(ChatCommandContext ctx, string context)
-        {
-            Entity character = ctx.Event.SenderCharacterEntity;
-            GearOverride.SetLevel(character);
+            string weaponStats = string.Join(", ", Enum.GetNames(typeof(WeaponStatManager.WeaponStatType)));
+            ctx.Reply($"Available weapon stats: {weaponStats}");
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Cobalt.Commands
     public static class ProfessionCommands
     {
         [Command(name: "logProfessionProgress", shortHand: "lpp", adminOnly: false, usage: ".lpp", description: "Toggles profession progress logging.")]
-        public static void LogMasteryCommand(ChatCommandContext ctx)
+        public static void LogProgessionCommand(ChatCommandContext ctx)
         {
             var SteamID = ctx.Event.User.PlatformId;
 
@@ -20,7 +20,7 @@ namespace Cobalt.Commands
             ctx.Reply($"Profession progress logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "getProfessionProgress", shortHand: "gpp", adminOnly: false, usage: ".gpp [Profession]", description: "Display your current mastery progress.")]
+        [Command(name: "getProfessionProgress", shortHand: "gpp", adminOnly: false, usage: ".gpp [Profession]", description: "Display your current profession progress.")]
         public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
         {
             ulong steamID = ctx.Event.User.PlatformId;
@@ -37,7 +37,7 @@ namespace Cobalt.Commands
             }
             else
             {
-                ctx.Reply($"You haven't gained any levels in {professionHandler.GetProfessionName()} yet. ");
+                ctx.Reply($"No progress in {professionHandler.GetProfessionName()} yet. ");
             }
         }
     }

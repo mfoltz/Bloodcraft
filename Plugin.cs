@@ -65,6 +65,11 @@ namespace Cobalt
             UnitExpertiseMultiplier = Instance.Config.Bind("Config", "ExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             VBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBlood.");
 
+            BloodSystem = Instance.Config.Bind("Config", "BloodSystem", true, "Enable or disable the blood system.");
+            MaxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in sanguimancy.");
+            UnitBloodMultiplier = Instance.Config.Bind("Config", "BloodMultiplier", 5, "The multiplier for blood stats gained from units.");
+            VBloodBloodMultiplier = Instance.Config.Bind("Config", "VBloodBloodMultiplier", 15, "The multiplier for blood stats gained from VBlood.");
+
             ProfessionSystem = Instance.Config.Bind("Config", "ProfessionSystem", true, "Enable or disable the profession system.");
             MaxProfessionLevel = Instance.Config.Bind("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
             ProfessionMultiplier = Instance.Config.Bind("Config", "ProfessionMultiplier", 10, "The multiplier for profession experience gained.");

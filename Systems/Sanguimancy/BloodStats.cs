@@ -6,25 +6,25 @@
         {
             public static bool ChooseStat(ulong steamId, string statType)
             {
-                if (!DataStructures.PlayerBloodChoices.ContainsKey(steamId))
-                    DataStructures.PlayerBloodChoices[steamId] = [];
+                if (!Core.DataStructures.PlayerBloodChoices.ContainsKey(steamId))
+                    Core.DataStructures.PlayerBloodChoices[steamId] = [];
 
-                if (DataStructures.PlayerBloodChoices[steamId].Count >= 2)
+                if (Core.DataStructures.PlayerBloodChoices[steamId].Count >= 2)
                 {
                     return false; // Only allow 3 stats to be chosen
                 }
 
-                DataStructures.PlayerBloodChoices[steamId].Add(statType);
-                DataStructures.SavePlayerBloodChoices();
+                Core.DataStructures.PlayerBloodChoices[steamId].Add(statType);
+                Core.DataStructures.SavePlayerBloodChoices();
                 return true;
             }
 
             public static void ResetChosenStats(ulong steamId)
             {
-                if (DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bloodChoices))
+                if (Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bloodChoices))
                 {
                     bloodChoices.Clear();
-                    DataStructures.SavePlayerBloodChoices();
+                    Core.DataStructures.SavePlayerBloodChoices();
                 }
             }
         }

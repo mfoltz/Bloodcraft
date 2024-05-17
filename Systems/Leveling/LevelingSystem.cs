@@ -199,7 +199,7 @@ namespace Cobalt.Systems.Experience
             return ConvertXpToLevel(GetXp(SteamID));
         }
 
-        private static int GetLevelProgress(ulong SteamID)
+        public static int GetLevelProgress(ulong SteamID)
         {
             float currentXP = GetXp(SteamID);
             int currentLevelXP = ConvertLevelToXp(GetLevel(SteamID));
