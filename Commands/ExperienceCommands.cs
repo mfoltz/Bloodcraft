@@ -20,15 +20,15 @@ namespace Cobalt.Commands
         [Command(name: "setLevel", shortHand: "sl", adminOnly: true, usage: ".sl [Level]", description: "Sets your level.")]
         public static void SetLevelCommand(ChatCommandContext ctx, int level)
         {
-            if (level < 0 || level > ExperienceSystem.MaxLevel)
+            if (level < 0 || level > LevelingSystem.MaxLevel)
             {
-                ctx.Reply($"Level must be between 0 and {ExperienceSystem.MaxLevel}.");
+                ctx.Reply($"Level must be between 0 and {LevelingSystem.MaxLevel}.");
                 return;
             }
             ulong steamId = ctx.Event.User.PlatformId;
             if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var _))
             {
-                var xpData = new KeyValuePair<int, float>(level, ExperienceSystem.ConvertLevelToXp(level));
+                var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
                 Core.DataStructures.PlayerExperience[steamId] = xpData;
                 Core.DataStructures.SavePlayerExperience();
                 ctx.Reply($"Level set to {level}.");

@@ -22,7 +22,7 @@ public class DeathEventListenerSystem_Patch
             {
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
-                    ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
+                    LevelingSystem.EXPMonitor(ev.Killer, ev.Died);
                     ExpertiseSystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
                     BloodSystem.UpdateBloodMastery(ev.Killer, ev.Died);
                 }

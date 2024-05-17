@@ -9,7 +9,7 @@ using static Cobalt.Core;
 
 namespace Cobalt.Systems.Experience
 {
-    public class ExperienceSystem
+    public class LevelingSystem
     {
         public static readonly int UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
         public static readonly int VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
