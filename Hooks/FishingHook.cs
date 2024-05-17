@@ -1,4 +1,3 @@
-using Cobalt.Core;
 using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
@@ -45,19 +44,19 @@ public class FishingSystemPatch
                         //target.LogComponentTypes();
                         if (!target.Has<DropTableBuffer>())
                         {
-                            Plugin.Log.LogInfo("No DropTableBuffer found on entity...");
+                            Core.Log.LogInfo("No DropTableBuffer found on entity...");
                         }
                         else
                         {
                             var dropTableBuffer = target.ReadBuffer<DropTableBuffer>();
                             if (dropTableBuffer.IsEmpty || !dropTableBuffer.IsCreated)
                             {
-                                Plugin.Log.LogInfo("DropTableBuffer is empty or not created...");
+                                Core.Log.LogInfo("DropTableBuffer is empty or not created...");
                             }
                             else
                             {
                                 toProcess = dropTableBuffer[0].DropTableGuid;
-                                Plugin.Log.LogInfo($"{toProcess.LookupName()}");
+                                Core.Log.LogInfo($"{toProcess.LookupName()}");
                             }
                         }
                     }
@@ -73,7 +72,7 @@ public class FishingSystemPatch
             }
             catch (Exception e)
             {
-                Plugin.Log.LogError($"Exited GameplayEventsSystem hook early: {e}");
+                Core.Log.LogError($"Exited GameplayEventsSystem hook early: {e}");
             }
         }
     }

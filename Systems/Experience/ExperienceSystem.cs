@@ -1,27 +1,28 @@
-﻿using Cobalt.Core;
-using Cobalt.Hooks;
-using Cobalt.Systems.Expertise;
+﻿using Cobalt.Hooks;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using static Cobalt.Core;
 
 namespace Cobalt.Systems.Experience
 {
     public class ExperienceSystem
     {
-        public static readonly float EXPMultiplier = 5; // multipler for normal units
-        public static readonly float VBloodMultiplier = 15; // multiplier for VBlood units
+        public static readonly int UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
+        public static readonly int VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
         public static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
         public static readonly int EXPPower = 2; // power for calculating level from xp
-        public static readonly int MaxLevel = 90; // maximum level
+        public static readonly int MaxLevel = Plugin.MaxPlayerLevel.Value; // maximum level
+        public static readonly int GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
 
         private static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
         public static void EXPMonitor(Entity killerEntity, Entity victimEntity)
         {
-            EntityManager entityManager = VWorld.Server.EntityManager;
+            EntityManager entityManager = Core.Server.EntityManager;
             if (!IsValidVictim(entityManager, victimEntity)) return;
             UpdateEXP(entityManager, killerEntity, victimEntity);
         }
@@ -35,22 +36,46 @@ namespace Cobalt.Systems.Experience
         {
             PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
             Entity userEntity = player.UserEntity;
-            User user = entityManager.GetComponentData<User>(userEntity);
-            ulong steamId = user.PlatformId;
-
-            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= MaxLevel) return; // Check if already at max level
-
-            ProcessExperienceGain(entityManager, killerEntity, victimEntity, steamId);
+            int groupMultiplier = 1;
+            HashSet<Entity> participants = GetParticipants(killerEntity, userEntity); // want list of participants to process experience for
+            if (participants.Count > 1) groupMultiplier = (int)GroupMultiplier; // if more than 1 participant, apply group multiplier
+            foreach (Entity participant in participants)
+            {
+                ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= MaxLevel) continue; // Check if already at max level
+                ProcessExperienceGain(entityManager, participant, victimEntity, steamId, groupMultiplier);
+            }
         }
 
-        private static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID)
+        private static HashSet<Entity> GetParticipants(Entity killer, Entity userEntity)
+        {
+            float3 killerPosition = killer.Read<LocalToWorld>().Position;
+            User killerUser = userEntity.Read<User>();
+            HashSet<Entity> players = [killer];
+            if (killerUser.ClanEntity._Entity.Equals(Entity.Null)) return players;
+            Entity clanEntity = killerUser.ClanEntity._Entity;
+            var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
+            for (int i = 0; i < userBuffer.Length; i++)
+            {
+                var users = userBuffer[i];
+                User user = users.UserEntity.Read<User>();
+                if (!user.IsConnected) continue;
+                Entity player = user.LocalCharacter._Entity;
+                var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<LocalToWorld>().Position);
+                if (distance > 25f) continue;
+                players.Add(player);
+            }
+            return players;
+        }
+
+        private static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, int groupMultiplier)
         {
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
             bool isVBlood = IsVBlood(entityManager, victimEntity);
 
             int gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
-            int currentLevel = DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
-            UpdatePlayerExperience(SteamID, gainedXP);
+            int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
+            UpdatePlayerExperience(SteamID, gainedXP * groupMultiplier);
 
             CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel);
         }
@@ -63,14 +88,14 @@ namespace Cobalt.Systems.Experience
         private static int CalculateExperienceGained(int victimLevel, bool isVBlood)
         {
             int baseXP = victimLevel;
-            if (isVBlood) baseXP *= (int)VBloodMultiplier;
-            return (int)(baseXP * EXPMultiplier);
+            if (isVBlood) return baseXP * VBloodMultiplier;
+            return baseXP * UnitMultiplier;
         }
 
         private static void UpdatePlayerExperience(ulong SteamID, int gainedXP)
         {
             // Retrieve the current experience and level from the player's data structure.
-            if (!DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
+            if (!Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
             {
                 xpData = new KeyValuePair<int, float>(0, 0); // Initialize if not present
             }
@@ -87,15 +112,15 @@ namespace Cobalt.Systems.Experience
             }
 
             // Update the level and experience in the data structure
-            DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, newExperience);
+            Core.DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, newExperience);
 
             // Save the experience data
-            DataStructures.SavePlayerExperience();
+            Core.DataStructures.SavePlayerExperience();
         }
 
         private static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, int gainedXP, int currentLevel)
         {
-            EntityManager entityManager = VWorld.Server.EntityManager;
+            EntityManager entityManager = Core.Server.EntityManager;
             Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
 
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
@@ -103,7 +128,7 @@ namespace Cobalt.Systems.Experience
             if (leveledUp)
             {
                 //Plugin.Log.LogInfo("Applying level up buff...");
-                DebugEventsSystem debugEventsSystem = VWorld.Server.GetExistingSystemManaged<DebugEventsSystem>();
+                DebugEventsSystem debugEventsSystem = Core.Server.GetExistingSystemManaged<DebugEventsSystem>();
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
                     BuffPrefabGUID = levelUpBuff,
@@ -121,7 +146,7 @@ namespace Cobalt.Systems.Experience
 
         private static bool CheckForLevelUp(ulong SteamID, int currentLevel)
         {
-            int newLevel = ConvertXpToLevel(DataStructures.PlayerExperience[SteamID].Value);
+            int newLevel = ConvertXpToLevel(Core.DataStructures.PlayerExperience[SteamID].Value);
             if (newLevel > currentLevel)
             {
                 return true;
@@ -134,13 +159,13 @@ namespace Cobalt.Systems.Experience
             User user = entityManager.GetComponentData<User>(userEntity);
             if (leveledUp)
             {
-                int newLevel = DataStructures.PlayerExperience[SteamID].Key;
+                int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
                 GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
             else
             {
-                if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
                 {
                     int levelProgress = GetLevelProgress(SteamID);
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
@@ -162,7 +187,7 @@ namespace Cobalt.Systems.Experience
 
         private static float GetXp(ulong SteamID)
         {
-            if (DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
+            if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
             else
             {
                 return 0;

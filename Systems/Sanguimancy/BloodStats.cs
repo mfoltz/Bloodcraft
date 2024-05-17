@@ -1,8 +1,6 @@
-﻿using Cobalt.Core;
-
-namespace Cobalt.Systems.Sanguimancy
+﻿namespace Cobalt.Systems.Sanguimancy
 {
-    public class BloodStatsSystem
+    public class BloodStats
     {
         public class PlayerBloodUtilities
         {

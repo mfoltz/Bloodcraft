@@ -62,13 +62,13 @@
               "target": "Package",
               "version": "[6.0.0-be.668, )"
             },
-            "ClientUnhollowed": {
-              "target": "Package",
-              "version": "[1.0.0, )"
-            },
             "HarmonyX": {
               "target": "Package",
               "version": "[2.10.1, )"
+            },
+            "VRising.Unhollowed.Client": {
+              "target": "Package",
+              "version": "[1.0.2.794360001, )"
             }
           },
           "imports": [

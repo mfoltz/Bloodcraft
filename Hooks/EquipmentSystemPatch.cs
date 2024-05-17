@@ -1,5 +1,5 @@
-﻿using Cobalt.Core;
-using Cobalt.Systems.Expertise;
+﻿using Cobalt.Systems.Expertise;
+using Cobalt.Systems.Sanguimancy;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -7,15 +7,13 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine.TextCore.Text;
 using static Cobalt.Hooks.BaseStats;
 using static Cobalt.Hooks.UnitStatsOverride;
-using static Cobalt.Systems.Sanguimancy.BloodStatsSystem;
-using static Cobalt.Systems.Sanguimancy.BloodStatsSystem.BloodStatManager;
 using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
-using static Cobalt.Systems.Expertise.WeaponStatsSystem;
-using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
-using Cobalt.Systems.Sanguimancy;
+using static Cobalt.Systems.Expertise.WeaponStats;
+using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
+using static Cobalt.Systems.Sanguimancy.BloodStats;
+using static Cobalt.Systems.Sanguimancy.BloodStats.BloodStatManager;
 
 namespace Cobalt.Hooks
 {
@@ -26,26 +24,25 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void EquipItemSystemPrefix(EquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("EquipItemSystem Prefix..."); //prefix here to properly catch previous weapon
+            Core.Log.LogInfo("EquipItemSystem Prefix..."); //prefix here to properly catch previous weapon
             NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
-
         }
 
         [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
         [HarmonyPrefix]
         private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
         {
-            Plugin.Log.LogInfo("UnEquipItemSystem Postfix..."); //should this be postfix?
+            Core.Log.LogInfo("UnEquipItemSystem Postfix..."); //should this be postfix?
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
             HandleEquipmentEvent(entities);
         }
-        
+
         [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
         [HarmonyPostfix]
         private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
         {
-            Plugin.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
+            //Plugin.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
             NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
             try
             {
@@ -58,7 +55,7 @@ namespace Cobalt.Hooks
             }
             catch (Exception e)
             {
-                Plugin.Log.LogError($"Exited LevelPrefix early: {e}");
+                Core.Log.LogError($"Exited LevelPrefix early: {e}");
             }
             finally
             {
@@ -66,6 +63,82 @@ namespace Cobalt.Hooks
             }
         }
 
+        [HarmonyPatch(typeof(ArmorLevelSystem_Spawn), nameof(ArmorLevelSystem_Spawn.OnUpdate))]
+        [HarmonyPostfix]
+        private static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
+        {
+            //Plugin.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
+            NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
+                    EntityOwner entityOwner = entity.Read<EntityOwner>();
+                    GearOverride.SetLevel(entityOwner.Owner);
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+
+        [HarmonyPatch(typeof(ArmorLevelSystem_Destroy), nameof(ArmorLevelSystem_Destroy.OnUpdate))]
+        [HarmonyPostfix]
+        private static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
+        {
+            //Plugin.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
+            NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
+                    EntityOwner entityOwner = entity.Read<EntityOwner>();
+                    GearOverride.SetLevel(entityOwner.Owner);
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+
+        [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
+        [HarmonyPostfix]
+        private static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
+        {
+            NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    if (entity.Has<SpellLevel>())
+                    {
+                        if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
+                        EntityOwner entityOwner = entity.Read<EntityOwner>();
+                        GearOverride.SetLevel(entityOwner.Owner);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError(ex);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
 
         private static void HandleEquipmentEvent(NativeArray<Entity> entities)
         {
@@ -81,7 +154,7 @@ namespace Cobalt.Hooks
             }
             catch (Exception e)
             {
-                Plugin.Log.LogError($"Exited HandleEquipment early: {e}");
+                Core.Log.LogError($"Exited HandleEquipment early: {e}");
             }
             finally
             {
@@ -100,13 +173,13 @@ namespace Cobalt.Hooks
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
 
-            if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
+            if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
-                    WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus);
+                    WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    Plugin.Log.LogInfo($"Applying {bonus} | {scaledBonus}");
+                    Core.Log.LogInfo($"Applying {bonus} | {scaledBonus}");
                     switch (weaponStatType)
                     {
                         case WeaponStatType.PhysicalPower:
@@ -139,7 +212,7 @@ namespace Cobalt.Hooks
             }
             else
             {
-                Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
+                Core.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
         }
 
@@ -149,12 +222,12 @@ namespace Cobalt.Hooks
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
             //IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
-            if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
+            if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
-                    WeaponStatType weaponStatType = WeaponMasterySystem.GetWeaponStatTypeFromString(bonus);
-                    Plugin.Log.LogInfo($"Resetting {weaponStatType} to {BaseWeaponStats[weaponStatType]}");
+                    WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
+                    Core.Log.LogInfo($"Resetting {weaponStatType} to {BaseWeaponStats[weaponStatType]}");
                     switch (weaponStatType)
                     {
                         case WeaponStatType.PhysicalPower:
@@ -186,7 +259,7 @@ namespace Cobalt.Hooks
             }
             else
             {
-                Plugin.Log.LogInfo($"No bonuses found for {weaponType}...");
+                Core.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
 
             // Subtract the bonuses
@@ -198,14 +271,14 @@ namespace Cobalt.Hooks
 
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            if (DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
+            if (Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
-                    BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
+                    BloodStatType bloodStatType = BloodSystem.GetBloodStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
 
-                    Plugin.Log.LogInfo($"Applying blood stats: {bonus} | {scaledBonus}");
+                    Core.Log.LogInfo($"Applying blood stats: {bonus} | {scaledBonus}");
                     switch (bloodStatType)
                     {
                         case BloodStatType.SunResistance:
@@ -239,12 +312,12 @@ namespace Cobalt.Hooks
 
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            if (DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
+            if (Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
-                    BloodStatType bloodStatType = BloodMasterySystem.GetBloodStatTypeFromString(bonus);
-                    Plugin.Log.LogInfo($"Resetting {bloodStatType} to {BaseBloodStats[bloodStatType]}");
+                    BloodStatType bloodStatType = BloodSystem.GetBloodStatTypeFromString(bonus);
+                    Core.Log.LogInfo($"Resetting {bloodStatType} to {BaseBloodStats[bloodStatType]}");
                     switch (bloodStatType)
                     {
                         case BloodStatType.SunResistance:
@@ -277,17 +350,17 @@ namespace Cobalt.Hooks
             if (handler != null)
             {
                 var xpData = handler.GetExperienceData(steamId);
-                int currentLevel = WeaponMasterySystem.ConvertXpToLevel(xpData.Value);
+                int currentLevel = ExpertiseSystem.ConvertXpToLevel(xpData.Value);
                 //Equipment equipment = character.Read<Equipment>();
                 //GearOverride.SetWeaponItemLevel(equipment, currentLevel);
                 float maxBonus = WeaponStatManager.BaseCaps[statType];
                 float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
-                Plugin.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
+                Core.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
                 return scaledBonus;
             }
             else
             {
-                Plugin.Log.LogInfo("Handler is null...");
+                Core.Log.LogInfo("Handler is null...");
             }
 
             return 0; // Return 0 if no handler is found or other error
@@ -295,31 +368,31 @@ namespace Cobalt.Hooks
 
         public static float CalculateScaledBloodBonus(ulong steamId, BloodStatType statType)
         {
-            if (DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var sanguimancy))
+            if (Core.DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var sanguimancy))
             {
                 int currentLevel = sanguimancy.Key;
 
                 float maxBonus = BloodStatManager.BaseCaps[statType];
                 float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
-                Plugin.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
+                Core.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
                 return scaledBonus;
             }
             else
             {
-                Plugin.Log.LogInfo("No blood stats found...");
+                Core.Log.LogInfo("No blood stats found...");
             }
 
             return 0; // Return 0 if no blood stats are found
         }
 
-        public static WeaponMasterySystem.WeaponType GetCurrentWeaponType(Entity character)
+        public static ExpertiseSystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-            if (!VWorld.Server.EntityManager.Exists(weapon))
+            if (!Core.Server.EntityManager.Exists(weapon))
             {
-                return WeaponMasterySystem.WeaponType.Unarmed;
+                return ExpertiseSystem.WeaponType.Unarmed;
             }
-            return WeaponMasterySystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
+            return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 
         public static void UpdatePlayerStats(Entity character)
@@ -331,10 +404,10 @@ namespace Cobalt.Hooks
             string currentWeapon = GetCurrentWeaponType(character).ToString();
 
             // Initialize player's weapon dictionary if it doesn't exist
-            if (!DataStructures.PlayerEquippedWeapon.TryGetValue(steamId, out var equippedWeapons))
+            if (!Core.DataStructures.PlayerEquippedWeapon.TryGetValue(steamId, out var equippedWeapons))
             {
                 equippedWeapons = [];
-                DataStructures.PlayerEquippedWeapon[steamId] = equippedWeapons;
+                Core.DataStructures.PlayerEquippedWeapon[steamId] = equippedWeapons;
             }
 
             // Check if weapon has changed
@@ -343,22 +416,22 @@ namespace Cobalt.Hooks
                 // Find the previous weapon (the one that is set to true)
                 string previousWeapon = equippedWeapons.FirstOrDefault(w => w.Value).Key;
 
-                Plugin.Log.LogInfo($"Previous: {previousWeapon} | Current: {currentWeapon}");
+                Core.Log.LogInfo($"Previous: {previousWeapon} | Current: {currentWeapon}");
 
                 // Apply and remove stat bonuses based on weapon change
                 if (!string.IsNullOrEmpty(previousWeapon))
                 {
-                    Plugin.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
+                    Core.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
                     RemoveWeaponBonuses(character, previousWeapon);  // Remove bonuses from the previous weapon
                     equippedWeapons[previousWeapon] = false;  // Set previous weapon as unequipped
                 }
 
-                Plugin.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
+                Core.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
                 ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
                 equippedWeapons[currentWeapon] = true;  // Set current weapon as equipped
 
                 // Save the player's weapon state
-                DataStructures.SavePlayerEquippedWeapon();
+                Core.DataStructures.SavePlayerEquippedWeapon();
             }
 
             ApplyBloodBonuses(character);
@@ -372,23 +445,21 @@ namespace Cobalt.Hooks
         {
             //player.LogComponentTypes();
             ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
+            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
                 int playerLevel = xpData.Key;
                 Equipment equipment = player.Read<Equipment>();
                 //equipment.ArmorLevel._Value = 0f;
                 //equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
-                
 
                 // weapon level of the weapon mirrors player weapon level if higher?
 
                 player.Write(equipment);
 
-                Plugin.Log.LogInfo($"Set GearScore to {playerLevel}.");
+                Core.Log.LogInfo($"Set GearScore to {playerLevel}.");
             }
         }
-       
 
         public static void SetWeaponItemLevel(Equipment equipment, int level, EntityManager entityManager)
         {
@@ -398,7 +469,7 @@ namespace Cobalt.Hooks
                 WeaponLevelSource weaponLevel = entityManager.GetComponentData<WeaponLevelSource>(weaponEntity);
                 weaponLevel.Level = level;
                 entityManager.SetComponentData(weaponEntity, weaponLevel);
-                Plugin.Log.LogInfo($"Set weapon level source to {level}.");
+                Core.Log.LogInfo($"Set weapon level source to {level}.");
             }
         }
     }
@@ -408,7 +479,7 @@ namespace Cobalt.Hooks
         private static void ApplyPrestigeBonuses(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && prestigeData.Key > 0)
+            if (Core.DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && prestigeData.Key > 0)
             {
                 UnitStats stats = character.Read<UnitStats>();
                 Movement movement = character.Read<Movement>();
@@ -438,7 +509,7 @@ namespace Cobalt.Hooks
         private static void RemovePrestigeBonuses(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && !prestigeData.Key.Equals(0))
+            if (Core.DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && !prestigeData.Key.Equals(0))
             {
                 UnitStats stats = character.Read<UnitStats>();
                 Movement movement = character.Read<Movement>();
@@ -476,7 +547,6 @@ namespace Cobalt.Hooks
 
         private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
         {
-            { WeaponStatType.AttackSpeed, 0f },
             { WeaponStatType.PhysicalPower, 10f },
             { WeaponStatType.SpellPower, 10f },
             { WeaponStatType.PhysicalCritChance, 0.05f },

@@ -4,18 +4,17 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.Sanguimancy.BloodStatsSystem;
+using static Cobalt.Systems.Sanguimancy.BloodStats;
 
-namespace Cobalt.Core.Commands
+namespace Cobalt.Commands
 {
     public static class BloodMasteryCommands
     {
-
         [Command(name: "getSanguimancyProgress", shortHand: "gsp", adminOnly: false, usage: ".gsp", description: "Display your current sanguimancy progress.")]
         public static void GetMasteryCommand(ChatCommandContext ctx)
         {
             var SteamID = ctx.Event.User.PlatformId;
-            if (DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var mastery))
+            if (Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var mastery))
             {
                 ctx.Reply($"You are level <color=white>{mastery.Key}</color> in <color=red>sanguimancy</color>.");
             }
@@ -30,7 +29,7 @@ namespace Cobalt.Core.Commands
         {
             var SteamID = ctx.Event.User.PlatformId;
 
-            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
             {
                 bools["BloodLogging"] = !bools["BloodLogging"];
             }
@@ -48,16 +47,16 @@ namespace Cobalt.Core.Commands
                 ctx.Reply("Invalid bloodStat type.");
                 return;
             }
-            if (!DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var _))
+            if (!Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var _))
             {
                 List<string> bloodStats = [];
-                DataStructures.PlayerBloodChoices[steamId] = bloodStats;
+                Core.DataStructures.PlayerBloodChoices[steamId] = bloodStats;
             }
 
             if (PlayerBloodUtilities.ChooseStat(steamId, statType))
             {
                 ctx.Reply($"Stat {statType} has been chosen for Sanguimancy.");
-                DataStructures.SavePlayerBloodChoices();
+                Core.DataStructures.SavePlayerBloodChoices();
             }
             else
             {
@@ -70,45 +69,15 @@ namespace Cobalt.Core.Commands
         {
             ulong steamId = ctx.Event.User.PlatformId;
             Entity character = ctx.Event.SenderCharacterEntity;
-            if (!DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var stats))
+            if (!Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var stats))
             {
                 ctx.Reply("No blood choices found for this SteamID.");
                 return;
             }
             UnitStatsOverride.RemoveBloodBonuses(character);
-            //PlayerBloodUtilities.ResetChosenStats(steamId);
             stats.Clear();
-            DataStructures.SavePlayerBloodChoices();
+            Core.DataStructures.SavePlayerBloodChoices();
             ctx.Reply($"Blood stat choices reset.");
-        }
-
-        [Command(name: "addAbility", shortHand: "ability", adminOnly: false, usage: ".ability [AbilityGroupName] [Slot]", description: "Puts prefab ability group on shift.")]
-        public static void AbilityTestCommand(ChatCommandContext ctx, string abilityGroup, int slot)
-        {
-            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
-            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
-            Entity character = ctx.Event.SenderCharacterEntity;
-            
-            if (slot == 1 || slot == 4)
-            {
-                ctx.Reply("Invalid slot number.");
-                return;
-            }
-            if (serverGameManager.TryGetBuff(character, UnitStatsOverride.unarmed.ToIdentifier(), out Entity buff))
-            {
-                if (prefabCollectionSystem.NameToPrefabGuidDictionary.TryGetValue(abilityGroup, out PrefabGUID prefabGUID))
-                {
-                    serverGameManager.ModifyAbilityGroupOnSlot(buff, character, slot, prefabGUID);
-                }
-                else
-                {
-                    ctx.Reply("Invalid ability group.");
-                }
-            }
-            else
-            {
-                ctx.Reply("You must have the unarmed buff to use this command.");
-            }
         }
     }
 }

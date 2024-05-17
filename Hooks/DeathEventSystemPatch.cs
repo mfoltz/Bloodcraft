@@ -1,4 +1,3 @@
-using Cobalt.Core;
 using Cobalt.Systems.Experience;
 using Cobalt.Systems.Expertise;
 using Cobalt.Systems.Sanguimancy;
@@ -24,8 +23,8 @@ public class DeathEventListenerSystem_Patch
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
                     ExperienceSystem.EXPMonitor(ev.Killer, ev.Died);
-                    WeaponMasterySystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
-                    BloodMasterySystem.UpdateBloodMastery(ev.Killer, ev.Died);
+                    ExpertiseSystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
+                    BloodSystem.UpdateBloodMastery(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
                 {
@@ -36,7 +35,7 @@ public class DeathEventListenerSystem_Patch
         }
         catch (Exception e)
         {
-            Plugin.Log.LogError($"Exited DeathEventListenerSystem hook early: {e}");
+            Core.Log.LogError($"Exited DeathEventListenerSystem hook early: {e}");
         }
         finally
         {

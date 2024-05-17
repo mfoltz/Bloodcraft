@@ -1,30 +1,27 @@
-﻿using Cobalt.Core;
-using ProjectM;
+﻿using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
-using static Cobalt.Systems.Sanguimancy.BloodStatsSystem.BloodStatManager;
+using static Cobalt.Systems.Sanguimancy.BloodStats.BloodStatManager;
 
 namespace Cobalt.Systems.Sanguimancy
 {
-    public class BloodMasterySystem
+    public class BloodSystem
     {
-        private static readonly float BloodMasteryMultiplier = 1f; // mastery points multiplier from normal units
-        private static readonly float BaseBloodMastery = 5; // base mastery points
-        private static readonly int MaxBloodMasteryLevel = 99; // maximum level
+        private static readonly int UnitMultiplier = Plugin.UnitBloodMultiplier.Value; // base mastery points
+        private static readonly int MaxBloodLevel = Plugin.MaxBloodLevel.Value; // maximum level
         private static readonly float BloodMasteryConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int BloodMasteryXPPower = 2; // power for calculating level from xp
-        private static readonly float VBloodMultiplier = 10; // mastery points multiplier from VBlood units
+        private static readonly int BloodXPPower = 2; // power for calculating level from xp
+        private static readonly int VBloodMultiplier = Plugin.VBloodBloodMultiplier.Value; // mastery points multiplier from VBlood units
 
         public static void UpdateBloodMastery(Entity Killer, Entity Victim)
         {
-            EntityManager entityManager = VWorld.Server.EntityManager;
+            EntityManager entityManager = Core.Server.EntityManager;
             if (Killer == Victim) return;
             if (entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>()) return;
 
             BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User User = entityManager.GetComponentData<User>(userEntity);
-            ulong SteamID = User.PlatformId;
 
             //var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
 
@@ -39,11 +36,13 @@ namespace Cobalt.Systems.Sanguimancy
             }
             float BloodMasteryValue = bloodConsumeSource.BloodQuality * bloodConsumeSource.BloodQuality;
             if (isVBlood) BloodMasteryValue *= VBloodMultiplier;
-
-            BloodMasteryValue *= BloodMasteryMultiplier;
+            else
+            {
+                BloodMasteryValue *= UnitMultiplier;
+            }
             if (BloodMasteryValue.Equals(0) || BloodMasteryValue < 5)
             {
-                BloodMasteryValue += BaseBloodMastery;
+                BloodMasteryValue += UnitMultiplier;
             }
             SetBloodMastery(User, BloodMasteryValue, entityManager);
         }
@@ -51,28 +50,28 @@ namespace Cobalt.Systems.Sanguimancy
         public static void SetBloodMastery(User user, float Value, EntityManager entityManager)
         {
             ulong SteamID = user.PlatformId;
-            bool isPlayerFound = DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var Mastery);
+            bool isPlayerFound = Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var Mastery);
             float newExperience = Value + (isPlayerFound ? Mastery.Value : 0);
             int newLevel = ConvertXpToLevel(newExperience);
             bool leveledUp = isPlayerFound && newLevel > Mastery.Key;
 
-            if (leveledUp && newLevel > MaxBloodMasteryLevel)
+            if (leveledUp && newLevel > MaxBloodLevel)
             {
-                newLevel = MaxBloodMasteryLevel;
-                newExperience = ConvertLevelToXp(MaxBloodMasteryLevel);
+                newLevel = MaxBloodLevel;
+                newExperience = ConvertLevelToXp(MaxBloodLevel);
             }
 
             KeyValuePair<int, float> newMastery = new(newLevel, newExperience);
             if (isPlayerFound)
             {
-                DataStructures.PlayerSanguimancy[SteamID] = newMastery;
+                Core.DataStructures.PlayerSanguimancy[SteamID] = newMastery;
             }
             else
             {
-                DataStructures.PlayerSanguimancy.Add(SteamID, newMastery);
+                Core.DataStructures.PlayerSanguimancy.Add(SteamID, newMastery);
             }
 
-            DataStructures.SavePlayerSanguimancy();
+            Core.DataStructures.SavePlayerSanguimancy();
             NotifyPlayer(entityManager, user, Value, leveledUp, newLevel);
         }
 
@@ -89,7 +88,7 @@ namespace Cobalt.Systems.Sanguimancy
             }
             else
             {
-                if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
                 {
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>sanguimancy</color> (<color=white>{levelProgress}%</color>)");
                 }
@@ -103,12 +102,12 @@ namespace Cobalt.Systems.Sanguimancy
 
         private static float ConvertLevelToXp(int level)
         {
-            return (int)Math.Pow(level / BloodMasteryConstant, BloodMasteryXPPower);
+            return (int)Math.Pow(level / BloodMasteryConstant, BloodXPPower);
         }
 
         private static int GetLevelProgress(ulong steamID)
         {
-            if (!DataStructures.PlayerSanguimancy.TryGetValue(steamID, out var mastery))
+            if (!Core.DataStructures.PlayerSanguimancy.TryGetValue(steamID, out var mastery))
                 return 0; // Return 0 if no mastery data found
 
             float currentXP = mastery.Value;

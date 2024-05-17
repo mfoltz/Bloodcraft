@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Cobalt.Core;
+namespace Cobalt;
 
 public static class ECSExtensions
 {
-    private static EntityManager EntityManager { get; } = VWorld.Server.EntityManager;
-   
+    private static EntityManager EntityManager { get; } = Core.Server.EntityManager;
+
     public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -60,7 +60,7 @@ public static class ECSExtensions
 
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
     {
-        return VWorld.Server.EntityManager.GetBuffer<T>(entity);
+        return Core.Server.EntityManager.GetBuffer<T>(entity);
     }
 
     public static bool Has<T>(this Entity entity)
@@ -71,20 +71,21 @@ public static class ECSExtensions
 
     public static string LookupName(this PrefabGUID prefabGuid)
     {
-        var prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+        var prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
             ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
     }
+
     public static void LogComponentTypes(this Entity entity)
     {
-        NativeArray<ComponentType>.Enumerator enumerator = VWorld.Server.EntityManager.GetComponentTypes(entity).GetEnumerator();
-        Plugin.Log.LogInfo("===");
+        NativeArray<ComponentType>.Enumerator enumerator = Core.Server.EntityManager.GetComponentTypes(entity).GetEnumerator();
+        Core.Log.LogInfo("===");
         while (enumerator.MoveNext())
         {
             ComponentType current = enumerator.Current;
-            Plugin.Log.LogInfo($"{current}");
+            Core.Log.LogInfo($"{current}");
         }
-        Plugin.Log.LogInfo("===");
+        Core.Log.LogInfo("===");
     }
 
     public static void Add<T>(this Entity entity)
@@ -99,4 +100,3 @@ public static class ECSExtensions
         EntityManager.RemoveComponent(entity, ct);
     }
 }
-

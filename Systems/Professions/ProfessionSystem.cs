@@ -1,10 +1,7 @@
-﻿using Cobalt.Core;
-using ProjectM;
-using ProjectM.Gameplay.Systems;
+﻿using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
-using StunShared.UI;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
@@ -14,14 +11,14 @@ namespace Cobalt.Systems.Professions
 {
     public class ProfessionSystem
     {
-        private static readonly float ProfessionMultiplier = 10; // multiplier for profession experience per harvest
+        private static readonly int ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
         private static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
         private static readonly int ProfessionXPPower = 2; // power for calculating level from xp
-        private static readonly int MaxProfessionLevel = 99; // maximum level
+        private static readonly int MaxProfessionLevel = Plugin.MaxProfessionLevel.Value; // maximum level
 
         public static void UpdateProfessions(Entity Killer, Entity Victim)
         {
-            EntityManager entityManager = VWorld.Server.EntityManager;
+            EntityManager entityManager = Core.Server.EntityManager;
             if (Killer == Victim) return;
 
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
@@ -50,7 +47,7 @@ namespace Cobalt.Systems.Professions
             {
                 ProfessionValue = Victim.Read<UnitLevel>().Level;
             }
-            //Plugin.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {Victim.Read<PrefabGUID>().LookupName()}");
+            //Core.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {Victim.Read<PrefabGUID>().LookupName()}");
             if (ProfessionValue.Equals(0))
             {
                 ProfessionValue = 10;
@@ -73,22 +70,22 @@ namespace Cobalt.Systems.Professions
             }
             else
             {
-                //Plugin.Log.LogError($"No handler found for profession...");
+                //Core.Log.LogError($"No handler found for profession...");
             }
         }
 
         public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer, User user, ulong SteamID, IProfessionHandler handler)
         {
-            EntityManager entityManager = VWorld.Server.EntityManager;
-            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
-            PrefabCollectionSystem prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            EntityManager entityManager = Core.Server.EntityManager;
+            ServerGameManager serverGameManager = Core.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            PrefabCollectionSystem prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
             Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             int level = GetLevel(SteamID, handler);
             if (!prefabEntity.Has<DropTableBuffer>())
             {
                 if (!prefabEntity.Has<DropTableDataBuffer>())
                 {
-                    Plugin.Log.LogInfo("No DropTableDataBuffer or DropTableBuffer found on entity...");
+                    Core.Log.LogInfo("No DropTableDataBuffer or DropTableBuffer found on entity...");
                 }
                 else
                 {
@@ -96,13 +93,13 @@ namespace Cobalt.Systems.Professions
                     var dropTableDataBuffer = prefabEntity.ReadBuffer<DropTableDataBuffer>();
                     foreach (var dropTableData in dropTableDataBuffer)
                     {
-                        Plugin.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
+                        Core.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
                         prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
                         if (!prefabEntity.Has<ItemDataDropGroupBuffer>()) continue;
                         var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
                         foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
                         {
-                            Plugin.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
+                            Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                         }
                     }
                 }
@@ -112,7 +109,7 @@ namespace Cobalt.Systems.Professions
                 var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();
                 foreach (var drop in dropTableBuffer)
                 {
-                    Plugin.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
+                    Core.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
                     switch (drop.DropTrigger)
                     {
                         case DropTriggerType.YieldResourceOnDamageTaken:
@@ -141,7 +138,7 @@ namespace Cobalt.Systems.Professions
                                 var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
                                 foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
                                 {
-                                    Plugin.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
+                                    Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                                 }
                             }
                             break;
@@ -152,7 +149,7 @@ namespace Cobalt.Systems.Professions
 
         public static void SetProfession(PrefabGUID prefabGUID, User user, ulong steamID, float value, IProfessionHandler handler)
         {
-            EntityManager entityManager = VWorld.Server.EntityManager;
+            EntityManager entityManager = Core.Server.EntityManager;
 
             handler.AddExperience(steamID, value);
             handler.SaveChanges();
@@ -187,8 +184,8 @@ namespace Cobalt.Systems.Professions
 
         private static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
-            ServerGameManager serverGameManager = VWorld.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
-            //EntityCommandBufferSystem entityCommandBufferSystem = VWorld.Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
+            ServerGameManager serverGameManager = Core.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
+            //EntityCommandBufferSystem entityCommandBufferSystem = Core.Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
             //EntityCommandBuffer entityCommandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
             PrefabGUID sctType = serverGameManager.SCTTypes.Generic_Type;
             LocalToWorld localToWorld = user.LocalCharacter._Entity.Read<LocalToWorld>();
@@ -200,13 +197,13 @@ namespace Cobalt.Systems.Professions
             }
             else
             {
-                if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
                     //string floating = gainedXP.ToString()+" "+professionName.ToLower();
                     //Entity sct = ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter, gainedXP, sctType);
                     //entityManager.Instantiate(sct);
-                    //Plugin.Log.LogInfo("Attempted to create scrolling combat text...");
+                    //Core.Log.LogInfo("Attempted to create scrolling combat text...");
                     serverGameManager.CommandBuffer.AllocateIfNotCreated(Allocator.Temp);
                     serverGameManager.CreateScrollingCombatText(gainedXP, sctType, localToWorld.Up, user.LocalCharacter._Entity, user.LocalCharacter._Entity.Read<PlayerCharacter>().UserEntity, prefabGUID);
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
@@ -242,7 +239,7 @@ namespace Cobalt.Systems.Professions
             float currentXP = GetXp(steamID, handler);
             int currentLevel = GetLevel(steamID, handler);
             int nextLevelXP = ConvertLevelToXp(currentLevel + 1);
-            //Plugin.Log.LogInfo($"Lv: {currentLevel} | xp: {currentXP} | toNext: {nextLevelXP}");
+            //Core.Log.LogInfo($"Lv: {currentLevel} | xp: {currentXP} | toNext: {nextLevelXP}");
             int percent = (int)(currentXP / nextLevelXP * 100);
             return percent;
         }

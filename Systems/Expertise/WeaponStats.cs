@@ -1,35 +1,33 @@
-﻿using Cobalt.Core;
-
-namespace Cobalt.Systems.Expertise
+﻿namespace Cobalt.Systems.Expertise
 {
-    public class WeaponStatsSystem
+    public class WeaponStats
     {
         public class PlayerWeaponUtilities
         {
             public static bool ChooseStat(ulong steamId, string weaponType, string statType)
             {
-                if (!DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
-                    DataStructures.PlayerWeaponChoices[steamId] = [];
+                if (!Core.DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
+                    Core.DataStructures.PlayerWeaponChoices[steamId] = [];
 
-                if (!DataStructures.PlayerWeaponChoices[steamId].ContainsKey(weaponType))
-                    DataStructures.PlayerWeaponChoices[steamId][weaponType] = [];
+                if (!Core.DataStructures.PlayerWeaponChoices[steamId].ContainsKey(weaponType))
+                    Core.DataStructures.PlayerWeaponChoices[steamId][weaponType] = [];
 
-                if (DataStructures.PlayerWeaponChoices[steamId][weaponType].Count >= 2)
+                if (Core.DataStructures.PlayerWeaponChoices[steamId][weaponType].Count >= 2)
                 {
                     return false; // Only allow 2 stats to be chosen
                 }
 
-                DataStructures.PlayerWeaponChoices[steamId][weaponType].Add(statType);
-                DataStructures.SavePlayerWeaponChoices();
+                Core.DataStructures.PlayerWeaponChoices[steamId][weaponType].Add(statType);
+                Core.DataStructures.SavePlayerWeaponChoices();
                 return true;
             }
 
             public static void ResetChosenStats(ulong steamId, string weaponType)
             {
-                if (DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
+                if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
                 {
                     choices.Clear();
-                    DataStructures.SavePlayerWeaponChoices();
+                    Core.DataStructures.SavePlayerWeaponChoices();
                 }
             }
         }
@@ -38,7 +36,6 @@ namespace Cobalt.Systems.Expertise
         {
             public enum WeaponStatType
             {
-                AttackSpeed,
                 PhysicalPower,
                 SpellPower,
                 PhysicalCritChance,
@@ -49,18 +46,16 @@ namespace Cobalt.Systems.Expertise
 
             public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
                 {
-                    { 1, WeaponStatType.AttackSpeed },
-                    { 2, WeaponStatType.PhysicalPower },
-                    { 3, WeaponStatType.SpellPower },
-                    { 4, WeaponStatType.PhysicalCritChance },
-                    { 5, WeaponStatType.PhysicalCritDamage },
-                    { 6, WeaponStatType.SpellCritChance },
-                    { 7, WeaponStatType.SpellCritDamage }
+                    { 1, WeaponStatType.PhysicalPower },
+                    { 2, WeaponStatType.SpellPower },
+                    { 3, WeaponStatType.PhysicalCritChance },
+                    { 4, WeaponStatType.PhysicalCritDamage },
+                    { 5, WeaponStatType.SpellCritChance },
+                    { 6, WeaponStatType.SpellCritDamage }
                 };
 
             private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
-                    {WeaponStatType.AttackSpeed, 0.15f},
                     {WeaponStatType.PhysicalPower, 15},
                     {WeaponStatType.SpellPower, 15},
                     {WeaponStatType.PhysicalCritChance, 0.15f},

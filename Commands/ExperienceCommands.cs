@@ -1,8 +1,7 @@
-
 using Cobalt.Systems.Experience;
 using VampireCommandFramework;
 
-namespace Cobalt.Core.Commands
+namespace Cobalt.Commands
 {
     public static class ExperienceCommands
     {
@@ -11,7 +10,7 @@ namespace Cobalt.Core.Commands
         {
             var SteamID = ctx.Event.User.PlatformId;
 
-            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
             {
                 bools["ExperienceLogging"] = !bools["ExperienceLogging"];
             }
@@ -27,11 +26,11 @@ namespace Cobalt.Core.Commands
                 return;
             }
             ulong steamId = ctx.Event.User.PlatformId;
-            if (DataStructures.PlayerExperience.TryGetValue(steamId, out var _))
+            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var _))
             {
                 var xpData = new KeyValuePair<int, float>(level, ExperienceSystem.ConvertLevelToXp(level));
-                DataStructures.PlayerExperience[steamId] = xpData;
-                DataStructures.SavePlayerExperience();
+                Core.DataStructures.PlayerExperience[steamId] = xpData;
+                Core.DataStructures.SavePlayerExperience();
                 ctx.Reply($"Level set to {level}.");
             }
             else

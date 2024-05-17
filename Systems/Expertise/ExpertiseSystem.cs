@@ -1,21 +1,19 @@
-﻿using Cobalt.Core;
-using Cobalt.Hooks;
+﻿using Cobalt.Hooks;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
-using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Systems.Expertise.WeaponStatsSystem.WeaponStatManager;
+using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Cobalt.Systems.Expertise
 {
-    public class WeaponMasterySystem
+    public class ExpertiseSystem
     {
-        private static readonly float CombatMasteryMultiplier = 15; // mastery points multiplier from normal units
-        public static readonly int MaxCombatMasteryLevel = 99; // maximum level
-        private static readonly float VBloodMultiplier = 15; // mastery points multiplier from VBlood units
-        private static readonly float CombatMasteryConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int CombatMasteryXPPower = 2; // power for calculating level from xp
+        private static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // mastery points multiplier from normal units
+        public static readonly int MaxWeaponExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
+        private static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // mastery points multiplier from VBlood units
+        private static readonly float WeaponExpertiseConstant = 0.1f; // constant for calculating level from xp
+        private static readonly int WeaponExpertiseXPPower = 2; // power for calculating level from xp
 
         public enum WeaponType
         {
@@ -45,37 +43,36 @@ namespace Cobalt.Systems.Expertise
             if (!weapon.Equals(Entity.Null))
             {
                 prefabGUID = entityManager.GetComponentData<Equipment>(Killer).WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
-
             }
             string weaponType = GetWeaponTypeFromPrefab(prefabGUID).ToString();
 
             if (entityManager.HasComponent<UnitStats>(Victim))
             {
                 var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
-                float CombatMasteryValue = CalculateMasteryValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
+                float WeaponExpertiseValue = CalculateMasteryValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
 
                 IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
                 if (handler != null)
                 {
                     // Check if the player leveled up
                     var xpData = handler.GetExperienceData(steamID);
-                    float newExperience = xpData.Value + CombatMasteryValue;
+                    float newExperience = xpData.Value + WeaponExpertiseValue;
                     int newLevel = ConvertXpToLevel(newExperience);
                     bool leveledUp = false;
 
                     if (newLevel > xpData.Key)
                     {
                         leveledUp = true;
-                        if (newLevel > MaxCombatMasteryLevel)
+                        if (newLevel > MaxWeaponExpertiseLevel)
                         {
-                            newLevel = MaxCombatMasteryLevel;
-                            newExperience = ConvertLevelToXp(MaxCombatMasteryLevel);
+                            newLevel = MaxWeaponExpertiseLevel;
+                            newExperience = ConvertLevelToXp(MaxWeaponExpertiseLevel);
                         }
                     }
                     var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
                     handler.UpdateExperienceData(steamID, updatedXPData);
                     handler.SaveChanges();
-                    NotifyPlayer(entityManager, user, weaponType, CombatMasteryValue, leveledUp, newLevel, handler);
+                    NotifyPlayer(entityManager, user, weaponType, WeaponExpertiseValue, leveledUp, newLevel, handler);
                 }
             }
         }
@@ -83,12 +80,8 @@ namespace Cobalt.Systems.Expertise
         private static float CalculateMasteryValue(UnitStats VictimStats, bool isVBlood)
         {
             float CombatMasteryValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
-            if (isVBlood)
-            {
-                CombatMasteryValue *= VBloodMultiplier;
-
-            }
-            return CombatMasteryValue * CombatMasteryMultiplier;
+            if (isVBlood) return CombatMasteryValue * VBloodMultiplier;
+            return CombatMasteryValue * UnitMultiplier;
         }
 
         public static void NotifyPlayer(EntityManager entityManager, User user, string weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponMasteryHandler handler)
@@ -104,19 +97,18 @@ namespace Cobalt.Systems.Expertise
                 Entity character = user.LocalCharacter._Entity;
                 Equipment equipment = character.Read<Equipment>();
                 message = $"{weaponType} improved to [<color=white>{newLevel}</color>]";
-                GearOverride.SetWeaponItemLevel(equipment, newLevel, VWorld.Server.EntityManager);
+                GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
                 //GearOverride.SetLevel(user.LocalCharacter._Entity, VWorld.Server.EntityManager);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
             {
-                if (DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["CombatLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["CombatLogging"])
                 {
                     message = $"+<color=yellow>{gainedXP}</color> {weaponType.ToLower()} mastery (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }
-            
         }
 
         public static int GetLevelProgress(ulong steamID, IWeaponMasteryHandler handler)
@@ -132,13 +124,13 @@ namespace Cobalt.Systems.Expertise
         public static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion
-            return (int)(CombatMasteryConstant * Math.Sqrt(xp));
+            return (int)(WeaponExpertiseConstant * Math.Sqrt(xp));
         }
 
         public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
-            return (int)Math.Pow(level / CombatMasteryConstant, CombatMasteryXPPower);
+            return (int)Math.Pow(level / WeaponExpertiseConstant, WeaponExpertiseXPPower);
         }
 
         private static float GetXp(ulong steamID, IWeaponMasteryHandler handler)
@@ -184,7 +176,7 @@ namespace Cobalt.Systems.Expertise
                     return type;
                 }
             }
-            return WeaponStatType.AttackSpeed;
+            return WeaponStatType.PhysicalPower;
         }
     }
 }

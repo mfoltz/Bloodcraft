@@ -4,7 +4,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using VampireCommandFramework;
 
-namespace Cobalt.Core.Commands
+namespace Cobalt.Commands
 {
     public static class ProfessionCommands
     {
@@ -13,7 +13,7 @@ namespace Cobalt.Core.Commands
         {
             var SteamID = ctx.Event.User.PlatformId;
 
-            if (DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
             {
                 bools["ProfessionLogging"] = !bools["ProfessionLogging"];
             }
@@ -31,43 +31,13 @@ namespace Cobalt.Core.Commands
                 ctx.Reply("Invalid profession.");
                 return;
             }
-            if (DataStructures.professionMap.TryGetValue(profession, out var professionDictionary) && professionDictionary.TryGetValue(steamID, out var prof))
+            if (Core.DataStructures.professionMap.TryGetValue(profession, out var professionDictionary) && professionDictionary.TryGetValue(steamID, out var prof))
             {
                 ctx.Reply($"You are level [<color=yellow>{prof.Key}</color>] (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
             }
             else
             {
                 ctx.Reply($"You haven't gained any levels in {professionHandler.GetProfessionName()} yet. ");
-            }
-        }
-        [Command(name: "teststrip", shortHand: "teststrip", adminOnly: false, usage: ".teststrip", description: "tes")]
-        public static void TestCommand(ChatCommandContext ctx)
-        {
-            Plugin.StripLevelSources();
-        }
-
-        public class BuildingCostsToggle
-        {
-            private static bool buildingCostsFlag = false;
-
-            private static SetDebugSettingEvent BuildingCostsDebugSetting = new()
-            {
-                SettingType = (DebugSettingType)5, // Assuming this is the correct DebugSettingType for building costs
-                Value = false
-            };
-
-            [Command(name: "toggleBuildingCosts", shortHand: "tbc", adminOnly: true, usage: ".tbc", description: "Toggles building costs, useful for setting up a castle linked to your heart easily.")]
-            public static void ToggleBuildingCostsCommand(ChatCommandContext ctx)
-            {
-                User user = ctx.Event.User;
-
-                DebugEventsSystem existingSystem = VWorld.Server.GetExistingSystemManaged<DebugEventsSystem>();
-                buildingCostsFlag = !buildingCostsFlag; // Toggle the flag
-
-                BuildingCostsDebugSetting.Value = buildingCostsFlag;
-                existingSystem.SetDebugSetting(user.Index, ref BuildingCostsDebugSetting);
-
-                ctx.Reply($"BuildingCostsDisabled: {BuildingCostsDebugSetting.Value}");
             }
         }
     }

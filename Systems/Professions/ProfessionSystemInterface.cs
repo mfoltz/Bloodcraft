@@ -1,6 +1,4 @@
-﻿using Cobalt.Core;
-using ProjectM;
-using Stunlock.Core;
+﻿using Stunlock.Core;
 
 namespace Cobalt.Systems.Professions
 {
