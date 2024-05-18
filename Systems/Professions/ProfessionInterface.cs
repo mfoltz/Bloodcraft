@@ -1,4 +1,5 @@
-﻿using Stunlock.Core;
+﻿using ProjectM.CastleBuilding;
+using Stunlock.Core;
 
 namespace Cobalt.Systems.Professions
 {
@@ -107,11 +108,11 @@ namespace Cobalt.Systems.Professions
     public class JewelcraftingHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerJewelcrafting;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerJewelcrafting;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerJewelcrafting();
+            Core.DataStructures.SavePlayerJewelcrafting();
         }
 
         public override string GetProfessionName()
@@ -123,11 +124,11 @@ namespace Cobalt.Systems.Professions
     public class AlchemyHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerAlchemy;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAlchemy;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerAlchemy();
+            Core.DataStructures.SavePlayerAlchemy();
         }
 
         public override string GetProfessionName()
@@ -139,11 +140,11 @@ namespace Cobalt.Systems.Professions
     public class HarvestingHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerHarvesting;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerHarvesting;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerHarvesting();
+            Core.DataStructures.SavePlayerHarvesting();
         }
 
         public override string GetProfessionName()
@@ -155,11 +156,11 @@ namespace Cobalt.Systems.Professions
     public class BlacksmithingHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerBlacksmithing;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerBlacksmithing;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerBlacksmithing();
+            Core.DataStructures.SavePlayerBlacksmithing();
         }
 
         public override string GetProfessionName()
@@ -171,11 +172,11 @@ namespace Cobalt.Systems.Professions
     public class TailoringHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerTailoring;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerTailoring;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerTailoring();
+            Core.DataStructures.SavePlayerTailoring();
         }
 
         public override string GetProfessionName()
@@ -187,11 +188,11 @@ namespace Cobalt.Systems.Professions
     public class WoodcuttingHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerWoodcutting;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWoodcutting;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerWoodcutting();
+            Core.DataStructures.SavePlayerWoodcutting();
         }
 
         public override string GetProfessionName()
@@ -203,11 +204,11 @@ namespace Cobalt.Systems.Professions
     public class MiningHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerMining;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMining;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerMining();
+            Core.DataStructures.SavePlayerMining();
         }
 
         public override string GetProfessionName()
@@ -219,11 +220,11 @@ namespace Cobalt.Systems.Professions
     public class FishingHandler : BaseProfessionHandler
     {
         // Override the DataStructure to provide the specific dictionary for woodcutting.
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerFishing;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishing;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerFishing();
+            Core.DataStructures.SavePlayerFishing();
         }
 
         public override string GetProfessionName()

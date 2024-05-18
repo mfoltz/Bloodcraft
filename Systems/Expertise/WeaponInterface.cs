@@ -72,11 +72,11 @@
     // Implementations for each weapon type
     public class SwordMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerSwordMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSwordMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerSwordMastery();
+            Core.DataStructures.SavePlayerSwordMastery();
         }
 
         public override string GetWeaponType()
@@ -87,11 +87,11 @@
 
     public class AxeMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerAxeMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAxeMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerAxeMastery();
+            Core.DataStructures.SavePlayerAxeMastery();
         }
 
         public override string GetWeaponType()
@@ -102,11 +102,11 @@
 
     public class MaceMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerMaceMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMaceMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerMaceMastery();
+            Core.DataStructures.SavePlayerMaceMastery();
         }
 
         public override string GetWeaponType()
@@ -117,11 +117,11 @@
 
     public class SpearMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerSpearMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSpearMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerSpearMastery();
+            Core.DataStructures.SavePlayerSpearMastery();
         }
 
         public override string GetWeaponType()
@@ -132,11 +132,11 @@
 
     public class CrossbowMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerCrossbowMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCrossbowMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerCrossbowMastery();
+            Core.DataStructures.SavePlayerCrossbowMastery();
         }
 
         public override string GetWeaponType()
@@ -147,11 +147,11 @@
 
     public class GreatSwordMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerGreatSwordMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerGreatSwordMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerGreatSwordMastery();
+            Core.DataStructures.SavePlayerGreatSwordMastery();
         }
 
         public override string GetWeaponType()
@@ -162,11 +162,11 @@
 
     public class SlashersMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerSlashersMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSlashersMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerSlashersMastery();
+            Core.DataStructures.SavePlayerSlashersMastery();
         }
 
         public override string GetWeaponType()
@@ -177,11 +177,11 @@
 
     public class PistolsMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerPistolsMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerPistolsMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerPistolsMastery();
+            Core.DataStructures.SavePlayerPistolsMastery();
         }
 
         public override string GetWeaponType()
@@ -192,11 +192,11 @@
 
     public class ReaperMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerReaperMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerReaperMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerReaperMastery();
+            Core.DataStructures.SavePlayerReaperMastery();
         }
 
         public override string GetWeaponType()
@@ -207,11 +207,11 @@
 
     public class LongbowMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerLongbowMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerLongbowMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerLongbowMastery();
+            Core.DataStructures.SavePlayerLongbowMastery();
         }
 
         public override string GetWeaponType()
@@ -222,11 +222,11 @@
 
     public class WhipMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerWhipMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWhipMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerWhipMastery();
+            Core.DataStructures.SavePlayerWhipMastery();
         }
 
         public override string GetWeaponType()
@@ -237,11 +237,11 @@
 
     public class UnarmedMasteryHandler : BaseWeaponMasteryHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => DataStructures.PlayerUnarmedMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedMastery;
 
         public override void SaveChanges()
         {
-            DataStructures.SavePlayerUnarmedMastery();
+            Core.DataStructures.SavePlayerUnarmedMastery();
         }
 
         public override string GetWeaponType()

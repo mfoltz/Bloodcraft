@@ -48,7 +48,6 @@ namespace Cobalt
             InitConfig();
             CommandRegistry.RegisterAll();
             LoadAllData();
-            UpdateBaseStats();
             //Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
         }
 

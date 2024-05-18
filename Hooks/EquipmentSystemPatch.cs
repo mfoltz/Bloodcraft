@@ -44,7 +44,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
         {
-            //Plugin.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
+            Core.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
             if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
             try
@@ -70,7 +70,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
         {
-            //Plugin.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
+            Core.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
             if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
             try
@@ -96,7 +96,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
         {
-            //Plugin.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
+            Core.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
             if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
             try
@@ -455,8 +455,8 @@ namespace Cobalt.Hooks
             {
                 int playerLevel = xpData.Key;
                 Equipment equipment = player.Read<Equipment>();
-                //equipment.ArmorLevel._Value = 0f;
-                //equipment.SpellLevel._Value = 0f;
+                equipment.ArmorLevel._Value = 0f;
+                equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
 
                 // weapon level of the weapon mirrors player weapon level if higher?
