@@ -146,6 +146,30 @@ namespace Cobalt.Hooks
             }
         }
 
+        [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
+        [HarmonyPostfix]
+        private static void OnUpdatePostix(ReactToInventoryChangedSystem __instance)
+        {
+            Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
+            if (!Plugin.ExpertiseSystem.Value) return;
+            NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    entity.LogComponentTypes(); // want to detect weapons entering inventory and change level sources to match masteries
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError(ex);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+
         private static void HandleEquipmentEvent(NativeArray<Entity> entities)
         {
             try

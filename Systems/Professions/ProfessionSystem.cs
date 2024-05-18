@@ -1,7 +1,9 @@
 ﻿using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using StableNameDotNet;
 using Stunlock.Core;
+using System.Text.RegularExpressions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
@@ -121,7 +123,8 @@ namespace Cobalt.Systems.Professions
                                 {
                                     if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, level))
                                     {
-                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received {dropTableData.ItemGuid.LookupName()}x<color=white>{level}</color> from {handler.GetProfessionName()}");
+                                        string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.LookupName());
+                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received <color=green>{name}</color>x<color=white>{level}</color> from {handler.GetProfessionName()}");
                                         break;
                                     }
                                 }
@@ -155,10 +158,10 @@ namespace Cobalt.Systems.Professions
             handler.SaveChanges();
 
             var xpData = handler.GetExperienceData(steamID);
-            UpdatePlayerExperience(prefabGUID, entityManager, user, steamID, xpData, value, handler);
+            UpdateProfessionExperience(prefabGUID, entityManager, user, steamID, xpData, value, handler);
         }
 
-        private static void UpdatePlayerExperience(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
+        private static void UpdateProfessionExperience(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
         {
             float newExperience = xpData.Value + gainedXP;
             int newLevel = ConvertXpToLevel(newExperience);
@@ -299,6 +302,31 @@ namespace Cobalt.Systems.Professions
                 }
             }
             return 1;
+        }
+
+        public static string FormatMaterialName(string prefabName)
+        {
+            string name = prefabName.Replace("Item_Ingredient_", "");
+            if (name.ToLower().Contains("mineral"))
+            {
+                name = name.Replace("Mineral_", "");
+                name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
+            }
+            else if (name.ToLower().Contains("wood"))
+            {
+                string[] parts = name.Split('_');
+                if (parts.Length > 1)
+                {
+                    name = parts[1] + " " + parts[0];
+                    if (name.ToLower().Contains("standard")) name = name.Replace("Standard", "");
+                }
+            }
+            else if (name.ToLower().Contains("plant"))
+            {
+                name = name.Replace("Plant_", "");
+                name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
+            }
+            return name;
         }
     }
 }

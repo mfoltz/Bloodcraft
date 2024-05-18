@@ -48,25 +48,25 @@ namespace Cobalt
             InitConfig();
             CommandRegistry.RegisterAll();
             LoadAllData();
-            //Plugin.Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
+            Core.Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
         }
 
         private static void InitConfig()
         {
             LevelingSystem = Instance.Config.Bind("Config", "LevelingSystem", true, "Enable or disable the leveling system.");
             MaxPlayerLevel = Instance.Config.Bind("Config", "MaxLevel", 90, "The maximum level a player can reach.");
-            UnitLevelingMultiplier = Instance.Config.Bind("Config", "XPMultiplier", 5, "The multiplier for experience gained from units.");
-            VBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodXPMultiplier", 15, "The multiplier for experience gained from VBlood.");
-            GroupLevelingMultiplier = Instance.Config.Bind("Config", "GroupXPMultiplier", 1, "The multiplier for experience gained from group kills.");
+            UnitLevelingMultiplier = Instance.Config.Bind("Config", "UnitLevelingMultiplier", 5, "The multiplier for experience gained from units.");
+            VBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15, "The multiplier for experience gained from VBlood.");
+            GroupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1, "The multiplier for experience gained from group kills.");
 
             ExpertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", true, "Enable or disable the expertise system.");
             MaxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in expertise.");
-            UnitExpertiseMultiplier = Instance.Config.Bind("Config", "ExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
+            UnitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             VBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBlood.");
 
             BloodSystem = Instance.Config.Bind("Config", "BloodSystem", true, "Enable or disable the blood system.");
             MaxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in sanguimancy.");
-            UnitBloodMultiplier = Instance.Config.Bind("Config", "BloodMultiplier", 5, "The multiplier for blood stats gained from units.");
+            UnitBloodMultiplier = Instance.Config.Bind("Config", "UnitBloodMultiplier", 5, "The multiplier for blood stats gained from units.");
             VBloodBloodMultiplier = Instance.Config.Bind("Config", "VBloodBloodMultiplier", 15, "The multiplier for blood stats gained from VBlood.");
 
             ProfessionSystem = Instance.Config.Bind("Config", "ProfessionSystem", true, "Enable or disable the profession system.");

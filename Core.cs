@@ -13,7 +13,7 @@ namespace Cobalt;
 
 internal static class Core
 {
-    public static World Server { get; } = GetWorld("Server") ?? throw new System.Exception("There is no Server world (yet). Did you install a server mod on the client?");
+    public static World Server { get; } = GetWorld("Server") ?? throw new System.Exception("There is no Server world (yet)...");
 
     // V Rising systems
     public static EntityManager EntityManager { get; } = Server.EntityManager;
@@ -41,7 +41,7 @@ internal static class Core
 
         // Initialize utility services
 
-        Core.Log.LogInfo("Cobalt initialized");
+        Core.Log.LogInfo("Cobalt initialized...");
 
         hasInitialized = true;
     }

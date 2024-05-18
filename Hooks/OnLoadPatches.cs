@@ -9,6 +9,7 @@ public static class InitializationPatch
     [HarmonyPostfix]
     public static void AfterLoad()
     {
+        Core.Initialize();
         Plugin.UpdateBaseStats();
     }
 }

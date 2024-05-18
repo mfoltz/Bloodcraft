@@ -21,7 +21,6 @@ public class CraftingPatch
         public static void Postfix(UpdateCraftingSystem __instance)
         {
             if (!Plugin.ProfessionSystem.Value) return;
-            //Core.Log.LogInfo("UpdateCraftingSystemPrefix called...");
             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
             NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
             try
@@ -36,7 +35,7 @@ public class CraftingPatch
                     if (entity.Equals(Entity.Null) || !entity.Has<CastleAreaRequirement>() || !entity.Has<QueuedWorkstationCraftAction>()) continue;
 
                     var actions = entity.ReadBuffer<QueuedWorkstationCraftAction>();
-                    if (actions.IsEmpty || !actions.IsCreated) continue;
+                    if (actions.IsEmpty) continue;
                     foreach (var action in actions)
                     {
                         User user = action.InitiateUser.Read<User>();
