@@ -84,18 +84,18 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerAlchemy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerHarvesting = [];
 
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSwordMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerAxeMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerMaceMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSpearMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerCrossbowMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerGreatSwordMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSlashersMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerPistolsMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedMastery = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipMastery = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSwordExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerAxeExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerMaceExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSpearExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerCrossbowExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerGreatSwordExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSlashersExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerPistolsExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<string, List<string>>> playerWeaponChoices = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerEquippedWeapon = [];
 
@@ -168,76 +168,76 @@ internal static class Core
             set => playerHarvesting = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSwordMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSwordExpertise
         {
-            get => playerSwordMastery;
-            set => playerSwordMastery = value;
+            get => playerSwordExpertise;
+            set => playerSwordExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAxeMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAxeExpertise
         {
-            get => playerAxeMastery;
-            set => playerAxeMastery = value;
+            get => playerAxeExpertise;
+            set => playerAxeExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMaceMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMaceExpertise
         {
-            get => playerMaceMastery;
-            set => playerMaceMastery = value;
+            get => playerMaceExpertise;
+            set => playerMaceExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSpearMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSpearExpertise
         {
-            get => playerSpearMastery;
-            set => playerSpearMastery = value;
+            get => playerSpearExpertise;
+            set => playerSpearExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCrossbowMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCrossbowExpertise
         {
-            get => playerCrossbowMastery;
-            set => playerCrossbowMastery = value;
+            get => playerCrossbowExpertise;
+            set => playerCrossbowExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerGreatSwordMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerGreatSwordExpertise
         {
-            get => playerGreatSwordMastery;
-            set => playerGreatSwordMastery = value;
+            get => playerGreatSwordExpertise;
+            set => playerGreatSwordExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSlashersMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSlashersExpertise
         {
-            get => playerSlashersMastery;
-            set => playerSlashersMastery = value;
+            get => playerSlashersExpertise;
+            set => playerSlashersExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerPistolsMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerPistolsExpertise
         {
-            get => playerPistolsMastery;
-            set => playerPistolsMastery = value;
+            get => playerPistolsExpertise;
+            set => playerPistolsExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerReaperMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerReaperExpertise
         {
-            get => playerReaperMastery;
-            set => playerReaperMastery = value;
+            get => playerReaperExpertise;
+            set => playerReaperExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerLongbowMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerLongbowExpertise
         {
-            get => playerLongbowMastery;
-            set => playerLongbowMastery = value;
+            get => playerLongbowExpertise;
+            set => playerLongbowExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWhipMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWhipExpertise
         {
-            get => playerWhipMastery;
-            set => playerWhipMastery = value;
+            get => playerWhipExpertise;
+            set => playerWhipExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerUnarmedMastery
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerUnarmedExpertise
         {
-            get => playerUnarmedMastery;
-            set => playerUnarmedMastery = value;
+            get => playerUnarmedExpertise;
+            set => playerUnarmedExpertise = value;
         }
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSanguimancy
@@ -288,18 +288,18 @@ internal static class Core
             {"Jewelcrafting", Core.JsonFiles.PlayerJewelcraftingJson},
             {"Alchemy", Core.JsonFiles.PlayerAlchemyJson},
             {"Harvesting", Core.JsonFiles.PlayerHarvestingJson},
-            {"SwordMastery", Core.JsonFiles.PlayerSwordMasteryJson },
-            {"AxeMastery", Core.JsonFiles.PlayerAxeMasteryJson},
-            {"MaceMastery", Core.JsonFiles.PlayerMaceMasteryJson},
-            {"SpearMastery", Core.JsonFiles.PlayerSpearMasteryJson},
-            {"CrossbowMastery", Core.JsonFiles.PlayerCrossbowMasteryJson},
-            {"GreatSwordMastery", Core.JsonFiles.PlayerGreatSwordMastery},
-            {"SlashersMastery", Core.JsonFiles.PlayerSlashersMasteryJson},
-            {"PistolsMastery", Core.JsonFiles.PlayerPistolsMasteryJson},
-            {"ReaperMastery", Core.JsonFiles.PlayerReaperMastery},
-            {"LongbowMastery", Core.JsonFiles.PlayerLongbowMasteryJson},
-            {"WhipMastery", Core.JsonFiles.PlayerWhipMasteryJson},
-            {"UnarmedMastery", Core.JsonFiles.PlayerUnarmedMasteryJson},
+            {"SwordExpertise", Core.JsonFiles.PlayerSwordExpertiseJson },
+            {"AxeExpertise", Core.JsonFiles.PlayerAxeExpertiseJson},
+            {"MaceExpertise", Core.JsonFiles.PlayerMaceExpertiseJson},
+            {"SpearExpertise", Core.JsonFiles.PlayerSpearExpertiseJson},
+            {"CrossbowExpertise", Core.JsonFiles.PlayerCrossbowExpertiseJson},
+            {"GreatSwordExpertise", Core.JsonFiles.PlayerGreatSwordExpertise},
+            {"SlashersExpertise", Core.JsonFiles.PlayerSlashersExpertiseJson},
+            {"PistolsExpertise", Core.JsonFiles.PlayerPistolsExpertiseJson},
+            {"ReaperExpertise", Core.JsonFiles.PlayerReaperExpertise},
+            {"LongbowExpertise", Core.JsonFiles.PlayerLongbowExpertiseJson},
+            {"WhipExpertise", Core.JsonFiles.PlayerWhipExpertiseJson},
+            {"UnarmedExpertise", Core.JsonFiles.PlayerUnarmedExpertiseJson},
             {"Sanguimancy", Core.JsonFiles.PlayerSanguimancyJson},
             {"EquippedWeapon", Core.JsonFiles.PlayerEquippedWeaponJson},
             {"WeaponChoices", Core.JsonFiles.PlayerWeaponChoicesJson},
@@ -318,38 +318,38 @@ internal static class Core
             {"Harvesting", PlayerHarvesting }
         };
 
-        public static readonly Dictionary<string, Dictionary<ulong, KeyValuePair<int, float>>> weaponMasteryMap = new()
+        public static readonly Dictionary<string, Dictionary<ulong, KeyValuePair<int, float>>> weaponExpertiseMap = new()
         {
-            {"Sword", PlayerSwordMastery},
-            {"Axe", PlayerAxeMastery},
-            {"Mace", PlayerMaceMastery},
-            {"Spear", PlayerSpearMastery},
-            {"Crossbow", PlayerCrossbowMastery},
-            {"GreatSword", PlayerGreatSwordMastery},
-            {"Slashers", PlayerSlashersMastery},
-            {"Pistols", PlayerPistolsMastery},
-            {"Reaper", PlayerReaperMastery},
-            {"Longbow", PlayerLongbowMastery},
-            {"Whip", PlayerWhipMastery},
-            {"Unarmed", PlayerUnarmedMastery},
+            {"Sword", PlayerSwordExpertise},
+            {"Axe", PlayerAxeExpertise},
+            {"Mace", PlayerMaceExpertise},
+            {"Spear", PlayerSpearExpertise},
+            {"Crossbow", PlayerCrossbowExpertise},
+            {"GreatSword", PlayerGreatSwordExpertise},
+            {"Slashers", PlayerSlashersExpertise},
+            {"Pistols", PlayerPistolsExpertise},
+            {"Reaper", PlayerReaperExpertise},
+            {"Longbow", PlayerLongbowExpertise},
+            {"Whip", PlayerWhipExpertise},
+            {"Unarmed", PlayerUnarmedExpertise},
         };
 
         // Generic method to save any type of dictionary.
         public static readonly Dictionary<string, Action> saveActions = new()
         {
-            {"Sword", SavePlayerSwordMastery},
-            {"Axe", SavePlayerAxeMastery},
-            {"Mace", SavePlayerMaceMastery},
-            {"Spear", SavePlayerSpearMastery},
-            {"Crossbow", SavePlayerCrossbowMastery},
-            {"GreatSword", SavePlayerGreatSwordMastery},
-            {"Slashers", SavePlayerSlashersMastery},
-            {"Pistols", SavePlayerPistolsMastery},
-            {"Reaper", SavePlayerReaperMastery},
-            {"Longbow", SavePlayerLongbowMastery},
-            {"Whip", SavePlayerWhipMastery},
-            {"Unarmed", SavePlayerUnarmedMastery},
-            // Add other mastery types as needed
+            {"Sword", SavePlayerSwordExpertise},
+            {"Axe", SavePlayerAxeExpertise},
+            {"Mace", SavePlayerMaceExpertise},
+            {"Spear", SavePlayerSpearExpertise},
+            {"Crossbow", SavePlayerCrossbowExpertise},
+            {"GreatSword", SavePlayerGreatSwordExpertise},
+            {"Slashers", SavePlayerSlashersExpertise},
+            {"Pistols", SavePlayerPistolsExpertise},
+            {"Reaper", SavePlayerReaperExpertise},
+            {"Longbow", SavePlayerLongbowExpertise},
+            {"Whip", SavePlayerWhipExpertise},
+            {"Unarmed", SavePlayerUnarmedExpertise},
+            // Add other Expertise types as needed
         };
 
         public static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
@@ -405,29 +405,29 @@ internal static class Core
 
         public static void LoadPlayerHarvesting() => LoadData(ref playerHarvesting, "Harvesting");
 
-        public static void LoadPlayerSwordMastery() => LoadData(ref playerSwordMastery, "SwordMastery");
+        public static void LoadPlayerSwordExpertise() => LoadData(ref playerSwordExpertise, "SwordExpertise");
 
-        public static void LoadPlayerAxeMastery() => LoadData(ref playerAxeMastery, "AxeMastery");
+        public static void LoadPlayerAxeExpertise() => LoadData(ref playerAxeExpertise, "AxeExpertise");
 
-        public static void LoadPlayerMaceMastery() => LoadData(ref playerMaceMastery, "MaceMastery");
+        public static void LoadPlayerMaceExpertise() => LoadData(ref playerMaceExpertise, "MaceExpertise");
 
-        public static void LoadPlayerSpearMastery() => LoadData(ref playerSpearMastery, "SpearMastery");
+        public static void LoadPlayerSpearExpertise() => LoadData(ref playerSpearExpertise, "SpearExpertise");
 
-        public static void LoadPlayerCrossbowMastery() => LoadData(ref playerCrossbowMastery, "CrossbowMastery");
+        public static void LoadPlayerCrossbowExpertise() => LoadData(ref playerCrossbowExpertise, "CrossbowExpertise");
 
-        public static void LoadPlayerGreatSwordMastery() => LoadData(ref playerGreatSwordMastery, "GreatSwordMastery");
+        public static void LoadPlayerGreatSwordExpertise() => LoadData(ref playerGreatSwordExpertise, "GreatSwordExpertise");
 
-        public static void LoadPlayerSlashersMastery() => LoadData(ref playerSlashersMastery, "SlashersMastery");
+        public static void LoadPlayerSlashersExpertise() => LoadData(ref playerSlashersExpertise, "SlashersExpertise");
 
-        public static void LoadPlayerPistolsMastery() => LoadData(ref playerPistolsMastery, "PistolsMastery");
+        public static void LoadPlayerPistolsExpertise() => LoadData(ref playerPistolsExpertise, "PistolsExpertise");
 
-        public static void LoadPlayerReaperMastery() => LoadData(ref playerReaperMastery, "ReaperMastery");
+        public static void LoadPlayerReaperExpertise() => LoadData(ref playerReaperExpertise, "ReaperExpertise");
 
-        public static void LoadPlayerLongbowMastery() => LoadData(ref playerLongbowMastery, "LongbowMastery");
+        public static void LoadPlayerLongbowExpertise() => LoadData(ref playerLongbowExpertise, "LongbowExpertise");
 
-        public static void LoadPlayerWhipMastery() => LoadData(ref playerWhipMastery, "WhipMastery");
+        public static void LoadPlayerWhipExpertise() => LoadData(ref playerWhipExpertise, "WhipExpertise");
 
-        public static void LoadPlayerUnarmedMastery() => LoadData(ref playerUnarmedMastery, "UnarmedMastery");
+        public static void LoadPlayerUnarmedExpertise() => LoadData(ref playerUnarmedExpertise, "UnarmedExpertise");
 
         public static void LoadPlayerSanguimancy() => LoadData(ref playerSanguimancy, "Sanguimancy");
 
@@ -478,29 +478,29 @@ internal static class Core
 
         public static void SavePlayerHarvesting() => SaveData(PlayerHarvesting, "Harvesting");
 
-        public static void SavePlayerSwordMastery() => SaveData(PlayerSwordMastery, "SwordMastery");
+        public static void SavePlayerSwordExpertise() => SaveData(PlayerSwordExpertise, "SwordExpertise");
 
-        public static void SavePlayerAxeMastery() => SaveData(PlayerAxeMastery, "AxeMastery");
+        public static void SavePlayerAxeExpertise() => SaveData(PlayerAxeExpertise, "AxeExpertise");
 
-        public static void SavePlayerMaceMastery() => SaveData(PlayerMaceMastery, "MaceMastery");
+        public static void SavePlayerMaceExpertise() => SaveData(PlayerMaceExpertise, "MaceExpertise");
 
-        public static void SavePlayerSpearMastery() => SaveData(PlayerSpearMastery, "SpearMastery");
+        public static void SavePlayerSpearExpertise() => SaveData(PlayerSpearExpertise, "SpearExpertise");
 
-        public static void SavePlayerCrossbowMastery() => SaveData(PlayerCrossbowMastery, "CrossbowMastery");
+        public static void SavePlayerCrossbowExpertise() => SaveData(PlayerCrossbowExpertise, "CrossbowExpertise");
 
-        public static void SavePlayerGreatSwordMastery() => SaveData(PlayerGreatSwordMastery, "GreatSwordMastery");
+        public static void SavePlayerGreatSwordExpertise() => SaveData(PlayerGreatSwordExpertise, "GreatSwordExpertise");
 
-        public static void SavePlayerSlashersMastery() => SaveData(PlayerSlashersMastery, "SlashersMastery");
+        public static void SavePlayerSlashersExpertise() => SaveData(PlayerSlashersExpertise, "SlashersExpertise");
 
-        public static void SavePlayerPistolsMastery() => SaveData(PlayerPistolsMastery, "PistolsMastery");
+        public static void SavePlayerPistolsExpertise() => SaveData(PlayerPistolsExpertise, "PistolsExpertise");
 
-        public static void SavePlayerReaperMastery() => SaveData(PlayerReaperMastery, "ReaperMastery");
+        public static void SavePlayerReaperExpertise() => SaveData(PlayerReaperExpertise, "ReaperExpertise");
 
-        public static void SavePlayerLongbowMastery() => SaveData(PlayerLongbowMastery, "LongbowMastery");
+        public static void SavePlayerLongbowExpertise() => SaveData(PlayerLongbowExpertise, "LongbowExpertise");
 
-        public static void SavePlayerWhipMastery() => SaveData(PlayerWhipMastery, "WhipMastery");
+        public static void SavePlayerWhipExpertise() => SaveData(PlayerWhipExpertise, "WhipExpertise");
 
-        public static void SavePlayerUnarmedMastery() => SaveData(PlayerUnarmedMastery, "UnarmedMastery");
+        public static void SavePlayerUnarmedExpertise() => SaveData(PlayerUnarmedExpertise, "UnarmedExpertise");
 
         public static void SavePlayerSanguimancy() => SaveData(PlayerSanguimancy, "Sanguimancy");
 
@@ -524,18 +524,18 @@ internal static class Core
         public static readonly string PlayerJewelcraftingJson = Path.Combine(Plugin.ConfigPath, "player_jewelcrafting.json");
         public static readonly string PlayerAlchemyJson = Path.Combine(Plugin.ConfigPath, "player_alchemy.json");
         public static readonly string PlayerHarvestingJson = Path.Combine(Plugin.ConfigPath, "player_harvesting.json");
-        public static readonly string PlayerSwordMasteryJson = Path.Combine(Plugin.ConfigPath, "player_sword.json");
-        public static readonly string PlayerAxeMasteryJson = Path.Combine(Plugin.ConfigPath, "player_axe.json");
-        public static readonly string PlayerMaceMasteryJson = Path.Combine(Plugin.ConfigPath, "player_mace.json");
-        public static readonly string PlayerSpearMasteryJson = Path.Combine(Plugin.ConfigPath, "player_spear.json");
-        public static readonly string PlayerCrossbowMasteryJson = Path.Combine(Plugin.ConfigPath, "player_crossbow.json");
-        public static readonly string PlayerGreatSwordMastery = Path.Combine(Plugin.ConfigPath, "player_greatsword.json");
-        public static readonly string PlayerSlashersMasteryJson = Path.Combine(Plugin.ConfigPath, "player_slashers.json");
-        public static readonly string PlayerPistolsMasteryJson = Path.Combine(Plugin.ConfigPath, "player_pistols.json");
-        public static readonly string PlayerReaperMastery = Path.Combine(Plugin.ConfigPath, "player_reaper.json");
-        public static readonly string PlayerLongbowMasteryJson = Path.Combine(Plugin.ConfigPath, "player_longbow.json");
-        public static readonly string PlayerUnarmedMasteryJson = Path.Combine(Plugin.ConfigPath, "player_unarmed.json");
-        public static readonly string PlayerWhipMasteryJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
+        public static readonly string PlayerSwordExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_sword.json");
+        public static readonly string PlayerAxeExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_axe.json");
+        public static readonly string PlayerMaceExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_mace.json");
+        public static readonly string PlayerSpearExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_spear.json");
+        public static readonly string PlayerCrossbowExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_crossbow.json");
+        public static readonly string PlayerGreatSwordExpertise = Path.Combine(Plugin.ConfigPath, "player_greatsword.json");
+        public static readonly string PlayerSlashersExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_slashers.json");
+        public static readonly string PlayerPistolsExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_pistols.json");
+        public static readonly string PlayerReaperExpertise = Path.Combine(Plugin.ConfigPath, "player_reaper.json");
+        public static readonly string PlayerLongbowExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_longbow.json");
+        public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_unarmed.json");
+        public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
 
         //public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");

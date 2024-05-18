@@ -20,11 +20,11 @@ namespace Cobalt.Systems.Experience
 
         private static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
-        public static void EXPMonitor(Entity killerEntity, Entity victimEntity)
+        public static void UpdateExperience(Entity killerEntity, Entity victimEntity)
         {
             EntityManager entityManager = Core.Server.EntityManager;
             if (!IsValidVictim(entityManager, victimEntity)) return;
-            UpdateEXP(entityManager, killerEntity, victimEntity);
+            HandleExperienceUpdate(entityManager, killerEntity, victimEntity);
         }
 
         private static bool IsValidVictim(EntityManager entityManager, Entity victimEntity)
@@ -32,7 +32,7 @@ namespace Cobalt.Systems.Experience
             return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
         }
 
-        private static void UpdateEXP(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
+        private static void HandleExperienceUpdate(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
         {
             PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
             Entity userEntity = player.UserEntity;

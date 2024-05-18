@@ -76,9 +76,9 @@ namespace Cobalt.Systems.Professions
 
         public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer, User user, ulong SteamID, IProfessionHandler handler)
         {
-            EntityManager entityManager = Core.Server.EntityManager;
-            ServerGameManager serverGameManager = Core.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
-            PrefabCollectionSystem prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            EntityManager entityManager = Core.EntityManager;
+            ServerGameManager serverGameManager = Core.ServerGameManager;
+            PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
             Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             int level = GetLevel(SteamID, handler);
             if (!prefabEntity.Has<DropTableBuffer>())
@@ -179,16 +179,11 @@ namespace Cobalt.Systems.Professions
             handler.UpdateExperienceData(steamID, updatedXPData);
 
             // Notify player about the changes
-            NotifyPlayer(prefabGUID, entityManager, user, steamID, gainedXP, leveledUp, handler);
+            NotifyPlayer(entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
 
-        private static void NotifyPlayer(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+        private static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
-            ServerGameManager serverGameManager = Core.Server.GetExistingSystemManaged<ServerScriptMapper>()._ServerGameManager;
-            //EntityCommandBufferSystem entityCommandBufferSystem = Core.Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
-            //EntityCommandBuffer entityCommandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
-            PrefabGUID sctType = serverGameManager.SCTTypes.Generic_Type;
-            LocalToWorld localToWorld = user.LocalCharacter._Entity.Read<LocalToWorld>();
             string professionName = handler.GetProfessionName();
             if (leveledUp)
             {
@@ -200,10 +195,6 @@ namespace Cobalt.Systems.Professions
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
                 {
                     int levelProgress = GetLevelProgress(steamID, handler);
-                    //string floating = gainedXP.ToString()+" "+professionName.ToLower();
-                    //Entity sct = ProjectM.ScrollingCombatTextMessage.CreateLocal(entityManager, floating, localToWorld.Up, new Unity.Mathematics.float3(0f, 1f, 1f), user.LocalCharacter, gainedXP, sctType);
-                    //entityManager.Instantiate(sct);
-                    //Core.Log.LogInfo("Attempted to create scrolling combat text...");
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
                 }
             }

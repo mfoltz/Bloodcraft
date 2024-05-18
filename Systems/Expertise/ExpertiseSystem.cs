@@ -9,9 +9,9 @@ namespace Cobalt.Systems.Expertise
 {
     public class ExpertiseSystem
     {
-        private static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // mastery points multiplier from normal units
+        private static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
         public static readonly int MaxWeaponExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-        private static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // mastery points multiplier from VBlood units
+        private static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
         private static readonly float WeaponExpertiseConstant = 0.1f; // constant for calculating level from xp
         private static readonly int WeaponExpertiseXPPower = 2; // power for calculating level from xp
 
@@ -31,7 +31,7 @@ namespace Cobalt.Systems.Expertise
             Unarmed
         }
 
-        public static void UpdateCombatMastery(EntityManager entityManager, Entity Killer, Entity Victim)
+        public static void UpdateWeaponExpertise(EntityManager entityManager, Entity Killer, Entity Victim)
         {
             if (Killer == Victim || entityManager.HasComponent<Minion>(Victim)) return;
 
@@ -49,9 +49,9 @@ namespace Cobalt.Systems.Expertise
             if (entityManager.HasComponent<UnitStats>(Victim))
             {
                 var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
-                float WeaponExpertiseValue = CalculateMasteryValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
+                float WeaponExpertiseValue = CalculateExpertiseValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
 
-                IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+                IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
                 if (handler != null)
                 {
                     // Check if the player leveled up
@@ -77,14 +77,14 @@ namespace Cobalt.Systems.Expertise
             }
         }
 
-        private static float CalculateMasteryValue(UnitStats VictimStats, bool isVBlood)
+        private static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
         {
-            float CombatMasteryValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
-            if (isVBlood) return CombatMasteryValue * VBloodMultiplier;
-            return CombatMasteryValue * UnitMultiplier;
+            float WeaponExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
+            if (isVBlood) return WeaponExpertiseValue * VBloodMultiplier;
+            return WeaponExpertiseValue * UnitMultiplier;
         }
 
-        public static void NotifyPlayer(EntityManager entityManager, User user, string weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponMasteryHandler handler)
+        public static void NotifyPlayer(EntityManager entityManager, User user, string weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponExpertiseHandler handler)
         {
             ulong steamID = user.PlatformId;
             gainedXP = (int)gainedXP; // Convert to integer if necessary
@@ -103,15 +103,15 @@ namespace Cobalt.Systems.Expertise
             }
             else
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["CombatLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> {weaponType.ToLower()} mastery (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> {weaponType.ToLower()} expertise (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }
         }
 
-        public static int GetLevelProgress(ulong steamID, IWeaponMasteryHandler handler)
+        public static int GetLevelProgress(ulong steamID, IWeaponExpertiseHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
             int currentLevel = GetLevel(steamID, handler);
@@ -133,13 +133,13 @@ namespace Cobalt.Systems.Expertise
             return (int)Math.Pow(level / WeaponExpertiseConstant, WeaponExpertiseXPPower);
         }
 
-        private static float GetXp(ulong steamID, IWeaponMasteryHandler handler)
+        private static float GetXp(ulong steamID, IWeaponExpertiseHandler handler)
         {
             var xpData = handler.GetExperienceData(steamID);
             return xpData.Value;
         }
 
-        private static int GetLevel(ulong steamID, IWeaponMasteryHandler handler)
+        private static int GetLevel(ulong steamID, IWeaponExpertiseHandler handler)
         {
             return ConvertXpToLevel(GetXp(steamID, handler));
         }

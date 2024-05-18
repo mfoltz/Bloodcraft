@@ -1,6 +1,6 @@
 ﻿namespace Cobalt.Systems.Expertise
 {
-    public interface IWeaponMasteryHandler
+    public interface IWeaponExpertiseHandler
     {
         void AddExperience(ulong steamID, float experience);
 
@@ -13,30 +13,30 @@
         string GetWeaponType();
     }
 
-    public static class WeaponMasteryHandlerFactory
+    public static class WeaponExpertiseHandlerFactory
     {
-        public static IWeaponMasteryHandler GetWeaponMasteryHandler(string weaponType)
+        public static IWeaponExpertiseHandler GetWeaponExpertiseHandler(string weaponType)
         {
             return weaponType.ToLower() switch
             {
-                "sword" => new SwordMasteryHandler(),
-                "axe" => new AxeMasteryHandler(),
-                "mace" => new MaceMasteryHandler(),
-                "spear" => new SpearMasteryHandler(),
-                "crossbow" => new CrossbowMasteryHandler(),
-                "greatsword" => new GreatSwordMasteryHandler(),
-                "slashers" => new SlashersMasteryHandler(),
-                "pistols" => new PistolsMasteryHandler(),
-                "reaper" => new ReaperMasteryHandler(),
-                "longbow" => new LongbowMasteryHandler(),
-                "whip" => new WhipMasteryHandler(),
-                "unarmed" => new UnarmedMasteryHandler(),
+                "sword" => new SwordExpertiseHandler(),
+                "axe" => new AxeExpertiseHandler(),
+                "mace" => new MaceExpertiseHandler(),
+                "spear" => new SpearExpertiseHandler(),
+                "crossbow" => new CrossbowExpertiseHandler(),
+                "greatsword" => new GreatSwordExpertiseHandler(),
+                "slashers" => new SlashersExpertiseHandler(),
+                "pistols" => new PistolsExpertiseHandler(),
+                "reaper" => new ReaperExpertiseHandler(),
+                "longbow" => new LongbowExpertiseHandler(),
+                "whip" => new WhipExpertiseHandler(),
+                "unarmed" => new UnarmedExpertiseHandler(),
                 _ => null,
             };
         }
     }
 
-    public abstract class BaseWeaponMasteryHandler : IWeaponMasteryHandler
+    public abstract class BaseWeaponExpertiseHandler : IWeaponExpertiseHandler
     {
         protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
 
@@ -70,13 +70,13 @@
     }
 
     // Implementations for each weapon type
-    public class SwordMasteryHandler : BaseWeaponMasteryHandler
+    public class SwordExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSwordMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSwordExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerSwordMastery();
+            Core.DataStructures.SavePlayerSwordExpertise();
         }
 
         public override string GetWeaponType()
@@ -85,13 +85,13 @@
         }
     }
 
-    public class AxeMasteryHandler : BaseWeaponMasteryHandler
+    public class AxeExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAxeMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAxeExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerAxeMastery();
+            Core.DataStructures.SavePlayerAxeExpertise();
         }
 
         public override string GetWeaponType()
@@ -100,13 +100,13 @@
         }
     }
 
-    public class MaceMasteryHandler : BaseWeaponMasteryHandler
+    public class MaceExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMaceMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMaceExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerMaceMastery();
+            Core.DataStructures.SavePlayerMaceExpertise();
         }
 
         public override string GetWeaponType()
@@ -115,13 +115,13 @@
         }
     }
 
-    public class SpearMasteryHandler : BaseWeaponMasteryHandler
+    public class SpearExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSpearMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSpearExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerSpearMastery();
+            Core.DataStructures.SavePlayerSpearExpertise();
         }
 
         public override string GetWeaponType()
@@ -130,13 +130,13 @@
         }
     }
 
-    public class CrossbowMasteryHandler : BaseWeaponMasteryHandler
+    public class CrossbowExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCrossbowMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCrossbowExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerCrossbowMastery();
+            Core.DataStructures.SavePlayerCrossbowExpertise();
         }
 
         public override string GetWeaponType()
@@ -145,13 +145,13 @@
         }
     }
 
-    public class GreatSwordMasteryHandler : BaseWeaponMasteryHandler
+    public class GreatSwordExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerGreatSwordMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerGreatSwordExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerGreatSwordMastery();
+            Core.DataStructures.SavePlayerGreatSwordExpertise();
         }
 
         public override string GetWeaponType()
@@ -160,13 +160,13 @@
         }
     }
 
-    public class SlashersMasteryHandler : BaseWeaponMasteryHandler
+    public class SlashersExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSlashersMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSlashersExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerSlashersMastery();
+            Core.DataStructures.SavePlayerSlashersExpertise();
         }
 
         public override string GetWeaponType()
@@ -175,13 +175,13 @@
         }
     }
 
-    public class PistolsMasteryHandler : BaseWeaponMasteryHandler
+    public class PistolsExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerPistolsMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerPistolsExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerPistolsMastery();
+            Core.DataStructures.SavePlayerPistolsExpertise();
         }
 
         public override string GetWeaponType()
@@ -190,13 +190,13 @@
         }
     }
 
-    public class ReaperMasteryHandler : BaseWeaponMasteryHandler
+    public class ReaperExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerReaperMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerReaperExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerReaperMastery();
+            Core.DataStructures.SavePlayerReaperExpertise();
         }
 
         public override string GetWeaponType()
@@ -205,13 +205,13 @@
         }
     }
 
-    public class LongbowMasteryHandler : BaseWeaponMasteryHandler
+    public class LongbowExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerLongbowMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerLongbowExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerLongbowMastery();
+            Core.DataStructures.SavePlayerLongbowExpertise();
         }
 
         public override string GetWeaponType()
@@ -220,13 +220,13 @@
         }
     }
 
-    public class WhipMasteryHandler : BaseWeaponMasteryHandler
+    public class WhipExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWhipMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWhipExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerWhipMastery();
+            Core.DataStructures.SavePlayerWhipExpertise();
         }
 
         public override string GetWeaponType()
@@ -235,13 +235,13 @@
         }
     }
 
-    public class UnarmedMasteryHandler : BaseWeaponMasteryHandler
+    public class UnarmedExpertiseHandler : BaseWeaponExpertiseHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedMastery;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedExpertise;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerUnarmedMastery();
+            Core.DataStructures.SavePlayerUnarmedExpertise();
         }
 
         public override string GetWeaponType()

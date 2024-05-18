@@ -22,8 +22,8 @@ public class DeathEventListenerSystem_Patch
             {
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
-                    if (Plugin.LevelingSystem.Value) LevelingSystem.EXPMonitor(ev.Killer, ev.Died);
-                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateCombatMastery(__instance.EntityManager, ev.Killer, ev.Died);
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateExperience(ev.Killer, ev.Died);
+                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateWeaponExpertise(__instance.EntityManager, ev.Killer, ev.Died);
                     if (Plugin.BloodSystem.Value) BloodSystem.UpdateSanguimancy(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))

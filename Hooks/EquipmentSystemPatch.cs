@@ -21,7 +21,7 @@ namespace Cobalt.Hooks
     public class EquipmentPatch
     {
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         private static void EquipItemSystemPrefix(EquipItemSystem __instance)
         {
             if (!Plugin.ExpertiseSystem.Value) return;
@@ -44,7 +44,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
         {
-            Core.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
+            //Core.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
             if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
             try
@@ -70,7 +70,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
         {
-            Core.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
+            //Core.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
             if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
             try
@@ -96,7 +96,7 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
         {
-            Core.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
+            //Core.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
             if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
             try
@@ -154,8 +154,9 @@ namespace Cobalt.Hooks
                 {
                     FromCharacter fromCharacter = entity.Read<FromCharacter>();
                     Entity character = fromCharacter.Character;
+                    Equipment equipment = character.Read<Equipment>();
+
                     UpdatePlayerStats(character);
-                    //GearOverride.SetLevel(character, VWorld.Server.EntityManager);
                 }
             }
             catch (Exception e)
@@ -177,8 +178,9 @@ namespace Cobalt.Hooks
         {
             UnitStats stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
-
+            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+            Equipment equipment = character.Read<Equipment>();
+            GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
@@ -227,7 +229,7 @@ namespace Cobalt.Hooks
             var stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-            //IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+            //IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
@@ -351,7 +353,7 @@ namespace Cobalt.Hooks
             }
         }
 
-        public static float CalculateScaledWeaponBonus(IWeaponMasteryHandler handler, ulong steamId, WeaponStatType statType)
+        public static float CalculateScaledWeaponBonus(IWeaponExpertiseHandler handler, ulong steamId, WeaponStatType statType)
         {
             if (handler != null)
             {

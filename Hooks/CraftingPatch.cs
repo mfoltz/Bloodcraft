@@ -28,6 +28,11 @@ public class CraftingPatch
             {
                 foreach (Entity entity in entities)
                 {
+                    if (entity.Has<JewelCraftingStation>())
+                    {
+                        Core.Log.LogInfo("JewelCraftingStation found...");
+                    }
+
                     if (entity.Equals(Entity.Null) || !entity.Has<CastleAreaRequirement>() || !entity.Has<QueuedWorkstationCraftAction>()) continue;
 
                     var actions = entity.ReadBuffer<QueuedWorkstationCraftAction>();

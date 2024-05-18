@@ -26,8 +26,8 @@ namespace Cobalt.Hooks
             {
                 { "ExperienceLogging", true },
                 { "ProfessionLogging", true },
-                { "BloodLogging", true },
-                { "CombatLogging", true }
+                { "SanguimancyLogging", true },
+                { "ExpertiseLogging", true }
             });
                 Core.DataStructures.SavePlayerBools();
             }
@@ -36,6 +36,7 @@ namespace Cobalt.Hooks
             {
                 Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 Core.DataStructures.SavePlayerExperience();
+                GearOverride.SetLevel(user.LocalCharacter._Entity);
             }
             if (!Core.DataStructures.PlayerPrestige.ContainsKey(steamId))
             {
@@ -88,65 +89,65 @@ namespace Cobalt.Hooks
                 Core.DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 Core.DataStructures.SavePlayerSanguimancy();
             }
-            if (!Core.DataStructures.PlayerSwordMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerSwordMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSwordMastery();
+                Core.DataStructures.PlayerSwordExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerSwordExpertise();
             }
-            if (!Core.DataStructures.PlayerAxeMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerAxeExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerAxeMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerAxeMastery();
+                Core.DataStructures.PlayerAxeExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerAxeExpertise();
             }
-            if (!Core.DataStructures.PlayerMaceMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerMaceExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerMaceMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerMaceMastery();
+                Core.DataStructures.PlayerMaceExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerMaceExpertise();
             }
-            if (!Core.DataStructures.PlayerSpearMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerSpearExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerSpearMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSpearMastery();
+                Core.DataStructures.PlayerSpearExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerSpearExpertise();
             }
-            if (!Core.DataStructures.PlayerCrossbowMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerCrossbowExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerCrossbowMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerCrossbowMastery();
+                Core.DataStructures.PlayerCrossbowExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerCrossbowExpertise();
             }
-            if (!Core.DataStructures.PlayerGreatSwordMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerGreatSwordExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerGreatSwordMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerGreatSwordMastery();
+                Core.DataStructures.PlayerGreatSwordExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerGreatSwordExpertise();
             }
-            if (!Core.DataStructures.PlayerSlashersMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerSlashersExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerSlashersMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSlashersMastery();
+                Core.DataStructures.PlayerSlashersExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerSlashersExpertise();
             }
-            if (!Core.DataStructures.PlayerPistolsMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerPistolsExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerPistolsMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerPistolsMastery();
+                Core.DataStructures.PlayerPistolsExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerPistolsExpertise();
             }
-            if (!Core.DataStructures.PlayerReaperMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerReaperExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerReaperMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerReaperMastery();
+                Core.DataStructures.PlayerReaperExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerReaperExpertise();
             }
-            if (!Core.DataStructures.PlayerLongbowMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerLongbowExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerLongbowMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerLongbowMastery();
+                Core.DataStructures.PlayerLongbowExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerLongbowExpertise();
             }
-            if (!Core.DataStructures.PlayerWhipMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerWhipExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerWhipMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerWhipMastery();
+                Core.DataStructures.PlayerWhipExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerWhipExpertise();
             }
-            if (!Core.DataStructures.PlayerUnarmedMastery.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerUnarmedExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerUnarmedMastery.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerUnarmedMastery();
+                Core.DataStructures.PlayerUnarmedExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerUnarmedExpertise();
             }
 
             if (!Core.DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))

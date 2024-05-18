@@ -1,8 +1,4 @@
 using Cobalt.Hooks;
-using ProjectM;
-using ProjectM.Scripting;
-using Stunlock.Core;
-using System.Text;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Sanguimancy.BloodStats;

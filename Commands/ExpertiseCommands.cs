@@ -11,28 +11,28 @@ namespace Cobalt.Commands
 {
     public static class ExpertiseCommands
     {
-        [Command(name: "getMasteryProgress", shortHand: "gmp", adminOnly: false, usage: ".gmp", description: "Display your current mastery progress.")]
-        public static void GetMasteryCommand(ChatCommandContext ctx)
+        [Command(name: "getExpertiseProgress", shortHand: "gep", adminOnly: false, usage: ".gep", description: "Display your current Expertise progress.")]
+        public static void GetExpertiseCommand(ChatCommandContext ctx)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weaponGuid = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
             string weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(weaponGuid).ToString();
 
-            IWeaponMasteryHandler handler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
+            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             if (handler == null)
             {
-                ctx.Reply($"No mastery handler found for {weaponType}.");
+                ctx.Reply($"No expertise handler found for {weaponType}.");
                 return;
             }
 
             ulong steamID = ctx.Event.User.PlatformId;
-            var masteryData = handler.GetExperienceData(steamID);
+            var ExpertiseData = handler.GetExperienceData(steamID);
 
-            // masteryData.Key represents the level, and masteryData.Value represents the experience.
-            if (masteryData.Key > 0 || masteryData.Value > 0)
+            // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
+            if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
             {
-                ctx.Reply($"Your expertise is <color=yellow>{masteryData.Key}</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}.");
+                ctx.Reply($"Your expertise is <color=yellow>{ExpertiseData.Key}</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}.");
             }
             else
             {
@@ -40,19 +40,19 @@ namespace Cobalt.Commands
             }
         }
 
-        [Command(name: "logExpertiseProgress", shortHand: "lep", adminOnly: false, usage: ".lep", description: "Toggles mastery progress logging.")]
-        public static void LogMasteryCommand(ChatCommandContext ctx)
+        [Command(name: "logExpertiseProgress", shortHand: "lep", adminOnly: false, usage: ".lep", description: "Toggles Expertise progress logging.")]
+        public static void LogExpertiseCommand(ChatCommandContext ctx)
         {
             var SteamID = ctx.Event.User.PlatformId;
 
             if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
             {
-                bools["CombatLogging"] = !bools["CombatLogging"];
+                bools["ExpertiseLogging"] = !bools["ExpertiseLogging"];
             }
-            ctx.Reply($"Weapon expertise logging is now {(bools["CombatLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            ctx.Reply($"Weapon expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: true, usage: ".cws <Stat>", description: "Choose a weapon stat to enhance based on your weapon mastery.")]
+        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws <Stat>", description: "Choose a weapon stat to enhance based on your weapon Expertise.")]
         public static void ChooseWeaponStat(ChatCommandContext ctx, string statChoice)
         {
             string statType = statChoice.ToLower();
@@ -111,8 +111,8 @@ namespace Cobalt.Commands
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
         }
 
-        [Command(name: "setWeaponMastery", shortHand: "swm", adminOnly: true, usage: ".swm [Weapon] [Level]", description: "Sets your weapon mastery level.")]
-        public static void MasterySetCommand(ChatCommandContext ctx, string weaponType, int level)
+        [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Weapon] [Level]", description: "Sets your weapon expertise level.")]
+        public static void SetExpertiseCommand(ChatCommandContext ctx, string weaponType, int level)
         {
             if (level < 0 || level > ExpertiseSystem.MaxWeaponExpertiseLevel)
             {
@@ -120,22 +120,24 @@ namespace Cobalt.Commands
                 return;
             }
 
-            var masteryHandler = WeaponMasteryHandlerFactory.GetWeaponMasteryHandler(weaponType);
-            if (masteryHandler == null)
+            var expertiseHandler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+            if (expertiseHandler == null)
             {
                 ctx.Reply("Invalid weapon type.");
                 return;
             }
 
             ulong steamId = ctx.Event.User.PlatformId;
-            //var xpData = masteryHandler.GetExperienceData(steamId);
-
-            // Update mastery level and XP
+            //var xpData = ExpertiseHandler.GetExperienceData(steamId);
+            Entity character = ctx.Event.SenderCharacterEntity;
+            Equipment equipment = character.Read<Equipment>();
+            // Update Expertise level and XP
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
-            masteryHandler.UpdateExperienceData(steamId, xpData);
-            masteryHandler.SaveChanges();
+            expertiseHandler.UpdateExperienceData(steamId, xpData);
+            expertiseHandler.SaveChanges();
+            GearOverride.SetWeaponItemLevel(equipment, level, Core.Server.EntityManager);
 
-            ctx.Reply($"Expertise for {masteryHandler.GetWeaponType()} set to {level}.");
+            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to {level}.");
         }
 
         [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat choices.")]

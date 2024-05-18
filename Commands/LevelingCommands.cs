@@ -1,8 +1,4 @@
 using Cobalt.Systems.Experience;
-using Cobalt.Systems.Expertise;
-using ProjectM;
-using Stunlock.Core;
-using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Cobalt.Commands
