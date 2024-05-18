@@ -4,6 +4,7 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -147,9 +148,10 @@ namespace Cobalt.Hooks
         }
 
         [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
-        [HarmonyPostfix]
-        private static void OnUpdatePostix(ReactToInventoryChangedSystem __instance)
+        [HarmonyPrefix]
+        private static void OnUpdatePreix(ReactToInventoryChangedSystem __instance)
         {
+            ServerGameManager serverGameManager = Core.ServerGameManager;
             Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
             if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.TempJob);
@@ -157,7 +159,9 @@ namespace Cobalt.Hooks
             {
                 foreach (var entity in entities)
                 {
-                    entity.LogComponentTypes(); // want to detect weapons entering inventory and change level sources to match masteries
+                    InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>(); // pick up if going to servant inventory, otherwise make level match player weapon mastery?
+                    Entity inventory = inventoryChangedEvent.InventoryEntity;
+                    inventory.LogComponentTypes();
                 }
             }
             catch (Exception ex)
@@ -179,7 +183,6 @@ namespace Cobalt.Hooks
                     FromCharacter fromCharacter = entity.Read<FromCharacter>();
                     Entity character = fromCharacter.Character;
                     Equipment equipment = character.Read<Equipment>();
-
                     UpdatePlayerStats(character);
                 }
             }
@@ -420,7 +423,8 @@ namespace Cobalt.Hooks
         public static ExpertiseSystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-            if (!Core.Server.EntityManager.Exists(weapon))
+            Core.Log.LogInfo($"Weapon: {weapon.Read<PrefabGUID>().LookupName()}");
+            if (weapon.Read<PrefabGUID>().IsEmpty())
             {
                 return ExpertiseSystem.WeaponType.Unarmed;
             }

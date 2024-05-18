@@ -88,7 +88,7 @@ namespace Cobalt.Systems.Sanguimancy
             }
             else
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["SanguimancyLogging"])
                 {
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>sanguimancy</color> (<color=white>{levelProgress}%</color>)");
                 }

@@ -326,6 +326,11 @@ namespace Cobalt.Systems.Professions
                 name = name.Replace("Plant_", "");
                 name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
             }
+            string[] words = name.Split(' ');
+            if (words.Length > 1)
+            {
+                name = words[0] + " " + words[1];
+            }
             return name;
         }
     }
