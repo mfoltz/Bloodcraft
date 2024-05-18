@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -21,6 +22,8 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class EquipmentPatch
     {
+        private static Dictionary<Entity, float> weaponLevels = [];
+
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPostfix]
         private static void EquipItemSystemPrefix(EquipItemSystem __instance)
@@ -32,8 +35,8 @@ namespace Cobalt.Hooks
         }
 
         [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
-        [HarmonyPrefix]
-        private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
+        [HarmonyPostfix]
+        private static void UnEquipItemSystemPostix(UnEquipItemSystem __instance)
         {
             if (!Plugin.ExpertiseSystem.Value) return;
             Core.Log.LogInfo("UnEquipItemSystem Postfix..."); //should this be postfix?
@@ -151,7 +154,6 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void OnUpdatePreix(ReactToInventoryChangedSystem __instance)
         {
-            ServerGameManager serverGameManager = Core.ServerGameManager;
             Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
             if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.TempJob);
@@ -160,8 +162,38 @@ namespace Cobalt.Hooks
                 foreach (var entity in entities)
                 {
                     InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>(); // pick up if going to servant inventory, otherwise make level match player weapon mastery?
+                    if (!inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>()) continue;
                     Entity inventory = inventoryChangedEvent.InventoryEntity;
-                    inventory.LogComponentTypes();
+                    if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
+                    {
+                        ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                        string weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>()).ToString();
+                        IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+                        if (handler != null)
+                        {
+                            if (!weaponLevels.ContainsKey(inventoryChangedEvent.ItemEntity))
+                            {
+                                weaponLevels.Add(inventoryChangedEvent.ItemEntity, inventoryChangedEvent.ItemEntity.Read<WeaponLevelSource>().Level);
+                            }
+                            WeaponLevelSource weaponLevelSource = new()
+                            {
+                                Level = ExpertiseSystem.ConvertXpToLevel(handler.GetExperienceData(steamId).Value)
+                            };
+                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                        }
+                    }
+                    else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Removed) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
+                    {
+                        if (weaponLevels.TryGetValue(inventoryChangedEvent.ItemEntity, out var level))
+                        {
+                            WeaponLevelSource weaponLevelSource = new()
+                            {
+                                Level = level
+                            };
+                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                            weaponLevels.Remove(inventoryChangedEvent.ItemEntity);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -207,7 +239,7 @@ namespace Cobalt.Hooks
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             Equipment equipment = character.Read<Equipment>();
-            GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
+            if (!weaponType.ToLower().Contains("unarmed")) GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
@@ -423,10 +455,14 @@ namespace Cobalt.Hooks
         public static ExpertiseSystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-            Core.Log.LogInfo($"Weapon: {weapon.Read<PrefabGUID>().LookupName()}");
-            if (weapon.Read<PrefabGUID>().IsEmpty())
+
+            if (weapon.Equals(Entity.Null))
             {
                 return ExpertiseSystem.WeaponType.Unarmed;
+            }
+            else
+            {
+                Core.Log.LogInfo($"Weapon: {weapon.Read<PrefabGUID>().LookupName()}");
             }
             return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
@@ -438,7 +474,7 @@ namespace Cobalt.Hooks
 
             // Get the current weapon type
             string currentWeapon = GetCurrentWeaponType(character).ToString();
-
+            Core.Log.LogInfo($"Current weapon: {currentWeapon}");
             // Initialize player's weapon dictionary if it doesn't exist
             if (!Core.DataStructures.PlayerEquippedWeapon.TryGetValue(steamId, out var equippedWeapons))
             {

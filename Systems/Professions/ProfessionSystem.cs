@@ -311,6 +311,14 @@ namespace Cobalt.Systems.Professions
             {
                 name = name.Replace("Mineral_", "");
                 name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
+                if (name.ToLower().Contains("ore"))
+                {
+                    string[] words = name.Split(' ');
+                    if (words.Length > 1)
+                    {
+                        name = words[0] + " " + words[1];
+                    }
+                }
             }
             else if (name.ToLower().Contains("wood"))
             {
@@ -325,12 +333,13 @@ namespace Cobalt.Systems.Professions
             {
                 name = name.Replace("Plant_", "");
                 name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
+                string[] words = name.Split(' ');
+                if (words.Length > 1)
+                {
+                    name = words[0] + " " + words[1];
+                }
             }
-            string[] words = name.Split(' ');
-            if (words.Length > 1)
-            {
-                name = words[0] + " " + words[1];
-            }
+
             return name;
         }
     }

@@ -27,8 +27,6 @@ public class CraftingPatch
             {
                 foreach (Entity entity in entities)
                 {
-                    
-
                     if (entity.Equals(Entity.Null) || !entity.Has<CastleAreaRequirement>() || !entity.Has<QueuedWorkstationCraftAction>()) continue;
 
                     var actions = entity.ReadBuffer<QueuedWorkstationCraftAction>();
@@ -37,22 +35,30 @@ public class CraftingPatch
                     {
                         User user = action.InitiateUser.Read<User>();
                         ulong steamId = user.PlatformId;
-                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var jobs) && jobs.ContainsKey(action.RecipeGuid) && jobs[action.RecipeGuid])
+                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(entity.Read<NetworkId>(), out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
                         {
-                            //Core.Log.LogInfo(action.ProgressTime);
                             RecipeData recipeData = prefabCollectionSystem._PrefabGuidToEntityMap[action.RecipeGuid].Read<RecipeData>();
                             float delta = (recipeData.CraftDuration / craftRate) - action.ProgressTime;
-                            //Core.Log.LogInfo($"{recipeData.CraftDuration} | {action.ProgressTime} | {delta}");
                             if (delta < 0.1)
                             {
-                                //Core.Log.LogInfo("CraftingXP");
-
                                 Entity recipe = prefabCollectionSystem._PrefabGuidToEntityMap[action.RecipeGuid];
-                                //CastleWorkstation workstation = entity.Read<CastleWorkstation>();
-                                //ServantType servantType = workstation.BonusServantType;
-                                //Core.Log.LogInfo(servantType.ToString());
+
                                 var recipeOutput = recipe.ReadBuffer<RecipeOutputBuffer>();
                                 PrefabGUID itemPrefab = recipeOutput[0].Guid;
+
+                                bool jobExists = false;
+                                for (int i = 0; i < playerJobs.Count; i++)
+                                {
+                                    if (playerJobs[i].Item1 == itemPrefab)
+                                    {
+                                        playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
+                                        jobExists = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!jobExists) continue;
+
                                 Entity item = prefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
                                 float ProfessionValue = BaseCraftingXP;
                                 // t01 etc multiplier
@@ -62,7 +68,6 @@ public class CraftingPatch
                                 {
                                     ProfessionSystem.SetProfession(itemPrefab, user, steamId, ProfessionValue, handler);
                                 }
-                                jobs.Remove(action.RecipeGuid);
                             }
                         }
                     }
@@ -99,11 +104,34 @@ public class CraftingPatch
                     ulong steamId = fromCharacter.User.Read<User>().PlatformId;
                     StartCraftItemEvent startCraftItemEvent = entity.Read<StartCraftItemEvent>();
                     PrefabGUID prefabGUID = startCraftItemEvent.RecipeId;
-                    if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var jobs) && !jobs.ContainsKey(prefabGUID))
+                    if (!Core.DataStructures.PlayerCraftingJobs.ContainsKey(startCraftItemEvent.Workstation))
                     {
-                        // if crafting job not already present, add to cache
-                        Core.Log.LogInfo($"Active Craft: {prefabGUID.LookupName()}");
-                        jobs.Add(prefabGUID, true);
+                        Core.DataStructures.PlayerCraftingJobs[startCraftItemEvent.Workstation] = [];
+                    }
+                    var workstationJobs = Core.DataStructures.PlayerCraftingJobs[startCraftItemEvent.Workstation];
+
+                    // Ensure the player’s job list exists
+                    if (!workstationJobs.TryGetValue(steamId, out var jobs))
+                    {
+                        jobs = [];
+                        workstationJobs[steamId] = jobs;
+                    }
+
+                    // Check if the job exists and update or add
+                    var jobExists = false;
+                    for (int i = 0; i < jobs.Count; i++)
+                    {
+                        if (jobs[i].Item1.Equals(prefabGUID))
+                        {
+                            Core.Log.LogInfo($"Adding Craft: {prefabGUID.LookupName()}");
+                            jobs[i] = (jobs[i].Item1, jobs[i].Item2 + 1);
+                            jobExists = true;
+                            break;
+                        }
+                    }
+                    if (!jobExists)
+                    {
+                        jobs.Add((prefabGUID, 1));
                     }
                 }
             }
@@ -138,11 +166,18 @@ public class CraftingPatch
                     ulong steamId = fromCharacter.User.Read<User>().PlatformId;
                     StopCraftItemEvent stopCraftItemEvent = entity.Read<StopCraftItemEvent>();
                     PrefabGUID prefabGUID = stopCraftItemEvent.RecipeGuid;
-                    if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var jobs) && jobs.ContainsKey(prefabGUID))
+                    if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(stopCraftItemEvent.Workstation, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
                     {
                         // if crafting job is active, remove
-                        Core.Log.LogInfo($"Inactive Craft: {prefabGUID.LookupName()}");
-                        jobs.Remove(prefabGUID);
+                        Core.Log.LogInfo($"Removing Craft: {prefabGUID.LookupName()}");
+                        for (int i = 0; i < jobs.Count; i++)
+                        {
+                            if (playerJobs[i].Item1 == prefabGUID)
+                            {
+                                playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -156,5 +191,4 @@ public class CraftingPatch
             }
         }
     }
-   
 }

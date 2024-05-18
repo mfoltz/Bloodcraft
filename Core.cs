@@ -1,6 +1,7 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -266,9 +267,9 @@ internal static class Core
 
         // cache-only
 
-        private static Dictionary<ulong, Dictionary<PrefabGUID, bool>> playerCraftingJobs = [];
+        private static Dictionary<NetworkId, Dictionary<ulong, List<(PrefabGUID, int)>>> playerCraftingJobs = [];
 
-        public static Dictionary<ulong, Dictionary<PrefabGUID, bool>> PlayerCraftingJobs
+        public static Dictionary<NetworkId, Dictionary<ulong, List<(PrefabGUID, int)>>> PlayerCraftingJobs
         {
             get => playerCraftingJobs;
             set => playerCraftingJobs = value;

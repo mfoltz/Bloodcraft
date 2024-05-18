@@ -172,10 +172,7 @@ namespace Cobalt.Hooks
                 Core.DataStructures.PlayerBloodChoices.Add(steamId, []);
                 Core.DataStructures.SavePlayerBloodChoices();
             }
-            if (!Core.DataStructures.PlayerCraftingJobs.ContainsKey(steamId))
-            {
-                Core.DataStructures.PlayerCraftingJobs.Add(steamId, []);
-            }
+            
         }
     }
 }
