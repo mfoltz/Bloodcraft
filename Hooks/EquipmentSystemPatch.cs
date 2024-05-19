@@ -229,7 +229,7 @@ namespace Cobalt.Hooks
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             Equipment equipment = character.Read<Equipment>();
-            var modifiedStats = GetModifiedStats(equipment, BaseWeaponStats);
+            //var modifiedStats = GetModifiedStats(equipment, BaseWeaponStats);
             
             // need to iterate through equipment and find the stat mods
 
@@ -245,36 +245,36 @@ namespace Cobalt.Hooks
                     switch (weaponStatType)
                     {
                         case WeaponStatType.PhysicalPower:
-                            Core.Log.LogInfo($"PhysicalPower current: {modifiedStats[weaponStatType]} | {stats.PhysicalPower._Value}");
-                            if (stats.PhysicalPower._Value.Equals(modifiedStats[weaponStatType])) stats.PhysicalPower._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalPower current: {stats.PhysicalPower._Value}");
+                            if (stats.PhysicalPower._Value.Equals(BaseWeaponStats[weaponStatType]) stats.PhysicalPower._Value += scaledBonus;
                             Core.Log.LogInfo($"PhysicalPower: {stats.PhysicalPower._Value}");
                             break;
                         case WeaponStatType.SpellPower:
-                            Core.Log.LogInfo($"SpellPower current: {modifiedStats[weaponStatType]} | {stats.SpellPower._Value}");
-                            if (stats.SpellPower._Value.Equals(modifiedStats[weaponStatType])) stats.SpellPower._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellPower current: {stats.SpellPower._Value}");
+                            if (stats.SpellPower._Value.Equals(BaseWeaponStats[weaponStatType]) stats.SpellPower._Value += scaledBonus;
                             Core.Log.LogInfo($"SpellPower: {stats.SpellPower._Value}");
                             break;
                         case WeaponStatType.PhysicalCritChance:
-                            Core.Log.LogInfo($"PhysicalCritChance current: {modifiedStats[weaponStatType]} | {stats.PhysicalCriticalStrikeChance._Value}");
-                            if (stats.PhysicalCriticalStrikeChance._Value.Equals(modifiedStats[weaponStatType])) stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalCritChance current: {stats.PhysicalCriticalStrikeChance._Value}");
+                            if (stats.PhysicalCriticalStrikeChance._Value.Equals(BaseWeaponStats[weaponStatType]) stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
                             Core.Log.LogInfo($"PhysicalCritChance: {stats.PhysicalCriticalStrikeChance._Value}");
                             break;
 
                         case WeaponStatType.PhysicalCritDamage:
-                            Core.Log.LogInfo($"PhysicalCritDamage current: {modifiedStats[weaponStatType]} | {stats.PhysicalCriticalStrikeDamage._Value}");
-                            if (stats.PhysicalCriticalStrikeDamage._Value.Equals(modifiedStats[weaponStatType])) stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalCritDamage current: {stats.PhysicalCriticalStrikeDamage._Value}");
+                            if (stats.PhysicalCriticalStrikeDamage._Value.Equals(BaseWeaponStats[weaponStatType]) stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
                             Core.Log.LogInfo($"PhysicalCritDamage: {stats.PhysicalCriticalStrikeDamage._Value}");
                             break;
 
                         case WeaponStatType.SpellCritChance:
-                            Core.Log.LogInfo($"SpellCritChance current: {modifiedStats[weaponStatType]} | {stats.SpellCriticalStrikeChance._Value}");
-                            if (stats.SpellCriticalStrikeChance._Value.Equals(modifiedStats[weaponStatType])) stats.SpellCriticalStrikeChance._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellCritChance current: {stats.SpellCriticalStrikeChance._Value}");
+                            if (stats.SpellCriticalStrikeChance._Value.Equals(BaseWeaponStats[weaponStatType]) stats.SpellCriticalStrikeChance._Value += scaledBonus;
                             Core.Log.LogInfo($"SpellCritChance: {stats.SpellCriticalStrikeChance._Value}");
                             break;
 
                         case WeaponStatType.SpellCritDamage:
-                            Core.Log.LogInfo($"SpellCritDamage current: {modifiedStats[weaponStatType]} | {stats.SpellCriticalStrikeDamage._Value}");
-                            if (stats.SpellCriticalStrikeDamage._Value.Equals(modifiedStats[weaponStatType])) stats.SpellCriticalStrikeDamage._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellCritDamage current: {stats.SpellCriticalStrikeDamage._Value}");
+                            if (stats.SpellCriticalStrikeDamage._Value.Equals(BaseWeaponStats[weaponStatType]) stats.SpellCriticalStrikeDamage._Value += scaledBonus;
                             Core.Log.LogInfo($"SpellCritDamage: {stats.SpellCriticalStrikeDamage._Value}");
                             break;
                     }
@@ -295,38 +295,38 @@ namespace Cobalt.Hooks
             var stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            var modifiedStats = GetModifiedStats(equipment, BaseWeaponStats);
+            //var modifiedStats = GetModifiedStats(equipment, BaseWeaponStats);
             //IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
                     WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
-                    Core.Log.LogInfo($"Resetting {weaponStatType} to {modifiedStats[weaponStatType]}");
+                    Core.Log.LogInfo($"Resetting {weaponStatType} to {BaseWeaponStats[weaponStatType]}");
                     switch (weaponStatType)
                     {
                         case WeaponStatType.PhysicalPower:
-                            stats.PhysicalPower._Value = modifiedStats[weaponStatType];
+                            stats.PhysicalPower._Value = BaseWeaponStats[weaponStatType];
                             break;
 
                         case WeaponStatType.SpellPower:
-                            stats.SpellPower._Value = modifiedStats[weaponStatType];
+                            stats.SpellPower._Value = BaseWeaponStats[weaponStatType];
                             break;
 
                         case WeaponStatType.PhysicalCritChance:
-                            stats.PhysicalCriticalStrikeChance._Value = modifiedStats[weaponStatType];
+                            stats.PhysicalCriticalStrikeChance._Value = BaseWeaponStats[weaponStatType];
                             break;
 
                         case WeaponStatType.PhysicalCritDamage:
-                            stats.PhysicalCriticalStrikeDamage._Value = modifiedStats[weaponStatType];
+                            stats.PhysicalCriticalStrikeDamage._Value = BaseWeaponStats[weaponStatType];
                             break;
 
                         case WeaponStatType.SpellCritChance:
-                            stats.SpellCriticalStrikeChance._Value = modifiedStats[weaponStatType];
+                            stats.SpellCriticalStrikeChance._Value = BaseWeaponStats[weaponStatType];
                             break;
 
                         case WeaponStatType.SpellCritDamage:
-                            stats.SpellCriticalStrikeDamage._Value = modifiedStats[weaponStatType];
+                            stats.SpellCriticalStrikeDamage._Value = BaseWeaponStats[weaponStatType];
                             break;
                     }
                 }
