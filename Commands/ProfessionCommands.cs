@@ -1,6 +1,4 @@
 using Cobalt.Systems.Professions;
-using ProjectM;
-using ProjectM.Network;
 using Stunlock.Core;
 using VampireCommandFramework;
 

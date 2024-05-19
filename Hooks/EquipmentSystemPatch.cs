@@ -221,7 +221,7 @@ namespace Cobalt.Hooks
 
     public static class UnitStatsOverride
     {
-        public static readonly PrefabGUID unarmed = new(-2075546002);
+        private static readonly PrefabGUID unarmed = new(-2075546002);
 
         public static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
@@ -231,30 +231,62 @@ namespace Cobalt.Hooks
             Equipment equipment = character.Read<Equipment>();
 
             if (!weaponType.ToLower().Contains("unarmed")) GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
+            Core.Log.LogInfo($"Before adding: {stats.PhysicalPower._Value} | {stats.SpellPower._Value} | {stats.PhysicalCriticalStrikeChance._Value} | {stats.PhysicalCriticalStrikeDamage._Value} | {stats.SpellCriticalStrikeChance._Value} | {stats.SpellCriticalStrikeDamage._Value}");
+            Entity buff = Entity.Null;
+            if (weaponType.ToLower().Contains("unarmed"))
+            {
+                ServerGameManager serverGameManager = Core.ServerGameManager;
+                if (serverGameManager.TryGetBuff(character, unarmed.ToIdentifier(), out Entity unarmedBuff))
+                {
+                    buff = unarmedBuff;
+                    Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buff);
+                }
+            }
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
+                DynamicBuffer<ModifyUnitStatBuff_DOTS> buffer = new();
+                if (!buff.Equals(Entity.Null)) buffer = buff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+                else buffer = equipment.WeaponSlot.SlotEntity._Entity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
                 foreach (var bonus in bonuses)
                 {
                     WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    var buffer = equipment.WeaponSlot.SlotEntity._Entity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+                    if (!buff.Equals(Entity.Null))
+                    {
+                        ModifyUnitStatBuff_DOTS unarmedModifier = new()
+                        {
+                            StatType = (UnitStatType)weaponStatType,
+                            ModificationType = ModificationType.AddToBase,
+                            Value = scaledBonus,
+                            Modifier = 1,
+                            IncreaseByStacks = false,
+                            ValueByStacks = 0,
+                            Priority = 0,
+                            Id = ModificationId.Empty
+                        };
+                        buffer.Add(unarmedModifier);
+                        Core.Log.LogInfo($"{unarmedModifier.StatType} | {unarmedModifier.Value}");
+                        continue;
+                    }
                     for (int i = 0; i < buffer.Length; i++)
                     {
-                        bool modified = false;
                         var statBuff = buffer[i];
                         if (statBuff.StatType == (UnitStatType)weaponStatType) // Assuming WeaponStatType can be cast to UnitStatType
                         {
                             statBuff.Value += scaledBonus; // Modify the value accordingly
                             buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                            modified = true;
+                            Core.Log.LogInfo($"{statBuff.StatType} | {statBuff.Value}");
+                            break;
                         }
-                        if (modified) break;
-                        // add to buffer if existing one not found
+                        // add to buffer if existing one not found to increase
+                        statBuff.StatType = (UnitStatType)weaponStatType;
+                        statBuff.Value = scaledBonus;
+                        buffer.Add(statBuff);
+                        Core.Log.LogInfo($"{statBuff.StatType} | {statBuff.Value}");
                     }
                 }
-                character.Write(stats);
                 stats = character.Read<UnitStats>();
-                Core.Log.LogInfo($"{stats.PhysicalPower._Value} | {stats.SpellPower._Value} | {stats.PhysicalCriticalStrikeChance._Value} | {stats.PhysicalCriticalStrikeDamage._Value} | {stats.SpellCriticalStrikeChance._Value} | {stats.SpellCriticalStrikeDamage._Value}");
+                Core.Log.LogInfo($"After adding: {stats.PhysicalPower._Value} | {stats.SpellPower._Value} | {stats.PhysicalCriticalStrikeChance._Value} | {stats.PhysicalCriticalStrikeDamage._Value} | {stats.SpellCriticalStrikeChance._Value} | {stats.SpellCriticalStrikeDamage._Value}");
             }
             else
             {
@@ -268,38 +300,52 @@ namespace Cobalt.Hooks
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             Equipment equipment = character.Read<Equipment>();
             IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
-
+            Core.Log.LogInfo($"Before removing: {stats.PhysicalPower._Value} | {stats.SpellPower._Value} | {stats.PhysicalCriticalStrikeChance._Value} | {stats.PhysicalCriticalStrikeDamage._Value} | {stats.SpellCriticalStrikeChance._Value} | {stats.SpellCriticalStrikeDamage._Value}");
+            Entity buff = Entity.Null;
+            if (weaponType.ToLower().Contains("unarmed"))
+            {
+                ServerGameManager serverGameManager = Core.ServerGameManager;
+                if (serverGameManager.TryGetBuff(character, unarmed.ToIdentifier(), out Entity unarmedBuff))
+                {
+                    buff = unarmedBuff;
+                }
+            }
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
+                DynamicBuffer<ModifyUnitStatBuff_DOTS> buffer = new();
+                if (!buff.Equals(Entity.Null)) buffer = buff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+                else buffer = equipment.WeaponSlot.SlotEntity._Entity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
                 foreach (var bonus in bonuses)
                 {
                     WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    var buffer = equipment.WeaponSlot.SlotEntity._Entity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
                     for (int i = 0; i < buffer.Length; i++)
                     {
-                        bool modified = false;
                         var statBuff = buffer[i];
                         if (statBuff.StatType == (UnitStatType)weaponStatType) // Assuming WeaponStatType can be cast to UnitStatType
                         {
-                            statBuff.Value += scaledBonus; // Modify the value accordingly
-                            buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                            modified = true;
+                            statBuff.Value -= scaledBonus; // Modify the value accordingly
+                            if (statBuff.Value <= 0)
+                            {
+                                buffer.RemoveAt(i);
+                            }
+                            else
+                            {
+                                buffer[i] = statBuff;
+                            } // remove from buffer if value is less than or equal to 0 since this means it was added and not modifying original
+                            Core.Log.LogInfo($"{statBuff.StatType} | {statBuff.Value}");
+                            break;
                         }
-                        if (modified) break;
-                        // add to buffer if existing one not found
                     }
                 }
-                character.Write(stats);
+                stats = character.Read<UnitStats>();
+                Core.Log.LogInfo($"After removing: {stats.PhysicalPower._Value} | {stats.SpellPower._Value} | {stats.PhysicalCriticalStrikeChance._Value} | {stats.PhysicalCriticalStrikeDamage._Value} | {stats.SpellCriticalStrikeChance._Value} | {stats.SpellCriticalStrikeDamage._Value}");
             }
             else
             {
                 Core.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
-
-            // Subtract the bonuses
         }
-
 
         public static void ApplyBloodBonuses(Entity character) // tie extra spell slots to sanguimancy
         {
@@ -429,18 +475,17 @@ namespace Cobalt.Hooks
             {
                 return ExpertiseSystem.WeaponType.Unarmed;
             }
-            
+
             return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 
         public static void UpdatePlayerStats(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            //EntityManager entityManager = VWorld.Server.EntityManager;
 
             // Get the current weapon type
             string currentWeapon = GetCurrentWeaponType(character).ToString();
-            //Core.Log.LogInfo($"Current weapon: {currentWeapon}");
+
             // Initialize player's weapon dictionary if it doesn't exist
             if (!Core.DataStructures.PlayerEquippedWeapon.TryGetValue(steamId, out var equippedWeapons))
             {
@@ -472,7 +517,7 @@ namespace Cobalt.Hooks
                 Core.DataStructures.SavePlayerEquippedWeapon();
             }
 
-            ApplyBloodBonuses(character);
+            //ApplyBloodBonuses(character);
             //GearOverride.SetLevel(character, entityManager);
         }
     }
