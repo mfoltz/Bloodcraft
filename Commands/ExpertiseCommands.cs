@@ -98,19 +98,9 @@ namespace Cobalt.Commands
         {
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
-            Equipment equipment = character.Read<Equipment>();
-            Entity weapon = Entity.Null;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
-            {
-                weapon = equipment.UnarmedBuffInstance;
-            }
-            else
-            {
-                weapon = equipment.WeaponSlot.SlotEntity._Entity;
-            }
 
-            ModifyUnitStatBuffUtils.ResetWeaponModifications(weapon);
+            //ModifyUnitStatBuffUtils.ResetWeaponModifications(weapon);
             PlayerWeaponUtilities.ResetChosenStats(steamID, weaponType);
             //Core.DataStructures.SavePlayerWeaponChoices();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");

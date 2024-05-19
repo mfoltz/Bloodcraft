@@ -31,6 +31,10 @@ public class DeathEventListenerSystem_Patch
                     //ev.Died.LogComponentTypes();
                     if (Plugin.ProfessionSystem.Value) ProfessionSystem.UpdateProfessions(ev.Killer, ev.Died);
                 }
+                else if (__instance.EntityManager.HasComponent<Follower>(ev.Killer) && ev.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
+                {
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateExperience(ev.Killer.Read<Follower>().Followed._Value, ev.Died);
+                }
             }
         }
         catch (Exception e)

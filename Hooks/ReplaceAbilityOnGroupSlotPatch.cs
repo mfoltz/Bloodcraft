@@ -6,7 +6,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine.TextCore.Text;
-
+/*
 namespace Cobalt.Hooks
 {
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
@@ -15,6 +15,7 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         public static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
         {
+            Core.Log.LogInfo("ReplaceAbilityOnGroupSlotPatch");
             NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp);
             try
             {
@@ -27,11 +28,6 @@ namespace Cobalt.Hooks
                         if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed"))
                         {
                             ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, ExpertiseSystem.WeaponType.Unarmed, entity);
-                        }
-                        else
-                        {
-                            ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
-                            ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
                         }
                     }
                 }
@@ -47,3 +43,4 @@ namespace Cobalt.Hooks
         }
     }
 }
+*/

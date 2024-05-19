@@ -2,13 +2,11 @@
 using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Hooks.ModifyUnitStatBuffUtils;
 using static Cobalt.Systems.Expertise.WeaponStats;
 using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
 using static Cobalt.Systems.Sanguimancy.BloodStats;
@@ -19,105 +17,12 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class EquipmentPatch
     {
-        /*
-        [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
+        [HarmonyPatch(typeof(PreviewPlacementBuffSystem), nameof(PreviewPlacementBuffSystem.OnUpdate))]
         [HarmonyPostfix]
-        private static void EquipItemSystemPostix(EquipItemSystem __instance)
+        private static void PreviewPlacementBuffSystemPostfix(PreviewPlacementBuffSystem __instance)
         {
-            if (!Plugin.ExpertiseSystem.Value) return;
-            Core.Log.LogInfo("EquipItemSystem Postfix..."); //prefix here to properly catch previous weapon
-            NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                    Entity character = fromCharacter.Character;
-                    Equipment equipment = character.Read<Equipment>();
-                    ExpertiseSystem.WeaponType weaponType = GetCurrentWeaponType(character);
-                    ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                    Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-                    ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, weaponEntity);
-                }
-            }
-            catch (Exception e)
-            {
-                Core.Log.LogError($"Exited EquipItemSystem early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-        */
-
-        [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
-        [HarmonyPrefix]
-        private static void EquipItemSystemPrefix(EquipItemSystem __instance)
-        {
-            if (!Plugin.ExpertiseSystem.Value) return;
-            Core.Log.LogInfo("EquipItemSystem Prefix..."); //prefix here to properly catch previous weapon
-            NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                    Entity character = fromCharacter.Character;
-                    Equipment equipment = character.Read<Equipment>();
-                    ExpertiseSystem.WeaponType weaponType = GetCurrentWeaponType(character);
-                    ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) continue;
-                    Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-                    ModifyUnitStatBuffUtils.ResetWeaponModifications(weaponEntity);
-                }
-            }
-            catch (Exception e)
-            {
-                Core.Log.LogError($"Exited EquipItemSystem early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
-        [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
-        [HarmonyPrefix]
-        private static void UnEquipItemSystemPrefix(UnEquipItemSystem __instance)
-        {
-            if (!Plugin.ExpertiseSystem.Value) return;
-            Core.Log.LogInfo("UnEquipItemSystem Prefix...");
+            Core.Log.LogInfo("PreviewPlacementBuffSystem Postfix...");
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                    Entity character = fromCharacter.Character;
-                    Equipment equipment = character.Read<Equipment>();
-                    ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                    Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-                    ModifyUnitStatBuffUtils.ResetWeaponModifications(weaponEntity);
-                }
-            }
-            catch (Exception e)
-            {
-                Core.Log.LogError($"Exited UnEquipItemSystem early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
-        [HarmonyPatch(typeof(Apply_BuffModificationsSystem_Server), nameof(Apply_BuffModificationsSystem_Server.OnUpdate))]
-        [HarmonyPostfix]
-        private static void BuffModificationPostfix(Apply_BuffModificationsSystem_Server __instance)
-        {
-            Core.Log.LogInfo("Apply_BuffModificationsSystem_Server Postfix...");
-            if (!Plugin.LevelingSystem.Value) return;
-            NativeArray<Entity> entities = __instance.__query_1912026727_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
@@ -127,7 +32,7 @@ namespace Cobalt.Hooks
             }
             catch (Exception e)
             {
-                Core.Log.LogError($"Exited LevelPrefix early: {e}");
+                Core.Log.LogError($"Exited PreviewPlacementBuffSystem early: {e}");
             }
             finally
             {
@@ -213,6 +118,60 @@ namespace Cobalt.Hooks
             }
         }
 
+        [HarmonyPatch(typeof(Apply_BuffModificationsSystem_Server), nameof(Apply_BuffModificationsSystem_Server.OnUpdate))]
+        [HarmonyPostfix]
+        private static void OnUpdatePostix(Apply_BuffModificationsSystem_Server __instance)
+        {
+            if (!Plugin.LevelingSystem.Value) return;
+            Core.Log.LogInfo("Apply_BuffModificationsSystem_Server Postfix...");
+            NativeArray<Entity> entities = __instance.__query_1912026727_0.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    entity.LogComponentTypes();
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError(ex);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+
+        [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
+        [HarmonyPrefix]
+        private static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
+        {
+            if (!Plugin.LevelingSystem.Value) return;
+            NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    {
+                        Entity character = entity.Read<EntityOwner>().Owner;
+                        ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+                        ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                        ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError(ex);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+
         [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
         [HarmonyPostfix]
         private static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
@@ -223,9 +182,8 @@ namespace Cobalt.Hooks
             {
                 foreach (var entity in entities)
                 {
-                    if (entity.Has<SpellLevel>())
+                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                     {
-                        if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
                         EntityOwner entityOwner = entity.Read<EntityOwner>();
                         GearOverride.SetLevel(entityOwner.Owner);
                     }
@@ -279,7 +237,7 @@ namespace Cobalt.Hooks
 
         [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
         [HarmonyPrefix]
-        private static void OnUpdatePreix(ReactToInventoryChangedSystem __instance)
+        private static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
         {
             //Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
             if (!Plugin.ExpertiseSystem.Value) return;
@@ -568,68 +526,8 @@ namespace Cobalt.Hooks
         {
             Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
 
-            if (weapon.Equals(Entity.Null))
-            {
-                return ExpertiseSystem.WeaponType.Unarmed;
-            }
-
             return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
-
-        /*
-        public static void UpdatePlayerStats(Entity character)
-        {
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-            // Get the current weapon type
-            string currentWeapon = GetCurrentWeaponType(character).ToString();
-            Entity currentWeaponEntity = Entity.Null;
-            if (currentWeapon.ToLower().Contains("unarmed"))
-            {
-                Core.ServerGameManager.TryGetBuff(character, unarmed.ToIdentifier(), out currentWeaponEntity);
-            }
-            else
-            {
-                currentWeaponEntity = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-            }
-
-            var equippedWeapons = Core.DataStructures.PlayerEquippedWeapon[steamId];
-
-            // Check if weapon has changed
-            if (!equippedWeapons.TryGetValue(currentWeapon, out var currentWeaponInfo) || !currentWeaponInfo.Item1)
-            {
-                // Find the previous weapon (the one that is set to true)
-                var previousWeaponEntry = equippedWeapons.FirstOrDefault(w => w.Value.Item1);
-                string previousWeapon = previousWeaponEntry.Key;
-                Entity previousWeaponEntity = previousWeaponEntry.Value.Item2;
-
-                Core.Log.LogInfo($"Previous: {previousWeapon} | Current: {currentWeapon}");
-
-                // Apply and remove stat bonuses based on weapon change
-                if (!string.IsNullOrEmpty(previousWeapon))
-                {
-                    Core.Log.LogInfo($"Removing bonuses for {previousWeapon}...");
-                    RemoveWeaponBonuses(character, previousWeapon, previousWeaponEntity);  // Remove bonuses from the previous weapon
-                    //equippedWeapons[previousWeapon] = (false, previousWeaponEntity);  // Set previous weapon as unequipped
-                }
-
-                Core.Log.LogInfo($"Applying bonuses for {currentWeapon}...");
-                ApplyWeaponBonuses(character, currentWeapon);  // Apply bonuses from the new weapon
-
-                if (equippedWeapons.ContainsKey(currentWeapon))
-                {
-                    equippedWeapons[currentWeapon] = (true, equippedWeapons[currentWeapon].Item2);  // Set current weapon as equipped, keep entity reference
-                }
-                else
-                {
-                    equippedWeapons[currentWeapon] = (true, currentWeaponEntity);  // Assign new tuple with isEquipped true and new weapon entity reference
-                }
-
-                // Save the player's weapon state
-                Core.DataStructures.SavePlayerEquippedWeapon();
-            }
-        }
-        */
     }
 
     public static class GearOverride
