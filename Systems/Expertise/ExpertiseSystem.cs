@@ -38,7 +38,7 @@ namespace Cobalt.Systems.Expertise
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
-            ExpertiseSystem.WeaponType weaponType = UnitStatsOverride.GetCurrentWeaponType(Killer);
+            ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
 
             if (entityManager.HasComponent<UnitStats>(Victim))
             {

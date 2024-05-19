@@ -1,17 +1,14 @@
 ﻿using Cobalt.Systems.Expertise;
-using Cobalt.Systems.Sanguimancy;
+using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Scripting;
-using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Hooks.BaseStats;
-using static Cobalt.Hooks.UnitStatsOverride;
-using static Cobalt.Systems.Experience.PrestigeSystem.PrestigeStatManager;
+using static Cobalt.Hooks.ModifyUnitStatBuffUtils;
 using static Cobalt.Systems.Expertise.WeaponStats;
 using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
 using static Cobalt.Systems.Sanguimancy.BloodStats;
@@ -22,6 +19,7 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class EquipmentPatch
     {
+        /*
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPostfix]
         private static void EquipItemSystemPostix(EquipItemSystem __instance)
@@ -38,16 +36,8 @@ namespace Cobalt.Hooks
                     Equipment equipment = character.Read<Equipment>();
                     ExpertiseSystem.WeaponType weaponType = GetCurrentWeaponType(character);
                     ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                    Entity weaponEntity = Entity.Null;
-                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed))
-                    {
-                        Core.ServerGameManager.TryGetBuff(character, unarmed.ToIdentifier(), out weaponEntity);
-                    }
-                    else
-                    {
-                        weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-                    }
-                    UnitStatsOverride.ApplyWeaponBonuses(character, weaponType, weaponEntity);
+                    Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
+                    ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, weaponEntity);
                 }
             }
             catch (Exception e)
@@ -59,6 +49,7 @@ namespace Cobalt.Hooks
                 entities.Dispose();
             }
         }
+        */
 
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPrefix]
@@ -76,16 +67,9 @@ namespace Cobalt.Hooks
                     Equipment equipment = character.Read<Equipment>();
                     ExpertiseSystem.WeaponType weaponType = GetCurrentWeaponType(character);
                     ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                    Entity weaponEntity = Entity.Null;
-                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed))
-                    {
-                        Core.ServerGameManager.TryGetBuff(character, unarmed.ToIdentifier(), out weaponEntity);
-                    }
-                    else
-                    {
-                        weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-                    }
-                    UnitStatsOverride.RemoveWeaponBonuses(character, weaponType, weaponEntity);
+                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) continue;
+                    Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
+                    ModifyUnitStatBuffUtils.ResetWeaponModifications(weaponEntity);
                 }
             }
             catch (Exception e)
@@ -112,10 +96,9 @@ namespace Cobalt.Hooks
                     FromCharacter fromCharacter = entity.Read<FromCharacter>();
                     Entity character = fromCharacter.Character;
                     Equipment equipment = character.Read<Equipment>();
-                    ExpertiseSystem.WeaponType weaponType = GetCurrentWeaponType(character);
                     ulong steamId = fromCharacter.User.Read<User>().PlatformId;
                     Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-                    UnitStatsOverride.RemoveWeaponBonuses(character, weaponType, weaponEntity);
+                    ModifyUnitStatBuffUtils.ResetWeaponModifications(weaponEntity);
                 }
             }
             catch (Exception e)
@@ -128,29 +111,23 @@ namespace Cobalt.Hooks
             }
         }
 
-        [HarmonyPatch(typeof(UnEquipItemSystem), nameof(UnEquipItemSystem.OnUpdate))]
+        [HarmonyPatch(typeof(Apply_BuffModificationsSystem_Server), nameof(Apply_BuffModificationsSystem_Server.OnUpdate))]
         [HarmonyPostfix]
-        private static void UnEquipItemSystemPostfix(UnEquipItemSystem __instance)
+        private static void BuffModificationPostfix(Apply_BuffModificationsSystem_Server __instance)
         {
-            if (!Plugin.ExpertiseSystem.Value) return;
-            Core.Log.LogInfo("UnEquipItemSystem Postfix...");
-            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+            Core.Log.LogInfo("Apply_BuffModificationsSystem_Server Postfix...");
+            if (!Plugin.LevelingSystem.Value) return;
+            NativeArray<Entity> entities = __instance.__query_1912026727_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                    Entity character = fromCharacter.Character;
-                    Equipment equipment = character.Read<Equipment>();
-                    ExpertiseSystem.WeaponType weaponType = GetCurrentWeaponType(character);
-                    ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                    Core.ServerGameManager.TryGetBuff(character, unarmed.ToIdentifier(), out Entity weaponEntity);
-                    UnitStatsOverride.ApplyWeaponBonuses(character, weaponType, weaponEntity);
+                    entity.LogComponentTypes();
                 }
             }
             catch (Exception e)
             {
-                Core.Log.LogError($"Exited UnEquipItemSystem early: {e}");
+                Core.Log.LogError($"Exited LevelPrefix early: {e}");
             }
             finally
             {
@@ -275,10 +252,18 @@ namespace Cobalt.Hooks
                 foreach (var entity in entities)
                 {
                     DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
-                    if (dealDamageEvent.DealDamageFlags.Equals(DealDamageFlag.TooLowResourceLevel))
+                    Entity entityOwner = dealDamageEvent.SpellSource.Read<EntityOwner>().Owner;
+                    EntityCategory entityCategory = dealDamageEvent.Target.Read<EntityCategory>();
+                    if (!entityCategory.MainCategory.Equals(MainEntityCategory.Resource) || !entityOwner.Has<Equipment>()) continue;
+                    Entity weapon = entityOwner.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
+                    if (weapon.Equals(Entity.Null) || !weapon.Has<WeaponLevelSource>()) continue;
+                    if (weapon.Read<WeaponLevelSource>().Level >= entityCategory.ResourceLevel._Value) continue;
+                    float originalSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
+                    if (originalSource >= entityCategory.ResourceLevel._Value)
                     {
-                        // want to check weapon and override this
-                        Core.Log.LogInfo($"{dealDamageEvent.MainFactor} | {dealDamageEvent.MaterialModifiers.Minerals} | {dealDamageEvent.Modifier} | {dealDamageEvent.RawDamage} | {dealDamageEvent.RawDamagePercent} | {dealDamageEvent.ResourceModifier}");
+                        entityCategory.ResourceLevel._Value = 0;
+                        dealDamageEvent.Target.Write(entityCategory);
+                        Core.Log.LogInfo($"Reduced Resource Level to 0.");
                     }
                 }
             }
@@ -304,10 +289,11 @@ namespace Cobalt.Hooks
                 foreach (var entity in entities)
                 {
                     InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>(); // pick up if going to servant inventory, otherwise make level match player weapon mastery?
-                    if (!inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>()) continue;
+
                     Entity inventory = inventoryChangedEvent.InventoryEntity;
                     if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
+                        if (!inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>()) continue;
                         ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                         ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
                         IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
@@ -322,9 +308,39 @@ namespace Cobalt.Hooks
                     }
                     else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Removed) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
+                        if (!inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>()) continue;
                         PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
                         WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<WeaponLevelSource>();
                         inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                    }
+                    else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())
+                    {
+                        Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
+                        NetworkId networkId = inventory.Read<InventoryConnection>().InventoryOwner.Read<NetworkId>();
+                        ulong steamId = userEntity.Read<User>().PlatformId;
+                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(networkId, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
+                        {
+                            bool jobExists = false;
+                            for (int i = 0; i < playerJobs.Count; i++)
+                            {
+                                if (playerJobs[i].Item1 == inventoryChangedEvent.Item && playerJobs[i].Item2 > 0)
+                                {
+                                    playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
+                                    if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
+                                    jobExists = true;
+                                    break;
+                                }
+                            }
+                            if (!jobExists) continue;
+                            Core.Log.LogInfo($"Processing Craft: {inventoryChangedEvent.Item.LookupName()}");
+                            float ProfessionValue = 50f;
+                            ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
+                            IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
+                            if (handler != null)
+                            {
+                                ProfessionSystem.SetProfession(inventoryChangedEvent.Item, userEntity.Read<User>(), steamId, ProfessionValue, handler);
+                            }
+                        }
                     }
                 }
             }
@@ -339,10 +355,8 @@ namespace Cobalt.Hooks
         }
     }
 
-    public static class UnitStatsOverride
+    public static class ModifyUnitStatBuffUtils
     {
-        public static readonly PrefabGUID unarmed = new(-2075546002);
-
         public static void ApplyWeaponBonuses(Entity character, ExpertiseSystem.WeaponType weaponType, Entity weaponEntity)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
@@ -364,11 +378,11 @@ namespace Cobalt.Hooks
                     for (int i = 0; i < buffer.Length; i++)
                     {
                         ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                        if (statBuff.StatType == (UnitStatType)weaponStatType) // Assuming WeaponStatType can be cast to UnitStatType
+                        if (statBuff.StatType.Equals(WeaponStatMap[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
                         {
                             statBuff.Value += scaledBonus; // Modify the value accordingly
                             buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                            Core.Log.LogInfo($"{statBuff.StatType} | {statBuff.Value}");
+                            Core.Log.LogInfo($"Modified {statBuff.StatType} | {statBuff.Value}");
                             found = true;
                             break;
                         }
@@ -377,9 +391,10 @@ namespace Cobalt.Hooks
                     if (!found)
                     {
                         // If not found, create a new stat modifier
+                        UnitStatType statType = WeaponStatMap[weaponStatType];
                         ModifyUnitStatBuff_DOTS newStatBuff = new()
                         {
-                            StatType = (UnitStatType)weaponStatType,
+                            StatType = statType,
                             ModificationType = ModificationType.AddToBase,
                             Value = scaledBonus,
                             Modifier = 1,
@@ -389,7 +404,7 @@ namespace Cobalt.Hooks
                             Id = ModificationId.Empty
                         };
                         buffer.Add(newStatBuff);
-                        Core.Log.LogInfo($"{newStatBuff.StatType} | {newStatBuff.Value}");
+                        Core.Log.LogInfo($"Added {newStatBuff.StatType} | {newStatBuff.Value}");
                     }
                 }
             }
@@ -399,43 +414,35 @@ namespace Cobalt.Hooks
             }
         }
 
-        public static void RemoveWeaponBonuses(Entity character, ExpertiseSystem.WeaponType weaponType, Entity weapon)
+        public static void ResetWeaponModifications(Entity weapon)
         {
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
-            if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
+            if (weapon.Has<ModifyUnitStatBuff_DOTS>())
             {
-                if (!weapon.Has<ModifyUnitStatBuff_DOTS>())
+                Core.Log.LogInfo("Resetting weapon modifications...");
+                if (weapon.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed"))
                 {
-                    Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weapon);
+                    weapon.Remove<ModifyUnitStatBuff_DOTS>();
+                    return;
                 }
-                var buffer = weapon.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-                foreach (var weaponStatType in bonuses)
+
+                Entity originalWeaponEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()];
+                var originalBuffer = originalWeaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+
+                weapon.Remove<ModifyUnitStatBuff_DOTS>();
+                var newBuffer = Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weapon);
+
+                foreach (var item in originalBuffer)
                 {
-                    float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    for (int i = 0; i < buffer.Length; i++)
-                    {
-                        ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                        if (statBuff.StatType == (UnitStatType)weaponStatType) // Assuming WeaponStatType can be cast to UnitStatType
-                        {
-                            statBuff.Value -= scaledBonus; // Modify the value accordingly
-                            if (statBuff.Value <= 0)
-                            {
-                                buffer.RemoveAt(i);
-                            }
-                            else buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                            Core.Log.LogInfo($"{statBuff.StatType} | {statBuff.Value}");
-                            break;
-                        }
-                    }
+                    newBuffer.Add(item);
                 }
             }
             else
             {
-                Core.Log.LogInfo($"No bonuses found for {weaponType}...");
+                Core.Log.LogInfo("No modifications found to reset...");
             }
         }
 
+        /*
         public static void ApplyBloodBonuses(Entity character) // tie extra spell slots to sanguimancy
         {
             var stats = character.Read<UnitStats>();
@@ -515,6 +522,7 @@ namespace Cobalt.Hooks
                 character.Write(stats);
             }
         }
+        */
 
         public static float CalculateScaledWeaponBonus(IWeaponExpertiseHandler handler, ulong steamId, WeaponStatType statType)
         {
@@ -659,8 +667,9 @@ namespace Cobalt.Hooks
         }
     }
 
-    public static class BaseStats
+    public static class Prestige
     {
+        /*
         private static void ApplyPrestigeBonuses(Entity character)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
@@ -729,49 +738,6 @@ namespace Cobalt.Hooks
             }
             return 0.01f;
         }
-
-        private static Dictionary<WeaponStatType, float> baseWeaponStats = new()
-        {
-            { WeaponStatType.PhysicalPower, 10f },
-            { WeaponStatType.SpellPower, 10f },
-            { WeaponStatType.PhysicalCritChance, 0.05f },
-            { WeaponStatType.PhysicalCritDamage, 1.5f },
-            { WeaponStatType.SpellCritChance, 0.05f },
-            { WeaponStatType.SpellCritDamage, 1.5f }
-        };
-
-        public static Dictionary<WeaponStatType, float> BaseWeaponStats
-        {
-            get => baseWeaponStats;
-            set => baseWeaponStats = value;
-        }
-
-        private static Dictionary<BloodStatType, float> baseBloodStats = new()
-        {
-            { BloodStatType.SunResistance, 0f },
-            { BloodStatType.FireResistance, 0f },
-            { BloodStatType.HolyResistance, 0f },
-            { BloodStatType.SilverResistance, 0f },
-            { BloodStatType.PassiveHealthRegen, 0.01f }
-        };
-
-        public static Dictionary<BloodStatType, float> BaseBloodStats
-        {
-            get => baseBloodStats;
-            set => baseBloodStats = value;
-        }
-
-        private static Dictionary<PrestigeStatType, float> basePrestigeStats = new()
-        {
-            { PrestigeStatType.PhysicalResistance, 0f },
-            { PrestigeStatType.SpellResistance, 0f },
-            { PrestigeStatType.MovementSpeed, 0f }
-        };
-
-        public static Dictionary<PrestigeStatType, float> BasePrestigeStats
-        {
-            get => basePrestigeStats;
-            set => basePrestigeStats = value;
-        }
+        */
     }
 }

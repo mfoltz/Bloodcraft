@@ -1,24 +1,44 @@
-﻿using HarmonyLib;
+﻿using Cobalt.Systems.Expertise;
+using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine.TextCore.Text;
 
-/* need to do this for extra spell slots earned from sanguimancy
 namespace Cobalt.Hooks
 {
-    [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), "OnUpdate")]
-    public class ReplaceAbilityOnSlotSystem_Patch
+    [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
+    public static class ReplaceAbilityOnGroupSlotPatch
     {
-        private static void Prefix(ReplaceAbilityOnSlotSystem __instance)
+        [HarmonyPrefix]
+        public static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
         {
-            Core.Log.LogInfo("ReplaceAbilityOnSlotSystemPrefix called...");
-            NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.TempJob);
+            NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    //entity.LogComponentTypes();
+                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    {
+                        Entity character = entity.Read<EntityOwner>().Owner;
+                        ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed"))
+                        {
+                            ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, ExpertiseSystem.WeaponType.Unarmed, entity);
+                        }
+                        else
+                        {
+                            ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                            ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
+                        }
+                    }
                 }
+            }
+            catch (System.Exception e)
+            {
+                Core.Log.LogError($"Error in ReplaceAbilityOnGroupSlotPatch: {e}");
             }
             finally
             {
@@ -27,4 +47,3 @@ namespace Cobalt.Hooks
         }
     }
 }
-*/

@@ -6,7 +6,6 @@ using HarmonyLib;
 using ProjectM;
 using System.Reflection;
 using VampireCommandFramework;
-using static Cobalt.Hooks.BaseStats;
 using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Cobalt
@@ -165,12 +164,5 @@ namespace Cobalt
             Core.DataStructures.LoadPlayerEquippedWeapon,
             Core.DataStructures.LoadPlayerBloodStats
         ];
-
-        public static void UpdateBaseStats()
-        {
-            VampireStatModifiers vampireStatModifiers = Core.Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings.VampireStatModifiers;
-            BaseWeaponStats[WeaponStatType.PhysicalPower] *= vampireStatModifiers.PhysicalPowerModifier;
-            BaseWeaponStats[WeaponStatType.SpellPower] *= vampireStatModifiers.SpellPowerModifier;
-        }
     }
 }

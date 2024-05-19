@@ -63,11 +63,11 @@ namespace Cobalt.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            ExpertiseSystem.WeaponType weaponType = UnitStatsOverride.GetCurrentWeaponType(character);
+            ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
             Entity weaponEntity = Entity.Null;
             if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
             {
-                Core.ServerGameManager.TryGetBuff(character, UnitStatsOverride.unarmed.ToIdentifier(), out weaponEntity);
+                weaponEntity = equipment.UnarmedBuffInstance;
             }
             else
             {
@@ -83,8 +83,8 @@ namespace Cobalt.Commands
             // Choose a stat for the specific weapon stats instance
             if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, weaponStatType))
             {
-                ctx.Reply($"Stat {statType} has been chosen for {weaponType}.");
-                UnitStatsOverride.ApplyWeaponBonuses(character, weaponType, weaponEntity);
+                ctx.Reply($"{statType} has been chosen for {weaponType} and will apply after reequiping.");
+                //ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, weaponEntity);
                 Core.DataStructures.SavePlayerWeaponChoices();
             }
             else
@@ -99,10 +99,18 @@ namespace Cobalt.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            PrefabGUID weapon = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
-            ExpertiseSystem.WeaponType weaponType = UnitStatsOverride.GetCurrentWeaponType(character);
+            Entity weapon = Entity.Null;
+            ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
+            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
+            {
+                weapon = equipment.UnarmedBuffInstance;
+            }
+            else
+            {
+                weapon = equipment.WeaponSlot.SlotEntity._Entity;
+            }
 
-            UnitStatsOverride.RemoveWeaponBonuses(character, weaponType, equipment.WeaponSlot.SlotEntity._Entity);
+            ModifyUnitStatBuffUtils.ResetWeaponModifications(weapon);
             PlayerWeaponUtilities.ResetChosenStats(steamID, weaponType);
             //Core.DataStructures.SavePlayerWeaponChoices();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");

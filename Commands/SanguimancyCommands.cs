@@ -71,7 +71,7 @@ namespace Cobalt.Commands
                 ctx.Reply("No blood stat choices found to reset.");
                 return;
             }
-            UnitStatsOverride.RemoveBloodBonuses(character);
+            //UnitStatsOverride.RemoveBloodBonuses(character);
             stats.Clear();
             Core.DataStructures.SavePlayerBloodChoices();
             ctx.Reply($"Blood stat choices reset.");

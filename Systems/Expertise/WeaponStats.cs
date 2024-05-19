@@ -1,4 +1,6 @@
-﻿namespace Cobalt.Systems.Expertise
+﻿using ProjectM;
+
+namespace Cobalt.Systems.Expertise
 {
     public class WeaponStats
     {
@@ -44,14 +46,14 @@
                 SpellCritDamage
             }
 
-            public static readonly Dictionary<int, WeaponStatType> WeaponStatMap = new()
+            public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatMap = new()
                 {
-                    { 1, WeaponStatType.PhysicalPower },
-                    { 2, WeaponStatType.SpellPower },
-                    { 3, WeaponStatType.PhysicalCritChance },
-                    { 4, WeaponStatType.PhysicalCritDamage },
-                    { 5, WeaponStatType.SpellCritChance },
-                    { 6, WeaponStatType.SpellCritDamage }
+                    { WeaponStatType.PhysicalPower, UnitStatType.PhysicalPower },
+                    { WeaponStatType.SpellPower, UnitStatType.SpellPower },
+                    { WeaponStatType.PhysicalCritChance, UnitStatType.PhysicalCriticalStrikeChance },
+                    { WeaponStatType.PhysicalCritDamage, UnitStatType.PhysicalCriticalStrikeDamage },
+                    { WeaponStatType.SpellCritChance, UnitStatType.SpellCriticalStrikeChance },
+                    { WeaponStatType.SpellCritDamage, UnitStatType.SpellCriticalStrikeDamage }
                 };
 
             private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
