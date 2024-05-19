@@ -10,6 +10,5 @@ public static class InitializationPatch
     public static void AfterLoad()
     {
         Core.Initialize();
-        Plugin.UpdateBaseStats();
     }
 }

@@ -306,24 +306,17 @@ namespace Cobalt.Systems.Professions
 
         public static string FormatMaterialName(string prefabName)
         {
+            int prefabIndex = prefabName.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                // Remove everything after 'Prefab' including 'Prefab'
+                prefabName = prefabName[..prefabIndex].TrimEnd();
+            }
             string name = prefabName.Replace("Item_Ingredient_", "");
             if (name.ToLower().Contains("mineral"))
             {
                 name = name.Replace("Mineral_", "");
                 name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
-                if (name.ToLower().Contains("ore"))
-                {
-                    string[] words = name.Split(' ');
-                    if (words.Length > 1)
-                    {
-                        name = words[0] + " " + words[1];
-                    }
-                }
-                else if (name.ToLower().Contains("stone"))
-                {
-                    string[] words = name.Split(' ');
-                    name = words[0];
-                }
             }
             else if (name.ToLower().Contains("wood"))
             {
@@ -338,11 +331,6 @@ namespace Cobalt.Systems.Professions
             {
                 name = name.Replace("Plant_", "");
                 name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
-                string[] words = name.Split(' ');
-                if (words.Length > 1)
-                {
-                    name = words[0] + " " + words[1];
-                }
             }
 
             return name;

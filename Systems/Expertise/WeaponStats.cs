@@ -4,13 +4,13 @@
     {
         public class PlayerWeaponUtilities
         {
-            public static bool ChooseStat(ulong steamId, string weaponType, string statType)
+            public static bool ChooseStat(ulong steamId, ExpertiseSystem.WeaponType weaponType, WeaponStatManager.WeaponStatType statType)
             {
-                if (!Core.DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
-                    Core.DataStructures.PlayerWeaponChoices[steamId] = [];
-
-                if (!Core.DataStructures.PlayerWeaponChoices[steamId].ContainsKey(weaponType))
-                    Core.DataStructures.PlayerWeaponChoices[steamId][weaponType] = [];
+                if (!Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) || !weaponStats.TryGetValue(weaponType, out var choices))
+                {
+                    choices = [];
+                    Core.DataStructures.PlayerWeaponChoices[steamId][weaponType] = choices;
+                }
 
                 if (Core.DataStructures.PlayerWeaponChoices[steamId][weaponType].Count >= 2)
                 {
@@ -22,7 +22,7 @@
                 return true;
             }
 
-            public static void ResetChosenStats(ulong steamId, string weaponType)
+            public static void ResetChosenStats(ulong steamId, ExpertiseSystem.WeaponType weaponType)
             {
                 if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
                 {

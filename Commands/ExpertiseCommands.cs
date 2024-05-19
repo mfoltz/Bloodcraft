@@ -17,7 +17,7 @@ namespace Cobalt.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weaponGuid = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
-            string weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(weaponGuid).ToString();
+            ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(weaponGuid);
 
             IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             if (handler == null)
@@ -52,12 +52,10 @@ namespace Cobalt.Commands
             ctx.Reply($"Weapon expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws <Stat>", description: "Choose a weapon stat to enhance based on your weapon Expertise.")]
-        public static void ChooseWeaponStat(ChatCommandContext ctx, string statChoice)
+        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws [Stat]", description: "Choose a weapon stat to enhance based on your weapon Expertise.")]
+        public static void ChooseWeaponStat(ChatCommandContext ctx, string statType)
         {
-            string statType = statChoice.ToLower();
-            // If not, try parsing it from the string representation
-            if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out _))
+            if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out var weaponStatType))
             {
                 ctx.Reply("Invalid weapon stat choice, use .lws to see options.");
                 return;
@@ -65,30 +63,28 @@ namespace Cobalt.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
-            Entity weapon = equipment.WeaponSlot.SlotEntity._Entity;
-            PrefabGUID prefabGUID;
-            if (weapon.Equals(Entity.Null))
+            ExpertiseSystem.WeaponType weaponType = UnitStatsOverride.GetCurrentWeaponType(character);
+            Entity weaponEntity = Entity.Null;
+            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
             {
-                prefabGUID = new(0);
+                Core.ServerGameManager.TryGetBuff(character, UnitStatsOverride.unarmed.ToIdentifier(), out weaponEntity);
             }
             else
             {
-                prefabGUID = weapon.Read<PrefabGUID>();
+                weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
             }
             // Ensure that there is a dictionary for the player's stats
-            if (!Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamID, out var _))
+            if (!Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamID, out var weaponsStats))
             {
-                Dictionary<string, List<string>> weaponsStats = [];
+                weaponsStats = [];
                 Core.DataStructures.PlayerWeaponChoices[steamID] = weaponsStats;
             }
-            string weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(prefabGUID).ToString();
-            // Ensure that there are stats registered for the specific weapon
 
             // Choose a stat for the specific weapon stats instance
-            if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, statType))
+            if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, weaponStatType))
             {
                 ctx.Reply($"Stat {statType} has been chosen for {weaponType}.");
-                UnitStatsOverride.ApplyWeaponBonuses(character, weaponType);
+                UnitStatsOverride.ApplyWeaponBonuses(character, weaponType, weaponEntity);
                 Core.DataStructures.SavePlayerWeaponChoices();
             }
             else
@@ -104,23 +100,26 @@ namespace Cobalt.Commands
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weapon = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
-            string weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(weapon).ToString();
+            ExpertiseSystem.WeaponType weaponType = UnitStatsOverride.GetCurrentWeaponType(character);
 
-            UnitStatsOverride.RemoveWeaponBonuses(character, weaponType);
+            UnitStatsOverride.RemoveWeaponBonuses(character, weaponType, equipment.WeaponSlot.SlotEntity._Entity);
             PlayerWeaponUtilities.ResetChosenStats(steamID, weaponType);
             //Core.DataStructures.SavePlayerWeaponChoices();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
         }
 
         [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Weapon] [Level]", description: "Sets your weapon expertise level.")]
-        public static void SetExpertiseCommand(ChatCommandContext ctx, string weaponType, int level)
+        public static void SetExpertiseCommand(ChatCommandContext ctx, string weapon, int level)
         {
             if (level < 0 || level > ExpertiseSystem.MaxWeaponExpertiseLevel)
             {
                 ctx.Reply($"Level must be between 0 and {ExpertiseSystem.MaxWeaponExpertiseLevel}.");
                 return;
             }
-
+            if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weapon, true, out var weaponType))
+            {
+                ctx.Reply("Invalid weapon type.");
+            }
             var expertiseHandler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             if (expertiseHandler == null)
             {

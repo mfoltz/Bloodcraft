@@ -10,27 +10,27 @@
 
         void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData);
 
-        string GetWeaponType();
+        ExpertiseSystem.WeaponType GetWeaponType();
     }
 
     public static class WeaponExpertiseHandlerFactory
     {
-        public static IWeaponExpertiseHandler GetWeaponExpertiseHandler(string weaponType)
+        public static IWeaponExpertiseHandler GetWeaponExpertiseHandler(ExpertiseSystem.WeaponType weaponType)
         {
-            return weaponType.ToLower() switch
+            return weaponType switch
             {
-                "sword" => new SwordExpertiseHandler(),
-                "axe" => new AxeExpertiseHandler(),
-                "mace" => new MaceExpertiseHandler(),
-                "spear" => new SpearExpertiseHandler(),
-                "crossbow" => new CrossbowExpertiseHandler(),
-                "greatsword" => new GreatSwordExpertiseHandler(),
-                "slashers" => new SlashersExpertiseHandler(),
-                "pistols" => new PistolsExpertiseHandler(),
-                "reaper" => new ReaperExpertiseHandler(),
-                "longbow" => new LongbowExpertiseHandler(),
-                "whip" => new WhipExpertiseHandler(),
-                "unarmed" => new UnarmedExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Sword => new SwordExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Axe => new AxeExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Mace => new MaceExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Spear => new SpearExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Crossbow => new CrossbowExpertiseHandler(),
+                ExpertiseSystem.WeaponType.GreatSword => new GreatSwordExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Slashers => new SlashersExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Pistols => new PistolsExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Reaper => new ReaperExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Longbow => new LongbowExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Whip => new WhipExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Unarmed => new UnarmedExpertiseHandler(),
                 _ => null,
             };
         }
@@ -66,7 +66,7 @@
 
         public abstract void SaveChanges();
 
-        public abstract string GetWeaponType();
+        public abstract ExpertiseSystem.WeaponType GetWeaponType();
     }
 
     // Implementations for each weapon type
@@ -79,9 +79,9 @@
             Core.DataStructures.SavePlayerSwordExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Sword";
+            return ExpertiseSystem.WeaponType.Sword;
         }
     }
 
@@ -94,9 +94,9 @@
             Core.DataStructures.SavePlayerAxeExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Axe";
+            return ExpertiseSystem.WeaponType.Axe;
         }
     }
 
@@ -109,9 +109,9 @@
             Core.DataStructures.SavePlayerMaceExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Mace";
+            return ExpertiseSystem.WeaponType.Mace;
         }
     }
 
@@ -124,9 +124,9 @@
             Core.DataStructures.SavePlayerSpearExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Spear";
+            return ExpertiseSystem.WeaponType.Spear;
         }
     }
 
@@ -139,9 +139,9 @@
             Core.DataStructures.SavePlayerCrossbowExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Crossbow";
+            return ExpertiseSystem.WeaponType.Crossbow;
         }
     }
 
@@ -154,9 +154,9 @@
             Core.DataStructures.SavePlayerGreatSwordExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "GreatSword";
+            return ExpertiseSystem.WeaponType.GreatSword;
         }
     }
 
@@ -169,9 +169,9 @@
             Core.DataStructures.SavePlayerSlashersExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Slashers";
+            return ExpertiseSystem.WeaponType.Slashers;
         }
     }
 
@@ -184,9 +184,9 @@
             Core.DataStructures.SavePlayerPistolsExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Pistols";
+            return ExpertiseSystem.WeaponType.Pistols;
         }
     }
 
@@ -199,9 +199,9 @@
             Core.DataStructures.SavePlayerReaperExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Reaper";
+            return ExpertiseSystem.WeaponType.Reaper;
         }
     }
 
@@ -214,9 +214,9 @@
             Core.DataStructures.SavePlayerLongbowExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Longbow";
+            return ExpertiseSystem.WeaponType.Longbow;
         }
     }
 
@@ -229,9 +229,9 @@
             Core.DataStructures.SavePlayerWhipExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Whip";
+            return ExpertiseSystem.WeaponType.Whip;
         }
     }
 
@@ -244,9 +244,9 @@
             Core.DataStructures.SavePlayerUnarmedExpertise();
         }
 
-        public override string GetWeaponType()
+        public override ExpertiseSystem.WeaponType GetWeaponType()
         {
-            return "Unarmed";
+            return ExpertiseSystem.WeaponType.Unarmed;
         }
     }
 }

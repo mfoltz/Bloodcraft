@@ -29,9 +29,10 @@ namespace Cobalt.Commands
                 ctx.Reply("Invalid profession.");
                 return;
             }
-            if (Core.DataStructures.professionMap.TryGetValue(profession, out var professionDictionary) && professionDictionary.TryGetValue(steamID, out var prof))
+            var data = professionHandler.GetExperienceData(steamID);
+            if (data.Key > 0)
             {
-                ctx.Reply($"You are level [<color=yellow>{prof.Key}</color>] (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
+                ctx.Reply($"You are level [<color=yellow>{data.Key}</color>] (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
             }
             else
             {

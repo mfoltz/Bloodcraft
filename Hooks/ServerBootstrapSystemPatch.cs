@@ -152,10 +152,10 @@ namespace Cobalt.Hooks
 
             if (!Core.DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))
             {
-                var weapons = new Dictionary<string, bool>();
+                var weapons = new Dictionary<string, (bool, Entity)>();
                 foreach (ExpertiseSystem.WeaponType weaponType in Enum.GetValues(typeof(ExpertiseSystem.WeaponType)))
                 {
-                    weapons.Add(weaponType.ToString(), false);
+                    weapons.Add(weaponType.ToString(), (false, Entity.Null));
                 }
                 Core.DataStructures.PlayerEquippedWeapon.Add(steamId, weapons);
                 Core.DataStructures.SavePlayerEquippedWeapon();
@@ -172,7 +172,6 @@ namespace Cobalt.Hooks
                 Core.DataStructures.PlayerBloodChoices.Add(steamId, []);
                 Core.DataStructures.SavePlayerBloodChoices();
             }
-            
         }
     }
 }

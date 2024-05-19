@@ -38,13 +38,7 @@ namespace Cobalt.Systems.Expertise
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
-            Entity weapon = entityManager.GetComponentData<Equipment>(Killer).WeaponSlot.SlotEntity._Entity;
-            PrefabGUID prefabGUID = new(0);
-            if (!weapon.Equals(Entity.Null))
-            {
-                prefabGUID = entityManager.GetComponentData<Equipment>(Killer).WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
-            }
-            string weaponType = GetWeaponTypeFromPrefab(prefabGUID).ToString();
+            ExpertiseSystem.WeaponType weaponType = UnitStatsOverride.GetCurrentWeaponType(Killer);
 
             if (entityManager.HasComponent<UnitStats>(Victim))
             {
@@ -84,7 +78,7 @@ namespace Cobalt.Systems.Expertise
             return WeaponExpertiseValue * UnitMultiplier;
         }
 
-        public static void NotifyPlayer(EntityManager entityManager, User user, string weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponExpertiseHandler handler)
+        public static void NotifyPlayer(EntityManager entityManager, User user, ExpertiseSystem.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponExpertiseHandler handler)
         {
             ulong steamID = user.PlatformId;
             gainedXP = (int)gainedXP; // Convert to integer if necessary
@@ -105,7 +99,7 @@ namespace Cobalt.Systems.Expertise
             {
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> {weaponType.ToLower()} expertise (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> {weaponType} expertise (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }

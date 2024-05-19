@@ -1,5 +1,6 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Cobalt.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
@@ -97,8 +98,8 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
-        private static Dictionary<ulong, Dictionary<string, List<string>>> playerWeaponChoices = [];
-        private static Dictionary<ulong, Dictionary<string, bool>> playerEquippedWeapon = [];
+        private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponChoices = [];
+        private static Dictionary<ulong, Dictionary<string, (bool, Entity)>> playerEquippedWeapon = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = [];
         private static Dictionary<ulong, List<string>> playerBloodChoices = [];
@@ -247,13 +248,13 @@ internal static class Core
             set => playerSanguimancy = value;
         }
 
-        public static Dictionary<ulong, Dictionary<string, List<string>>> PlayerWeaponChoices // weapon, then list of stats for the weapon in string form
+        public static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponChoices // weapon, then list of stats for the weapon in string form
         {
             get => playerWeaponChoices;
             set => playerWeaponChoices = value;
         }
 
-        public static Dictionary<ulong, Dictionary<string, bool>> PlayerEquippedWeapon
+        public static Dictionary<ulong, Dictionary<string, (bool, Entity)>> PlayerEquippedWeapon
         {
             get => playerEquippedWeapon;
             set => playerEquippedWeapon = value;
