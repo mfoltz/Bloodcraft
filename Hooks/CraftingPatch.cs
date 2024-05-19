@@ -41,15 +41,11 @@ public class CraftingPatch
                             float delta = (recipeData.CraftDuration / craftRate) - action.ProgressTime;
                             if (delta < 0.1)
                             {
-                                Entity recipe = prefabCollectionSystem._PrefabGuidToEntityMap[action.RecipeGuid];
-
-                                var recipeOutput = recipe.ReadBuffer<RecipeOutputBuffer>();
-                                PrefabGUID itemPrefab = recipeOutput[0].Guid;
-
+                                Core.Log.LogInfo($"Crafting: {action.RecipeGuid.LookupName()}");
                                 bool jobExists = false;
                                 for (int i = 0; i < playerJobs.Count; i++)
                                 {
-                                    if (playerJobs[i].Item1 == itemPrefab)
+                                    if (playerJobs[i].Item1 == action.RecipeGuid && playerJobs[i].Item2 > 0)
                                     {
                                         playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
                                         jobExists = true;
@@ -59,14 +55,13 @@ public class CraftingPatch
 
                                 if (!jobExists) continue;
 
-                                Entity item = prefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
                                 float ProfessionValue = BaseCraftingXP;
                                 // t01 etc multiplier
                                 ProfessionValue *= GetTierMultiplier(action.RecipeGuid);
                                 IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(action.RecipeGuid, "");
                                 if (handler != null)
                                 {
-                                    ProfessionSystem.SetProfession(itemPrefab, user, steamId, ProfessionValue, handler);
+                                    ProfessionSystem.SetProfession(action.RecipeGuid, user, steamId, ProfessionValue, handler);
                                 }
                             }
                         }
@@ -131,6 +126,7 @@ public class CraftingPatch
                     }
                     if (!jobExists)
                     {
+                        Core.Log.LogInfo($"Adding Craft: {prefabGUID.LookupName()}");
                         jobs.Add((prefabGUID, 1));
                     }
                 }
@@ -169,11 +165,12 @@ public class CraftingPatch
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(stopCraftItemEvent.Workstation, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
                     {
                         // if crafting job is active, remove
-                        Core.Log.LogInfo($"Removing Craft: {prefabGUID.LookupName()}");
+
                         for (int i = 0; i < jobs.Count; i++)
                         {
-                            if (playerJobs[i].Item1 == prefabGUID)
+                            if (playerJobs[i].Item1 == prefabGUID && playerJobs[i].Item2 > 0)
                             {
+                                Core.Log.LogInfo($"Removing Craft: {prefabGUID.LookupName()}");
                                 playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
                                 break;
                             }

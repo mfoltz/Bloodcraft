@@ -88,6 +88,7 @@ namespace Cobalt.Commands
             if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, statType))
             {
                 ctx.Reply($"Stat {statType} has been chosen for {weaponType}.");
+                UnitStatsOverride.ApplyWeaponBonuses(character, weaponType);
                 Core.DataStructures.SavePlayerWeaponChoices();
             }
             else

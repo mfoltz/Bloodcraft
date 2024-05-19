@@ -22,7 +22,7 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class EquipmentPatch
     {
-        private static Dictionary<Entity, float> weaponLevels = [];
+        //private static Dictionary<Entity, float> weaponLevels = [];
 
         [HarmonyPatch(typeof(EquipItemSystem), nameof(EquipItemSystem.OnUpdate))]
         [HarmonyPostfix]
@@ -154,7 +154,7 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void OnUpdatePreix(ReactToInventoryChangedSystem __instance)
         {
-            Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
+            //Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
             if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.TempJob);
             try
@@ -171,10 +171,6 @@ namespace Cobalt.Hooks
                         IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
                         if (handler != null)
                         {
-                            if (!weaponLevels.ContainsKey(inventoryChangedEvent.ItemEntity))
-                            {
-                                weaponLevels.Add(inventoryChangedEvent.ItemEntity, inventoryChangedEvent.ItemEntity.Read<WeaponLevelSource>().Level);
-                            }
                             WeaponLevelSource weaponLevelSource = new()
                             {
                                 Level = ExpertiseSystem.ConvertXpToLevel(handler.GetExperienceData(steamId).Value)
@@ -184,15 +180,9 @@ namespace Cobalt.Hooks
                     }
                     else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Removed) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
-                        if (weaponLevels.TryGetValue(inventoryChangedEvent.ItemEntity, out var level))
-                        {
-                            WeaponLevelSource weaponLevelSource = new()
-                            {
-                                Level = level
-                            };
-                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
-                            weaponLevels.Remove(inventoryChangedEvent.ItemEntity);
-                        }
+                        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
+                        WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<WeaponLevelSource>();
+                        inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
                     }
                 }
             }
@@ -233,12 +223,16 @@ namespace Cobalt.Hooks
     {
         public static readonly PrefabGUID unarmed = new(-2075546002);
 
-        private static void ApplyWeaponBonuses(Entity character, string weaponType)
+        public static void ApplyWeaponBonuses(Entity character, string weaponType)
         {
             UnitStats stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             Equipment equipment = character.Read<Equipment>();
+            var modifiedStats = GetModifiedStats(equipment, BaseWeaponStats);
+            
+            // need to iterate through equipment and find the stat mods
+
             if (!weaponType.ToLower().Contains("unarmed")) GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
@@ -246,36 +240,49 @@ namespace Cobalt.Hooks
                 {
                     WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
                     float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    Core.Log.LogInfo($"Applying {bonus} | {scaledBonus}");
+                    // need to get what base stats are plus the modifyunitstatsbuffs
+                    Core.Log.LogInfo($"Applying {bonus} | {scaledBonus} | {weaponStatType.ToString()}");
                     switch (weaponStatType)
                     {
                         case WeaponStatType.PhysicalPower:
-                            stats.PhysicalPower._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalPower current: {modifiedStats[weaponStatType]} | {stats.PhysicalPower._Value}");
+                            if (stats.PhysicalPower._Value.Equals(modifiedStats[weaponStatType])) stats.PhysicalPower._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalPower: {stats.PhysicalPower._Value}");
                             break;
-
                         case WeaponStatType.SpellPower:
-                            stats.SpellPower._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellPower current: {modifiedStats[weaponStatType]} | {stats.SpellPower._Value}");
+                            if (stats.SpellPower._Value.Equals(modifiedStats[weaponStatType])) stats.SpellPower._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellPower: {stats.SpellPower._Value}");
                             break;
-
                         case WeaponStatType.PhysicalCritChance:
-                            stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalCritChance current: {modifiedStats[weaponStatType]} | {stats.PhysicalCriticalStrikeChance._Value}");
+                            if (stats.PhysicalCriticalStrikeChance._Value.Equals(modifiedStats[weaponStatType])) stats.PhysicalCriticalStrikeChance._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalCritChance: {stats.PhysicalCriticalStrikeChance._Value}");
                             break;
 
                         case WeaponStatType.PhysicalCritDamage:
-                            stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalCritDamage current: {modifiedStats[weaponStatType]} | {stats.PhysicalCriticalStrikeDamage._Value}");
+                            if (stats.PhysicalCriticalStrikeDamage._Value.Equals(modifiedStats[weaponStatType])) stats.PhysicalCriticalStrikeDamage._Value += scaledBonus;
+                            Core.Log.LogInfo($"PhysicalCritDamage: {stats.PhysicalCriticalStrikeDamage._Value}");
                             break;
 
                         case WeaponStatType.SpellCritChance:
-                            stats.SpellCriticalStrikeChance._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellCritChance current: {modifiedStats[weaponStatType]} | {stats.SpellCriticalStrikeChance._Value}");
+                            if (stats.SpellCriticalStrikeChance._Value.Equals(modifiedStats[weaponStatType])) stats.SpellCriticalStrikeChance._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellCritChance: {stats.SpellCriticalStrikeChance._Value}");
                             break;
 
                         case WeaponStatType.SpellCritDamage:
-                            stats.SpellCriticalStrikeDamage._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellCritDamage current: {modifiedStats[weaponStatType]} | {stats.SpellCriticalStrikeDamage._Value}");
+                            if (stats.SpellCriticalStrikeDamage._Value.Equals(modifiedStats[weaponStatType])) stats.SpellCriticalStrikeDamage._Value += scaledBonus;
+                            Core.Log.LogInfo($"SpellCritDamage: {stats.SpellCriticalStrikeDamage._Value}");
                             break;
                     }
                 }
 
                 character.Write(stats);
+                stats = character.Read<UnitStats>();
+                Core.Log.LogInfo($"{stats.PhysicalPower._Value} | {stats.SpellPower._Value} | {stats.PhysicalCriticalStrikeChance._Value} | {stats.PhysicalCriticalStrikeDamage._Value} | {stats.SpellCriticalStrikeChance._Value} | {stats.SpellCriticalStrikeDamage._Value}");
             }
             else
             {
@@ -287,38 +294,39 @@ namespace Cobalt.Hooks
         {
             var stats = character.Read<UnitStats>();
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
+            Equipment equipment = character.Read<Equipment>();
+            var modifiedStats = GetModifiedStats(equipment, BaseWeaponStats);
             //IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 foreach (var bonus in bonuses)
                 {
                     WeaponStatType weaponStatType = ExpertiseSystem.GetWeaponStatTypeFromString(bonus);
-                    Core.Log.LogInfo($"Resetting {weaponStatType} to {BaseWeaponStats[weaponStatType]}");
+                    Core.Log.LogInfo($"Resetting {weaponStatType} to {modifiedStats[weaponStatType]}");
                     switch (weaponStatType)
                     {
                         case WeaponStatType.PhysicalPower:
-                            stats.PhysicalPower._Value = BaseWeaponStats[WeaponStatType.PhysicalPower];
+                            stats.PhysicalPower._Value = modifiedStats[weaponStatType];
                             break;
 
                         case WeaponStatType.SpellPower:
-                            stats.SpellPower._Value = BaseWeaponStats[WeaponStatType.SpellPower];
+                            stats.SpellPower._Value = modifiedStats[weaponStatType];
                             break;
 
                         case WeaponStatType.PhysicalCritChance:
-                            stats.PhysicalCriticalStrikeChance._Value = BaseWeaponStats[WeaponStatType.PhysicalCritChance];
+                            stats.PhysicalCriticalStrikeChance._Value = modifiedStats[weaponStatType];
                             break;
 
                         case WeaponStatType.PhysicalCritDamage:
-                            stats.PhysicalCriticalStrikeDamage._Value = BaseWeaponStats[WeaponStatType.PhysicalCritDamage];
+                            stats.PhysicalCriticalStrikeDamage._Value = modifiedStats[weaponStatType];
                             break;
 
                         case WeaponStatType.SpellCritChance:
-                            stats.SpellCriticalStrikeChance._Value = BaseWeaponStats[WeaponStatType.SpellCritChance];
+                            stats.SpellCriticalStrikeChance._Value = modifiedStats[weaponStatType];
                             break;
 
                         case WeaponStatType.SpellCritDamage:
-                            stats.SpellCriticalStrikeDamage._Value = BaseWeaponStats[WeaponStatType.SpellCritDamage];
+                            stats.SpellCriticalStrikeDamage._Value = modifiedStats[weaponStatType];
                             break;
                     }
                 }
@@ -330,6 +338,59 @@ namespace Cobalt.Hooks
             }
 
             // Subtract the bonuses
+        }
+
+        static Dictionary<WeaponStatType, float> GetModifiedStats(Equipment equipment, Dictionary<WeaponStatType, float> baseStats)
+        {
+            List<Entity> entities = [];
+            entities.Add(equipment.WeaponSlot.SlotEntity._Entity);
+            entities.Add(equipment.GrimoireSlot.SlotEntity._Entity);
+            entities.Add(equipment.ArmorChestSlot.SlotEntity._Entity);
+            entities.Add(equipment.ArmorFootgearSlot.SlotEntity._Entity);
+            entities.Add(equipment.ArmorGlovesSlot.SlotEntity._Entity);
+            entities.Add(equipment.ArmorLegsSlot.SlotEntity._Entity);
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    if (entity.Equals(Entity.Null)) continue;
+                    var buffer = entity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+                    foreach (var stat in buffer)
+                    {
+                        switch (stat.StatType)
+                        {
+                            case UnitStatType.PhysicalPower:
+                                baseStats[WeaponStatType.PhysicalPower] += stat.Value;
+                                break;
+
+                            case UnitStatType.SpellPower:
+                                baseStats[WeaponStatType.SpellPower] += stat.Value;
+                                break;
+
+                            case UnitStatType.PhysicalCriticalStrikeChance:
+                                baseStats[WeaponStatType.PhysicalCritChance] += stat.Value;
+                                break;
+
+                            case UnitStatType.PhysicalCriticalStrikeDamage:
+                                baseStats[WeaponStatType.PhysicalCritDamage] += stat.Value;
+                                break;
+
+                            case UnitStatType.SpellCriticalStrikeChance:
+                                baseStats[WeaponStatType.SpellCritChance] += stat.Value;
+                                break;
+
+                            case UnitStatType.SpellCriticalStrikeDamage:
+                                baseStats[WeaponStatType.SpellCritDamage] += stat.Value;
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Log.LogError($"Exited GetModifiedStats early: {e}");
+            }
+            return baseStats;
         }
 
         public static void ApplyBloodBonuses(Entity character) // tie extra spell slots to sanguimancy
@@ -460,10 +521,7 @@ namespace Cobalt.Hooks
             {
                 return ExpertiseSystem.WeaponType.Unarmed;
             }
-            else
-            {
-                Core.Log.LogInfo($"Weapon: {weapon.Read<PrefabGUID>().LookupName()}");
-            }
+            
             return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 
@@ -474,7 +532,7 @@ namespace Cobalt.Hooks
 
             // Get the current weapon type
             string currentWeapon = GetCurrentWeaponType(character).ToString();
-            Core.Log.LogInfo($"Current weapon: {currentWeapon}");
+            //Core.Log.LogInfo($"Current weapon: {currentWeapon}");
             // Initialize player's weapon dictionary if it doesn't exist
             if (!Core.DataStructures.PlayerEquippedWeapon.TryGetValue(steamId, out var equippedWeapons))
             {
@@ -541,7 +599,7 @@ namespace Cobalt.Hooks
                 WeaponLevelSource weaponLevel = entityManager.GetComponentData<WeaponLevelSource>(weaponEntity);
                 weaponLevel.Level = level;
                 entityManager.SetComponentData(weaponEntity, weaponLevel);
-                Core.Log.LogInfo($"Set weapon level source to {level}.");
+                //Core.Log.LogInfo($"Set weapon level source to {level}.");
             }
         }
     }

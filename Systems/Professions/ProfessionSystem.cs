@@ -124,7 +124,7 @@ namespace Cobalt.Systems.Professions
                                     if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, level))
                                     {
                                         string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.LookupName());
-                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"You received <color=green>{name}</color>x<color=white>{level}</color> from {handler.GetProfessionName()}");
+                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{level}</color> received from {handler.GetProfessionName()}");
                                         break;
                                     }
                                 }
@@ -318,6 +318,11 @@ namespace Cobalt.Systems.Professions
                     {
                         name = words[0] + " " + words[1];
                     }
+                }
+                else if (name.ToLower().Contains("stone"))
+                {
+                    string[] words = name.Split(' ');
+                    name = words[0];
                 }
             }
             else if (name.ToLower().Contains("wood"))
