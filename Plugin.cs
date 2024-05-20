@@ -26,6 +26,7 @@ namespace Cobalt
         public static ConfigEntry<int> GroupLevelingMultiplier;
 
         public static ConfigEntry<bool> ExpertiseSystem;
+        public static ConfigEntry<bool> Sanguimancy;
         public static ConfigEntry<int> MaxExpertiseLevel;
         public static ConfigEntry<int> UnitExpertiseMultiplier;
         public static ConfigEntry<int> VBloodExpertiseMultiplier;
@@ -59,6 +60,7 @@ namespace Cobalt
             GroupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1, "The multiplier for experience gained from group kills.");
 
             ExpertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
+            Sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy.");
             MaxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in expertise.");
             UnitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             VBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBlood.");
@@ -128,7 +130,7 @@ namespace Cobalt
             Core.DataStructures.SavePlayerLongbowExpertise,
             Core.DataStructures.SavePlayerWhipExpertise,
             Core.DataStructures.SavePlayerSanguimancy,
-            Core.DataStructures.SavePlayerWeaponChoices,
+            Core.DataStructures.SavePlayerWeaponStats,
         ];
 
         private static readonly Action[] loadFunctions =
@@ -156,7 +158,7 @@ namespace Cobalt
             Core.DataStructures.LoadPlayerReaperExpertise,
             Core.DataStructures.LoadPlayerLongbowExpertise,
             Core.DataStructures.LoadPlayerWhipExpertise,
-            Core.DataStructures.LoadPlayerWeaponChoices,
+            Core.DataStructures.LoadPlayerWeaponStats,
             Core.DataStructures.LoadPlayerSanguimancySpells
         ];
     }

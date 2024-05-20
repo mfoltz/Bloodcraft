@@ -1,6 +1,5 @@
 using Cobalt.Systems.Experience;
 using Cobalt.Systems.Expertise;
-using Cobalt.Systems.Sanguimancy;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
@@ -27,8 +26,7 @@ public class DeathEventListenerSystem_Patch
                     ev.Source.LogComponentTypes(); // check for spell kills versus weapon kills or whatever
                     Core.Log.LogInfo("DeathEvent components>");
                     if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateExperience(ev.Killer, ev.Died);
-                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateWeaponExpertise(__instance.EntityManager, ev.Killer, ev.Died);
-                    if (Plugin.BloodSystem.Value) SanguimancySystem.UpdateSanguimancy(ev.Killer, ev.Died);
+                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
                 {

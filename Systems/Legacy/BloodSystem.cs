@@ -1,11 +1,12 @@
 ﻿using Cobalt.Hooks;
+using Cobalt.Systems.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
 
-namespace Cobalt.Systems.Expertise
+namespace Cobalt.Systems.Legacy
 {
     public class BloodSystem
     {
@@ -13,7 +14,7 @@ namespace Cobalt.Systems.Expertise
         public static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
         private static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
         private static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int BloodXPPower = 2; // power for calculating level from xp
+        private static readonly int BloodPower = 2; // power for calculating level from xp
 
         public enum BloodType
         {
@@ -34,48 +35,58 @@ namespace Cobalt.Systems.Expertise
         public static void UpdateBloodline(EntityManager entityManager, Entity Killer, Entity Victim)
         {
             if (Killer == Victim || entityManager.HasComponent<Minion>(Victim)) return;
-
+            if (entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>()) return;
+            // want to check for feed events or whatever
+            BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
+            User User = entityManager.GetComponentData<User>(userEntity);
+
+            //var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
+
+            bool isVBlood;
+            if (entityManager.HasComponent<VBloodConsumeSource>(Victim))
+            {
+                isVBlood = true;
+            }
+            else
+            {
+                isVBlood = false;
+            }
+            float BloodValue = bloodConsumeSource.BloodQuality * bloodConsumeSource.BloodQuality;
+            if (isVBlood) BloodValue *= VBloodMultiplier;
+            else
+            {
+                BloodValue *= UnitMultiplier;
+            }
+
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
             BloodSystem.BloodType bloodType = ModifyUnitStatBuffUtils.GetCurrentBloodType(Killer);
             if (bloodType.Equals(BloodType.None)) return;
-            if (entityManager.HasComponent<UnitStats>(Victim))
+
+            IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
+            if (handler != null)
             {
-                var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
-                float BloodValue = CalculateBloodValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
+                // Check if the player leveled up
+                var xpData = handler.GetExperienceData(steamID);
+                float newExperience = xpData.Value + BloodValue;
+                int newLevel = ConvertXpToLevel(newExperience);
+                bool leveledUp = false;
 
-                IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
-                if (handler != null)
+                if (newLevel > xpData.Key)
                 {
-                    // Check if the player leveled up
-                    var xpData = handler.GetExperienceData(steamID);
-                    float newExperience = xpData.Value + BloodValue;
-                    int newLevel = ConvertXpToLevel(newExperience);
-                    bool leveledUp = false;
-
-                    if (newLevel > xpData.Key)
+                    leveledUp = true;
+                    if (newLevel > MaxBloodLevel)
                     {
-                        leveledUp = true;
-                        if (newLevel > MaxBloodLevel)
-                        {
-                            newLevel = MaxBloodLevel;
-                            newExperience = ConvertLevelToXp(MaxBloodLevel);
-                        }
+                        newLevel = MaxBloodLevel;
+                        newExperience = ConvertLevelToXp(MaxBloodLevel);
                     }
-                    var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
-                    handler.UpdateExperienceData(steamID, updatedXPData);
-                    handler.SaveChanges();
-                    NotifyPlayer(entityManager, user, bloodType, BloodValue, leveledUp, newLevel, handler);
                 }
+                var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
+                handler.UpdateExperienceData(steamID, updatedXPData);
+                handler.SaveChanges();
+                NotifyPlayer(entityManager, user, bloodType, BloodValue, leveledUp, newLevel, handler);
             }
-        }
-
-        private static float CalculateBloodValue(UnitStats VictimStats, bool isVBlood)
-        {
-            float WeaponExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
-            if (isVBlood) return WeaponExpertiseValue * VBloodMultiplier;
-            return WeaponExpertiseValue * UnitMultiplier;
         }
 
         public static void NotifyPlayer(EntityManager entityManager, User user, BloodSystem.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
@@ -90,14 +101,14 @@ namespace Cobalt.Systems.Expertise
             {
                 Entity character = user.LocalCharacter._Entity;
                 Equipment equipment = character.Read<Equipment>();
-                message = $"<color=#c0c0c0>{bloodType}</color> improved to [<color=white>{newLevel}</color>]";
+                message = $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> expertise (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> lineage (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }
@@ -122,7 +133,7 @@ namespace Cobalt.Systems.Expertise
         public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
-            return (int)Math.Pow(level / BloodConstant, BloodXPPower);
+            return (int)Math.Pow(level / BloodConstant, BloodPower);
         }
 
         private static float GetXp(ulong steamID, IBloodHandler handler)

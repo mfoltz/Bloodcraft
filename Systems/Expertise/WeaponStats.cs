@@ -8,28 +8,28 @@ namespace Cobalt.Systems.Expertise
         {
             public static bool ChooseStat(ulong steamId, ExpertiseSystem.WeaponType weaponType, WeaponStatManager.WeaponStatType statType)
             {
-                if (!Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) || !weaponStats.TryGetValue(weaponType, out var choices))
+                if (!Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStats) || !weaponStats.TryGetValue(weaponType, out var Stats))
                 {
-                    choices = [];
-                    Core.DataStructures.PlayerWeaponChoices[steamId][weaponType] = choices;
+                    Stats = [];
+                    Core.DataStructures.PlayerWeaponStats[steamId][weaponType] = Stats;
                 }
 
-                if (Core.DataStructures.PlayerWeaponChoices[steamId][weaponType].Count >= 2)
+                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= 2)
                 {
                     return false; // Only allow 2 stats to be chosen
                 }
 
-                Core.DataStructures.PlayerWeaponChoices[steamId][weaponType].Add(statType);
-                Core.DataStructures.SavePlayerWeaponChoices();
+                Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Add(statType);
+                Core.DataStructures.SavePlayerWeaponStats();
                 return true;
             }
 
-            public static void ResetChosenStats(ulong steamId, ExpertiseSystem.WeaponType weaponType)
+            public static void ResetStats(ulong steamId, ExpertiseSystem.WeaponType weaponType)
             {
-                if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStatChoices) && weaponStatChoices.TryGetValue(weaponType, out var choices))
+                if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStatStats) && weaponStatStats.TryGetValue(weaponType, out var Stats))
                 {
-                    choices.Clear();
-                    Core.DataStructures.SavePlayerWeaponChoices();
+                    Stats.Clear();
+                    Core.DataStructures.SavePlayerWeaponStats();
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿using Cobalt.Systems.Expertise;
+using Cobalt.Systems.Legacy;
 using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
@@ -223,12 +224,12 @@ namespace Cobalt.Hooks
                         {
                             ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                             ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
-                            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+                            IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
                             if (handler != null)
                             {
                                 WeaponLevelSource weaponLevelSource = new()
                                 {
-                                    Level = ExpertiseSystem.ConvertXpToLevel(handler.GetExperienceData(steamId).Value)
+                                    Level = ExpertiseSystem.ConvertXpToLevel(handler.GetExpertiseData(steamId).Value)
                                 };
                                 inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
                             }
@@ -314,12 +315,12 @@ namespace Cobalt.Hooks
         public static void ApplyWeaponBonuses(Entity character, ExpertiseSystem.WeaponType weaponType, Entity weaponEntity)
         {
             ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+            IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             Equipment equipment = character.Read<Equipment>();
 
-            GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
+            GearOverride.SetWeaponItemLevel(equipment, handler.GetExpertiseData(steamId).Key, Core.EntityManager);
 
-            if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
+            if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 var buffer = weaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
                 foreach (var weaponStatType in bonuses)
@@ -365,11 +366,11 @@ namespace Cobalt.Hooks
             }
         }
 
-        public static float CalculateScaledWeaponBonus(IWeaponExpertiseHandler handler, ulong steamId, WeaponStatType statType)
+        public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, WeaponStatType statType)
         {
             if (handler != null)
             {
-                var xpData = handler.GetExperienceData(steamId);
+                var xpData = handler.GetExpertiseData(steamId);
                 int currentLevel = ExpertiseSystem.ConvertXpToLevel(xpData.Value);
                 //Equipment equipment = character.Read<Equipment>();
                 //GearOverride.SetWeaponItemLevel(equipment, currentLevel);
@@ -389,7 +390,7 @@ namespace Cobalt.Hooks
         public static ExpertiseSystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-
+            if (weapon.Equals(Entity.Null)) return ExpertiseSystem.WeaponType.Unarmed;
             return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
         }
 

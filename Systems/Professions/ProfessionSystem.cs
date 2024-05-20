@@ -18,7 +18,7 @@ namespace Cobalt.Systems.Professions
     {
         private static readonly int ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
         private static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int ProfessionXPPower = 2; // power for calculating level from xp
+        private static readonly int ProfessionPower = 2; // power for calculating level from xp
         private static readonly int MaxProfessionLevel = Plugin.MaxProfessionLevel.Value; // maximum level
 
         public static void UpdateProfessions(Entity Killer, Entity Victim)
@@ -215,7 +215,7 @@ namespace Cobalt.Systems.Professions
         private static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
-            return (int)Math.Pow(level / ProfessionConstant, ProfessionXPPower);
+            return (int)Math.Pow(level / ProfessionConstant, ProfessionPower);
         }
 
         private static float GetXp(ulong steamID, IProfessionHandler handler)

@@ -18,7 +18,7 @@ namespace Cobalt.Commands
             PrefabGUID weaponGuid = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
             ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(weaponGuid);
 
-            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+            IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler == null)
             {
                 ctx.Reply($"No expertise handler found for {weaponType}.");
@@ -26,7 +26,7 @@ namespace Cobalt.Commands
             }
 
             ulong steamID = ctx.Event.User.PlatformId;
-            var ExpertiseData = handler.GetExperienceData(steamID);
+            var ExpertiseData = handler.GetExpertiseData(steamID);
 
             // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
             if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
@@ -67,10 +67,10 @@ namespace Cobalt.Commands
             Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
 
             // Ensure that there is a dictionary for the player's stats
-            if (!Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamID, out var weaponsStats))
+            if (!Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats))
             {
                 weaponsStats = [];
-                Core.DataStructures.PlayerWeaponChoices[steamID] = weaponsStats;
+                Core.DataStructures.PlayerWeaponStats[steamID] = weaponsStats;
             }
 
             // Choose a stat for the specific weapon stats instance
@@ -78,7 +78,7 @@ namespace Cobalt.Commands
             {
                 ctx.Reply($"{statType} has been chosen for {weaponType} and will apply after reequiping.");
                 //ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, weaponEntity);
-                Core.DataStructures.SavePlayerWeaponChoices();
+                Core.DataStructures.SavePlayerWeaponStats();
             }
             else
             {
@@ -86,7 +86,7 @@ namespace Cobalt.Commands
             }
         }
 
-        [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stat choices for a player's currently equipped weapon stats.")]
+        [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stat Stats for a player's currently equipped weapon stats.")]
         public static void ResetWeaponStats(ChatCommandContext ctx)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
@@ -94,24 +94,24 @@ namespace Cobalt.Commands
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
             //ModifyUnitStatBuffUtils.ResetWeaponModifications(weapon);
-            PlayerWeaponUtilities.ResetChosenStats(steamID, weaponType);
-            //Core.DataStructures.SavePlayerWeaponChoices();
+            PlayerWeaponUtilities.ResetStats(steamID, weaponType);
+            //Core.DataStructures.SavePlayerWeaponStats();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
         }
 
         [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Weapon] [Level]", description: "Sets your weapon expertise level.")]
         public static void SetExpertiseCommand(ChatCommandContext ctx, string weapon, int level)
         {
-            if (level < 0 || level > ExpertiseSystem.MaxWeaponExpertiseLevel)
+            if (level < 0 || level > ExpertiseSystem.MaxExpertiseLevel)
             {
-                ctx.Reply($"Level must be between 0 and {ExpertiseSystem.MaxWeaponExpertiseLevel}.");
+                ctx.Reply($"Level must be between 0 and {ExpertiseSystem.MaxExpertiseLevel}.");
                 return;
             }
             if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weapon, true, out var weaponType))
             {
                 ctx.Reply("Invalid weapon type.");
             }
-            var expertiseHandler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+            var expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (expertiseHandler == null)
             {
                 ctx.Reply("Invalid weapon type.");
@@ -124,14 +124,14 @@ namespace Cobalt.Commands
             Equipment equipment = character.Read<Equipment>();
             // Update Expertise level and XP
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
-            expertiseHandler.UpdateExperienceData(steamId, xpData);
+            expertiseHandler.UpdateExpertiseData(steamId, xpData);
             expertiseHandler.SaveChanges();
             GearOverride.SetWeaponItemLevel(equipment, level, Core.Server.EntityManager);
 
             ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to {level}.");
         }
 
-        [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat choices.")]
+        [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat Stats.")]
         public static void ListBloodStatsCommand(ChatCommandContext ctx)
         {
             string weaponStats = string.Join(", ", Enum.GetNames(typeof(WeaponStatManager.WeaponStatType)));

@@ -159,10 +159,10 @@ namespace Cobalt.Hooks
                 Core.DataStructures.SavePlayerWhipExpertise();
             }
 
-            if (!Core.DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerWeaponStats.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerWeaponChoices.Add(steamId, []);
-                Core.DataStructures.SavePlayerWeaponChoices();
+                Core.DataStructures.PlayerWeaponStats.Add(steamId, []);
+                Core.DataStructures.SavePlayerWeaponStats();
             }
         }
     }

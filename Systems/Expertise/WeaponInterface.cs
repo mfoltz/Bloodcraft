@@ -1,45 +1,46 @@
 ﻿namespace Cobalt.Systems.Expertise
 {
-    public interface IWeaponExpertiseHandler
+    public interface IExpertiseHandler
     {
-        void AddExperience(ulong steamID, float experience);
+        void AddExpertise(ulong steamID, float experience);
 
         void SaveChanges();
 
-        KeyValuePair<int, float> GetExperienceData(ulong steamID);
+        KeyValuePair<int, float> GetExpertiseData(ulong steamID);
 
-        void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData);
+        void UpdateExpertiseData(ulong steamID, KeyValuePair<int, float> xpData);
 
         ExpertiseSystem.WeaponType GetWeaponType();
     }
 
-    public static class WeaponExpertiseHandlerFactory
+    public static class ExpertiseHandlerFactory
     {
-        public static IWeaponExpertiseHandler GetWeaponExpertiseHandler(ExpertiseSystem.WeaponType weaponType)
+        public static IExpertiseHandler GetExpertiseHandler(ExpertiseSystem.WeaponType weaponType)
         {
             return weaponType switch
             {
-                ExpertiseSystem.WeaponType.Sword => new SwordExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Axe => new AxeExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Mace => new MaceExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Spear => new SpearExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Crossbow => new CrossbowExpertiseHandler(),
-                ExpertiseSystem.WeaponType.GreatSword => new GreatSwordExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Slashers => new SlashersExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Pistols => new PistolsExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Reaper => new ReaperExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Longbow => new LongbowExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Whip => new WhipExpertiseHandler(),
+                ExpertiseSystem.WeaponType.Sword => new SwordHandler(),
+                ExpertiseSystem.WeaponType.Axe => new AxeHandler(),
+                ExpertiseSystem.WeaponType.Mace => new MaceHandler(),
+                ExpertiseSystem.WeaponType.Spear => new SpearHandler(),
+                ExpertiseSystem.WeaponType.Crossbow => new CrossbowHandler(),
+                ExpertiseSystem.WeaponType.GreatSword => new GreatSwordHandler(),
+                ExpertiseSystem.WeaponType.Slashers => new SlashersHandler(),
+                ExpertiseSystem.WeaponType.Pistols => new PistolsHandler(),
+                ExpertiseSystem.WeaponType.Reaper => new ReaperHandler(),
+                ExpertiseSystem.WeaponType.Longbow => new LongbowHandler(),
+                ExpertiseSystem.WeaponType.Whip => new WhipHandler(),
+                ExpertiseSystem.WeaponType.Unarmed => new SanguimancyHandler(),
                 _ => null,
             };
         }
     }
 
-    public abstract class BaseWeaponExpertiseHandler : IWeaponExpertiseHandler
+    public abstract class BaseExpertiseHandler : IExpertiseHandler
     {
         protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
 
-        public void AddExperience(ulong steamID, float experience)
+        public void AddExpertise(ulong steamID, float experience)
         {
             if (DataStructure.TryGetValue(steamID, out var currentData))
             {
@@ -51,14 +52,14 @@
             }
         }
 
-        public KeyValuePair<int, float> GetExperienceData(ulong steamID)
+        public KeyValuePair<int, float> GetExpertiseData(ulong steamID)
         {
             if (DataStructure.TryGetValue(steamID, out var xpData))
                 return xpData;
             return new KeyValuePair<int, float>(0, 0);
         }
 
-        public void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData)
+        public void UpdateExpertiseData(ulong steamID, KeyValuePair<int, float> xpData)
         {
             DataStructure[steamID] = xpData;
         }
@@ -69,7 +70,7 @@
     }
 
     // Implementations for each weapon type
-    public class SwordExpertiseHandler : BaseWeaponExpertiseHandler
+    public class SwordHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSwordExpertise;
 
@@ -84,7 +85,7 @@
         }
     }
 
-    public class AxeExpertiseHandler : BaseWeaponExpertiseHandler
+    public class AxeHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAxeExpertise;
 
@@ -99,7 +100,7 @@
         }
     }
 
-    public class MaceExpertiseHandler : BaseWeaponExpertiseHandler
+    public class MaceHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMaceExpertise;
 
@@ -114,7 +115,7 @@
         }
     }
 
-    public class SpearExpertiseHandler : BaseWeaponExpertiseHandler
+    public class SpearHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSpearExpertise;
 
@@ -129,7 +130,7 @@
         }
     }
 
-    public class CrossbowExpertiseHandler : BaseWeaponExpertiseHandler
+    public class CrossbowHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCrossbowExpertise;
 
@@ -144,7 +145,7 @@
         }
     }
 
-    public class GreatSwordExpertiseHandler : BaseWeaponExpertiseHandler
+    public class GreatSwordHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerGreatSwordExpertise;
 
@@ -159,7 +160,7 @@
         }
     }
 
-    public class SlashersExpertiseHandler : BaseWeaponExpertiseHandler
+    public class SlashersHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSlashersExpertise;
 
@@ -174,7 +175,7 @@
         }
     }
 
-    public class PistolsExpertiseHandler : BaseWeaponExpertiseHandler
+    public class PistolsHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerPistolsExpertise;
 
@@ -189,7 +190,7 @@
         }
     }
 
-    public class ReaperExpertiseHandler : BaseWeaponExpertiseHandler
+    public class ReaperHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerReaperExpertise;
 
@@ -204,7 +205,7 @@
         }
     }
 
-    public class LongbowExpertiseHandler : BaseWeaponExpertiseHandler
+    public class LongbowHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerLongbowExpertise;
 
@@ -219,7 +220,7 @@
         }
     }
 
-    public class WhipExpertiseHandler : BaseWeaponExpertiseHandler
+    public class WhipHandler : BaseExpertiseHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWhipExpertise;
 
@@ -231,6 +232,21 @@
         public override ExpertiseSystem.WeaponType GetWeaponType()
         {
             return ExpertiseSystem.WeaponType.Whip;
+        }
+    }
+
+    public class SanguimancyHandler : BaseExpertiseHandler
+    {
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSanguimancy;
+
+        public override void SaveChanges()
+        {
+            Core.DataStructures.SavePlayerSanguimancy();
+        }
+
+        public override ExpertiseSystem.WeaponType GetWeaponType()
+        {
+            return ExpertiseSystem.WeaponType.Unarmed;
         }
     }
 }
