@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using System.Collections;
 using System.Text.Json;
@@ -24,8 +25,11 @@ internal static class Core
     public static ServerGameSettingsSystem ServerGameSettingsSystem { get; internal set; }
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
     public static DebugEventsSystem DebugEventsSystem { get; internal set; }
+
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
+
+    public static ModificationsRegistry ModificationsRegistry => ServerGameManager.Modifications;
 
     // BepInEx services
     public static ManualLogSource Log => Plugin.LogInstance;
@@ -96,12 +100,12 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerPistolsExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponChoices = [];
         private static Dictionary<ulong, Dictionary<string, (bool, Entity)>> playerEquippedWeapon = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = [];
+        private static Dictionary<ulong, (PrefabGUID, PrefabGUID)> playerSanguimancySpells = [];
         private static Dictionary<ulong, List<string>> playerBloodChoices = [];
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
@@ -236,16 +240,16 @@ internal static class Core
             set => playerWhipExpertise = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerUnarmedExpertise
-        {
-            get => playerUnarmedExpertise;
-            set => playerUnarmedExpertise = value;
-        }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSanguimancy
         {
             get => playerSanguimancy;
             set => playerSanguimancy = value;
+        }
+
+        public static Dictionary<ulong, (PrefabGUID, PrefabGUID)> PlayerSanguimancySpells
+        {
+            get => playerSanguimancySpells;
+            set => playerSanguimancySpells = value;
         }
 
         public static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponChoices // weapon, then list of stats for the weapon in string form
@@ -303,6 +307,7 @@ internal static class Core
             {"WhipExpertise", Core.JsonFiles.PlayerWhipExpertiseJson},
             {"UnarmedExpertise", Core.JsonFiles.PlayerUnarmedExpertiseJson},
             {"Sanguimancy", Core.JsonFiles.PlayerSanguimancyJson},
+            {"SanguimancySpells", Core.JsonFiles.PlayerSanguimancySpellsJson},
             {"EquippedWeapon", Core.JsonFiles.PlayerEquippedWeaponJson},
             {"WeaponChoices", Core.JsonFiles.PlayerWeaponChoicesJson},
             {"BloodChoices", Core.JsonFiles.PlayerBloodChoicesJson}
@@ -333,7 +338,6 @@ internal static class Core
             {"Reaper", PlayerReaperExpertise},
             {"Longbow", PlayerLongbowExpertise},
             {"Whip", PlayerWhipExpertise},
-            {"Unarmed", PlayerUnarmedExpertise},
         };
 
         // Generic method to save any type of dictionary.
@@ -350,7 +354,6 @@ internal static class Core
             {"Reaper", SavePlayerReaperExpertise},
             {"Longbow", SavePlayerLongbowExpertise},
             {"Whip", SavePlayerWhipExpertise},
-            {"Unarmed", SavePlayerUnarmedExpertise},
             // Add other Expertise types as needed
         };
 
@@ -429,9 +432,9 @@ internal static class Core
 
         public static void LoadPlayerWhipExpertise() => LoadData(ref playerWhipExpertise, "WhipExpertise");
 
-        public static void LoadPlayerUnarmedExpertise() => LoadData(ref playerUnarmedExpertise, "UnarmedExpertise");
-
         public static void LoadPlayerSanguimancy() => LoadData(ref playerSanguimancy, "Sanguimancy");
+
+        public static void LoadPlayerSanguimancySpells() => LoadData(ref playerSanguimancySpells, "SanguimancySpells");
 
         public static void LoadPlayerEquippedWeapon() => LoadData(ref playerEquippedWeapon, "EquippedWeapon");
 
@@ -502,9 +505,9 @@ internal static class Core
 
         public static void SavePlayerWhipExpertise() => SaveData(PlayerWhipExpertise, "WhipExpertise");
 
-        public static void SavePlayerUnarmedExpertise() => SaveData(PlayerUnarmedExpertise, "UnarmedExpertise");
-
         public static void SavePlayerSanguimancy() => SaveData(PlayerSanguimancy, "Sanguimancy");
+
+        public static void SavePlayerSanguimancySpells() => SaveData(PlayerSanguimancySpells, "SanguimancySpells");
 
         public static void SavePlayerEquippedWeapon() => SaveData(PlayerEquippedWeapon, "EquippedWeapon");
 
@@ -539,6 +542,7 @@ internal static class Core
         public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_unarmed.json");
         public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
+        public static readonly string PlayerSanguimancySpellsJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy_spells.json");
 
         //public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
         public static readonly string PlayerEquippedWeaponJson = Path.Combine(Plugin.ConfigPath, "player_equipped_weapon.json");

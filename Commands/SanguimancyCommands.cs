@@ -1,6 +1,10 @@
 using Cobalt.Hooks;
+using Cobalt.Systems.Sanguimancy;
+using ProjectM.Network;
+using Steamworks;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Cobalt.Core;
 using static Cobalt.Systems.Sanguimancy.BloodStats;
 
 namespace Cobalt.Commands
@@ -33,55 +37,52 @@ namespace Cobalt.Commands
             ctx.Reply($"Sanguimancy progress logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "chooseBloodStat", shortHand: "cbs", adminOnly: false, usage: ".cbs <Stat>", description: "Choose a blood stat to enhance based on your sanguimancy.")]
-        public static void ChooseBloodStatCommand(ChatCommandContext ctx, string statChoice)
+        [Command(name: "setSanguimancyProgress", shortHand: "ssp", adminOnly: true, usage: ".ssp [Player] [Level]", description: "Sets sanguimancy progress.")]
+        public static void SetSanguimancyProgress(ChatCommandContext ctx, string name, int level)
         {
-            ulong steamId = ctx.Event.User.PlatformId;
-            string statType = statChoice.ToLower();
-            // try to parse statType from choice string
-            if (!Enum.TryParse<BloodStatManager.BloodStatType>(statType, true, out _))
+            User foundUser = ServerBootstrapPatches.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
+            if (foundUser.CharacterName.IsEmpty)
             {
-                ctx.Reply("Invalid blood stat choice, use .lbs to see options.");
+                ctx.Reply("Player not found.");
                 return;
             }
-            if (!Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var _))
+            if (level < 0 || level > BloodSystem.MaxBloodLevel)
             {
-                List<string> bloodStats = [];
-                Core.DataStructures.PlayerBloodChoices[steamId] = bloodStats;
+                ctx.Reply($"Level must be between 0 and {BloodSystem.MaxBloodLevel}.");
+                return;
             }
 
-            if (PlayerBloodUtilities.ChooseStat(steamId, statType))
+            if (Core.DataStructures.PlayerSanguimancy.TryGetValue(foundUser.PlatformId, out var Sanguimancy))
             {
-                ctx.Reply($"{statType} has been chosen for Sanguimancy.");
-                Core.DataStructures.SavePlayerBloodChoices();
+                Sanguimancy = new KeyValuePair<int, float>(level, BloodSystem.ConvertLevelToXp(level));
+                Core.DataStructures.PlayerSanguimancy[foundUser.PlatformId] = Sanguimancy;
+                Core.DataStructures.SavePlayerSanguimancy();
+                ctx.Reply($"Sanguimancy level set to {level} for {foundUser.CharacterName}.");
+            }
+        }
+
+        [Command(name: "lockSpell", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
+        public static void LockPlayerSpells(ChatCommandContext ctx)
+        {
+            var user = ctx.Event.User;
+            var SteamID = user.PlatformId;
+
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= 25)
+            {
+                bools["SpellLock"] = !bools["SpellLock"];
+                if (bools["SpellLock"])
+                {
+                    ctx.Reply("Change spells to the ones you want in your unarmed slot(s). When done, toggle this again.");
+                }
+                else
+                {
+                    ctx.Reply("Spells set.");
+                }
             }
             else
             {
-                ctx.Reply("You have already chosen two stats for this weapon.");
+                ctx.Reply("You must be level 25 in Sanguimancy to lock spells.");
             }
-        }
-
-        [Command(name: "resetBloodStats", shortHand: "rbs", adminOnly: false, usage: ".rbs", description: "Reset the stat choices for a player's blood stats.")]
-        public static void ResetBloodlineStatsCommand(ChatCommandContext ctx)
-        {
-            ulong steamId = ctx.Event.User.PlatformId;
-            Entity character = ctx.Event.SenderCharacterEntity;
-            if (!Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var stats))
-            {
-                ctx.Reply("No blood stat choices found to reset.");
-                return;
-            }
-            //UnitStatsOverride.RemoveBloodBonuses(character);
-            stats.Clear();
-            Core.DataStructures.SavePlayerBloodChoices();
-            ctx.Reply($"Blood stat choices reset.");
-        }
-
-        [Command(name: "listBloodStats", shortHand: "lbs", adminOnly: false, usage: ".lbs", description: "Lists blood stat choices.")]
-        public static void ListBloodStatsCommand(ChatCommandContext ctx)
-        {
-            string bloodStats = string.Join(", ", Enum.GetNames(typeof(BloodStatManager.BloodStatType)));
-            ctx.Reply($"Available blood stats: {bloodStats}");
         }
     }
 }

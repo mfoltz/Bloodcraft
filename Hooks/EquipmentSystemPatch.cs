@@ -4,6 +4,7 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -118,30 +119,6 @@ namespace Cobalt.Hooks
             }
         }
 
-        [HarmonyPatch(typeof(Apply_BuffModificationsSystem_Server), nameof(Apply_BuffModificationsSystem_Server.OnUpdate))]
-        [HarmonyPostfix]
-        private static void OnUpdatePostix(Apply_BuffModificationsSystem_Server __instance)
-        {
-            if (!Plugin.LevelingSystem.Value) return;
-            Core.Log.LogInfo("Apply_BuffModificationsSystem_Server Postfix...");
-            NativeArray<Entity> entities = __instance.__query_1912026727_0.ToEntityArray(Allocator.TempJob);
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError(ex);
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
         [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
         [HarmonyPrefix]
         private static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
@@ -159,6 +136,21 @@ namespace Cobalt.Hooks
 
                         ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                         ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
+                        /*
+                        if (character.Has<BloodQualityBuff>())
+                        {
+                            var buffer = character.ReadBuffer<BloodQualityBuff>();
+                            foreach (var buff in buffer)
+                            {
+                                if (buff.BloodQualityBuffPrefabGuid.GuidHash.Equals(-1596803256) && buff.BloodQualityBuffEntity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
+                                {
+                                    buff.BloodQualityBuffEntity.Remove<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
+                                    GearOverride.SetLevel(character);
+                                    Core.Log.LogInfo("Overrided brute blood.");
+                                }
+                            }
+                        }
+                        */
                     }
                 }
             }
@@ -177,6 +169,7 @@ namespace Cobalt.Hooks
         private static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
         {
             if (!Plugin.LevelingSystem.Value) return;
+            Core.Log.LogInfo("ModifyUnitStatBuffSystem_Spawn Postfix...");
             NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
             try
             {
@@ -187,6 +180,29 @@ namespace Cobalt.Hooks
                         EntityOwner entityOwner = entity.Read<EntityOwner>();
                         GearOverride.SetLevel(entityOwner.Owner);
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError(ex);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+
+        [HarmonyPatch(typeof(ProjectM.Shared.Systems.ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
+        [HarmonyPostfix]
+        private static void OnUpdatePostix(ScriptSpawnServer __instance)
+        {
+            Core.Log.LogInfo("ScriptSpawnServer Postfix...");
+            NativeArray<Entity> entities = __instance.__query_1231292176_0.ToEntityArray(Allocator.TempJob);
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    entity.LogComponentTypes();
                 }
             }
             catch (Exception ex)
@@ -221,7 +237,7 @@ namespace Cobalt.Hooks
                     {
                         entityCategory.ResourceLevel._Value = 0;
                         dealDamageEvent.Target.Write(entityCategory);
-                        Core.Log.LogInfo($"Reduced Resource Level to 0.");
+                        //Core.Log.LogInfo($"Reduced Resource Level to 0.");
                     }
                 }
             }
@@ -321,11 +337,8 @@ namespace Cobalt.Hooks
             IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
             Equipment equipment = character.Read<Equipment>();
 
-            if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !weaponEntity.Has<ModifyUnitStatBuff_DOTS>())
-            {
-                Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weaponEntity);
-            }
+            GearOverride.SetWeaponItemLevel(equipment, handler.GetExperienceData(steamId).Key, Core.EntityManager);
+
             if (Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
             {
                 var buffer = weaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
@@ -372,34 +385,6 @@ namespace Cobalt.Hooks
             }
         }
 
-        public static void ResetWeaponModifications(Entity weapon)
-        {
-            if (weapon.Has<ModifyUnitStatBuff_DOTS>())
-            {
-                Core.Log.LogInfo("Resetting weapon modifications...");
-                if (weapon.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed"))
-                {
-                    weapon.Remove<ModifyUnitStatBuff_DOTS>();
-                    return;
-                }
-
-                Entity originalWeaponEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()];
-                var originalBuffer = originalWeaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-
-                weapon.Remove<ModifyUnitStatBuff_DOTS>();
-                var newBuffer = Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weapon);
-
-                foreach (var item in originalBuffer)
-                {
-                    newBuffer.Add(item);
-                }
-            }
-            else
-            {
-                Core.Log.LogInfo("No modifications found to reset...");
-            }
-        }
-
         /*
         public static void ApplyBloodBonuses(Entity character) // tie extra spell slots to sanguimancy
         {
@@ -409,39 +394,47 @@ namespace Cobalt.Hooks
 
             if (Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
             {
-                foreach (var bonus in bonuses)
+                var buffer = character.ReadBuffer<BloodQualityBuff>();
+                foreach (var weaponStatType in bonuses)
                 {
-                    BloodStatType bloodStatType = BloodSystem.GetBloodStatTypeFromString(bonus);
-                    float scaledBonus = CalculateScaledBloodBonus(steamId, bloodStatType);
-
-                    Core.Log.LogInfo($"Applying blood stats: {bonus} | {scaledBonus}");
-                    switch (bloodStatType)
+                    float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
+                    bool found = false;
+                    for (int i = 0; i < buffer.Length; i++)
                     {
-                        case BloodStatType.SunResistance:
-                            stats.SunResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.SunResistance]);
+                        ModifyUnitStatBuff_DOTS statBuff = buffer[i];
+                        if (statBuff.StatType.Equals(WeaponStatMap[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
+                        {
+                            statBuff.Value += scaledBonus; // Modify the value accordingly
+                            buffer[i] = statBuff; // Assign the modified struct back to the buffer
+                            Core.Log.LogInfo($"Modified {statBuff.StatType} | {statBuff.Value}");
+                            found = true;
                             break;
+                        }
+                    }
 
-                        case BloodStatType.FireResistance:
-                            stats.FireResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.FireResistance]);
-                            break;
-
-                        case BloodStatType.HolyResistance:
-                            stats.HolyResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.HolyResistance]);
-                            break;
-
-                        case BloodStatType.SilverResistance:
-                            stats.SilverResistance._Value = (int)(Math.Round(scaledBonus) + BaseBloodStats[BloodStatType.SilverResistance]);
-                            break;
-
-                        case BloodStatType.PassiveHealthRegen:
-                            stats.PassiveHealthRegen._Value = scaledBonus + BaseBloodStats[BloodStatType.PassiveHealthRegen];
-                            break;
+                    if (!found)
+                    {
+                        // If not found, create a new stat modifier
+                        UnitStatType statType = WeaponStatMap[weaponStatType];
+                        ModifyUnitStatBuff_DOTS newStatBuff = new()
+                        {
+                            StatType = statType,
+                            ModificationType = ModificationType.AddToBase,
+                            Value = scaledBonus,
+                            Modifier = 1,
+                            IncreaseByStacks = false,
+                            ValueByStacks = 0,
+                            Priority = 0,
+                            Id = ModificationId.Empty
+                        };
+                        buffer.Add(newStatBuff);
+                        Core.Log.LogInfo($"Added {newStatBuff.StatType} | {newStatBuff.Value}");
                     }
                 }
-                character.Write(stats);
             }
         }
-
+        */
+        /*
         public static void RemoveBloodBonuses(Entity character)
         {
             var stats = character.Read<UnitStats>();
@@ -532,13 +525,14 @@ namespace Cobalt.Hooks
 
     public static class GearOverride
     {
-        public static void SetLevel(Entity player)
+        public static void SetLevel(Entity player, bool addLevel = false)
         {
             //player.LogComponentTypes();
             ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
             if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
             {
                 int playerLevel = xpData.Key;
+                if (addLevel) playerLevel++;
                 Equipment equipment = player.Read<Equipment>();
                 equipment.ArmorLevel._Value = 0f;
                 equipment.SpellLevel._Value = 0f;

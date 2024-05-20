@@ -30,7 +30,6 @@
                 ExpertiseSystem.WeaponType.Reaper => new ReaperExpertiseHandler(),
                 ExpertiseSystem.WeaponType.Longbow => new LongbowExpertiseHandler(),
                 ExpertiseSystem.WeaponType.Whip => new WhipExpertiseHandler(),
-                ExpertiseSystem.WeaponType.Unarmed => new UnarmedExpertiseHandler(),
                 _ => null,
             };
         }
@@ -232,21 +231,6 @@
         public override ExpertiseSystem.WeaponType GetWeaponType()
         {
             return ExpertiseSystem.WeaponType.Whip;
-        }
-    }
-
-    public class UnarmedExpertiseHandler : BaseWeaponExpertiseHandler
-    {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedExpertise;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerUnarmedExpertise();
-        }
-
-        public override ExpertiseSystem.WeaponType GetWeaponType()
-        {
-            return ExpertiseSystem.WeaponType.Unarmed;
         }
     }
 }

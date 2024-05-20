@@ -64,15 +64,9 @@ namespace Cobalt.Commands
             ulong steamID = ctx.Event.User.PlatformId;
             Equipment equipment = character.Read<Equipment>();
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-            Entity weaponEntity = Entity.Null;
-            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
-            {
-                weaponEntity = equipment.UnarmedBuffInstance;
-            }
-            else
-            {
-                weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
-            }
+
+            Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
+
             // Ensure that there is a dictionary for the player's stats
             if (!Core.DataStructures.PlayerWeaponChoices.TryGetValue(steamID, out var weaponsStats))
             {

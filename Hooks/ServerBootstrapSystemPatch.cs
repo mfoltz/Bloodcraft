@@ -10,6 +10,8 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class ServerBootstrapPatches
     {
+        public static List<User> users = [];
+
         [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
         [HarmonyPrefix]
         private static unsafe void OnUserConnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
@@ -20,6 +22,11 @@ namespace Cobalt.Hooks
             User user = __instance.EntityManager.GetComponentData<User>(userEntity);
             ulong steamId = user.PlatformId;
 
+            if (!users.Contains(user))
+            {
+                users.Add(user);
+            }
+
             if (!Core.DataStructures.PlayerBools.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
@@ -27,7 +34,8 @@ namespace Cobalt.Hooks
                 { "ExperienceLogging", true },
                 { "ProfessionLogging", true },
                 { "SanguimancyLogging", true },
-                { "ExpertiseLogging", true }
+                { "ExpertiseLogging", true },
+                { "SpellLock", false }
             });
                 Core.DataStructures.SavePlayerBools();
             }
@@ -89,6 +97,11 @@ namespace Cobalt.Hooks
                 Core.DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 Core.DataStructures.SavePlayerSanguimancy();
             }
+            if (!Core.DataStructures.PlayerSanguimancySpells.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerSanguimancySpells.Add(steamId, (new(0), new(0)));
+                Core.DataStructures.SavePlayerSanguimancySpells();
+            }
             if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerSwordExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
@@ -143,11 +156,6 @@ namespace Cobalt.Hooks
             {
                 Core.DataStructures.PlayerWhipExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 Core.DataStructures.SavePlayerWhipExpertise();
-            }
-            if (!Core.DataStructures.PlayerUnarmedExpertise.ContainsKey(steamId))
-            {
-                Core.DataStructures.PlayerUnarmedExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerUnarmedExpertise();
             }
 
             if (!Core.DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))

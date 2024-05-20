@@ -8,7 +8,7 @@ namespace Cobalt.Systems.Sanguimancy
     public class BloodSystem
     {
         private static readonly int UnitMultiplier = Plugin.UnitBloodMultiplier.Value; // base mastery points
-        private static readonly int MaxBloodLevel = Plugin.MaxBloodLevel.Value; // maximum level
+        public static readonly int MaxBloodLevel = Plugin.MaxBloodLevel.Value; // maximum level
         private static readonly float BloodMasteryConstant = 0.1f; // constant for calculating level from xp
         private static readonly int BloodXPPower = 2; // power for calculating level from xp
         private static readonly int VBloodMultiplier = Plugin.VBloodBloodMultiplier.Value; // mastery points multiplier from VBlood units
@@ -100,7 +100,7 @@ namespace Cobalt.Systems.Sanguimancy
             return (int)(BloodMasteryConstant * Math.Sqrt(xp));
         }
 
-        private static float ConvertLevelToXp(int level)
+        public static float ConvertLevelToXp(int level)
         {
             return (int)Math.Pow(level / BloodMasteryConstant, BloodXPPower);
         }

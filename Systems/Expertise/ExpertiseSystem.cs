@@ -27,8 +27,7 @@ namespace Cobalt.Systems.Expertise
             Pistols,
             Reaper,
             Longbow,
-            Whip,
-            Unarmed
+            Whip
         }
 
         public static void UpdateWeaponExpertise(EntityManager entityManager, Entity Killer, Entity Victim)
@@ -140,25 +139,20 @@ namespace Cobalt.Systems.Expertise
 
         public static WeaponType GetWeaponTypeFromPrefab(PrefabGUID weapon)
         {
-            if (weapon.GuidHash.Equals(0)) return WeaponType.Unarmed; // Return Unarmed if no weapon is equipped
             string weaponCheck = weapon.LookupName().ToString().ToLower();
             foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
             {
-                //Plugin.Log.LogInfo($"{weaponCheck}|{type.ToString().ToLower()}");
-                // Convert the enum name to lower case and check if it is contained in the weapon GUID string
                 if (weaponCheck.Contains(type.ToString().ToLower()) && !weaponCheck.Contains("great"))
                 {
                     return type;
                 }
-                else
+                else if (weaponCheck.Contains("great"))
                 {
-                    if (weaponCheck.Contains("great"))
-                    {
-                        return WeaponType.GreatSword;
-                    }
+                    return WeaponType.GreatSword;
                 }
             }
-            return WeaponType.Unarmed; // Return Unknown if no match is found
+
+            throw new InvalidOperationException("Unrecognized weapon type");
         }
 
         public static WeaponStatType GetWeaponStatTypeFromString(string statType)
@@ -170,7 +164,8 @@ namespace Cobalt.Systems.Expertise
                     return type;
                 }
             }
-            return WeaponStatType.PhysicalPower;
+
+            throw new InvalidOperationException("Unrecognized stat type");
         }
     }
 }

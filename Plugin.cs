@@ -127,7 +127,6 @@ namespace Cobalt
             Core.DataStructures.SavePlayerReaperExpertise,
             Core.DataStructures.SavePlayerLongbowExpertise,
             Core.DataStructures.SavePlayerWhipExpertise,
-            Core.DataStructures.SavePlayerUnarmedExpertise,
             Core.DataStructures.SavePlayerSanguimancy,
             Core.DataStructures.SavePlayerWeaponChoices,
             Core.DataStructures.SavePlayerEquippedWeapon,
@@ -159,7 +158,6 @@ namespace Cobalt
             Core.DataStructures.LoadPlayerReaperExpertise,
             Core.DataStructures.LoadPlayerLongbowExpertise,
             Core.DataStructures.LoadPlayerWhipExpertise,
-            Core.DataStructures.LoadPlayerUnarmedExpertise,
             Core.DataStructures.LoadPlayerWeaponChoices,
             Core.DataStructures.LoadPlayerEquippedWeapon,
             Core.DataStructures.LoadPlayerBloodStats
