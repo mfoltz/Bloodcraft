@@ -102,11 +102,20 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponChoices = [];
-        private static Dictionary<ulong, Dictionary<string, (bool, Entity)>> playerEquippedWeapon = [];
 
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed basically
         private static Dictionary<ulong, (PrefabGUID, PrefabGUID)> playerSanguimancySpells = [];
-        private static Dictionary<ulong, List<string>> playerBloodChoices = [];
+
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerWorkerBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerWarriorBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerScholarBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerRogueBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerMutantBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerVBloodBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerDraculinBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerImmortalBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerCreatureBloodline = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerBruteBloodline = [];
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
         {
@@ -258,16 +267,64 @@ internal static class Core
             set => playerWeaponChoices = value;
         }
 
-        public static Dictionary<ulong, Dictionary<string, (bool, Entity)>> PlayerEquippedWeapon
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWorkerBloodline
         {
-            get => playerEquippedWeapon;
-            set => playerEquippedWeapon = value;
+            get => playerWorkerBloodline;
+            set => playerWorkerBloodline = value;
         }
 
-        public static Dictionary<ulong, List<string>> PlayerBloodChoices
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWarriorBloodline
         {
-            get => playerBloodChoices;
-            set => playerBloodChoices = value;
+            get => playerWarriorBloodline;
+            set => playerWarriorBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerScholarBloodline
+        {
+            get => playerScholarBloodline;
+            set => playerScholarBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerRogueBloodline
+        {
+            get => playerRogueBloodline;
+            set => playerRogueBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMutantBloodline
+        {
+            get => playerMutantBloodline;
+            set => playerMutantBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerVBloodBloodline
+        {
+            get => playerVBloodBloodline;
+            set => playerVBloodBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerDraculinBloodline
+        {
+            get => playerDraculinBloodline;
+            set => playerDraculinBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerImmortalBloodline
+        {
+            get => playerImmortalBloodline;
+            set => playerImmortalBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCreatureBloodline
+        {
+            get => playerCreatureBloodline;
+            set => playerCreatureBloodline = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerBruteBloodline
+        {
+            get => playerBruteBloodline;
+            set => playerBruteBloodline = value;
         }
 
         // cache-only
@@ -308,54 +365,20 @@ internal static class Core
             {"UnarmedExpertise", Core.JsonFiles.PlayerUnarmedExpertiseJson},
             {"Sanguimancy", Core.JsonFiles.PlayerSanguimancyJson},
             {"SanguimancySpells", Core.JsonFiles.PlayerSanguimancySpellsJson},
-            {"EquippedWeapon", Core.JsonFiles.PlayerEquippedWeaponJson},
             {"WeaponChoices", Core.JsonFiles.PlayerWeaponChoicesJson},
-            {"BloodChoices", Core.JsonFiles.PlayerBloodChoicesJson}
-        };
-
-        public static readonly Dictionary<string, Dictionary<ulong, KeyValuePair<int, float>>> professionMap = new()
-        {
-            {"Woodcutting", PlayerWoodcutting},
-            {"Mining", PlayerMining},
-            {"Fishing", PlayerFishing},
-            {"Blacksmithing", PlayerBlacksmithing},
-            {"Tailoring", PlayerTailoring},
-            {"Jewelcrafting", PlayerJewelcrafting},
-            {"Alchemy", PlayerAlchemy},
-            {"Harvesting", PlayerHarvesting }
-        };
-
-        public static readonly Dictionary<string, Dictionary<ulong, KeyValuePair<int, float>>> weaponExpertiseMap = new()
-        {
-            {"Sword", PlayerSwordExpertise},
-            {"Axe", PlayerAxeExpertise},
-            {"Mace", PlayerMaceExpertise},
-            {"Spear", PlayerSpearExpertise},
-            {"Crossbow", PlayerCrossbowExpertise},
-            {"GreatSword", PlayerGreatSwordExpertise},
-            {"Slashers", PlayerSlashersExpertise},
-            {"Pistols", PlayerPistolsExpertise},
-            {"Reaper", PlayerReaperExpertise},
-            {"Longbow", PlayerLongbowExpertise},
-            {"Whip", PlayerWhipExpertise},
+            {"WorkerBloodline", Core.JsonFiles.PlayerWorkerBloodlineJson},
+            {"WarriorBloodline", Core.JsonFiles.PlayerWarriorBloodlineJson},
+            {"ScholarBloodline", Core.JsonFiles.PlayerScholarBloodlineJson},
+            {"RogueBloodline", Core.JsonFiles.PlayerRogueBloodlineJson},
+            {"MutantBloodline", Core.JsonFiles.PlayerMutantBloodlineJson},
+            {"VBloodBloodline", Core.JsonFiles.PlayerVBloodBloodlineJson},
+            {"DraculinBloodline", Core.JsonFiles.PlayerDraculinBloodlineJson},
+            {"ImmortalBloodline", Core.JsonFiles.PlayerImmortalBloodlineJson},
+            {"CreatureBloodline", Core.JsonFiles.PlayerCreatureBloodlineJson},
+            {"BruteBloodline", Core.JsonFiles.PlayerBruteBloodlineJson},
         };
 
         // Generic method to save any type of dictionary.
-        public static readonly Dictionary<string, Action> saveActions = new()
-        {
-            {"Sword", SavePlayerSwordExpertise},
-            {"Axe", SavePlayerAxeExpertise},
-            {"Mace", SavePlayerMaceExpertise},
-            {"Spear", SavePlayerSpearExpertise},
-            {"Crossbow", SavePlayerCrossbowExpertise},
-            {"GreatSword", SavePlayerGreatSwordExpertise},
-            {"Slashers", SavePlayerSlashersExpertise},
-            {"Pistols", SavePlayerPistolsExpertise},
-            {"Reaper", SavePlayerReaperExpertise},
-            {"Longbow", SavePlayerLongbowExpertise},
-            {"Whip", SavePlayerWhipExpertise},
-            // Add other Expertise types as needed
-        };
 
         public static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
         {
@@ -436,11 +459,27 @@ internal static class Core
 
         public static void LoadPlayerSanguimancySpells() => LoadData(ref playerSanguimancySpells, "SanguimancySpells");
 
-        public static void LoadPlayerEquippedWeapon() => LoadData(ref playerEquippedWeapon, "EquippedWeapon");
-
         public static void LoadPlayerWeaponChoices() => LoadData(ref playerWeaponChoices, "WeaponChoices");
 
-        public static void LoadPlayerBloodStats() => LoadData(ref playerBloodChoices, "BloodChoices");
+        public static void LoadPlayerWorkerBloodline() => LoadData(ref playerWorkerBloodline, "WorkerBloodline");
+
+        public static void LoadPlayerWarriorBloodline() => LoadData(ref playerWarriorBloodline, "WarriorBloodline");
+
+        public static void LoadPlayerScholarBloodline() => LoadData(ref playerScholarBloodline, "ScholarBloodline");
+
+        public static void LoadPlayerRogueBloodline() => LoadData(ref playerRogueBloodline, "RogueBloodline");
+
+        public static void LoadPlayerMutantBloodline() => LoadData(ref playerMutantBloodline, "MutantBloodline");
+
+        public static void LoadPlayerVBloodBloodline() => LoadData(ref playerVBloodBloodline, "VBloodBloodline");
+
+        public static void LoadPlayerDraculinBloodline() => LoadData(ref playerDraculinBloodline, "DraculinBloodline");
+
+        public static void LoadPlayerImmortalBloodline() => LoadData(ref playerImmortalBloodline, "ImmortalBloodline");
+
+        public static void LoadPlayerCreatureBloodline() => LoadData(ref playerCreatureBloodline, "CreatureBloodline");
+
+        public static void LoadPlayerBruteBloodline() => LoadData(ref playerBruteBloodline, "BruteBloodline");
 
         public static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
@@ -509,11 +548,27 @@ internal static class Core
 
         public static void SavePlayerSanguimancySpells() => SaveData(PlayerSanguimancySpells, "SanguimancySpells");
 
-        public static void SavePlayerEquippedWeapon() => SaveData(PlayerEquippedWeapon, "EquippedWeapon");
-
         public static void SavePlayerWeaponChoices() => SaveData(PlayerWeaponChoices, "WeaponChoices");
 
-        public static void SavePlayerBloodChoices() => SaveData(PlayerBloodChoices, "BloodChoices");
+        public static void SavePlayerWorkerBloodline() => SaveData(PlayerWorkerBloodline, "WorkerBloodline");
+
+        public static void SavePlayerWarriorBloodline() => SaveData(PlayerWarriorBloodline, "WarriorBloodline");
+
+        public static void SavePlayerScholarBloodline() => SaveData(PlayerScholarBloodline, "ScholarBloodline");
+
+        public static void SavePlayerRogueBloodline() => SaveData(PlayerRogueBloodline, "RogueBloodline");
+
+        public static void SavePlayerMutantBloodline() => SaveData(PlayerMutantBloodline, "MutantBloodline");
+
+        public static void SavePlayerVBloodBloodline() => SaveData(PlayerVBloodBloodline, "VBloodBloodline");
+
+        public static void SavePlayerDraculinBloodline() => SaveData(PlayerDraculinBloodline, "DraculinBloodline");
+
+        public static void SavePlayerImmortalBloodline() => SaveData(PlayerImmortalBloodline, "ImmortalBloodline");
+
+        public static void SavePlayerCreatureBloodline() => SaveData(PlayerCreatureBloodline, "CreatureBloodline");
+
+        public static void SavePlayerBruteBloodline() => SaveData(PlayerBruteBloodline, "BruteBloodline");
     }
 
     public class JsonFiles
@@ -543,11 +598,16 @@ internal static class Core
         public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
         public static readonly string PlayerSanguimancySpellsJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy_spells.json");
-
-        //public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
-        public static readonly string PlayerEquippedWeaponJson = Path.Combine(Plugin.ConfigPath, "player_equipped_weapon.json");
-
         public static readonly string PlayerWeaponChoicesJson = Path.Combine(Plugin.ConfigPath, "player_weapon_choices.json");
-        public static readonly string PlayerBloodChoicesJson = Path.Combine(Plugin.ConfigPath, "player_blood_choices.json");
+        public static readonly string PlayerWorkerBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_worker_bloodline.json");
+        public static readonly string PlayerWarriorBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_warrior_bloodline.json");
+        public static readonly string PlayerScholarBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_scholar_bloodline.json");
+        public static readonly string PlayerRogueBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_rogue_bloodline.json");
+        public static readonly string PlayerMutantBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_mutant_bloodline.json");
+        public static readonly string PlayerVBloodBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_vblood_bloodline.json");
+        public static readonly string PlayerDraculinBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_draculin_bloodline.json");
+        public static readonly string PlayerImmortalBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_immortal_bloodline.json");
+        public static readonly string PlayerCreatureBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_creature_bloodline.json");
+        public static readonly string PlayerBruteBloodlineJson = Path.Combine(Plugin.ConfigPath, "player_brute_bloodline.json");
     }
 }

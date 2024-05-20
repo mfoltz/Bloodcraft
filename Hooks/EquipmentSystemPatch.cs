@@ -2,22 +2,13 @@
 using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.CastleBuilding.Placement;
-using ProjectM.CastleBuilding.Systems;
-using ProjectM.Gameplay;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Scripting;
-using ProjectM.Shared.Systems;
-using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Cobalt.Systems.Expertise.WeaponStats;
 using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
-using static Cobalt.Systems.Sanguimancy.BloodStats;
-using static Cobalt.Systems.Sanguimancy.BloodStats.BloodStatManager;
 
 namespace Cobalt.Hooks
 {
@@ -374,96 +365,6 @@ namespace Cobalt.Hooks
             }
         }
 
-        /*
-        public static void ApplyBloodBonuses(Entity character) // tie extra spell slots to sanguimancy
-        {
-            var stats = character.Read<UnitStats>();
-
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-            if (Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
-            {
-                var buffer = character.ReadBuffer<BloodQualityBuff>();
-                foreach (var weaponStatType in bonuses)
-                {
-                    float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponStatType);
-                    bool found = false;
-                    for (int i = 0; i < buffer.Length; i++)
-                    {
-                        ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                        if (statBuff.StatType.Equals(WeaponStatMap[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
-                        {
-                            statBuff.Value += scaledBonus; // Modify the value accordingly
-                            buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                            Core.Log.LogInfo($"Modified {statBuff.StatType} | {statBuff.Value}");
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        // If not found, create a new stat modifier
-                        UnitStatType statType = WeaponStatMap[weaponStatType];
-                        ModifyUnitStatBuff_DOTS newStatBuff = new()
-                        {
-                            StatType = statType,
-                            ModificationType = ModificationType.AddToBase,
-                            Value = scaledBonus,
-                            Modifier = 1,
-                            IncreaseByStacks = false,
-                            ValueByStacks = 0,
-                            Priority = 0,
-                            Id = ModificationId.Empty
-                        };
-                        buffer.Add(newStatBuff);
-                        Core.Log.LogInfo($"Added {newStatBuff.StatType} | {newStatBuff.Value}");
-                    }
-                }
-            }
-        }
-        */
-        /*
-        public static void RemoveBloodBonuses(Entity character)
-        {
-            var stats = character.Read<UnitStats>();
-
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-            if (Core.DataStructures.PlayerBloodChoices.TryGetValue(steamId, out var bonuses))
-            {
-                foreach (var bonus in bonuses)
-                {
-                    BloodStatType bloodStatType = BloodSystem.GetBloodStatTypeFromString(bonus);
-                    Core.Log.LogInfo($"Resetting {bloodStatType} to {BaseBloodStats[bloodStatType]}");
-                    switch (bloodStatType)
-                    {
-                        case BloodStatType.SunResistance:
-                            stats.SunResistance._Value = (int)BaseBloodStats[BloodStatType.SunResistance];
-                            break;
-
-                        case BloodStatType.FireResistance:
-                            stats.FireResistance._Value = (int)BaseBloodStats[BloodStatType.FireResistance];
-                            break;
-
-                        case BloodStatType.HolyResistance:
-                            stats.HolyResistance._Value = (int)BaseBloodStats[BloodStatType.HolyResistance];
-                            break;
-
-                        case BloodStatType.SilverResistance:
-                            stats.SilverResistance._Value = (int)BaseBloodStats[BloodStatType.SilverResistance];
-                            break;
-
-                        case BloodStatType.PassiveHealthRegen:
-                            stats.PassiveHealthRegen._Value = BaseBloodStats[BloodStatType.PassiveHealthRegen];
-                            break;
-                    }
-                }
-                character.Write(stats);
-            }
-        }
-        */
-
         public static float CalculateScaledWeaponBonus(IWeaponExpertiseHandler handler, ulong steamId, WeaponStatType statType)
         {
             if (handler != null)
@@ -485,30 +386,18 @@ namespace Cobalt.Hooks
             return 0; // Return 0 if no handler is found or other error
         }
 
-        public static float CalculateScaledBloodBonus(ulong steamId, BloodStatType statType)
-        {
-            if (Core.DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var sanguimancy))
-            {
-                int currentLevel = sanguimancy.Key;
-
-                float maxBonus = BloodStatManager.BaseCaps[statType];
-                float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
-                Core.Log.LogInfo($"{currentLevel} | {statType} | {scaledBonus}");
-                return scaledBonus;
-            }
-            else
-            {
-                Core.Log.LogInfo("No blood stats found...");
-            }
-
-            return 0; // Return 0 if no blood stats are found
-        }
-
         public static ExpertiseSystem.WeaponType GetCurrentWeaponType(Entity character)
         {
             Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
 
             return ExpertiseSystem.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
+        }
+
+        public static BloodSystem.BloodType GetCurrentBloodType(Entity character)
+        {
+            Blood blood = character.Read<Blood>();
+
+            return BloodSystem.GetBloodTypeFromPrefab(blood.BloodType);
         }
     }
 

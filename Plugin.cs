@@ -129,8 +129,6 @@ namespace Cobalt
             Core.DataStructures.SavePlayerWhipExpertise,
             Core.DataStructures.SavePlayerSanguimancy,
             Core.DataStructures.SavePlayerWeaponChoices,
-            Core.DataStructures.SavePlayerEquippedWeapon,
-            Core.DataStructures.SavePlayerBloodChoices
         ];
 
         private static readonly Action[] loadFunctions =
@@ -159,8 +157,7 @@ namespace Cobalt
             Core.DataStructures.LoadPlayerLongbowExpertise,
             Core.DataStructures.LoadPlayerWhipExpertise,
             Core.DataStructures.LoadPlayerWeaponChoices,
-            Core.DataStructures.LoadPlayerEquippedWeapon,
-            Core.DataStructures.LoadPlayerBloodStats
+            Core.DataStructures.LoadPlayerSanguimancySpells
         ];
     }
 }

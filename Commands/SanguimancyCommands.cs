@@ -46,15 +46,15 @@ namespace Cobalt.Commands
                 ctx.Reply("Player not found.");
                 return;
             }
-            if (level < 0 || level > BloodSystem.MaxBloodLevel)
+            if (level < 0 || level > SanguimancySystem.MaxBloodLevel)
             {
-                ctx.Reply($"Level must be between 0 and {BloodSystem.MaxBloodLevel}.");
+                ctx.Reply($"Level must be between 0 and {SanguimancySystem.MaxBloodLevel}.");
                 return;
             }
 
             if (Core.DataStructures.PlayerSanguimancy.TryGetValue(foundUser.PlatformId, out var Sanguimancy))
             {
-                Sanguimancy = new KeyValuePair<int, float>(level, BloodSystem.ConvertLevelToXp(level));
+                Sanguimancy = new KeyValuePair<int, float>(level, SanguimancySystem.ConvertLevelToXp(level));
                 Core.DataStructures.PlayerSanguimancy[foundUser.PlatformId] = Sanguimancy;
                 Core.DataStructures.SavePlayerSanguimancy();
                 ctx.Reply($"Sanguimancy level set to {level} for {foundUser.CharacterName}.");

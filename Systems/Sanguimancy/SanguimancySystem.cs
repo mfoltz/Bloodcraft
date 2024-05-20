@@ -5,7 +5,7 @@ using static Cobalt.Systems.Sanguimancy.BloodStats.BloodStatManager;
 
 namespace Cobalt.Systems.Sanguimancy
 {
-    public class BloodSystem
+    public class SanguimancySystem
     {
         private static readonly int UnitMultiplier = Plugin.UnitBloodMultiplier.Value; // base mastery points
         public static readonly int MaxBloodLevel = Plugin.MaxBloodLevel.Value; // maximum level
@@ -15,6 +15,8 @@ namespace Cobalt.Systems.Sanguimancy
 
         public static void UpdateSanguimancy(Entity Killer, Entity Victim)
         {
+            // check for unarmed and spell kill, if not return
+
             EntityManager entityManager = Core.Server.EntityManager;
             if (Killer == Victim) return;
             if (entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>()) return;

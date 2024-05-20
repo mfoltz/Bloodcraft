@@ -5,7 +5,6 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Cobalt.Systems.Expertise.WeaponStats;
-using static Cobalt.Systems.Sanguimancy.BloodStats;
 
 namespace Cobalt.Commands
 {

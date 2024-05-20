@@ -26,6 +26,9 @@ public class FishingSystemPatch
                 foreach (Entity entity in entities)
                 {
                     if (entity.Equals(Entity.Null)) continue;
+                    Core.Log.LogInfo("CreateGameplayEventOnDestroy components>");
+                    entity.LogComponentTypes(); // want to find feed kill events or whatever
+                    Core.Log.LogInfo("CreateGameplayEventOnDestroy components>");
                     if (!entity.Has<Buff>()) continue;
                     PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 

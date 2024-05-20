@@ -35,6 +35,7 @@ namespace Cobalt.Hooks
                 { "ProfessionLogging", true },
                 { "SanguimancyLogging", true },
                 { "ExpertiseLogging", true },
+                { "BloodLogging", true },
                 { "SpellLock", false }
             });
                 Core.DataStructures.SavePlayerBools();
@@ -158,27 +159,10 @@ namespace Cobalt.Hooks
                 Core.DataStructures.SavePlayerWhipExpertise();
             }
 
-            if (!Core.DataStructures.PlayerEquippedWeapon.ContainsKey(steamId))
-            {
-                var weapons = new Dictionary<string, (bool, Entity)>();
-                foreach (ExpertiseSystem.WeaponType weaponType in Enum.GetValues(typeof(ExpertiseSystem.WeaponType)))
-                {
-                    weapons.Add(weaponType.ToString(), (false, Entity.Null));
-                }
-                Core.DataStructures.PlayerEquippedWeapon.Add(steamId, weapons);
-                Core.DataStructures.SavePlayerEquippedWeapon();
-            }
-
             if (!Core.DataStructures.PlayerWeaponChoices.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerWeaponChoices.Add(steamId, []);
                 Core.DataStructures.SavePlayerWeaponChoices();
-            }
-
-            if (!Core.DataStructures.PlayerBloodChoices.ContainsKey(steamId))
-            {
-                Core.DataStructures.PlayerBloodChoices.Add(steamId, []);
-                Core.DataStructures.SavePlayerBloodChoices();
             }
         }
     }
