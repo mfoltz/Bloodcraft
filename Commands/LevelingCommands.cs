@@ -7,9 +7,14 @@ namespace Cobalt.Commands
 {
     public static class LevelingCommands
     {
-        [Command(name: "logLevelingProgress", shortHand: "llp", adminOnly: false, usage: ".llp", description: "Toggles leveling progress logging.")]
+        [Command(name: "logLevelingProgress", shortHand: "log leveling", adminOnly: false, usage: ".log leveling", description: "Toggles leveling progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
         {
+            if (!Plugin.LevelingSystem.Value)
+            {
+                ctx.Reply("Leveling is not enabled.");
+                return;
+            }
             var SteamID = ctx.Event.User.PlatformId;
 
             if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
@@ -19,9 +24,14 @@ namespace Cobalt.Commands
             ctx.Reply($"Leveling progress logging is now {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "getLevelingProgress", shortHand: "glp", adminOnly: false, usage: ".glp", description: "Display current leveling progress.")]
+        [Command(name: "getLevelingProgress", shortHand: "get leveling", adminOnly: false, usage: ".get leveling", description: "Display current leveling progress.")]
         public static void GetLevelCommand(ChatCommandContext ctx)
         {
+            if (!Plugin.LevelingSystem.Value)
+            {
+                ctx.Reply("Leveling is not enabled.");
+                return;
+            }
             ulong steamId = ctx.Event.User.PlatformId;
             if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var Leveling))
             {
@@ -39,6 +49,11 @@ namespace Cobalt.Commands
         [Command(name: "setLevel", shortHand: "sl", adminOnly: true, usage: ".sl [Player] [Level]", description: "Sets your level.")]
         public static void SetLevelCommand(ChatCommandContext ctx, string name, int level)
         {
+            if (!Plugin.LevelingSystem.Value)
+            {
+                ctx.Reply("Leveling is not enabled.");
+                return;
+            }
             User foundUser = ServerBootstrapPatches.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
             if (foundUser.CharacterName.IsEmpty)
             {

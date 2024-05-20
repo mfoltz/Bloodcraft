@@ -2,13 +2,13 @@
 {
     public interface IBloodHandler
     {
-        void AddExperience(ulong steamID, float experience);
+        void AddLegacy(ulong steamID, float experience);
 
         void SaveChanges();
 
-        KeyValuePair<int, float> GetExperienceData(ulong steamID);
+        KeyValuePair<int, float> GetLegacyData(ulong steamID);
 
-        void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData);
+        void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData);
 
         BloodSystem.BloodType GetBloodType();
     }
@@ -38,7 +38,7 @@
     {
         protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
 
-        public void AddExperience(ulong steamID, float experience)
+        public void AddLegacy(ulong steamID, float experience)
         {
             if (DataStructure.TryGetValue(steamID, out var currentData))
             {
@@ -50,14 +50,14 @@
             }
         }
 
-        public KeyValuePair<int, float> GetExperienceData(ulong steamID)
+        public KeyValuePair<int, float> GetLegacyData(ulong steamID)
         {
             if (DataStructure.TryGetValue(steamID, out var xpData))
                 return xpData;
             return new KeyValuePair<int, float>(0, 0);
         }
 
-        public void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData)
+        public void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData)
         {
             DataStructure[steamID] = xpData;
         }

@@ -33,7 +33,6 @@ namespace Cobalt.Hooks
             {
                 { "ExperienceLogging", true },
                 { "ProfessionLogging", true },
-                { "SanguimancyLogging", true },
                 { "ExpertiseLogging", true },
                 { "BloodLogging", true },
                 { "SpellLock", false }
@@ -100,7 +99,7 @@ namespace Cobalt.Hooks
             }
             if (!Core.DataStructures.PlayerSanguimancySpells.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerSanguimancySpells.Add(steamId, (new(0), new(0)));
+                Core.DataStructures.PlayerSanguimancySpells.Add(steamId, (0, 0));
                 Core.DataStructures.SavePlayerSanguimancySpells();
             }
             if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
@@ -163,6 +162,102 @@ namespace Cobalt.Hooks
             {
                 Core.DataStructures.PlayerWeaponStats.Add(steamId, []);
                 Core.DataStructures.SavePlayerWeaponStats();
+            }
+            if (!Core.DataStructures.PlayerWorkerLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerWorkerLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerWorkerLegacy();
+            }
+            if (!Core.DataStructures.PlayerWarriorLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerWarriorLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerWarriorLegacy();
+            }
+            if (!Core.DataStructures.PlayerScholarLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerScholarLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerScholarLegacy();
+            }
+            if (!Core.DataStructures.PlayerRogueLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerRogueLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerRogueLegacy();
+            }
+            if (!Core.DataStructures.PlayerMutantLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerMutantLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerMutantLegacy();
+            }
+            if (!Core.DataStructures.PlayerVBloodLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerVBloodLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerVBloodLegacy();
+            }
+            if (!Core.DataStructures.PlayerDraculinLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerDraculinLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerDraculinLegacy();
+            }
+            if (!Core.DataStructures.PlayerImmortalLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerImmortalLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerImmortalLegacy();
+            }
+            if (!Core.DataStructures.PlayerCreatureLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerCreatureLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerCreatureLegacy();
+            }
+            if (!Core.DataStructures.PlayerBruteLegacy.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerBruteLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerBruteLegacy();
+            }
+            Entity character = user.LocalCharacter._Entity;
+            if (!Plugin.LevelingSystem.Value)
+            {
+                if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
+                {
+                    foreach (var item in playerBuffer)
+                    {
+                        if (item.ItemEntity._Entity.Has<ArmorLevelSource>())
+                        {
+                            // restore armor levels
+                            PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
+                            ArmorLevelSource armorLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<ArmorLevelSource>();
+                            item.ItemEntity._Entity.Write(armorLevelSource);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity inventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(inventory, out var buffer))
+                {
+                    foreach (var item in buffer)
+                    {
+                        if (item.ItemEntity._Entity.Has<ArmorLevelSource>() && !item.ItemEntity._Entity.Read<ArmorLevelSource>().Level.Equals(0))
+                        {
+                            item.ItemEntity._Entity.Write(new ArmorLevelSource { Level = 0 });
+                        }
+                    }
+                }
+            }
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
+                {
+                    foreach (var item in playerBuffer)
+                    {
+                        if (item.ItemEntity._Entity.Has<WeaponLevelSource>())
+                        {
+                            // restore weapon levels
+                            PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
+                            WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<WeaponLevelSource>();
+                            item.ItemEntity._Entity.Write(weaponLevelSource);
+                        }
+                    }
+                }
             }
         }
     }

@@ -22,10 +22,7 @@ public class DeathEventListenerSystem_Patch
             {
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
                 {
-                    Core.Log.LogInfo("DeathEvent components>");
-                    ev.Source.LogComponentTypes(); // check for spell kills versus weapon kills or whatever
-                    Core.Log.LogInfo("DeathEvent components>");
-                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateExperience(ev.Killer, ev.Died);
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(ev.Killer, ev.Died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(ev.Killer, ev.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
@@ -35,7 +32,7 @@ public class DeathEventListenerSystem_Patch
                 }
                 else if (__instance.EntityManager.HasComponent<Follower>(ev.Killer) && ev.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateExperience(ev.Killer.Read<Follower>().Followed._Value, ev.Died);
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(ev.Killer.Read<Follower>().Followed._Value, ev.Died);
                 }
             }
         }

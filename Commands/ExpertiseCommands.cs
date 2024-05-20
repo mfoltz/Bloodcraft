@@ -10,9 +10,14 @@ namespace Cobalt.Commands
 {
     public static class ExpertiseCommands
     {
-        [Command(name: "getExpertiseProgress", shortHand: "gep", adminOnly: false, usage: ".gep", description: "Display your current Expertise progress.")]
+        [Command(name: "getExpertiseProgress", shortHand: "get expertise", adminOnly: false, usage: ".get expertise", description: "Display your current Expertise progress.")]
         public static void GetExpertiseCommand(ChatCommandContext ctx)
         {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
             Entity character = ctx.Event.SenderCharacterEntity;
             Equipment equipment = character.Read<Equipment>();
             PrefabGUID weaponGuid = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
@@ -39,9 +44,14 @@ namespace Cobalt.Commands
             }
         }
 
-        [Command(name: "logExpertiseProgress", shortHand: "lep", adminOnly: false, usage: ".lep", description: "Toggles Expertise progress logging.")]
+        [Command(name: "logExpertiseProgress", shortHand: "log expertise", adminOnly: false, usage: ".log expertise", description: "Toggles Expertise progress logging.")]
         public static void LogExpertiseCommand(ChatCommandContext ctx)
         {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
             var SteamID = ctx.Event.User.PlatformId;
 
             if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
@@ -54,6 +64,11 @@ namespace Cobalt.Commands
         [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws [Stat]", description: "Choose a weapon stat to enhance based on your weapon Expertise.")]
         public static void ChooseWeaponStat(ChatCommandContext ctx, string statType)
         {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
             if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out var weaponStatType))
             {
                 ctx.Reply("Invalid weapon stat choice, use .lws to see options.");
@@ -61,10 +76,13 @@ namespace Cobalt.Commands
             }
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
-            Equipment equipment = character.Read<Equipment>();
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
-            Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
+            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
+            {
+                ctx.Reply("You cannot choose weapon stats for unarmed (sanguimancy). It bestows other powers...");
+                return;
+            }
 
             // Ensure that there is a dictionary for the player's stats
             if (!Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats))
@@ -89,9 +107,20 @@ namespace Cobalt.Commands
         [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stat Stats for a player's currently equipped weapon stats.")]
         public static void ResetWeaponStats(ChatCommandContext ctx)
         {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
+
+            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
+            {
+                ctx.Reply("You cannot reset weapon stats for unarmed (sanguimancy) as none can be chosen.");
+                return;
+            }
 
             //ModifyUnitStatBuffUtils.ResetWeaponModifications(weapon);
             PlayerWeaponUtilities.ResetStats(steamID, weaponType);
@@ -102,6 +131,11 @@ namespace Cobalt.Commands
         [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Weapon] [Level]", description: "Sets your weapon expertise level.")]
         public static void SetExpertiseCommand(ChatCommandContext ctx, string weapon, int level)
         {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
             if (level < 0 || level > ExpertiseSystem.MaxExpertiseLevel)
             {
                 ctx.Reply($"Level must be between 0 and {ExpertiseSystem.MaxExpertiseLevel}.");
@@ -132,10 +166,49 @@ namespace Cobalt.Commands
         }
 
         [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat Stats.")]
-        public static void ListBloodStatsCommand(ChatCommandContext ctx)
+        public static void ListWeaponStatsCommand(ChatCommandContext ctx)
         {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
             string weaponStats = string.Join(", ", Enum.GetNames(typeof(WeaponStatManager.WeaponStatType)));
             ctx.Reply($"Available weapon stats: {weaponStats}");
+        }
+
+        [Command(name: "lockSpell", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
+        public static void LockPlayerSpells(ChatCommandContext ctx)
+        {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
+            if (!Plugin.Sanguimancy.Value)
+            {
+                ctx.Reply("Sanguimancy is not enabled.");
+                return;
+            }
+            var user = ctx.Event.User;
+            var SteamID = user.PlatformId;
+
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= 25)
+            {
+                bools["SpellLock"] = !bools["SpellLock"];
+                if (bools["SpellLock"])
+                {
+                    ctx.Reply("Change spells to the ones you want in your unarmed slot(s). When done, toggle this again.");
+                }
+                else
+                {
+                    ctx.Reply("Spells set.");
+                }
+            }
+            else
+            {
+                ctx.Reply("You must be at least level 25 in Sanguimancy to lock spells.");
+            }
         }
     }
 }

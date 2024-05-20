@@ -20,16 +20,16 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
         {
-            //Core.Log.LogInfo("WeaponLevelSystem_Spawn Postfix...");
-            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
-                    EntityOwner entityOwner = entity.Read<EntityOwner>();
-                    GearOverride.SetLevel(entityOwner.Owner);
+                    if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    {
+                        EntityOwner entityOwner = entity.Read<EntityOwner>();
+                        GearOverride.SetLevel(entityOwner.Owner);
+                    }
                 }
             }
             catch (Exception e)
@@ -46,16 +46,16 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
         {
-            //Core.Log.LogInfo("ArmorLevelSystem_Spawn Postfix...");
-            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
-                    EntityOwner entityOwner = entity.Read<EntityOwner>();
-                    GearOverride.SetLevel(entityOwner.Owner);
+                    if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    {
+                        EntityOwner entityOwner = entity.Read<EntityOwner>();
+                        GearOverride.SetLevel(entityOwner.Owner);
+                    }
                 }
             }
             catch (Exception e)
@@ -72,16 +72,16 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
         {
-            //Core.Log.LogInfo("ArmorLevelSystem_Destroy Postfix...");
-            if (!Plugin.LevelingSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
             try
             {
                 foreach (Entity entity in entities)
                 {
-                    if (!entity.Has<EntityOwner>() || !entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) continue;
-                    EntityOwner entityOwner = entity.Read<EntityOwner>();
-                    GearOverride.SetLevel(entityOwner.Owner);
+                    if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    {
+                        EntityOwner entityOwner = entity.Read<EntityOwner>();
+                        GearOverride.SetLevel(entityOwner.Owner);
+                    }
                 }
             }
             catch (Exception e)
@@ -98,35 +98,17 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
         {
-            if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
             try
             {
                 foreach (var entity in entities)
                 {
-                    if (!entity.Has<WeaponLevel>()) continue;
-                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    if (Plugin.ExpertiseSystem.Value && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;
                         ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                         ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                         ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
-
-                        /*
-                        if (character.Has<BloodQualityBuff>())
-                        {
-                            var buffer = character.ReadBuffer<BloodQualityBuff>();
-                            foreach (var buff in buffer)
-                            {
-                                if (buff.BloodQualityBuffPrefabGuid.GuidHash.Equals(-1596803256) && buff.BloodQualityBuffEntity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
-                                {
-                                    buff.BloodQualityBuffEntity.Remove<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
-                                    GearOverride.SetLevel(character);
-                                    Core.Log.LogInfo("Overrided brute blood.");
-                                }
-                            }
-                        }
-                        */
                     }
                 }
             }
@@ -144,14 +126,13 @@ namespace Cobalt.Hooks
         [HarmonyPostfix]
         private static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
         {
-            if (!Plugin.LevelingSystem.Value) return;
             //Core.Log.LogInfo("ModifyUnitStatBuffSystem_Spawn Postfix...");
             NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
             try
             {
                 foreach (var entity in entities)
                 {
-                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && Plugin.LevelingSystem.Value)
                     {
                         EntityOwner entityOwner = entity.Read<EntityOwner>();
                         GearOverride.SetLevel(entityOwner.Owner);
@@ -172,25 +153,26 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void OnUpdatePrefix(DealDamageSystem __instance)
         {
-            if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
             try
             {
                 foreach (var entity in entities)
                 {
-                    DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
-                    Entity entityOwner = dealDamageEvent.SpellSource.Read<EntityOwner>().Owner;
-                    EntityCategory entityCategory = dealDamageEvent.Target.Read<EntityCategory>();
-                    if (!entityCategory.MainCategory.Equals(MainEntityCategory.Resource) || !entityOwner.Has<Equipment>()) continue;
-                    Entity weapon = entityOwner.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-                    if (weapon.Equals(Entity.Null) || !weapon.Has<WeaponLevelSource>()) continue;
-                    if (weapon.Read<WeaponLevelSource>().Level >= entityCategory.ResourceLevel._Value) continue;
-                    float originalSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
-                    if (originalSource >= entityCategory.ResourceLevel._Value)
+                    if (Plugin.ExpertiseSystem.Value)
                     {
-                        entityCategory.ResourceLevel._Value = 0;
-                        dealDamageEvent.Target.Write(entityCategory);
-                        //Core.Log.LogInfo($"Reduced Resource Level to 0.");
+                        DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
+                        Entity entityOwner = dealDamageEvent.SpellSource.Read<EntityOwner>().Owner;
+                        EntityCategory entityCategory = dealDamageEvent.Target.Read<EntityCategory>();
+                        if (!entityCategory.MainCategory.Equals(MainEntityCategory.Resource) || !entityOwner.Has<Equipment>()) continue;
+                        Entity weapon = entityOwner.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
+                        if (weapon.Equals(Entity.Null) || !weapon.Has<WeaponLevelSource>()) continue;
+                        if (weapon.Read<WeaponLevelSource>().Level >= entityCategory.ResourceLevel._Value) continue;
+                        float originalSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
+                        if (originalSource >= entityCategory.ResourceLevel._Value)
+                        {
+                            entityCategory.ResourceLevel._Value = 0;
+                            dealDamageEvent.Target.Write(entityCategory);
+                        }
                     }
                 }
             }
@@ -208,19 +190,16 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
         {
-            //Core.Log.LogInfo("ReactToInventoryChangedSystem Postfix...");
-            if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.TempJob);
             try
             {
                 foreach (var entity in entities)
                 {
-                    InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>(); // pick up if going to servant inventory, otherwise make level match player weapon mastery?
-
+                    InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                     Entity inventory = inventoryChangedEvent.InventoryEntity;
                     if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
-                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
+                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>() && Plugin.ExpertiseSystem.Value)
                         {
                             ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                             ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
@@ -234,7 +213,7 @@ namespace Cobalt.Hooks
                                 inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
                             }
                         }
-                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>())
+                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>() && Plugin.LevelingSystem.Value)
                         {
                             ArmorLevelSource armorLevelSource = inventoryChangedEvent.ItemEntity.Read<ArmorLevelSource>();
                             armorLevelSource.Level = 0f;
@@ -243,13 +222,13 @@ namespace Cobalt.Hooks
                     }
                     else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Removed) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
-                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
+                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>() && Plugin.ExpertiseSystem.Value)
                         {
                             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
                             WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<WeaponLevelSource>();
                             inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
                         }
-                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>())
+                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>() && Plugin.LevelingSystem.Value)
                         {
                             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
                             ArmorLevelSource armorLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<ArmorLevelSource>();
@@ -258,42 +237,45 @@ namespace Cobalt.Hooks
                     }
                     else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())
                     {
-                        Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
-                        NetworkId networkId = inventory.Read<InventoryConnection>().InventoryOwner.Read<NetworkId>();
-                        ulong steamId = userEntity.Read<User>().PlatformId;
-                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
+                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>() && Plugin.ExpertiseSystem.Value)
                         {
                             WeaponLevelSource weaponLevelSource = inventoryChangedEvent.ItemEntity.Read<WeaponLevelSource>();
                             weaponLevelSource.Level = 0f;
                             inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
                         }
-                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>())
+                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>() && Plugin.LevelingSystem.Value)
                         {
                             ArmorLevelSource armorLevelSource = inventoryChangedEvent.ItemEntity.Read<ArmorLevelSource>();
                             armorLevelSource.Level = 0f;
                             inventoryChangedEvent.ItemEntity.Write(armorLevelSource);
                         }
-                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(networkId, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
+                        if (Plugin.ProfessionSystem.Value)
                         {
-                            bool jobExists = false;
-                            for (int i = 0; i < playerJobs.Count; i++)
+                            Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
+                            NetworkId networkId = inventory.Read<InventoryConnection>().InventoryOwner.Read<NetworkId>();
+                            ulong steamId = userEntity.Read<User>().PlatformId;
+                            if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(networkId, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
                             {
-                                if (playerJobs[i].Item1 == inventoryChangedEvent.Item && playerJobs[i].Item2 > 0)
+                                bool jobExists = false;
+                                for (int i = 0; i < playerJobs.Count; i++)
                                 {
-                                    playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
-                                    if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
-                                    jobExists = true;
-                                    break;
+                                    if (playerJobs[i].Item1 == inventoryChangedEvent.Item && playerJobs[i].Item2 > 0)
+                                    {
+                                        playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
+                                        if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
+                                        jobExists = true;
+                                        break;
+                                    }
                                 }
-                            }
-                            if (!jobExists) continue;
-                            Core.Log.LogInfo($"Processing Craft: {inventoryChangedEvent.Item.LookupName()}");
-                            float ProfessionValue = 50f;
-                            ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
-                            IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
-                            if (handler != null)
-                            {
-                                ProfessionSystem.SetProfession(inventoryChangedEvent.Item, userEntity.Read<User>(), steamId, ProfessionValue, handler);
+                                if (!jobExists) continue;
+                                Core.Log.LogInfo($"Processing Craft: {inventoryChangedEvent.Item.LookupName()}");
+                                float ProfessionValue = 50f;
+                                ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
+                                IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
+                                if (handler != null)
+                                {
+                                    ProfessionSystem.SetProfession(inventoryChangedEvent.Item, userEntity.Read<User>(), steamId, ProfessionValue, handler);
+                                }
                             }
                         }
                     }
@@ -334,7 +316,7 @@ namespace Cobalt.Hooks
                         {
                             statBuff.Value += scaledBonus; // Modify the value accordingly
                             buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                            Core.Log.LogInfo($"Modified {statBuff.StatType} | {statBuff.Value}");
+                            //Core.Log.LogInfo($"Modified {statBuff.StatType} | {statBuff.Value}");
                             found = true;
                             break;
                         }
@@ -356,13 +338,13 @@ namespace Cobalt.Hooks
                             Id = ModificationId.Empty
                         };
                         buffer.Add(newStatBuff);
-                        Core.Log.LogInfo($"Added {newStatBuff.StatType} | {newStatBuff.Value}");
+                        //Core.Log.LogInfo($"Added {newStatBuff.StatType} | {newStatBuff.Value}");
                     }
                 }
             }
             else
             {
-                Core.Log.LogInfo($"No bonuses found for {weaponType}...");
+                //Core.Log.LogInfo($"No bonuses found for {weaponType}...");
             }
         }
 
@@ -436,79 +418,5 @@ namespace Cobalt.Hooks
                 //Core.Log.LogInfo($"Set weapon level source to {level}.");
             }
         }
-    }
-
-    public static class Prestige
-    {
-        /*
-        private static void ApplyPrestigeBonuses(Entity character)
-        {
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (Core.DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && prestigeData.Key > 0)
-            {
-                UnitStats stats = character.Read<UnitStats>();
-                Movement movement = character.Read<Movement>();
-                foreach (var stat in BasePrestigeStats)
-                {
-                    float scaledBonus = CalculateScaledPrestigeBonus(prestigeData.Key, stat.Key);
-                    switch (stat.Key)
-                    {
-                        case PrestigeStatType.PhysicalResistance:
-                            stats.PhysicalResistance._Value += scaledBonus;
-                            break;
-
-                        case PrestigeStatType.SpellResistance:
-                            stats.SpellResistance._Value += scaledBonus;
-                            break;
-
-                        case PrestigeStatType.MovementSpeed:
-                            movement.Speed._Value += scaledBonus;
-                            break;
-                    }
-                }
-                character.Write(stats);
-                character.Write(movement);
-            }
-        }
-
-        private static void RemovePrestigeBonuses(Entity character)
-        {
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (Core.DataStructures.PlayerPrestige.TryGetValue(steamId, out var prestigeData) && !prestigeData.Key.Equals(0))
-            {
-                UnitStats stats = character.Read<UnitStats>();
-                Movement movement = character.Read<Movement>();
-                foreach (var stat in BasePrestigeStats)
-                {
-                    switch (stat.Key)
-                    {
-                        case PrestigeStatType.PhysicalResistance:
-                            stats.PhysicalResistance._Value = BasePrestigeStats[PrestigeStatType.PhysicalResistance];
-                            break;
-
-                        case PrestigeStatType.SpellResistance:
-                            stats.SpellResistance._Value = BasePrestigeStats[PrestigeStatType.SpellResistance];
-                            break;
-
-                        case PrestigeStatType.MovementSpeed:
-                            movement.Speed._Value = BasePrestigeStats[PrestigeStatType.MovementSpeed];
-                            break;
-                    }
-                }
-                character.Write(stats);
-                character.Write(movement);
-            }
-        }
-
-        private static float CalculateScaledPrestigeBonus(int prestigeLevel, PrestigeStatType statType)
-        {
-            // Scaling factor of 0.01f per level of prestige
-            if (statType.Equals(PrestigeStatType.MovementSpeed))
-            {
-                return 0.1f; // Movement speed is a flat bonus, current intention is 15 levels of prestige
-            }
-            return 0.01f;
-        }
-        */
     }
 }

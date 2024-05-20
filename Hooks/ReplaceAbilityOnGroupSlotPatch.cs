@@ -19,14 +19,11 @@ namespace Cobalt.Hooks
             {
                 foreach (Entity entity in entities)
                 {
-                    Core.Log.LogInfo("ReplaceAbilityOnSlot components>");
-                    entity.LogComponentTypes();
-                    Core.Log.LogInfo("ReplaceAbilityOnSlot components>");
-                    if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    if (Plugin.Sanguimancy.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;
                         ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSanguimancySpells.TryGetValue(steamId, out var spellTuple) && !spellTuple.Item1.IsEmpty())
+                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSanguimancySpells.TryGetValue(steamId, out var spellTuple) && !spellTuple.Item1.Equals(0))
                         {
                             HandleUnarmed(entity, spellTuple);
                         }
@@ -47,26 +44,26 @@ namespace Cobalt.Hooks
             }
         }
 
-        private static void HandleUnarmed(Entity entity, (PrefabGUID, PrefabGUID) spellTuple)
+        private static void HandleUnarmed(Entity entity, (int, int) spellTuple)
         {
             var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
-            if (!spellTuple.Item1.IsEmpty())
+            if (!spellTuple.Item1.Equals(0))
             {
                 ReplaceAbilityOnSlotBuff buff = new()
                 {
                     Slot = 5,
-                    ReplaceGroupId = spellTuple.Item1,
+                    NewGroupId = new(spellTuple.Item1),
                     CopyCooldown = true,
                     Priority = 0,
                 };
                 buffer.Add(buff);
             }
-            if (!spellTuple.Item2.IsEmpty())
+            if (!spellTuple.Item2.Equals(0))
             {
                 ReplaceAbilityOnSlotBuff buff = new()
                 {
                     Slot = 6,
-                    ReplaceGroupId = spellTuple.Item2,
+                    NewGroupId = new(spellTuple.Item2),
                     CopyCooldown = true,
                     Priority = 0,
                 };
@@ -76,24 +73,29 @@ namespace Cobalt.Hooks
 
         private static void HandleSpells(Entity entity, ulong steamId)
         {
+            Core.Log.LogInfo("HandleSpells...");
             if (!Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) || !bools["SpellLock"]) return;
+            Core.Log.LogInfo("Passed lock check...");
             if (Core.DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var data) && data.Key >= 25)
             {
+                Core.Log.LogInfo("Passed sanguimancy check...");
                 var spellTuple = Core.DataStructures.PlayerSanguimancySpells[steamId];
                 var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
                 for (int i = 0; i < buffer.Length; i++)
                 {
+                    //Core.Log.LogInfo($"{buffer[i].Slot} | {buffer[i].ReplaceGroupId.LookupName()} | {buffer[i].NewGroupId.LookupName()}");
                     var buff = buffer[i];
+                    if (!buff.Slot.Equals(5) && !buff.Slot.Equals(6)) continue;
                     if (buff.Slot == 5)
                     {
-                        spellTuple.Item1 = buff.ReplaceGroupId;
+                        spellTuple.Item1 = buff.ReplaceGroupId.GuidHash;
                         continue;
                     }
                     if (data.Key >= 75)
                     {
                         if (buff.Slot == 6)
                         {
-                            spellTuple.Item2 = buff.ReplaceGroupId;
+                            spellTuple.Item2 = buff.ReplaceGroupId.GuidHash;
                         }
                     }
                 }

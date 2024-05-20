@@ -20,7 +20,7 @@ namespace Cobalt.Systems.Experience
 
         private static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
-        public static void UpdateExperience(Entity killerEntity, Entity victimEntity)
+        public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
         {
             EntityManager entityManager = Core.Server.EntityManager;
             if (!IsValidVictim(entityManager, victimEntity)) return;

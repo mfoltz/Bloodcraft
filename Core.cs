@@ -104,7 +104,7 @@ internal static class Core
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed basically
-        private static Dictionary<ulong, (PrefabGUID, PrefabGUID)> playerSanguimancySpells = [];
+        private static Dictionary<ulong, (int, int)> playerSanguimancySpells = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWorkerLegacy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWarriorLegacy = [];
@@ -255,7 +255,7 @@ internal static class Core
             set => playerSanguimancy = value;
         }
 
-        public static Dictionary<ulong, (PrefabGUID, PrefabGUID)> PlayerSanguimancySpells
+        public static Dictionary<ulong, (int, int)> PlayerSanguimancySpells
         {
             get => playerSanguimancySpells;
             set => playerSanguimancySpells = value;
@@ -598,7 +598,7 @@ internal static class Core
         public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
         public static readonly string PlayerSanguimancySpellsJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy_spells.json");
-        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_Stats.json");
+        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
         public static readonly string PlayerWorkerLegacyJson = Path.Combine(Plugin.ConfigPath, "player_worker.json");
         public static readonly string PlayerWarriorLegacyJson = Path.Combine(Plugin.ConfigPath, "player_warrior.json");
         public static readonly string PlayerScholarLegacyJson = Path.Combine(Plugin.ConfigPath, "player_scholar.json");

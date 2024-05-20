@@ -10,9 +10,9 @@ namespace Cobalt.Systems.Legacy
 {
     public class BloodSystem
     {
-        private static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
+        private static readonly int UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
         public static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-        private static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
+        private static readonly int VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
         private static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
         private static readonly int BloodPower = 2; // power for calculating level from xp
 
@@ -32,14 +32,12 @@ namespace Cobalt.Systems.Legacy
             Brute
         }
 
-        public static void UpdateBloodline(EntityManager entityManager, Entity Killer, Entity Victim)
+        public static void UpdateLegacy(Entity Killer, Entity Victim)
         {
-            if (Killer == Victim || entityManager.HasComponent<Minion>(Victim)) return;
-            if (entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>()) return;
-            // want to check for feed events or whatever
+            EntityManager entityManager = Core.EntityManager;
+            if (Killer == Victim || entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>()) return;
             BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
-            User User = entityManager.GetComponentData<User>(userEntity);
 
             //var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
 
@@ -53,10 +51,10 @@ namespace Cobalt.Systems.Legacy
                 isVBlood = false;
             }
             float BloodValue = bloodConsumeSource.BloodQuality * bloodConsumeSource.BloodQuality;
-            if (isVBlood) BloodValue *= VBloodMultiplier;
+            if (isVBlood) BloodValue *= VBloodLegacyMultiplier;
             else
             {
-                BloodValue *= UnitMultiplier;
+                BloodValue *= UnitLegacyMultiplier;
             }
 
             User user = entityManager.GetComponentData<User>(userEntity);
@@ -68,7 +66,7 @@ namespace Cobalt.Systems.Legacy
             if (handler != null)
             {
                 // Check if the player leveled up
-                var xpData = handler.GetExperienceData(steamID);
+                var xpData = handler.GetLegacyData(steamID);
                 float newExperience = xpData.Value + BloodValue;
                 int newLevel = ConvertXpToLevel(newExperience);
                 bool leveledUp = false;
@@ -83,7 +81,7 @@ namespace Cobalt.Systems.Legacy
                     }
                 }
                 var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
-                handler.UpdateExperienceData(steamID, updatedXPData);
+                handler.UpdateLegacyData(steamID, updatedXPData);
                 handler.SaveChanges();
                 NotifyPlayer(entityManager, user, bloodType, BloodValue, leveledUp, newLevel, handler);
             }
@@ -100,7 +98,6 @@ namespace Cobalt.Systems.Legacy
             if (leveledUp)
             {
                 Entity character = user.LocalCharacter._Entity;
-                Equipment equipment = character.Read<Equipment>();
                 message = $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
@@ -138,7 +135,7 @@ namespace Cobalt.Systems.Legacy
 
         private static float GetXp(ulong steamID, IBloodHandler handler)
         {
-            var xpData = handler.GetExperienceData(steamID);
+            var xpData = handler.GetLegacyData(steamID);
             return xpData.Value;
         }
 

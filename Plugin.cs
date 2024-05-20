@@ -3,10 +3,8 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using ProjectM;
 using System.Reflection;
 using VampireCommandFramework;
-using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Cobalt
 {
@@ -33,8 +31,8 @@ namespace Cobalt
 
         public static ConfigEntry<bool> BloodSystem;
         public static ConfigEntry<int> MaxBloodLevel;
-        public static ConfigEntry<int> UnitBloodMultiplier;
-        public static ConfigEntry<int> VBloodBloodMultiplier;
+        public static ConfigEntry<int> UnitLegacyMultiplier;
+        public static ConfigEntry<int> VBloodLegacyMultipler;
 
         public static ConfigEntry<bool> ProfessionSystem;
         public static ConfigEntry<int> MaxProfessionLevel;
@@ -67,8 +65,8 @@ namespace Cobalt
 
             BloodSystem = Instance.Config.Bind("Config", "BloodSystem", false, "Enable or disable the blood system.");
             MaxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in sanguimancy.");
-            UnitBloodMultiplier = Instance.Config.Bind("Config", "UnitBloodMultiplier", 5, "The multiplier for blood stats gained from units.");
-            VBloodBloodMultiplier = Instance.Config.Bind("Config", "VBloodBloodMultiplier", 15, "The multiplier for blood stats gained from VBlood.");
+            UnitLegacyMultiplier = Instance.Config.Bind("Config", "UnitLegacyMultiplier", 5, "The multiplier for blood stats gained from units.");
+            VBloodLegacyMultipler = Instance.Config.Bind("Config", "VBloodLegacyMultipler", 15, "The multiplier for blood stats gained from VBlood.");
 
             ProfessionSystem = Instance.Config.Bind("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
             MaxProfessionLevel = Instance.Config.Bind("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");

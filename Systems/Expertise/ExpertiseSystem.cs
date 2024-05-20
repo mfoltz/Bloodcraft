@@ -95,8 +95,7 @@ namespace Cobalt.Systems.Expertise
                 Entity character = user.LocalCharacter._Entity;
                 Equipment equipment = character.Read<Equipment>();
                 message = $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]";
-                GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
-                //GearOverride.SetLevel(user.LocalCharacter._Entity, VWorld.Server.EntityManager);
+                if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
