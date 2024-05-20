@@ -89,7 +89,7 @@ namespace Cobalt.Systems.Expertise
             {
                 Entity character = user.LocalCharacter._Entity;
                 Equipment equipment = character.Read<Equipment>();
-                message = $"{weaponType} improved to [<color=white>{newLevel}</color>]";
+                message = $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]";
                 GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
                 //GearOverride.SetLevel(user.LocalCharacter._Entity, VWorld.Server.EntityManager);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
@@ -98,7 +98,7 @@ namespace Cobalt.Systems.Expertise
             {
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> {weaponType} expertise (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType}</color> expertise (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }

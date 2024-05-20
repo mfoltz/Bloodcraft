@@ -2,9 +2,15 @@
 using Cobalt.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.CastleBuilding.Placement;
+using ProjectM.CastleBuilding.Systems;
+using ProjectM.Gameplay;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -18,29 +24,6 @@ namespace Cobalt.Hooks
     [HarmonyPatch]
     public class EquipmentPatch
     {
-        [HarmonyPatch(typeof(PreviewPlacementBuffSystem), nameof(PreviewPlacementBuffSystem.OnUpdate))]
-        [HarmonyPostfix]
-        private static void PreviewPlacementBuffSystemPostfix(PreviewPlacementBuffSystem __instance)
-        {
-            Core.Log.LogInfo("PreviewPlacementBuffSystem Postfix...");
-            NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    entity.LogComponentTypes();
-                }
-            }
-            catch (Exception e)
-            {
-                Core.Log.LogError($"Exited PreviewPlacementBuffSystem early: {e}");
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
         [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
         [HarmonyPostfix]
         private static void WeaponLevelPostfix(WeaponLevelSystem_Spawn __instance)
@@ -123,19 +106,20 @@ namespace Cobalt.Hooks
         [HarmonyPrefix]
         private static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
         {
-            if (!Plugin.LevelingSystem.Value) return;
+            if (!Plugin.ExpertiseSystem.Value) return;
             NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
             try
             {
                 foreach (var entity in entities)
                 {
+                    if (!entity.Has<WeaponLevel>()) continue;
                     if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;
                         ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
                         ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                         ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
+
                         /*
                         if (character.Has<BloodQualityBuff>())
                         {
@@ -169,7 +153,7 @@ namespace Cobalt.Hooks
         private static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
         {
             if (!Plugin.LevelingSystem.Value) return;
-            Core.Log.LogInfo("ModifyUnitStatBuffSystem_Spawn Postfix...");
+            //Core.Log.LogInfo("ModifyUnitStatBuffSystem_Spawn Postfix...");
             NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
             try
             {
@@ -180,29 +164,6 @@ namespace Cobalt.Hooks
                         EntityOwner entityOwner = entity.Read<EntityOwner>();
                         GearOverride.SetLevel(entityOwner.Owner);
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError(ex);
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-
-        [HarmonyPatch(typeof(ProjectM.Shared.Systems.ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
-        [HarmonyPostfix]
-        private static void OnUpdatePostix(ScriptSpawnServer __instance)
-        {
-            Core.Log.LogInfo("ScriptSpawnServer Postfix...");
-            NativeArray<Entity> entities = __instance.__query_1231292176_0.ToEntityArray(Allocator.TempJob);
-            try
-            {
-                foreach (var entity in entities)
-                {
-                    entity.LogComponentTypes();
                 }
             }
             catch (Exception ex)
@@ -267,31 +228,59 @@ namespace Cobalt.Hooks
                     Entity inventory = inventoryChangedEvent.InventoryEntity;
                     if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
-                        if (!inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>()) continue;
-                        ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                        ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
-                        IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
-                        if (handler != null)
+                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
                         {
-                            WeaponLevelSource weaponLevelSource = new()
+                            ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                            ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
+                            IWeaponExpertiseHandler handler = WeaponExpertiseHandlerFactory.GetWeaponExpertiseHandler(weaponType);
+                            if (handler != null)
                             {
-                                Level = ExpertiseSystem.ConvertXpToLevel(handler.GetExperienceData(steamId).Value)
-                            };
-                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                                WeaponLevelSource weaponLevelSource = new()
+                                {
+                                    Level = ExpertiseSystem.ConvertXpToLevel(handler.GetExperienceData(steamId).Value)
+                                };
+                                inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                            }
+                        }
+                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>())
+                        {
+                            ArmorLevelSource armorLevelSource = inventoryChangedEvent.ItemEntity.Read<ArmorLevelSource>();
+                            armorLevelSource.Level = 0f;
+                            inventoryChangedEvent.ItemEntity.Write(armorLevelSource);
                         }
                     }
                     else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Removed) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                     {
-                        if (!inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>()) continue;
-                        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
-                        WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<WeaponLevelSource>();
-                        inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
+                        {
+                            PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
+                            WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<WeaponLevelSource>();
+                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                        }
+                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>())
+                        {
+                            PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
+                            ArmorLevelSource armorLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<ArmorLevelSource>();
+                            inventoryChangedEvent.ItemEntity.Write(armorLevelSource);
+                        }
                     }
                     else if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())
                     {
                         Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
                         NetworkId networkId = inventory.Read<InventoryConnection>().InventoryOwner.Read<NetworkId>();
                         ulong steamId = userEntity.Read<User>().PlatformId;
+                        if (inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
+                        {
+                            WeaponLevelSource weaponLevelSource = inventoryChangedEvent.ItemEntity.Read<WeaponLevelSource>();
+                            weaponLevelSource.Level = 0f;
+                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                        }
+                        else if (inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>())
+                        {
+                            ArmorLevelSource armorLevelSource = inventoryChangedEvent.ItemEntity.Read<ArmorLevelSource>();
+                            armorLevelSource.Level = 0f;
+                            inventoryChangedEvent.ItemEntity.Write(armorLevelSource);
+                        }
                         if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(networkId, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
                         {
                             bool jobExists = false;
@@ -542,7 +531,7 @@ namespace Cobalt.Hooks
 
                 player.Write(equipment);
 
-                Core.Log.LogInfo($"Set GearScore to {playerLevel}.");
+                //Core.Log.LogInfo($"Set GearScore to {playerLevel}.");
             }
         }
 

@@ -56,7 +56,7 @@ namespace Cobalt.Systems.Professions
                         return new MiningHandler();
                     if (itemTypeName.Contains("weapon"))
                         return new BlacksmithingHandler();
-                    if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag"))
+                    if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag") || itemTypeName.Contains("cloth"))
                         return new TailoringHandler();
                     if (itemTypeName.Contains("fish"))
                         return new FishingHandler();

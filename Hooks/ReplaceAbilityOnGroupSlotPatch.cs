@@ -19,6 +19,7 @@ namespace Cobalt.Hooks
             {
                 foreach (Entity entity in entities)
                 {
+                    entity.LogComponentTypes();
                     if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;

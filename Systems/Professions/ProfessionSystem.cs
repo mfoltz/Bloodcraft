@@ -1,8 +1,11 @@
 ﻿using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using ProjectM.UI;
 using StableNameDotNet;
 using Stunlock.Core;
+using Stunlock.Localization;
 using System.Text.RegularExpressions;
 using Unity.Collections;
 using Unity.Entities;
