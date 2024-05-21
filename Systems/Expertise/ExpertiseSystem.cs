@@ -1,4 +1,4 @@
-﻿using Bloodcraft.Hooks;
+﻿using Bloodcraft.Patches;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;

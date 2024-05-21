@@ -1,4 +1,4 @@
-using Bloodcraft.Hooks;
+using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using Stunlock.Core;

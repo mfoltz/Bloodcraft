@@ -1,16 +1,11 @@
 using BepInEx.Logging;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared.Systems;
 using Stunlock.Core;
-using System.Collections;
 using System.Text.Json;
 using Unity.Entities;
-using UnityEngine;
 
 namespace Bloodcraft;
 

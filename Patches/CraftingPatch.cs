@@ -8,7 +8,7 @@ using Unity.Entities;
 using static Bloodcraft.Systems.Professions.ProfessionUtilities;
 using User = ProjectM.Network.User;
 
-namespace Bloodcraft.Hooks;
+namespace Bloodcraft.Patches;
 
 public class CraftingPatch
 {

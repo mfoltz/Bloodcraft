@@ -5,7 +5,7 @@ using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
-namespace Bloodcraft.Hooks
+namespace Bloodcraft.Patches
 {
     [HarmonyPatch]
     public class ServerBootstrapPatches

@@ -5,7 +5,7 @@ using ProjectM;
 using Unity.Collections;
 using ProfessionSystem = Bloodcraft.Systems.Professions.ProfessionSystem;
 
-namespace Bloodcraft.Hooks;
+namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 public class DeathEventListenerSystem_Patch

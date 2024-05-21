@@ -1,4 +1,4 @@
-using Bloodcraft.Hooks;
+using Bloodcraft.Patches;
 using Bloodcraft.Systems.Experience;
 using ProjectM.Network;
 using VampireCommandFramework;

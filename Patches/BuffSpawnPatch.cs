@@ -1,4 +1,4 @@
-﻿using Bloodcraft.Hooks;
+﻿using Bloodcraft.Patches;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;

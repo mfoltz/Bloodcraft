@@ -11,7 +11,7 @@ using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponStats;
 using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
-namespace Bloodcraft.Hooks
+namespace Bloodcraft.Patches
 {
     [HarmonyPatch]
     public class EquipmentPatch
