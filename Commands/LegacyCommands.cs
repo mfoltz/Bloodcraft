@@ -83,15 +83,11 @@ namespace Cobalt.Commands
             }
 
             ulong steamId = ctx.Event.User.PlatformId;
-            //var xpData = BloodHandler.GetExperienceData(steamId);
-            Entity character = ctx.Event.SenderCharacterEntity;
-            Equipment equipment = character.Read<Equipment>();
-            // Update Legacy level and XP
             var xpData = new KeyValuePair<int, float>(level, BloodSystem.ConvertLevelToXp(level));
             BloodHandler.UpdateLegacyData(steamId, xpData);
             BloodHandler.SaveChanges();
 
-            ctx.Reply($"Legacy for {BloodHandler.GetBloodType()} set to {level}.");
+            ctx.Reply($"Legacy for <color=red>{BloodHandler.GetBloodType()}</color> set to {level}.");
         }
     }
 }

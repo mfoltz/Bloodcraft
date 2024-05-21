@@ -7,7 +7,7 @@ namespace Cobalt.Commands
 {
     public static class LevelingCommands
     {
-        [Command(name: "logLevelingProgress", shortHand: "log leveling", adminOnly: false, usage: ".log leveling", description: "Toggles leveling progress logging.")]
+        [Command(name: "logLevelingProgress", shortHand: "log level", adminOnly: false, usage: ".log level", description: "Toggles leveling progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
         {
             if (!Plugin.LevelingSystem.Value)
@@ -24,7 +24,7 @@ namespace Cobalt.Commands
             ctx.Reply($"Leveling progress logging is now {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "getLevelingProgress", shortHand: "get leveling", adminOnly: false, usage: ".get leveling", description: "Display current leveling progress.")]
+        [Command(name: "getLevelingProgress", shortHand: "get level", adminOnly: false, usage: ".get level", description: "Display current leveling progress.")]
         public static void GetLevelCommand(ChatCommandContext ctx)
         {
             if (!Plugin.LevelingSystem.Value)

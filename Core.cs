@@ -61,7 +61,6 @@ internal static class Core
                 return world;
             }
         }
-
         return null;
     }
 
@@ -362,7 +361,6 @@ internal static class Core
             {"ReaperExpertise", Core.JsonFiles.PlayerReaperExpertise},
             {"LongbowExpertise", Core.JsonFiles.PlayerLongbowExpertiseJson},
             {"WhipExpertise", Core.JsonFiles.PlayerWhipExpertiseJson},
-            {"UnarmedExpertise", Core.JsonFiles.PlayerUnarmedExpertiseJson},
             {"Sanguimancy", Core.JsonFiles.PlayerSanguimancyJson},
             {"SanguimancySpells", Core.JsonFiles.PlayerSanguimancySpellsJson},
             {"WeaponStats", Core.JsonFiles.PlayerWeaponStatsJson},
@@ -573,41 +571,41 @@ internal static class Core
 
     public class JsonFiles
     {
-        public static readonly string PlayerExperienceJson = Path.Combine(Plugin.ConfigPath, "player_experience.json");
-        public static readonly string PlayerPrestigeJson = Path.Combine(Plugin.ConfigPath, "player_prestige.json");
+        public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerExperiencePath, "player_experience.json");
+        public static readonly string PlayerPrestigeJson = Path.Combine(Plugin.PlayerExperiencePath, "player_prestige.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
-        public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.ConfigPath, "player_woodcutting.json");
-        public static readonly string PlayerMiningJson = Path.Combine(Plugin.ConfigPath, "player_mining.json");
-        public static readonly string PlayerFishingJson = Path.Combine(Plugin.ConfigPath, "player_fishing.json");
-        public static readonly string PlayerBlacksmithingJson = Path.Combine(Plugin.ConfigPath, "player_blacksmithing.json");
-        public static readonly string PlayerTailoringJson = Path.Combine(Plugin.ConfigPath, "player_tailoring.json");
-        public static readonly string PlayerJewelcraftingJson = Path.Combine(Plugin.ConfigPath, "player_jewelcrafting.json");
-        public static readonly string PlayerAlchemyJson = Path.Combine(Plugin.ConfigPath, "player_alchemy.json");
-        public static readonly string PlayerHarvestingJson = Path.Combine(Plugin.ConfigPath, "player_harvesting.json");
-        public static readonly string PlayerSwordExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_sword.json");
-        public static readonly string PlayerAxeExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_axe.json");
-        public static readonly string PlayerMaceExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_mace.json");
-        public static readonly string PlayerSpearExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_spear.json");
-        public static readonly string PlayerCrossbowExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_crossbow.json");
-        public static readonly string PlayerGreatSwordExpertise = Path.Combine(Plugin.ConfigPath, "player_greatsword.json");
-        public static readonly string PlayerSlashersExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_slashers.json");
-        public static readonly string PlayerPistolsExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_pistols.json");
-        public static readonly string PlayerReaperExpertise = Path.Combine(Plugin.ConfigPath, "player_reaper.json");
-        public static readonly string PlayerLongbowExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_longbow.json");
-        public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_unarmed.json");
-        public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.ConfigPath, "player_whip.json");
-        public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy.json");
-        public static readonly string PlayerSanguimancySpellsJson = Path.Combine(Plugin.ConfigPath, "player_sanguimancy_spells.json");
-        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.ConfigPath, "player_weapon_stats.json");
-        public static readonly string PlayerWorkerLegacyJson = Path.Combine(Plugin.ConfigPath, "player_worker.json");
-        public static readonly string PlayerWarriorLegacyJson = Path.Combine(Plugin.ConfigPath, "player_warrior.json");
-        public static readonly string PlayerScholarLegacyJson = Path.Combine(Plugin.ConfigPath, "player_scholar.json");
-        public static readonly string PlayerRogueLegacyJson = Path.Combine(Plugin.ConfigPath, "player_rogue.json");
-        public static readonly string PlayerMutantLegacyJson = Path.Combine(Plugin.ConfigPath, "player_mutant.json");
-        public static readonly string PlayerVBloodLegacyJson = Path.Combine(Plugin.ConfigPath, "player_vblood.json");
-        public static readonly string PlayerDraculinLegacyJson = Path.Combine(Plugin.ConfigPath, "player_draculin.json");
-        public static readonly string PlayerImmortalLegacyJson = Path.Combine(Plugin.ConfigPath, "player_immortal.json");
-        public static readonly string PlayerCreatureLegacyJson = Path.Combine(Plugin.ConfigPath, "player_creature.json");
-        public static readonly string PlayerBruteLegacyJson = Path.Combine(Plugin.ConfigPath, "player_brute.json");
+        public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
+        public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
+        public static readonly string PlayerFishingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_fishing.json");
+        public static readonly string PlayerBlacksmithingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_blacksmithing.json");
+        public static readonly string PlayerTailoringJson = Path.Combine(Plugin.PlayerProfessionPath, "player_tailoring.json");
+        public static readonly string PlayerJewelcraftingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_jewelcrafting.json");
+        public static readonly string PlayerAlchemyJson = Path.Combine(Plugin.PlayerProfessionPath, "player_alchemy.json");
+        public static readonly string PlayerHarvestingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_harvesting.json");
+        public static readonly string PlayerSwordExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sword.json");
+        public static readonly string PlayerAxeExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_axe.json");
+        public static readonly string PlayerMaceExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_mace.json");
+        public static readonly string PlayerSpearExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_spear.json");
+        public static readonly string PlayerCrossbowExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_crossbow.json");
+        public static readonly string PlayerGreatSwordExpertise = Path.Combine(Plugin.PlayerExpertisePath, "player_greatsword.json");
+        public static readonly string PlayerSlashersExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_slashers.json");
+        public static readonly string PlayerPistolsExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_pistols.json");
+        public static readonly string PlayerReaperExpertise = Path.Combine(Plugin.PlayerExpertisePath, "player_reaper.json");
+        public static readonly string PlayerLongbowExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_longbow.json");
+        public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_unarmed.json");
+        public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_whip.json");
+        public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sanguimancy.json");
+        public static readonly string PlayerSanguimancySpellsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sanguimancy_spells.json");
+        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_weapon_stats.json");
+        public static readonly string PlayerWorkerLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_worker.json");
+        public static readonly string PlayerWarriorLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_warrior.json");
+        public static readonly string PlayerScholarLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_scholar.json");
+        public static readonly string PlayerRogueLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_rogue.json");
+        public static readonly string PlayerMutantLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_mutant.json");
+        public static readonly string PlayerVBloodLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_vblood.json");
+        public static readonly string PlayerDraculinLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_draculin.json");
+        public static readonly string PlayerImmortalLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_immortal.json");
+        public static readonly string PlayerCreatureLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_creature.json");
+        public static readonly string PlayerBruteLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_brute.json");
     }
 }

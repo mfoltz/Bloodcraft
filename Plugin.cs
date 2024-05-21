@@ -16,6 +16,10 @@ namespace Cobalt
         public static ManualLogSource LogInstance => Instance.Log;
 
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
+        public static readonly string PlayerExperiencePath = Path.Combine(ConfigPath, "Leveling");
+        public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
+        public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
+        public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
 
         public static ConfigEntry<bool> LevelingSystem;
         public static ConfigEntry<int> MaxPlayerLevel;
@@ -51,6 +55,12 @@ namespace Cobalt
 
         private static void InitConfig()
         {
+            CreateDirectories(ConfigPath);
+            CreateDirectories(PlayerExperiencePath);
+            CreateDirectories(PlayerExpertisePath);
+            CreateDirectories(PlayerBloodPath);
+            CreateDirectories(PlayerProfessionPath);
+
             LevelingSystem = Instance.Config.Bind("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
             MaxPlayerLevel = Instance.Config.Bind("Config", "MaxLevel", 90, "The maximum level a player can reach.");
             UnitLevelingMultiplier = Instance.Config.Bind("Config", "UnitLevelingMultiplier", 5, "The multiplier for experience gained from units.");
@@ -73,9 +83,13 @@ namespace Cobalt
             ProfessionMultiplier = Instance.Config.Bind("Config", "ProfessionMultiplier", 10, "The multiplier for profession experience gained.");
 
             // Initialize configuration settings
-            if (!Directory.Exists(ConfigPath))
+        }
+
+        private static void CreateDirectories(string path)
+        {
+            if (!Directory.Exists(path))
             {
-                Directory.CreateDirectory(ConfigPath);
+                Directory.CreateDirectory(path);
             }
         }
 
@@ -83,16 +97,7 @@ namespace Cobalt
         {
             Config.Clear();
             _harmony.UnpatchSelf();
-            //SaveAllData();  // Call a method that saves all data types.
             return true;
-        }
-
-        public static void SaveAllData()
-        {
-            foreach (var saveFunction in saveFunctions)
-            {
-                saveFunction();
-            }
         }
 
         private static void LoadAllData()
@@ -102,34 +107,6 @@ namespace Cobalt
                 loadFunction();
             }
         }
-
-        private static readonly Action[] saveFunctions =
-        [
-            Core.DataStructures.SavePlayerExperience,
-            Core.DataStructures.SavePlayerPrestige,
-            Core.DataStructures.SavePlayerBools,
-            Core.DataStructures.SavePlayerWoodcutting,
-            Core.DataStructures.SavePlayerMining,
-            Core.DataStructures.SavePlayerFishing,
-            Core.DataStructures.SavePlayerBlacksmithing,
-            Core.DataStructures.SavePlayerTailoring,
-            Core.DataStructures.SavePlayerJewelcrafting,
-            Core.DataStructures.SavePlayerAlchemy,
-            Core.DataStructures.SavePlayerHarvesting,
-            Core.DataStructures.SavePlayerSwordExpertise,
-            Core.DataStructures.SavePlayerAxeExpertise,
-            Core.DataStructures.SavePlayerMaceExpertise,
-            Core.DataStructures.SavePlayerSpearExpertise,
-            Core.DataStructures.SavePlayerCrossbowExpertise,
-            Core.DataStructures.SavePlayerGreatSwordExpertise,
-            Core.DataStructures.SavePlayerSlashersExpertise,
-            Core.DataStructures.SavePlayerPistolsExpertise,
-            Core.DataStructures.SavePlayerReaperExpertise,
-            Core.DataStructures.SavePlayerLongbowExpertise,
-            Core.DataStructures.SavePlayerWhipExpertise,
-            Core.DataStructures.SavePlayerSanguimancy,
-            Core.DataStructures.SavePlayerWeaponStats,
-        ];
 
         private static readonly Action[] loadFunctions =
         [

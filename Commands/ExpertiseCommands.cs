@@ -58,7 +58,7 @@ namespace Cobalt.Commands
             {
                 bools["ExpertiseLogging"] = !bools["ExpertiseLogging"];
             }
-            ctx.Reply($"Weapon expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            ctx.Reply($"Expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
         [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws [Stat]", description: "Choose a weapon stat to enhance based on your weapon Expertise.")]
@@ -94,8 +94,7 @@ namespace Cobalt.Commands
             // Choose a stat for the specific weapon stats instance
             if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, weaponStatType))
             {
-                ctx.Reply($"{statType} has been chosen for {weaponType} and will apply after reequiping.");
-                //ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, weaponEntity);
+                ctx.Reply($"<color=#00FFFF>{statType}</color> has been chosen for <color=#c0c0c0>{weaponType}</color> and will apply after reequiping.");
                 Core.DataStructures.SavePlayerWeaponStats();
             }
             else
@@ -122,9 +121,7 @@ namespace Cobalt.Commands
                 return;
             }
 
-            //ModifyUnitStatBuffUtils.ResetWeaponModifications(weapon);
             PlayerWeaponUtilities.ResetStats(steamID, weaponType);
-            //Core.DataStructures.SavePlayerWeaponStats();
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
         }
 
@@ -144,6 +141,7 @@ namespace Cobalt.Commands
             if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weapon, true, out var weaponType))
             {
                 ctx.Reply("Invalid weapon type.");
+                return;
             }
             var expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (expertiseHandler == null)
@@ -153,10 +151,9 @@ namespace Cobalt.Commands
             }
 
             ulong steamId = ctx.Event.User.PlatformId;
-            //var xpData = ExpertiseHandler.GetExperienceData(steamId);
             Entity character = ctx.Event.SenderCharacterEntity;
             Equipment equipment = character.Read<Equipment>();
-            // Update Expertise level and XP
+
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
             expertiseHandler.UpdateExpertiseData(steamId, xpData);
             expertiseHandler.SaveChanges();
@@ -204,6 +201,7 @@ namespace Cobalt.Commands
                 {
                     ctx.Reply("Spells set.");
                 }
+                Core.DataStructures.SavePlayerBools();
             }
             else
             {
