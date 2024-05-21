@@ -42,7 +42,7 @@ internal static class Core
 
         // Initialize utility services
 
-        Core.Log.LogInfo("Cobalt initialized...");
+        Log.LogInfo("Cobalt initialized...");
 
         hasInitialized = true;
     }
@@ -334,41 +334,41 @@ internal static class Core
         // file paths dictionary
         private static readonly Dictionary<string, string> filePaths = new()
         {
-            {"Experience", Core.JsonFiles.PlayerExperienceJson},
-            {"Prestige", Core.JsonFiles.PlayerPrestigeJson },
-            {"PlayerBools", Core.JsonFiles.PlayerBoolsJson},
-            {"Woodcutting", Core.JsonFiles.PlayerWoodcuttingJson},
-            {"Mining", Core.JsonFiles.PlayerMiningJson},
-            {"Fishing", Core.JsonFiles.PlayerFishingJson},
-            {"Blacksmithing", Core.JsonFiles.PlayerBlacksmithingJson},
-            {"Tailoring", Core.JsonFiles.PlayerTailoringJson},
-            {"Jewelcrafting", Core.JsonFiles.PlayerJewelcraftingJson},
-            {"Alchemy", Core.JsonFiles.PlayerAlchemyJson},
-            {"Harvesting", Core.JsonFiles.PlayerHarvestingJson},
-            {"SwordExpertise", Core.JsonFiles.PlayerSwordExpertiseJson },
-            {"AxeExpertise", Core.JsonFiles.PlayerAxeExpertiseJson},
-            {"MaceExpertise", Core.JsonFiles.PlayerMaceExpertiseJson},
-            {"SpearExpertise", Core.JsonFiles.PlayerSpearExpertiseJson},
-            {"CrossbowExpertise", Core.JsonFiles.PlayerCrossbowExpertiseJson},
-            {"GreatSwordExpertise", Core.JsonFiles.PlayerGreatSwordExpertise},
-            {"SlashersExpertise", Core.JsonFiles.PlayerSlashersExpertiseJson},
-            {"PistolsExpertise", Core.JsonFiles.PlayerPistolsExpertiseJson},
-            {"ReaperExpertise", Core.JsonFiles.PlayerReaperExpertise},
-            {"LongbowExpertise", Core.JsonFiles.PlayerLongbowExpertiseJson},
-            {"WhipExpertise", Core.JsonFiles.PlayerWhipExpertiseJson},
-            {"Sanguimancy", Core.JsonFiles.PlayerSanguimancyJson},
-            {"SanguimancySpells", Core.JsonFiles.PlayerSanguimancySpellsJson},
-            {"WeaponStats", Core.JsonFiles.PlayerWeaponStatsJson},
-            {"WorkerLegacy", Core.JsonFiles.PlayerWorkerLegacyJson},
-            {"WarriorLegacy", Core.JsonFiles.PlayerWarriorLegacyJson},
-            {"ScholarLegacy", Core.JsonFiles.PlayerScholarLegacyJson},
-            {"RogueLegacy", Core.JsonFiles.PlayerRogueLegacyJson},
-            {"MutantLegacy", Core.JsonFiles.PlayerMutantLegacyJson},
-            {"VBloodLegacy", Core.JsonFiles.PlayerVBloodLegacyJson},
-            {"DraculinLegacy", Core.JsonFiles.PlayerDraculinLegacyJson},
-            {"ImmortalLegacy", Core.JsonFiles.PlayerImmortalLegacyJson},
-            {"CreatureLegacy", Core.JsonFiles.PlayerCreatureLegacyJson},
-            {"BruteLegacy", Core.JsonFiles.PlayerBruteLegacyJson},
+            {"Experience", JsonFiles.PlayerExperienceJson},
+            {"Prestige", JsonFiles.PlayerPrestigeJson },
+            {"PlayerBools", JsonFiles.PlayerBoolsJson},
+            {"Woodcutting", JsonFiles.PlayerWoodcuttingJson},
+            {"Mining", JsonFiles.PlayerMiningJson},
+            {"Fishing", JsonFiles.PlayerFishingJson},
+            {"Blacksmithing", JsonFiles.PlayerBlacksmithingJson},
+            {"Tailoring", JsonFiles.PlayerTailoringJson},
+            {"Jewelcrafting", JsonFiles.PlayerJewelcraftingJson},
+            {"Alchemy", JsonFiles.PlayerAlchemyJson},
+            {"Harvesting", JsonFiles.PlayerHarvestingJson},
+            {"SwordExpertise", JsonFiles.PlayerSwordExpertiseJson },
+            {"AxeExpertise", JsonFiles.PlayerAxeExpertiseJson},
+            {"MaceExpertise", JsonFiles.PlayerMaceExpertiseJson},
+            {"SpearExpertise", JsonFiles.PlayerSpearExpertiseJson},
+            {"CrossbowExpertise", JsonFiles.PlayerCrossbowExpertiseJson},
+            {"GreatSwordExpertise", JsonFiles.PlayerGreatSwordExpertise},
+            {"SlashersExpertise", JsonFiles.PlayerSlashersExpertiseJson},
+            {"PistolsExpertise", JsonFiles.PlayerPistolsExpertiseJson},
+            {"ReaperExpertise", JsonFiles.PlayerReaperExpertise},
+            {"LongbowExpertise", JsonFiles.PlayerLongbowExpertiseJson},
+            {"WhipExpertise", JsonFiles.PlayerWhipExpertiseJson},
+            {"Sanguimancy", JsonFiles.PlayerSanguimancyJson},
+            {"SanguimancySpells", JsonFiles.PlayerSanguimancySpellsJson},
+            {"WeaponStats", JsonFiles.PlayerWeaponStatsJson},
+            {"WorkerLegacy", JsonFiles.PlayerWorkerLegacyJson},
+            {"WarriorLegacy", JsonFiles.PlayerWarriorLegacyJson},
+            {"ScholarLegacy", JsonFiles.PlayerScholarLegacyJson},
+            {"RogueLegacy", JsonFiles.PlayerRogueLegacyJson},
+            {"MutantLegacy", JsonFiles.PlayerMutantLegacyJson},
+            {"VBloodLegacy", JsonFiles.PlayerVBloodLegacyJson},
+            {"DraculinLegacy", JsonFiles.PlayerDraculinLegacyJson},
+            {"ImmortalLegacy", JsonFiles.PlayerImmortalLegacyJson},
+            {"CreatureLegacy", JsonFiles.PlayerCreatureLegacyJson},
+            {"BruteLegacy", JsonFiles.PlayerBruteLegacyJson},
         };
 
         // Generic method to save any type of dictionary.
@@ -381,25 +381,32 @@ internal static class Core
                 // If the file does not exist, create a new empty file to avoid errors on initial load.
                 File.Create(path).Dispose();
                 dataStructure = []; // Initialize as empty if file does not exist.
-                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                Log.LogInfo($"{key} file created as it did not exist.");
                 return;
             }
-
             try
             {
                 string json = File.ReadAllText(path);
-                var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
-                dataStructure = data ?? []; // Ensure non-null assignment.
-                Core.Log.LogInfo($"{key} data loaded successfully.");
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    // Handle the empty file case
+                    //Log.LogWarning($"{key} data file is empty or contains only whitespace.");
+                    dataStructure = []; // Provide default empty dictionary
+                }
+                else
+                {
+                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
+                    dataStructure = data ?? []; // Ensure non-null assignment
+                }
             }
             catch (IOException ex)
             {
-                Core.Log.LogError($"Error reading {key} data from file: {ex.Message}");
+                Log.LogError($"Error reading {key} data from file: {ex.Message}");
                 dataStructure = []; // Provide default empty dictionary on error.
             }
             catch (JsonException ex)
             {
-                Core.Log.LogError($"JSON deserialization error when loading {key} data: {ex.Message}");
+                Log.LogError($"JSON deserialization error when loading {key} data: {ex.Message}");
                 dataStructure = []; // Provide default empty dictionary on error.
             }
         }
@@ -485,11 +492,11 @@ internal static class Core
             }
             catch (IOException ex)
             {
-                Core.Log.LogError($"Failed to write {key} data to file: {ex.Message}");
+                Log.LogError($"Failed to write {key} data to file: {ex.Message}");
             }
             catch (JsonException ex)
             {
-                Core.Log.LogError($"JSON serialization error when saving {key} data: {ex.Message}");
+                Log.LogError($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
 

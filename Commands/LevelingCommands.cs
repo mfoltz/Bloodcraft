@@ -54,7 +54,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Leveling is not enabled.");
                 return;
             }
-            User foundUser = ServerBootstrapPatches.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
+            User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
             if (foundUser.CharacterName.IsEmpty)
             {
                 ctx.Reply("Player not found.");
@@ -72,7 +72,7 @@ namespace Bloodcraft.Commands
                 var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
                 Core.DataStructures.PlayerExperience[steamId] = xpData;
                 Core.DataStructures.SavePlayerExperience();
-                ctx.Reply($"Level set to {level} for {foundUser.CharacterName}.");
+                ctx.Reply($"Level set to <color=white>{level}</color> for {foundUser.CharacterName}.");
             }
             else
             {

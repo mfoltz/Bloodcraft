@@ -11,12 +11,14 @@ using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
-[HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
-public static class GameplayEventsSystemPatch
+[HarmonyPatch]
+internal static class CreateGameplayEventOnDestroySystemPatch
 {
-    private const int BaseFishingXP = 100;
+    const int BaseFishingXP = 100;
 
-    public static void Prefix(CreateGameplayEventOnDestroySystem __instance)
+    [HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(CreateGameplayEventOnDestroySystem __instance)
     {
         NativeArray<Entity> entities = __instance.__query_1297357609_0.ToEntityArray(Allocator.Temp);
         try
@@ -65,7 +67,7 @@ public static class GameplayEventsSystemPatch
 
                     if (handler != null)
                     {
-                        ProfessionSystem.SetProfession(toProcess, user, steamId, BaseFishingXP * multiplier, handler);
+                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
                         ProfessionSystem.GiveProfessionBonus(toProcess, target, user, steamId, handler);
                     }
                 }

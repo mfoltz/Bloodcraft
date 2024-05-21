@@ -97,14 +97,14 @@ namespace Bloodcraft.Systems.Legacy
 
             if (leveledUp)
             {
-                message = $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]";
+                message = $"<color=red>{bloodType}</color> lineage improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             else
             {
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> lineage (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }

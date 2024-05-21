@@ -2,6 +2,7 @@
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
@@ -101,7 +102,7 @@ namespace Bloodcraft.Systems.Expertise
             {
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
                 {
-                    message = $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType}</color> expertise (<color=white>{levelProgress}%</color>)";
+                    message = $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)";
                     ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
                 }
             }
@@ -156,19 +157,6 @@ namespace Bloodcraft.Systems.Expertise
             }
 
             throw new InvalidOperationException("Unrecognized weapon type");
-        }
-
-        public static WeaponStatType GetWeaponStatTypeFromString(string statType)
-        {
-            foreach (WeaponStatType type in Enum.GetValues(typeof(WeaponStatType)))
-            {
-                if (statType.ToLower().Contains(type.ToString().ToLower()))
-                {
-                    return type;
-                }
-            }
-
-            throw new InvalidOperationException("Unrecognized stat type");
         }
     }
 }

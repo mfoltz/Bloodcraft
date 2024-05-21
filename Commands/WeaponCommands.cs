@@ -8,7 +8,7 @@ using static Bloodcraft.Systems.Expertise.WeaponStats;
 
 namespace Bloodcraft.Commands
 {
-    public static class ExpertiseCommands
+    public static class WeaponCommands
     {
         [Command(name: "getExpertiseProgress", shortHand: "get expertise", adminOnly: false, usage: ".get expertise", description: "Display your current Expertise progress.")]
         public static void GetExpertiseCommand(ChatCommandContext ctx)
@@ -19,9 +19,7 @@ namespace Bloodcraft.Commands
                 return;
             }
             Entity character = ctx.Event.SenderCharacterEntity;
-            Equipment equipment = character.Read<Equipment>();
-            PrefabGUID weaponGuid = equipment.WeaponSlot.SlotEntity._Entity.Read<PrefabGUID>();
-            ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(weaponGuid);
+            ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler == null)

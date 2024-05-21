@@ -69,13 +69,8 @@ namespace Bloodcraft.Systems.Professions
                     ProfessionValue *= ProfessionUtilities.GetWoodcuttingModifier(prefabGUID);
                 }
 
-                SetProfession(prefabGUID, user, SteamID, ProfessionValue, handler);
-                // retrieve level and award bonus drop table item to inventory every 10 levels?
+                SetProfession(user, SteamID, ProfessionValue, handler);
                 GiveProfessionBonus(Victim.Read<PrefabGUID>(), Killer, user, SteamID, handler);
-            }
-            else
-            {
-                //Core.Log.LogError($"No handler found for profession...");
             }
         }
 
@@ -153,7 +148,7 @@ namespace Bloodcraft.Systems.Professions
             }
         }
 
-        public static void SetProfession(PrefabGUID prefabGUID, User user, ulong steamID, float value, IProfessionHandler handler)
+        public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
         {
             EntityManager entityManager = Core.Server.EntityManager;
 
@@ -161,10 +156,10 @@ namespace Bloodcraft.Systems.Professions
             handler.SaveChanges();
 
             var xpData = handler.GetExperienceData(steamID);
-            UpdateProfessionExperience(prefabGUID, entityManager, user, steamID, xpData, value, handler);
+            UpdateProfessionExperience(entityManager, user, steamID, xpData, value, handler);
         }
 
-        private static void UpdateProfessionExperience(PrefabGUID prefabGUID, EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
+        private static void UpdateProfessionExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
         {
             float newExperience = xpData.Value + gainedXP;
             int newLevel = ConvertXpToLevel(newExperience);

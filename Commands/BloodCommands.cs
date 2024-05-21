@@ -6,7 +6,7 @@ using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
 {
-    public static class LegacyCommands
+    public static class BloodCommands
     {
         [Command(name: "getLegacyProgress", shortHand: "get legacy", adminOnly: false, usage: ".get legacy", description: "Display your current Legacy progress.")]
         public static void GetLegacyCommand(ChatCommandContext ctx)
