@@ -16,7 +16,7 @@ namespace Cobalt
         public static ManualLogSource LogInstance => Instance.Log;
 
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
-        public static readonly string PlayerExperiencePath = Path.Combine(ConfigPath, "Leveling");
+        public static readonly string PlayerExperiencePath = Path.Combine(ConfigPath, "ExperienceLeveling");
         public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
         public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
         public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
