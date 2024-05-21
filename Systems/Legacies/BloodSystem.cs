@@ -97,7 +97,6 @@ namespace Bloodcraft.Systems.Legacy
 
             if (leveledUp)
             {
-                Entity character = user.LocalCharacter._Entity;
                 message = $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
