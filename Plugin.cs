@@ -33,6 +33,13 @@ namespace Bloodcraft
         private static ConfigEntry<int> _unitExpertiseMultiplier;
         private static ConfigEntry<int> _vBloodExpertiseMultiplier;
 
+        private static ConfigEntry<float> _physicalPower;
+        private static ConfigEntry<float> _spellPower;
+        private static ConfigEntry<float> _physicalCritChance;
+        private static ConfigEntry<float> _physicalCritDamage;
+        private static ConfigEntry<float> _spellCritChance;
+        private static ConfigEntry<float> _spellCritDamage;
+
         private static ConfigEntry<bool> _bloodSystem;
         private static ConfigEntry<int> _maxBloodLevel;
         private static ConfigEntry<int> _unitLegacyMultiplier;
@@ -53,6 +60,13 @@ namespace Bloodcraft
         public static ConfigEntry<int> MaxExpertiseLevel => _maxExpertiseLevel;
         public static ConfigEntry<int> UnitExpertiseMultiplier => _unitExpertiseMultiplier;
         public static ConfigEntry<int> VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier;
+
+        public static ConfigEntry<float> PhysicalPower => _physicalPower;
+        public static ConfigEntry<float> SpellPower => _spellPower;
+        public static ConfigEntry<float> PhysicalCritChance => _physicalCritChance;
+        public static ConfigEntry<float> PhysicalCritDamage => _physicalCritDamage;
+        public static ConfigEntry<float> SpellCritChance => _spellCritChance;
+        public static ConfigEntry<float> SpellCritDamage => _spellCritDamage;
 
         public static ConfigEntry<bool> BloodSystem => _bloodSystem;
         public static ConfigEntry<int> MaxBloodLevel => _maxBloodLevel;
@@ -92,6 +106,13 @@ namespace Bloodcraft
             _maxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
             _unitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             _vBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBloods.");
+
+            _physicalPower = Instance.Config.Bind("Config", "PhysicalPower", 15f, "The base cap for physical power.");
+            _spellPower = Instance.Config.Bind("Config", "SpellPower", 15f, "The base cap for spell power.");
+            _physicalCritChance = Instance.Config.Bind("Config", "PhysicalCritChance", 0.15f, "The base cap for physical critical strike chance.");
+            _physicalCritDamage = Instance.Config.Bind("Config", "PhysicalCritDamage", 0.75f, "The base cap for physical critical strike damage.");
+            _spellCritChance = Instance.Config.Bind("Config", "SpellCritChance", 0.15f, "The base cap for spell critical strike chance.");
+            _spellCritDamage = Instance.Config.Bind("Config", "SpellCritDamage", 0.75f, "The base cap for spell critical strike damage.");
 
             _bloodSystem = Instance.Config.Bind("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
             _maxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");

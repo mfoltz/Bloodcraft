@@ -1,6 +1,7 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
+using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -123,12 +124,18 @@ namespace Bloodcraft.Commands
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
         }
 
-        [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Weapon] [Level]", description: "Sets your weapon expertise level.")]
-        public static void SetExpertiseCommand(ChatCommandContext ctx, string weapon, int level)
+        [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Name] [Weapon] [Level]", description: "Sets your weapon expertise level.")]
+        public static void SetExpertiseCommand(ChatCommandContext ctx, string name, string weapon, int level)
         {
             if (!Plugin.ExpertiseSystem.Value)
             {
                 ctx.Reply("Expertise is not enabled.");
+                return;
+            }
+            User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
+            if (foundUser.CharacterName.IsEmpty)
+            {
+                ctx.Reply("Player not found.");
                 return;
             }
             if (level < 0 || level > ExpertiseSystem.MaxExpertiseLevel)
@@ -148,8 +155,8 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            ulong steamId = ctx.Event.User.PlatformId;
-            Entity character = ctx.Event.SenderCharacterEntity;
+            ulong steamId = foundUser.PlatformId;
+            Entity character = foundUser.LocalCharacter._Entity;
             Equipment equipment = character.Read<Equipment>();
 
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
@@ -157,7 +164,7 @@ namespace Bloodcraft.Commands
             expertiseHandler.SaveChanges();
             GearOverride.SetWeaponItemLevel(equipment, level, Core.Server.EntityManager);
 
-            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to {level}.");
+            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to <color=white>{level}</color> for {foundUser.CharacterName}.");
         }
 
         [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat Stats.")]
@@ -172,7 +179,7 @@ namespace Bloodcraft.Commands
             ctx.Reply($"Available weapon stats: {weaponStats}");
         }
 
-        [Command(name: "lockSpell", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
+        [Command(name: "lockSpells", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
         public static void LockPlayerSpells(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)

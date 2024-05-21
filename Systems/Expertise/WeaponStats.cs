@@ -58,12 +58,12 @@ namespace Bloodcraft.Systems.Expertise
 
             private static readonly Dictionary<WeaponStatType, float> baseCaps = new()
                 {
-                    {WeaponStatType.PhysicalPower, 15},
-                    {WeaponStatType.SpellPower, 15},
-                    {WeaponStatType.PhysicalCritChance, 0.15f},
-                    {WeaponStatType.PhysicalCritDamage, 0.75f},
-                    {WeaponStatType.SpellCritChance, 0.15f},
-                    {WeaponStatType.SpellCritDamage, 0.75f}
+                    {WeaponStatType.PhysicalPower, Plugin.PhysicalPower.Value},
+                    {WeaponStatType.SpellPower, Plugin.SpellPower.Value},
+                    {WeaponStatType.PhysicalCritChance, Plugin.PhysicalCritChance.Value},
+                    {WeaponStatType.PhysicalCritDamage, Plugin.PhysicalCritDamage.Value},
+                    {WeaponStatType.SpellCritChance, Plugin.SpellCritChance.Value},
+                    {WeaponStatType.SpellCritDamage, Plugin.SpellCritDamage.Value}
                 };
 
             public static Dictionary<WeaponStatType, float> BaseCaps

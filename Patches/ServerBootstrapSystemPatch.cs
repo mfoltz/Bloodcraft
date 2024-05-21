@@ -40,12 +40,7 @@ internal static class ServerBootstrapPatch
             Core.DataStructures.SavePlayerBools();
         }
 
-        if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
-        {
-            Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-            Core.DataStructures.SavePlayerExperience();
-            GearOverride.SetLevel(user.LocalCharacter._Entity);
-        }
+        
         if (!Core.DataStructures.PlayerPrestige.ContainsKey(steamId))
         {
             Core.DataStructures.PlayerPrestige.Add(steamId, new KeyValuePair<int, float>(0, 0f));
@@ -213,6 +208,12 @@ internal static class ServerBootstrapPatch
             Core.DataStructures.PlayerBruteLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
             Core.DataStructures.SavePlayerBruteLegacy();
         }
+        if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
+        {
+            Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+            Core.DataStructures.SavePlayerExperience();
+            
+        }
         Entity character = user.LocalCharacter._Entity;
         if (!Plugin.LevelingSystem.Value) // restore armor levels
         {
@@ -242,6 +243,7 @@ internal static class ServerBootstrapPatch
                     }
                 }
             }
+            GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
         if (!Plugin.ExpertiseSystem.Value) // restore weapon levels
         {
@@ -251,7 +253,6 @@ internal static class ServerBootstrapPatch
                 {
                     if (item.ItemEntity._Entity.Has<WeaponLevelSource>())
                     {
-                        // restore weapon levels
                         PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
                         WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<WeaponLevelSource>();
                         item.ItemEntity._Entity.Write(weaponLevelSource);
