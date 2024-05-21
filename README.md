@@ -37,7 +37,7 @@ UNDER CONSTRUCTION
 - `.logLevelingProgress`
   - Enables or disables blood legacy logging.
   - Shortcut: *.log level*
-- - `.setLevel [Player] [Level]` 🔒
+- `.setLevel [Player] [Level]` 🔒
   - Sets player experience level.
   - Shorcut: *.sl [Player] [Level]*
 
@@ -56,16 +56,16 @@ UNDER CONSTRUCTION
 - `.logExpertiseProgress`
   - Enables or disables expertise logging.
   - Shortcut: *.log expertise*
-- - `.chooseWeaponStat [WeaponStat]`
+- `.chooseWeaponStat [WeaponStat]`
   - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise.
   - Shortcut: *.cws [WeaponStat]*
-- - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
+- `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shorcut: *.swe [Player] [Weapon] [Level]*
-- - `.listWeaponStats`
+- `.listWeaponStats`
   - Lists weapon stats available.
   - Shortcut: *.lws*
-- - `.lockSpell`
+- `.lockSpell`
   - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (25 and 75 currently). Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
  
