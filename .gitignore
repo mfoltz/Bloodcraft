@@ -294,6 +294,6 @@ __pycache__/
 *.lutconfig
 build/
 dist/
-/Cobalt.sln
+/Bloodcraft.sln
 /*.sln
 /TODO.txt

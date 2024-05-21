@@ -7,6 +7,7 @@
 	<Version>0.1.0</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	  <BepInExPluginGuid>com.zfolmt.Bloodcraft</BepInExPluginGuid>
 	<LangVersion>latest</LangVersion>
 	 
   </PropertyGroup>
