@@ -12,7 +12,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using User = ProjectM.Network.User;
 
-namespace Cobalt.Systems.Professions
+namespace Bloodcraft.Systems.Professions
 {
     public class ProfessionSystem
     {

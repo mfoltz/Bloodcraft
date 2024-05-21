@@ -6,7 +6,7 @@ using HarmonyLib;
 using System.Reflection;
 using VampireCommandFramework;
 
-namespace Cobalt
+namespace Bloodcraft
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public class Plugin : BasePlugin

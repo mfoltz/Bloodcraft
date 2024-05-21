@@ -1,6 +1,6 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
-using Cobalt.Systems.Expertise;
+using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
@@ -12,7 +12,7 @@ using System.Text.Json;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Cobalt;
+namespace Bloodcraft;
 
 internal static class Core
 {

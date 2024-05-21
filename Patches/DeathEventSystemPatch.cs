@@ -1,11 +1,11 @@
-using Cobalt.Systems.Experience;
-using Cobalt.Systems.Expertise;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
-using ProfessionSystem = Cobalt.Systems.Professions.ProfessionSystem;
+using ProfessionSystem = Bloodcraft.Systems.Professions.ProfessionSystem;
 
-namespace Cobalt.Hooks;
+namespace Bloodcraft.Hooks;
 
 [HarmonyPatch]
 public class DeathEventListenerSystem_Patch

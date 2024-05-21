@@ -1,4 +1,4 @@
-﻿namespace Cobalt.Systems.Legacy
+﻿namespace Bloodcraft.Systems.Legacy
 {
     public interface IBloodHandler
     {

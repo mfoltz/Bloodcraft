@@ -1,8 +1,8 @@
-using Cobalt.Systems.Professions;
+using Bloodcraft.Systems.Professions;
 using Stunlock.Core;
 using VampireCommandFramework;
 
-namespace Cobalt.Commands
+namespace Bloodcraft.Commands
 {
     public static class ProfessionCommands
     {

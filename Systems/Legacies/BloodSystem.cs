@@ -1,12 +1,12 @@
-﻿using Cobalt.Hooks;
-using Cobalt.Systems.Legacy;
+﻿using Bloodcraft.Hooks;
+using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
+using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
-namespace Cobalt.Systems.Legacy
+namespace Bloodcraft.Systems.Legacy
 {
     public class BloodSystem
     {

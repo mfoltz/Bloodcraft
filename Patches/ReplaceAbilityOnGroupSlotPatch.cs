@@ -5,7 +5,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Cobalt.Hooks
+namespace Bloodcraft.Hooks
 {
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     public static class ReplaceAbilityOnGroupSlotPatch

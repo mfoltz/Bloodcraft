@@ -1,13 +1,13 @@
-﻿using Cobalt.Hooks;
+﻿using Bloodcraft.Hooks;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using static Cobalt.Core;
+using static Bloodcraft.Core;
 
-namespace Cobalt.Systems.Experience
+namespace Bloodcraft.Systems.Experience
 {
     public class LevelingSystem
     {

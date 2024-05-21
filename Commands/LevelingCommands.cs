@@ -1,9 +1,9 @@
-using Cobalt.Hooks;
-using Cobalt.Systems.Experience;
+using Bloodcraft.Hooks;
+using Bloodcraft.Systems.Experience;
 using ProjectM.Network;
 using VampireCommandFramework;
 
-namespace Cobalt.Commands
+namespace Bloodcraft.Commands
 {
     public static class LevelingCommands
     {

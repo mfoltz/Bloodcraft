@@ -1,10 +1,10 @@
-using Cobalt.Hooks;
-using Cobalt.Systems.Legacy;
+using Bloodcraft.Hooks;
+using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using Unity.Entities;
 using VampireCommandFramework;
 
-namespace Cobalt.Commands
+namespace Bloodcraft.Commands
 {
     public static class LegacyCommands
     {

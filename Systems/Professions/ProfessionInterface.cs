@@ -1,7 +1,7 @@
 ﻿using ProjectM.CastleBuilding;
 using Stunlock.Core;
 
-namespace Cobalt.Systems.Professions
+namespace Bloodcraft.Systems.Professions
 {
     public interface IProfessionHandler
     {

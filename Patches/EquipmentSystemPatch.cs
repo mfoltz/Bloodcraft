@@ -1,6 +1,6 @@
-﻿using Cobalt.Systems.Expertise;
-using Cobalt.Systems.Legacy;
-using Cobalt.Systems.Professions;
+﻿using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacy;
+using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -8,10 +8,10 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Systems.Expertise.WeaponStats;
-using static Cobalt.Systems.Expertise.WeaponStats.WeaponStatManager;
+using static Bloodcraft.Systems.Expertise.WeaponStats;
+using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
-namespace Cobalt.Hooks
+namespace Bloodcraft.Hooks
 {
     [HarmonyPatch]
     public class EquipmentPatch

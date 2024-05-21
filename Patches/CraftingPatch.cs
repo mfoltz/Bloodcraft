@@ -1,14 +1,14 @@
-using Cobalt.Systems.Professions;
+using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Cobalt.Systems.Professions.ProfessionUtilities;
+using static Bloodcraft.Systems.Professions.ProfessionUtilities;
 using User = ProjectM.Network.User;
 
-namespace Cobalt.Hooks;
+namespace Bloodcraft.Hooks;
 
 public class CraftingPatch
 {

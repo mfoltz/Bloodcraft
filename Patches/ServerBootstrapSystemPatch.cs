@@ -1,11 +1,11 @@
-﻿using Cobalt.Systems.Expertise;
+﻿using Bloodcraft.Systems.Expertise;
 using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
-namespace Cobalt.Hooks
+namespace Bloodcraft.Hooks
 {
     [HarmonyPatch]
     public class ServerBootstrapPatches

@@ -1,5 +1,5 @@
-using Cobalt.Systems.Legacy;
-using Cobalt.Systems.Professions;
+using Bloodcraft.Systems.Legacy;
+using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -9,7 +9,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Cobalt.Hooks;
+namespace Bloodcraft.Hooks;
 
 public class CreateGameplayEventsOnDestroyPatch
 {

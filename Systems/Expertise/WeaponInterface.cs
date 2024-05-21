@@ -1,4 +1,4 @@
-﻿namespace Cobalt.Systems.Expertise
+﻿namespace Bloodcraft.Systems.Expertise
 {
     public interface IExpertiseHandler
     {

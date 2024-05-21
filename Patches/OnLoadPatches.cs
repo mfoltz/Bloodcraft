@@ -1,7 +1,7 @@
 using HarmonyLib;
 using ProjectM;
 
-namespace Cobalt.Hooks;
+namespace Bloodcraft.Hooks;
 
 [HarmonyPatch(typeof(SpawnTeamSystem_OnPersistenceLoad), nameof(SpawnTeamSystem_OnPersistenceLoad.OnUpdate))]
 public static class InitializationPatch

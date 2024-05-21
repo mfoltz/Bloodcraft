@@ -1,6 +1,6 @@
 ﻿using ProjectM;
 
-namespace Cobalt.Systems.Expertise
+namespace Bloodcraft.Systems.Expertise
 {
     public class WeaponStats
     {

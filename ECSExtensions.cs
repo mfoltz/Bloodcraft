@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Cobalt;
+namespace Bloodcraft;
 
 public static class ECSExtensions
 {

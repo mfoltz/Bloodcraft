@@ -1,12 +1,12 @@
-using Cobalt.Hooks;
-using Cobalt.Systems.Expertise;
+using Bloodcraft.Hooks;
+using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Cobalt.Systems.Expertise.WeaponStats;
+using static Bloodcraft.Systems.Expertise.WeaponStats;
 
-namespace Cobalt.Commands
+namespace Bloodcraft.Commands
 {
     public static class ExpertiseCommands
     {
