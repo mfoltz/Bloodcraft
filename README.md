@@ -5,7 +5,6 @@ UNDER CONSTRUCTION
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
-- [License](#license)
 
 ## Features
 
