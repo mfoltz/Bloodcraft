@@ -39,7 +39,6 @@ namespace Cobalt.Systems.Expertise
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
-            if (Killer.Read<Equipment>().WeaponSlot.SlotEntity._Entity == Entity.Null) return;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
 
             if (weaponType.Equals(WeaponType.Unarmed) && !Plugin.Sanguimancy.Value) return; // check for sanguimancy setting
@@ -77,9 +76,9 @@ namespace Cobalt.Systems.Expertise
 
         private static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
         {
-            float WeaponExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
-            if (isVBlood) return WeaponExpertiseValue * VBloodMultiplier;
-            return WeaponExpertiseValue * UnitMultiplier;
+            float ExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
+            if (isVBlood) return ExpertiseValue * VBloodMultiplier;
+            return ExpertiseValue * UnitMultiplier;
         }
 
         public static void NotifyPlayer(EntityManager entityManager, User user, ExpertiseSystem.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)

@@ -11,7 +11,7 @@ using Unity.Entities;
 
 namespace Cobalt.Hooks;
 
-public class FishingSystemPatch
+public class CreateGameplayEventsOnDestroyPatch
 {
     [HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
     public static class GameplayEventsSystemPatch
