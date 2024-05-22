@@ -65,7 +65,7 @@ UNDER CONSTRUCTION
   - Lists weapon stats available.
   - Shortcut: *.lws*
 - `.lockSpell`
-  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (25 and 75 currently). Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
  
 ## Configuration
