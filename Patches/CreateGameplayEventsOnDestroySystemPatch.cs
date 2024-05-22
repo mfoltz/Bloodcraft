@@ -4,7 +4,9 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -39,15 +41,11 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     {
                         Entity player = entity.Read<EntityOwner>().Owner;
                         Blood blood = player.Read<Blood>();
-                        
                         BloodType bloodType = GetBloodTypeFromPrefab(blood.BloodType);
                         IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
                         var legacyData = bloodHandler.GetLegacyData(steamId);
-                        blood.MaxBlood._Value = 101 + legacyData.Key;   
-                        blood.Value = blood.MaxBlood._Value;
                         blood.Quality += legacyData.Key;
                         player.Write(blood);
-                        //Core.Log.LogInfo($"MaxBlood: {blood.MaxBlood._Value} | Value: {blood.Value} | Quality: {blood.Quality}");
                     }
                     catch (System.Exception ex)
                     {
