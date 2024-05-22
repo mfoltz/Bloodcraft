@@ -1,5 +1,4 @@
 using BepInEx.Logging;
-using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
@@ -22,7 +21,6 @@ internal static class Core
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
     public static ModificationsRegistry ModificationsRegistry => ServerGameManager.Modifications;
     public static ManualLogSource Log => Plugin.LogInstance;
-    public static EquipmentService EquipmentService { get; internal set; }
 
     private static bool hasInitialized;
     public static void Initialize()
@@ -33,7 +31,6 @@ internal static class Core
         ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
         ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
-        EquipmentService = new();
 
         // Initialize utility services
 
