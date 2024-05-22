@@ -10,7 +10,7 @@ UNDER CONSTRUCTION
 
 - **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills.
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and enhance replayability (prestiging is on the list).
+- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression.
 - **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies.
 
 ## Commands
@@ -65,7 +65,7 @@ UNDER CONSTRUCTION
   - Lists weapon stats available.
   - Shortcut: *.lws*
 - `.lockSpell`
-  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (25 and 75 currently). Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
  
 ## Configuration
@@ -89,6 +89,10 @@ UNDER CONSTRUCTION
   Enable or disable the expertise system.
 - **Enable Sanguimancy**: `Sanguimancy` (bool, default: false)  
   Enable or disable sanguimancy.
+- **First Slot Unlock**: `FirstSlot` (int, default: 25)  
+  Level to unlock first spell slot for unarmed.
+- **Second Slot Unlock**: `SecondSlot` (int, default: 75)  
+  Level to unlock second spell slot for unarmed.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 99)  
   Maximum level in weapon expertise.
 - **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (int, default: 5)  
