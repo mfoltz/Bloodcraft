@@ -19,7 +19,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (Plugin.Sanguimancy.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (Plugin.ExpertiseSystem.Value && Plugin.Sanguimancy.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
@@ -70,7 +70,6 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
             buffer.Add(buff);
         }
     }
-
     static void HandleSpells(Entity entity, ulong steamId)
     {
         if (!Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) || !bools["SpellLock"]) return;

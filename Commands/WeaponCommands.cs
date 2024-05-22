@@ -2,7 +2,6 @@ using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
-using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponStats;

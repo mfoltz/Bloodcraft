@@ -1,5 +1,4 @@
-﻿using ProjectM.CastleBuilding;
-using Stunlock.Core;
+﻿using Stunlock.Core;
 
 namespace Bloodcraft.Systems.Professions
 {

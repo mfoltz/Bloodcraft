@@ -16,10 +16,10 @@ namespace Bloodcraft.Systems.Professions
 {
     public class ProfessionSystem
     {
-        private static readonly int ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
-        private static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int ProfessionPower = 2; // power for calculating level from xp
-        private static readonly int MaxProfessionLevel = Plugin.MaxProfessionLevel.Value; // maximum level
+        static readonly int ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
+        static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
+        static readonly int ProfessionPower = 2; // power for calculating level from xp
+        static readonly int MaxProfessionLevel = Plugin.MaxProfessionLevel.Value; // maximum level
 
         public static void UpdateProfessions(Entity Killer, Entity Victim)
         {
@@ -159,7 +159,7 @@ namespace Bloodcraft.Systems.Professions
             UpdateProfessionExperience(entityManager, user, steamID, xpData, value, handler);
         }
 
-        private static void UpdateProfessionExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
+        static void UpdateProfessionExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
         {
             float newExperience = xpData.Value + gainedXP;
             int newLevel = ConvertXpToLevel(newExperience);
@@ -183,7 +183,7 @@ namespace Bloodcraft.Systems.Professions
             NotifyPlayer(entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
 
-        private static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+        static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
             string professionName = handler.GetProfessionName();
             if (leveledUp)
@@ -200,30 +200,25 @@ namespace Bloodcraft.Systems.Professions
                 }
             }
         }
-
-        private static int ConvertXpToLevel(float xp)
+        static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion
             return (int)(ProfessionConstant * Math.Sqrt(xp));
         }
-
-        private static int ConvertLevelToXp(int level)
+        static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
             return (int)Math.Pow(level / ProfessionConstant, ProfessionPower);
         }
-
-        private static float GetXp(ulong steamID, IProfessionHandler handler)
+        static float GetXp(ulong steamID, IProfessionHandler handler)
         {
             var xpData = handler.GetExperienceData(steamID);
             return xpData.Value;
         }
-
-        private static int GetLevel(ulong steamID, IProfessionHandler handler)
+        static int GetLevel(ulong steamID, IProfessionHandler handler)
         {
             return ConvertXpToLevel(GetXp(steamID, handler));
         }
-
         public static int GetLevelProgress(ulong steamID, IProfessionHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
@@ -237,7 +232,7 @@ namespace Bloodcraft.Systems.Professions
 
     public class ProfessionUtilities
     {
-        private static readonly Dictionary<string, int> FishingMultipliers = new()
+        static readonly Dictionary<string, int> FishingMultipliers = new()
         {
             { "farbane", 1 },
             { "dunley", 2 },
@@ -246,14 +241,14 @@ namespace Bloodcraft.Systems.Professions
             { "silverlight", 4 }
         };
 
-        private static readonly Dictionary<string, int> WoodcuttingMultipliers = new()
+        static readonly Dictionary<string, int> WoodcuttingMultipliers = new()
         {
             { "hallow", 2 },
             { "gloom", 3 },
             { "cursed", 4 }
         };
 
-        private static readonly Dictionary<string, int> TierMultiplier = new()
+        static readonly Dictionary<string, int> TierMultiplier = new()
         {
             { "t01", 1 },
             { "t02", 2 },

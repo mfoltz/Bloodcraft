@@ -1,6 +1,6 @@
-﻿using Bloodcraft.Patches;
-using HarmonyLib;
+﻿using HarmonyLib;
 using ProjectM;
+using ProjectM.Shared.Systems;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -18,10 +18,12 @@ internal static class BuffSystem_Spawn_ServerPatch
         {
             foreach (Entity entity in entities)
             {
+                /*
                 if (Plugin.LevelingSystem.Value && entity.Has<Buff>() && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     GearOverride.SetLevel(entity.Read<Buff>().Target);
                 }
+                */
             }
         }
         catch (System.Exception ex)

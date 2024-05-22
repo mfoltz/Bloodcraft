@@ -21,9 +21,7 @@ internal class VBloodSystemPatch
             foreach (VBloodConsumed vBloodConsumed in events)
             {
                 Entity vBlood = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
-                vBlood.LogComponentTypes();
                 Entity player = vBloodConsumed.Target;
-                player.LogComponentTypes();
                 if (Plugin.LevelingSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) LevelingSystem.UpdateLeveling(player, vBlood);
                 if (Plugin.ExpertiseSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) ExpertiseSystem.UpdateExpertise(player, vBlood);
                 if (Plugin.ProfessionSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) BloodSystem.UpdateLegacy(player, vBlood);

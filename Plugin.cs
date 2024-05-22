@@ -23,6 +23,7 @@ namespace Bloodcraft
 
         private static ConfigEntry<bool> _levelingSystem;
         private static ConfigEntry<int> _maxPlayerLevel;
+        private static ConfigEntry<int> _startingLevel;
         private static ConfigEntry<int> _unitLevelingMultiplier;
         private static ConfigEntry<int> _vBloodLevelingMultiplier;
         private static ConfigEntry<int> _groupLevelingMultiplier;
@@ -51,6 +52,7 @@ namespace Bloodcraft
 
         public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
         public static ConfigEntry<int> MaxPlayerLevel => _maxPlayerLevel;
+        public static ConfigEntry<int> StartingLevel => _startingLevel;
         public static ConfigEntry<int> UnitLevelingMultiplier => _unitLevelingMultiplier;
         public static ConfigEntry<int> VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
         public static ConfigEntry<int> GroupLevelingMultiplier => _groupLevelingMultiplier;
@@ -84,10 +86,10 @@ namespace Bloodcraft
             InitConfig();
             CommandRegistry.RegisterAll();
             LoadAllData();
-            Core.Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
+            Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
         }
 
-        private static void InitConfig()
+        static void InitConfig()
         {
             CreateDirectories(ConfigPath);
             CreateDirectories(PlayerExperiencePath);
@@ -97,12 +99,13 @@ namespace Bloodcraft
 
             _levelingSystem = Instance.Config.Bind("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
             _maxPlayerLevel = Instance.Config.Bind("Config", "MaxLevel", 90, "The maximum level a player can reach.");
+            _startingLevel = Instance.Config.Bind("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
             _unitLevelingMultiplier = Instance.Config.Bind("Config", "UnitLevelingMultiplier", 5, "The multiplier for experience gained from units.");
             _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15, "The multiplier for experience gained from VBloods.");
             _groupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1, "The multiplier for experience gained from group kills.");
 
             _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
-            _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy.");
+            _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
             _maxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
             _unitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             _vBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBloods.");
@@ -125,44 +128,66 @@ namespace Bloodcraft
 
             // Initialize configuration settings
         }
-
-        private static void CreateDirectories(string path)
+        static void CreateDirectories(string path)
         {
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
         }
-
         public override bool Unload()
         {
             Config.Clear();
             _harmony.UnpatchSelf();
             return true;
         }
-
-        private static void LoadAllData()
+        static void LoadAllData()
         {
-            foreach (var loadFunction in loadFunctions)
+            Core.DataStructures.LoadPlayerBools();
+            if (LevelingSystem.Value)
             {
-                loadFunction();
+                foreach (var loadFunction in loadLeveling)
+                {
+                    loadFunction();
+                }
+            }
+            if (ExpertiseSystem.Value)
+            {
+                foreach (var loadFunction in loadExpertises)
+                {
+                    loadFunction();
+                }
+                if (Sanguimancy.Value)
+                {
+                    foreach (var loadFunction in loadSanguimancy)
+                    {
+                        loadFunction();
+                    }
+                }
+            }
+            if (BloodSystem.Value)
+            {
+                foreach (var loadFunction in loadLegacies)
+                {
+                    loadFunction();
+                }
+            }
+            if (ProfessionSystem.Value)
+            {
+                foreach (var loadFunction in loadProfessions)
+                {
+                    loadFunction();
+                }
             }
         }
 
-        private static readonly Action[] loadFunctions =
+        static readonly Action[] loadLeveling =
         [
             Core.DataStructures.LoadPlayerExperience,
-            Core.DataStructures.LoadPlayerPrestige,
-            Core.DataStructures.LoadPlayerBools,
-            Core.DataStructures.LoadPlayerWoodcutting,
-            Core.DataStructures.LoadPlayerMining,
-            Core.DataStructures.LoadPlayerFishing,
-            Core.DataStructures.LoadPlayerBlacksmithing,
-            Core.DataStructures.LoadPlayerTailoring,
-            Core.DataStructures.LoadPlayerJewelcrafting,
-            Core.DataStructures.LoadPlayerAlchemy,
-            Core.DataStructures.LoadPlayerHarvesting,
-            Core.DataStructures.LoadPlayerSanguimancy,
+        ];
+
+        static readonly Action[] loadExpertises =
+        [
             Core.DataStructures.LoadPlayerSwordExpertise,
             Core.DataStructures.LoadPlayerAxeExpertise,
             Core.DataStructures.LoadPlayerMaceExpertise,
@@ -175,7 +200,16 @@ namespace Bloodcraft
             Core.DataStructures.LoadPlayerLongbowExpertise,
             Core.DataStructures.LoadPlayerWhipExpertise,
             Core.DataStructures.LoadPlayerWeaponStats,
-            Core.DataStructures.LoadPlayerSanguimancySpells,
+        ];
+
+        static readonly Action[] loadSanguimancy =
+        [
+            Core.DataStructures.LoadPlayerSanguimancy,
+            Core.DataStructures.LoadPlayerSanguimancySpells
+        ];
+
+        static readonly Action[] loadLegacies =
+        [
             Core.DataStructures.LoadPlayerWorkerLegacy,
             Core.DataStructures.LoadPlayerWarriorLegacy,
             Core.DataStructures.LoadPlayerScholarLegacy,
@@ -186,6 +220,18 @@ namespace Bloodcraft
             Core.DataStructures.LoadPlayerImmortalLegacy,
             Core.DataStructures.LoadPlayerCreatureLegacy,
             Core.DataStructures.LoadPlayerBruteLegacy
+        ];
+
+        static readonly Action[] loadProfessions =
+        [
+            Core.DataStructures.LoadPlayerWoodcutting,
+            Core.DataStructures.LoadPlayerMining,
+            Core.DataStructures.LoadPlayerFishing,
+            Core.DataStructures.LoadPlayerBlacksmithing,
+            Core.DataStructures.LoadPlayerTailoring,
+            Core.DataStructures.LoadPlayerJewelcrafting,
+            Core.DataStructures.LoadPlayerAlchemy,
+            Core.DataStructures.LoadPlayerHarvesting,
         ];
     }
 }

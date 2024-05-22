@@ -2,20 +2,17 @@
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
-using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Bloodcraft.Systems.Expertise
 {
     public class ExpertiseSystem
     {
-        private static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
+        static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
         public static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-        private static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
-        private static readonly float ExpertiseConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int ExpertisePower = 2; // power for calculating level from xp
-
+        static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
+        static readonly float ExpertiseConstant = 0.1f; // constant for calculating level from xp
+        static readonly int ExpertisePower = 2; // power for calculating level from xp
         public enum WeaponType
         {
             Sword,
@@ -31,7 +28,6 @@ namespace Bloodcraft.Systems.Expertise
             Whip,
             Unarmed
         }
-
         public static void UpdateExpertise(Entity Killer, Entity Victim)
         {
             EntityManager entityManager = Core.EntityManager;
@@ -74,14 +70,12 @@ namespace Bloodcraft.Systems.Expertise
                 }
             }
         }
-
-        private static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
+        static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
         {
             float ExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
             if (isVBlood) return ExpertiseValue * VBloodMultiplier;
             return ExpertiseValue * UnitMultiplier;
         }
-
         public static void NotifyPlayer(EntityManager entityManager, User user, ExpertiseSystem.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
         {
             ulong steamID = user.PlatformId;
@@ -107,7 +101,6 @@ namespace Bloodcraft.Systems.Expertise
                 }
             }
         }
-
         public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
@@ -117,30 +110,25 @@ namespace Bloodcraft.Systems.Expertise
             int percent = (int)(currentXP / nextLevelXP * 100);
             return percent;
         }
-
         public static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion
             return (int)(ExpertiseConstant * Math.Sqrt(xp));
         }
-
         public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
             return (int)Math.Pow(level / ExpertiseConstant, ExpertisePower);
         }
-
-        private static float GetXp(ulong steamID, IExpertiseHandler handler)
+        static float GetXp(ulong steamID, IExpertiseHandler handler)
         {
             var xpData = handler.GetExpertiseData(steamID);
             return xpData.Value;
         }
-
-        private static int GetLevel(ulong steamID, IExpertiseHandler handler)
+        static int GetLevel(ulong steamID, IExpertiseHandler handler)
         {
             return ConvertXpToLevel(GetXp(steamID, handler));
         }
-
         public static WeaponType GetWeaponTypeFromPrefab(PrefabGUID weapon)
         {
             string weaponCheck = weapon.LookupName().ToString().ToLower();
@@ -155,7 +143,6 @@ namespace Bloodcraft.Systems.Expertise
                     return WeaponType.GreatSword;
                 }
             }
-
             throw new InvalidOperationException("Unrecognized weapon type");
         }
     }

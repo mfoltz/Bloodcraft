@@ -1,4 +1,5 @@
 using BepInEx.Logging;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
@@ -12,25 +13,18 @@ namespace Bloodcraft;
 internal static class Core
 {
     public static World Server { get; } = GetWorld("Server") ?? throw new System.Exception("There is no Server world (yet)...");
-
-    // V Rising systems
     public static EntityManager EntityManager { get; } = Server.EntityManager;
-
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
     public static ServerGameSettingsSystem ServerGameSettingsSystem { get; internal set; }
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
     public static DebugEventsSystem DebugEventsSystem { get; internal set; }
-
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
-
     public static ModificationsRegistry ModificationsRegistry => ServerGameManager.Modifications;
-
-    // BepInEx services
     public static ManualLogSource Log => Plugin.LogInstance;
+    public static EquipmentService EquipmentService { get; internal set; }
 
     private static bool hasInitialized;
-
     public static void Initialize()
     {
         if (hasInitialized) return;
@@ -39,10 +33,11 @@ internal static class Core
         ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
         ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
+        EquipmentService = new();
 
         // Initialize utility services
 
-        Log.LogInfo("Cobalt initialized...");
+        Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
 
         hasInitialized = true;
     }
@@ -72,8 +67,9 @@ internal static class Core
         // structures to write to json for permanence
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerPrestige = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
+
+        // professions
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWoodcutting = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerMining = [];
@@ -83,6 +79,8 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerJewelcrafting = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerAlchemy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerHarvesting = [];
+
+        // weapon expertise
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSwordExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerAxeExpertise = [];
@@ -96,9 +94,10 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
-
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed basically
         private static Dictionary<ulong, (int, int)> playerSanguimancySpells = [];
+
+        // blood legacies
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWorkerLegacy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWarriorLegacy = [];
@@ -115,12 +114,6 @@ internal static class Core
         {
             get => playerExperience;
             set => playerExperience = value;
-        }
-
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerPrestige
-        {
-            get => playerPrestige;
-            set => playerPrestige = value;
         }
 
         public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
@@ -335,7 +328,6 @@ internal static class Core
         private static readonly Dictionary<string, string> filePaths = new()
         {
             {"Experience", JsonFiles.PlayerExperienceJson},
-            {"Prestige", JsonFiles.PlayerPrestigeJson },
             {"PlayerBools", JsonFiles.PlayerBoolsJson},
             {"Woodcutting", JsonFiles.PlayerWoodcuttingJson},
             {"Mining", JsonFiles.PlayerMiningJson},
@@ -372,7 +364,6 @@ internal static class Core
         };
 
         // Generic method to save any type of dictionary.
-
         public static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
         {
             string path = filePaths[key];
@@ -412,8 +403,6 @@ internal static class Core
         }
 
         public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
-
-        public static void LoadPlayerPrestige() => LoadData(ref playerPrestige, "Prestige");
 
         public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
 
@@ -499,10 +488,7 @@ internal static class Core
                 Log.LogError($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
-
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
-
-        public static void SavePlayerPrestige() => SaveData(PlayerPrestige, "Prestige");
 
         public static void SavePlayerBools() => SaveData(PlayerBools, "PlayerBools");
 
@@ -570,11 +556,9 @@ internal static class Core
 
         public static void SavePlayerBruteLegacy() => SaveData(PlayerBruteLegacy, "BruteLegacy");
     }
-
     public class JsonFiles
     {
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerExperiencePath, "player_experience.json");
-        public static readonly string PlayerPrestigeJson = Path.Combine(Plugin.PlayerExperiencePath, "player_prestige.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");

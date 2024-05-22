@@ -78,7 +78,7 @@ public static class ECSExtensions
 
     public static void LogComponentTypes(this Entity entity)
     {
-        NativeArray<ComponentType>.Enumerator enumerator = Core.Server.EntityManager.GetComponentTypes(entity).GetEnumerator();
+        NativeArray<ComponentType>.Enumerator enumerator = Core.EntityManager.GetComponentTypes(entity).GetEnumerator();
         Core.Log.LogInfo("===");
         while (enumerator.MoveNext())
         {

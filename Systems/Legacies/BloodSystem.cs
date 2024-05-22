@@ -1,20 +1,18 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Bloodcraft.Systems.Legacy
 {
     public class BloodSystem
     {
-        private static readonly int UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
+        static readonly int UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
         public static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-        private static readonly int VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
-        private static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
-        private static readonly int BloodPower = 2; // power for calculating level from xp
+        static readonly int VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
+        static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
+        static readonly int BloodPower = 2; // power for calculating level from xp
 
         public enum BloodType
         {
@@ -132,13 +130,13 @@ namespace Bloodcraft.Systems.Legacy
             return (int)Math.Pow(level / BloodConstant, BloodPower);
         }
 
-        private static float GetXp(ulong steamID, IBloodHandler handler)
+        static float GetXp(ulong steamID, IBloodHandler handler)
         {
             var xpData = handler.GetLegacyData(steamID);
             return xpData.Value;
         }
 
-        private static int GetLevel(ulong steamID, IBloodHandler handler)
+        static int GetLevel(ulong steamID, IBloodHandler handler)
         {
             return ConvertXpToLevel(GetXp(steamID, handler));
         }

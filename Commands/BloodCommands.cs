@@ -4,7 +4,6 @@ using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Expertise.WeaponStats;
 
 namespace Bloodcraft.Commands
 {
