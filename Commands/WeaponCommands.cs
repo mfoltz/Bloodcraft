@@ -194,7 +194,7 @@ namespace Bloodcraft.Commands
             var user = ctx.Event.User;
             var SteamID = user.PlatformId;
 
-            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= 25)
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= Plugin.FirstSlot.Value)
             {
                 bools["SpellLock"] = !bools["SpellLock"];
                 if (bools["SpellLock"])
@@ -209,7 +209,7 @@ namespace Bloodcraft.Commands
             }
             else
             {
-                ctx.Reply("You must be at least level 25 in Sanguimancy to lock spells.");
+                ctx.Reply($"You must be at least level {Plugin.FirstSlot.Value} in Sanguimancy to use this. Both slots are unlocked at {Plugin.SecondSlot.Value}");
             }
         }
     }

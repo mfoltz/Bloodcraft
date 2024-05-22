@@ -73,19 +73,19 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
     static void HandleSpells(Entity entity, ulong steamId)
     {
         if (!Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) || !bools["SpellLock"]) return;
-        if (Core.DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var data) && data.Key >= 25)
+        if (Core.DataStructures.PlayerSanguimancy.TryGetValue(steamId, out var data) && data.Key >= Plugin.FirstSlot.Value)
         {
             var spellTuple = Core.DataStructures.PlayerSanguimancySpells[steamId];
             var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
             foreach (var buff in buffer)
             {
-                Core.Log.LogInfo($"{buff.Slot} | {buff.ReplaceGroupId.LookupName()} | {buff.NewGroupId.LookupName()}");
+                //Core.Log.LogInfo($"{buff.Slot} | {buff.ReplaceGroupId.LookupName()} | {buff.NewGroupId.LookupName()}");
                 if (buff.Slot == 5)
                 {
                     spellTuple = (buff.NewGroupId.GuidHash, spellTuple.Item2);
                 }
 
-                if (data.Key >= 75 && buff.Slot == 6)
+                if (data.Key >= Plugin.SecondSlot.Value && buff.Slot == 6)
                 {
                     spellTuple = (spellTuple.Item1, buff.NewGroupId.GuidHash);
                 }

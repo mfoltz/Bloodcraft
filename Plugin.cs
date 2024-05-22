@@ -30,6 +30,8 @@ namespace Bloodcraft
 
         private static ConfigEntry<bool> _expertiseSystem;
         private static ConfigEntry<bool> _sanguimancy;
+        private static ConfigEntry<int> _firstSlot;
+        private static ConfigEntry<int> _secondSlot;
         private static ConfigEntry<int> _maxExpertiseLevel;
         private static ConfigEntry<int> _unitExpertiseMultiplier;
         private static ConfigEntry<int> _vBloodExpertiseMultiplier;
@@ -59,6 +61,9 @@ namespace Bloodcraft
 
         public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
         public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
+        public static ConfigEntry<int> FirstSlot => _firstSlot;
+        public static ConfigEntry<int> SecondSlot => _secondSlot;
+
         public static ConfigEntry<int> MaxExpertiseLevel => _maxExpertiseLevel;
         public static ConfigEntry<int> UnitExpertiseMultiplier => _unitExpertiseMultiplier;
         public static ConfigEntry<int> VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier;
@@ -106,6 +111,8 @@ namespace Bloodcraft
 
             _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
             _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
+            _firstSlot = Instance.Config.Bind("Config", "FirstSlot", 25, "Level of sanguimancy required for first slot unlock.");
+            _secondSlot = Instance.Config.Bind("Config", "SecondSlot", 75, "Level of sanguimancy required for second slot unlock.");
             _maxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
             _unitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             _vBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBloods.");

@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
@@ -32,7 +33,7 @@ internal static class EquipmentPatches
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                     GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
                 }
-                if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                else if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(player);
@@ -49,7 +50,7 @@ internal static class EquipmentPatches
         }
     }
 
-    /*
+    
     [HarmonyPatch(typeof(ArmorLevelSystem_Spawn), nameof(ArmorLevelSystem_Spawn.OnUpdate))]
     [HarmonyPostfix]
     static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
@@ -101,7 +102,7 @@ internal static class EquipmentPatches
             entities.Dispose();
         }
     }
-    */
+    
 
     [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
     [HarmonyPrefix]
@@ -176,11 +177,16 @@ internal static class EquipmentPatches
                     Entity weapon = entityOwner.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
                     if (weapon.Equals(Entity.Null) || !weapon.Has<WeaponLevelSource>()) continue;
                     if (weapon.Read<WeaponLevelSource>().Level >= entityCategory.ResourceLevel._Value) continue;
-                    float originalSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
-                    if (originalSource >= entityCategory.ResourceLevel._Value)
+                    //float originalSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
+                    if (Core.EquipmentService.WeaponLevelSources.TryGetValue(weapon.Read<PrefabGUID>(), out var sources))
                     {
-                        entityCategory.ResourceLevel._Value = 0;
-                        dealDamageEvent.Target.Write(entityCategory);
+                        var (entityIndex, level) = sources.FirstOrDefault(s => s.entityIndex == weapon.Index);
+
+                        if (level >= entityCategory.ResourceLevel._Value)
+                        {
+                            entityCategory.ResourceLevel._Value = 0;
+                            dealDamageEvent.Target.Write(entityCategory);
+                        }
                     }
                 }
             }
@@ -235,36 +241,27 @@ internal static class EquipmentPatches
                 {
                     if (Plugin.ExpertiseSystem.Value && inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>() )
                     {
-                        if (Core.EquipmentService.WeaponLevelSources.TryGetValue(inventoryChangedEvent.Item, out float weaponLevelSource))
+                        if (Core.EquipmentService.WeaponLevelSources.TryGetValue(inventoryChangedEvent.Item, out var weaponLevelSources))
                         {
+                            var weaponLevelSource = weaponLevelSources.FirstOrDefault(s => s.entityIndex == inventoryChangedEvent.ItemEntity.Index).level;
                             inventoryChangedEvent.ItemEntity.Write(new WeaponLevelSource { Level = weaponLevelSource });
-                        }
-                        else
-                        {
-                            inventoryChangedEvent.ItemEntity.Write(new WeaponLevelSource { Level = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<WeaponLevelSource>().Level });
                         }
                         
                     }
                     else if (Plugin.LevelingSystem.Value && inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>() )
                     {
-                        if (Core.EquipmentService.ArmorLevelSources.TryGetValue(inventoryChangedEvent.Item, out float armorLevelSource))
+                        if (Core.EquipmentService.ArmorLevelSources.TryGetValue(inventoryChangedEvent.Item, out var armorLevelSources))
                         {
+                            var armorLevelSource = armorLevelSources.FirstOrDefault(s => s.entityIndex == inventoryChangedEvent.ItemEntity.Index).level;
                             inventoryChangedEvent.ItemEntity.Write(new ArmorLevelSource { Level = armorLevelSource });
-                        }
-                        else
-                        {
-                            inventoryChangedEvent.ItemEntity.Write(new ArmorLevelSource { Level = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<ArmorLevelSource>().Level });
                         }
                     }
                     else if (Plugin.LevelingSystem.Value && inventoryChangedEvent.ItemEntity.Has<SpellLevelSource>())
                     {
-                        if (Core.EquipmentService.SpellLevelSources.TryGetValue(inventoryChangedEvent.Item, out float spellLevelSource))
+                        if (Core.EquipmentService.SpellLevelSources.TryGetValue(inventoryChangedEvent.Item, out var spellLevelSources))
                         {
+                            var spellLevelSource = spellLevelSources.FirstOrDefault(s => s.entityIndex == inventoryChangedEvent.ItemEntity.Index).level;
                             inventoryChangedEvent.ItemEntity.Write(new SpellLevelSource { Level = spellLevelSource });
-                        }
-                        else
-                        {
-                            inventoryChangedEvent.ItemEntity.Write(new SpellLevelSource { Level = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[inventoryChangedEvent.Item].Read<SpellLevelSource>().Level });
                         }
                     }
                 }
