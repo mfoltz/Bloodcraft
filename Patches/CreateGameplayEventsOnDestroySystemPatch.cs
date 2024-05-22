@@ -43,11 +43,11 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                         BloodType bloodType = GetBloodTypeFromPrefab(blood.BloodType);
                         IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
                         var legacyData = bloodHandler.GetLegacyData(steamId);
-                        blood.MaxBlood._Value += legacyData.Key;
-                        blood.Value += legacyData.Key;
+                        blood.MaxBlood._Value = 101 + legacyData.Key;   
+                        blood.Value = blood.MaxBlood._Value;
                         blood.Quality += legacyData.Key;
                         player.Write(blood);
-                        //Core.Log.LogInfo($"MaxBlood: {blood.MaxBlood._Value} | Quality: {blood.Quality}");
+                        //Core.Log.LogInfo($"MaxBlood: {blood.MaxBlood._Value} | Value: {blood.Value} | Quality: {blood.Quality}");
                     }
                     catch (System.Exception ex)
                     {
