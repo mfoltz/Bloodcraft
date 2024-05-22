@@ -33,7 +33,7 @@ internal static class EquipmentPatches
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                     GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
                 }
-                else if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(player);
@@ -423,9 +423,7 @@ public static class GearOverride
         Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
         if (!weaponEntity.Equals(Entity.Null) && entityManager.HasComponent<WeaponLevelSource>(weaponEntity))
         {
-            WeaponLevelSource weaponLevel = entityManager.GetComponentData<WeaponLevelSource>(weaponEntity);
-            weaponLevel.Level = level;
-            entityManager.SetComponentData(weaponEntity, weaponLevel);
+            weaponEntity.Write(new WeaponLevelSource { Level = level });
         }
     }
 }

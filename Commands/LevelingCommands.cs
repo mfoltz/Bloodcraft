@@ -72,6 +72,7 @@ namespace Bloodcraft.Commands
                 var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
                 Core.DataStructures.PlayerExperience[steamId] = xpData;
                 Core.DataStructures.SavePlayerExperience();
+                GearOverride.SetLevel(foundUser.LocalCharacter._Entity);
                 ctx.Reply($"Level set to <color=white>{level}</color> for {foundUser.CharacterName}.");
             }
             else

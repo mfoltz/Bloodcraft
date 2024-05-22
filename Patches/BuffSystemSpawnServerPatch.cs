@@ -13,17 +13,16 @@ internal static class BuffSystem_Spawn_ServerPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(BuffSystem_Spawn_Server __instance)
     {
+        Core.Log.LogInfo("BuffSystem_Spawn_Server.OnUpdate");
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                /*
                 if (Plugin.LevelingSystem.Value && entity.Has<Buff>() && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     GearOverride.SetLevel(entity.Read<Buff>().Target);
                 }
-                */
             }
         }
         catch (System.Exception ex)

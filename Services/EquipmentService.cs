@@ -18,7 +18,7 @@ namespace Bloodcraft.Services
             EntityQueryDesc queryDesc = new()
             {
                 All = new ComponentType[] { new(Il2CppType.Of<Equippable>(), ComponentType.AccessMode.ReadOnly) },
-                Options = EntityQueryOptions.IncludeDisabled
+                Options = EntityQueryOptions.IncludeAll
             };
             EntityQuery query = Core.EntityManager.CreateEntityQuery(queryDesc);
 
@@ -28,7 +28,6 @@ namespace Bloodcraft.Services
                 PrefabGUID prefabGUID = source.Read<PrefabGUID>();
                 Entity baseEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
                 int entityIndex = baseEntity.Index;
-
                 if (Plugin.LevelingSystem.Value && baseEntity.Has<ArmorLevelSource>())
                 {
                     float level = baseEntity.Read<ArmorLevelSource>().Level;
