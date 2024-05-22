@@ -89,6 +89,10 @@ UNDER CONSTRUCTION
   Enable or disable the expertise system.
 - **Enable Sanguimancy**: `Sanguimancy` (bool, default: false)  
   Enable or disable sanguimancy.
+- **First Slot Unlock**: `FirstSlot` (int, default: 25)  
+  Level to unlock first spell slot for unarmed.
+- **Second Slot Unlock**: `SecondSlot` (int, default: 75)  
+  Level to unlock second spell slot for unarmed.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 99)  
   Maximum level in weapon expertise.
 - **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (int, default: 5)  
