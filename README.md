@@ -10,7 +10,7 @@ UNDER CONSTRUCTION
 
 - **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills.
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and enhance replayability (prestige will feature in the future).
+- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and enhance replayability (prestiging is on the list).
 - **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies.
 
 ## Commands
@@ -75,6 +75,8 @@ UNDER CONSTRUCTION
   Enable or disable the leveling system.
 - **Max Player Level**: `MaxLevel` (int, default: 90)  
   The maximum level a player can reach.
+- **Starting Player Level**: `StartingLevel` (int, default: 0)  
+  The starting level for players. Use this to skip the first few journal quests for now until I think of a better solution.
 - **Unit Leveling Multiplier**: `UnitLevelingMultiplier` (int, default: 5)  
   Multiplier for experience gained from units.
 - **VBlood Leveling Multiplier**: `VBloodLevelingMultiplier` (int, default: 15)  
