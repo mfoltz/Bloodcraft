@@ -112,7 +112,7 @@ namespace Bloodcraft
             _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
             _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
             _firstSlot = Instance.Config.Bind("Config", "FirstSlot", 25, "Level of sanguimancy required for first slot unlock.");
-            _secondSlot = Instance.Config.Bind("Config", "SecondSlot", 75, "Level of sanguimancy required for second slot unlock.");
+            _secondSlot = Instance.Config.Bind("Config", "SecondSlot", 50, "Level of sanguimancy required for second slot unlock.");
             _maxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
             _unitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             _vBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBloods.");
