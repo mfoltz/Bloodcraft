@@ -178,11 +178,9 @@ internal static class EquipmentPatches
                     if (weapon.Equals(Entity.Null) || !weapon.Has<WeaponLevelSource>()) continue;
                     if (weapon.Read<WeaponLevelSource>().Level >= entityCategory.ResourceLevel._Value) continue;
                     //float originalSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weapon.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
-                    if (Core.EquipmentService.WeaponLevelSources.TryGetValue(weapon.Read<PrefabGUID>(), out var sources))
+                    if (Core.EquipmentService.WeaponLevelSources.TryGetValue(weapon.Read<PrefabGUID>(), out var source))
                     {
-                        var (entityIndex, level) = sources.FirstOrDefault(s => s.entityIndex == weapon.Index);
-
-                        if (level >= entityCategory.ResourceLevel._Value)
+                        if (source >= entityCategory.ResourceLevel._Value)
                         {
                             entityCategory.ResourceLevel._Value = 0;
                             dealDamageEvent.Target.Write(entityCategory);
@@ -241,26 +239,23 @@ internal static class EquipmentPatches
                 {
                     if (Plugin.ExpertiseSystem.Value && inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>() )
                     {
-                        if (Core.EquipmentService.WeaponLevelSources.TryGetValue(inventoryChangedEvent.Item, out var weaponLevelSources))
+                        if (Core.EquipmentService.WeaponLevelSources.TryGetValue(inventoryChangedEvent.Item, out var weaponLevelSource))
                         {
-                            var weaponLevelSource = weaponLevelSources.FirstOrDefault(s => s.entityIndex == inventoryChangedEvent.ItemEntity.Index).level;
                             inventoryChangedEvent.ItemEntity.Write(new WeaponLevelSource { Level = weaponLevelSource });
                         }
                         
                     }
                     else if (Plugin.LevelingSystem.Value && inventoryChangedEvent.ItemEntity.Has<ArmorLevelSource>() )
                     {
-                        if (Core.EquipmentService.ArmorLevelSources.TryGetValue(inventoryChangedEvent.Item, out var armorLevelSources))
+                        if (Core.EquipmentService.ArmorLevelSources.TryGetValue(inventoryChangedEvent.Item, out var armorLevelSource))
                         {
-                            var armorLevelSource = armorLevelSources.FirstOrDefault(s => s.entityIndex == inventoryChangedEvent.ItemEntity.Index).level;
                             inventoryChangedEvent.ItemEntity.Write(new ArmorLevelSource { Level = armorLevelSource });
                         }
                     }
                     else if (Plugin.LevelingSystem.Value && inventoryChangedEvent.ItemEntity.Has<SpellLevelSource>())
                     {
-                        if (Core.EquipmentService.SpellLevelSources.TryGetValue(inventoryChangedEvent.Item, out var spellLevelSources))
+                        if (Core.EquipmentService.SpellLevelSources.TryGetValue(inventoryChangedEvent.Item, out var spellLevelSource))
                         {
-                            var spellLevelSource = spellLevelSources.FirstOrDefault(s => s.entityIndex == inventoryChangedEvent.ItemEntity.Index).level;
                             inventoryChangedEvent.ItemEntity.Write(new SpellLevelSource { Level = spellLevelSource });
                         }
                     }
@@ -274,6 +269,20 @@ internal static class EquipmentPatches
                     else if (Plugin.LevelingSystem.Value && inventoryChangedEvent.ItemEntity.Has<SpellLevelSource>())
                     {
                         inventoryChangedEvent.ItemEntity.Write(new SpellLevelSource { Level = 0f });
+                    }
+                    else if (Plugin.ExpertiseSystem.Value && inventoryChangedEvent.ItemEntity.Has<WeaponLevelSource>())
+                    {
+                        ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                        ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
+                        IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+                        if (handler != null)
+                        {
+                            WeaponLevelSource weaponLevelSource = new()
+                            {
+                                Level = handler.GetExpertiseData(steamId).Key
+                            };
+                            inventoryChangedEvent.ItemEntity.Write(weaponLevelSource);
+                        }
                     }
                 }
                 else if (Plugin.ProfessionSystem.Value && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())

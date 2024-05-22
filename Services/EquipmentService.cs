@@ -8,9 +8,9 @@ namespace Bloodcraft.Services
 {
     internal class EquipmentService
     {
-        public readonly Dictionary<PrefabGUID, List<(int entityIndex, float level)>> ArmorLevelSources = [];
-        public readonly Dictionary<PrefabGUID, List<(int entityIndex, float level)>> WeaponLevelSources = [];
-        public readonly Dictionary<PrefabGUID, List<(int entityIndex, float level)>> SpellLevelSources = [];
+        public readonly Dictionary<PrefabGUID, float> ArmorLevelSources = [];
+        public readonly Dictionary<PrefabGUID, float> WeaponLevelSources = [];
+        public readonly Dictionary<PrefabGUID, float> SpellLevelSources = [];
         public EquipmentService()
         {
             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
@@ -33,9 +33,8 @@ namespace Bloodcraft.Services
                     float level = baseEntity.Read<ArmorLevelSource>().Level;
                     if (!ArmorLevelSources.ContainsKey(prefabGUID))
                     {
-                        ArmorLevelSources[prefabGUID] = [];
+                        ArmorLevelSources.Add(prefabGUID, level);
                     }
-                    ArmorLevelSources[prefabGUID].Add((entityIndex, level));
                     baseEntity.Write(new ArmorLevelSource { Level = 0 });
                 }
                 else if (Plugin.LevelingSystem.Value && baseEntity.Has<SpellLevelSource>())
@@ -43,9 +42,8 @@ namespace Bloodcraft.Services
                     float level = baseEntity.Read<SpellLevelSource>().Level;
                     if (!SpellLevelSources.ContainsKey(prefabGUID))
                     {
-                        SpellLevelSources[prefabGUID] = [];
+                        SpellLevelSources.Add(prefabGUID, level);
                     }
-                    SpellLevelSources[prefabGUID].Add((entityIndex, level));
                     baseEntity.Write(new SpellLevelSource { Level = 0 });
                 }
                 else if (Plugin.ExpertiseSystem.Value && baseEntity.Has<WeaponLevelSource>())
@@ -53,9 +51,8 @@ namespace Bloodcraft.Services
                     float level = baseEntity.Read<WeaponLevelSource>().Level;
                     if (!WeaponLevelSources.ContainsKey(prefabGUID))
                     {
-                        WeaponLevelSources[prefabGUID] = [];
+                        WeaponLevelSources.Add(prefabGUID, level);
                     }
-                    WeaponLevelSources[prefabGUID].Add((entityIndex, level));
                     baseEntity.Write(new WeaponLevelSource { Level = 0 });
                 }
             }
