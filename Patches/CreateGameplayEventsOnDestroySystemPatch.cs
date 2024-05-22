@@ -43,6 +43,10 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                         Blood blood = player.Read<Blood>();
                         BloodType bloodType = GetBloodTypeFromPrefab(blood.BloodType);
                         IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+                        if (bloodHandler == null)
+                        {
+                            continue;
+                        }
                         var legacyData = bloodHandler.GetLegacyData(steamId);
                         blood.Quality += legacyData.Key;
                         player.Write(blood);
