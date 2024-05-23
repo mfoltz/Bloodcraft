@@ -34,6 +34,7 @@ internal static class EquipmentPatches
 
                     Equipment equipment = character.Read<Equipment>();
                     equipment.WeaponLevel._Value = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[entity.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
+                    character.Write(equipment);
                 }
                 else if (Plugin.ExpertiseSystem.Value && Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
