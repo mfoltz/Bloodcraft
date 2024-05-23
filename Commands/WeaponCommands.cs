@@ -37,7 +37,14 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"Your expertise is <color=yellow>{ExpertiseData.Key}</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}.");
                 if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
-                    
+                    List<KeyValuePair<WeaponStatManager.WeaponStatType, float>> bonusWeaponStats = [];
+                    foreach(var stat in stats)
+                    {
+                        float bonus = ModifyUnitStatBuffUtils.CalculateScaledWeaponBonus(handler, steamID, stat);
+                        bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, float>(stat, bonus));
+                    }
+                    string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
+                    ctx.Reply($"Current weapon bonuses: {bonuses}");
                 }
                 else
                 {
@@ -100,7 +107,7 @@ namespace Bloodcraft.Commands
             // Choose a stat for the specific weapon stats instance
             if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, weaponStatType))
             {
-                ctx.Reply($"<color=#00FFFF>{statType}</color> has been chosen for <color=#c0c0c0>{weaponType}</color> and will apply after reequiping.");
+                ctx.Reply($"<color=#00FFFF>{weaponStatType}</color> has been chosen for <color=#c0c0c0>{weaponType}</color> and will apply after reequiping.");
                 Core.DataStructures.SavePlayerWeaponStats();
             }
             else
