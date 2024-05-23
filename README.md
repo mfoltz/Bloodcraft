@@ -66,6 +66,9 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - `.listWeaponStats`
   - Lists weapon stats available.
   - Shortcut: *.lws*
+- `.resetWeaponStats`
+  - Resets stat choices for currently equipped weapon. Adding configurable cost soon.
+  - Shortcut: *.rws*
 - `.lockSpell`
   - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
