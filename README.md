@@ -58,16 +58,16 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   - Enables or disables expertise logging.
   - Shortcut: *.log expertise*
 - `.chooseWeaponStat [WeaponStat]`
-  - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise.
+  - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise. (making number of stats configurable soon)
   - Shortcut: *.cws [WeaponStat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shorcut: *.swe [Player] [Weapon] [Level]*
 - `.listWeaponStats`
-  - Lists weapon stats available.
+  - Lists weapon stats available. (will add more stat choices soon)
   - Shortcut: *.lws*
 - `.resetWeaponStats`
-  - Resets stat choices for currently equipped weapon. Adding configurable cost soon.
+  - Resets stat choices for currently equipped weapon. (adding configurable item cost and quantity soon)
   - Shortcut: *.rws*
 - `.lockSpell`
   - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
