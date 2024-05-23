@@ -90,7 +90,7 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - **Enable Expertise System**: `ExpertiseSystem` (bool, default: false)  
   Enable or disable the expertise system.
 - **Enable Sanguimancy**: `Sanguimancy` (bool, default: false)  
-  Enable or disable sanguimancy.
+  Enable or disable sanguimancy (unarmed expertise, note that expertise must also be enabled for this to work).
 - **First Slot Unlock**: `FirstSlot` (int, default: 25)  
   Level to unlock first spell slot for unarmed.
 - **Second Slot Unlock**: `SecondSlot` (int, default: 75)  
