@@ -112,8 +112,6 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   Quantity of item cost required for resetting stats.
 - **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
   Multiplier for expertise gained from VBloods.
-- **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
-  Multiplier for expertise gained from VBloods.
 
 ### Expertise Stats
 - **Physical Power**: `PhysicalPower` (float, default: 15.0)  
