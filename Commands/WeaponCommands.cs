@@ -35,6 +35,14 @@ namespace Bloodcraft.Commands
             if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
             {
                 ctx.Reply($"Your expertise is <color=yellow>{ExpertiseData.Key}</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}.");
+                if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
+                {
+                    
+                }
+                else
+                {
+                    ctx.Reply("No bonuses from currently equipped weapon.");
+                }
             }
             else
             {
