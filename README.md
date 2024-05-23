@@ -10,10 +10,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ## Features
 
-- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills.
+- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills. Experience for this is gained per kill based on equipped weapon.
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most.
 - **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression.
-- **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies.
+- **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies. Experience for this is gained per feed kill based on equipped blood type.
 
 ## Commands
 
