@@ -58,16 +58,16 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   - Enables or disables expertise logging.
   - Shortcut: *.log expertise*
 - `.chooseWeaponStat [WeaponStat]`
-  - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise. (making number of stats configurable soon)
+  - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
   - Shortcut: *.cws [WeaponStat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shorcut: *.swe [Player] [Weapon] [Level]*
 - `.listWeaponStats`
-  - Lists weapon stats available. (will add more stat choices soon)
+  - Lists weapon stats available.
   - Shortcut: *.lws*
 - `.resetWeaponStats`
-  - Resets stat choices for currently equipped weapon. (adding configurable item cost and quantity soon)
+  - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
   - Shortcut: *.rws*
 - `.lockSpell`
   - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
@@ -102,6 +102,16 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   Maximum level in weapon expertise.
 - **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (int, default: 5)  
   Multiplier for expertise gained from units.
+- **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
+  Multiplier for expertise gained from VBloods.
+- **Max Number Stat Choices**: `MaxStatChoices` (int, default: 2)  
+  The maximum number of stat choices a player can choose for weapon expertise per weapon.
+- **Reset Item Cost**: `ResetStatsItem` (int, default: 0)  
+  Item PrefabGUID cost for resetting weapon stats.
+- **Reset Item Quantity**: `ResetStatsItemQuantity` (int, default: 0)  
+  Quantity of item cost required for resetting stats.
+- **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
+  Multiplier for expertise gained from VBloods.
 - **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
   Multiplier for expertise gained from VBloods.
 
