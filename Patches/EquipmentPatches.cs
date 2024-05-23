@@ -25,17 +25,30 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
-                if (Plugin.ExpertiseSystem.Value && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (Plugin.ExpertiseSystem.Value && !Plugin.LevelingSystem.Value && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                     GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
+
+                    Equipment equipment = character.Read<Equipment>();
+                    equipment.WeaponLevel._Value = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[entity.Read<PrefabGUID>()].Read<WeaponLevelSource>().Level;
                 }
-                if (Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                else if (Plugin.ExpertiseSystem.Value && Plugin.LevelingSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
+                    Entity character = entity.Read<EntityOwner>().Owner;
+                    ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                    GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
+
                     Entity player = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(player);
+                }
+                else if (Plugin.LevelingSystem.Value && !Plugin.ExpertiseSystem.Value && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                {
+                    Entity character = entity.Read<EntityOwner>().Owner;
+                    GearOverride.SetLevel(character);
                 }
             }
         }
@@ -378,8 +391,6 @@ public static class GearOverride
         {
             int playerLevel = xpData.Key + extra;
             Equipment equipment = player.Read<Equipment>();
-
-            
 
             if (Plugin.LevelingSystem.Value && Plugin.ExpertiseSystem.Value)
             {
