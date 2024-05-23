@@ -2,7 +2,7 @@
 
 Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly.
 
-Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (progress tracking is functional but only woodcutting, harvesting and mining provide bonuses at the moment), leveling is functional, and blood legacies are functional (currently each legacy level adds +1% to blood quality for that type when equipped, enhancing blood buffs accordingly if applicable). Still needs refinement and have many plans for improvements, feedback and bug reports welcome!
+Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (progress tracking is functional but only woodcutting, harvesting and mining provide bonuses at the moment), leveling is functional, and blood legacies are functional (currently each legacy level adds +1% to blood quality for that type when equipped, enhancing blood buffs accordingly if applicable). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
 
 - [Features](#features)
 - [Commands](#commands)
@@ -52,20 +52,23 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ### Weapon Commands
 - `.getExpertiseProgress`
-  - Display expertise progress for current weapon.
+  - Display expertise progress for current weapon along with any bonus stats if applicable.
   - Shortcut: *.get expertise*
 - `.logExpertiseProgress`
   - Enables or disables expertise logging.
   - Shortcut: *.log expertise*
 - `.chooseWeaponStat [WeaponStat]`
-  - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise.
+  - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise. (making number of stats configurable soon)
   - Shortcut: *.cws [WeaponStat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shorcut: *.swe [Player] [Weapon] [Level]*
 - `.listWeaponStats`
-  - Lists weapon stats available.
+  - Lists weapon stats available. (will add more stat choices soon)
   - Shortcut: *.lws*
+- `.resetWeaponStats`
+  - Resets stat choices for currently equipped weapon. (adding configurable item cost and quantity soon)
+  - Shortcut: *.rws*
 - `.lockSpell`
   - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
@@ -90,7 +93,7 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - **Enable Expertise System**: `ExpertiseSystem` (bool, default: false)  
   Enable or disable the expertise system.
 - **Enable Sanguimancy**: `Sanguimancy` (bool, default: false)  
-  Enable or disable sanguimancy.
+  Enable or disable sanguimancy (unarmed expertise, note that expertise must also be enabled for this to work).
 - **First Slot Unlock**: `FirstSlot` (int, default: 25)  
   Level to unlock first spell slot for unarmed.
 - **Second Slot Unlock**: `SecondSlot` (int, default: 75)  
