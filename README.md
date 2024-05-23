@@ -52,7 +52,7 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ### Weapon Commands
 - `.getExpertiseProgress`
-  - Display expertise progress for current weapon.
+  - Display expertise progress for current weapon along with any bonus stats if applicable.
   - Shortcut: *.get expertise*
 - `.logExpertiseProgress`
   - Enables or disables expertise logging.
