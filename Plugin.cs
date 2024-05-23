@@ -35,6 +35,9 @@ namespace Bloodcraft
         private static ConfigEntry<int> _maxExpertiseLevel;
         private static ConfigEntry<int> _unitExpertiseMultiplier;
         private static ConfigEntry<int> _vBloodExpertiseMultiplier;
+        private static ConfigEntry<int> _MaxStatChoices;
+        private static ConfigEntry<int> _ResetStatsItem;
+        private static ConfigEntry<int> _ResetStatsItemQuantity;
 
         private static ConfigEntry<float> _physicalPower;
         private static ConfigEntry<float> _spellPower;
@@ -63,10 +66,12 @@ namespace Bloodcraft
         public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
         public static ConfigEntry<int> FirstSlot => _firstSlot;
         public static ConfigEntry<int> SecondSlot => _secondSlot;
-
         public static ConfigEntry<int> MaxExpertiseLevel => _maxExpertiseLevel;
         public static ConfigEntry<int> UnitExpertiseMultiplier => _unitExpertiseMultiplier;
         public static ConfigEntry<int> VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier;
+        public static ConfigEntry<int> MaxStatChoices => _MaxStatChoices;
+        public static ConfigEntry<int> ResetStatsItem => _ResetStatsItem;
+        public static ConfigEntry<int> ResetStatsItemQuantity => _ResetStatsItemQuantity;
 
         public static ConfigEntry<float> PhysicalPower => _physicalPower;
         public static ConfigEntry<float> SpellPower => _spellPower;
@@ -116,6 +121,9 @@ namespace Bloodcraft
             _maxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
             _unitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 5, "The multiplier for expertise gained from units.");
             _vBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 15, "The multiplier for expertise gained from VBloods.");
+            _MaxStatChoices = Instance.Config.Bind("Config", "MaxStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
+            _ResetStatsItem = Instance.Config.Bind("Config", "ResetStatsItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
+            _ResetStatsItemQuantity = Instance.Config.Bind("Config", "ResetStatsItemQuantity", 0, "Quantity of item required for resetting stats.");
 
             _physicalPower = Instance.Config.Bind("Config", "PhysicalPower", 15f, "The base cap for physical power.");
             _spellPower = Instance.Config.Bind("Config", "SpellPower", 15f, "The base cap for spell power.");

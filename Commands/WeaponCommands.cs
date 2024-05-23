@@ -2,6 +2,7 @@ using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
+using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponStats;
@@ -124,6 +125,8 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Expertise is not enabled.");
                 return;
             }
+            
+
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
@@ -132,6 +135,27 @@ namespace Bloodcraft.Commands
             {
                 ctx.Reply("You cannot reset weapon stats for unarmed (sanguimancy) as none can be chosen.");
                 return;
+            }
+
+            if (!Plugin.ResetStatsItem.Value.Equals(0))
+            {
+                PrefabGUID item = new(Plugin.ResetStatsItem.Value);
+                int quantity = Plugin.ResetStatsItemQuantity.Value;
+                // Check if the player has the item to reset stats
+                if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && Core.ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+                {
+                    if (Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
+                    {
+                        PlayerWeaponUtilities.ResetStats(steamID, weaponType);
+                        ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
+                        return;
+                    }
+                }
+                else
+                {
+                    ctx.Reply("You do not have the required item to reset your weapon stats.");
+                    return;
+                }
             }
 
             PlayerWeaponUtilities.ResetStats(steamID, weaponType);

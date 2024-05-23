@@ -85,7 +85,7 @@ namespace Bloodcraft.Systems.Professions
             {
                 if (!prefabEntity.Has<DropTableDataBuffer>())
                 {
-                    Core.Log.LogInfo("No DropTableDataBuffer or DropTableBuffer found on entity...");
+                    //Core.Log.LogInfo("No DropTableDataBuffer or DropTableBuffer found on entity...");
                 }
                 else
                 {
@@ -93,13 +93,13 @@ namespace Bloodcraft.Systems.Professions
                     var dropTableDataBuffer = prefabEntity.ReadBuffer<DropTableDataBuffer>();
                     foreach (var dropTableData in dropTableDataBuffer)
                     {
-                        Core.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
+                        //Core.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
                         prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
                         if (!prefabEntity.Has<ItemDataDropGroupBuffer>()) continue;
                         var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
                         foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
                         {
-                            Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
+                            //Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                         }
                     }
                 }
@@ -109,7 +109,7 @@ namespace Bloodcraft.Systems.Professions
                 var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();
                 foreach (var drop in dropTableBuffer)
                 {
-                    Core.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
+                    //Core.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
                     switch (drop.DropTrigger)
                     {
                         case DropTriggerType.YieldResourceOnDamageTaken:

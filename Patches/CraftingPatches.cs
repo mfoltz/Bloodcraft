@@ -50,7 +50,7 @@ internal static class CraftingPatches
                         {
                             if (playerJobs[i].Item1.Equals(itemPrefab))
                             {
-                                Core.Log.LogInfo($"Adding Craft: {itemPrefab.LookupName()}");
+                                //Core.Log.LogInfo($"Adding Craft: {itemPrefab.LookupName()}");
                                 playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 + 1);
                                 jobExists = true;
                                 break;
@@ -58,7 +58,7 @@ internal static class CraftingPatches
                         }
                         if (!jobExists)
                         {
-                            Core.Log.LogInfo($"Adding Craft: {itemPrefab.LookupName()}");
+                            //Core.Log.LogInfo($"Adding Craft: {itemPrefab.LookupName()}");
                             playerJobs.Add((itemPrefab, 1));
                         }
                     }
@@ -104,7 +104,7 @@ internal static class CraftingPatches
                             {
                                 if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
                                 {
-                                    Core.Log.LogInfo($"Removing Craft: {itemPrefab.LookupName()}");
+                                    //Core.Log.LogInfo($"Removing Craft: {itemPrefab.LookupName()}");
                                     playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
                                     if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
                                     break;
