@@ -7,6 +7,7 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
+- [Roadmap](#roadmap)
 
 ## Features
 
@@ -148,3 +149,12 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   Maximum level in professions.
 - **Profession Multiplier**: `ProfessionMultiplier` (int, default: 10)  
   Multiplier for profession experience gained per action.
+
+## Roadmap
+
+These are things I'm working on in the immediate future, please feel free to suggest things you'd like to see.
+
+- **Weapon Expertise:** Config options for allowed stats, additional stat choices
+- **Player Professions:** Config options to control bonuses per profession, more features per profession
+- **Experience Leveling:** Config options to account for things like unit spawners, servant kills, etc
+- **Blood Legacies:** Config options to customize blood benefits in some manner more similar to weapon expertise than just improving quality %
