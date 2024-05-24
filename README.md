@@ -44,12 +44,18 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ### Profession Commands
 - `.getProfessionProgress [Profession]`
-  - Display progress in current blood lineage.
+  - Display progress in entered profession.
   - Shortcut: *.get [Profession]*
 - `.logProfessionProgress`
   - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
   - Shortcut: *.log professions*
-
+- `.setProfessionLevel [Name] [Profession] [Level]` 🔒
+  - Sets player profession level.
+  - Shortcut: *.spl [Name] [Profession] [Level]*
+- `.listProfessions`
+  - Lists available professions.
+  - Shortcut: *.lp*
+    
 ### Weapon Commands
 - `.getExpertiseProgress`
   - Display expertise progress for current weapon along with any bonus stats if applicable.
