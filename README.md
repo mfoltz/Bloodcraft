@@ -20,10 +20,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Blood Commands
 - `.getLegacyProgress`
   - Display progress in current blood lineage.
-  - Shortcut: *.get legacy*
+  - Shortcut: *.get b*
 - `.logLegacyProgress`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.log legacy*
+  - Shortcut: *.log b*
 - `.setBloodLegacy [Player] [BloodType] [Level]` 🔒
   - Sets player blood legacy level.
   - Shorcut: *.sbl [Player] [BloodType] [Level]*
@@ -34,10 +34,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Leveling Commands
 - `.getLevelingProgress`
   - Display current level progress.
-  - Shortcut: *.get level*
+  - Shortcut: *.get l*
 - `.logLevelingProgress`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.log level*
+  - Shortcut: *.log l*
 - `.setLevel [Player] [Level]` 🔒
   - Sets player experience level.
   - Shorcut: *.sl [Player] [Level]*
@@ -59,10 +59,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Weapon Commands
 - `.getExpertiseProgress`
   - Display expertise progress for current weapon along with any bonus stats if applicable.
-  - Shortcut: *.get expertise*
+  - Shortcut: *.get e*
 - `.logExpertiseProgress`
   - Enables or disables expertise logging.
-  - Shortcut: *.log expertise*
+  - Shortcut: *.log e*
 - `.chooseWeaponStat [WeaponStat]`
   - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
   - Shortcut: *.cws [WeaponStat]*
