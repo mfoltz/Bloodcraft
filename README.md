@@ -10,10 +10,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ## Features
 
-- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills.
+- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills. Experience for this is gained per kill based on equipped weapon.
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most.
 - **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression.
-- **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies.
+- **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies. Experience for this is gained per feed kill based on equipped blood type.
 
 ## Commands
 
@@ -44,12 +44,18 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ### Profession Commands
 - `.getProfessionProgress [Profession]`
-  - Display progress in current blood lineage.
+  - Display progress in entered profession.
   - Shortcut: *.get [Profession]*
 - `.logProfessionProgress`
   - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
   - Shortcut: *.log professions*
-
+- `.setProfessionLevel [Name] [Profession] [Level]` 🔒
+  - Sets player profession level.
+  - Shortcut: *.spl [Name] [Profession] [Level]*
+- `.listProfessions`
+  - Lists available professions.
+  - Shortcut: *.lp*
+    
 ### Weapon Commands
 - `.getExpertiseProgress`
   - Display expertise progress for current weapon along with any bonus stats if applicable.
@@ -58,19 +64,19 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   - Enables or disables expertise logging.
   - Shortcut: *.log expertise*
 - `.chooseWeaponStat [WeaponStat]`
-  - Chooses 1 of 2 total stats a weapon will apply bonuses towards based on expertise. (making number of stats configurable soon)
+  - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
   - Shortcut: *.cws [WeaponStat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shorcut: *.swe [Player] [Weapon] [Level]*
 - `.listWeaponStats`
-  - Lists weapon stats available. (will add more stat choices soon)
+  - Lists weapon stats available.
   - Shortcut: *.lws*
 - `.resetWeaponStats`
-  - Resets stat choices for currently equipped weapon. (adding configurable item cost and quantity soon)
+  - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
   - Shortcut: *.rws*
 - `.lockSpell`
-  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough. (requirement for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough (requirements for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
  
 ## Configuration
@@ -104,6 +110,12 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   Multiplier for expertise gained from units.
 - **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
   Multiplier for expertise gained from VBloods.
+- **Max Number Stat Choices**: `MaxStatChoices` (int, default: 2)  
+  The maximum number of stat choices a player can choose for weapon expertise per weapon.
+- **Reset Item Cost**: `ResetStatsItem` (int, default: 0)  
+  Item PrefabGUID cost for resetting weapon stats.
+- **Reset Item Quantity**: `ResetStatsItemQuantity` (int, default: 0)  
+  Quantity of item cost required for resetting stats.
 
 ### Expertise Stats
 - **Physical Power**: `PhysicalPower` (float, default: 15.0)  
