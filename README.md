@@ -2,7 +2,7 @@
 
 Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly.
 
-Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus except for fishing (WIP), woodcutting/mining/harvesting bonus yields blacksmithing/tailoring/jewelcrafting bonus durability to crafted items alchemy bonus consumable buff effects/lifetime), leveling is functional, and blood legacies are functional (each legacy level adds +1% to blood quality for that type when equipped, won't show higher quality after 100% but will still affect stats that scale with quality past 100%). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
+Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus except for fishing (WIP), woodcutting/mining/harvesting bonus yields blacksmithing/tailoring/jewelcrafting bonus durability to crafted items alchemy bonus consumable buff effects/lifetime), leveling is functional, and blood legacies are functional (each legacy level adds +1% to blood quality for that type when equipped, won't show higher quality after 100% but will still affect stats that scale with quality past 100%). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged! If you'd like to contribute to development, my Kofi can be found here: https://ko-fi.com/zfolmt (please rest assured this mod will remain open source and will never be charged for, any contributions are entirely optional and greatly appreciated)
 
 - [Features](#features)
 - [Commands](#commands)
@@ -20,10 +20,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Blood Commands
 - `.getLegacyProgress`
   - Display progress in current blood lineage.
-  - Shortcut: *.get legacy*
+  - Shortcut: *.get b*
 - `.logLegacyProgress`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.log legacy*
+  - Shortcut: *.log b*
 - `.setBloodLegacy [Player] [BloodType] [Level]` 🔒
   - Sets player blood legacy level.
   - Shorcut: *.sbl [Player] [BloodType] [Level]*
@@ -34,10 +34,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Leveling Commands
 - `.getLevelingProgress`
   - Display current level progress.
-  - Shortcut: *.get level*
+  - Shortcut: *.get l*
 - `.logLevelingProgress`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.log level*
+  - Shortcut: *.log l*
 - `.setLevel [Player] [Level]` 🔒
   - Sets player experience level.
   - Shorcut: *.sl [Player] [Level]*
@@ -45,10 +45,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Profession Commands
 - `.getProfessionProgress [Profession]`
   - Display progress in entered profession.
-  - Shortcut: *.get [Profession]*
+  - Shortcut: *.gp [Profession]*
 - `.logProfessionProgress`
   - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
-  - Shortcut: *.log professions*
+  - Shortcut: *.log p*
 - `.setProfessionLevel [Name] [Profession] [Level]` 🔒
   - Sets player profession level.
   - Shortcut: *.spl [Name] [Profession] [Level]*
@@ -59,10 +59,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Weapon Commands
 - `.getExpertiseProgress`
   - Display expertise progress for current weapon along with any bonus stats if applicable.
-  - Shortcut: *.get expertise*
+  - Shortcut: *.get e*
 - `.logExpertiseProgress`
   - Enables or disables expertise logging.
-  - Shortcut: *.log expertise*
+  - Shortcut: *.log e*
 - `.chooseWeaponStat [WeaponStat]`
   - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
   - Shortcut: *.cws [WeaponStat]*
