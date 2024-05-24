@@ -101,7 +101,7 @@ namespace Bloodcraft.Commands
             ctx.Reply($"<color=red>{BloodHandler.GetBloodType()}</color> lineage set to <color=white>{level}</color> for {foundUser.CharacterName}.");
         }
 
-        [Command(name: "listBloodTypes", shortHand: ".lbt", adminOnly: false, usage: ".lbt", description: "Lists blood types.")]
+        [Command(name: "listBloodTypes", shortHand: "lbt", adminOnly: false, usage: ".lbt", description: "Lists blood types.")]
         public static void ListBloodTypesCommand(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)

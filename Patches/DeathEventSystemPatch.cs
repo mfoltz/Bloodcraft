@@ -18,21 +18,21 @@ internal static class DeathEventListenerSystemPatch
         NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
         try
         {
-            foreach (DeathEvent ev in deathEvents)
+            foreach (DeathEvent deathEvent in deathEvents)
             {
-                if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer) && __instance.EntityManager.HasComponent<Movement>(ev.Died))
+                if (__instance.EntityManager.HasComponent<PlayerCharacter>(deathEvent.Killer) && __instance.EntityManager.HasComponent<Movement>(deathEvent.Died))
                 {
-                    if (Plugin.LevelingSystem.Value && !ev.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(ev.Killer, ev.Died);
-                    if (Plugin.ExpertiseSystem.Value && !ev.Died.Has<VBloodConsumeSource>()) ExpertiseSystem.UpdateExpertise(ev.Killer, ev.Died);
+                    if (Plugin.LevelingSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
+                    if (Plugin.ExpertiseSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                 }
-                else if (__instance.EntityManager.HasComponent<PlayerCharacter>(ev.Killer))
+                else if (__instance.EntityManager.HasComponent<PlayerCharacter>(deathEvent.Killer))
                 {
                     //ev.Died.LogComponentTypes();
-                    if (Plugin.ProfessionSystem.Value && !ev.Died.Has<VBloodConsumeSource>()) ProfessionSystem.UpdateProfessions(ev.Killer, ev.Died);
+                    if (Plugin.ProfessionSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
                 }
-                else if (__instance.EntityManager.HasComponent<Follower>(ev.Killer) && ev.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
+                else if (__instance.EntityManager.HasComponent<Follower>(deathEvent.Killer) && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    if (Plugin.LevelingSystem.Value && !ev.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(ev.Killer.Read<Follower>().Followed._Value, ev.Died);
+                    if (Plugin.LevelingSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer.Read<Follower>().Followed._Value, deathEvent.Died);
                 }
             }
         }

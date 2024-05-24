@@ -32,7 +32,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     Entity killer = entity.Read<EntityOwner>().Owner;
                     BloodSystem.UpdateLegacy(killer, died);
                 }
-                else if (Plugin.BloodSystem.Value && entity.Has<ChangeBloodOnGameplayEvent>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (Plugin.BloodSystem.Value && entity.Has<ChangeBloodOnGameplayEvent>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     ulong steamId = entity.Read<EntityOwner>().Owner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     try

@@ -1,10 +1,5 @@
 using HarmonyLib;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.CastleBuilding;
-using Stunlock.Core;
-using Unity.Collections;
-using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
