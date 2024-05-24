@@ -20,10 +20,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Blood Commands
 - `.getLegacyProgress`
   - Display progress in current blood lineage.
-  - Shortcut: *.get b*
+  - Shortcut: *.get bl*
 - `.logLegacyProgress`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.log b*
+  - Shortcut: *.log bl*
 - `.setBloodLegacy [Player] [BloodType] [Level]` 🔒
   - Sets player blood legacy level.
   - Shorcut: *.sbl [Player] [BloodType] [Level]*
