@@ -2,7 +2,7 @@
 
 Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly.
 
-Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus except for fishing (WIP), woodcutting/mining/harvesting bonus yields blacksmithing/tailoring/jewelcrafting bonus durability to crafted items alchemy bonus consumable buff effects/lifetime), leveling is functional, and blood legacies are functional (currently each legacy level adds +1% to blood quality for that type when equipped, enhancing blood buffs accordingly if applicable). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
+Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus except for fishing (WIP), woodcutting/mining/harvesting bonus yields blacksmithing/tailoring/jewelcrafting bonus durability to crafted items alchemy bonus consumable buff effects/lifetime), leveling is functional, and blood legacies are functional (each legacy level adds +1% to blood quality for that type when equipped, won't show higher quality after 100% but will still affect stats that scale with quality past 100%). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
 
 - [Features](#features)
 - [Commands](#commands)
@@ -10,10 +10,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ## Features
 
-- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills. Experience for this is gained per kill based on equipped weapon.
-- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression.
-- **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies. Experience for this is gained per feed kill based on equipped blood type.
+- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills. Experience for this is gained per kill based for equipped weapon.
+- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Experience for this is gained per resource broken, item crafted, or succesful catch.
+- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill.
+- **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies. Experience for this is gained per feed kill for equipped blood type.
 
 ## Commands
 
@@ -147,4 +147,4 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - **Max Profession Level**: `MaxProfessionLevel` (int, default: 99)  
   Maximum level in professions.
 - **Profession Multiplier**: `ProfessionMultiplier` (int, default: 10)  
-  Multiplier for profession experience gained.
+  Multiplier for profession experience gained per action.
