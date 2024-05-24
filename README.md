@@ -2,7 +2,7 @@
 
 Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly.
 
-Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (progress tracking is functional but only woodcutting, harvesting and mining provide bonuses at the moment), leveling is functional, and blood legacies are functional (currently each legacy level adds +1% to blood quality for that type when equipped, enhancing blood buffs accordingly if applicable). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
+Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus except for fishing (WIP), woodcutting/mining/harvesting bonus yields blacksmithing/tailoring/jewelcrafting bonus durability to crafted items alchemy bonus consumable buff effects/lifetime), leveling is functional, and blood legacies are functional (currently each legacy level adds +1% to blood quality for that type when equipped, enhancing blood buffs accordingly if applicable). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
 
 - [Features](#features)
 - [Commands](#commands)
