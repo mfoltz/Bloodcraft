@@ -116,8 +116,6 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   Item PrefabGUID cost for resetting weapon stats.
 - **Reset Item Quantity**: `ResetStatsItemQuantity` (int, default: 0)  
   Quantity of item cost required for resetting stats.
-- **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (int, default: 15)  
-  Multiplier for expertise gained from VBloods.
 
 ### Expertise Stats
 - **Physical Power**: `PhysicalPower` (float, default: 15.0)  
