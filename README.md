@@ -45,10 +45,10 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 ### Profession Commands
 - `.getProfessionProgress [Profession]`
   - Display progress in entered profession.
-  - Shortcut: *.get [Profession]*
+  - Shortcut: *.gp [Profession]*
 - `.logProfessionProgress`
   - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
-  - Shortcut: *.log professions*
+  - Shortcut: *.log p*
 - `.setProfessionLevel [Name] [Profession] [Level]` 🔒
   - Sets player profession level.
   - Shortcut: *.spl [Name] [Profession] [Level]*
