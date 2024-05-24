@@ -9,7 +9,7 @@ namespace Bloodcraft.Commands
 {
     public static class BloodCommands
     {
-        [Command(name: "getLegacyProgress", shortHand: "get legacy", adminOnly: false, usage: ".get legacy", description: "Display your current Legacy progress.")]
+        [Command(name: "getLegacyProgress", shortHand: "get b", adminOnly: false, usage: ".get b", description: "Display your current Legacy progress.")]
         public static void GetLegacyCommand(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)
@@ -42,7 +42,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "logLegacyProgress", shortHand: "log legacy", adminOnly: false, usage: ".log legacy", description: "Toggles Legacy progress logging.")]
+        [Command(name: "logLegacyProgress", shortHand: "log b", adminOnly: false, usage: ".log b", description: "Toggles Legacy progress logging.")]
         public static void LogLegacyCommand(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)
@@ -98,7 +98,7 @@ namespace Bloodcraft.Commands
             ctx.Reply($"Legacy for <color=red>{BloodHandler.GetBloodType()}</color> set to <color=white>{level}</color> for {foundUser.CharacterName}.");
         }
 
-        [Command(name: "listBloodTypes", shortHand: ".lbt", adminOnly: true, usage: ".lbt", description: "Lists blood types.")]
+        [Command(name: "listBloodTypes", shortHand: ".lbt", adminOnly: false, usage: ".lbt", description: "Lists blood types.")]
         public static void ListBloodTypesCommand(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)

@@ -31,7 +31,7 @@ public class BuffPatch
                     if (entity.Has<LifeTime>())
                     {
                         LifeTime lifeTime = entity.Read<LifeTime>();
-                        lifeTime.Duration = lifeTime.Duration * (1 + level / Plugin.MaxProfessionLevel.Value);
+                        lifeTime.Duration *= (1 + level / Plugin.MaxProfessionLevel.Value);
                         entity.Write(lifeTime);
                     }
                     if (entity.Has<ModifyUnitStatBuff_DOTS>())
@@ -40,7 +40,7 @@ public class BuffPatch
                         for (int i = 0; i < buffer.Length; i++)
                         {
                             ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                            statBuff.Value = statBuff.Value * (1 + level / Plugin.MaxProfessionLevel.Value);
+                            statBuff.Value *= (1 + level / Plugin.MaxProfessionLevel.Value);
                             buffer[i] = statBuff;
                         }
                     }

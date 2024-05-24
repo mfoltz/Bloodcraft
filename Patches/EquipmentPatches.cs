@@ -303,7 +303,7 @@ internal static class EquipmentPatches
                                 {
                                     Durability durability = itemEntity.Read<Durability>();
                                     int level = handler.GetExperienceData(steamId).Key;
-                                    durability.MaxDurability = durability.MaxDurability * (1 + level / Plugin.MaxProfessionLevel.Value);
+                                    durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
                                     durability.Value = durability.MaxDurability;
                                     itemEntity.Write(durability);
                                 }
@@ -315,7 +315,7 @@ internal static class EquipmentPatches
                                 {
                                     Durability durability = itemEntity.Read<Durability>();
                                     int level = handler.GetExperienceData(steamId).Key;
-                                    durability.MaxDurability = durability.MaxDurability * (1 + level / Plugin.MaxProfessionLevel.Value);
+                                    durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
                                     durability.Value = durability.MaxDurability;
                                     itemEntity.Write(durability);
                                 }
@@ -325,7 +325,7 @@ internal static class EquipmentPatches
                                 {
                                     Durability durability = itemEntity.Read<Durability>();
                                     int level = handler.GetExperienceData(steamId).Key;
-                                    durability.MaxDurability = durability.MaxDurability * (1 + level / Plugin.MaxProfessionLevel.Value);
+                                    durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
                                     durability.Value = durability.MaxDurability;
                                     itemEntity.Write(durability);
                                 }

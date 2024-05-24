@@ -11,7 +11,7 @@ namespace Bloodcraft.Commands
 {
     public static class WeaponCommands
     {
-        [Command(name: "getExpertiseProgress", shortHand: "get expertise", adminOnly: false, usage: ".get expertise", description: "Display your current Expertise progress.")]
+        [Command(name: "getExpertiseProgress", shortHand: "get e", adminOnly: false, usage: ".get e", description: "Display your current Expertise progress.")]
         public static void GetExpertiseCommand(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)
@@ -58,7 +58,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "logExpertiseProgress", shortHand: "log expertise", adminOnly: false, usage: ".log expertise", description: "Toggles Expertise progress logging.")]
+        [Command(name: "logExpertiseProgress", shortHand: "log e", adminOnly: false, usage: ".log e", description: "Toggles Expertise progress logging.")]
         public static void LogExpertiseCommand(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)

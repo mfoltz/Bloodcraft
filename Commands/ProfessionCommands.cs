@@ -11,7 +11,7 @@ namespace Bloodcraft.Commands
 {
     public static class ProfessionCommands
     {
-        [Command(name: "logProfessionProgress", shortHand: "log professions", adminOnly: false, usage: ".log professions", description: "Toggles profession progress logging.")]
+        [Command(name: "logProfessionProgress", shortHand: "log p", adminOnly: false, usage: ".log p", description: "Toggles profession progress logging.")]
         public static void LogProgessionCommand(ChatCommandContext ctx)
         {
             if (!Plugin.ProfessionSystem.Value)
@@ -29,7 +29,7 @@ namespace Bloodcraft.Commands
             ctx.Reply($"Profession progress logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "getProfessionProgress", shortHand: "get [Profession]", adminOnly: false, usage: ".get [Profession]", description: "Display your current profession progress.")]
+        [Command(name: "getProfessionProgress", shortHand: "gp [Profession]", adminOnly: false, usage: ".gp [Profession]", description: "Display your current profession progress.")]
         public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
         {
             if (!Plugin.ProfessionSystem.Value)
