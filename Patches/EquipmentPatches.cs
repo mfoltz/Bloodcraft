@@ -30,7 +30,13 @@ internal static class EquipmentPatches
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+                    PrefabGUID prefab = entity.Read<PrefabGUID>();
+
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+
+                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) || weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) continue;
+
                     GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
 
                     Equipment equipment = character.Read<Equipment>();
@@ -41,7 +47,13 @@ internal static class EquipmentPatches
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+                    PrefabGUID prefab = entity.Read<PrefabGUID>();
+                    if (prefab.LookupName().ToLower().Contains("fishingpole")) continue;
+
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) || weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) continue;
+
                     GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
 
                     Entity player = entity.Read<EntityOwner>().Owner;
@@ -156,7 +168,8 @@ internal static class EquipmentPatches
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
-                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) continue;
+                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) || weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) continue;
+
                     ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
                 }
             }
@@ -251,6 +264,8 @@ internal static class EquipmentPatches
                     {
                         ulong steamId = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                         ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(inventoryChangedEvent.ItemEntity.Read<PrefabGUID>());
+                        if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) || weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) continue;
+
                         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
                         if (handler != null)
                         {

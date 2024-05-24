@@ -265,24 +265,7 @@ internal static class ServerBootstrapPatch
             }
             GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
-        /*
-        if (!Plugin.LevelingSystem.Value) // restore armor levels in inventory on connect
-        {
-            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
-            {
-                foreach (var item in playerBuffer)
-                {
-                    if (item.ItemEntity._Entity.Has<ArmorLevelSource>())
-                    {
-                        // restore armor levels
-                        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
-                        ArmorLevelSource armorLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<ArmorLevelSource>();
-                        item.ItemEntity._Entity.Write(armorLevelSource);
-                    }
-                }
-            }
-        }
-        */
+
         if (!Plugin.ExpertiseSystem.Value) // restore weapon levels in player inventory
         {
             if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))

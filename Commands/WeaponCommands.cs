@@ -1,4 +1,5 @@
 using Bloodcraft.Patches;
+using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
@@ -20,6 +21,8 @@ namespace Bloodcraft.Commands
                 return;
             }
             Entity character = ctx.Event.SenderCharacterEntity;
+
+
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
@@ -31,11 +34,11 @@ namespace Bloodcraft.Commands
 
             ulong steamID = ctx.Event.User.PlatformId;
             var ExpertiseData = handler.GetExpertiseData(steamID);
-
+            int progress = (int)(ExpertiseData.Value - LevelingSystem.ConvertLevelToXp(ExpertiseData.Key));
             // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
             if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
             {
-                ctx.Reply($"Your expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{ExpertiseData.Value - ExpertiseSystem.ConvertLevelToXp(ExpertiseData.Key)}</color> experience (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}");
+                ctx.Reply($"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> experience (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
                 if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
                     List<KeyValuePair<WeaponStatManager.WeaponStatType, float>> bonusWeaponStats = [];
@@ -54,7 +57,7 @@ namespace Bloodcraft.Commands
             }
             else
             {
-                ctx.Reply($"You haven't gained any expertise for {weaponType} yet.");
+                ctx.Reply($"You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet.");
             }
         }
 
@@ -83,18 +86,25 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Expertise is not enabled.");
                 return;
             }
+
             if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out var weaponStatType))
             {
                 ctx.Reply("Invalid weapon stat choice, use .lws to see options.");
                 return;
             }
+
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
-            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed))
             {
                 ctx.Reply("You cannot choose weapon stats for unarmed (sanguimancy). It bestows other powers...");
+                return;
+            }
+            else if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+            {
+               ctx.Reply("You cannot choose weapon stats for fishing pole.");
                 return;
             }
 
@@ -113,7 +123,7 @@ namespace Bloodcraft.Commands
             }
             else
             {
-                ctx.Reply("You have already chosen two stats for this weapon.");
+                ctx.Reply($"You have already chosen {Plugin.MaxStatChoices.Value} stats for this weapon.");
             }
         }
 
@@ -125,7 +135,6 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Expertise is not enabled.");
                 return;
             }
-            
 
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
@@ -134,6 +143,11 @@ namespace Bloodcraft.Commands
             if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
             {
                 ctx.Reply("You cannot reset weapon stats for unarmed (sanguimancy) as none can be chosen.");
+                return;
+            }
+            else if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+            {
+                ctx.Reply("You cannot reset weapon stats for fishing pole as none can be chosen.");
                 return;
             }
 
@@ -170,23 +184,29 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Expertise is not enabled.");
                 return;
             }
+
             User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
+
             if (foundUser.CharacterName.IsEmpty)
             {
                 ctx.Reply("Player not found.");
                 return;
             }
+
             if (level < 0 || level > Plugin.MaxExpertiseLevel.Value)
             {
                 ctx.Reply($"Level must be between 0 and {Plugin.MaxExpertiseLevel.Value}.");
                 return;
             }
+
             if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weapon, true, out var weaponType))
             {
                 ctx.Reply("Invalid weapon type.");
                 return;
             }
+
             var expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+
             if (expertiseHandler == null)
             {
                 ctx.Reply("Invalid weapon type.");
@@ -200,7 +220,7 @@ namespace Bloodcraft.Commands
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
             expertiseHandler.UpdateExpertiseData(steamId, xpData);
             expertiseHandler.SaveChanges();
-            GearOverride.SetWeaponItemLevel(equipment, level, Core.Server.EntityManager);
+            GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
 
             ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}.");
         }
@@ -230,6 +250,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Sanguimancy is not enabled.");
                 return;
             }
+
             var user = ctx.Event.User;
             var SteamID = user.PlatformId;
 

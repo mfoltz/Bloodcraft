@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Professions;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -26,7 +27,8 @@ namespace Bloodcraft.Systems.Expertise
             Reaper,
             Longbow,
             Whip,
-            Unarmed
+            Unarmed,
+            FishingPole
         }
         public static void UpdateExpertise(Entity Killer, Entity Victim)
         {
@@ -101,14 +103,16 @@ namespace Bloodcraft.Systems.Expertise
                 }
             }
         }
+        
         public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
-            int currentLevel = GetLevel(steamID, handler);
-            int nextLevelXP = ConvertLevelToXp(currentLevel + 1);
-            //Plugin.Log.LogInfo($"Lv: {currentLevel} | xp: {currentXP} | toNext: {nextLevelXP}");
-            int percent = (int)(currentXP / nextLevelXP * 100);
-            return percent;
+            int currentLevelXP = ConvertLevelToXp(GetLevel(steamID, handler));
+            int nextLevelXP = ConvertLevelToXp(GetLevel(steamID, handler) + 1);
+
+            double neededXP = nextLevelXP - currentLevelXP;
+            double earnedXP = nextLevelXP - currentXP;
+            return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
         public static int ConvertXpToLevel(float xp)
         {
@@ -141,6 +145,10 @@ namespace Bloodcraft.Systems.Expertise
                 else if (weaponCheck.Contains("great"))
                 {
                     return WeaponType.GreatSword;
+                }
+                else if (weaponCheck.Contains("fishingpole"))
+                {
+                    return WeaponType.FishingPole;
                 }
             }
             throw new InvalidOperationException("Unrecognized weapon type");

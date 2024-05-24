@@ -82,7 +82,20 @@ namespace Bloodcraft.Systems.Professions
             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
             Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             int level = GetLevel(SteamID, handler);
-            if (prefabEntity.Has<DropTableBuffer>())
+            if (handler.GetProfessionName().Contains("Fishing"))
+            {
+                List<PrefabGUID> fishDrops = ProfessionUtilities.GetFishingAreaDrops(prefab);
+                Random random = new();
+                int bonus = level / 20;
+                int index = random.Next(fishDrops.Count);
+                PrefabGUID fish = fishDrops[index];
+                if (serverGameManager.TryAddInventoryItem(Killer, fish, bonus))
+                {
+                    string name = ProfessionUtilities.FormatMaterialName(fishDrops[index].LookupName());
+                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                }
+            }
+            else if (prefabEntity.Has<DropTableBuffer>())
             {
                 var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();
                 foreach (var drop in dropTableBuffer)
@@ -127,52 +140,11 @@ namespace Bloodcraft.Systems.Professions
                     }
                 }
             }
-            /*
-            else if (prefabEntity.Has<DropTableDataBuffer>())
-            {
-                var dropTableDataBuffer = prefabEntity.ReadBuffer<DropTableDataBuffer>();
-                foreach (var dropTableData in dropTableDataBuffer)
-                {
-                    Entity dropEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
-                    if (dropEntity.Has<ItemDataDropGroupBuffer>())
-                    {
-                        var itemDataDropGroupBuffer = dropEntity.ReadBuffer<ItemDataDropGroupBuffer>();
-                        if (itemDataDropGroupBuffer.IsEmpty) continue;
-                        int bonusItems = level / 10;
-                        List<PrefabGUID> fish = [];
-                        foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
-                        {
-                            //Core.Log.LogInfo(itemDataDropGroup.DropItemPrefab.LookupName()); another drop group, lovely
-                            if (itemDataDropGroup.DropItemPrefab.LookupName().ToLower().Contains("fish") && level > 10)
-                            {
-                                // DG_Fish_Cursed_T01 here now or something like that, get next itemDataDropGroupBuffer then process for fish
-                                ItemDataDropGroup itemDataDrop = itemDataDropGroup.Entity.Read<ItemDataDropGroup>();
-                                Core.Log.LogInfo(itemDataDrop.Guid.LookupName());
-                                if (regex.IsMatch(itemDataDrop.Guid.LookupName().ToLower()))
-                                {
-                                    Core.Log.LogInfo("fish match");
-                                    fish.Add(itemDataDrop.Guid);
-                                }
-                                if (fish.Count == 0) continue;
-                                Random random = new();
-                                int index = random.Next(fish.Count);
-                                if (serverGameManager.TryAddInventoryItem(Killer, fish[index], bonusItems))
-                                {
-                                    string name = ProfessionUtilities.FormatMaterialName(fish[index].LookupName());
-                                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{level}</color> received from {handler.GetProfessionName()}");
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            */
         }
 
         public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
         {
-            EntityManager entityManager = Core.Server.EntityManager;
+            EntityManager entityManager = Core.EntityManager;
 
             handler.AddExperience(steamID, value);
             handler.SaveChanges();
@@ -244,12 +216,15 @@ namespace Bloodcraft.Systems.Professions
         public static int GetLevelProgress(ulong steamID, IProfessionHandler handler)
         {
             float currentXP = GetXp(steamID, handler);
-            int currentLevel = GetLevel(steamID, handler);
-            int nextLevelXP = ConvertLevelToXp(currentLevel + 1);
+            int currentLevelXP = ConvertLevelToXp(GetLevel(steamID, handler));
+            int nextLevelXP = ConvertLevelToXp(GetLevel(steamID, handler) + 1);
             //Core.Log.LogInfo($"Lv: {currentLevel} | xp: {currentXP} | toNext: {nextLevelXP}");
-            int percent = (int)(currentXP / nextLevelXP * 100);
-            return percent;
+
+            double neededXP = nextLevelXP - currentLevelXP;
+            double earnedXP = nextLevelXP - currentXP;
+            return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
+        
     }
 
     public class ProfessionUtilities
@@ -261,6 +236,56 @@ namespace Bloodcraft.Systems.Professions
             { "gloomrot", 3 },
             { "cursed", 4 },
             { "silverlight", 4 }
+        };
+
+        static readonly List<PrefabGUID> FarbaneFishDrops = new ()
+        {
+            { new(-1642545082)} //goby
+        };
+
+        static readonly List<PrefabGUID> DunleyFishDrops = new()
+        {
+            { new(-1642545082) }, //goby
+            { new(447901086) }, //stinger
+            { new(-149778795) } //rainbow
+        };
+
+        static readonly List<PrefabGUID> GloomrotFishDrops = new()
+        {
+            { new(-1642545082) }, //goby
+            { new(447901086) }, //stinger
+            { new(-149778795) }, //rainbow
+            { new(736318803) }, //sagefish
+            { new(-1779269313) } //bloodsnapper
+        };
+
+        static readonly List<PrefabGUID> CursedFishDrops = new()
+        {
+            { new(-1642545082) }, //goby
+            { new(447901086) }, //stinger
+            { new(-149778795) }, //rainbow
+            { new(736318803) }, //sagefish
+            { new(-1779269313) }, //bloodsnapper
+            { new(177845365) } //swampdweller
+        };
+
+        static readonly List<PrefabGUID> SilverlightFishDrops = new()
+        {
+            { new(-1642545082) }, //goby
+            { new(447901086) }, //stinger
+            { new(-149778795) }, //rainbow
+            { new(736318803) }, //sagefish
+            { new(-1779269313) }, //bloodsnapper
+            { new(67930804) } //goldenbassriver
+        };
+
+        static readonly Dictionary<string, List<PrefabGUID>> FishingAreaDrops = new()
+        {
+            { "farbane", FarbaneFishDrops},
+            { "dunley", DunleyFishDrops},
+            { "gloomrot", GloomrotFishDrops},
+            { "cursed", CursedFishDrops},
+            { "silverlight", SilverlightFishDrops}
         };
 
         static readonly Dictionary<string, int> WoodcuttingMultipliers = new()
@@ -293,6 +318,18 @@ namespace Bloodcraft.Systems.Professions
                 }
             }
             return 1;
+        }
+
+        public static List<PrefabGUID> GetFishingAreaDrops(PrefabGUID prefab)
+        {
+            foreach (KeyValuePair<string, List<PrefabGUID>> location in FishingAreaDrops)
+            {
+                if (prefab.LookupName().ToLower().Contains(location.Key))
+                {
+                    return location.Value;
+                }
+            }
+            throw new InvalidOperationException("Unrecognized fishing area");
         }
 
         public static int GetWoodcuttingModifier(PrefabGUID prefab)

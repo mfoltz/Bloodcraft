@@ -1,20 +1,23 @@
 using Bloodcraft.Patches;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Systems.Expertise.ExpertiseSystem;
 
 namespace Bloodcraft.Commands
 {
     public static class BloodCommands
     {
-        [Command(name: "getLegacyProgress", shortHand: "get b", adminOnly: false, usage: ".get b", description: "Display your current Legacy progress.")]
-        public static void GetLegacyCommand(ChatCommandContext ctx)
+        [Command(name: "getBloodLegacyProgress", shortHand: "get bl", adminOnly: false, usage: ".get bl", description: "Display your current Blood Legacy progress.")]
+        public static void GetBloodLegacyCommand(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)
             {
-                ctx.Reply("Legacies are not enabled.");
+                ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
             Entity character = ctx.Event.SenderCharacterEntity;
@@ -24,30 +27,30 @@ namespace Bloodcraft.Commands
             IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
             if (handler == null)
             {
-                ctx.Reply($"No Legacy handler found for {bloodType}.");
+                ctx.Reply($"No Blood Legacy handler found for {bloodType}.");
                 return;
             }
 
             ulong steamID = ctx.Event.User.PlatformId;
             var LegacyData = handler.GetLegacyData(steamID);
-
+            int progress = (int)(LegacyData.Value - BloodSystem.ConvertLevelToXp(LegacyData.Key));
             // LegacyData.Key represents the level, and LegacyData.Value represents the experience.
             if (LegacyData.Key > 0 || LegacyData.Value > 0)
             {
-                ctx.Reply($"Your Legacy is <color=yellow>{LegacyData.Key}</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, handler)}%</color>) with {bloodType}.");
+                ctx.Reply($"Your blood legacy is level [<color=white>{LegacyData.Key}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, handler)}%</color>) in <color=red>{bloodType}</color>");
             }
             else
             {
-                ctx.Reply($"You haven't gained any Legacy for {bloodType} yet.");
+                ctx.Reply($"You haven't gained any <color=#FFC0CB>essence</color> for {bloodType} yet.");
             }
         }
 
-        [Command(name: "logLegacyProgress", shortHand: "log b", adminOnly: false, usage: ".log b", description: "Toggles Legacy progress logging.")]
+        [Command(name: "logBloodLegacyProgress", shortHand: "log bl", adminOnly: false, usage: ".log bl", description: "Toggles Legacy progress logging.")]
         public static void LogLegacyCommand(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)
             {
-                ctx.Reply("Legacies are not enabled.");
+                ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
             var SteamID = ctx.Event.User.PlatformId;
@@ -56,15 +59,15 @@ namespace Bloodcraft.Commands
             {
                 bools["BloodLogging"] = !bools["BloodLogging"];
             }
-            ctx.Reply($"Legacy logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            ctx.Reply($"Blood Legacy logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "setBloodLegacy", shortHand: "sbl", adminOnly: true, usage: ".sbl [Player] [BloodType] [Level]", description: "Sets your blood Legacy level.")]
-        public static void SetLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
+        [Command(name: "setBloodLegacy", shortHand: "sbl", adminOnly: true, usage: ".sbl [Player] [BloodType] [Level]", description: "Sets player Blood Legacy level.")]
+        public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
         {
             if (!Plugin.BloodSystem.Value)
             {
-                ctx.Reply("Legacies are not enabled.");
+                ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
 
@@ -95,7 +98,7 @@ namespace Bloodcraft.Commands
             BloodHandler.UpdateLegacyData(steamId, xpData);
             BloodHandler.SaveChanges();
 
-            ctx.Reply($"Legacy for <color=red>{BloodHandler.GetBloodType()}</color> set to <color=white>{level}</color> for {foundUser.CharacterName}.");
+            ctx.Reply($"<color=red>{BloodHandler.GetBloodType()}</color> lineage set to <color=white>{level}</color> for {foundUser.CharacterName}.");
         }
 
         [Command(name: "listBloodTypes", shortHand: ".lbt", adminOnly: false, usage: ".lbt", description: "Lists blood types.")]
@@ -103,11 +106,11 @@ namespace Bloodcraft.Commands
         {
             if (!Plugin.BloodSystem.Value)
             {
-                ctx.Reply("Legacies are not enabled.");
+                ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
             string bloodTypes = string.Join(", ", Enum.GetNames(typeof(BloodSystem.BloodType)));
-            ctx.Reply($"Available blood legacies: {bloodTypes}");
+            ctx.Reply($"Available Blood Legacies: {bloodTypes}");
         }
     }
 }

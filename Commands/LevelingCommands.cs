@@ -54,6 +54,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Leveling is not enabled.");
                 return;
             }
+
             User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
             if (foundUser.CharacterName.IsEmpty)
             {
@@ -66,7 +67,9 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"Level must be between 0 and {LevelingSystem.MaxLevel}.");
                 return;
             }
+
             ulong steamId = foundUser.PlatformId;
+
             if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var _))
             {
                 var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));

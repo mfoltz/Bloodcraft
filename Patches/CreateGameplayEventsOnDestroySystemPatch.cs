@@ -32,7 +32,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     Entity killer = entity.Read<EntityOwner>().Owner;
                     BloodSystem.UpdateLegacy(killer, died);
                 }
-                if (Plugin.BloodSystem.Value && entity.Has<ChangeBloodOnGameplayEvent>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                else if (Plugin.BloodSystem.Value && entity.Has<ChangeBloodOnGameplayEvent>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     ulong steamId = entity.Read<EntityOwner>().Owner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     try
@@ -65,34 +65,24 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     PrefabGUID toProcess = new(0);
                     Entity target = entity.Read<Buff>().Target;
 
-                    if (!target.Equals(Entity.Null))
+                    if (target.Has<DropTableBuffer>())
                     {
-                        //target.LogComponentTypes();
-                        if (!target.Has<DropTableBuffer>())
+                        var dropTableBuffer = target.ReadBuffer<DropTableBuffer>();
+                        if (!dropTableBuffer.IsEmpty)
                         {
-                            //Core.Log.LogInfo("No DropTableBuffer found on entity...");
+                            toProcess = dropTableBuffer[0].DropTableGuid;
                         }
-                        else
-                        {
-                            var dropTableBuffer = target.ReadBuffer<DropTableBuffer>();
-                            if (dropTableBuffer.IsEmpty || !dropTableBuffer.IsCreated)
-                            {
-                                //Core.Log.LogInfo("DropTableBuffer is empty or not created...");
-                            }
-                            else
-                            {
-                                toProcess = dropTableBuffer[0].DropTableGuid;
-                                //Core.Log.LogInfo($"{toProcess.LookupName()}");
-                            }
-                        }
+                    }
+                    if (toProcess.GuidHash == 0)
+                    {
+                        continue;
                     }
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "");
                     int multiplier = ProfessionUtilities.GetFishingModifier(toProcess);
-
                     if (handler != null)
                     {
                         ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
-                        ProfessionSystem.GiveProfessionBonus(toProcess, target, user, steamId, handler);
+                        ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }
             }

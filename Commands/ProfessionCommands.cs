@@ -1,4 +1,5 @@
 using Bloodcraft.Patches;
+using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Professions;
 using ProjectM;
@@ -29,7 +30,7 @@ namespace Bloodcraft.Commands
             ctx.Reply($"Profession progress logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "getProfessionProgress", shortHand: "gp [Profession]", adminOnly: false, usage: ".gp [Profession]", description: "Display your current profession progress.")]
+        [Command(name: "getProfessionProgress", shortHand: "gp", adminOnly: false, usage: ".gp [Profession]", description: "Display your current profession progress.")]
         public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
         {
             if (!Plugin.ProfessionSystem.Value)
@@ -46,9 +47,10 @@ namespace Bloodcraft.Commands
                 return;
             }
             var data = professionHandler.GetExperienceData(steamID);
+            int progress = (int)(data.Value - ProfessionSystem.ConvertLevelToXp(data.Key));
             if (data.Key > 0)
             {
-                ctx.Reply($"You are level [<color=white>{data.Key}</color>] and have <color=yellow>{data.Value - ProfessionSystem.ConvertLevelToXp(data.Key)}</color> experience (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
+                ctx.Reply($"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> experience (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
             }
             else
             {
