@@ -16,6 +16,7 @@ namespace Bloodcraft.Systems.Professions
 {
     public class ProfessionSystem
     {
+        //static readonly Regex regex = new(@"fish.*t0[1-3]$");
         static readonly int ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
         static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
         static readonly int ProfessionPower = 2; // power for calculating level from xp
@@ -81,35 +82,11 @@ namespace Bloodcraft.Systems.Professions
             PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
             Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             int level = GetLevel(SteamID, handler);
-            if (!prefabEntity.Has<DropTableBuffer>())
-            {
-                if (!prefabEntity.Has<DropTableDataBuffer>())
-                {
-                    //Core.Log.LogInfo("No DropTableDataBuffer or DropTableBuffer found on entity...");
-                }
-                else
-                {
-                    //process fish drop table here since prefab enters as a DropTableGuid
-                    var dropTableDataBuffer = prefabEntity.ReadBuffer<DropTableDataBuffer>();
-                    foreach (var dropTableData in dropTableDataBuffer)
-                    {
-                        //Core.Log.LogInfo($"{dropTableData.Quantity} | {dropTableData.ItemGuid.LookupName()} | {dropTableData.DropRate}");
-                        prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
-                        if (!prefabEntity.Has<ItemDataDropGroupBuffer>()) continue;
-                        var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
-                        foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
-                        {
-                            //Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
-                        }
-                    }
-                }
-            }
-            else
+            if (prefabEntity.Has<DropTableBuffer>())
             {
                 var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();
                 foreach (var drop in dropTableBuffer)
                 {
-                    //Core.Log.LogInfo($"{drop.DropTrigger} | {drop.DropTableGuid.LookupName()}");
                     switch (drop.DropTrigger)
                     {
                         case DropTriggerType.YieldResourceOnDamageTaken:
@@ -128,8 +105,8 @@ namespace Bloodcraft.Systems.Professions
                                 }
                             }
                             break;
-
                         case DropTriggerType.OnDeath:
+                            /* WIP
                             dropTable = prefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
                             dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                             foreach (var dropTableData in dropTableDataBuffer)
@@ -142,10 +119,55 @@ namespace Bloodcraft.Systems.Professions
                                     Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                                 }
                             }
+                            */
+                            break;
+                        default:
+                            //Core.Log.LogInfo($"{drop.DropTableGuid.LookupName()} | {drop.DropTrigger}");
                             break;
                     }
                 }
             }
+            /*
+            else if (prefabEntity.Has<DropTableDataBuffer>())
+            {
+                var dropTableDataBuffer = prefabEntity.ReadBuffer<DropTableDataBuffer>();
+                foreach (var dropTableData in dropTableDataBuffer)
+                {
+                    Entity dropEntity = prefabCollectionSystem._PrefabGuidToEntityMap[dropTableData.ItemGuid];
+                    if (dropEntity.Has<ItemDataDropGroupBuffer>())
+                    {
+                        var itemDataDropGroupBuffer = dropEntity.ReadBuffer<ItemDataDropGroupBuffer>();
+                        if (itemDataDropGroupBuffer.IsEmpty) continue;
+                        int bonusItems = level / 10;
+                        List<PrefabGUID> fish = [];
+                        foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
+                        {
+                            //Core.Log.LogInfo(itemDataDropGroup.DropItemPrefab.LookupName()); another drop group, lovely
+                            if (itemDataDropGroup.DropItemPrefab.LookupName().ToLower().Contains("fish") && level > 10)
+                            {
+                                // DG_Fish_Cursed_T01 here now or something like that, get next itemDataDropGroupBuffer then process for fish
+                                ItemDataDropGroup itemDataDrop = itemDataDropGroup.Entity.Read<ItemDataDropGroup>();
+                                Core.Log.LogInfo(itemDataDrop.Guid.LookupName());
+                                if (regex.IsMatch(itemDataDrop.Guid.LookupName().ToLower()))
+                                {
+                                    Core.Log.LogInfo("fish match");
+                                    fish.Add(itemDataDrop.Guid);
+                                }
+                                if (fish.Count == 0) continue;
+                                Random random = new();
+                                int index = random.Next(fish.Count);
+                                if (serverGameManager.TryAddInventoryItem(Killer, fish[index], bonusItems))
+                                {
+                                    string name = ProfessionUtilities.FormatMaterialName(fish[index].LookupName());
+                                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{level}</color> received from {handler.GetProfessionName()}");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            */
         }
 
         public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
@@ -205,7 +227,7 @@ namespace Bloodcraft.Systems.Professions
             // Assuming a basic square root scaling for experience to level conversion
             return (int)(ProfessionConstant * Math.Sqrt(xp));
         }
-        static int ConvertLevelToXp(int level)
+        public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
             return (int)Math.Pow(level / ProfessionConstant, ProfessionPower);
@@ -325,7 +347,12 @@ namespace Bloodcraft.Systems.Professions
                 name = name.Replace("Plant_", "");
                 name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
             }
-
+            else if (name.ToLower().Contains("fish"))
+            {
+                name = name.Replace("Fish_", "");
+                name = Regex.Replace(name, "_T\\d{2}$", "");
+                name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
+            }
             return name;
         }
     }

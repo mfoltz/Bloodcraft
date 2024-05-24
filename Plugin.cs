@@ -88,7 +88,7 @@ namespace Bloodcraft
         public static ConfigEntry<bool> ProfessionSystem => _professionSystem;
         public static ConfigEntry<int> MaxProfessionLevel => _maxProfessionLevel;
         public static ConfigEntry<int> ProfessionMultiplier => _professionMultiplier;
-
+        
         public override void Load()
         {
             Instance = this;

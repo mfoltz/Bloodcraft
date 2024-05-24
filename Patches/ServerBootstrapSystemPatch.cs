@@ -252,9 +252,18 @@ internal static class ServerBootstrapPatch
             {
                 Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
                 Core.DataStructures.SavePlayerExperience();
-                GearOverride.SetLevel(user.LocalCharacter._Entity);
             }
-            //GearOverride.SetLevel(user.LocalCharacter._Entity);
+            var buffer = character.ReadBuffer<BuffBuffer>();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                var item = buffer[i];
+                if (item.Entity.Has<ArmorLevel>() && !item.Entity.Read<ArmorLevel>().Level.Equals(0))
+                {
+                    item.Entity.Write(new ArmorLevel { Level = 0f });
+                    buffer[i] = item;
+                }
+            }
+            GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
         /*
         if (!Plugin.LevelingSystem.Value) // restore armor levels in inventory on connect

@@ -35,7 +35,7 @@ namespace Bloodcraft.Commands
             // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
             if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
             {
-                ctx.Reply($"Your expertise is <color=yellow>{ExpertiseData.Key}</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}.");
+                ctx.Reply($"Your expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{ExpertiseData.Value - ExpertiseSystem.ConvertLevelToXp(ExpertiseData.Key)}</color> experience (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with {weaponType}");
                 if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
                     List<KeyValuePair<WeaponStatManager.WeaponStatType, float>> bonusWeaponStats = [];
@@ -162,7 +162,7 @@ namespace Bloodcraft.Commands
             ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
         }
 
-        [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Name] [Weapon] [Level]", description: "Sets your weapon expertise level.")]
+        [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
         public static void SetExpertiseCommand(ChatCommandContext ctx, string name, string weapon, int level)
         {
             if (!Plugin.ExpertiseSystem.Value)
@@ -176,9 +176,9 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Player not found.");
                 return;
             }
-            if (level < 0 || level > ExpertiseSystem.MaxExpertiseLevel)
+            if (level < 0 || level > Plugin.MaxExpertiseLevel.Value)
             {
-                ctx.Reply($"Level must be between 0 and {ExpertiseSystem.MaxExpertiseLevel}.");
+                ctx.Reply($"Level must be between 0 and {Plugin.MaxExpertiseLevel.Value}.");
                 return;
             }
             if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weapon, true, out var weaponType))
@@ -202,10 +202,10 @@ namespace Bloodcraft.Commands
             expertiseHandler.SaveChanges();
             GearOverride.SetWeaponItemLevel(equipment, level, Core.Server.EntityManager);
 
-            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to <color=white>{level}</color> for {foundUser.CharacterName}.");
+            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}.");
         }
 
-        [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stat Stats.")]
+        [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stats available.")]
         public static void ListWeaponStatsCommand(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)

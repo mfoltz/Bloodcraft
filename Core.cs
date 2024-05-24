@@ -91,7 +91,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed basically
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed
         private static Dictionary<ulong, (int, int)> playerSanguimancySpells = [];
 
         // blood legacies
@@ -245,7 +245,7 @@ internal static class Core
             set => playerSanguimancySpells = value;
         }
 
-        public static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats // weapon, then list of stats for the weapon in string form
+        public static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats
         {
             get => playerWeaponStats;
             set => playerWeaponStats = value;

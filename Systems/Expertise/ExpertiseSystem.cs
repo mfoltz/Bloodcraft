@@ -9,7 +9,7 @@ namespace Bloodcraft.Systems.Expertise
     public class ExpertiseSystem
     {
         static readonly int UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
-        public static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
+        static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
         static readonly int VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
         static readonly float ExpertiseConstant = 0.1f; // constant for calculating level from xp
         static readonly int ExpertisePower = 2; // power for calculating level from xp

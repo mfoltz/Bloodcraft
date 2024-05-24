@@ -2,6 +2,7 @@
 
 namespace Bloodcraft.Systems.Professions
 {
+    
     public interface IProfessionHandler
     {
         void AddExperience(ulong steamID, float experience);
@@ -17,6 +18,17 @@ namespace Bloodcraft.Systems.Professions
 
     public static class ProfessionHandlerFactory
     {
+        private static readonly List<BaseProfessionHandler> professionHandlers =
+        [
+            new WoodcuttingHandler(),
+            new MiningHandler(),
+            new BlacksmithingHandler(),
+            new TailoringHandler(),
+            new FishingHandler(),
+            new AlchemyHandler(),
+            new HarvestingHandler(),
+            new JewelcraftingHandler()
+        ];
         public static IProfessionHandler GetProfessionHandler(PrefabGUID prefabGUID, string context = "")
         {
             string itemTypeName = prefabGUID.LookupName().ToLower();
@@ -59,7 +71,7 @@ namespace Bloodcraft.Systems.Professions
                         return new TailoringHandler();
                     if (itemTypeName.Contains("fish"))
                         return new FishingHandler();
-                    if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask"))
+                    if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable"))
                         return new AlchemyHandler();
                     if (itemTypeName.Contains("plant"))
                         return new HarvestingHandler();
@@ -68,6 +80,10 @@ namespace Bloodcraft.Systems.Professions
                     else
                         return null;
             }
+        }
+        public static string GetAllProfessions()
+        {
+            return string.Join(", ", professionHandlers.Select(ph => ph.GetProfessionName()));
         }
     }
 

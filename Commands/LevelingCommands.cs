@@ -38,7 +38,7 @@ namespace Bloodcraft.Commands
                 int level = Leveling.Key;
                 int progress = (int)(Leveling.Value - LevelingSystem.ConvertLevelToXp(level));
                 int percent = LevelingSystem.GetLevelProgress(steamId);
-                ctx.Reply($"You're level <color=white>{level}</color> and have <color=yellow>{progress}</color> experience (<color=white>{percent}%</color>)");
+                ctx.Reply($"You're level [<color=white>{level}</color>] and have <color=yellow>{progress}</color> experience (<color=white>{percent}%</color>)");
             }
             else
             {
