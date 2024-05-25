@@ -67,7 +67,7 @@ namespace Bloodcraft.Systems.Professions
                         return new MiningHandler();
                     if (itemTypeName.Contains("weapon"))
                         return new BlacksmithingHandler();
-                    if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag") || itemTypeName.Contains("cloth"))
+                    if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag") || itemTypeName.Contains("cloth") || itemTypeName.Contains("chest") || itemTypeName.Contains("boots") || itemTypeName.Contains("gloves") || itemTypeName.Contains("legs"))
                         return new TailoringHandler();
                     if (itemTypeName.Contains("fish"))
                         return new FishingHandler();

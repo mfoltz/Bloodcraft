@@ -328,6 +328,10 @@ namespace Bloodcraft.Systems.Professions
                 {
                     return location.Value;
                 }
+                else if (prefab.LookupName().ToLower().Contains("general"))
+                {
+                    return FarbaneFishDrops;
+                }
             }
             throw new InvalidOperationException("Unrecognized fishing area");
         }

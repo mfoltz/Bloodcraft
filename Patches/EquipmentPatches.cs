@@ -304,6 +304,7 @@ internal static class EquipmentPatches
                         }
                         if (!jobExists) continue;
                         float ProfessionValue = 50f;
+                        //Core.Log.LogInfo(inventoryChangedEvent.Item.LookupName());
                         ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
                         if (handler != null)
