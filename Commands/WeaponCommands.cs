@@ -24,7 +24,11 @@ namespace Bloodcraft.Commands
 
 
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
+            {
+                ctx.Reply("Sanguimancy is not enabled.");
+                return;
+            }
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler == null)
             {
@@ -75,6 +79,7 @@ namespace Bloodcraft.Commands
             {
                 bools["ExpertiseLogging"] = !bools["ExpertiseLogging"];
             }
+            Core.DataStructures.SavePlayerBools();
             ctx.Reply($"Expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
@@ -96,13 +101,12 @@ namespace Bloodcraft.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed))
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
             {
-                ctx.Reply("You cannot choose weapon stats for unarmed (sanguimancy). It bestows other powers...");
+                ctx.Reply("Sanguimancy is not enabled.");
                 return;
             }
-            else if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
                ctx.Reply("You cannot choose weapon stats for fishing pole.");
                 return;
@@ -140,12 +144,12 @@ namespace Bloodcraft.Commands
             ulong steamID = ctx.Event.User.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
-            if (weaponType == ExpertiseSystem.WeaponType.Unarmed)
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
             {
-                ctx.Reply("You cannot reset weapon stats for unarmed (sanguimancy) as none can be chosen.");
+                ctx.Reply("Sanguimancy is not enabled.");
                 return;
             }
-            else if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
                 ctx.Reply("You cannot reset weapon stats for fishing pole as none can be chosen.");
                 return;
@@ -204,7 +208,11 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Invalid weapon type.");
                 return;
             }
-
+            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
+            {
+                ctx.Reply("Sanguimancy is not enabled.");
+                return;
+            }
             var expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
             if (expertiseHandler == null)

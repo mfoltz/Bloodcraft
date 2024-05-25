@@ -21,6 +21,7 @@ namespace Bloodcraft.Commands
             {
                 bools["ExperienceLogging"] = !bools["ExperienceLogging"];
             }
+            Core.DataStructures.SavePlayerBools();
             ctx.Reply($"Leveling progress logging is now {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 

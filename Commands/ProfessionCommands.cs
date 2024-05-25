@@ -27,6 +27,7 @@ namespace Bloodcraft.Commands
             {
                 bools["ProfessionLogging"] = !bools["ProfessionLogging"];
             }
+            Core.DataStructures.SavePlayerBools();
             ctx.Reply($"Profession progress logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 

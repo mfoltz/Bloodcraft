@@ -1,5 +1,6 @@
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -22,8 +23,8 @@ internal static class DeathEventListenerSystemPatch
             {
                 if (__instance.EntityManager.HasComponent<PlayerCharacter>(deathEvent.Killer) && __instance.EntityManager.HasComponent<Movement>(deathEvent.Died))
                 {
-                    if (Plugin.LevelingSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
-                    if (Plugin.ExpertiseSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
+                    if (Plugin.LevelingSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
+                    if (Plugin.ExpertiseSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(deathEvent.Killer))
                 {

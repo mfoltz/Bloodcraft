@@ -59,6 +59,7 @@ namespace Bloodcraft.Commands
             {
                 bools["BloodLogging"] = !bools["BloodLogging"];
             }
+            Core.DataStructures.SavePlayerBools();
             ctx.Reply($"Blood Legacy logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 

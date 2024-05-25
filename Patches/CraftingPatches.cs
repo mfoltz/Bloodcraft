@@ -31,17 +31,13 @@ internal static class CraftingPatches
                         Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
                         var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                         PrefabGUID itemPrefab = buffer[0].Guid;
-                        if (!Core.DataStructures.PlayerCraftingJobs.ContainsKey(startCraftItemEvent.Workstation))
-                        {
-                            Core.DataStructures.PlayerCraftingJobs[startCraftItemEvent.Workstation] = [];
-                        }
-                        var workstationJobs = Core.DataStructures.PlayerCraftingJobs[startCraftItemEvent.Workstation];
+                        
 
                         // Ensure the player’s job list exists
-                        if (!workstationJobs.TryGetValue(steamId, out var playerJobs))
+                        if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
                         {
                             playerJobs = [];
-                            workstationJobs[steamId] = playerJobs;
+                            Core.DataStructures.PlayerCraftingJobs.Add(steamId, playerJobs);
                         }
 
                         // Check if the job exists and update or add
@@ -50,7 +46,7 @@ internal static class CraftingPatches
                         {
                             if (playerJobs[i].Item1.Equals(itemPrefab))
                             {
-                                //Core.Log.LogInfo($"Adding Craft: {itemPrefab.LookupName()}");
+                                //Core.Log.LogInfo($"Adding Craft to existing: {itemPrefab.LookupName()}");
                                 playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 + 1);
                                 jobExists = true;
                                 break;
@@ -97,14 +93,14 @@ internal static class CraftingPatches
                         Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
                         var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                         PrefabGUID itemPrefab = buffer[0].Guid;
-                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(stopCraftItemEvent.Workstation, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
+                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
                         {
                             // if crafting job is active, remove
                             for (int i = 0; i < playerJobs.Count; i++)
                             {
                                 if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
                                 {
-                                    //Core.Log.LogInfo($"Removing Craft: {itemPrefab.LookupName()}");
+                                    Core.Log.LogInfo($"Removing Craft: {itemPrefab.LookupName()}");
                                     playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
                                     if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
                                     break;

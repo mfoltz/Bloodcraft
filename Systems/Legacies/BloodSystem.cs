@@ -33,28 +33,19 @@ namespace Bloodcraft.Systems.Legacy
         public static void UpdateLegacy(Entity Killer, Entity Victim)
         {
             EntityManager entityManager = Core.EntityManager;
-            if (Killer == Victim || entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>()) return;
+            if (Killer == Victim || entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>() || !Victim.Has<UnitLevel>()) return;
             BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
             Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
-
-            //var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
-
-            bool isVBlood;
+            int unitLevel = Victim.Read<UnitLevel>().Level;
+            float BloodValue = 0;
             if (entityManager.HasComponent<VBloodConsumeSource>(Victim))
             {
-                isVBlood = true;
+                BloodValue = 10 * unitLevel * VBloodLegacyMultiplier;
             }
             else
             {
-                isVBlood = false;
+                BloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * UnitLegacyMultiplier;
             }
-            float BloodValue = bloodConsumeSource.BloodQuality * bloodConsumeSource.BloodQuality;
-            if (isVBlood) BloodValue *= VBloodLegacyMultiplier;
-            else
-            {
-                BloodValue *= UnitLegacyMultiplier;
-            }
-
             User user = entityManager.GetComponentData<User>(userEntity);
             ulong steamID = user.PlatformId;
             BloodSystem.BloodType bloodType = ModifyUnitStatBuffUtils.GetCurrentBloodType(Killer);
@@ -98,14 +89,13 @@ namespace Bloodcraft.Systems.Legacy
                 message = $"<color=red>{bloodType}</color> lineage improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
-            else
+            
+            if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
-                {
-                    message = $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)";
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
-                }
+                message = $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)";
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
+            
         }
 
         public static int GetLevelProgress(ulong steamID, IBloodHandler handler)

@@ -163,13 +163,10 @@ namespace Bloodcraft.Systems.Experience
                 GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
-            else
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
-                {
-                    int levelProgress = GetLevelProgress(SteamID);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
-                }
+                int levelProgress = GetLevelProgress(SteamID);
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
             }
         }
 

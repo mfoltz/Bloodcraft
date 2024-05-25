@@ -94,13 +94,10 @@ namespace Bloodcraft.Systems.Expertise
                 if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
-            else
+            if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
-                {
-                    message = $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)";
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
-                }
+                message = $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)";
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
         }
         

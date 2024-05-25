@@ -313,9 +313,9 @@ internal static class Core
 
         // cache-only
 
-        private static Dictionary<NetworkId, Dictionary<ulong, List<(PrefabGUID, int)>>> playerCraftingJobs = [];
+        private static Dictionary<ulong, List<(PrefabGUID, int)>> playerCraftingJobs = [];
 
-        public static Dictionary<NetworkId, Dictionary<ulong, List<(PrefabGUID, int)>>> PlayerCraftingJobs
+        public static Dictionary<ulong, List<(PrefabGUID, int)>> PlayerCraftingJobs
         {
             get => playerCraftingJobs;
             set => playerCraftingJobs = value;

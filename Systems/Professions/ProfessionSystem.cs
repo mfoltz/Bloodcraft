@@ -185,13 +185,10 @@ namespace Bloodcraft.Systems.Professions
                 int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
             }
-            else
+            if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
-                {
-                    int levelProgress = GetLevelProgress(steamID, handler);
-                    ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
-                }
+                int levelProgress = GetLevelProgress(steamID, handler);
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
             }
         }
         static int ConvertXpToLevel(float xp)

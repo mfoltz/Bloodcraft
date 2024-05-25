@@ -134,8 +134,8 @@ public class Plugin : BasePlugin
 
         _bloodSystem = Instance.Config.Bind("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
         _maxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
-        _unitLegacyMultiplier = Instance.Config.Bind("Config", "UnitLegacyMultiplier", 5, "The multiplier for lineage gained from units.");
-        _vBloodLegacyMultipler = Instance.Config.Bind("Config", "VBloodLegacyMultipler", 15, "The multiplier for lineage gained from VBloods.");
+        _unitLegacyMultiplier = Instance.Config.Bind("Config", "UnitLegacyMultiplier", 1, "The multiplier for lineage gained from units.");
+        _vBloodLegacyMultipler = Instance.Config.Bind("Config", "VBloodLegacyMultipler", 5, "The multiplier for lineage gained from VBloods.");
 
         _professionSystem = Instance.Config.Bind("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
         _maxProfessionLevel = Instance.Config.Bind("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");

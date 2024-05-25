@@ -18,6 +18,41 @@ namespace Bloodcraft.Patches;
 internal static class EquipmentPatches
 {
     [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(WeaponLevelSystem_Spawn __instance)
+    {
+        NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (Plugin.ExpertiseSystem.Value && Plugin.Sanguimancy.Value && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                {
+                    
+                    Entity character = entity.Read<EntityOwner>().Owner;
+                    ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+                    PrefabGUID prefab = entity.Read<PrefabGUID>();
+                    ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                    if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) continue;
+                    if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed))
+                    {
+                        ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Core.Log.LogError($"Exited LevelPrefix early: {e}");
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+
+    [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(WeaponLevelSystem_Spawn __instance)
     {
@@ -49,7 +84,6 @@ internal static class EquipmentPatches
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     PrefabGUID prefab = entity.Read<PrefabGUID>();
-                    if (prefab.LookupName().ToLower().Contains("fishingpole")) continue;
 
                     ExpertiseSystem.WeaponType weaponType = ExpertiseSystem.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
                     if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) || weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) continue;
@@ -290,7 +324,7 @@ internal static class EquipmentPatches
                     NetworkId networkId = inventory.Read<InventoryConnection>().InventoryOwner.Read<NetworkId>();
                     ulong steamId = userEntity.Read<User>().PlatformId;
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
-                    if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(networkId, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
+                    if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
                     {
                         bool jobExists = false;
                         for (int i = 0; i < playerJobs.Count; i++)
@@ -305,53 +339,48 @@ internal static class EquipmentPatches
                         }
                         if (!jobExists) continue;
                         float ProfessionValue = 50f;
-                        //Core.Log.LogInfo(inventoryChangedEvent.Item.LookupName());
                         ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
                         if (handler != null)
                         {
                             ProfessionSystem.SetProfession(userEntity.Read<User>(), steamId, ProfessionValue, handler);
+                            Entity itemEntity = inventoryChangedEvent.ItemEntity;
+                            switch (handler)
+                            {
+                                case BlacksmithingHandler:
+                                    if (itemEntity.Has<Durability>())
+                                    {
+                                        Durability durability = itemEntity.Read<Durability>();
+                                        int level = handler.GetExperienceData(steamId).Key;
+                                        durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
+                                        durability.Value = durability.MaxDurability;
+                                        itemEntity.Write(durability);
+                                    }
+                                    break;
+                                case AlchemyHandler:
+                                    break;
+                                case JewelcraftingHandler:
+                                    if (itemEntity.Has<Durability>())
+                                    {
+                                        Durability durability = itemEntity.Read<Durability>();
+                                        int level = handler.GetExperienceData(steamId).Key;
+                                        durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
+                                        durability.Value = durability.MaxDurability;
+                                        itemEntity.Write(durability);
+                                    }
+                                    break;
+                                case TailoringHandler:
+                                    if (itemEntity.Has<Durability>())
+                                    {
+                                        Durability durability = itemEntity.Read<Durability>();
+                                        int level = handler.GetExperienceData(steamId).Key;
+                                        durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
+                                        durability.Value = durability.MaxDurability;
+                                        itemEntity.Write(durability);
+                                    }
+                                    break;
+                            }
                         }
                     }
-                    if (handler != null)
-                    {
-                        Entity itemEntity = inventoryChangedEvent.ItemEntity;
-                        switch (handler)
-                        {
-                            case BlacksmithingHandler:
-                                if (itemEntity.Has<Durability>())
-                                {
-                                    Durability durability = itemEntity.Read<Durability>();
-                                    int level = handler.GetExperienceData(steamId).Key;
-                                    durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
-                                    durability.Value = durability.MaxDurability;
-                                    itemEntity.Write(durability);
-                                }
-                                break;
-                            case AlchemyHandler:
-                                break;
-                            case JewelcraftingHandler:
-                                if (itemEntity.Has<Durability>())
-                                {
-                                    Durability durability = itemEntity.Read<Durability>();
-                                    int level = handler.GetExperienceData(steamId).Key;
-                                    durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
-                                    durability.Value = durability.MaxDurability;
-                                    itemEntity.Write(durability);
-                                }
-                                break;
-                            case TailoringHandler:
-                                if (itemEntity.Has<Durability>())
-                                {
-                                    Durability durability = itemEntity.Read<Durability>();
-                                    int level = handler.GetExperienceData(steamId).Key;
-                                    durability.MaxDurability *= (1 + level / Plugin.MaxProfessionLevel.Value);
-                                    durability.Value = durability.MaxDurability;
-                                    itemEntity.Write(durability);
-                                }
-                                break;
-                        }
-                    }
-                    
                 }
             }
         }
@@ -374,10 +403,14 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         Equipment equipment = character.Read<Equipment>();
 
-        GearOverride.SetWeaponItemLevel(equipment, handler.GetExpertiseData(steamId).Key, Core.EntityManager);
+        if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, handler.GetExpertiseData(steamId).Key, Core.EntityManager);
 
         if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
         {
+            if (!weaponEntity.Has<ModifyUnitStatBuff_DOTS>())
+            {
+                Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weaponEntity);
+            }
             var buffer = weaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
             foreach (var weaponStatType in bonuses)
             {
