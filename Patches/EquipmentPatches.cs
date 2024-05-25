@@ -289,6 +289,7 @@ internal static class EquipmentPatches
                     Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
                     NetworkId networkId = inventory.Read<InventoryConnection>().InventoryOwner.Read<NetworkId>();
                     ulong steamId = userEntity.Read<User>().PlatformId;
+                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(networkId, out var jobs) && jobs.TryGetValue(steamId, out var playerJobs))
                     {
                         bool jobExists = false;
@@ -306,11 +307,13 @@ internal static class EquipmentPatches
                         float ProfessionValue = 50f;
                         //Core.Log.LogInfo(inventoryChangedEvent.Item.LookupName());
                         ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
-                        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
                         if (handler != null)
                         {
                             ProfessionSystem.SetProfession(userEntity.Read<User>(), steamId, ProfessionValue, handler);
                         }
+                    }
+                    if (handler != null)
+                    {
                         Entity itemEntity = inventoryChangedEvent.ItemEntity;
                         switch (handler)
                         {
@@ -348,6 +351,7 @@ internal static class EquipmentPatches
                                 break;
                         }
                     }
+                    
                 }
             }
         }
