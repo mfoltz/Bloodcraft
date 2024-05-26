@@ -1,9 +1,8 @@
 using BepInEx.Logging;
-using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.UI;
@@ -23,20 +22,11 @@ internal static class Core
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
     public static DebugEventsSystem DebugEventsSystem { get; internal set; }
     public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
+    //public static GetCharacterHUDSystem GetCharacterHUDSystem { get; internal set; }
 
-    public static ModifyUnitStatBuffSystem_Destroy ModifyUnitStatBuffSystem_Destroy { get; internal set; }
-
-    //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future
-
-    public static ServerBootstrapSystem ServerBootstrapSystem { get; internal set; }
-
-    public static ArmorLevelSystem_Spawn ArmorLevelSystem_Spawn { get; internal set; }
-
-    public static StatChangeMutationSystem StatChangeMutationSystem { get; internal set; }
-
+    //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future journal quest 560247139 Journal_GettingReadyForTheHunt
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
-    public static ModificationsRegistry ModificationsRegistry => ServerGameManager.Modifications;
     public static ManualLogSource Log => Plugin.LogInstance;
 
     private static bool hasInitialized;
@@ -49,10 +39,7 @@ internal static class Core
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
         ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
         ModifyUnitStatBuffSystem_Spawn = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Spawn>();
-        ModifyUnitStatBuffSystem_Destroy = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Destroy>();
-        ArmorLevelSystem_Spawn = Server.GetExistingSystemManaged<ArmorLevelSystem_Spawn>();
-        ServerBootstrapSystem = Server.GetExistingSystemManaged<ServerBootstrapSystem>();
-        StatChangeMutationSystem = Server.GetExistingSystemManaged<StatChangeMutationSystem>();
+        //GetCharacterHUDSystem = Server.GetExistingSystemManaged<GetCharacterHUDSystem>();
         //EquipmentService = new(); 
 
         // Initialize utility services
@@ -111,7 +98,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerFishing = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerBlacksmithing = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerTailoring = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerJewelcrafting = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerEnchanting = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerAlchemy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerHarvesting = [];
 
@@ -129,6 +116,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
+
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed
         private static Dictionary<ulong, (int, int)> playerSanguimancySpells = [];
 
@@ -144,7 +132,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerImmortalLegacy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerCreatureLegacy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerBruteLegacy = [];
-
+        private static Dictionary<ulong, Dictionary<BloodSystem.BloodType, List<BloodStats.BloodStatManager.BloodStatType>>> playerBloodStats = [];
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
         {
             get => playerExperience;
@@ -187,10 +175,10 @@ internal static class Core
             set => playerTailoring = value;
         }
 
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerJewelcrafting
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerEnchanting
         {
-            get => playerJewelcrafting;
-            set => playerJewelcrafting = value;
+            get => playerEnchanting;
+            set => playerEnchanting = value;
         }
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAlchemy
@@ -288,7 +276,6 @@ internal static class Core
             get => playerWeaponStats;
             set => playerWeaponStats = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWorkerLegacy
         {
             get => playerWorkerLegacy;
@@ -348,7 +335,11 @@ internal static class Core
             get => playerBruteLegacy;
             set => playerBruteLegacy = value;
         }
-
+        public static Dictionary<ulong, Dictionary<BloodSystem.BloodType, List<BloodStats.BloodStatManager.BloodStatType>>> PlayerBloodStats
+        {
+            get => playerBloodStats;
+            set => playerBloodStats = value;
+        }
         // cache-only
 
         private static Dictionary<ulong, List<(PrefabGUID, int)>> playerCraftingJobs = [];
@@ -370,7 +361,7 @@ internal static class Core
             {"Fishing", JsonFiles.PlayerFishingJson},
             {"Blacksmithing", JsonFiles.PlayerBlacksmithingJson},
             {"Tailoring", JsonFiles.PlayerTailoringJson},
-            {"Jewelcrafting", JsonFiles.PlayerJewelcraftingJson},
+            {"Enchanting", JsonFiles.PlayerEnchantingJson},
             {"Alchemy", JsonFiles.PlayerAlchemyJson},
             {"Harvesting", JsonFiles.PlayerHarvestingJson},
             {"SwordExpertise", JsonFiles.PlayerSwordExpertiseJson },
@@ -397,6 +388,7 @@ internal static class Core
             {"ImmortalLegacy", JsonFiles.PlayerImmortalLegacyJson},
             {"CreatureLegacy", JsonFiles.PlayerCreatureLegacyJson},
             {"BruteLegacy", JsonFiles.PlayerBruteLegacyJson},
+            {"BloodStats", JsonFiles.PlayerBloodStatsJson},
         };
 
         // Generic method to save any type of dictionary.
@@ -452,7 +444,7 @@ internal static class Core
 
         public static void LoadPlayerTailoring() => LoadData(ref playerTailoring, "Tailoring");
 
-        public static void LoadPlayerJewelcrafting() => LoadData(ref playerJewelcrafting, "Jewelcrafting");
+        public static void LoadPlayerEnchanting() => LoadData(ref playerEnchanting, "Enchanting");
 
         public static void LoadPlayerAlchemy() => LoadData(ref playerAlchemy, "Alchemy");
 
@@ -506,6 +498,8 @@ internal static class Core
 
         public static void LoadPlayerBruteLegacy() => LoadData(ref playerBruteLegacy, "BruteLegacy");
 
+        public static void LoadPlayerBloodStats() => LoadData(ref playerBloodStats, "BloodStats");
+
         public static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
             string path = filePaths[key];
@@ -538,7 +532,7 @@ internal static class Core
 
         public static void SavePlayerTailoring() => SaveData(PlayerTailoring, "Tailoring");
 
-        public static void SavePlayerJewelcrafting() => SaveData(PlayerJewelcrafting, "Jewelcrafting");
+        public static void SavePlayerEnchanting() => SaveData(PlayerEnchanting, "Enchanting");
 
         public static void SavePlayerAlchemy() => SaveData(PlayerAlchemy, "Alchemy");
 
@@ -591,6 +585,8 @@ internal static class Core
         public static void SavePlayerCreatureLegacy() => SaveData(PlayerCreatureLegacy, "CreatureLegacy");
 
         public static void SavePlayerBruteLegacy() => SaveData(PlayerBruteLegacy, "BruteLegacy");
+
+        public static void SavePlayerBloodStats() => SaveData(PlayerBloodStats, "BloodStats");
     }
     public class JsonFiles
     {
@@ -601,7 +597,7 @@ internal static class Core
         public static readonly string PlayerFishingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_fishing.json");
         public static readonly string PlayerBlacksmithingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_blacksmithing.json");
         public static readonly string PlayerTailoringJson = Path.Combine(Plugin.PlayerProfessionPath, "player_tailoring.json");
-        public static readonly string PlayerJewelcraftingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_jewelcrafting.json");
+        public static readonly string PlayerEnchantingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_enchanting.json");
         public static readonly string PlayerAlchemyJson = Path.Combine(Plugin.PlayerProfessionPath, "player_alchemy.json");
         public static readonly string PlayerHarvestingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_harvesting.json");
         public static readonly string PlayerSwordExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sword.json");
@@ -629,5 +625,6 @@ internal static class Core
         public static readonly string PlayerImmortalLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_immortal.json");
         public static readonly string PlayerCreatureLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_creature.json");
         public static readonly string PlayerBruteLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_brute.json");
+        public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.PlayerBloodPath, "player_blood_stats.json");
     }
 }

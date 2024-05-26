@@ -1,9 +1,7 @@
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using Unity.Collections;
 using ProfessionSystem = Bloodcraft.Systems.Professions.ProfessionSystem;
 

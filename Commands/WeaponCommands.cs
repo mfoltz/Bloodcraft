@@ -1,6 +1,6 @@
 using Bloodcraft.Patches;
-using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -12,7 +12,7 @@ namespace Bloodcraft.Commands
 {
     public static class WeaponCommands
     {
-        [Command(name: "getExpertiseProgress", shortHand: "get e", adminOnly: false, usage: ".get e", description: "Display your current Expertise progress.")]
+        [Command(name: "getExpertiseProgress", shortHand: "get e", adminOnly: false, usage: ".get e", description: "Displays your current expertise.")] 
         public static void GetExpertiseCommand(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)
@@ -38,7 +38,7 @@ namespace Bloodcraft.Commands
 
             ulong steamID = ctx.Event.User.PlatformId;
             var ExpertiseData = handler.GetExpertiseData(steamID);
-            int progress = (int)(ExpertiseData.Value - LevelingSystem.ConvertLevelToXp(ExpertiseData.Key));
+            int progress = (int)(ExpertiseData.Value - ExpertiseSystem.ConvertLevelToXp(ExpertiseData.Key));
             // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
             if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
             {
@@ -52,7 +52,7 @@ namespace Bloodcraft.Commands
                         bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, float>(stat, bonus));
                     }
                     string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    ctx.Reply($"Current weapon bonuses: {bonuses}");
+                    ctx.Reply($"Current weapon stat bonuses: {bonuses}");
                 }
                 else
                 {
@@ -65,7 +65,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "logExpertiseProgress", shortHand: "log e", adminOnly: false, usage: ".log e", description: "Toggles Expertise progress logging.")]
+        [Command(name: "logExpertiseProgress", shortHand: "log e", adminOnly: false, usage: ".log e", description: "Toggles expertise logging.")]
         public static void LogExpertiseCommand(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)
@@ -83,8 +83,8 @@ namespace Bloodcraft.Commands
             ctx.Reply($"Expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
-        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws [Stat]", description: "Choose a weapon stat to enhance based on your weapon Expertise.")]
-        public static void ChooseWeaponStat(ChatCommandContext ctx, string statType)
+        [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
+        public static void ChooseWeaponStat(ChatCommandContext ctx, string weaponType, string statType)
         {
             if (!Plugin.ExpertiseSystem.Value)
             {
@@ -92,23 +92,29 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out var weaponStatType))
+            if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out var StatType))
             {
-                ctx.Reply("Invalid weapon stat choice, use .lws to see options.");
+                ctx.Reply("Invalid stat choice, use .lws to see options.");
+                return;
+            }
+
+            if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weaponType, true, out var WeaponType))
+            {
+                ctx.Reply("Invalid weapon choice.");
                 return;
             }
 
             Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
-            ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
+            //ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
+            if (WeaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
             {
                 ctx.Reply("Sanguimancy is not enabled.");
                 return;
             }
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+            if (WeaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
-               ctx.Reply("You cannot choose weapon stats for fishing pole.");
+               ctx.Reply("You cannot choose weapon stats for the fishing pole.");
                 return;
             }
 
@@ -120,18 +126,18 @@ namespace Bloodcraft.Commands
             }
 
             // Choose a stat for the specific weapon stats instance
-            if (PlayerWeaponUtilities.ChooseStat(steamID, weaponType, weaponStatType))
+            if (PlayerWeaponUtilities.ChooseStat(steamID, WeaponType, StatType))
             {
-                ctx.Reply($"<color=#00FFFF>{weaponStatType}</color> has been chosen for <color=#c0c0c0>{weaponType}</color> and will apply after reequiping.");
+                ctx.Reply($"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
                 Core.DataStructures.SavePlayerWeaponStats();
             }
             else
             {
-                ctx.Reply($"You have already chosen {Plugin.MaxStatChoices.Value} stats for this weapon.");
+                ctx.Reply($"You have already chosen {Plugin.ExpertiseStatChoices.Value} stats for this weapon.");
             }
         }
 
-        [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stat Stats for a player's currently equipped weapon stats.")]
+        [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stats for current weapon.")]
         public static void ResetWeaponStats(ChatCommandContext ctx)
         {
             if (!Plugin.ExpertiseSystem.Value)
@@ -155,29 +161,29 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            if (!Plugin.ResetStatsItem.Value.Equals(0))
+            if (!Plugin.ResetExpertiseItem.Value.Equals(0))
             {
-                PrefabGUID item = new(Plugin.ResetStatsItem.Value);
-                int quantity = Plugin.ResetStatsItemQuantity.Value;
+                PrefabGUID item = new(Plugin.ResetExpertiseItem.Value);
+                int quantity = Plugin.ResetExpertiseItemQuantity.Value;
                 // Check if the player has the item to reset stats
                 if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && Core.ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
                 {
                     if (Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
                         PlayerWeaponUtilities.ResetStats(steamID, weaponType);
-                        ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
+                        ctx.Reply($"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
                         return;
                     }
                 }
                 else
                 {
-                    ctx.Reply("You do not have the required item to reset your weapon stats.");
+                    ctx.Reply($"You do not have the required item to reset your weapon stats ({item.LookupName()}x{quantity})");
                     return;
                 }
             }
 
             PlayerWeaponUtilities.ResetStats(steamID, weaponType);
-            ctx.Reply("Your weapon stats have been reset for the currently equipped weapon.");
+            ctx.Reply($"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>");
         }
 
         [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
@@ -230,7 +236,7 @@ namespace Bloodcraft.Commands
             expertiseHandler.SaveChanges();
             if (Plugin.LevelingSystem.Value) GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
 
-            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}.");
+            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}");
         }
 
         [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stats available.")]
@@ -241,14 +247,32 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Expertise is not enabled.");
                 return;
             }
+
             var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStatManager.WeaponStatType))
                 .Cast<WeaponStatManager.WeaponStatType>()
-                .Select(stat => $"<color=#00FFFF>{stat}</color>: <color=white>{WeaponStatManager.BaseCaps[stat]}</color>")
+                .Select(stat =>
+                    $"<color=#00FFFF>{stat}</color>: <color=white>{WeaponStatManager.BaseCaps[stat]}</color>")
                 .ToArray();
 
-            // Join the formatted strings
-            string weaponStats = string.Join(", ", weaponStatsWithCaps);
-            ctx.Reply($"Available weapon stats: {weaponStats}");
+            int halfLength = weaponStatsWithCaps.Length / 2;
+
+            string weaponStatsLine1 = string.Join(", ", weaponStatsWithCaps.Take(halfLength));
+            string weaponStatsLine2 = string.Join(", ", weaponStatsWithCaps.Skip(halfLength));
+
+            ctx.Reply($"Available weapon stats (1/2): {weaponStatsLine1}");
+            ctx.Reply($"Available weapon stats (2/2): {weaponStatsLine2}");
+        }
+
+        [Command(name: "listWeaponExpertises", shortHand: "lwe", adminOnly: false, usage: ".lwe", description: "Lists weapon expertises available.")]
+        public static void ListWeaponsCommand(ChatCommandContext ctx)
+        {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Weapon Expertise is not enabled.");
+                return;
+            }
+            string weaponTypes = string.Join(", ", Enum.GetNames(typeof(ExpertiseSystem.WeaponType)));
+            ctx.Reply($"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
         }
 
         [Command(name: "lockSpells", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]

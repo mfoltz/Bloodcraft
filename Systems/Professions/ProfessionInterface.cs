@@ -27,7 +27,7 @@ namespace Bloodcraft.Systems.Professions
             new FishingHandler(),
             new AlchemyHandler(),
             new HarvestingHandler(),
-            new JewelcraftingHandler()
+            new EnchantingHandler()
         ];
         public static IProfessionHandler GetProfessionHandler(PrefabGUID prefabGUID, string context = "")
         {
@@ -57,8 +57,8 @@ namespace Bloodcraft.Systems.Professions
                 case "harvesting":
                     return new HarvestingHandler();
 
-                case "jewelcrafting":
-                    return new JewelcraftingHandler();
+                case "enchanting":
+                    return new EnchantingHandler();
 
                 default:
                     if (itemTypeName.Contains("wood"))
@@ -76,7 +76,7 @@ namespace Bloodcraft.Systems.Professions
                     if (itemTypeName.Contains("plant"))
                         return new HarvestingHandler();
                     if (itemTypeName.Contains("gem") || itemTypeName.Contains("jewel") || itemTypeName.Contains("magicsource"))
-                        return new JewelcraftingHandler();
+                        return new EnchantingHandler();
                     else
                         return null;
             }
@@ -120,18 +120,18 @@ namespace Bloodcraft.Systems.Professions
         public abstract string GetProfessionName();
     }
 
-    public class JewelcraftingHandler : BaseProfessionHandler
+    public class EnchantingHandler : BaseProfessionHandler
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerJewelcrafting;
+        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerEnchanting;
 
         public override void SaveChanges()
         {
-            Core.DataStructures.SavePlayerJewelcrafting();
+            Core.DataStructures.SavePlayerEnchanting();
         }
 
         public override string GetProfessionName()
         {
-            return "<color=#7E22CE>Jewelcrafting</color>";
+            return "<color=#7E22CE>Enchanting</color>";
         }
     }
 

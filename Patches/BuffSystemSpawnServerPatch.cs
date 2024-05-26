@@ -1,9 +1,9 @@
-﻿using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
@@ -55,6 +55,7 @@ public class BuffPatch
                     Entity killer = entity.Read<EntityOwner>().Owner;
                     BloodSystem.UpdateLegacy(killer, died);
                     ExpertiseSystem.UpdateExpertise(killer, died);
+                    LevelingSystem.UpdateLeveling(killer, died);
                 }
                 
             }
@@ -68,7 +69,7 @@ public class BuffPatch
             entities.Dispose();
         }
     }
-
+    /*
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
     [HarmonyPrefix]
     private static void OnUpdatePrefix(StatChangeMutationSystem __instance)
@@ -80,13 +81,14 @@ public class BuffPatch
             {
                 if (entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
-                    
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
+                    //statChangeEvent.StatChangeEntity.LogComponentTypes();
                     BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
                     Blood blood = statChangeEvent.Entity.Read<Blood>();
                     BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
                     ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+                    var bloodQualityBuff = statChangeEvent.Entity.ReadBuffer<BloodQualityBuff>();
                     if (bloodHandler == null)
                     {
                         continue;
@@ -94,9 +96,9 @@ public class BuffPatch
                     var legacyData = bloodHandler.GetLegacyData(steamID);
                     if (legacyData.Key > 0)
                     {
-                        bloodQualityChange.Quality += legacyData.Key;
-                        bloodQualityChange.ForceReapplyBuff = true;
-                        entity.Write(bloodQualityChange);
+                        //bloodQualityChange.Quality += legacyData.Key;
+                        //bloodQualityChange.ForceReapplyBuff = true;
+                        //entity.Write(bloodQualityChange);
                     }
                 }
             }
@@ -106,6 +108,7 @@ public class BuffPatch
             Core.Log.LogError(ex);
         }
     }
+    */
 
 
 }

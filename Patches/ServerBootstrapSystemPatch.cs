@@ -3,7 +3,6 @@ using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
-using Stunlock.Core;
 
 using User = ProjectM.Network.User;
 
@@ -30,9 +29,36 @@ internal static class ServerBootstrapSystemPatch
                 { "ProfessionLogging", false },
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
-                { "SpellLock", false }
+                { "SpellLock", false },
+                { "QuickStart", false }
             });
             Core.DataStructures.SavePlayerBools();
+        }
+        else
+        {
+            var existingDict = Core.DataStructures.PlayerBools[steamId];
+
+            // Define the default values
+            var defaultValues = new Dictionary<string, bool>
+            {
+                { "ExperienceLogging", false },
+                { "ProfessionLogging", false },
+                { "ExpertiseLogging", false },
+                { "BloodLogging", false },
+                { "SpellLock", false },
+                { "QuickStart", false }
+            };
+
+            // Add missing default values to the existing dictionary
+            foreach (var key in defaultValues.Keys)
+            {
+                if (!existingDict.ContainsKey(key))
+                {
+                    existingDict[key] = defaultValues[key];
+                }
+            }
+
+            Core.DataStructures.PlayerBools[steamId] = existingDict;
         }
 
         if (Plugin.ProfessionSystem.Value)
@@ -79,10 +105,10 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.SavePlayerHarvesting();
             }
 
-            if (!Core.DataStructures.PlayerJewelcrafting.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerEnchanting.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerJewelcrafting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerJewelcrafting();
+                Core.DataStructures.PlayerEnchanting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerEnchanting();
             }
         }
         
@@ -286,7 +312,7 @@ internal static class ServerBootstrapSystemPatch
                 }
             }
         }
-        else if (!Plugin.ExpertiseSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null)) // restore weapon levels in player inventory
+        if (!Plugin.ExpertiseSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null)) // restore weapon levels in player inventory
         {
             if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, user.LocalCharacter._Entity, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
             {

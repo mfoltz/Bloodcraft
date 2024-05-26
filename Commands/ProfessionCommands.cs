@@ -1,8 +1,4 @@
-using Bloodcraft.Patches;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Professions;
-using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;

@@ -10,7 +10,6 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Legacy.BloodSystem;
 
 namespace Bloodcraft.Patches;
 
@@ -64,6 +63,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
 
                     if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(killer, died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
                 }
                 
                 

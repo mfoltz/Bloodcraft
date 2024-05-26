@@ -11,12 +11,13 @@ namespace Bloodcraft.Systems.Experience
 {
     public class LevelingSystem
     {
-        public static readonly int UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
-        public static readonly int VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
-        public static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
-        public static readonly int EXPPower = 2; // power for calculating level from xp
-        public static readonly int MaxLevel = Plugin.MaxPlayerLevel.Value; // maximum level
-        public static readonly int GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
+        static readonly float UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
+        static readonly float VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
+        static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
+        static readonly int EXPPower = 2; // power for calculating level from xp
+        static readonly int MaxLevel = Plugin.MaxPlayerLevel.Value; // maximum level
+        static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
+        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, increases experience at lower levels and tapers off as level increases
 
         static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
@@ -75,6 +76,9 @@ namespace Bloodcraft.Systems.Experience
 
             int gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
             int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
+
+            gainedXP = ApplyScalingFactor(gainedXP, currentLevel);
+
             UpdatePlayerExperience(SteamID, gainedXP * groupMultiplier);
 
             CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel);
@@ -88,8 +92,8 @@ namespace Bloodcraft.Systems.Experience
         static int CalculateExperienceGained(int victimLevel, bool isVBlood)
         {
             int baseXP = victimLevel;
-            if (isVBlood) return baseXP * VBloodMultiplier;
-            return baseXP * UnitMultiplier;
+            if (isVBlood) return (int)(baseXP * VBloodMultiplier);
+            return (int)(baseXP * UnitMultiplier);
         }
 
         static void UpdatePlayerExperience(ulong SteamID, int gainedXP)
@@ -185,10 +189,7 @@ namespace Bloodcraft.Systems.Experience
         static float GetXp(ulong SteamID)
         {
             if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
-            else
-            {
-                return 0;
-            }
+            return 0;
         }
 
         static int GetLevel(ulong SteamID)
@@ -207,5 +208,12 @@ namespace Bloodcraft.Systems.Experience
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
+        static int ApplyScalingFactor(int gainedXP, int currentLevel)
+        {
+            float k = LevelScalingMultiplier; // You can adjust this constant to control the tapering effect
+            float scalingFactor = 1 / (1 + k * currentLevel);
+            return (int)(gainedXP * scalingFactor);
+        }
+
     }
 }

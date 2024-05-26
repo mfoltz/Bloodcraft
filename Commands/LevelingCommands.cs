@@ -1,13 +1,49 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Experience;
+using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
 {
-    public static class LevelingCommands
+    public static class LevelingCommands //560247139 Journal_GettingReadyForTheHunt
     {
+        [Command(name: "quickStart", shortHand: "start", adminOnly: false, usage: ".start", description: "Completes GettingReadyForTheHunt.")]
+        public static void QuickStartCommand(ChatCommandContext ctx)
+        {
+            if (!Plugin.LevelingSystem.Value)
+            {
+                ctx.Reply("Leveling is not enabled.");
+                return;
+            }
+            User user = ctx.Event.User;
+            ulong steamId = user.PlatformId;
+            if (Core.DataStructures.PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && bools["QuickStart"])
+            {
+                ctx.Reply("You are already prepared for the hunt.");
+                return;
+            }
+
+            ProgressionMapper progressionMapper = ctx.Event.SenderUserEntity.Read<ProgressionMapper>();
+            Entity unlockedProgressionEntity = progressionMapper.ProgressionEntity._Entity;
+            var buffer = unlockedProgressionEntity.ReadBuffer<UnlockedProgressionElement>();
+            bool hasQuest = false;
+            foreach (var element in buffer)
+            {
+                if (element.UnlockedPrefab.GuidHash == 560247139)
+                {
+                    hasQuest = true;
+                    break;
+                }
+            }
+            if (!hasQuest) buffer.Add(new UnlockedProgressionElement { UnlockedPrefab = new(560247139) });
+
+            Core.DataStructures.PlayerBools[steamId]["QuickStart"] = true;
+            Core.DataStructures.SavePlayerBools();
+            ctx.Reply("You are now prepared for the hunt.");
+        }
+
         [Command(name: "logLevelingProgress", shortHand: "log l", adminOnly: false, usage: ".log l", description: "Toggles leveling progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
         {
@@ -60,14 +96,14 @@ namespace Bloodcraft.Commands
             Entity foundUserEntity = Core.FindUserOnline(name);
             if (foundUserEntity.Equals(Entity.Null))
             {
-                ctx.Reply("Player not found.");
+                ctx.Reply("Player not found...");
                 return;
             }
             User foundUser = foundUserEntity.Read<User>();
 
-            if (level < 0 || level > LevelingSystem.MaxLevel)
+            if (level < 0 || level > Plugin.MaxPlayerLevel.Value)
             {
-                ctx.Reply($"Level must be between 0 and {LevelingSystem.MaxLevel}.");
+                ctx.Reply($"Level must be between 0 and {Plugin.MaxPlayerLevel.Value}");
                 return;
             }
             ulong steamId = foundUser.PlatformId;
@@ -78,12 +114,14 @@ namespace Bloodcraft.Commands
                 Core.DataStructures.PlayerExperience[steamId] = xpData;
                 Core.DataStructures.SavePlayerExperience();
                 GearOverride.SetLevel(foundUser.LocalCharacter._Entity);
-                ctx.Reply($"Level set to <color=white>{level}</color> for {foundUser.CharacterName}.");
+                ctx.Reply($"Level set to <color=white>{level}</color> for {foundUser.CharacterName}");
             }
             else
             {
                 ctx.Reply("No experience data found.");
             }
         }
+
+        
     }
 }

@@ -8,9 +8,9 @@ namespace Bloodcraft.Systems.Legacy
 {
     public class BloodSystem
     {
-        static readonly int UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
+        static readonly float UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
         static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-        static readonly int VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
+        static readonly float VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
         static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
         static readonly int BloodPower = 2; // power for calculating level from xp
 
@@ -29,6 +29,20 @@ namespace Bloodcraft.Systems.Legacy
             Creature,
             Brute
         }
+
+        public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new()
+{
+            { new PrefabGUID(-773025435), BloodType.Worker }, // yield bonus
+            { new PrefabGUID(-804597757), BloodType.Warrior }, // phys bonus
+            { new PrefabGUID(1934870645), BloodType.Scholar }, // spell bonus
+            { new PrefabGUID(1201299233), BloodType.Rogue }, // crit bonus
+            { new PrefabGUID(-1266262267), BloodType.Mutant }, // drain bonus
+            { new PrefabGUID(560247144), BloodType.VBlood }, // vblood_0
+            { new PrefabGUID(1558171501), BloodType.Draculin }, // speed bonus
+            { new PrefabGUID(-488475343), BloodType.Immortal }, // phys/spell bonus
+            { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
+            { new PrefabGUID(-534491790), BloodType.Brute } // primary life leech
+        };
 
         public static void UpdateLegacy(Entity Killer, Entity Victim)
         {
@@ -86,7 +100,7 @@ namespace Bloodcraft.Systems.Legacy
 
             if (leveledUp)
             {
-                message = $"<color=red>{bloodType}</color> lineage improved to [<color=white>{newLevel}</color>]";
+                message = $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]";
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             

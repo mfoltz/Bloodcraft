@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
@@ -9,8 +10,8 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Expertise.WeaponStats;
 using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
+using static Bloodcraft.Systems.Legacies.BloodStats.BloodStatManager;
 
 namespace Bloodcraft.Patches;
 
@@ -374,7 +375,7 @@ internal static class EquipmentPatches
                                     break;
                                 case AlchemyHandler:
                                     break;
-                                case JewelcraftingHandler:
+                                case EnchantingHandler:
                                     if (itemEntity.Has<Durability>())
                                     {
                                         Durability durability = itemEntity.Read<Durability>();
@@ -464,14 +465,75 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
             
         }
     }
-    public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, WeaponStatType statType)
+    public static void ApplyBloodBonuses(Entity character, BloodSystem.BloodType bloodType, Entity bloodBuff)
+    {
+        ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+        IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
+
+        if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamId, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
+        {
+            if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>())
+            {
+                Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
+            }
+            var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+            foreach (var bloodStatType in bonuses)
+            {
+                float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodStatType);
+                bool found = false;
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    ModifyUnitStatBuff_DOTS statBuff = buffer[i];
+                    if (statBuff.StatType.Equals(BloodStatMap[bloodStatType])) // Assuming WeaponStatType can be cast to UnitStatType
+                    {
+                        statBuff.Value += scaledBonus; // Modify the value accordingly
+                        buffer[i] = statBuff; // Assign the modified struct back to the buffer
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    // If not found, create a new stat modifier
+                    UnitStatType statType = BloodStatMap[bloodStatType];
+                    ModifyUnitStatBuff_DOTS newStatBuff = new()
+                    {
+                        StatType = statType,
+                        ModificationType = ModificationType.AddToBase,
+                        Value = scaledBonus,
+                        Modifier = 1,
+                        IncreaseByStacks = false,
+                        ValueByStacks = 0,
+                        Priority = 0,
+                        Id = ModificationId.Empty
+                    };
+                    buffer.Add(newStatBuff);
+                }
+            }
+
+        }
+    }
+    public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, WeaponStats.WeaponStatManager.WeaponStatType statType)
     {
         if (handler != null)
         {
             var xpData = handler.GetExpertiseData(steamId);
             int currentLevel = ExpertiseSystem.ConvertXpToLevel(xpData.Value);
-            float maxBonus = WeaponStatManager.BaseCaps[statType];
-            float scaledBonus = maxBonus * (currentLevel / 99.0f); // Scale bonus up to 99%
+            float maxBonus = WeaponStats.WeaponStatManager.BaseCaps[statType];
+            float scaledBonus = maxBonus * (currentLevel / Plugin.MaxExpertiseLevel.Value); // Scale bonus up to 99%
+            return scaledBonus;
+        }
+        return 0; // Return 0 if no handler is found or other error
+    }
+    public static float CalculateScaledBloodBonus(IBloodHandler handler, ulong steamId, BloodStats.BloodStatManager.BloodStatType statType)
+    {
+        if (handler != null)
+        {
+            var xpData = handler.GetLegacyData(steamId);
+            int currentLevel = BloodSystem.ConvertXpToLevel(xpData.Value);
+            float maxBonus = BloodStats.BloodStatManager.BaseCaps[statType];
+            float scaledBonus = maxBonus * (currentLevel / Plugin.MaxBloodLevel.Value); // Scale bonus up to 99%
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
@@ -507,15 +569,6 @@ public static class GearOverride // also this
                 equipment.WeaponLevel._Value = playerLevel;
                 player.Write(equipment);
             }
-            /*
-            else if (Plugin.LevelingSystem.Value && !Plugin.ExpertiseSystem.Value)
-            {
-                equipment.ArmorLevel._Value = 0f;
-                equipment.SpellLevel._Value = playerLevel;
-                equipment.WeaponLevel._Value = 0f;
-                player.Write(equipment);
-            }
-            */
         }
     }
     public static void SetWeaponItemLevel(Equipment equipment, int level, EntityManager entityManager)

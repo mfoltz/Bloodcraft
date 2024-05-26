@@ -1,15 +1,9 @@
 ﻿using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using ProjectM.UI;
-using StableNameDotNet;
 using Stunlock.Core;
-using Stunlock.Localization;
 using System.Text.RegularExpressions;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Transforms;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Systems.Professions
@@ -17,7 +11,7 @@ namespace Bloodcraft.Systems.Professions
     public class ProfessionSystem
     {
         //static readonly Regex regex = new(@"fish.*t0[1-3]$");
-        static readonly int ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
+        static readonly float ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
         static readonly float ProfessionConstant = 0.1f; // constant for calculating level from xp
         static readonly int ProfessionPower = 2; // power for calculating level from xp
         static readonly int MaxProfessionLevel = Plugin.MaxProfessionLevel.Value; // maximum level
@@ -50,7 +44,9 @@ namespace Bloodcraft.Systems.Professions
 
             float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel._Value;
 
-            Entity original = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[Victim.Read<PrefabGUID>()];
+            PrefabGUID prefab = Victim.Read<PrefabGUID>();
+
+            Entity original = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
 
             if (original.Has<EntityCategory>() && original.Read<EntityCategory>().ResourceLevel._Value > ProfessionValue)
             {
@@ -62,7 +58,6 @@ namespace Bloodcraft.Systems.Professions
                 ProfessionValue = Victim.Read<UnitLevel>().Level;
             }
 
-            //Core.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {Victim.Read<PrefabGUID>().LookupName()}");
             if (ProfessionValue.Equals(0))
             {
                 ProfessionValue = 10;
@@ -80,7 +75,7 @@ namespace Bloodcraft.Systems.Professions
                 }
 
                 SetProfession(user, SteamID, ProfessionValue, handler);
-                GiveProfessionBonus(Victim.Read<PrefabGUID>(), Killer, user, SteamID, handler);
+                GiveProfessionBonus(prefab, Killer, user, SteamID, handler);
             }
         }
 
@@ -197,7 +192,7 @@ namespace Bloodcraft.Systems.Professions
             if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
             {
                 int levelProgress = GetLevelProgress(steamID, handler);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
             }
         }
         static int ConvertXpToLevel(float xp)
