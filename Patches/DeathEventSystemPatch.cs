@@ -28,7 +28,6 @@ internal static class DeathEventListenerSystemPatch
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(deathEvent.Killer))
                 {
-                    //ev.Died.LogComponentTypes();
                     if (Plugin.ProfessionSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<Follower>(deathEvent.Killer) && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())

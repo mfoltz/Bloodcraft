@@ -63,7 +63,7 @@ namespace Bloodcraft.Systems.Professions
                 default:
                     if (itemTypeName.Contains("wood"))
                         return new WoodcuttingHandler();
-                    if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") && !itemTypeName.Contains("magicsource"))
+                    if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal") && !itemTypeName.Contains("magicsource"))
                         return new MiningHandler();
                     if (itemTypeName.Contains("weapon"))
                         return new BlacksmithingHandler();

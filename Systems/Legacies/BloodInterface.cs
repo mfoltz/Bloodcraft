@@ -26,7 +26,7 @@
                 BloodSystem.BloodType.Mutant => new MutantHandler(),
                 BloodSystem.BloodType.VBlood => new VBloodHandler(),
                 BloodSystem.BloodType.Draculin => new DraculinHandler(),
-                BloodSystem.BloodType.DraculaTheImmortal => new ImmortalHandler(),
+                BloodSystem.BloodType.Immortal => new ImmortalHandler(),
                 BloodSystem.BloodType.Creature => new CreatureHandler(),
                 BloodSystem.BloodType.Brute => new BruteHandler(),
                 _ => null,
@@ -184,7 +184,7 @@
 
         public override BloodSystem.BloodType GetBloodType()
         {
-            return BloodSystem.BloodType.DraculaTheImmortal;
+            return BloodSystem.BloodType.Immortal;
         }
     }
 

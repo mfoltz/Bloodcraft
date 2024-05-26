@@ -1,47 +1,44 @@
 using Bloodcraft.Patches;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacy;
-using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Expertise.ExpertiseSystem;
 
 namespace Bloodcraft.Commands
 {
     public static class BloodCommands
     {
-        [Command(name: "getBloodLegacyProgress", shortHand: "get bl", adminOnly: false, usage: ".get bl", description: "Display your current Blood Legacy progress.")]
-        public static void GetBloodLegacyCommand(ChatCommandContext ctx)
+        [Command(name: "getBloodLegacyProgress", shortHand: "gbl", adminOnly: false, usage: ".gbl [BloodType]", description: "Display your current blood legacy progress.")]
+        public static void GetProfessionCommand(ChatCommandContext ctx, string blood)
         {
             if (!Plugin.BloodSystem.Value)
             {
                 ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
-            Entity character = ctx.Event.SenderCharacterEntity;
-            Blood blood = character.Read<Blood>();
-            BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(blood.BloodType);
 
-            IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
-            if (handler == null)
+            if (!Enum.TryParse<BloodSystem.BloodType>(blood, true, out var bloodType))
             {
-                ctx.Reply($"No Blood Legacy handler found for {bloodType}.");
+                ctx.Reply("Invalid blood type, use .lbt to see options.");
                 return;
             }
 
             ulong steamID = ctx.Event.User.PlatformId;
-            var LegacyData = handler.GetLegacyData(steamID);
-            int progress = (int)(LegacyData.Value - BloodSystem.ConvertLevelToXp(LegacyData.Key));
-            // LegacyData.Key represents the level, and LegacyData.Value represents the experience.
-            if (LegacyData.Key > 0 || LegacyData.Value > 0)
+            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+            if (bloodHandler == null)
             {
-                ctx.Reply($"Your blood legacy is level [<color=white>{LegacyData.Key}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, handler)}%</color>) in <color=red>{bloodType}</color>");
+                ctx.Reply("Invalid blood type.");
+                return;
+            }
+            var data = bloodHandler.GetLegacyData(steamID);
+            int progress = (int)(data.Value - BloodSystem.ConvertLevelToXp(data.Key));
+            if (data.Key > 0)
+            {
+                ctx.Reply($"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> experience (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
             }
             else
             {
-                ctx.Reply($"You haven't gained any <color=#FFC0CB>essence</color> for {bloodType} yet.");
+                ctx.Reply($"No progress in <color=red>{bloodHandler.GetBloodType()}</color> yet. ");
             }
         }
 
@@ -71,16 +68,16 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
-
-            User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
-            if (foundUser.CharacterName.IsEmpty)
+            Entity foundUserEntity = Core.FindUserOnline(name);
+            if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");
                 return;
             }
-            if (level < 0 || level > BloodSystem.MaxBloodLevel)
+            User foundUser = foundUserEntity.Read<User>();
+            if (level < 0 || level > Plugin.MaxBloodLevel.Value)
             {
-                ctx.Reply($"Level must be between 0 and {BloodSystem.MaxBloodLevel}.");
+                ctx.Reply($"Level must be between 0 and {Plugin.MaxBloodLevel.Value}.");
                 return;
             }
             if (!Enum.TryParse<BloodSystem.BloodType>(blood, true, out var bloodType))
@@ -93,8 +90,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Invalid blood type.");
                 return;
             }
-
-            ulong steamId = ctx.Event.User.PlatformId;
+            ulong steamId = foundUser.PlatformId;
             var xpData = new KeyValuePair<int, float>(level, BloodSystem.ConvertLevelToXp(level));
             BloodHandler.UpdateLegacyData(steamId, xpData);
             BloodHandler.SaveChanges();

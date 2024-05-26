@@ -1,6 +1,7 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Experience;
 using ProjectM.Network;
+using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
@@ -56,21 +57,21 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
-            if (foundUser.CharacterName.IsEmpty)
+            Entity foundUserEntity = Core.FindUserOnline(name);
+            if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");
                 return;
             }
+            User foundUser = foundUserEntity.Read<User>();
 
             if (level < 0 || level > LevelingSystem.MaxLevel)
             {
                 ctx.Reply($"Level must be between 0 and {LevelingSystem.MaxLevel}.");
                 return;
             }
-
             ulong steamId = foundUser.PlatformId;
-
+            //Entity character = Core.ServerBootstrapSystem._ApprovedUsersLookup[foundUser.Index].UserEntity.Read<User>().LocalCharacter._Entity;
             if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var _))
             {
                 var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));

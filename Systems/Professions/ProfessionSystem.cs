@@ -48,11 +48,20 @@ namespace Bloodcraft.Systems.Professions
                 return;
             }
 
-            float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel;
+            float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel._Value;
+
+            Entity original = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[Victim.Read<PrefabGUID>()];
+
+            if (original.Has<EntityCategory>() && original.Read<EntityCategory>().ResourceLevel._Value > ProfessionValue)
+            {
+                ProfessionValue = original.Read<EntityCategory>().ResourceLevel._Value;
+            }
+
             if (Victim.Read<UnitLevel>().Level > ProfessionValue)
             {
                 ProfessionValue = Victim.Read<UnitLevel>().Level;
             }
+
             //Core.Log.LogInfo($"{Victim.Read<EntityCategory>().ResourceLevel}|{Victim.Read<UnitLevel>().Level} || {Victim.Read<PrefabGUID>().LookupName()}");
             if (ProfessionValue.Equals(0))
             {

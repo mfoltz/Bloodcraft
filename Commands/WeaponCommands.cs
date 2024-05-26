@@ -189,13 +189,13 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
-
-            if (foundUser.CharacterName.IsEmpty)
+            Entity foundUserEntity = Core.FindUserOnline(name);
+            if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");
                 return;
             }
+            User foundUser = foundUserEntity.Read<User>();
 
             if (level < 0 || level > Plugin.MaxExpertiseLevel.Value)
             {
@@ -222,13 +222,13 @@ namespace Bloodcraft.Commands
             }
 
             ulong steamId = foundUser.PlatformId;
-            Entity character = foundUser.LocalCharacter._Entity;
-            Equipment equipment = character.Read<Equipment>();
+            //Entity character = Core.ServerBootstrapSystem._ApprovedUsersLookup[foundUser.Index].UserEntity.Read<User>().LocalCharacter._Entity;
+            Equipment equipment = foundUser.LocalCharacter._Entity.Read<Equipment>();
 
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
             expertiseHandler.UpdateExpertiseData(steamId, xpData);
             expertiseHandler.SaveChanges();
-            GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
+            if (Plugin.LevelingSystem.Value) GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
 
             ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}.");
         }
@@ -241,7 +241,13 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Expertise is not enabled.");
                 return;
             }
-            string weaponStats = string.Join(", ", Enum.GetNames(typeof(WeaponStatManager.WeaponStatType)));
+            var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStatManager.WeaponStatType))
+                .Cast<WeaponStatManager.WeaponStatType>()
+                .Select(stat => $"<color=#00FFFF>{stat}</color>: <color=white>{WeaponStatManager.BaseCaps[stat]}</color>")
+                .ToArray();
+
+            // Join the formatted strings
+            string weaponStats = string.Join(", ", weaponStatsWithCaps);
             ctx.Reply($"Available weapon stats: {weaponStats}");
         }
 

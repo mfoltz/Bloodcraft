@@ -9,7 +9,7 @@ namespace Bloodcraft.Systems.Legacy
     public class BloodSystem
     {
         static readonly int UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
-        public static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
+        static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
         static readonly int VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
         static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
         static readonly int BloodPower = 2; // power for calculating level from xp
@@ -25,7 +25,7 @@ namespace Bloodcraft.Systems.Legacy
             None,
             GateBoss,
             Draculin,
-            DraculaTheImmortal,
+            Immortal,
             Creature,
             Brute
         }
@@ -97,15 +97,17 @@ namespace Bloodcraft.Systems.Legacy
             }
             
         }
-
-        public static int GetLevelProgress(ulong steamID, IBloodHandler handler)
+        
+        public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
         {
-            float currentXP = GetXp(steamID, handler);
-            int currentLevel = GetLevel(steamID, handler);
-            int nextLevelXP = ConvertLevelToXp(currentLevel + 1);
-            //Plugin.Log.LogInfo($"Lv: {currentLevel} | xp: {currentXP} | toNext: {nextLevelXP}");
-            int percent = (int)(currentXP / nextLevelXP * 100);
-            return percent;
+            float currentXP = GetXp(SteamID, handler);
+            int currentLevelXP = ConvertLevelToXp(GetLevel(SteamID, handler));
+            int nextLevelXP = ConvertLevelToXp(GetLevel(SteamID, handler) + 1);
+
+            double neededXP = nextLevelXP - currentLevelXP;
+            double earnedXP = nextLevelXP - currentXP;
+
+            return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
 
         public static int ConvertXpToLevel(float xp)

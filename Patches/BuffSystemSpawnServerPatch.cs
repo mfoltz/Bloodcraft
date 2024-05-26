@@ -1,14 +1,13 @@
-﻿using Bloodcraft.Systems.Legacy;
+﻿using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
-using Il2CppSystem.Buffers;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Legacy.BloodSystem;
 
 namespace Bloodcraft.Patches;
 
@@ -25,6 +24,7 @@ public class BuffPatch
             foreach (Entity entity in entities)
             {
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+                
                 if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
@@ -54,6 +54,7 @@ public class BuffPatch
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;
                     BloodSystem.UpdateLegacy(killer, died);
+                    ExpertiseSystem.UpdateExpertise(killer, died);
                 }
                 
             }
@@ -67,34 +68,35 @@ public class BuffPatch
             entities.Dispose();
         }
     }
-    
-    [HarmonyPatch(typeof(CreateGameplayEvents_OnAbilityCast), nameof(CreateGameplayEvents_OnAbilityCast.OnUpdate))]
-    [HarmonyPostfix]
-    private static void OnUpdatePostix(CreateGameplayEvents_OnAbilityCast __instance)
+
+    [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
+    [HarmonyPrefix]
+    private static void OnUpdatePrefix(StatChangeMutationSystem __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_1365518405_2.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance._StatChangeEventQuery.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (Plugin.BloodSystem.Value && entity.Has<AbilityPostCastFinishedEvent>())
+                if (entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
-                    AbilityPostCastFinishedEvent abilityPostCastFinishedEvent = entity.Read<AbilityPostCastFinishedEvent>();
-                    PrefabGUID prefabGUID = abilityPostCastFinishedEvent.AbilityGroup.Read<PrefabGUID>();
-                    Entity character = abilityPostCastFinishedEvent.Character;
-                    if (character.Has<PlayerCharacter>() && prefabGUID.GuidHash.Equals(974235336)) // blood potion ability group
+                    
+                    StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
+                    BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
+                    Blood blood = statChangeEvent.Entity.Read<Blood>();
+                    BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
+                    ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+                    if (bloodHandler == null)
                     {
-                        ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                        Blood blood = character.Read<Blood>();
-                        BloodType bloodType = GetBloodTypeFromPrefab(blood.BloodType);
-                        IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
-                        if (bloodHandler == null)
-                        {
-                            continue;
-                        }
-                        var legacyData = bloodHandler.GetLegacyData(steamId);
-                        blood.Quality += legacyData.Key;
-                        character.Write(blood);
+                        continue;
+                    }
+                    var legacyData = bloodHandler.GetLegacyData(steamID);
+                    if (legacyData.Key > 0)
+                    {
+                        bloodQualityChange.Quality += legacyData.Key;
+                        bloodQualityChange.ForceReapplyBuff = true;
+                        entity.Write(bloodQualityChange);
                     }
                 }
             }
@@ -103,9 +105,7 @@ public class BuffPatch
         {
             Core.Log.LogError(ex);
         }
-        finally
-        {
-            entities.Dispose();
-        }
     }
+
+
 }

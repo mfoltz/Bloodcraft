@@ -67,12 +67,13 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Professions are not enabled.");
                 return;
             }
-            User foundUser = ServerBootstrapPatch.users.FirstOrDefault(user => user.CharacterName.ToString().ToLower() == name.ToLower());
-            if (foundUser.CharacterName.IsEmpty)
+            Entity foundUserEntity = Core.FindUserOnline(name);
+            if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");
                 return;
             }
+            User foundUser = foundUserEntity.Read<User>();
             if (level < 0 || level > Plugin.MaxProfessionLevel.Value)
             {
                 ctx.Reply($"Level must be between 0 and {Plugin.MaxProfessionLevel.Value}.");

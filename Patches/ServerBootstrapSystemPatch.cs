@@ -3,30 +3,25 @@ using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
 using Unity.Entities;
+using Stunlock.Core;
+
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class ServerBootstrapPatch
+internal static class ServerBootstrapSystemPatch
 {
-    public static List<User> users = [];
-
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
-    [HarmonyPrefix]
-    static void OnUserConnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
+    [HarmonyPostfix]
+    static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
         int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
         ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
-
-        if (!users.Contains(user))
-        {
-            users.Add(user);
-        }
-
+       
         if (!Core.DataStructures.PlayerBools.ContainsKey(steamId))
         {
             Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
@@ -244,16 +239,15 @@ internal static class ServerBootstrapPatch
             }
         }
 
-        Entity character = user.LocalCharacter._Entity;
 
-        if (Plugin.LevelingSystem.Value)
+        if (Plugin.LevelingSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null))
         {
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
                 Core.DataStructures.SavePlayerExperience();
             }
-            var buffer = character.ReadBuffer<BuffBuffer>();
+            var buffer = user.LocalCharacter._Entity.ReadBuffer<BuffBuffer>();
             for (int i = 0; i < buffer.Length; i++)
             {
                 var item = buffer[i];
@@ -265,10 +259,36 @@ internal static class ServerBootstrapPatch
             }
             GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
-
-        if (!Plugin.ExpertiseSystem.Value) // restore weapon levels in player inventory
+        else if (Plugin.LevelingSystem.Value)
         {
-            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
+            if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
+                Core.DataStructures.SavePlayerExperience();
+            }
+        }
+
+        if (Plugin.ExpertiseSystem.Value && !Plugin.LevelingSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null)) // restore weapon levels in player inventory
+        {
+            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, user.LocalCharacter._Entity, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
+            {
+                foreach (var item in playerBuffer)
+                {
+                    if (item.ItemEntity._Entity.Has<WeaponLevelSource>())
+                    {
+                        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
+                        if (prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Has<WeaponLevelSource>())
+                        {
+                            WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<WeaponLevelSource>();
+                            item.ItemEntity._Entity.Write(weaponLevelSource);
+                        }
+                    }
+                }
+            }
+        }
+        else if (!Plugin.ExpertiseSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null)) // restore weapon levels in player inventory
+        {
+            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, user.LocalCharacter._Entity, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
             {
                 foreach (var item in playerBuffer)
                 {

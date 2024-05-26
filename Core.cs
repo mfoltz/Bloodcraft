@@ -1,10 +1,15 @@
 using BepInEx.Logging;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacy;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.UI;
 using Stunlock.Core;
 using System.Text.Json;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft;
@@ -17,6 +22,18 @@ internal static class Core
     public static ServerGameSettingsSystem ServerGameSettingsSystem { get; internal set; }
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
     public static DebugEventsSystem DebugEventsSystem { get; internal set; }
+    public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
+
+    public static ModifyUnitStatBuffSystem_Destroy ModifyUnitStatBuffSystem_Destroy { get; internal set; }
+
+    //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future
+
+    public static ServerBootstrapSystem ServerBootstrapSystem { get; internal set; }
+
+    public static ArmorLevelSystem_Spawn ArmorLevelSystem_Spawn { get; internal set; }
+
+    public static StatChangeMutationSystem StatChangeMutationSystem { get; internal set; }
+
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
     public static ModificationsRegistry ModificationsRegistry => ServerGameManager.Modifications;
@@ -31,9 +48,14 @@ internal static class Core
         ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
         ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
+        ModifyUnitStatBuffSystem_Spawn = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Spawn>();
+        ModifyUnitStatBuffSystem_Destroy = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Destroy>();
+        ArmorLevelSystem_Spawn = Server.GetExistingSystemManaged<ArmorLevelSystem_Spawn>();
+        ServerBootstrapSystem = Server.GetExistingSystemManaged<ServerBootstrapSystem>();
+        StatChangeMutationSystem = Server.GetExistingSystemManaged<StatChangeMutationSystem>();
+        //EquipmentService = new(); 
 
         // Initialize utility services
-
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
 
         hasInitialized = true;
@@ -49,6 +71,22 @@ internal static class Core
             }
         }
         return null;
+    }
+    public static Entity FindUserOnline(string name)
+    {
+        NativeArray<Entity> _userEntities = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<User>()).ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in _userEntities)
+            {
+                if (Core.EntityManager.Exists(entity) && entity.Read<User>().CharacterName.Value.ToLower().Equals(name.ToLower())) return entity;
+            }
+        }
+        finally
+        {
+            _userEntities.Dispose();
+        }
+        return Entity.Null;
     }
 
     public class DataStructures
@@ -320,6 +358,7 @@ internal static class Core
             get => playerCraftingJobs;
             set => playerCraftingJobs = value;
         }
+       
 
         // file paths dictionary
         private static readonly Dictionary<string, string> filePaths = new()
