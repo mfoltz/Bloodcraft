@@ -13,7 +13,7 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 - **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills (unarmed also has stats as of second release). Experience for this is gained per kill based for equipped weapon.
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill.
+- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill. Can skip level 20 quest.
 - **Blood Legacies:** This is more like weapon expertise now with a different set of stats as of most recent push (5/26). Experience for this is gained per feed kill for equipped blood type.
 
 ## Commands
