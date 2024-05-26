@@ -1,8 +1,8 @@
 ## Table of Contents
 
-Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly.
+Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly. Features are intended to be useable standalone without causing conflict but please let me know if you run into issues with this.
 
-Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus, woodcutting/mining/harvesting bonus yields (x1 of drop per level) blacksmithing/tailoring/Enchanting bonus durability to crafted items (up to x2 at max) alchemy bonus consumable buff effects/lifetime (up to x2 at max), fishing x1 bonus random fish based on location every 20 levels per catch), leveling is functional, and blood legacies are functional (each legacy level adds +1% to blood quality for that type when equipped, won't show higher quality after 100% but will still affect stats that scale with quality past 100%). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged! If you'd like to contribute to development, my Kofi can be found here: https://ko-fi.com/zfolmt (please rest assured this mod will remain open source and will never be charged for, any contributions are entirely optional and greatly appreciated)
+Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus, woodcutting/mining/harvesting bonus yields (x1 of drop per level) blacksmithing/tailoring/jewelcrafting bonus durability to crafted items (up to x2 at max) alchemy bonus consumable buff effects/lifetime (up to x2 at max), fishing x1 bonus random fish based on location every 20 levels per catch), leveling is functional, and blood legacies are functional (each legacy level adds +1% to blood quality for that type when equipped, won't show higher quality after 100% but will still affect stats that scale with quality past 100%). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
 
 - [Features](#features)
 - [Commands](#commands)
@@ -11,33 +11,33 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ## Features
 
-- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills. Experience for this is gained per kill based for equipped weapon.
-- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Experience for this is gained per resource broken, item crafted, or succesful catch.
+- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills (unarmed also has stats as of second release). Experience for this is gained per kill based for equipped weapon.
+- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch.
 - **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill.
 - **Blood Legacies:** Players can increase their lineage in various bloodtypes, collecting essence and improving their potencies. Experience for this is gained per feed kill for equipped blood type.
 
 ## Commands
 
 ### Blood Commands
-- `.getLegacyProgress`
-  - Display progress in current blood lineage.
-  - Shortcut: *.get bl*
-- `.logLegacyProgress`
+- `.getBloodLegacyProgress [Blood]`
+  - Display progress in current blood legacy.
+  - Shortcut: *.gbl [Blood]*
+- `.logBloodLegacyProgress`
   - Enables or disables blood legacy logging.
   - Shortcut: *.log bl*
-- `.setBloodLegacy [Player] [BloodType] [Level]` 🔒
+- `.setBloodLegacy [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
-  - Shorcut: *.sbl [Player] [BloodType] [Level]*
-- `.listBloodTypes`
+  - Shorcut: *.sbl [Player] [Blood] [Level]*
+- `.listBloodLegacies`
   - Lists blood legacies available.
-  - Shortcut: *.lbt*
+  - Shortcut: *.lbl*
 
 ### Leveling Commands
 - `.getLevelingProgress`
   - Display current level progress.
   - Shortcut: *.get l*
 - `.logLevelingProgress`
-  - Enables or disables blood legacy logging.
+  - Enables or disables leveling experience logging.
   - Shortcut: *.log l*
 - `.setLevel [Player] [Level]` 🔒
   - Sets player experience level.
@@ -64,14 +64,14 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - `.logExpertiseProgress`
   - Enables or disables expertise logging.
   - Shortcut: *.log e*
-- `.chooseWeaponStat [WeaponStat]`
+- `.chooseWeaponStat [Stat]`
   - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
-  - Shortcut: *.cws [WeaponStat]*
+  - Shortcut: *.cws [Stat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shorcut: *.swe [Player] [Weapon] [Level]*
 - `.listWeaponStats`
-  - Lists weapon stats available.
+  - Lists weapon stats available along with bonuses at max expertise.
   - Shortcut: *.lws*
 - `.resetWeaponStats`
   - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
@@ -138,9 +138,9 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - **Max Blood Level**: `MaxBloodLevel` (int, default: 99)  
   Maximum level in blood legacies.
 - **Unit Legacy Multiplier**: `UnitLegacyMultiplier` (int, default: 5)  
-  Multiplier for lineage gained from units.
+  Multiplier for essence gained from units.
 - **VBlood Legacy Multiplier**: `VBloodLegacyMultipler` (int, default: 15)  
-  Multiplier for lineage gained from VBloods.
+  Multiplier for essence gained from VBloods.
 
 ### Profession System
 - **Enable Profession System**: `ProfessionSystem` (bool, default: false)  
@@ -148,7 +148,7 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 - **Max Profession Level**: `MaxProfessionLevel` (int, default: 99)  
   Maximum level in professions.
 - **Profession Multiplier**: `ProfessionMultiplier` (int, default: 10)  
-  Multiplier for profession experience gained per action.
+  Multiplier for proficiency gained per action.
 
 ## Roadmap
 
