@@ -24,6 +24,8 @@ internal static class Core
     public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
     //public static GetCharacterHUDSystem GetCharacterHUDSystem { get; internal set; }
 
+    //public static CommonClientDataSystem CommonClientDataSystem { get; internal set; }
+
     //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future journal quest 560247139 Journal_GettingReadyForTheHunt
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
@@ -40,6 +42,7 @@ internal static class Core
         ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
         ModifyUnitStatBuffSystem_Spawn = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Spawn>();
         //GetCharacterHUDSystem = Server.GetExistingSystemManaged<GetCharacterHUDSystem>();
+        //CommonClientDataSystem = Server.GetExistingSystemManaged<CommonClientDataSystem>();
         //EquipmentService = new(); 
 
         // Initialize utility services

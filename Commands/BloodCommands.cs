@@ -216,6 +216,7 @@ namespace Bloodcraft.Commands
             if (!Enum.TryParse<BloodSystem.BloodType>(blood, true, out var bloodType))
             {
                 ctx.Reply("Invalid blood legacy.");
+                return;
             }
             var BloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
             if (BloodHandler == null)

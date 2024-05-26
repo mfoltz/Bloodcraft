@@ -183,7 +183,7 @@ public class Plugin : BasePlugin
         _resetExpertiseItem = Instance.Config.Bind("Config", "ResetExpertiseItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
         _resetExpertiseItemQuantity = Instance.Config.Bind("Config", "ResetExpertiseItemQuantity", 0, "Quantity of item required for resetting stats.");
 
-        _maxHealth = Instance.Config.Bind("Config", "MaxHealth", 150f, "The base cap for maximum health.");
+        _maxHealth = Instance.Config.Bind("Config", "MaxHealth", 250f, "The base cap for maximum health.");
         _movementSpeed = Instance.Config.Bind("Config", "MovementSpeed", 0.25f, "The base cap for movement speed.");
         _primaryAttackSpeed = Instance.Config.Bind("Config", "PrimaryAttackSpeed", 0.25f, "The base cap for primary attack speed.");
         _physicalLifeLeech = Instance.Config.Bind("Config", "PhysicalLifeLeech", 0.15f, "The base cap for physical life leech.");

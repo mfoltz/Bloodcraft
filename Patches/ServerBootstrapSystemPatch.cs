@@ -59,6 +59,7 @@ internal static class ServerBootstrapSystemPatch
             }
 
             Core.DataStructures.PlayerBools[steamId] = existingDict;
+            Core.DataStructures.SavePlayerBools();
         }
 
         if (Plugin.ProfessionSystem.Value)
@@ -265,67 +266,14 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-
-        if (Plugin.LevelingSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null))
+        if (Plugin.LevelingSystem.Value)
         {
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
                 Core.DataStructures.SavePlayerExperience();
             }
-            var buffer = user.LocalCharacter._Entity.ReadBuffer<BuffBuffer>();
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                var item = buffer[i];
-                if (item.Entity.Has<ArmorLevel>() && !item.Entity.Read<ArmorLevel>().Level.Equals(0))
-                {
-                    item.Entity.Write(new ArmorLevel { Level = 0f });
-                    buffer[i] = item;
-                }
-            }
-            GearOverride.SetLevel(user.LocalCharacter._Entity);
-        }
-        else if (Plugin.LevelingSystem.Value)
-        {
-            if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
-            {
-                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
-                Core.DataStructures.SavePlayerExperience();
-            }
-        }
-
-        if (Plugin.ExpertiseSystem.Value && !Plugin.LevelingSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null)) // restore weapon levels in player inventory
-        {
-            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, user.LocalCharacter._Entity, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
-            {
-                foreach (var item in playerBuffer)
-                {
-                    if (item.ItemEntity._Entity.Has<WeaponLevelSource>())
-                    {
-                        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
-                        if (prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Has<WeaponLevelSource>())
-                        {
-                            WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<WeaponLevelSource>();
-                            item.ItemEntity._Entity.Write(weaponLevelSource);
-                        }
-                    }
-                }
-            }
-        }
-        if (!Plugin.ExpertiseSystem.Value && !user.FirstTimeConnected && !user.LocalCharacter._Entity.Equals(Entity.Null)) // restore weapon levels in player inventory
-        {
-            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, user.LocalCharacter._Entity, out Entity playerInventory) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var playerBuffer))
-            {
-                foreach (var item in playerBuffer)
-                {
-                    if (item.ItemEntity._Entity.Has<WeaponLevelSource>())
-                    {
-                        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
-                        WeaponLevelSource weaponLevelSource = prefabCollectionSystem._PrefabGuidToEntityMap[item.ItemType].Read<WeaponLevelSource>();
-                        item.ItemEntity._Entity.Write(weaponLevelSource);
-                    }
-                }
-            }
+            if (user.LocalCharacter._Entity != Entity.Null) GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
     }
 }

@@ -122,6 +122,5 @@ namespace Bloodcraft.Commands
             }
         }
 
-        
     }
 }
