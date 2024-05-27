@@ -548,7 +548,7 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
             var xpData = handler.GetExpertiseData(steamId);
             int currentLevel = ExpertiseSystem.ConvertXpToLevel(xpData.Value);
             float maxBonus = WeaponStats.WeaponStatManager.BaseCaps[statType];
-            float scaledBonus = maxBonus * (currentLevel / Plugin.MaxExpertiseLevel.Value); // Scale bonus up to 99%
+            float scaledBonus = maxBonus * ((float)currentLevel / Plugin.MaxExpertiseLevel.Value); // Scale bonus up to 99%
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
@@ -560,7 +560,7 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
             var xpData = handler.GetLegacyData(steamId);
             int currentLevel = BloodSystem.ConvertXpToLevel(xpData.Value);
             float maxBonus = BloodStats.BloodStatManager.BaseCaps[statType];
-            float scaledBonus = maxBonus * (currentLevel / Plugin.MaxBloodLevel.Value); // Scale bonus up to 99%
+            float scaledBonus = maxBonus * ((float)currentLevel / Plugin.MaxBloodLevel.Value); // Scale bonus up to 99%
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
