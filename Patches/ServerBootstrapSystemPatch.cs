@@ -29,8 +29,8 @@ internal static class ServerBootstrapSystemPatch
                 { "ProfessionLogging", false },
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
-                { "SpellLock", false },
-                { "QuickStart", false }
+                { "FamiliarLogging", false },
+                { "SpellLock", false }
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -45,6 +45,7 @@ internal static class ServerBootstrapSystemPatch
                 { "ProfessionLogging", false },
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
+                { "FamiliarLogging", false },
                 { "SpellLock", false }
             };
 

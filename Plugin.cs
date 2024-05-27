@@ -20,6 +20,9 @@ public class Plugin : BasePlugin
     public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
     public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
     public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
+    public static readonly string PlayerFamiliarsPath = Path.Combine(ConfigPath, "Familiars");
+    public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "Unlocks");
+    public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "Unlocks");
 
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<int> _maxPlayerLevel;
@@ -28,7 +31,6 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodLevelingMultiplier;
     private static ConfigEntry<float> _groupLevelingMultiplier;
     private static ConfigEntry<float> _levelScalingMultiplier;
-    private static ConfigEntry<bool> _preparedForTheHunt;
 
     private static ConfigEntry<bool> _expertiseSystem;
     private static ConfigEntry<bool> _sanguimancy;
@@ -79,6 +81,11 @@ public class Plugin : BasePlugin
     private static ConfigEntry<int> _maxProfessionLevel;
     private static ConfigEntry<float> _professionMultiplier;
 
+    private static ConfigEntry<bool> _familiarSystem;
+    private static ConfigEntry<int> _maxFamiliarLevel;
+    private static ConfigEntry<float> _unitFamiliarMultiplier;
+    private static ConfigEntry<float> _vBloodFamiliarMultiplier;
+
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
     public static ConfigEntry<int> MaxPlayerLevel => _maxPlayerLevel;
     public static ConfigEntry<int> StartingLevel => _startingLevel;
@@ -86,7 +93,6 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
     public static ConfigEntry<float> GroupLevelingMultiplier => _groupLevelingMultiplier;
     public static ConfigEntry<float> LevelScalingMultiplier => _levelScalingMultiplier;
-    public static ConfigEntry<bool> PreparedForTheHunt => _preparedForTheHunt;
 
     public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
     public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
@@ -147,6 +153,13 @@ public class Plugin : BasePlugin
     public static ConfigEntry<bool> ProfessionSystem => _professionSystem;
     public static ConfigEntry<int> MaxProfessionLevel => _maxProfessionLevel;
     public static ConfigEntry<float> ProfessionMultiplier => _professionMultiplier;
+
+    public static ConfigEntry<bool> FamiliarSystem => _familiarSystem;
+    public static ConfigEntry<int> MaxFamiliarLevel => _maxFamiliarLevel;
+    public static ConfigEntry<float> UnitFamiliarMultiplier => _unitFamiliarMultiplier;
+    public static ConfigEntry<float> VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier;
+
+
     
     public override void Load()
     {
@@ -173,7 +186,6 @@ public class Plugin : BasePlugin
         _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _groupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
         _levelScalingMultiplier = Instance.Config.Bind("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
-        _preparedForTheHunt = Instance.Config.Bind("Config", "PreparedForTheHunt", false, "True to autocomplete this quest.");
 
         _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
@@ -223,6 +235,11 @@ public class Plugin : BasePlugin
         _professionSystem = Instance.Config.Bind("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
         _maxProfessionLevel = Instance.Config.Bind("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
         _professionMultiplier = Instance.Config.Bind("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
+
+        _familiarSystem = Instance.Config.Bind("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
+        _maxFamiliarLevel = Instance.Config.Bind("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
+        _unitFamiliarMultiplier = Instance.Config.Bind("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
+        _vBloodFamiliarMultiplier = Instance.Config.Bind("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         // Initialize configuration settings
     }
     static void CreateDirectories(string path)

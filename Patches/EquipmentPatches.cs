@@ -424,6 +424,7 @@ internal static class EquipmentPatches
                         }
                     }
 
+
                 }
             }
         }

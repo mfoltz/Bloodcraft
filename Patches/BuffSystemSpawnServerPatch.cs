@@ -54,8 +54,8 @@ public class BuffPatch
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;
                     BloodSystem.UpdateLegacy(killer, died);
-                    ExpertiseSystem.UpdateExpertise(killer, died);
-                    LevelingSystem.UpdateLeveling(killer, died);
+                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
+                    //FamiliarSystem.UpdateLeveling(killer, died);
                 }
                 
             }

@@ -187,7 +187,7 @@ namespace Bloodcraft.Systems.Professions
             if (leveledUp)
             {
                 int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
+                if (newLevel < MaxProfessionLevel) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
             }
             if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
             {

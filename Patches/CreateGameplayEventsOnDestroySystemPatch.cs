@@ -63,7 +63,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
 
                     if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(killer, died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
-                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
+                    //if (Plugin.LevelingSystem.Value) FamiliarSystem.UpdateLeveling(killer, died);
                 }
                 
                 

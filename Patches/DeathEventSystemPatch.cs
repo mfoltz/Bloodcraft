@@ -1,5 +1,6 @@
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
@@ -23,6 +24,7 @@ internal static class DeathEventListenerSystemPatch
                 {
                     if (Plugin.LevelingSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
                     if (Plugin.ExpertiseSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
+                    //if (Plugin.FamiliarSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
                 }
                 else if (__instance.EntityManager.HasComponent<PlayerCharacter>(deathEvent.Killer))
                 {
@@ -31,6 +33,7 @@ internal static class DeathEventListenerSystemPatch
                 else if (__instance.EntityManager.HasComponent<Follower>(deathEvent.Killer) && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
                     if (Plugin.LevelingSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer.Read<Follower>().Followed._Value, deathEvent.Died);
+                    //if (Plugin.FamiliarSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer.Read<Follower>().Followed._Value, deathEvent.Died);
                 }
             }
         }
