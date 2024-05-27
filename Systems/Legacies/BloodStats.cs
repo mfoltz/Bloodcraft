@@ -71,18 +71,18 @@ namespace Bloodcraft.Systems.Legacies
 
             static readonly Dictionary<BloodStatType, float> baseCaps = new()
                 {
-                    {BloodStatType.HealingReceived, Plugin.MaxHealth.Value},
-                    {BloodStatType.DamageReduction, Plugin.MovementSpeed.Value},
-                    {BloodStatType.PhysicalResistance, Plugin.PrimaryAttackSpeed.Value},
-                    {BloodStatType.SpellResistance, Plugin.PhysicalLifeLeech.Value},
-                    {BloodStatType.BloodDrain, Plugin.SpellLifeLeech.Value},
-                    {BloodStatType.CCReduction, Plugin.PrimaryLifeLeech.Value},
-                    {BloodStatType.SpellCooldownRecoveryRate, Plugin.PhysicalPower.Value},
-                    {BloodStatType.WeaponCooldownRecoveryRate, Plugin.SpellPower.Value},
-                    {BloodStatType.UltimateCooldownRecoveryRate, Plugin.PhysicalCritChance.Value},
-                    {BloodStatType.MinionDamage, Plugin.PhysicalCritDamage.Value},
-                    {BloodStatType.ShieldAbsorb, Plugin.SpellCritChance.Value},
-                    {BloodStatType.BloodEfficiency, Plugin.SpellCritDamage.Value}
+                    {BloodStatType.HealingReceived, Plugin.HealingReceived.Value},
+                    {BloodStatType.DamageReduction, Plugin.DamageReduction.Value},
+                    {BloodStatType.PhysicalResistance, Plugin.PhysicalResistance.Value},
+                    {BloodStatType.SpellResistance, Plugin.SpellResistance.Value},
+                    {BloodStatType.BloodDrain, Plugin.BloodDrain.Value},
+                    {BloodStatType.CCReduction, Plugin.CCReduction.Value},
+                    {BloodStatType.SpellCooldownRecoveryRate, Plugin.SpellCooldownRecoveryRate.Value},
+                    {BloodStatType.WeaponCooldownRecoveryRate, Plugin.WeaponCooldownRecoveryRate.Value},
+                    {BloodStatType.UltimateCooldownRecoveryRate, Plugin.UltimateCooldownRecoveryRate.Value},
+                    {BloodStatType.MinionDamage, Plugin.MinionDamage.Value},
+                    {BloodStatType.ShieldAbsorb, Plugin.ShieldAbsorb.Value},
+                    {BloodStatType.BloodEfficiency, Plugin.BloodEfficiency.Value}
                 };
 
             public static Dictionary<BloodStatType, float> BaseCaps
