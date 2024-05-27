@@ -1,6 +1,6 @@
 ## Table of Contents
 
-Note: to skip that quest everyone wants to skip, add 560247139 to your ServerGameSettings like so: |"UnlockedAchievements": [560247139],|
+Note: to skip that quest everyone wants to skip, add 560247139 to your ServerGameSettings like so: |"UnlockedAchievements": [560247139],| (I believe this is a better solution than others I have seen, if it's not ideal for some reason I haven't thought of please let me know)
 
 Ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus, woodcutting/mining/harvesting bonus yields (x1 of drop per level) blacksmithing/tailoring/jewelcrafting bonus durability to crafted items (up to x2 at max) alchemy bonus consumable buff effects/lifetime (up to x2 at max), fishing x1 bonus random fish based on location every 20 levels per catch), leveling is functional, and blood legacies are functional (like weapon expertise with different stats now). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
 
