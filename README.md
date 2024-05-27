@@ -1,8 +1,8 @@
 ## Table of Contents
 
-Note: leveling is probably too fast at the moment by default. Please test config values on local before using on a live server and adjust accordingly. Features are intended to be useable standalone without causing conflict but please let me know if you run into issues with this. Making progress tuning numbers here but still needs work.
+Note: to skip that quest everyone wants to skip, add 560247139 to your ServerGameSettings like so: |"UnlockedAchievements": [560247139],| (I believe this is a better solution than others I have seen, if it's not ideal for some reason I haven't thought of please let me know. also left .tbc in this release under profession commands because I got tired of taking it out and it's useful, admin only, don't use it unless you want buildings/recipes to be free and know what you're doing with it)
 
-Tentatively ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus, woodcutting/mining/harvesting bonus yields (x1 of drop per level) blacksmithing/tailoring/jewelcrafting bonus durability to crafted items (up to x2 at max) alchemy bonus consumable buff effects/lifetime (up to x2 at max), fishing x1 bonus random fish based on location every 20 levels per catch), leveling is functional, and blood legacies are functional (like weapon expertise with different stats now). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
+Ready for public use, please reach out to @zfolmt on the V Rising modding Discord for support. Expertise is functional, professions are getting there (all professions provide at least one bonus, woodcutting/mining/harvesting bonus yields (x1 of drop per level) blacksmithing/tailoring/jewelcrafting bonus durability to crafted items (up to x2 at max) alchemy bonus consumable buff effects/lifetime (up to x2 at max), fishing x1 bonus random fish based on location every 20 levels per catch), leveling is functional, and blood legacies are functional (like weapon expertise with different stats now). Still needs refinement and have many plans for improvements, feedback and bug reports encouraged!
 
 - [Features](#features)
 - [Commands](#commands)
@@ -20,14 +20,14 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
 
 ### Blood Commands
 - `.getBloodLegacyProgress [Blood]`
-  - Display progress in current blood legacy.
+  - Display progress and bonuses in entered blood legacy.
   - Shortcut: *.gbl [Blood]*
 - `.logBloodLegacyProgress`
   - Enables or disables blood legacy logging.
   - Shortcut: *.log bl*
 - `.chooseBloodStat [Blood] [Stat]`
   - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a blood will apply bonuses towards based on legacy.
-  - Shortcut: *.cws [Blood] [Stat]*
+  - Shortcut: *.cbs [Blood] [Stat]*
 - `.setBloodLegacy [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
   - Shorcut: *.sbl [Player] [Blood] [Level]*
@@ -42,9 +42,6 @@ Tentatively ready for public use, please reach out to @zfolmt on the V Rising mo
   - Shortcut: *.lbl*
 
 ### Leveling Commands
-- `.quickStart`
-  - Completes GettingReadyForTheHunt.
-  - Shortcut: *.start*
 - `.getLevelingProgress`
   - Display current level progress.
   - Shortcut: *.get l*
