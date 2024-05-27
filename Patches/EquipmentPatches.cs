@@ -69,6 +69,10 @@ internal static class EquipmentPatches
                         Core.ModifyUnitStatBuffSystem_Spawn.OnUpdate();
                     }
                 }
+                else if (!Plugin.ExpertiseSystem.Value)
+                {
+                    // want to safely restore weapon level sources here while accounting for upgraded weapons that have different sources compared to base prefab
+                }
             }
         }
         catch (Exception e)

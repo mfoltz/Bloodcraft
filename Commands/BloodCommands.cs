@@ -191,7 +191,7 @@ namespace Bloodcraft.Commands
             string bloodStatsLine2 = string.Join(", ", bloodStatsWithCaps.Skip(halfLength));
 
             ctx.Reply($"Available blood stats (1/2): {bloodStatsLine1}");
-            ctx.Reply($"Available blood stats (2/2): {bloodStatsLine1}");
+            ctx.Reply($"Available blood stats (2/2): {bloodStatsLine2}");
         }
         [Command(name: "setBloodLegacy", shortHand: "sbl", adminOnly: true, usage: ".sbl [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
         public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
