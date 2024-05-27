@@ -7,7 +7,7 @@ using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
 {
-    public static class LevelingCommands //560247139 Journal_GettingReadyForTheHunt
+    public static class LevelingCommands
     {
         [Command(name: "logLevelingProgress", shortHand: "log l", adminOnly: false, usage: ".log l", description: "Toggles leveling progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
