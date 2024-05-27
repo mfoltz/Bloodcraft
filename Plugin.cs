@@ -21,7 +21,7 @@ public class Plugin : BasePlugin
     public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
     public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
     public static readonly string PlayerFamiliarsPath = Path.Combine(ConfigPath, "Familiars");
-    public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "Unlocks");
+    public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "Experience");
     public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "Unlocks");
 
     private static ConfigEntry<bool> _levelingSystem;
@@ -31,6 +31,9 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodLevelingMultiplier;
     private static ConfigEntry<float> _groupLevelingMultiplier;
     private static ConfigEntry<float> _levelScalingMultiplier;
+    private static ConfigEntry<bool> _playerGrouping;
+    private static ConfigEntry<int> _maxGroupSize;
+
 
     private static ConfigEntry<bool> _expertiseSystem;
     private static ConfigEntry<bool> _sanguimancy;
@@ -93,6 +96,9 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
     public static ConfigEntry<float> GroupLevelingMultiplier => _groupLevelingMultiplier;
     public static ConfigEntry<float> LevelScalingMultiplier => _levelScalingMultiplier;
+    public static ConfigEntry<int> MaxGroupSize => _maxGroupSize;
+
+    public static ConfigEntry<bool> PlayerGrouping => _playerGrouping;
 
     public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
     public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
@@ -186,6 +192,8 @@ public class Plugin : BasePlugin
         _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _groupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
         _levelScalingMultiplier = Instance.Config.Bind("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
+        _playerGrouping = Instance.Config.Bind("Config", "PlayerGrouping", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
+        _maxGroupSize = Instance.Config.Bind("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
 
         _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");

@@ -229,7 +229,7 @@ namespace Bloodcraft.Commands
             BloodHandler.UpdateLegacyData(steamId, xpData);
             BloodHandler.SaveChanges();
 
-            ctx.Reply($"<color=red>{BloodHandler.GetBloodType()}</color> legacy set to <color=white>{level}</color> for {foundUser.CharacterName}");
+            ctx.Reply($"<color=red>{BloodHandler.GetBloodType()}</color> legacy set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");
         }
 
         [Command(name: "listBloodLegacies", shortHand: "lbl", adminOnly: false, usage: ".lbl", description: "Lists blood legacies available.")]

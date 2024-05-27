@@ -53,6 +53,32 @@ namespace Bloodcraft.Systems.Experience
             float3 killerPosition = killer.Read<LocalToWorld>().Position;
             User killerUser = userEntity.Read<User>();
             HashSet<Entity> players = [killer];
+            // check for exp sharing group here too
+            if (Core.DataStructures.PlayerGroups.TryGetValue(killerUser.PlatformId, out var group)) //check if group leader, add members
+            {
+                foreach (Entity player in group)
+                {
+                    var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<LocalToWorld>().Position);
+                    if (distance > 25f) continue;
+                    players.Add(player);
+                }
+            }
+            else
+            {
+                foreach (var groupEntry in Core.DataStructures.PlayerGroups)
+                {
+                    if (groupEntry.Value.Contains(killer) && groupEntry.Key != killerUser.PlatformId)
+                    {
+                        foreach (Entity player in groupEntry.Value)
+                        {
+                            var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<LocalToWorld>().Position);
+                            if (distance > 25f) continue;
+                            players.Add(player);
+                        }
+                        break;
+                    }
+                }
+            }
             if (killerUser.ClanEntity._Entity.Equals(Entity.Null)) return players;
             Entity clanEntity = killerUser.ClanEntity._Entity;
             var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();

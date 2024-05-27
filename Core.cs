@@ -371,6 +371,16 @@ internal static class Core
             set => playerBloodStats = value;
         }
         // cache-only
+
+        private static Dictionary<ulong, List<Entity>> playerGroups = [];
+
+        public static Dictionary<ulong, List<Entity>> PlayerGroups
+        {
+            get => playerGroups;
+            set => playerGroups = value;
+        }
+
+
         private static Dictionary<ulong, List<(PrefabGUID, int)>> playerCraftingJobs = [];
 
         public static Dictionary<ulong, List<(PrefabGUID, int)>> PlayerCraftingJobs

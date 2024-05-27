@@ -234,7 +234,7 @@ namespace Bloodcraft.Commands
             expertiseHandler.SaveChanges();
             if (Plugin.LevelingSystem.Value) GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
 
-            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}");
+            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
         }
 
         [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stats available.")]

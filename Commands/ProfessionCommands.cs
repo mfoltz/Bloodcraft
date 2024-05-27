@@ -94,7 +94,7 @@ namespace Bloodcraft.Commands
             professionHandler.UpdateExperienceData(steamId, new KeyValuePair<int, float>(level, xp));
             professionHandler.SaveChanges();
 
-            ctx.Reply($"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for {foundUser.CharacterName}.");
+            ctx.Reply($"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
         }
         [Command(name: "listProfessions", shortHand: "lp", adminOnly: false, usage: ".lp", description: "Lists professions available.")]
         public static void ListProfessionsCommand(ChatCommandContext ctx)

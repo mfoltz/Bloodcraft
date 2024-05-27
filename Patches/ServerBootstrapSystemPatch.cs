@@ -30,7 +30,8 @@ internal static class ServerBootstrapSystemPatch
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
                 { "FamiliarLogging", false },
-                { "SpellLock", false }
+                { "SpellLock", false },
+                { "Grouping", false }
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -46,7 +47,8 @@ internal static class ServerBootstrapSystemPatch
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
                 { "FamiliarLogging", false },
-                { "SpellLock", false }
+                { "SpellLock", false },
+                { "Grouping", false }
             };
 
             // Add missing default values to the existing dictionary
