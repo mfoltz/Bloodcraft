@@ -28,7 +28,6 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodLevelingMultiplier;
     private static ConfigEntry<float> _groupLevelingMultiplier;
     private static ConfigEntry<float> _levelScalingMultiplier;
-    private static ConfigEntry<bool> _preparedForTheHunt;
 
     private static ConfigEntry<bool> _expertiseSystem;
     private static ConfigEntry<bool> _sanguimancy;
@@ -173,7 +172,6 @@ public class Plugin : BasePlugin
         _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _groupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
         _levelScalingMultiplier = Instance.Config.Bind("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
-        _preparedForTheHunt = Instance.Config.Bind("Config", "PreparedForTheHunt", false, "True to autocomplete this quest.");
 
         _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
