@@ -41,11 +41,11 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
                 if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamID, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
                 {
-                    List<KeyValuePair<BloodStatManager.BloodStatType, float>> bonusBloodStats = [];
+                    List<KeyValuePair<BloodStatManager.BloodStatType, double>> bonusBloodStats = [];
                     foreach (var stat in stats)
                     {
                         float bonus = ModifyUnitStatBuffUtils.CalculateScaledBloodBonus(bloodHandler, steamID, stat);
-                        bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, float>(stat, bonus));
+                        bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, double>(stat, (double)bonus));
                     }
                     string bonuses = string.Join(", ", bonusBloodStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     ctx.Reply($"Current blood stat bonuses: {bonuses}");

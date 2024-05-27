@@ -11,6 +11,9 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CraftingPatches
 {
+    
+
+
     [HarmonyPatch(typeof(StartCraftingSystem), nameof(StartCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(StartCraftingSystem __instance)

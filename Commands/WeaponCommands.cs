@@ -44,11 +44,11 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> experience (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
                 if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
-                    List<KeyValuePair<WeaponStatManager.WeaponStatType, float>> bonusWeaponStats = [];
+                    List<KeyValuePair<WeaponStatManager.WeaponStatType, double>> bonusWeaponStats = [];
                     foreach(var stat in stats)
                     {
                         float bonus = ModifyUnitStatBuffUtils.CalculateScaledWeaponBonus(handler, steamID, stat);
-                        bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, float>(stat, bonus));
+                        bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, double>(stat, (double)bonus));
                     }
                     string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     ctx.Reply($"Current weapon stat bonuses: {bonuses}");
