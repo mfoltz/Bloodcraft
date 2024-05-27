@@ -7,8 +7,10 @@ using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
+using Unity.DebugDisplay;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 using static Bloodcraft.Systems.Legacies.BloodStats.BloodStatManager;
@@ -18,7 +20,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class EquipmentPatches
 {
-
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]
     [HarmonyPostfix]
     static void WeaponLevelDestroyPostfix(WeaponLevelSystem_Destroy __instance)
@@ -72,6 +73,25 @@ internal static class EquipmentPatches
                 else if (!Plugin.ExpertiseSystem.Value)
                 {
                     // want to safely restore weapon level sources here while accounting for upgraded weapons that have different sources compared to base prefab
+                    if (entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    {
+                        Equipment equipment = entity.Read<EntityOwner>().Owner.Read<Equipment>();
+                        Entity weaponEntity = equipment.WeaponSlot.SlotEntity._Entity;
+                        if (!weaponEntity.Equals(Entity.Null) && weaponEntity.Has<WeaponLevelSource>())
+                        {
+                            Entity originalEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[weaponEntity.Read<PrefabGUID>()];
+                            WeaponLevelSource weaponLevelSource = originalEntity.Read<WeaponLevelSource>();
+                            if (weaponEntity.Has<UpgradeableLegendaryItem>())
+                            {
+                                int tier = weaponEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                                var buffer = weaponEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
+                                PrefabGUID prefabGUID = buffer[tier].TierPrefab;
+                                weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID].Read<WeaponLevelSource>();
+                            }
+                            weaponEntity.Write(weaponLevelSource);
+                        }
+                        
+                    }
                 }
             }
         }
@@ -343,6 +363,7 @@ internal static class EquipmentPatches
                 else if (Plugin.ProfessionSystem.Value && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())
                 {
                     Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
+                    // get ulong of online clanmates
                     ulong steamId = userEntity.Read<User>().PlatformId;
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
@@ -402,6 +423,7 @@ internal static class EquipmentPatches
                             }
                         }
                     }
+
                 }
             }
         }

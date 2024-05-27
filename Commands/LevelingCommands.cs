@@ -9,41 +9,6 @@ namespace Bloodcraft.Commands
 {
     public static class LevelingCommands //560247139 Journal_GettingReadyForTheHunt
     {
-        [Command(name: "quickStart", shortHand: "start", adminOnly: false, usage: ".start", description: "Completes GettingReadyForTheHunt.")]
-        public static void QuickStartCommand(ChatCommandContext ctx)
-        {
-            if (!Plugin.LevelingSystem.Value)
-            {
-                ctx.Reply("Leveling is not enabled.");
-                return;
-            }
-            User user = ctx.Event.User;
-            ulong steamId = user.PlatformId;
-            if (Core.DataStructures.PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && bools["QuickStart"])
-            {
-                ctx.Reply("You are already prepared for the hunt.");
-                return;
-            }
-
-            ProgressionMapper progressionMapper = ctx.Event.SenderUserEntity.Read<ProgressionMapper>();
-            Entity unlockedProgressionEntity = progressionMapper.ProgressionEntity._Entity;
-            var buffer = unlockedProgressionEntity.ReadBuffer<UnlockedProgressionElement>();
-            bool hasQuest = false;
-            foreach (var element in buffer)
-            {
-                if (element.UnlockedPrefab.GuidHash == 560247139)
-                {
-                    hasQuest = true;
-                    break;
-                }
-            }
-            if (!hasQuest) buffer.Add(new UnlockedProgressionElement { UnlockedPrefab = new(560247139) });
-
-            Core.DataStructures.PlayerBools[steamId]["QuickStart"] = true;
-            Core.DataStructures.SavePlayerBools();
-            ctx.Reply("You are now prepared for the hunt.");
-        }
-
         [Command(name: "logLevelingProgress", shortHand: "log l", adminOnly: false, usage: ".log l", description: "Toggles leveling progress logging.")]
         public static void LogExperienceCommand(ChatCommandContext ctx)
         {

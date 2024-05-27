@@ -47,7 +47,6 @@ internal static class Core
 
         // Initialize utility services
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
-
         hasInitialized = true;
     }
 

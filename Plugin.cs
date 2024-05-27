@@ -28,6 +28,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodLevelingMultiplier;
     private static ConfigEntry<float> _groupLevelingMultiplier;
     private static ConfigEntry<float> _levelScalingMultiplier;
+    private static ConfigEntry<bool> _preparedForTheHunt;
 
     private static ConfigEntry<bool> _expertiseSystem;
     private static ConfigEntry<bool> _sanguimancy;
@@ -85,6 +86,7 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
     public static ConfigEntry<float> GroupLevelingMultiplier => _groupLevelingMultiplier;
     public static ConfigEntry<float> LevelScalingMultiplier => _levelScalingMultiplier;
+    public static ConfigEntry<bool> PreparedForTheHunt => _preparedForTheHunt;
 
     public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
     public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
@@ -167,10 +169,11 @@ public class Plugin : BasePlugin
         _levelingSystem = Instance.Config.Bind("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _maxPlayerLevel = Instance.Config.Bind("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = Instance.Config.Bind("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
-        _unitLevelingMultiplier = Instance.Config.Bind("Config", "UnitLevelingMultiplier", 1f, "The multiplier for experience gained from units.");
-        _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 5f, "The multiplier for experience gained from VBloods.");
+        _unitLevelingMultiplier = Instance.Config.Bind("Config", "UnitLevelingMultiplier", 5f, "The multiplier for experience gained from units.");
+        _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _groupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
-        _levelScalingMultiplier = Instance.Config.Bind("Config", "LevelScalingMultiplier", 0.025f, "Scaling multiplier for tapering experience gained at higher levels.");
+        _levelScalingMultiplier = Instance.Config.Bind("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
+        _preparedForTheHunt = Instance.Config.Bind("Config", "PreparedForTheHunt", false, "True to autocomplete this quest.");
 
         _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");

@@ -31,9 +31,7 @@ internal static class CraftingPatches
                         Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
                         var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                         PrefabGUID itemPrefab = buffer[0].Guid;
-                        
-
-                        // Ensure the player’s job list exists
+                                                // Ensure the player’s job list exists
                         if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
                         {
                             playerJobs = [];

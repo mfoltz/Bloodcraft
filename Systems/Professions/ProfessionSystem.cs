@@ -150,7 +150,7 @@ namespace Bloodcraft.Systems.Professions
         {
             EntityManager entityManager = Core.EntityManager;
 
-            handler.AddExperience(steamID, value);
+            //handler.AddExperience(steamID, value);
             handler.SaveChanges();
 
             var xpData = handler.GetExperienceData(steamID);

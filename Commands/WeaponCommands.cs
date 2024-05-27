@@ -1,6 +1,5 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;

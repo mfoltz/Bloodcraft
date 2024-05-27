@@ -45,8 +45,7 @@ internal static class ServerBootstrapSystemPatch
                 { "ProfessionLogging", false },
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
-                { "SpellLock", false },
-                { "QuickStart", false }
+                { "SpellLock", false }
             };
 
             // Add missing default values to the existing dictionary

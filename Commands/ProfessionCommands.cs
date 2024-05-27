@@ -1,4 +1,5 @@
 using Bloodcraft.Systems.Professions;
+using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
@@ -8,6 +9,11 @@ namespace Bloodcraft.Commands
 {
     public static class ProfessionCommands
     {
+        static SetDebugSettingEvent BuildingCostsDebugSetting = new()
+        {
+            SettingType = DebugSettingType.BuildCostsDisabled, // Assuming this is the correct DebugSettingType for building costs
+            Value = false
+        };
         [Command(name: "logProfessionProgress", shortHand: "log p", adminOnly: false, usage: ".log p", description: "Toggles profession progress logging.")]
         public static void LogProgessionCommand(ChatCommandContext ctx)
         {
@@ -100,6 +106,21 @@ namespace Bloodcraft.Commands
             }
             string professions = ProfessionHandlerFactory.GetAllProfessions();
             ctx.Reply($"Available professions: {professions}");
+        }
+
+
+        [Command(name: "toggleBuildingCosts", shortHand: "tbc", adminOnly: true, usage: ".tbc", description: "Toggles building costs, useful for setting up a castle linked to your heart easily.")]
+        public static void ToggleBuildingCostsCommand(ChatCommandContext ctx)
+        {
+            User user = ctx.Event.User;
+
+            DebugEventsSystem existingSystem = Core.DebugEventsSystem;
+
+            BuildingCostsDebugSetting.Value = !BuildingCostsDebugSetting.Value;
+            existingSystem.SetDebugSetting(user.Index, ref BuildingCostsDebugSetting);
+
+            string toggleColor = BuildingCostsDebugSetting.Value ? "<color=green>enabled</color>" : "<color=red>disabled</color>";
+            ctx.Reply($"Building costs removed: {toggleColor}");
         }
     }
 }
