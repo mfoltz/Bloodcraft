@@ -20,7 +20,7 @@ Ready for public use, please reach out to @zfolmt on the V Rising modding Discor
 
 ### Blood Commands
 - `.getBloodLegacyProgress [Blood]`
-  - Display progress in current blood legacy.
+  - Display progress and bonuses in entered blood legacy.
   - Shortcut: *.gbl [Blood]*
 - `.logBloodLegacyProgress`
   - Enables or disables blood legacy logging.
