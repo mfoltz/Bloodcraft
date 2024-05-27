@@ -60,12 +60,14 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _spellCritDamage;
 
     private static ConfigEntry<bool> _bloodSystem;
+    private static ConfigEntry<bool> _bloodQualityBonus;
     private static ConfigEntry<int> _maxBloodLevel;
     private static ConfigEntry<float> _unitLegacyMultiplier;
     private static ConfigEntry<float> _vBloodLegacyMultipler;
     private static ConfigEntry<int> _legacyStatChoices;
     private static ConfigEntry<int> _resetLegacyItem;
     private static ConfigEntry<int> _resetLegacyItemQuantity;
+
 
     private static ConfigEntry<float> _healingReceived;
     private static ConfigEntry<float> _damageReduction;
@@ -125,6 +127,7 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> SpellCritDamage => _spellCritDamage;
 
     public static ConfigEntry<bool> BloodSystem => _bloodSystem;
+    public static ConfigEntry<bool> BloodQualityBonus => _bloodQualityBonus;
     public static ConfigEntry<int> MaxBloodLevel => _maxBloodLevel;
     public static ConfigEntry<float> UnitLegacyMultiplier => _unitLegacyMultiplier;
     public static ConfigEntry<float> VBloodLegacyMultipler => _vBloodLegacyMultipler;
@@ -220,9 +223,11 @@ public class Plugin : BasePlugin
         _spellCritDamage = Instance.Config.Bind("Config", "SpellCritDamage", 0.75f, "The base cap for spell critical strike damage.");
 
         _bloodSystem = Instance.Config.Bind("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
+        _bloodQualityBonus = Instance.Config.Bind("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus (wouldn't recommend using this after the revamp but left it in on request, blood system must be turned on as well).");
         _maxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
         _unitLegacyMultiplier = Instance.Config.Bind("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
         _vBloodLegacyMultipler = Instance.Config.Bind("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
+
         _legacyStatChoices = Instance.Config.Bind("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
         _resetLegacyItem = Instance.Config.Bind("Config", "ResetLegacyItem", 0, "Item PrefabGUID cost for resetting blood stats.");
         _resetLegacyItemQuantity = Instance.Config.Bind("Config", "ResetLegacyItemQuantity", 0, "Quantity of item required for resetting blood stats.");

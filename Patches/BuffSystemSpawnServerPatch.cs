@@ -4,6 +4,7 @@ using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
@@ -69,7 +70,7 @@ public class BuffPatch
             entities.Dispose();
         }
     }
-    /*
+    
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
     [HarmonyPrefix]
     private static void OnUpdatePrefix(StatChangeMutationSystem __instance)
@@ -79,7 +80,7 @@ public class BuffPatch
         {
             foreach (Entity entity in entities)
             {
-                if (entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
+                if (Plugin.BloodSystem.Value && Plugin.BloodQualityBonus.Value && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
                     //statChangeEvent.StatChangeEntity.LogComponentTypes();
@@ -96,9 +97,9 @@ public class BuffPatch
                     var legacyData = bloodHandler.GetLegacyData(steamID);
                     if (legacyData.Key > 0)
                     {
-                        //bloodQualityChange.Quality += legacyData.Key;
-                        //bloodQualityChange.ForceReapplyBuff = true;
-                        //entity.Write(bloodQualityChange);
+                        bloodQualityChange.Quality += legacyData.Key;
+                        bloodQualityChange.ForceReapplyBuff = true;
+                        entity.Write(bloodQualityChange);
                     }
                 }
             }
@@ -108,7 +109,7 @@ public class BuffPatch
             Core.Log.LogError(ex);
         }
     }
-    */
+    
 
 
 }
