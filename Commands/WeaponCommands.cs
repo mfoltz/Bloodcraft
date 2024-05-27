@@ -103,7 +103,6 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            Entity character = ctx.Event.SenderCharacterEntity;
             ulong steamID = ctx.Event.User.PlatformId;
             //ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
             if (WeaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
