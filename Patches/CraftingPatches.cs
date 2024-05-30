@@ -22,7 +22,7 @@ internal static class CraftingPatches
         {
             foreach (Entity entity in entities)
             {
-
+                // want better way to track crafting but idk
             }
         }
         catch (Exception e)

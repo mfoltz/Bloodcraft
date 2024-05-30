@@ -14,6 +14,7 @@ namespace Bloodcraft.Commands
             SettingType = DebugSettingType.BuildCostsDisabled, // Assuming this is the correct DebugSettingType for building costs
             Value = false
         };
+
         [Command(name: "logProfessionProgress", shortHand: "log p", adminOnly: false, usage: ".log p", description: "Toggles profession progress logging.")]
         public static void LogProgessionCommand(ChatCommandContext ctx)
         {

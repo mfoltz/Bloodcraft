@@ -1,5 +1,6 @@
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
@@ -64,10 +65,12 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(killer, died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
                     if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
+                    if (Plugin.FamiliarSystem.Value)
+                    {
+                        FamiliarLevelingSystem.UpdateFamiliar(killer, died);
+                        FamiliarUnlockSystem.HandleUnitUnlock(killer, died);
+                    }
                 }
-                
-                
-                
             }
         }
         catch (Exception e)

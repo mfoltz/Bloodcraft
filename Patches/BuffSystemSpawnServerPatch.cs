@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
@@ -56,7 +57,13 @@ public class BuffPatch
                     Entity killer = entity.Read<EntityOwner>().Owner;
                     BloodSystem.UpdateLegacy(killer, died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
-                    //FamiliarSystem.UpdateLeveling(killer, died);
+                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
+                    if (Plugin.FamiliarSystem.Value)
+                    {
+                        FamiliarLevelingSystem.UpdateFamiliar(killer, died);
+                        FamiliarUnlockSystem.HandleUnitUnlock(killer, died);
+                    }
+
                 }
                 
             }

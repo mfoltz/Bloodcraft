@@ -19,7 +19,7 @@ namespace Bloodcraft.Systems.Legacies
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon
                 }
-
+                
                 Core.DataStructures.PlayerBloodStats[steamId][BloodType].Add(statType);
                 Core.DataStructures.SavePlayerBloodStats();
                 return true;
@@ -43,7 +43,7 @@ namespace Bloodcraft.Systems.Legacies
                 DamageReduction,
                 PhysicalResistance,
                 SpellResistance,
-                BloodDrain,
+                ResourceYield,
                 CCReduction,
                 SpellCooldownRecoveryRate,
                 WeaponCooldownRecoveryRate,
@@ -59,7 +59,7 @@ namespace Bloodcraft.Systems.Legacies
                     { BloodStatType.DamageReduction, UnitStatType.DamageReduction },
                     { BloodStatType.PhysicalResistance, UnitStatType.PhysicalResistance },
                     { BloodStatType.SpellResistance, UnitStatType.SpellResistance },
-                    { BloodStatType.BloodDrain, UnitStatType.BloodDrain },
+                    { BloodStatType.ResourceYield, UnitStatType.ResourceYield },
                     { BloodStatType.CCReduction, UnitStatType.CCReduction },
                     { BloodStatType.SpellCooldownRecoveryRate, UnitStatType.SpellCooldownRecoveryRate },
                     { BloodStatType.WeaponCooldownRecoveryRate, UnitStatType.WeaponCooldownRecoveryRate },
@@ -75,7 +75,7 @@ namespace Bloodcraft.Systems.Legacies
                     {BloodStatType.DamageReduction, Plugin.DamageReduction.Value},
                     {BloodStatType.PhysicalResistance, Plugin.PhysicalResistance.Value},
                     {BloodStatType.SpellResistance, Plugin.SpellResistance.Value},
-                    {BloodStatType.BloodDrain, Plugin.BloodDrain.Value},
+                    {BloodStatType.ResourceYield, Plugin.ResourceYield.Value},
                     {BloodStatType.CCReduction, Plugin.CCReduction.Value},
                     {BloodStatType.SpellCooldownRecoveryRate, Plugin.SpellCooldownRecoveryRate.Value},
                     {BloodStatType.WeaponCooldownRecoveryRate, Plugin.WeaponCooldownRecoveryRate.Value},

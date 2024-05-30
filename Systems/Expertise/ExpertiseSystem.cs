@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -29,6 +30,23 @@ namespace Bloodcraft.Systems.Expertise
             Unarmed,
             FishingPole
         }
+
+        public static readonly Dictionary<WeaponType, PrestigeSystem.PrestigeType> WeaponPrestigeMap = new()
+        {
+            { WeaponType.Sword, PrestigeSystem.PrestigeType.SwordExpertise },
+            { WeaponType.Axe, PrestigeSystem.PrestigeType.AxeExpertise },
+            { WeaponType.Mace, PrestigeSystem.PrestigeType.MaceExpertise },
+            { WeaponType.Spear, PrestigeSystem.PrestigeType.SpearExpertise },
+            { WeaponType.Crossbow, PrestigeSystem.PrestigeType.CrossbowExpertise },
+            { WeaponType.GreatSword, PrestigeSystem.PrestigeType.GreatSwordExpertise },
+            { WeaponType.Slashers, PrestigeSystem.PrestigeType.SlashersExpertise },
+            { WeaponType.Pistols, PrestigeSystem.PrestigeType.PistolsExpertise },
+            { WeaponType.Reaper, PrestigeSystem.PrestigeType.ReaperExpertise },
+            { WeaponType.Longbow, PrestigeSystem.PrestigeType.LongbowExpertise },
+            { WeaponType.Whip, PrestigeSystem.PrestigeType.WhipExpertise },
+            { WeaponType.Unarmed, PrestigeSystem.PrestigeType.Sanguimancy }, // Assuming unarmed maps to Sanguimancy
+            { WeaponType.FishingPole, PrestigeSystem.PrestigeType.WorkerLegacy } // Example mapping
+        };
         public static void UpdateExpertise(Entity Killer, Entity Victim)
         {
             EntityManager entityManager = Core.EntityManager;
@@ -45,6 +63,19 @@ namespace Bloodcraft.Systems.Expertise
             {
                 var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
                 float ExpertiseValue = CalculateExpertiseValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
+
+                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
+                {
+                    float reductionFactor = 1.0f / (1 + PrestigeData * Plugin.PrestigeRatesReducer.Value);
+                    ExpertiseValue *= reductionFactor;
+                }
+                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var xpPrestige) && xpPrestige.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
+                {
+                    float gainFactor = (1 + xpPrestigeLevel * Plugin.PrestigeRatesMultiplier.Value);
+                    ExpertiseValue *= gainFactor;
+                }
+                //IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponPrestigeMap[weaponType]);
+
 
                 IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
                 if (handler != null)

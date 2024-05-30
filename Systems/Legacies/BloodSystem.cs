@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -29,6 +30,21 @@ namespace Bloodcraft.Systems.Legacy
             Creature,
             Brute
         }
+        public static readonly Dictionary<BloodType, PrestigeSystem.PrestigeType> BloodPrestigeMap = new()
+        {
+            { BloodType.Worker, PrestigeSystem.PrestigeType.WorkerLegacy },
+            { BloodType.Warrior, PrestigeSystem.PrestigeType.WarriorLegacy },
+            { BloodType.Scholar, PrestigeSystem.PrestigeType.ScholarLegacy },
+            { BloodType.Rogue, PrestigeSystem.PrestigeType.RogueLegacy },
+            { BloodType.Mutant, PrestigeSystem.PrestigeType.MutantLegacy },
+            { BloodType.VBlood, PrestigeSystem.PrestigeType.VBloodLegacy },
+            { BloodType.None, PrestigeSystem.PrestigeType.Experience }, // Assuming 'None' maps to general experience
+            { BloodType.GateBoss, PrestigeSystem.PrestigeType.Experience }, // Example mapping
+            { BloodType.Draculin, PrestigeSystem.PrestigeType.DraculinLegacy },
+            { BloodType.Immortal, PrestigeSystem.PrestigeType.ImmortalLegacy },
+            { BloodType.Creature, PrestigeSystem.PrestigeType.CreatureLegacy },
+            { BloodType.Brute, PrestigeSystem.PrestigeType.BruteLegacy }
+        };
 
         public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new()
 {
@@ -70,6 +86,20 @@ namespace Bloodcraft.Systems.Legacy
             {
                 // Check if the player leveled up
                 var xpData = handler.GetLegacyData(steamID);
+
+                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
+                {
+                    float reductionFactor = 1.0f / (1 + PrestigeData * Plugin.PrestigeRatesReducer.Value);
+                    BloodValue *= reductionFactor;
+                }
+
+                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var xpPrestige) && xpPrestige.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
+                {
+                    float gainFactor = (1 + xpPrestigeLevel * Plugin.PrestigeRatesMultiplier.Value);
+                    BloodValue *= gainFactor;
+                }
+
+
                 float newExperience = xpData.Value + BloodValue;
                 int newLevel = ConvertXpToLevel(newExperience);
                 bool leveledUp = false;
@@ -101,7 +131,7 @@ namespace Bloodcraft.Systems.Legacy
             if (leveledUp)
             {
                 message = $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]";
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
+                if (newLevel < MaxBloodLevel) ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             
             if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])

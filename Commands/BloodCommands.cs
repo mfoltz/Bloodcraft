@@ -6,6 +6,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Systems.Expertise.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodStats;
 
 namespace Bloodcraft.Commands
@@ -41,11 +42,21 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
                 if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamID, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
                 {
-                    List<KeyValuePair<BloodStatManager.BloodStatType, double>> bonusBloodStats = [];
+                    List<KeyValuePair<BloodStatManager.BloodStatType, string>> bonusBloodStats = [];
                     foreach (var stat in stats)
                     {
-                        float bonus = ModifyUnitStatBuffUtils.CalculateScaledBloodBonus(bloodHandler, steamID, stat);
-                        bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, double>(stat, (double)bonus));
+                        float bonus = ModifyUnitStatBuffUtils.CalculateScaledBloodBonus(bloodHandler, steamID, bloodType, stat);
+                        if (bonus > 1)
+                        {
+                            int intBonus = (int)bonus;
+                            string bonusString = intBonus.ToString();
+                            bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
+                        }
+                        else
+                        {
+                            string bonusString = (bonus * 100).ToString("F0") + "%";
+                            bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
+                        }
                     }
                     string bonuses = string.Join(", ", bonusBloodStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     ctx.Reply($"Current blood stat bonuses: {bonuses}");
@@ -76,7 +87,7 @@ namespace Bloodcraft.Commands
                 bools["BloodLogging"] = !bools["BloodLogging"];
             }
             Core.DataStructures.SavePlayerBools();
-            ctx.Reply($"Blood Legacy logging is now {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+            ctx.Reply($"Blood Legacy logging {(bools["BloodLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
 
         [Command(name: "chooseBloodStat", shortHand: "cbs", adminOnly: false, usage: ".cbs [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]

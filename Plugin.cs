@@ -16,15 +16,26 @@ public class Plugin : BasePlugin
     public static ManualLogSource LogInstance => Instance.Log;
 
     public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
-    public static readonly string PlayerExperiencePath = Path.Combine(ConfigPath, "ExperienceLeveling");
+
+    // old paths to migrate data if needed
+    public static readonly string OldPlayerExperiencePath = Path.Combine(ConfigPath, "ExperienceLeveling");
+
+    // current paths
+    public static readonly string PlayerUnitStatsPath = Path.Combine(ConfigPath, "PlayerUnitStats");
+    public static readonly string PlayerLevelingPath = Path.Combine(ConfigPath, "PlayerLeveling");
     public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
     public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
     public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
     public static readonly string PlayerFamiliarsPath = Path.Combine(ConfigPath, "Familiars");
-    public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "Experience");
-    public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "Unlocks");
+    public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "FamiliarLeveling");
+    public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "FamiliarUnlocks");
 
     private static ConfigEntry<bool> _levelingSystem;
+    private static ConfigEntry<bool> _prestigeSystem;
+    private static ConfigEntry<int> _maxLevelingPrestiges;
+    private static ConfigEntry<float> _prestigeRatesReducer; //reduces gains by this percent per level of prestige for all systems, expertise/legacy rates can be raised by prestiging in leveling
+    private static ConfigEntry<float> _prestigeStatMultiplier; //increases stats gained from expertise/legacies per level of prestige
+    private static ConfigEntry<float> _prestigeRatesMultiplier; //increases player gains in expertise/legacy by this percent per level of prestige (leveling prestige)
     private static ConfigEntry<int> _maxPlayerLevel;
     private static ConfigEntry<int> _startingLevel;
     private static ConfigEntry<float> _unitLevelingMultiplier;
@@ -34,8 +45,8 @@ public class Plugin : BasePlugin
     private static ConfigEntry<bool> _playerGrouping;
     private static ConfigEntry<int> _maxGroupSize;
 
-
     private static ConfigEntry<bool> _expertiseSystem;
+    private static ConfigEntry<int> _maxExpertisePrestiges;
     private static ConfigEntry<bool> _sanguimancy;
     private static ConfigEntry<int> _firstSlot;
     private static ConfigEntry<int> _secondSlot;
@@ -60,6 +71,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _spellCritDamage;
 
     private static ConfigEntry<bool> _bloodSystem;
+    private static ConfigEntry<int> _maxLegacyPrestiges;
     private static ConfigEntry<bool> _bloodQualityBonus;
     private static ConfigEntry<int> _maxBloodLevel;
     private static ConfigEntry<float> _unitLegacyMultiplier;
@@ -68,12 +80,11 @@ public class Plugin : BasePlugin
     private static ConfigEntry<int> _resetLegacyItem;
     private static ConfigEntry<int> _resetLegacyItemQuantity;
 
-
     private static ConfigEntry<float> _healingReceived;
     private static ConfigEntry<float> _damageReduction;
     private static ConfigEntry<float> _physicalResistance;
     private static ConfigEntry<float> _spellResistance;
-    private static ConfigEntry<float> _bloodDrain;
+    private static ConfigEntry<float> _resourceYield;
     private static ConfigEntry<float> _ccReduction;
     private static ConfigEntry<float> _spellCooldownRecoveryRate;
     private static ConfigEntry<float> _weaponCooldownRecoveryRate;
@@ -90,8 +101,15 @@ public class Plugin : BasePlugin
     private static ConfigEntry<int> _maxFamiliarLevel;
     private static ConfigEntry<float> _unitFamiliarMultiplier;
     private static ConfigEntry<float> _vBloodFamiliarMultiplier;
+    private static ConfigEntry<float> _unitUnlockChance;
+    //private static ConfigEntry<float> _vBloodUnlockChance;
 
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
+    public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
+    public static ConfigEntry<int> MaxLevelingPrestiges => _maxLevelingPrestiges;
+    public static ConfigEntry<float> PrestigeRatesReducer => _prestigeRatesReducer;
+    public static ConfigEntry<float> PrestigeStatMultiplier => _prestigeStatMultiplier;
+    public static ConfigEntry<float> PrestigeRatesMultiplier => _prestigeRatesMultiplier;
     public static ConfigEntry<int> MaxPlayerLevel => _maxPlayerLevel;
     public static ConfigEntry<int> StartingLevel => _startingLevel;
     public static ConfigEntry<float> UnitLevelingMultiplier => _unitLevelingMultiplier;
@@ -99,10 +117,11 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> GroupLevelingMultiplier => _groupLevelingMultiplier;
     public static ConfigEntry<float> LevelScalingMultiplier => _levelScalingMultiplier;
     public static ConfigEntry<int> MaxGroupSize => _maxGroupSize;
-
     public static ConfigEntry<bool> PlayerGrouping => _playerGrouping;
 
     public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
+
+    public static ConfigEntry<int> MaxExpertisePrestiges => _maxExpertisePrestiges;
     public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
     public static ConfigEntry<int> FirstSlot => _firstSlot;
     public static ConfigEntry<int> SecondSlot => _secondSlot;
@@ -127,6 +146,7 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> SpellCritDamage => _spellCritDamage;
 
     public static ConfigEntry<bool> BloodSystem => _bloodSystem;
+    public static ConfigEntry<int> MaxLegacyPrestiges => _maxLegacyPrestiges;
     public static ConfigEntry<bool> BloodQualityBonus => _bloodQualityBonus;
     public static ConfigEntry<int> MaxBloodLevel => _maxBloodLevel;
     public static ConfigEntry<float> UnitLegacyMultiplier => _unitLegacyMultiplier;
@@ -143,7 +163,7 @@ public class Plugin : BasePlugin
 
     public static ConfigEntry<float> SpellResistance => _spellResistance;
 
-    public static ConfigEntry<float> BloodDrain => _bloodDrain;
+    public static ConfigEntry<float> ResourceYield => _resourceYield;
 
     public static ConfigEntry<float> CCReduction => _ccReduction;
 
@@ -167,9 +187,9 @@ public class Plugin : BasePlugin
     public static ConfigEntry<int> MaxFamiliarLevel => _maxFamiliarLevel;
     public static ConfigEntry<float> UnitFamiliarMultiplier => _unitFamiliarMultiplier;
     public static ConfigEntry<float> VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier;
+    public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
+    //public static ConfigEntry<float> VBloodUnlockChance => _vBloodUnlockChance;
 
-
-    
     public override void Load()
     {
         Instance = this;
@@ -182,78 +202,110 @@ public class Plugin : BasePlugin
 
     static void InitConfig()
     {
-        CreateDirectories(ConfigPath);
-        CreateDirectories(PlayerExperiencePath);
-        CreateDirectories(PlayerExpertisePath);
-        CreateDirectories(PlayerBloodPath);
-        CreateDirectories(PlayerProfessionPath);
+        if (Directory.Exists(OldPlayerExperiencePath))
+        {
+            // Move contents from the old path to the new path
+            Directory.Move(OldPlayerExperiencePath, PlayerLevelingPath);
+        }
 
-        _levelingSystem = Instance.Config.Bind("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
-        _maxPlayerLevel = Instance.Config.Bind("Config", "MaxLevel", 90, "The maximum level a player can reach.");
-        _startingLevel = Instance.Config.Bind("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
-        _unitLevelingMultiplier = Instance.Config.Bind("Config", "UnitLevelingMultiplier", 5f, "The multiplier for experience gained from units.");
-        _vBloodLevelingMultiplier = Instance.Config.Bind("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
-        _groupLevelingMultiplier = Instance.Config.Bind("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
-        _levelScalingMultiplier = Instance.Config.Bind("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
-        _playerGrouping = Instance.Config.Bind("Config", "PlayerGrouping", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
-        _maxGroupSize = Instance.Config.Bind("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
+        foreach (string path in directoryPaths)
+        {
+            CreateDirectories(path);
+        }
+ 
+        _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
+        _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
+        _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
+        _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.25f, "The percent to reduce rate gains by for all systems per level of prestige (applies to leveling, expertise, and legacies).");
+        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.25f, "The percent to increase stats gained from expertise/legacies per level of prestige.");
+        _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.10f, "The percent to increase rate gains by for expertise/legacies per level of leveling prestige.");
+        _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
+        _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
+        _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 5f, "The multiplier for experience gained from units.");
+        _vBloodLevelingMultiplier = InitConfigEntry("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
+        _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
+        _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
+        _playerGrouping = InitConfigEntry("Config", "PlayerGrouping", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
+        _maxGroupSize = InitConfigEntry("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
 
-        _expertiseSystem = Instance.Config.Bind("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
-        _sanguimancy = Instance.Config.Bind("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
-        _firstSlot = Instance.Config.Bind("Config", "FirstSlot", 25, "Level of sanguimancy required for first slot unlock.");
-        _secondSlot = Instance.Config.Bind("Config", "SecondSlot", 50, "Level of sanguimancy required for second slot unlock.");
-        _maxExpertiseLevel = Instance.Config.Bind("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
-        _unitExpertiseMultiplier = Instance.Config.Bind("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
-        _vBloodExpertiseMultiplier = Instance.Config.Bind("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
-        _expertiseStatChoices = Instance.Config.Bind("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
-        _resetExpertiseItem = Instance.Config.Bind("Config", "ResetExpertiseItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
-        _resetExpertiseItemQuantity = Instance.Config.Bind("Config", "ResetExpertiseItemQuantity", 0, "Quantity of item required for resetting stats.");
+        _expertiseSystem = InitConfigEntry("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
+        _maxExpertisePrestiges = InitConfigEntry("Config", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise.");
+        _sanguimancy = InitConfigEntry("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
+        _firstSlot = InitConfigEntry("Config", "FirstSlot", 25, "Level of sanguimancy required for first slot unlock.");
+        _secondSlot = InitConfigEntry("Config", "SecondSlot", 50, "Level of sanguimancy required for second slot unlock.");
+        _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
+        _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
+        _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
+        _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
+        _resetExpertiseItem = InitConfigEntry("Config", "ResetExpertiseItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
+        _resetExpertiseItemQuantity = InitConfigEntry("Config", "ResetExpertiseItemQuantity", 0, "Quantity of item required for resetting stats.");
 
-        _maxHealth = Instance.Config.Bind("Config", "MaxHealth", 250f, "The base cap for maximum health.");
-        _movementSpeed = Instance.Config.Bind("Config", "MovementSpeed", 0.25f, "The base cap for movement speed.");
-        _primaryAttackSpeed = Instance.Config.Bind("Config", "PrimaryAttackSpeed", 0.25f, "The base cap for primary attack speed.");
-        _physicalLifeLeech = Instance.Config.Bind("Config", "PhysicalLifeLeech", 0.15f, "The base cap for physical life leech.");
-        _spellLifeLeech = Instance.Config.Bind("Config", "SpellLifeLeech", 0.15f, "The base cap for spell life leech.");
-        _primaryLifeLeech = Instance.Config.Bind("Config", "PrimaryLifeLeech", 0.25f, "The base cap for primary life leech.");
-        _physicalPower = Instance.Config.Bind("Config", "PhysicalPower", 15f, "The base cap for physical power.");
-        _spellPower = Instance.Config.Bind("Config", "SpellPower", 15f, "The base cap for spell power.");
-        _physicalCritChance = Instance.Config.Bind("Config", "PhysicalCritChance", 0.15f, "The base cap for physical critical strike chance.");
-        _physicalCritDamage = Instance.Config.Bind("Config", "PhysicalCritDamage", 0.75f, "The base cap for physical critical strike damage.");
-        _spellCritChance = Instance.Config.Bind("Config", "SpellCritChance", 0.15f, "The base cap for spell critical strike chance.");
-        _spellCritDamage = Instance.Config.Bind("Config", "SpellCritDamage", 0.75f, "The base cap for spell critical strike damage.");
+        _maxHealth = InitConfigEntry("Config", "MaxHealth", 250f, "The base cap for maximum health.");
+        _movementSpeed = InitConfigEntry("Config", "MovementSpeed", 0.25f, "The base cap for movement speed.");
+        _primaryAttackSpeed = InitConfigEntry("Config", "PrimaryAttackSpeed", 0.25f, "The base cap for primary attack speed.");
+        _physicalLifeLeech = InitConfigEntry("Config", "PhysicalLifeLeech", 0.15f, "The base cap for physical life leech.");
+        _spellLifeLeech = InitConfigEntry("Config", "SpellLifeLeech", 0.15f, "The base cap for spell life leech.");
+        _primaryLifeLeech = InitConfigEntry("Config", "PrimaryLifeLeech", 0.25f, "The base cap for primary life leech.");
+        _physicalPower = InitConfigEntry("Config", "PhysicalPower", 15f, "The base cap for physical power.");
+        _spellPower = InitConfigEntry("Config", "SpellPower", 15f, "The base cap for spell power.");
+        _physicalCritChance = InitConfigEntry("Config", "PhysicalCritChance", 0.15f, "The base cap for physical critical strike chance.");
+        _physicalCritDamage = InitConfigEntry("Config", "PhysicalCritDamage", 0.75f, "The base cap for physical critical strike damage.");
+        _spellCritChance = InitConfigEntry("Config", "SpellCritChance", 0.15f, "The base cap for spell critical strike chance.");
+        _spellCritDamage = InitConfigEntry("Config", "SpellCritDamage", 0.75f, "The base cap for spell critical strike damage.");
 
-        _bloodSystem = Instance.Config.Bind("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
-        _bloodQualityBonus = Instance.Config.Bind("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus (wouldn't recommend using this after the revamp but left it in on request, blood system must be turned on as well).");
-        _maxBloodLevel = Instance.Config.Bind("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
-        _unitLegacyMultiplier = Instance.Config.Bind("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
-        _vBloodLegacyMultipler = Instance.Config.Bind("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
+        _bloodSystem = InitConfigEntry("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
+        _maxLegacyPrestiges = InitConfigEntry("Config", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies.");
+        _bloodQualityBonus = InitConfigEntry("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus (wouldn't recommend using this after the revamp but left it in on request, blood system must be turned on as well).");
+        _maxBloodLevel = InitConfigEntry("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
+        _unitLegacyMultiplier = InitConfigEntry("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
+        _vBloodLegacyMultipler = InitConfigEntry("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
+        _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
+        _resetLegacyItem = InitConfigEntry("Config", "ResetLegacyItem", 0, "Item PrefabGUID cost for resetting blood stats.");
+        _resetLegacyItemQuantity = InitConfigEntry("Config", "ResetLegacyItemQuantity", 0, "Quantity of item required for resetting blood stats.");
 
-        _legacyStatChoices = Instance.Config.Bind("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
-        _resetLegacyItem = Instance.Config.Bind("Config", "ResetLegacyItem", 0, "Item PrefabGUID cost for resetting blood stats.");
-        _resetLegacyItemQuantity = Instance.Config.Bind("Config", "ResetLegacyItemQuantity", 0, "Quantity of item required for resetting blood stats.");
+        _healingReceived = InitConfigEntry("Config", "HealingReceived", 0.25f, "The base cap for healing received.");
+        _damageReduction = InitConfigEntry("Config", "DamageReduction", 0.10f, "The base cap for damage reduction.");
+        _physicalResistance = InitConfigEntry("Config", "PhysicalResistance", 0.20f, "The base cap for physical resistance.");
+        _spellResistance = InitConfigEntry("Config", "SpellResistance", 0.20f, "The base cap for spell resistance.");
+        _resourceYield = InitConfigEntry("Config", "ResourceYield", 0.25f, "The base cap for resource yield.");
+        _ccReduction = InitConfigEntry("Config", "CCReduction", 0.25f, "The base cap for crowd control reduction.");
+        _spellCooldownRecoveryRate = InitConfigEntry("Config", "SpellCooldownRecoveryRate", 0.15f, "The base cap for spell cooldown recovery rate.");
+        _weaponCooldownRecoveryRate = InitConfigEntry("Config", "WeaponCooldownRecoveryRate", 0.15f, "The base cap for weapon cooldown recovery rate.");
+        _ultimateCooldownRecoveryRate = InitConfigEntry("Config", "UltimateCooldownRecoveryRate", 0.20f, "The base cap for ultimate cooldown recovery rate.");
+        _minionDamage = InitConfigEntry("Config", "MinionDamage", 0.25f, "The base cap for minion damage.");
+        _shieldAbsorb = InitConfigEntry("Config", "ShieldAbsorb", 0.50f, "The base cap for shield absorb.");
+        _bloodEfficiency = InitConfigEntry("Config", "BloodEfficiency", 0.10f, "The base cap for blood efficiency.");
 
-        _healingReceived = Instance.Config.Bind("Config", "HealingReceived", 0.25f, "The base cap for healing received.");
-        _damageReduction = Instance.Config.Bind("Config", "DamageReduction", 0.10f, "The base cap for damage reduction.");
-        _physicalResistance = Instance.Config.Bind("Config", "PhysicalResistance", 0.20f, "The base cap for physical resistance.");
-        _spellResistance = Instance.Config.Bind("Config", "SpellResistance", 0.20f, "The base cap for spell resistance.");
-        _bloodDrain = Instance.Config.Bind("Config", "BloodDrain", 0.50f, "The base cap for blood drain.");
-        _ccReduction = Instance.Config.Bind("Config", "CCReduction", 0.25f, "The base cap for crowd control reduction.");
-        _spellCooldownRecoveryRate = Instance.Config.Bind("Config", "SpellCooldownRecoveryRate", 0.15f, "The base cap for spell cooldown recovery rate.");
-        _weaponCooldownRecoveryRate = Instance.Config.Bind("Config", "WeaponCooldownRecoveryRate", 0.15f, "The base cap for weapon cooldown recovery rate.");
-        _ultimateCooldownRecoveryRate = Instance.Config.Bind("Config", "UltimateCooldownRecoveryRate", 0.20f, "The base cap for ultimate cooldown recovery rate.");
-        _minionDamage = Instance.Config.Bind("Config", "MinionDamage", 0.25f, "The base cap for minion damage.");
-        _shieldAbsorb = Instance.Config.Bind("Config", "ShieldAbsorb", 0.50f, "The base cap for shield absorb.");
-        _bloodEfficiency = Instance.Config.Bind("Config", "BloodEfficiency", 0.10f, "The base cap for blood efficiency.");
+        _professionSystem = InitConfigEntry("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
+        _maxProfessionLevel = InitConfigEntry("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
+        _professionMultiplier = InitConfigEntry("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
 
-        _professionSystem = Instance.Config.Bind("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
-        _maxProfessionLevel = Instance.Config.Bind("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
-        _professionMultiplier = Instance.Config.Bind("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
-
-        _familiarSystem = Instance.Config.Bind("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
-        _maxFamiliarLevel = Instance.Config.Bind("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
-        _unitFamiliarMultiplier = Instance.Config.Bind("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
-        _vBloodFamiliarMultiplier = Instance.Config.Bind("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
+        _familiarSystem = InitConfigEntry("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
+        _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
+        _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
+        _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
+        _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
+        //_vBloodUnlockChance = InitConfigEntry("Config", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar.");
         // Initialize configuration settings
+    }
+
+    static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
+    {
+        // Bind the configuration entry and get its value
+        var entry = Instance.Config.Bind(section, key, defaultValue, description);
+
+        // Check if the key exists in the configuration file and retrieve its current value
+        var configFile = Path.Combine(ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+        if (File.Exists(configFile))
+        {
+            var config = new ConfigFile(configFile, true);
+            if (config.TryGetEntry(section, key, out ConfigEntry<T> existingEntry))
+            {
+                // If the entry exists, update the value to the existing value
+                entry.Value = existingEntry.Value;
+            }
+        }
+        return entry;
     }
     static void CreateDirectories(string path)
     {
@@ -306,11 +358,19 @@ public class Plugin : BasePlugin
                 loadFunction();
             }
         }
+        if (FamiliarSystem.Value)
+        {
+            foreach (var loadFunction in loadFamiliars)
+            {
+                loadFunction();
+            }
+        }
     }
 
     static readonly Action[] loadLeveling =
     [
         Core.DataStructures.LoadPlayerExperience,
+        Core.DataStructures.LoadPlayerPrestiges
     ];
 
     static readonly Action[] loadExpertises =
@@ -361,4 +421,22 @@ public class Plugin : BasePlugin
         Core.DataStructures.LoadPlayerAlchemy,
         Core.DataStructures.LoadPlayerHarvesting,
     ];
+    static readonly Action[] loadFamiliars =
+    [
+        Core.DataStructures.LoadPlayerFamiliarActives,
+        Core.DataStructures.LoadPlayerFamiliarSets
+    ];
+
+    static readonly List<string> directoryPaths =
+        [
+        ConfigPath,
+        PlayerUnitStatsPath,
+        PlayerLevelingPath,
+        PlayerExpertisePath,
+        PlayerBloodPath,
+        PlayerProfessionPath,
+        PlayerFamiliarsPath,
+        FamiliarExperiencePath,
+        FamiliarUnlocksPath
+        ];
 }

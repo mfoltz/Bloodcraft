@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using ProjectM;
+﻿using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
@@ -18,11 +17,11 @@ namespace Bloodcraft.Systems.Familiars
 
         static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
-        public static void UpdateFamiliar(Entity familiarEntity, Entity victimEntity)
+        public static void UpdateFamiliar(Entity player, Entity victimEntity)
         {
             EntityManager entityManager = Core.EntityManager;
             if (!IsValidVictim(entityManager, victimEntity)) return;
-            HandleExperienceUpdate(entityManager, familiarEntity, victimEntity);
+            HandleExperienceUpdate(entityManager, player, victimEntity);
         }
 
         static bool IsValidVictim(EntityManager entityManager, Entity victimEntity)
@@ -30,22 +29,16 @@ namespace Bloodcraft.Systems.Familiars
             return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
         }
 
-        static void HandleExperienceUpdate(EntityManager entityManager, Entity familiarEntity, Entity victimEntity)
+        static void HandleExperienceUpdate(EntityManager entityManager, Entity player, Entity victimEntity)
         {
-            if (!entityManager.HasComponent<Follower>(familiarEntity)) return;
-
-            Follower followerComponent = entityManager.GetComponentData<Follower>(familiarEntity);
-            Entity playerEntity = followerComponent.Followed._Value;
-
-            if (!entityManager.HasComponent<PlayerCharacter>(playerEntity)) return;
-
-            PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(playerEntity);
-            Entity userEntity = player.UserEntity;
+            if (!entityManager.HasComponent<PlayerCharacter>(player)) return;
+            PlayerCharacter playerCharacter = entityManager.GetComponentData<PlayerCharacter>(player);
+            Entity userEntity = playerCharacter.UserEntity;
+            Entity familiarEntity = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+            if (familiarEntity == Entity.Null) return;
             ulong steamId = userEntity.Read<User>().PlatformId;
             PrefabGUID familiarUnit = familiarEntity.Read<PrefabGUID>();
             int familiarId = familiarUnit.GuidHash;
-            if (GetFamiliarExperience(steamId, familiarId).Value >= MaxFamiliarLevel) return; // Check if already at max level
-
             ProcessExperienceGain(entityManager, familiarEntity, victimEntity, steamId, familiarId);
         }
 
@@ -54,63 +47,60 @@ namespace Bloodcraft.Systems.Familiars
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
             bool isVBlood = IsVBlood(entityManager, victimEntity);
 
-            int gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
+            float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
+            KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamID, familiarId);
 
-            int currentLevel = ConvertXpToLevel(GetFamiliarExperience(steamID, familiarId).Value);
+            int currentLevel = ConvertXpToLevel(familiarXP.Value);
+            if (currentLevel >= MaxFamiliarLevel) return;
 
-            AddOrUpdateFamiliarExperience(steamID, familiarId, gainedXP);
-
-            CheckAndHandleLevelUp(familiarEntity, steamID, gainedXP, currentLevel, familiarId);
+            UpdateFamiliarExperience(familiarEntity, familiarId, steamID, familiarXP, gainedXP, currentLevel);            
         }
         static bool IsVBlood(EntityManager entityManager, Entity victimEntity)
         {
             return entityManager.HasComponent<VBloodConsumeSource>(victimEntity);
         }
-        static int CalculateExperienceGained(int victimLevel, bool isVBlood)
+        static float CalculateExperienceGained(int victimLevel, bool isVBlood)
         {
             int baseXP = victimLevel;
-            if (isVBlood) return (int)(baseXP * VBloodMultiplier);
-            return (int)(baseXP * UnitMultiplier);
+            if (isVBlood) return baseXP * VBloodMultiplier;
+            return baseXP * UnitMultiplier;
         }
 
-        static void AddOrUpdateFamiliarExperience(ulong playerId, int familiarId, float experience)
+        static void UpdateFamiliarExperience(Entity familiarEntity, int familiarId, ulong playerId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
         {
-            if (!FamiliarExperience.ContainsKey(playerId))
-            {
-                FamiliarExperience[playerId] = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
-            }
+            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
+            data.FamiliarExperience[familiarId] = new(familiarXP.Key, familiarXP.Value + gainedXP);
+            FamiliarExperienceManager.SaveFamiliarExperience(playerId, data);
+            CheckAndHandleLevelUp(familiarEntity, familiarId, playerId, data.FamiliarExperience[familiarId], currentLevel);
+        }
 
-            var playerData = FamiliarExperience[playerId];
-            if (playerData.FamiliarExperience.ContainsKey(familiarId))
+        public static KeyValuePair<int, float> GetFamiliarExperience(ulong playerId, int familiarId)
+        {
+            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
+            if (data.FamiliarExperience.TryGetValue(familiarId, out var familiarData))
             {
-                var existingData = playerData.FamiliarExperience[familiarId];
-                playerData.FamiliarExperience[familiarId] = new KeyValuePair<int, float>(existingData.Key, existingData.Value + experience);
+                return familiarData;
             }
             else
             {
-                playerData.FamiliarExperience[familiarId] = new KeyValuePair<int, float>(0, experience);
+                return new(0, 0);
             }
-
-            FamiliarExperienceManager.SaveFamiliarExperience(playerId, playerData);
         }
-
-        static KeyValuePair<int, float> GetFamiliarExperience(ulong playerId, int familiarId)
+        
+        static void CheckAndHandleLevelUp(Entity familiarEntity, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel)
         {
-            if (!FamiliarExperience.ContainsKey(playerId))
-            {
-                FamiliarExperience[playerId] = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
-            }
-
-            var playerData = FamiliarExperience[playerId];
-            return playerData.FamiliarExperience.ContainsKey(familiarId) ? playerData.FamiliarExperience[familiarId] : new KeyValuePair<int, float>(0, 0f);
-        }
-
-        static void CheckAndHandleLevelUp(Entity familiarEntity, ulong steamID, int gainedXP, int currentLevel, int familiarId)
-        {
-            EntityManager entityManager = Core.EntityManager;
             Entity userEntity = familiarEntity.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity;
 
-            bool leveledUp = CheckForLevelUp(steamID, familiarEntity.Index, currentLevel);
+            bool leveledUp = false;
+            int newLevel = ConvertXpToLevel(familiarXP.Value);
+
+            if (newLevel > currentLevel)
+            {
+                leveledUp = true;
+                FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(steamID);
+                data.FamiliarExperience[familiarId] = new(newLevel, familiarXP.Value);
+                FamiliarExperienceManager.SaveFamiliarExperience(steamID, data);
+            }
             if (leveledUp)
             {
                 DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
@@ -124,32 +114,13 @@ namespace Bloodcraft.Systems.Familiars
                     User = userEntity,
                 };
                 debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                UnitLevel unitLevel = familiarEntity.Read<UnitLevel>();
+                unitLevel.Level._Value = newLevel;
+                familiarEntity.Write(unitLevel);
+                FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel);
+                if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiarEntity, newLevel);
             }
-            NotifyPlayer(entityManager, userEntity, steamID, familiarId, gainedXP, leveledUp);
-        }
-
-        static bool CheckForLevelUp(ulong steamID, int familiarId, int currentLevel)
-        {
-            int newLevel = ConvertXpToLevel(GetFamiliarExperience(steamID, familiarId).Value);
-            return newLevel > currentLevel;
-        }
-
-        static void NotifyPlayer(EntityManager entityManager, Entity userEntity, ulong steamID, int familiarId, int gainedXP, bool leveledUp)
-        {
-            User user = entityManager.GetComponentData<User>(userEntity);
-            if (leveledUp)
-            {
-                int newLevel = ConvertXpToLevel(GetFamiliarExperience(steamID, familiarId).Value);
-                GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Your familiar reached level <color=white>{newLevel}</color>!");
-            }
-            if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["FamiliarLogging"])
-            {
-                int levelProgress = GetLevelProgress(steamID, familiarId);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> for familiar (<color=white>{levelProgress}%</color>)");
-            }
-        }
-
+        }   
         public static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion

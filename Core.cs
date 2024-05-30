@@ -1,14 +1,23 @@
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
+using Bloodcraft.Systems.Leveling;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Shared.Systems;
 using Stunlock.Core;
+using System.Collections;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft;
@@ -22,6 +31,11 @@ internal static class Core
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
     public static DebugEventsSystem DebugEventsSystem { get; internal set; }
     public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
+    public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
+    public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
+    public static SpawnTransformSystem_OnSpawn SpawnTransformSystem_OnSpawn { get; internal set; }
+
+
     //public static GetCharacterHUDSystem GetCharacterHUDSystem { get; internal set; }
 
     //public static CommonClientDataSystem CommonClientDataSystem { get; internal set; }
@@ -32,6 +46,8 @@ internal static class Core
     public static ManualLogSource Log => Plugin.LogInstance;
 
     private static bool hasInitialized;
+
+
     public static void Initialize()
     {
         if (hasInitialized) return;
@@ -41,14 +57,18 @@ internal static class Core
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
         ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
         ModifyUnitStatBuffSystem_Spawn = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Spawn>();
+        ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
+        EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
+        SpawnTransformSystem_OnSpawn = Server.GetExistingSystemManaged<SpawnTransformSystem_OnSpawn>();
         //GetCharacterHUDSystem = Server.GetExistingSystemManaged<GetCharacterHUDSystem>();
         //CommonClientDataSystem = Server.GetExistingSystemManaged<CommonClientDataSystem>();
         //EquipmentService = new(); 
-
         // Initialize utility services
+        //UnitStatSet();
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
         hasInitialized = true;
     }
+
 
     private static World GetWorld(string name)
     {
@@ -61,6 +81,8 @@ internal static class Core
         }
         return null;
     }
+
+    
     public static Entity FindUserOnline(string name)
     {
         NativeArray<Entity> _userEntities = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<User>()).ToEntityArray(Allocator.Temp);
@@ -76,8 +98,7 @@ internal static class Core
             _userEntities.Dispose();
         }
         return Entity.Null;
-    }
-
+    } 
     public class DataStructures
     {
         // Encapsulated fields with properties
@@ -92,6 +113,7 @@ internal static class Core
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
+        private static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> playerPrestiges = [];
 
         // professions
 
@@ -138,8 +160,11 @@ internal static class Core
 
         // familiar data
 
-        private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
         private static Dictionary<ulong, UnlockedFamiliarData> unlockedFamiliars = [];
+        private static Dictionary<ulong, (Entity, int)> familiarActives = [];
+        private static Dictionary<ulong, string> familiarSet = [];
+        private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
+        
         
         [Serializable]
         public class FamiliarExperienceData
@@ -153,6 +178,17 @@ internal static class Core
             public Dictionary<string, List<int>> UnlockedFamiliars { get; set; } = [];
         }
 
+        public static Dictionary<ulong, (Entity, int)> FamiliarActives
+        {
+            get => familiarActives;
+            set => familiarActives = value;
+        }
+
+        public static Dictionary<ulong, string> FamiliarSet
+        {
+            get => familiarSet;
+            set => familiarSet = value;
+        }
         public static Dictionary<ulong, UnlockedFamiliarData> UnlockedFamiliars
         {
             get => unlockedFamiliars;
@@ -169,6 +205,12 @@ internal static class Core
             set => playerExperience = value;
         }
 
+        public static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> PlayerPrestiges
+        {
+            get => playerPrestiges;
+            set => playerPrestiges = value;
+        }
+        
         public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
         {
             get => playerBools;
@@ -394,6 +436,7 @@ internal static class Core
         private static readonly Dictionary<string, string> filePaths = new()
         {
             {"Experience", JsonFiles.PlayerExperienceJson},
+            {"Prestiges", JsonFiles.PlayerPrestigesJson },
             {"PlayerBools", JsonFiles.PlayerBoolsJson},
             {"Woodcutting", JsonFiles.PlayerWoodcuttingJson},
             {"Mining", JsonFiles.PlayerMiningJson},
@@ -428,6 +471,9 @@ internal static class Core
             {"CreatureLegacy", JsonFiles.PlayerCreatureLegacyJson},
             {"BruteLegacy", JsonFiles.PlayerBruteLegacyJson},
             {"BloodStats", JsonFiles.PlayerBloodStatsJson},
+            {"FamiliarActives", JsonFiles.PlayerFamiliarActivesJson},
+            {"FamiliarSets", JsonFiles.PlayerFamiliarSetsJson }
+
         };
 
         // Generic method to save any type of dictionary.
@@ -453,7 +499,7 @@ internal static class Core
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
+                    var data = System.Text.Json.JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
                     dataStructure = data ?? []; // Ensure non-null assignment
                 }
             }
@@ -462,7 +508,7 @@ internal static class Core
                 Log.LogError($"Error reading {key} data from file: {ex.Message}");
                 dataStructure = []; // Provide default empty dictionary on error.
             }
-            catch (JsonException ex)
+            catch (System.Text.Json.JsonException ex)
             {
                 Log.LogError($"JSON deserialization error when loading {key} data: {ex.Message}");
                 dataStructure = []; // Provide default empty dictionary on error.
@@ -470,6 +516,8 @@ internal static class Core
         }
 
         public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
+
+        public static void LoadPlayerPrestiges() => LoadData(ref playerPrestiges, "Prestiges");
 
         public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
 
@@ -538,13 +586,16 @@ internal static class Core
         public static void LoadPlayerBruteLegacy() => LoadData(ref playerBruteLegacy, "BruteLegacy");
 
         public static void LoadPlayerBloodStats() => LoadData(ref playerBloodStats, "BloodStats");
+        public static void LoadPlayerFamiliarActives() => LoadData(ref familiarActives, "FamiliarActives");
+
+        public static void LoadPlayerFamiliarSets() => LoadData(ref familiarSet, "FamiliarSets");
 
         public static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
             string path = filePaths[key];
             try
             {
-                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                string json = System.Text.Json.JsonSerializer.Serialize(data, prettyJsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
             }
@@ -552,12 +603,14 @@ internal static class Core
             {
                 Log.LogError($"Failed to write {key} data to file: {ex.Message}");
             }
-            catch (JsonException ex)
+            catch (System.Text.Json.JsonException ex)
             {
                 Log.LogError($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
+
+        public static void SavePlayerPrestiges() => SaveData(PlayerPrestiges, "Prestiges");
 
         public static void SavePlayerBools() => SaveData(PlayerBools, "PlayerBools");
 
@@ -626,6 +679,10 @@ internal static class Core
         public static void SavePlayerBruteLegacy() => SaveData(PlayerBruteLegacy, "BruteLegacy");
 
         public static void SavePlayerBloodStats() => SaveData(PlayerBloodStats, "BloodStats");
+
+        public static void SavePlayerFamiliarActives() => SaveData(FamiliarActives, "FamiliarActives");
+
+        public static void SavePlayerFamiliarSets() => SaveData(FamiliarSet, "FamiliarSets");
     }
 
     public static class FamiliarExperienceManager
@@ -636,7 +693,7 @@ internal static class Core
         {
             string filePath = GetFilePath(playerId);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(data, options);
+            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, options);
             File.WriteAllText(filePath, jsonString);
         }
 
@@ -647,7 +704,7 @@ internal static class Core
                 return new FamiliarExperienceData();
 
             string jsonString = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
+            return System.Text.Json.JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
         }
     }
     public static class FamiliarUnlocksManager
@@ -658,7 +715,7 @@ internal static class Core
         {
             string filePath = GetFilePath(playerId);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(data, options);
+            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, options);
             File.WriteAllText(filePath, jsonString);
         }
 
@@ -669,12 +726,13 @@ internal static class Core
                 return new UnlockedFamiliarData();
 
             string jsonString = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<UnlockedFamiliarData>(jsonString);
+            return System.Text.Json.JsonSerializer.Deserialize<UnlockedFamiliarData>(jsonString);
         }
     }
     public class JsonFiles
     {
-        public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerExperiencePath, "player_experience.json");
+        public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerLevelingPath, "player_experience.json");
+        public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
@@ -710,7 +768,7 @@ internal static class Core
         public static readonly string PlayerCreatureLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_creature.json");
         public static readonly string PlayerBruteLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_brute.json");
         public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.PlayerBloodPath, "player_blood_stats.json");
-        public static readonly string PlayerFamiliarExperienceJson = Path.Combine(Plugin.FamiliarExperiencePath, "player_familiar_experience.json");
-        public static readonly string PlayerFamiliarUnlocksJson = Path.Combine(Plugin.FamiliarUnlocksPath, "player_familiar_unlocks.json");
+        public static readonly string PlayerFamiliarActivesJson = Path.Combine(Plugin.PlayerFamiliarsPath, "player_familiar_actives.json");
+        public static readonly string PlayerFamiliarSetsJson = Path.Combine(Plugin.FamiliarUnlocksPath, "player_familiar_sets.json");
     }
 }

@@ -1,11 +1,14 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using static Bloodcraft.Core;
+using static Bloodcraft.Systems.Legacy.BloodSystem;
 
 namespace Bloodcraft.Systems.Experience
 {
@@ -15,7 +18,7 @@ namespace Bloodcraft.Systems.Experience
         static readonly float VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
         static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
         static readonly int EXPPower = 2; // power for calculating level from xp
-        static readonly int MaxLevel = Plugin.MaxPlayerLevel.Value; // maximum level
+        static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value; // maximum level
         static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
         static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, increases experience at lower levels and tapers off as level increases
 
@@ -43,7 +46,7 @@ namespace Bloodcraft.Systems.Experience
             foreach (Entity participant in participants)
             {
                 ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= MaxLevel) continue; // Check if already at max level
+                if (DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= MaxPlayerLevel) continue; // Check if already at max level
                 ProcessExperienceGain(entityManager, participant, victimEntity, steamId, groupMultiplier);
             }
         }
@@ -100,10 +103,16 @@ namespace Bloodcraft.Systems.Experience
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
             bool isVBlood = IsVBlood(entityManager, victimEntity);
 
-            int gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
+            float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
             int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
-
             gainedXP = ApplyScalingFactor(gainedXP, currentLevel);
+
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
+            {
+                float reductionFactor = 1.0f / (1 + PrestigeData * Plugin.PrestigeRatesReducer.Value);
+                gainedXP *= reductionFactor;
+            }
+
 
             UpdatePlayerExperience(SteamID, gainedXP * groupMultiplier);
 
@@ -115,14 +124,14 @@ namespace Bloodcraft.Systems.Experience
             return entityManager.HasComponent<VBloodConsumeSource>(victimEntity);
         }
 
-        static int CalculateExperienceGained(int victimLevel, bool isVBlood)
+        static float CalculateExperienceGained(int victimLevel, bool isVBlood)
         {
             int baseXP = victimLevel;
-            if (isVBlood) return (int)(baseXP * VBloodMultiplier);
-            return (int)(baseXP * UnitMultiplier);
+            if (isVBlood) return baseXP * VBloodMultiplier;
+            return baseXP * UnitMultiplier;
         }
 
-        static void UpdatePlayerExperience(ulong SteamID, int gainedXP)
+        static void UpdatePlayerExperience(ulong SteamID, float gainedXP)
         {
             // Retrieve the current experience and level from the player's data structure.
             if (!Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
@@ -135,10 +144,10 @@ namespace Bloodcraft.Systems.Experience
 
             // Check and update the level based on new experience
             int newLevel = ConvertXpToLevel(newExperience);
-            if (newLevel > MaxLevel)
+            if (newLevel > MaxPlayerLevel)
             {
-                newLevel = MaxLevel; // Cap the level at the maximum
-                newExperience = ConvertLevelToXp(MaxLevel); // Adjust the XP to the max level's XP
+                newLevel = MaxPlayerLevel; // Cap the level at the maximum
+                newExperience = ConvertLevelToXp(MaxPlayerLevel); // Adjust the XP to the max level's XP
             }
 
             // Update the level and experience in the data structure
@@ -148,9 +157,9 @@ namespace Bloodcraft.Systems.Experience
             Core.DataStructures.SavePlayerExperience();
         }
 
-        static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, int gainedXP, int currentLevel)
+        static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, float gainedXP, int currentLevel)
         {
-            EntityManager entityManager = Core.Server.EntityManager;
+            EntityManager entityManager = Core.EntityManager;
             Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
 
             bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
@@ -158,7 +167,7 @@ namespace Bloodcraft.Systems.Experience
             if (leveledUp)
             {
                 //Plugin.Log.LogInfo("Applying level up buff...");
-                DebugEventsSystem debugEventsSystem = Core.Server.GetExistingSystemManaged<DebugEventsSystem>();
+                DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
                     BuffPrefabGUID = levelUpBuff,
@@ -171,7 +180,7 @@ namespace Bloodcraft.Systems.Experience
                 // apply level up buff here
                 debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             }
-            NotifyPlayer(entityManager, userEntity, SteamID, gainedXP, leveledUp);
+            NotifyPlayer(entityManager, userEntity, SteamID, (int)gainedXP, leveledUp);
         }
 
         static bool CheckForLevelUp(ulong SteamID, int currentLevel)
@@ -191,7 +200,7 @@ namespace Bloodcraft.Systems.Experience
             {
                 int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
                 GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
-                ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+                if (newLevel < MaxPlayerLevel) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
             if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
             {
@@ -234,11 +243,11 @@ namespace Bloodcraft.Systems.Experience
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
-        static int ApplyScalingFactor(int gainedXP, int currentLevel)
+        static float ApplyScalingFactor(float gainedXP, int currentLevel)
         {
             float k = LevelScalingMultiplier; // You can adjust this constant to control the tapering effect
             float scalingFactor = 1 / (1 + k * currentLevel);
-            return (int)(gainedXP * scalingFactor);
+            return gainedXP * scalingFactor;
         }
 
     }

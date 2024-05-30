@@ -44,11 +44,21 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> experience (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
                 if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
-                    List<KeyValuePair<WeaponStatManager.WeaponStatType, double>> bonusWeaponStats = [];
+                    List<KeyValuePair<WeaponStatManager.WeaponStatType, string>> bonusWeaponStats = [];
                     foreach(var stat in stats)
                     {
-                        float bonus = ModifyUnitStatBuffUtils.CalculateScaledWeaponBonus(handler, steamID, stat);
-                        bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, double>(stat, (double)bonus));
+                        float bonus = ModifyUnitStatBuffUtils.CalculateScaledWeaponBonus(handler, steamID, weaponType, stat);
+                        if (bonus > 1)
+                        {
+                            int intBonus = (int)bonus;
+                            string bonusString = intBonus.ToString();
+                            bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, string>(stat, bonusString));
+                        }
+                        else
+                        {
+                            string bonusString = (bonus * 100).ToString("F0") + "%";
+                            bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, string>(stat, bonusString));
+                        }
                     }
                     string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     ctx.Reply($"Current weapon stat bonuses: {bonuses}");

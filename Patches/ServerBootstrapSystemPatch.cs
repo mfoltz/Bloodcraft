@@ -1,9 +1,11 @@
 ﻿using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
+using Steamworks;
 using Stunlock.Network;
 using Unity.Entities;
-
+using static Bloodcraft.Core.DataStructures;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -31,7 +33,8 @@ internal static class ServerBootstrapSystemPatch
                 { "BloodLogging", false },
                 { "FamiliarLogging", false },
                 { "SpellLock", false },
-                { "Grouping", false }
+                { "Grouping", false },
+                { "Emotes", false }
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -48,7 +51,9 @@ internal static class ServerBootstrapSystemPatch
                 { "BloodLogging", false },
                 { "FamiliarLogging", false },
                 { "SpellLock", false },
-                { "Grouping", false }
+                { "Grouping", false },
+                { "Emotes", false },
+                { "Binding", false }
             };
 
             // Add missing default values to the existing dictionary
@@ -275,7 +280,33 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
                 Core.DataStructures.SavePlayerExperience();
             }
+            if (Plugin.PrestigeSystem.Value && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
+            {
+                var prestigeDict = new Dictionary<PrestigeSystem.PrestigeType, int>();
+                foreach (var prestigeType in Enum.GetValues<PrestigeSystem.PrestigeType>())
+                {
+                    prestigeDict.Add(prestigeType, 0);
+                }
+                Core.DataStructures.PlayerPrestiges.Add(steamId, prestigeDict);
+                Core.DataStructures.SavePlayerPrestiges();
+            }
             if (user.LocalCharacter._Entity != Entity.Null) GearOverride.SetLevel(user.LocalCharacter._Entity);
+        }
+
+        if (Plugin.FamiliarSystem.Value)
+        {
+            if (!Core.DataStructures.FamiliarActives.ContainsKey(steamId))
+            {
+                Core.DataStructures.FamiliarActives.Add(steamId, (Entity.Null, 0));
+                Core.DataStructures.SavePlayerFamiliarActives();
+            }
+            if (!Core.DataStructures.FamiliarSet.ContainsKey(steamId))
+            {
+                Core.DataStructures.FamiliarSet.Add(steamId, "");
+                Core.DataStructures.SavePlayerFamiliarSets();
+            }
+            Core.FamiliarExperienceManager.SaveFamiliarExperience(steamId, Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId));
+            Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
         }
     }
 }
