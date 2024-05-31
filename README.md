@@ -257,7 +257,7 @@ UPDATED, NOW CURRENT (5/30)
   The base cap for physical resistance.
 - **Spell Resistance**: `SpellResistance` (float, default: 0.20)  
   The base cap for spell resistance.
-- **Blood Drain**: `BloodDrain` (float, default: 0.50)  
+- **Resource Yield**: `ResourceYield` (float, default: 0.25)  
   The base cap for blood drain.
 - **Crowd Control Reduction**: `CCReduction` (float, default: 0.25)  
   The base cap for crowd control reduction.
