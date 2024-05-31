@@ -5,7 +5,7 @@ UPDATED, NOW CURRENT (5/30)
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
-- 
+
 ## Features
 
 - **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills (unarmed also has stats as of second release). Experience for this is gained per kill based on equipped weapon. Stat choices are configurable from 1 to 5 per weapon. Resetting choices is free by default but can be made to cost items. Will be linking these to classes in some way hopefully sooner rather than later.
