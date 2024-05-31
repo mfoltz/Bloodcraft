@@ -37,7 +37,6 @@ namespace Bloodcraft.Systems.Legacy
             { BloodType.Scholar, PrestigeSystem.PrestigeType.ScholarLegacy },
             { BloodType.Rogue, PrestigeSystem.PrestigeType.RogueLegacy },
             { BloodType.Mutant, PrestigeSystem.PrestigeType.MutantLegacy },
-            { BloodType.VBlood, PrestigeSystem.PrestigeType.VBloodLegacy },
             { BloodType.None, PrestigeSystem.PrestigeType.Experience }, // Assuming 'None' maps to general experience
             { BloodType.GateBoss, PrestigeSystem.PrestigeType.Experience }, // Example mapping
             { BloodType.Draculin, PrestigeSystem.PrestigeType.DraculinLegacy },
@@ -87,16 +86,24 @@ namespace Bloodcraft.Systems.Legacy
                 // Check if the player leveled up
                 var xpData = handler.GetLegacyData(steamID);
 
-                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
+                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
                 {
-                    float reductionFactor = 1.0f / (1 + PrestigeData * Plugin.PrestigeRatesReducer.Value);
-                    BloodValue *= reductionFactor;
-                }
+                    // Apply rate reduction with diminishing returns
+                    if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
+                    {
+                        float baseReduction = Plugin.PrestigeRatesReducer.Value; // e.g., 0.1 for 10%
+                        float diminishingFactor = baseReduction * PrestigeData;
+                        float reductionFactor = 1 / (1 + diminishingFactor);
+                        BloodValue *= reductionFactor;
+                    }
 
-                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var xpPrestige) && xpPrestige.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
-                {
-                    float gainFactor = (1 + xpPrestigeLevel * Plugin.PrestigeRatesMultiplier.Value);
-                    BloodValue *= gainFactor;
+                    // Apply rate gain with linear increase
+                    if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
+                    {
+                        float baseGain = Plugin.PrestigeRatesMultiplier.Value; // e.g., 0.1 for 10%
+                        float gainFactor = 1 + (baseGain * xpPrestigeLevel);
+                        BloodValue *= gainFactor;
+                    }
                 }
 
 

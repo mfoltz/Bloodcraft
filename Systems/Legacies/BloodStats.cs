@@ -15,7 +15,7 @@ namespace Bloodcraft.Systems.Legacies
                     Core.DataStructures.PlayerBloodStats[steamId][BloodType] = Stats;
                 }
 
-                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value)
+                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= 5) // 5 hard cap
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon
                 }

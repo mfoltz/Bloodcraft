@@ -6,7 +6,6 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Expertise.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodStats;
 
 namespace Bloodcraft.Commands
@@ -139,7 +138,7 @@ namespace Bloodcraft.Commands
             }
         }
         [Command(name: "resetBloodStats", shortHand: "rbs", adminOnly: false, usage: ".rbs", description: "Reset stats for current blood.")]
-        public static void ResetWeaponStats(ChatCommandContext ctx)
+        public static void ResetBloodStats(ChatCommandContext ctx)
         {
             if (!Plugin.BloodSystem.Value)
             {
@@ -251,8 +250,14 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
-            string bloodTypes = string.Join(", ", Enum.GetNames(typeof(BloodSystem.BloodType)));
-            ctx.Reply($"Available Blood Legacies: <color=red>{bloodTypes}</color>");
+            var excludedBloodTypes = new HashSet<BloodSystem.BloodType> { BloodSystem.BloodType.None, BloodSystem.BloodType.VBlood, BloodSystem.BloodType.GateBoss };
+            var bloodTypes = Enum.GetValues(typeof(BloodSystem.BloodType))
+                                  .Cast<BloodSystem.BloodType>()
+                                  .Where(b => !excludedBloodTypes.Contains(b))
+                                  .Select(b => b.ToString());
+
+            string bloodTypesList = string.Join(", ", bloodTypes);
+            ctx.Reply($"Available Blood Legacies: <color=red>{bloodTypesList}</color>");
         }
     }
 }

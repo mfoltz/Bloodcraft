@@ -9,6 +9,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace Bloodcraft.Patches;
 
@@ -27,11 +28,12 @@ class FamiliarPatches
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
+                    BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
-                        BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
                         behaviourTreeState.Value = GenericEnemyState.Follow;
                         behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
+
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
                     }
@@ -56,33 +58,28 @@ class FamiliarPatches
         {
             foreach (Entity entity in entities)
             {
-                SpawnTransform spawnTransform = entity.Read<SpawnTransform>();
-
-                if (spawnTransform.Rotation.Equals(new float4(0, 0, 0, 0)))
+                TeamReference teamReference = entity.Read<TeamReference>();
+                NativeList<Entity> alliedUsers = new NativeList<Entity>(Allocator.Temp);
+                try
                 {
-                    TeamReference teamReference = entity.Read<TeamReference>();
-                    NativeList<Entity> alliedUsers = new NativeList<Entity>(Allocator.Temp);
-                    try
+                    PrefabGUID famKey = entity.Read<PrefabGUID>();
+                    TeamUtility.GetAlliedUsers(Core.EntityManager, teamReference, alliedUsers);
+                    foreach (Entity userEntity in alliedUsers)
                     {
-                        PrefabGUID famKey = entity.Read<PrefabGUID>();
-                        TeamUtility.GetAlliedUsers(Core.EntityManager, teamReference, alliedUsers);
-                        foreach (Entity userEntity in alliedUsers)
+                        User user = userEntity.Read<User>();
+                        ulong steamID = user.PlatformId;
+                        if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["Binding"] && Core.DataStructures.FamiliarActives.TryGetValue(steamID, out var data) && data.Item2.Equals(famKey.GuidHash))
                         {
-                            User user = userEntity.Read<User>();
-                            ulong steamID = user.PlatformId;
-                            if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["Binding"] && Core.DataStructures.FamiliarActives.TryGetValue(steamID, out var data) && data.Item2.Equals(famKey.GuidHash))
-                            {
-                                FamiliarSummonSystem.HandleFamiliar(user.LocalCharacter._Entity, entity);
-                                bools["Binding"] = false;
-                                Core.DataStructures.SavePlayerBools();
-                                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.LookupName()}</color>");
-                            }
+                            FamiliarSummonSystem.HandleFamiliar(user.LocalCharacter._Entity, entity);
+                            bools["Binding"] = false;
+                            Core.DataStructures.SavePlayerBools();
+                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.LookupName()}</color>");
                         }
                     }
-                    finally
-                    {
-                        alliedUsers.Dispose();
-                    }
+                }
+                finally
+                {
+                    alliedUsers.Dispose();
                 }
             }
         }

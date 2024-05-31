@@ -28,6 +28,12 @@ namespace Bloodcraft.Commands
 
             string set = Core.DataStructures.FamiliarSet[steamId];
 
+            if (set == "")
+            {
+                ctx.Reply("You don't have a set selected. Use .famsets to see available sets then choose one with .cfs [SetName]");
+                return;
+            }
+
             if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Item1.Equals(Entity.Null) && data.Item2.Equals(0) && Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
             {
                 Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
@@ -279,6 +285,34 @@ namespace Bloodcraft.Commands
             else
             {
                 ctx.Reply("Couldn't find any experience data for familiar.");
+            }
+        }
+
+        [Command(name: "resetFamiliars", shortHand: "resetfams", adminOnly: false, usage: ".resetfams", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
+        public static void ResetFamiliars(ChatCommandContext ctx)
+        {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
+
+            ulong steamId = ctx.Event.User.PlatformId;
+
+            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data))
+            {
+                data = new(Entity.Null, 0);
+                Core.DataStructures.FamiliarActives[steamId] = data;
+                Core.DataStructures.SavePlayerFamiliarActives();
+            }
+
+            var buffer = ctx.Event.SenderCharacterEntity.ReadBuffer<FollowerBuffer>();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (Core.EntityManager.Exists(buffer[i].Entity._Entity))
+                {
+                    DestroyUtility.CreateDestroyEvent(Core.EntityManager, buffer[i].Entity._Entity, DestroyReason.Default, DestroyDebugReason.None);
+                }
             }
         }
     }

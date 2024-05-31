@@ -113,10 +113,19 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Prestiging is not enabled.");
                 return;
             }
-            if (!Enum.TryParse<PrestigeSystem.PrestigeType>(prestigeType, true, out var parsedPrestigeType))
+
+            if (!Enum.TryParse(prestigeType, true, out PrestigeSystem.PrestigeType parsedPrestigeType))
             {
-                ctx.Reply("Invalid prestige, use .lpp to see options (WIP).");
-                return;
+                // Attempt a substring match with existing enum names
+                parsedPrestigeType = Enum.GetValues(typeof(PrestigeSystem.PrestigeType))
+                                         .Cast<PrestigeSystem.PrestigeType>()
+                                         .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
+
+                if (parsedPrestigeType == default)
+                {
+                    ctx.Reply("Invalid prestige, use .lpp to see options.");
+                    return;
+                }
             }
 
             var steamId = ctx.Event.User.PlatformId;
@@ -129,42 +138,16 @@ namespace Bloodcraft.Commands
             }
 
             var xpData = handler.GetExperienceData(steamId);
-            if (xpData.Key >= PrestigeSystem.PrestigeTypeToMaxLevel[parsedPrestigeType] && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel < PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType])
+            if (PrestigeSystem.CanPrestige(steamId, parsedPrestigeType, xpData.Key))
             {
-                handler.Prestige(steamId);
-                
-                if (parsedPrestigeType.Equals(PrestigeSystem.PrestigeType.Experience))
-                {
-                    GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
-                    string experienceString = (prestigeLevel * Plugin.PrestigeRatesMultiplier.Value * 100).ToString("F0") + "%";
-                    ctx.Reply($"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>! Growth rates for all expertise/legacies increased by <color=yellow>{experienceString}</color>.");
-                    handler.SaveChanges();
-                    return;
-                }
-
-                // Calculate the cumulative effect of reduction in growth rates
-                float reductionFactor = 1.0f / (1 + prestigeLevel * Plugin.PrestigeRatesReducer.Value);
-                float growthRateAfterReduction = reductionFactor * (1 + prestigeLevel * Plugin.PrestigeRatesMultiplier.Value);
-                float totalEffectPercentage = (growthRateAfterReduction - 1) * 100;
-
-                // Calculate the percentage reduction and the net effect
-                float percentageReduction = (1 - reductionFactor) * 100;
-                string percentageReductionString = percentageReduction.ToString("F0") + "%";
-
-                // Calculate the stat gain increase
-                float statGainIncrease = prestigeLevel * Plugin.PrestigeStatMultiplier.Value;
-                string statGainString = (statGainIncrease * 100).ToString("F0") + "%";
-
-                string totalEffectString = totalEffectPercentage >= 0 ? "+" + totalEffectPercentage.ToString("F0") + "%" : totalEffectPercentage.ToString("F0") + "%";
-
-                ctx.Reply($"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total effect on growth rates is <color=yellow>{totalEffectString}</color>.");
-                handler.SaveChanges();
+                PrestigeSystem.PerformPrestige(ctx, steamId, parsedPrestigeType, handler);
             }
             else
             {
                 ctx.Reply($"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
             }
         }
+
         [Command(name: "getPrestige", shortHand: "gp", adminOnly: false, usage: ".gp [PrestigeType]", description: "Shows information about player's prestige status.")]
         public unsafe static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
@@ -174,10 +157,17 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            if (!Enum.TryParse<PrestigeSystem.PrestigeType>(prestigeType, true, out var parsedPrestigeType))
+            if (!Enum.TryParse(prestigeType, true, out PrestigeSystem.PrestigeType parsedPrestigeType))
             {
-                ctx.Reply("Invalid prestige type, use .lpp to see options (WIP).");
-                return;
+                parsedPrestigeType = Enum.GetValues(typeof(PrestigeSystem.PrestigeType))
+                                         .Cast<PrestigeSystem.PrestigeType>()
+                                         .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
+
+                if (parsedPrestigeType == default)
+                {
+                    ctx.Reply("Invalid prestige, use .lpp to see options.");
+                    return;
+                }
             }
 
             var steamId = ctx.Event.User.PlatformId;
@@ -190,46 +180,17 @@ namespace Bloodcraft.Commands
             }
 
             var maxPrestigeLevel = PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType];
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
             {
-
-                if (parsedPrestigeType.Equals(PrestigeSystem.PrestigeType.Experience))
-                {
-                    string experienceString = (prestigeLevel * Plugin.PrestigeRatesMultiplier.Value * 100).ToString() + "%";
-                    ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
-                    ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-                    ctx.Reply($"Growth rate improvement for expertise/legacies: <color=yellow>{experienceString}</color>");
-                    return;
-                }
-
-
-
-                float reductionFactor = 1.0f / (1 + prestigeLevel * Plugin.PrestigeRatesReducer.Value);
-                float growthRateAfterReduction = reductionFactor * (1 + prestigeLevel * Plugin.PrestigeRatesMultiplier.Value);
-                float totalEffectPercentage = (growthRateAfterReduction - 1) * 100;
-
-                // Calculate the percentage reduction and the net effect
-                float percentageReduction = (1 - reductionFactor) * 100;
-                string percentageReductionString = percentageReduction.ToString("F0") + "%";
-
-                // Calculate the stat gain increase
-                float statGainIncrease = prestigeLevel * Plugin.PrestigeStatMultiplier.Value;
-                string statGainString = (statGainIncrease * 100).ToString("F0") + "%";
-
-                string totalEffectString = totalEffectPercentage >= 0 ? "+" + totalEffectPercentage.ToString("F0") + "%" : totalEffectPercentage.ToString("F0") + "%";
-
-
-                ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
-                ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-                ctx.Reply($"Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>{percentageReductionString}</color>");
-                ctx.Reply($"Stat bonuses improvement: <color=green>{statGainString}</color>");
-                ctx.Reply($"Total effect on growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>");
+                PrestigeSystem.DisplayPrestigeInfo(ctx, steamId, parsedPrestigeType, prestigeLevel, maxPrestigeLevel);
             }
             else
             {
                 ctx.Reply($"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
             }
         }
+
 
         [Command(name: "listPlayerPrestiges", shortHand: "lpp", adminOnly: false, usage: ".lpp", description: "Lists prestiges available.")]
         public static void ListPlayerPrestigeTypes(ChatCommandContext ctx)

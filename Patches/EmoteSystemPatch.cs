@@ -57,6 +57,11 @@ internal class EmoteSystemPatch
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching guidhash in FamiliarActives
+            
+            if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
+            {
+                familiar = data.Item1;
+            }
 
             if (familiar == Entity.Null)
             {

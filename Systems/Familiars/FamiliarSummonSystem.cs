@@ -1,16 +1,9 @@
 ﻿using ProjectM;
-using ProjectM.Behaviours;
-using ProjectM.Debugging;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Scripting;
 using ProjectM.Shared;
-using ProjectM.Shared.Systems;
 using Stunlock.Core;
-using System.Collections;
 using Unity.Entities;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace Bloodcraft.Systems.Familiars
 {
@@ -61,6 +54,7 @@ namespace Bloodcraft.Systems.Familiars
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
         }
+        
         static void ModifyFollowerAndTeam(Entity player, Entity familiar)
         {
             Team team = player.Read<Team>();
@@ -77,10 +71,9 @@ namespace Bloodcraft.Systems.Familiars
             follower.Followed._Value = player;
             follower.ModeModifiable._Value = 1;
             familiar.Write(follower);
-            
+
             var buffer = player.ReadBuffer<FollowerBuffer>();
             buffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
-            Core.Log.LogInfo("ModifyFollowerAndTeam complete...");
         }
         public static void ModifyBloodSource(Entity familiar, int level)
         {
@@ -88,7 +81,6 @@ namespace Bloodcraft.Systems.Familiars
             bloodConsumeSource.BloodQuality = level / Plugin.MaxFamiliarLevel.Value * 100;
             bloodConsumeSource.CanBeConsumed = false;
             familiar.Write(bloodConsumeSource);
-            Core.Log.LogInfo("ModifyBloodSource complete...");
         }
         public static void ModifyDamageStats(Entity familiar, int level)
         {
@@ -107,7 +99,8 @@ namespace Bloodcraft.Systems.Familiars
             familiar.Write(damageStats);
 
             Health health = familiar.Read<Health>();
-            health.MaxHealth._Value *= healthScalingFactor;
+            int baseHealth = 500;
+            health.MaxHealth._Value = baseHealth * healthScalingFactor;
             health.Value = health.MaxHealth._Value;
             familiar.Write(health);
 
@@ -163,7 +156,7 @@ namespace Bloodcraft.Systems.Familiars
         static void ModifyCollision(Entity familiar)
         {
             DynamicCollision collision = familiar.Read<DynamicCollision>();
-            collision.AgainstPlayers.RadiusOverride = 1.5f;
+            collision.AgainstPlayers.RadiusOverride = -1f;
             familiar.Write(collision);
         }
         static void ModifyDropTable(Entity familiar)

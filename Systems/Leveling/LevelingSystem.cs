@@ -20,7 +20,7 @@ namespace Bloodcraft.Systems.Experience
         static readonly int EXPPower = 2; // power for calculating level from xp
         static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value; // maximum level
         static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
-        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, increases experience at lower levels and tapers off as level increases
+        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, tapers experience gain as level increases
 
         static readonly PrefabGUID levelUpBuff = new(-1133938228);
 
@@ -109,10 +109,11 @@ namespace Bloodcraft.Systems.Experience
 
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
             {
-                float reductionFactor = 1.0f / (1 + PrestigeData * Plugin.PrestigeRatesReducer.Value);
-                gainedXP *= reductionFactor;
+                float baseReduction = Plugin.PrestigeRatesReducer.Value; // This should be a small base reduction value, e.g., 0.1 (10%)
+                float diminishingFactor = baseReduction * PrestigeData;
+                float expReductionFactor = 1 / (1 + diminishingFactor);
+                gainedXP *= expReductionFactor;
             }
-
 
             UpdatePlayerExperience(SteamID, gainedXP * groupMultiplier);
 

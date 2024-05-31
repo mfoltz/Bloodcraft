@@ -21,7 +21,6 @@ public class Plugin : BasePlugin
     public static readonly string OldPlayerExperiencePath = Path.Combine(ConfigPath, "ExperienceLeveling");
 
     // current paths
-    public static readonly string PlayerUnitStatsPath = Path.Combine(ConfigPath, "PlayerUnitStats");
     public static readonly string PlayerLevelingPath = Path.Combine(ConfigPath, "PlayerLeveling");
     public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
     public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
@@ -216,9 +215,9 @@ public class Plugin : BasePlugin
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
-        _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.25f, "The percent to reduce rate gains by for all systems per level of prestige (applies to leveling, expertise, and legacies).");
-        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.25f, "The percent to increase stats gained from expertise/legacies per level of prestige.");
-        _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.10f, "The percent to increase rate gains by for expertise/legacies per level of leveling prestige.");
+        _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.20f, "Multiplicative factor by which rates are reduced in expertise/legacy/experience per increment of prestige in expertise/legacy/experience.");
+        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.25f, "Multiplicative rate by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.");
+        _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.15f, "Multiplicative factor by which rates are increased in expertise/legacy per increment of prestige in leveling.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
         _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 5f, "The multiplier for experience gained from units.");
@@ -236,7 +235,7 @@ public class Plugin : BasePlugin
         _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
         _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
         _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
-        _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
+        _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise (5 max).");
         _resetExpertiseItem = InitConfigEntry("Config", "ResetExpertiseItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
         _resetExpertiseItemQuantity = InitConfigEntry("Config", "ResetExpertiseItemQuantity", 0, "Quantity of item required for resetting stats.");
 
@@ -259,7 +258,7 @@ public class Plugin : BasePlugin
         _maxBloodLevel = InitConfigEntry("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
         _unitLegacyMultiplier = InitConfigEntry("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
         _vBloodLegacyMultipler = InitConfigEntry("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
-        _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
+        _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy (5 max).");
         _resetLegacyItem = InitConfigEntry("Config", "ResetLegacyItem", 0, "Item PrefabGUID cost for resetting blood stats.");
         _resetLegacyItemQuantity = InitConfigEntry("Config", "ResetLegacyItemQuantity", 0, "Quantity of item required for resetting blood stats.");
 
@@ -430,7 +429,6 @@ public class Plugin : BasePlugin
     static readonly List<string> directoryPaths =
         [
         ConfigPath,
-        PlayerUnitStatsPath,
         PlayerLevelingPath,
         PlayerExpertisePath,
         PlayerBloodPath,

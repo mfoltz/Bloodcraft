@@ -25,7 +25,7 @@ namespace Bloodcraft.Systems.Familiars
             string lowerName = diedPrefab.LookupName().ToLower();
 
             if (died.Has<MinionMaster>() || died.Has<Minion>() ||  died.Has<VBloodConsumeSource>()) return; // component checks
-            if (lowerName.Contains("trader") || lowerName.Contains("carriage")) return; // prefab name checks
+            if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("werewolf")) return; // prefab name checks
             if (IsBanned(diedPrefab)) return; // banned prefab checks
 
             if ((int)diedCategory.UnitCategory < 5)

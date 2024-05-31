@@ -50,6 +50,26 @@ public class BuffPatch
                     }
                 }
 
+                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                {
+                    Entity player = entity.Read<Buff>().Target;
+                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    if (familiar != Entity.Null)
+                    {
+                        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
+                        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                        {
+                            BuffPrefabGUID = prefabGUID,
+                        };
+                        FromCharacter fromCharacter = new()
+                        {
+                            Character = familiar,
+                            User = player.Read<PlayerCharacter>().UserEntity,
+                        };
+                        debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                    }
+                }
+
                 if (Plugin.BloodSystem.Value && prefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
                 {
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;

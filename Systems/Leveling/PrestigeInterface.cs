@@ -32,7 +32,6 @@
                 PrestigeSystem.PrestigeType.ScholarLegacy => new ScholarLegacyPrestigeHandler(),
                 PrestigeSystem.PrestigeType.RogueLegacy => new RogueLegacyPrestigeHandler(),
                 PrestigeSystem.PrestigeType.MutantLegacy => new MutantLegacyPrestigeHandler(),
-                PrestigeSystem.PrestigeType.VBloodLegacy => new VBloodLegacyPrestigeHandler(),
                 PrestigeSystem.PrestigeType.DraculinLegacy => new DraculinLegacyPrestigeHandler(),
                 PrestigeSystem.PrestigeType.ImmortalLegacy => new ImmortalLegacyPrestigeHandler(),
                 PrestigeSystem.PrestigeType.CreatureLegacy => new CreatureLegacyPrestigeHandler(),
@@ -339,7 +338,7 @@
             return PrestigeSystem.PrestigeType.MutantLegacy;
         }
     }
-
+    /*
     public class VBloodLegacyPrestigeHandler : BasePrestigeHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerVBloodLegacy;
@@ -354,7 +353,7 @@
             return PrestigeSystem.PrestigeType.VBloodLegacy;
         }
     }
-
+    */
     public class DraculinLegacyPrestigeHandler : BasePrestigeHandler
     {
         protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerDraculinLegacy;

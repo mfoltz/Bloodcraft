@@ -14,7 +14,7 @@ namespace Bloodcraft.Systems.Expertise
                     Core.DataStructures.PlayerWeaponStats[steamId][weaponType] = Stats;
                 }
 
-                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value)
+                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= 5) // 5 hard cap
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon
                 }

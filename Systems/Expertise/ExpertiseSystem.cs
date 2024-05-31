@@ -64,15 +64,24 @@ namespace Bloodcraft.Systems.Expertise
                 var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
                 float ExpertiseValue = CalculateExpertiseValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
 
-                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
+                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
                 {
-                    float reductionFactor = 1.0f / (1 + PrestigeData * Plugin.PrestigeRatesReducer.Value);
-                    ExpertiseValue *= reductionFactor;
-                }
-                if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var xpPrestige) && xpPrestige.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
-                {
-                    float gainFactor = (1 + xpPrestigeLevel * Plugin.PrestigeRatesMultiplier.Value);
-                    ExpertiseValue *= gainFactor;
+                    // Apply rate reduction with diminishing returns
+                    if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
+                    {
+                        float baseReduction = Plugin.PrestigeRatesReducer.Value; // e.g., 0.1 for 10%
+                        float diminishingFactor = baseReduction * PrestigeData;
+                        float reductionFactor = 1 / (1 + diminishingFactor);
+                        ExpertiseValue *= reductionFactor;
+                    }
+
+                    // Apply rate gain with linear increase
+                    if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
+                    {
+                        float baseGain = Plugin.PrestigeRatesMultiplier.Value; // e.g., 0.1 for 10%
+                        float gainFactor = 1 + (baseGain * xpPrestigeLevel);
+                        ExpertiseValue *= gainFactor;
+                    }
                 }
                 //IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponPrestigeMap[weaponType]);
 

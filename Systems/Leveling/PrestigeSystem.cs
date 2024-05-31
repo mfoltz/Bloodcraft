@@ -1,4 +1,7 @@
-﻿namespace Bloodcraft.Systems.Leveling;
+﻿using Bloodcraft.Patches;
+using VampireCommandFramework;
+
+namespace Bloodcraft.Systems.Leveling;
 
 public class PrestigeSystem
 {
@@ -22,7 +25,6 @@ public class PrestigeSystem
         ScholarLegacy,
         RogueLegacy,
         MutantLegacy,
-        VBloodLegacy,
         DraculinLegacy,
         ImmortalLegacy,
         CreatureLegacy,
@@ -48,7 +50,6 @@ public class PrestigeSystem
         { PrestigeSystem.PrestigeType.ScholarLegacy, Core.DataStructures.PlayerScholarLegacy },
         { PrestigeSystem.PrestigeType.RogueLegacy, Core.DataStructures.PlayerRogueLegacy },
         { PrestigeSystem.PrestigeType.MutantLegacy, Core.DataStructures.PlayerMutantLegacy },
-        { PrestigeSystem.PrestigeType.VBloodLegacy, Core.DataStructures.PlayerVBloodLegacy },
         { PrestigeSystem.PrestigeType.DraculinLegacy, Core.DataStructures.PlayerDraculinLegacy },
         { PrestigeSystem.PrestigeType.ImmortalLegacy, Core.DataStructures.PlayerImmortalLegacy },
         { PrestigeSystem.PrestigeType.CreatureLegacy, Core.DataStructures.PlayerCreatureLegacy },
@@ -79,7 +80,6 @@ public class PrestigeSystem
         { PrestigeSystem.PrestigeType.ScholarLegacy, Plugin.MaxBloodLevel.Value },
         { PrestigeSystem.PrestigeType.RogueLegacy, Plugin.MaxBloodLevel.Value },
         { PrestigeSystem.PrestigeType.MutantLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeSystem.PrestigeType.VBloodLegacy, Plugin.MaxBloodLevel.Value },
         { PrestigeSystem.PrestigeType.DraculinLegacy, Plugin.MaxBloodLevel.Value },
         { PrestigeSystem.PrestigeType.ImmortalLegacy, Plugin.MaxBloodLevel.Value },
         { PrestigeSystem.PrestigeType.CreatureLegacy, Plugin.MaxBloodLevel.Value },
@@ -109,7 +109,6 @@ public class PrestigeSystem
         { PrestigeSystem.PrestigeType.ScholarLegacy, Plugin.MaxLegacyPrestiges.Value },
         { PrestigeSystem.PrestigeType.RogueLegacy, Plugin.MaxLegacyPrestiges.Value },
         { PrestigeSystem.PrestigeType.MutantLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeSystem.PrestigeType.VBloodLegacy, Plugin.MaxLegacyPrestiges.Value },
         { PrestigeSystem.PrestigeType.DraculinLegacy, Plugin.MaxLegacyPrestiges.Value },
         { PrestigeSystem.PrestigeType.ImmortalLegacy, Plugin.MaxLegacyPrestiges.Value },
         { PrestigeSystem.PrestigeType.CreatureLegacy, Plugin.MaxLegacyPrestiges.Value },
@@ -119,4 +118,105 @@ public class PrestigeSystem
     {
         get => prestigeTypeToMaxPrestigeLevel;
     }
+
+    public static void DisplayPrestigeInfo(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel, int maxPrestigeLevel)
+    {
+        float reductionFactor = MathF.Pow(1 - Plugin.PrestigeRatesReducer.Value, prestigeLevel);
+        float gainMultiplier = 1.0f;
+
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+        {
+            gainMultiplier = 1 + (Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel);
+        }
+
+        if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+        {
+            string reductionPercentage = ((1 - reductionFactor) * 100).ToString("F2") + "%";
+            string gainPercentage = ((gainMultiplier - 1) * 100).ToString("F2") + "%";
+
+            ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
+            ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
+            ctx.Reply($"Growth rate improvement for expertise/legacies: <color=green>{gainPercentage}</color>");
+            ctx.Reply($"Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>");
+        }
+        else
+        {
+            float combinedFactor = gainMultiplier * reductionFactor;
+            string percentageReductionString = ((1 - reductionFactor) * 100).ToString("F0") + "%";
+
+            // Fixed additive stat gain increase based on base value
+            float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * prestigeLevel;
+            string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
+
+            string totalEffectString = ((combinedFactor - 1) * 100).ToString("F2") + "%";
+
+            ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
+            ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
+            ctx.Reply($"Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>{percentageReductionString}</color>");
+            ctx.Reply($"Stat bonuses improvement: <color=green>{statGainString}</color>");
+            ctx.Reply($"Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>");
+        }
+    }
+
+    public static bool CanPrestige(ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int xpKey)
+    {
+        return xpKey >= PrestigeSystem.PrestigeTypeToMaxLevel[parsedPrestigeType] &&
+               Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+               prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) &&
+               prestigeLevel < PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType];
+    }
+
+    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, IPrestigeHandler handler)
+    {
+        handler.Prestige(steamId);
+        handler.SaveChanges();
+
+        var updatedPrestigeLevel = Core.DataStructures.PlayerPrestiges[steamId][parsedPrestigeType];
+        if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+        {
+            HandleExperiencePrestige(ctx, updatedPrestigeLevel);
+        }
+        else
+        {
+            HandleOtherPrestige(ctx, steamId, parsedPrestigeType, updatedPrestigeLevel);
+        }
+    }
+
+    private static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
+    {
+        GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
+        float expReductionFactor = MathF.Pow(1 - Plugin.PrestigeRatesReducer.Value, prestigeLevel);
+        string reductionPercentage = ((1 - expReductionFactor) * 100).ToString("F2") + "%";
+
+        float gainMultiplier = 1.0f;
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(ctx.Event.User.PlatformId, out var prestigeData) &&
+            prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+        {
+            gainMultiplier = 1 + (Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel);
+        }
+
+        string gainPercentage = ((gainMultiplier - 1) * 100).ToString("F2") + "%";
+        ctx.Reply($"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
+    }
+
+    private static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel)
+    {
+        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
+
+        float reductionFactor = MathF.Pow(1 - Plugin.PrestigeRatesReducer.Value, prestigeLevel);
+        float gainMultiplier = 1 + (Plugin.PrestigeRatesMultiplier.Value * expPrestige);
+        float combinedFactor = gainMultiplier * reductionFactor;
+
+        string percentageReductionString = ((1 - reductionFactor) * 100).ToString("F0") + "%";
+
+        // Fixed additive stat gain increase based on base value
+        float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * prestigeLevel;
+        string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
+
+        string totalEffectString = ((combinedFactor - 1) * 100).ToString("F2") + "%";
+
+        ctx.Reply($"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total effect on growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+    }
+
 }

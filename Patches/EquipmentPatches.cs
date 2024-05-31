@@ -548,7 +548,7 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
             float maxBonus = WeaponStats.WeaponStatManager.BaseCaps[statType];
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(ExpertiseSystem.WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
             {
-                float gainFactor = (1 + PrestigeData * Plugin.PrestigeStatMultiplier.Value);
+                float gainFactor = 1 + (Plugin.PrestigeStatMultiplier.Value * PrestigeData);
                 maxBonus *= gainFactor;
             }
 
@@ -566,7 +566,7 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
             float maxBonus = BloodStats.BloodStatManager.BaseCaps[statType];
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
             {
-                float gainFactor = (1 + PrestigeData * Plugin.PrestigeStatMultiplier.Value);
+                float gainFactor = 1 + (Plugin.PrestigeStatMultiplier.Value * PrestigeData);
                 maxBonus *= gainFactor;
             }
 
