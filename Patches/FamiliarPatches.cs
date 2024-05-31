@@ -8,8 +8,6 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 
 namespace Bloodcraft.Patches;
 
@@ -49,6 +47,7 @@ class FamiliarPatches
             entities.Dispose();
         }
     }
+   
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)

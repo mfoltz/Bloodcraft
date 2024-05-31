@@ -93,7 +93,7 @@ namespace Bloodcraft.Systems.Familiars
             damageStats.DamageVsDemons._Value *= scalingFactor;
             damageStats.DamageVsMechanical._Value *= scalingFactor;
             damageStats.DamageVsBeasts._Value *= scalingFactor;
-            damageStats.DamageVsLightArmor._Value *= scalingFactor      ;
+            damageStats.DamageVsLightArmor._Value *= scalingFactor;
             damageStats.DamageVsVBloods._Value *= scalingFactor;
             damageStats.DamageVsMagic._Value *= scalingFactor;
             familiar.Write(damageStats);

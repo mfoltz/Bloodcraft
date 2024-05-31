@@ -1,23 +1,18 @@
 using BepInEx.Logging;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Network;
-using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
-using System.Collections;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft;
@@ -43,6 +38,7 @@ internal static class Core
     //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future journal quest 560247139 Journal_GettingReadyForTheHunt
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
+
     public static ManualLogSource Log => Plugin.LogInstance;
 
     private static bool hasInitialized;

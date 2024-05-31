@@ -257,37 +257,6 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "getFamiliarStats", shortHand: "get fs", adminOnly: false, usage: ".get fs", description: "Display current familiar stats.")]
-        public static void GetFamiliarStats(ChatCommandContext ctx)
-        {
-            if (!Plugin.FamiliarSystem.Value)
-            {
-                ctx.Reply("Familiars are not enabled.");
-                return;
-            }
-
-            ulong steamId = ctx.Event.User.PlatformId;
-            Entity entity = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
-            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.Item2.Equals(0))
-            {
-                UnitLevel level = entity.Read<UnitLevel>();
-                float scalingFactor = 0.1f + (level.Level / (float)Plugin.MaxFamiliarLevel.Value) * 0.9f; // Calculate scaling factor
-                float healthScalingFactor = 1.0f + (level.Level / (float)Plugin.MaxFamiliarLevel.Value) * 4.0f; // Calculate scaling factor for max health
-                
-                UnitStats stats = entity.Read<UnitStats>();
-                Health health = entity.Read<Health>();
-                int maxHealth = (int)health.MaxHealth._Value;
-                int physicalPower = (int)(stats.PhysicalPower._Value * scalingFactor);
-                int spellPower = (int)(stats.SpellPower._Value * scalingFactor);
-                
-                ctx.Reply($"Familiar Stats - Level: <color=white>{level.Level}</color>, Max Health: <color=red>{maxHealth}</color>, Physical Power: <color=green>{physicalPower}</color>, Spell Power: <color=blue>{spellPower}</color>");
-            }
-            else
-            {
-                ctx.Reply("Couldn't find any experience data for familiar.");
-            }
-        }
-
         [Command(name: "resetFamiliars", shortHand: "resetfams", adminOnly: false, usage: ".resetfams", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
         public static void ResetFamiliars(ChatCommandContext ctx)
         {

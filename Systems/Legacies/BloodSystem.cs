@@ -37,8 +37,6 @@ namespace Bloodcraft.Systems.Legacy
             { BloodType.Scholar, PrestigeSystem.PrestigeType.ScholarLegacy },
             { BloodType.Rogue, PrestigeSystem.PrestigeType.RogueLegacy },
             { BloodType.Mutant, PrestigeSystem.PrestigeType.MutantLegacy },
-            { BloodType.None, PrestigeSystem.PrestigeType.Experience }, // Assuming 'None' maps to general experience
-            { BloodType.GateBoss, PrestigeSystem.PrestigeType.Experience }, // Example mapping
             { BloodType.Draculin, PrestigeSystem.PrestigeType.DraculinLegacy },
             { BloodType.Immortal, PrestigeSystem.PrestigeType.ImmortalLegacy },
             { BloodType.Creature, PrestigeSystem.PrestigeType.CreatureLegacy },
