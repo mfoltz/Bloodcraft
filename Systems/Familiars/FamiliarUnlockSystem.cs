@@ -25,7 +25,7 @@ namespace Bloodcraft.Systems.Familiars
             string lowerName = diedPrefab.LookupName().ToLower();
 
             if (died.Has<MinionMaster>() || died.Has<Minion>() ||  died.Has<VBloodConsumeSource>()) return; // component checks
-            if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("werewolf")) return; // prefab name checks
+            if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("werewolf") || lowerName.Contains("horse") || lowerName.Contains("crystal")) return; // prefab name checks
             if (IsBanned(diedPrefab)) return; // banned prefab checks
 
             if ((int)diedCategory.UnitCategory < 5)
@@ -56,7 +56,7 @@ namespace Bloodcraft.Systems.Familiars
 
             if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
             {
-                lastListName = $"FamiliarsList{data.UnlockedFamiliars.Count + 1}";
+                lastListName = $"fl{data.UnlockedFamiliars.Count + 1}";
                 data.UnlockedFamiliars[lastListName] = [];
                 if (Core.DataStructures.FamiliarSet[playerId] == "")
                 {
@@ -84,7 +84,7 @@ namespace Bloodcraft.Systems.Familiars
                 currentList.Add(familiarKey);
                 FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
 
-                var message = $"New unit unlocked: <color=#c0c0c0>{died.Read<PrefabGUID>().LookupName()}</color>";
+                var message = $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().LookupName()}</color>";
                 ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, message);
             }
         }

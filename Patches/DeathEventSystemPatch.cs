@@ -3,6 +3,9 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
+using Steamworks;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using ProfessionSystem = Bloodcraft.Systems.Professions.ProfessionSystem;
@@ -27,30 +30,19 @@ internal static class DeathEventListenerSystemPatch
         {
             foreach (DeathEvent deathEvent in deathEvents)
             {
-                /*
-                if (deathEvent.Killer.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>())
-                {
-                    if (Plugin.LevelingSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
-                    if (Plugin.ExpertiseSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
-                    if (Plugin.FamiliarSystem.Value && !deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodConsumeSource>()) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
-                    if (Plugin.FamiliarSystem.Value) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died);
-                }
-                else if (deathEvent.Killer.Has<PlayerCharacter>())
-                {
-                    if (Plugin.ProfessionSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
-                }
-                else if (deathEvent.Killer.Has<Follower>() && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // player familiar kills
-                {
-                    if (Plugin.LevelingSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer.Read<Follower>().Followed._Value, deathEvent.Died);
-                    if (Plugin.FamiliarSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer.Read<Follower>().Followed._Value, deathEvent.Died);
-                }
-                else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // player summon kills
-                {
-                    if (Plugin.LevelingSystem.Value && !deathEvent.Died.Has<VBloodConsumeSource>()) LevelingSystem.UpdateLeveling(deathEvent.Killer.Read<Follower>().Followed._Value, deathEvent.Died);
-                }
-                */
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
+
+                if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
+                {
+                    ulong steamId = deathEvent.Died.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.Item2.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
+                    {
+                        actives = new(Entity.Null, 0);
+                        Core.DataStructures.FamiliarActives[steamId] = actives;
+                        Core.DataStructures.SavePlayerFamiliarActives();
+                    }
+                }
 
                 if (deathEvent.Killer.Has<PlayerCharacter>())
                 {
@@ -89,6 +81,7 @@ internal static class DeathEventListenerSystemPatch
                         LevelingSystem.UpdateLeveling(killer, deathEvent.Died);
                     }
                 }
+                
             }
         }
         catch (Exception e)

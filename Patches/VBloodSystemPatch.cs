@@ -25,7 +25,7 @@ internal class VBloodSystemPatch
                 Entity player = vBloodConsumed.Target;
                 if (Plugin.LevelingSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) LevelingSystem.UpdateLeveling(player, vBlood);
                 if (Plugin.ExpertiseSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) ExpertiseSystem.UpdateExpertise(player, vBlood);
-                if (Plugin.ProfessionSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) BloodSystem.UpdateLegacy(player, vBlood);
+                if (Plugin.BloodSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) BloodSystem.UpdateLegacy(player, vBlood);
                 if (Plugin.FamiliarSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
             }
         }

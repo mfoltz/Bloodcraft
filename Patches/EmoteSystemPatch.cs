@@ -2,10 +2,12 @@
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
+using static ProjectM.SpawnBuffsAuthoring.SpawnBuffElement_Editor;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -13,9 +15,14 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal class EmoteSystemPatch
 {
+    static readonly PrefabGUID invulnerableBuff = new(-480024072);
+    static readonly PrefabGUID ignoredFaction = new(-1430861195);
+    static readonly PrefabGUID playerFaction = new(1106458752);
+
     public static readonly Dictionary<PrefabGUID, Action<Entity, Entity, ulong>> actions = new()
     {
         { new(1177797340), CallDismiss }, // Wave
+        { new(-370061286), CombatMode } // Salute
     };
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
@@ -50,7 +57,6 @@ internal class EmoteSystemPatch
             entities.Dispose();
         }
     }
-
     public static void CallDismiss(Entity userEntity, Entity character, ulong playerId)
     {
         EntityManager entityManager = Core.EntityManager;
@@ -103,6 +109,185 @@ internal class EmoteSystemPatch
         {
             ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar to enable/disable.");
         }
-    } 
-    
+    }
+    public static void CombatMode(Entity userEntity, Entity character, ulong playerId)
+    {
+        ServerGameManager serverGameManager = Core.ServerGameManager;
+        EntityManager entityManager = Core.EntityManager;
+        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
+        {
+            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching guidhash in FamiliarActives
+
+            if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
+            {
+                familiar = data.Item1;
+            }
+
+            if (familiar == Entity.Null)
+            {
+                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
+                return;
+            }
+
+            if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // if invulnerable, remove and enable combat
+            {
+                BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(serverGameManager);
+                EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, invulnerableBuff, familiar);
+
+                FactionReference factionReference = familiar.Read<FactionReference>();
+                factionReference.FactionGuid._Value = playerFaction;
+                familiar.Write(factionReference);
+
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                aggroConsumer.Active._Value = true;
+                familiar.Write(aggroConsumer);
+
+                Aggroable aggroable = familiar.Read<Aggroable>();
+                aggroable.Value._Value = true;
+                aggroable.DistanceFactor._Value = 1f;
+                aggroable.AggroFactor._Value = 1f;
+                familiar.Write(aggroable);
+                
+                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
+            }
+            else // if not, disable combat
+            {
+                FactionReference factionReference = familiar.Read<FactionReference>();
+                factionReference.FactionGuid._Value = ignoredFaction;
+                familiar.Write(factionReference);
+
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                aggroConsumer.Active._Value = false;
+                familiar.Write(aggroConsumer);
+
+                Aggroable aggroable = familiar.Read<Aggroable>();
+                aggroable.Value._Value = false;
+                aggroable.DistanceFactor._Value = 0f;
+                aggroable.AggroFactor._Value = 0f;
+                familiar.Write(aggroable);
+
+                DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
+                ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                {
+                    BuffPrefabGUID = invulnerableBuff,
+                };
+                FromCharacter fromCharacter = new()
+                {
+                    Character = familiar,
+                    User = userEntity,
+                };
+
+                debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
+                {
+                    if (invlunerableBuff.Has<LifeTime>())
+                    {
+                        var lifetime = invlunerableBuff.Read<LifeTime>();
+                        lifetime.Duration = -1;
+                        lifetime.EndAction = LifeTimeEndAction.None;
+                        invlunerableBuff.Write(lifetime);
+                    }
+                    else
+                    {
+                        LifeTime lifeTime = new()
+                        {
+                            Duration = -1,
+                            EndAction = LifeTimeEndAction.None
+                        };
+                        invlunerableBuff.Add<LifeTime>();
+                        invlunerableBuff.Write(lifeTime);
+                    }
+                    
+                }
+                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
+            }
+        }
+        else
+        {
+            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
+        }
+    }
+    public static void FamiliarNoCombatBuff(Entity characterEntity, PrefabGUID prefabGUID)
+    {
+        FromCharacter fromCharacter = new() { Character = characterEntity, User = characterEntity };
+        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
+        var debugEvent = new ApplyBuffDebugEvent
+        {
+            BuffPrefabGUID = prefabGUID,
+        };
+        if (!BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out Entity buffEntity))
+        {
+            debugEventsSystem.ApplyBuff(fromCharacter, debugEvent);
+
+            if (BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out buffEntity))
+            {
+                //buffEntity.LogComponentTypes();
+                debugEventsSystem.ApplyBuff(fromCharacter, debugEvent);
+                if (BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out buffEntity))
+                {
+                    if (BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out buffEntity))
+                    {
+                        if (buffEntity.Has<Buff>())
+                        {
+                            Buff newBuff = buffEntity.Read<Buff>();
+                            newBuff.BuffEffectType = BuffEffectType.Buff;
+                            newBuff.BuffType = BuffType.Parallel;
+                            buffEntity.Write(newBuff);
+                        }
+
+                        if (buffEntity.Has<BuffCategory>())
+                        {
+                            BuffCategory buffCategory = buffEntity.Read<BuffCategory>();
+                            buffCategory.Groups = BuffCategoryFlag.None;
+                            buffEntity.Write(buffCategory);
+                        }
+                        if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
+                        {
+                            buffEntity.Remove<CreateGameplayEventsOnSpawn>();
+                        }
+                        if (buffEntity.Has<GameplayEventListeners>())
+                        {
+                            buffEntity.Remove<GameplayEventListeners>();
+                        }
+                        if (!buffEntity.Has<Buff_Persists_Through_Death>())
+                        {
+                            buffEntity.Has<Buff_Persists_Through_Death>();
+                        }
+
+                        if (buffEntity.Has<LifeTime>())
+                        {
+                            var lifetime = buffEntity.Read<LifeTime>();
+                            lifetime.Duration = -1;
+                            lifetime.EndAction = LifeTimeEndAction.None;
+                            buffEntity.Write(lifetime);
+                            //buffEntity.Remove<LifeTime>();
+                        }
+                        else
+                        {
+                            LifeTime lifeTime = new()
+                            {
+                                Duration = -1,
+                                EndAction = LifeTimeEndAction.None
+                            };
+                            Core.EntityManager.AddComponentData(buffEntity, lifeTime);
+                        }
+                        if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
+                        {
+                            buffEntity.Remove<RemoveBuffOnGameplayEvent>();
+                        }
+                        if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
+                        {
+                            buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
+                        }
+
+                        if (buffEntity.Has<DestroyOnGameplayEvent>())
+                        {
+                            buffEntity.Remove<DestroyOnGameplayEvent>();
+                        }
+                    }
+                }
+            }
+        }
+    }    
 }

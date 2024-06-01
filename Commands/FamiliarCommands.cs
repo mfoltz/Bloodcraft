@@ -168,6 +168,61 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Couldn't find set to rename.");
             }
         }
+        [Command(name: "transplantFamiliar", shortHand: "tf", adminOnly: false, usage: ".tf [SetName]", description: "Moves active familiar to specified set.")]
+        public static void TransplantFamiliar(ChatCommandContext ctx, string name)
+        {
+            ulong steamId = ctx.User.PlatformId;
+            UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
+            if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count < 10)
+            {
+                // Remove the old set
+                if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Item2.Equals(0))
+                {
+                    var keys = data.UnlockedFamiliars.Keys;
+                    foreach (var key in keys)
+                    {
+                        if (data.UnlockedFamiliars[key].Contains(actives.Item2))
+                        {
+                            data.UnlockedFamiliars[key].Remove(actives.Item2);
+                            familiarSet.Add(actives.Item2);
+                            Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
+                        }
+                    }
+                    PrefabGUID prefabGUID = new(actives.Item2);
+                    ctx.Reply($"<color=green>{prefabGUID.LookupName()}</color> moved to <color=white>{name}</color>.");
+                }
+            }
+            else
+            {
+                ctx.Reply("Couldn't find set or set is full.");
+            }
+        }
+
+        [Command(name: "removeFamiliar", shortHand: "rf", adminOnly: false, usage: ".rf [#]", description: "Removes familiar from current set permanently.")]
+        public static void RemoveFamiliarFromSet(ChatCommandContext ctx, int choice)
+        {
+            ulong steamId = ctx.User.PlatformId;
+            UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
+            if (Core.DataStructures.FamiliarSet.TryGetValue(steamId, out var activeSet) && data.UnlockedFamiliars.TryGetValue(activeSet, out var familiarSet))
+            {
+                // Remove the old set
+                if (choice < 1 || choice > familiarSet.Count)
+                {
+                    ctx.Reply($"Invalid choice for removal, please use 1 to {familiarSet.Count} (Current List:<color=white>{familiarSet}</color>)");
+                    return;
+                }
+                PrefabGUID familiarId = new(familiarSet[choice - 1]);
+                // remove from set
+                familiarSet.RemoveAt(choice - 1);
+                Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
+
+                ctx.Reply($"<color=green>{familiarId.LookupName()}</color> removed from <color=white>{activeSet}</color>.");
+            }
+            else
+            {
+                ctx.Reply("Couldn't find set to remove from.");
+            }
+        }
 
         [Command(name: "toggleFamiliar", shortHand: "toggle", usage: ".toggle", description: "Calls or dismisses familar.", adminOnly: false)]
         public static void ToggleFamiliar(ChatCommandContext ctx)
@@ -176,6 +231,15 @@ namespace Bloodcraft.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             Entity userEntity = ctx.Event.SenderUserEntity;
             EmoteSystemPatch.CallDismiss(userEntity, character, platformId);
+        }
+
+        [Command(name: "toggleCombat", shortHand: "combat", usage: ".combat", description: "Enables or disables combat for familiar.", adminOnly: false)]
+        public static void ToggleCombat(ChatCommandContext ctx)
+        {
+            ulong platformId = ctx.User.PlatformId;
+            Entity character = ctx.Event.SenderCharacterEntity;
+            Entity userEntity = ctx.Event.SenderUserEntity;
+            EmoteSystemPatch.CombatMode(userEntity, character, platformId);
         }
 
         [Command(name: "toggleEmotes", shortHand: "emotes", usage: ".emotes", description: "Toggle emote commands.", adminOnly: false)]

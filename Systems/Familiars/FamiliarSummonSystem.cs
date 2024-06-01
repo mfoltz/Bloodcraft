@@ -72,13 +72,17 @@ namespace Bloodcraft.Systems.Familiars
             follower.ModeModifiable._Value = 1;
             familiar.Write(follower);
 
+            UnitStats unitStats = familiar.Read<UnitStats>();
+            unitStats.PvPProtected._Value = true;
+            familiar.Write(unitStats);
+
             var buffer = player.ReadBuffer<FollowerBuffer>();
             buffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
         }
         public static void ModifyBloodSource(Entity familiar, int level)
         {
             BloodConsumeSource bloodConsumeSource = familiar.Read<BloodConsumeSource>();
-            bloodConsumeSource.BloodQuality = level / Plugin.MaxFamiliarLevel.Value * 100;
+            bloodConsumeSource.BloodQuality = level / (float)Plugin.MaxFamiliarLevel.Value * 100;
             bloodConsumeSource.CanBeConsumed = false;
             familiar.Write(bloodConsumeSource);
         }
@@ -88,14 +92,14 @@ namespace Bloodcraft.Systems.Familiars
             float healthScalingFactor = 1.0f + (level / (float)Plugin.MaxFamiliarLevel.Value) * 4.0f; // Calculate scaling factor for max health
 
             DamageCategoryStats damageStats = familiar.Read<DamageCategoryStats>();
-            damageStats.DamageVsUndeads._Value *= scalingFactor;
-            damageStats.DamageVsHumans._Value *= scalingFactor;
-            damageStats.DamageVsDemons._Value *= scalingFactor;
-            damageStats.DamageVsMechanical._Value *= scalingFactor;
-            damageStats.DamageVsBeasts._Value *= scalingFactor;
-            damageStats.DamageVsLightArmor._Value *= scalingFactor;
-            damageStats.DamageVsVBloods._Value *= scalingFactor;
-            damageStats.DamageVsMagic._Value *= scalingFactor;
+            damageStats.DamageVsUndeads._Value = scalingFactor;
+            damageStats.DamageVsHumans._Value = scalingFactor;
+            damageStats.DamageVsDemons._Value = scalingFactor;
+            damageStats.DamageVsMechanical._Value*= scalingFactor;
+            damageStats.DamageVsBeasts._Value = scalingFactor;
+            damageStats.DamageVsLightArmor._Value = scalingFactor;
+            damageStats.DamageVsVBloods._Value = scalingFactor;
+            damageStats.DamageVsMagic._Value = scalingFactor;
             familiar.Write(damageStats);
 
             Health health = familiar.Read<Health>();
@@ -103,11 +107,6 @@ namespace Bloodcraft.Systems.Familiars
             health.MaxHealth._Value = baseHealth * healthScalingFactor;
             health.Value = health.MaxHealth._Value;
             familiar.Write(health);
-
-            UnitStats unitStats = familiar.Read<UnitStats>();
-            unitStats.PvPProtected._Value = true;
-            familiar.Write(unitStats);
-
         }
         static void ModifyUnitTier(Entity familiar, int level)
         {
