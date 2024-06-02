@@ -60,8 +60,14 @@ namespace Bloodcraft.Commands
                             bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, string>(stat, bonusString));
                         }
                     }
-                    string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    ctx.Reply($"Current weapon stat bonuses: {bonuses}");
+                    //string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
+                    //ctx.Reply($"Current weapon stat bonuses: {bonuses}");
+                    for (int i = 0; i < bonusWeaponStats.Count; i += 6)
+                    {
+                        var batch = bonusWeaponStats.Skip(i).Take(6);
+                        string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
+                        ctx.Reply($"Current weapon stat bonuses: {bonuses}");
+                    }
                 }
                 else
                 {
@@ -141,7 +147,7 @@ namespace Bloodcraft.Commands
             }
             else
             {
-                ctx.Reply($"You have already chosen {Plugin.ExpertiseStatChoices.Value} stats for this weapon.");
+                ctx.Reply($"You have already chosen {Plugin.ExpertiseStatChoices.Value} stats for this expertise, the stat has already been chosen for this expertise, or the stat is not allowed for your class.");
             }
         }
 
@@ -244,7 +250,7 @@ namespace Bloodcraft.Commands
             expertiseHandler.SaveChanges();
             if (Plugin.LevelingSystem.Value) GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
 
-            ctx.Reply($"Expertise for {expertiseHandler.GetWeaponType()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
+            ctx.Reply($"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
         }
 
         [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stats available.")]

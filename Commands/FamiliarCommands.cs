@@ -135,6 +135,7 @@ namespace Bloodcraft.Commands
             {
                 Core.DataStructures.FamiliarSet[steamId] = name;
                 ctx.Reply($"Active Familiar Set: <color=white>{name}</color>");
+                Core.DataStructures.SavePlayerFamiliarSets();
             }
             else
             {

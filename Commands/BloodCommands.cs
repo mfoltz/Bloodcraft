@@ -57,8 +57,17 @@ namespace Bloodcraft.Commands
                             bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
                         }
                     }
+                    /*
                     string bonuses = string.Join(", ", bonusBloodStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
+                    
                     ctx.Reply($"Current blood stat bonuses: {bonuses}");
+                    */
+                    for (int i = 0; i < bonusBloodStats.Count; i += 6)
+                    {
+                        var batch = bonusBloodStats.Skip(i).Take(6);
+                        string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
+                        ctx.Reply($"Current blood stat bonuses: {bonuses}");
+                    }
                 }
                 else
                 {
@@ -134,7 +143,7 @@ namespace Bloodcraft.Commands
             }
             else
             {
-                ctx.Reply($"You have already chosen {Plugin.LegacyStatChoices.Value} stats for this legacy.");
+                ctx.Reply($"You have already chosen {Plugin.LegacyStatChoices.Value} stats for this legacy, the stat has already been chosen for this legacy, or the stat is not allowed for your class.");
             }
         }
         [Command(name: "resetBloodStats", shortHand: "rbs", adminOnly: false, usage: ".rbs", description: "Reset stats for current blood.")]

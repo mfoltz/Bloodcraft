@@ -1,4 +1,5 @@
 ﻿using ProjectM;
+using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Bloodcraft.Systems.Expertise
 {
@@ -14,7 +15,32 @@ namespace Bloodcraft.Systems.Expertise
                     Core.DataStructures.PlayerWeaponStats[steamId][weaponType] = Stats;
                 }
 
-                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= 5) // 5 hard cap
+                if (Plugin.HardSynergies.Value)
+                {
+                    if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) || classes.Keys.Count == 0)
+                    {
+                        return false;
+                    }
+                    List<int> playerClassStats = classes.First().Value.Item1;
+
+                    List<WeaponStatType> weaponStatTypes = playerClassStats.Select(value => (WeaponStatType)value).ToList();
+
+                    if (!weaponStatTypes.Contains(statType))
+                    {
+                        return false;
+                    }
+                    if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType))
+                    {
+                        return false; // Only allow configured amount of stats to be chosen per weapon, one stat type per weapon
+                    }
+                    Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Add(statType);
+                    Core.DataStructures.SavePlayerWeaponStats();
+                    return true;
+                }
+                
+
+
+                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType)) 
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon
                 }

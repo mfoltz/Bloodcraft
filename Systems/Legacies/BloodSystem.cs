@@ -83,27 +83,26 @@ namespace Bloodcraft.Systems.Legacy
             {
                 // Check if the player leveled up
                 var xpData = handler.GetLegacyData(steamID);
+                float changeFactor = 1f;
 
                 if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
                 {
+                    
                     // Apply rate reduction with diminishing returns
-                    if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
+                    if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige) && legacyPrestige > 0)
                     {
-                        float baseReduction = Plugin.PrestigeRatesReducer.Value; // e.g., 0.1 for 10%
-                        float diminishingFactor = baseReduction * PrestigeData;
-                        float reductionFactor = 1 / (1 + diminishingFactor);
-                        BloodValue *= reductionFactor;
+                        changeFactor -= (Plugin.PrestigeRatesReducer.Value * legacyPrestige);
                     }
 
                     // Apply rate gain with linear increase
-                    if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
+                    if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                     {
-                        float baseGain = Plugin.PrestigeRatesMultiplier.Value; // e.g., 0.1 for 10%
-                        float gainFactor = 1 + (baseGain * xpPrestigeLevel);
-                        BloodValue *= gainFactor;
+                        changeFactor += 1 + (Plugin.PrestigeRatesMultiplier.Value * xpPrestige);
+                        
                     }
                 }
 
+                BloodValue *= changeFactor;
 
                 float newExperience = xpData.Value + BloodValue;
                 int newLevel = ConvertXpToLevel(newExperience);

@@ -27,6 +27,21 @@ public class BuffPatch
             {
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 
+                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
+                {
+                    if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                    {
+                        //Core.Log.LogInfo(prefabGUID.LookupName());
+                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entity.Read<Buff>().Target);
+                        if (familiar != Entity.Null)
+                        {
+                            Follower follower = familiar.Read<Follower>();
+                            follower.ModeModifiable._Value = 1;
+                            familiar.Write(follower);
+                        }
+                    }
+                }
+                
                 if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
@@ -115,6 +130,9 @@ public class BuffPatch
                     Blood blood = statChangeEvent.Entity.Read<Blood>();
                     BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
                     ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    
+
+                    
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
                     var bloodQualityBuff = statChangeEvent.Entity.ReadBuffer<BloodQualityBuff>();
                     if (bloodHandler == null)
@@ -122,6 +140,13 @@ public class BuffPatch
                         continue;
                     }
                     var legacyData = bloodHandler.GetLegacyData(steamID);
+                    int legacyKey = legacyData.Key;
+
+                    if (Plugin.PrestigeSystem.Value && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
+                    {
+                        legacyKey = bloodPrestige * 10;
+                    }
+
                     if (legacyData.Key > 0)
                     {
                         bloodQualityChange.Quality += legacyData.Key;

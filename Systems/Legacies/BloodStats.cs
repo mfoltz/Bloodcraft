@@ -1,5 +1,7 @@
 ﻿using Bloodcraft.Systems.Legacy;
 using ProjectM;
+using static Bloodcraft.Systems.Legacies.BloodStats.BloodStatManager;
+using static Bloodcraft.Systems.Legacy.BloodSystem;
 
 namespace Bloodcraft.Systems.Legacies
 {
@@ -15,7 +17,31 @@ namespace Bloodcraft.Systems.Legacies
                     Core.DataStructures.PlayerBloodStats[steamId][BloodType] = Stats;
                 }
 
-                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= 5) // 5 hard cap
+                if (Plugin.HardSynergies.Value)
+                {
+                    if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) || classes.Count == 0)
+                    {
+                        return false;
+                    }
+                    
+                    List<int> playerClassStats = classes.First().Value.Item2;
+
+                    List<BloodStatType> weaponStatTypes = playerClassStats.Select(value => (BloodStatType)value).ToList();
+
+                    if (!weaponStatTypes.Contains(statType))
+                    {
+                        return false;
+                    }
+                    if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
+                    {
+                        return false; // Only allow configured amount of stats to be chosen per blood, only allow one stat type per blood
+                    }
+                    Core.DataStructures.PlayerBloodStats[steamId][BloodType].Add(statType);
+                    Core.DataStructures.SavePlayerWeaponStats();
+                    return true;
+                }
+
+                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon
                 }
@@ -52,6 +78,19 @@ namespace Bloodcraft.Systems.Legacies
                 ShieldAbsorb,
                 BloodEfficiency
             }
+
+            public static readonly Dictionary<BloodType, List<BloodStatType>> BloodSynergyMap = new()
+                {
+                    { BloodType.Worker, new List<BloodStatType> { BloodStatType.ResourceYield, BloodStatType.CCReduction } },
+                    { BloodType.Warrior, new List<BloodStatType> { BloodStatType.DamageReduction, BloodStatType.PhysicalResistance } },
+                    { BloodType.Scholar, new List<BloodStatType> { BloodStatType.SpellResistance, BloodStatType.SpellCooldownRecoveryRate } },
+                    { BloodType.Rogue, new List<BloodStatType> { BloodStatType.CCReduction, BloodStatType.MinionDamage } },
+                    { BloodType.Mutant, new List<BloodStatType> { BloodStatType.SpellCooldownRecoveryRate} },
+                    { BloodType.Draculin, new List<BloodStatType> { BloodStatType.SpellResistance, BloodStatType.UltimateCooldownRecoveryRate } },
+                    { BloodType.Immortal, new List<BloodStatType> { BloodStatType.WeaponCooldownRecoveryRate, BloodStatType.ResourceYield } },
+                    { BloodType.Creature, new List<BloodStatType> { BloodStatType.HealingReceived, BloodStatType.MinionDamage } },
+                    { BloodType.Brute, new List<BloodStatType> { BloodStatType.ShieldAbsorb, BloodStatType.SpellCooldownRecoveryRate} }
+                };
 
             public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatMap = new()
                 {

@@ -22,6 +22,7 @@ public class Plugin : BasePlugin
 
     // current paths
     public static readonly string PlayerLevelingPath = Path.Combine(ConfigPath, "PlayerLeveling");
+
     public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
     public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
     public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
@@ -32,7 +33,8 @@ public class Plugin : BasePlugin
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<int> _maxLevelingPrestiges;
-    private static ConfigEntry<float> _prestigeRatesReducer; //reduces gains by this percent per level of prestige for all systems, expertise/legacy rates can be raised by prestiging in leveling
+    private static ConfigEntry<float> _levelingPrestigeReducer; // separate factor for reducing experience gain in leveling per level of leveling prestige
+    private static ConfigEntry<float> _prestigeRatesReducer; //reduces gains by this percent per level of prestige for expertise/legacy, they get raised by prestiging in leveling
     private static ConfigEntry<float> _prestigeStatMultiplier; //increases stats gained from expertise/legacies per level of prestige
     private static ConfigEntry<float> _prestigeRatesMultiplier; //increases player gains in expertise/legacy by this percent per level of prestige (leveling prestige)
     private static ConfigEntry<int> _maxPlayerLevel;
@@ -101,11 +103,29 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _unitFamiliarMultiplier;
     private static ConfigEntry<float> _vBloodFamiliarMultiplier;
     private static ConfigEntry<float> _unitUnlockChance;
+
+    private static ConfigEntry<bool> _softSynergies; // allow synergies (turns on class multipliers but doesn't restrict choices)
+    private static ConfigEntry<bool> _hardSynergies; // enforce synergies (turns on class multipliers and restricts choices)
+    private static ConfigEntry<float> _statSyngergyMultiplier;
+    private static ConfigEntry<string> _bloodKnightWeapon;
+    private static ConfigEntry<string> _bloodKnightBlood;
+    private static ConfigEntry<string> _demonHunterWeapon;
+    private static ConfigEntry<string> _demonHunterBlood;
+    private static ConfigEntry<string> _vampireLordWeapon;
+    private static ConfigEntry<string> _vampireLordBlood;
+    private static ConfigEntry<string> _shadowBladeWeapon;
+    private static ConfigEntry<string> _shadowBladeBlood;
+    private static ConfigEntry<string> _arcaneSorcererWeapon;
+    private static ConfigEntry<string> _arcaneSorcererBlood;
+    private static ConfigEntry<string> _deathMageWeapon;
+    private static ConfigEntry<string> _deathMageBlood;
     //private static ConfigEntry<float> _vBloodUnlockChance;
 
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
     public static ConfigEntry<int> MaxLevelingPrestiges => _maxLevelingPrestiges;
+
+    public static ConfigEntry<float> LevelingPrestigeReducer => _levelingPrestigeReducer;
     public static ConfigEntry<float> PrestigeRatesReducer => _prestigeRatesReducer;
     public static ConfigEntry<float> PrestigeStatMultiplier => _prestigeStatMultiplier;
     public static ConfigEntry<float> PrestigeRatesMultiplier => _prestigeRatesMultiplier;
@@ -189,6 +209,23 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
     //public static ConfigEntry<float> VBloodUnlockChance => _vBloodUnlockChance;
 
+    public static ConfigEntry<bool> SoftSynergies => _softSynergies;
+    public static ConfigEntry<bool> HardSynergies => _hardSynergies;
+
+    public static ConfigEntry<float> StatSynergyMultiplier => _statSyngergyMultiplier;
+    public static ConfigEntry<string> BloodKnightWeapon => _bloodKnightWeapon;
+    public static ConfigEntry<string> BloodKnightBlood => _bloodKnightBlood;
+    public static ConfigEntry<string> DemonHunterWeapon => _demonHunterWeapon;
+    public static ConfigEntry<string> DemonHunterBlood => _demonHunterBlood;
+    public static ConfigEntry<string> VampireLordWeapon => _vampireLordWeapon;
+    public static ConfigEntry<string> VampireLordBlood => _vampireLordBlood;
+    public static ConfigEntry<string> ShadowBladeWeapon => _shadowBladeWeapon;
+    public static ConfigEntry<string> ShadowBladeBlood => _shadowBladeBlood;
+    public static ConfigEntry<string> ArcaneSorcererWeapon => _arcaneSorcererWeapon;
+    public static ConfigEntry<string> ArcaneSorcererBlood => _arcaneSorcererBlood;
+    public static ConfigEntry<string> DeathMageWeapon => _deathMageWeapon;
+    public static ConfigEntry<string> DeathMageBlood => _deathMageBlood;
+
     public override void Load()
     {
         Instance = this;
@@ -211,19 +248,20 @@ public class Plugin : BasePlugin
         {
             CreateDirectories(path);
         }
- 
+
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
-        _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.20f, "Multiplicative factor by which rates are reduced in expertise/legacy/experience per increment of prestige in expertise/legacy/experience.");
-        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.25f, "Multiplicative rate by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.");
-        _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.15f, "Multiplicative factor by which rates are increased in expertise/legacy per increment of prestige in leveling.");
+        _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
+        _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy.");
+        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.25f, "Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.");
+        _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.10f, "Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
-        _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 5f, "The multiplier for experience gained from units.");
+        _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 10f, "The multiplier for experience gained from units.");
         _vBloodLevelingMultiplier = InitConfigEntry("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
-        _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "Scaling multiplier for tapering experience gained at higher levels.");
+        _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "TBD");
         _playerGrouping = InitConfigEntry("Config", "PlayerGrouping", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
         _maxGroupSize = InitConfigEntry("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
 
@@ -235,7 +273,7 @@ public class Plugin : BasePlugin
         _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
         _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
         _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
-        _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise (5 max).");
+        _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
         _resetExpertiseItem = InitConfigEntry("Config", "ResetExpertiseItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
         _resetExpertiseItemQuantity = InitConfigEntry("Config", "ResetExpertiseItemQuantity", 0, "Quantity of item required for resetting stats.");
 
@@ -254,11 +292,11 @@ public class Plugin : BasePlugin
 
         _bloodSystem = InitConfigEntry("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
         _maxLegacyPrestiges = InitConfigEntry("Config", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies.");
-        _bloodQualityBonus = InitConfigEntry("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus (wouldn't recommend using this after the revamp but left it in on request, blood system must be turned on as well).");
+        _bloodQualityBonus = InitConfigEntry("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using prestige prestige level in legacy will take over the value for this at legacyPrestigeLevel*10 for now).");
         _maxBloodLevel = InitConfigEntry("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
         _unitLegacyMultiplier = InitConfigEntry("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
         _vBloodLegacyMultipler = InitConfigEntry("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
-        _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy (5 max).");
+        _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
         _resetLegacyItem = InitConfigEntry("Config", "ResetLegacyItem", 0, "Item PrefabGUID cost for resetting blood stats.");
         _resetLegacyItemQuantity = InitConfigEntry("Config", "ResetLegacyItemQuantity", 0, "Quantity of item required for resetting blood stats.");
 
@@ -285,7 +323,27 @@ public class Plugin : BasePlugin
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
         //_vBloodUnlockChance = InitConfigEntry("Config", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar.");
-        // Initialize configuration settings
+
+        _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");
+        _hardSynergies = InitConfigEntry("Config", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).");
+        _statSyngergyMultiplier = InitConfigEntry("Config", "StatSynergyMultiplier", 2f, "Multiplier for class stat synergies to base stat cap.");
+        _bloodKnightWeapon = InitConfigEntry("Config", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies.");
+        _bloodKnightBlood = InitConfigEntry("Config", "BloodKnightBlood", "0,2,3,11", "Blood Knight blood synergies.");
+
+        _demonHunterWeapon = InitConfigEntry("Config", "DemonHunterWeapon", "1,2,8,9", "Demon Hunter weapon synergies.");
+        _demonHunterBlood = InitConfigEntry("Config", "DemonHunterBlood", "2,5,7,9", "Demon Hunter blood synergies.");
+
+        _vampireLordWeapon = InitConfigEntry("Config", "VampireLordWeapon", "0,5,6,7", "Vampire Lord weapon synergies.");
+        _vampireLordBlood = InitConfigEntry("Config", "VampireLordBlood", "1,4,8,11", "Vampire Lord blood synergies.");
+
+        _shadowBladeWeapon = InitConfigEntry("Config", "ShadowBladeWeapon", "1,2,3,4", "Shadow Blade weapon synergies.");
+        _shadowBladeBlood = InitConfigEntry("Config", "ShadowBladeBlood", "3,7,8,10", "Shadow Blade blood synergies.");
+
+        _arcaneSorcererWeapon = InitConfigEntry("Config", "ArcaneSorcererWeapon", "4,7,10,11", "Arcane Sorcerer weapon synergies.");
+        _arcaneSorcererBlood = InitConfigEntry("Config", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies.");
+
+        _deathMageWeapon = InitConfigEntry("Config", "DeathMageWeapon", "0,3,4,7", "Death Mage weapon synergies.");
+        _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,6,9,10", "Death Mage blood synergies.");
     }
 
     static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
@@ -306,6 +364,7 @@ public class Plugin : BasePlugin
         }
         return entry;
     }
+
     static void CreateDirectories(string path)
     {
         if (!Directory.Exists(path))
@@ -313,12 +372,14 @@ public class Plugin : BasePlugin
             Directory.CreateDirectory(path);
         }
     }
+
     public override bool Unload()
     {
         Config.Clear();
         _harmony.UnpatchSelf();
         return true;
     }
+
     static void LoadAllData()
     {
         Core.DataStructures.LoadPlayerBools();
@@ -420,6 +481,7 @@ public class Plugin : BasePlugin
         Core.DataStructures.LoadPlayerAlchemy,
         Core.DataStructures.LoadPlayerHarvesting,
     ];
+
     static readonly Action[] loadFamiliars =
     [
         Core.DataStructures.LoadPlayerFamiliarActives,

@@ -2,13 +2,11 @@
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using static Bloodcraft.Core;
-using static Bloodcraft.Systems.Legacy.BloodSystem;
 
 namespace Bloodcraft.Systems.Experience
 {
@@ -17,12 +15,32 @@ namespace Bloodcraft.Systems.Experience
         static readonly float UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
         static readonly float VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
         static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
-        static readonly int EXPPower = 2; // power for calculating level from xp
+        static readonly float EXPPower = 2f; // power for calculating level from xp
         static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value; // maximum level
         static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
-        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, tapers experience gain as level increases
+        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, boosts exp at lower levels
 
         static readonly PrefabGUID levelUpBuff = new(-1133938228);
+
+        public enum PlayerClasses
+        {
+            BloodKnight,
+            DemonHunter,
+            VampireLord,
+            ShadowBlade,
+            ArcaneSorcerer,
+            DeathMage
+        }
+
+        public static readonly Dictionary<PlayerClasses, (string, string)> ClassWeaponBloodMap = new()
+        {
+            { PlayerClasses.BloodKnight, (Plugin.BloodKnightWeapon.Value, Plugin.BloodKnightBlood.Value) },
+            { PlayerClasses.DemonHunter, (Plugin.DemonHunterWeapon.Value, Plugin.DemonHunterBlood.Value) },
+            { PlayerClasses.VampireLord, (Plugin.VampireLordWeapon.Value, Plugin.VampireLordBlood.Value) },
+            { PlayerClasses.ShadowBlade, (Plugin.ShadowBladeWeapon.Value, Plugin.ShadowBladeBlood.Value) },
+            { PlayerClasses.ArcaneSorcerer, (Plugin.ArcaneSorcererWeapon.Value, Plugin.ArcaneSorcererBlood.Value) },
+            { PlayerClasses.DeathMage, (Plugin.DeathMageWeapon.Value, Plugin.DeathMageBlood.Value) }
+        };
 
         public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
         {
@@ -101,21 +119,25 @@ namespace Bloodcraft.Systems.Experience
         static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, int groupMultiplier)
         {
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
+            Health health = entityManager.GetComponentData<Health>(victimEntity);
             bool isVBlood = IsVBlood(entityManager, victimEntity);
-
-            float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
+            int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
+            float gainedXP = CalculateExperienceGained(victimLevel.Level._Value, isVBlood);
+            //Core.Log.LogInfo($"Gained XP before adding bonus from health of unit: {gainedXP}");
+            gainedXP += additionalXP;
+            //Core.Log.LogInfo($"Gained XP after adding bonus from health of unit: {gainedXP}");
             int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
-            gainedXP = ApplyScalingFactor(gainedXP, currentLevel);
 
+            gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
+            //Core.Log.LogInfo($"Gained XP after applying scaling factor: {gainedXP}");
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
             {
-                float baseReduction = Plugin.PrestigeRatesReducer.Value; // This should be a small base reduction value, e.g., 0.1 (10%)
-                float diminishingFactor = baseReduction * PrestigeData;
-                float expReductionFactor = 1 / (1 + diminishingFactor);
+                float expReductionFactor = 1 - (Plugin.LevelingPrestigeReducer.Value * PrestigeData);
                 gainedXP *= expReductionFactor;
             }
-
-            UpdatePlayerExperience(SteamID, gainedXP * groupMultiplier);
+            //Core.Log.LogInfo($"Gained XP after reducing for prestige: {gainedXP}");
+            gainedXP *= groupMultiplier;
+            UpdatePlayerExperience(SteamID, gainedXP);
 
             CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel);
         }
@@ -244,12 +266,16 @@ namespace Bloodcraft.Systems.Experience
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
-        static float ApplyScalingFactor(float gainedXP, int currentLevel)
+        
+        static float ApplyScalingFactor(float gainedXP, int currentLevel, int victimLevel)
         {
             float k = LevelScalingMultiplier; // You can adjust this constant to control the tapering effect
-            float scalingFactor = 1 / (1 + k * currentLevel);
+            int levelDifference = currentLevel - victimLevel;
+            //float scalingFactor =
+            if (k == 0) return gainedXP;
+            float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
             return gainedXP * scalingFactor;
         }
-
+        
     }
 }

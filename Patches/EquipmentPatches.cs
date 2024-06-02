@@ -8,6 +8,7 @@ using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
@@ -501,6 +502,7 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
             {
                 Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
             }
+
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
             foreach (var bloodStatType in bonuses)
             {
@@ -537,6 +539,7 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
                 }
             }
 
+            
         }
     }
     public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, ExpertiseSystem.WeaponType weaponType, WeaponStats.WeaponStatManager.WeaponStatType statType)
@@ -544,15 +547,25 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
         if (handler != null)
         {
             var xpData = handler.GetExpertiseData(steamId);
-            int currentLevel = ExpertiseSystem.ConvertXpToLevel(xpData.Value);
             float maxBonus = WeaponStats.WeaponStatManager.BaseCaps[statType];
+
+            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Count > 0)
+            {
+                List<int> playerClassStats = classes.First().Value.Item1;
+                List<WeaponStats.WeaponStatManager.WeaponStatType> weaponStatTypes = playerClassStats.Select(value => (WeaponStats.WeaponStatManager.WeaponStatType)value).ToList();
+                if (weaponStatTypes.Contains(statType))
+                {
+                    maxBonus *= Plugin.StatSynergyMultiplier.Value;
+                }
+                
+            }
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(ExpertiseSystem.WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
             {
                 float gainFactor = 1 + (Plugin.PrestigeStatMultiplier.Value * PrestigeData);
                 maxBonus *= gainFactor;
             }
-
-            float scaledBonus = maxBonus * ((float)currentLevel / Plugin.MaxExpertiseLevel.Value); // Scale bonus up to 99%
+            
+            float scaledBonus = maxBonus * ((float)xpData.Key / Plugin.MaxExpertiseLevel.Value); // Scale bonus up to 99%
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
@@ -562,15 +575,25 @@ public static class ModifyUnitStatBuffUtils // need to move this out of equipmen
         if (handler != null)
         {
             var xpData = handler.GetLegacyData(steamId);
-            int currentLevel = BloodSystem.ConvertXpToLevel(xpData.Value);
             float maxBonus = BloodStats.BloodStatManager.BaseCaps[statType];
+
+            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Count > 0)
+            {
+                List<int> playerClassStats = classes.First().Value.Item2;
+                List<BloodStats.BloodStatManager.BloodStatType> bloodStatTypes = playerClassStats.Select(value => (BloodStats.BloodStatManager.BloodStatType)value).ToList();
+                if (bloodStatTypes.Contains(statType))
+                {
+                    maxBonus *= Plugin.StatSynergyMultiplier.Value;
+                }
+                
+            }
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
             {
                 float gainFactor = 1 + (Plugin.PrestigeStatMultiplier.Value * PrestigeData);
                 maxBonus *= gainFactor;
             }
-
-            float scaledBonus = maxBonus * ((float)currentLevel / Plugin.MaxBloodLevel.Value); // Scale bonus up to 99%
+            
+            float scaledBonus = maxBonus * ((float)xpData.Key / Plugin.MaxBloodLevel.Value); // Scale bonus up to 99%
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error

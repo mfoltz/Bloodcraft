@@ -63,26 +63,25 @@ namespace Bloodcraft.Systems.Expertise
             {
                 var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
                 float ExpertiseValue = CalculateExpertiseValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
+                float changeFactor = 1f;
 
                 if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
                 {
                     // Apply rate reduction with diminishing returns
-                    if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
+                    if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige) && expertisePrestige > 0)
                     {
-                        float baseReduction = Plugin.PrestigeRatesReducer.Value; // e.g., 0.1 for 10%
-                        float diminishingFactor = baseReduction * PrestigeData;
-                        float reductionFactor = 1 / (1 + diminishingFactor);
-                        ExpertiseValue *= reductionFactor;
+                        changeFactor -= (Plugin.PrestigeRatesReducer.Value * expertisePrestige);
                     }
 
                     // Apply rate gain with linear increase
-                    if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestigeLevel) && xpPrestigeLevel > 0)
+                    if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                     {
-                        float baseGain = Plugin.PrestigeRatesMultiplier.Value; // e.g., 0.1 for 10%
-                        float gainFactor = 1 + (baseGain * xpPrestigeLevel);
-                        ExpertiseValue *= gainFactor;
+                        changeFactor += (Plugin.PrestigeRatesMultiplier.Value * xpPrestige);
+
                     }
                 }
+
+                ExpertiseValue *= changeFactor;
                 //IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponPrestigeMap[weaponType]);
 
 

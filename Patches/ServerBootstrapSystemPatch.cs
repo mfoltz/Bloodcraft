@@ -308,5 +308,15 @@ internal static class ServerBootstrapSystemPatch
             Core.FamiliarExperienceManager.SaveFamiliarExperience(steamId, Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId));
             Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
         }
+
+        if (Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value)
+        {
+            if (!Core.DataStructures.PlayerClasses.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerClasses.Add(steamId, []);
+                Core.DataStructures.SavePlayerClasses();
+            }
+        }
+
     }
 }

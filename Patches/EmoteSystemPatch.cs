@@ -129,8 +129,9 @@ internal class EmoteSystemPatch
                 return;
             }
 
-            if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // if invulnerable, remove and enable combat
+            if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // remove and enable combat
             {
+                
                 BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(serverGameManager);
                 EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
                 BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, invulnerableBuff, familiar);
@@ -153,6 +154,10 @@ internal class EmoteSystemPatch
             }
             else // if not, disable combat
             {
+                
+
+
+                
                 FactionReference factionReference = familiar.Read<FactionReference>();
                 factionReference.FactionGuid._Value = ignoredFaction;
                 familiar.Write(factionReference);
@@ -200,6 +205,7 @@ internal class EmoteSystemPatch
                     }
                     
                 }
+                
                 ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
             }
         }
@@ -208,86 +214,5 @@ internal class EmoteSystemPatch
             ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
         }
     }
-    public static void FamiliarNoCombatBuff(Entity characterEntity, PrefabGUID prefabGUID)
-    {
-        FromCharacter fromCharacter = new() { Character = characterEntity, User = characterEntity };
-        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
-        var debugEvent = new ApplyBuffDebugEvent
-        {
-            BuffPrefabGUID = prefabGUID,
-        };
-        if (!BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out Entity buffEntity))
-        {
-            debugEventsSystem.ApplyBuff(fromCharacter, debugEvent);
-
-            if (BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out buffEntity))
-            {
-                //buffEntity.LogComponentTypes();
-                debugEventsSystem.ApplyBuff(fromCharacter, debugEvent);
-                if (BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out buffEntity))
-                {
-                    if (BuffUtility.TryGetBuff(Core.EntityManager, characterEntity, prefabGUID, out buffEntity))
-                    {
-                        if (buffEntity.Has<Buff>())
-                        {
-                            Buff newBuff = buffEntity.Read<Buff>();
-                            newBuff.BuffEffectType = BuffEffectType.Buff;
-                            newBuff.BuffType = BuffType.Parallel;
-                            buffEntity.Write(newBuff);
-                        }
-
-                        if (buffEntity.Has<BuffCategory>())
-                        {
-                            BuffCategory buffCategory = buffEntity.Read<BuffCategory>();
-                            buffCategory.Groups = BuffCategoryFlag.None;
-                            buffEntity.Write(buffCategory);
-                        }
-                        if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
-                        {
-                            buffEntity.Remove<CreateGameplayEventsOnSpawn>();
-                        }
-                        if (buffEntity.Has<GameplayEventListeners>())
-                        {
-                            buffEntity.Remove<GameplayEventListeners>();
-                        }
-                        if (!buffEntity.Has<Buff_Persists_Through_Death>())
-                        {
-                            buffEntity.Has<Buff_Persists_Through_Death>();
-                        }
-
-                        if (buffEntity.Has<LifeTime>())
-                        {
-                            var lifetime = buffEntity.Read<LifeTime>();
-                            lifetime.Duration = -1;
-                            lifetime.EndAction = LifeTimeEndAction.None;
-                            buffEntity.Write(lifetime);
-                            //buffEntity.Remove<LifeTime>();
-                        }
-                        else
-                        {
-                            LifeTime lifeTime = new()
-                            {
-                                Duration = -1,
-                                EndAction = LifeTimeEndAction.None
-                            };
-                            Core.EntityManager.AddComponentData(buffEntity, lifeTime);
-                        }
-                        if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
-                        {
-                            buffEntity.Remove<RemoveBuffOnGameplayEvent>();
-                        }
-                        if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
-                        {
-                            buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
-                        }
-
-                        if (buffEntity.Has<DestroyOnGameplayEvent>())
-                        {
-                            buffEntity.Remove<DestroyOnGameplayEvent>();
-                        }
-                    }
-                }
-            }
-        }
-    }    
+  
 }

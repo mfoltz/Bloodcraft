@@ -6,6 +6,7 @@ using Bloodcraft.Systems.Leveling;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Behaviours;
+using ProjectM.CastleBuilding;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
@@ -43,7 +44,7 @@ internal static class Core
 
     private static bool hasInitialized;
 
-
+    
     public static void Initialize()
     {
         if (hasInitialized) return;
@@ -94,7 +95,7 @@ internal static class Core
             _userEntities.Dispose();
         }
         return Entity.Null;
-    } 
+    }
     public class DataStructures
     {
         // Encapsulated fields with properties
@@ -109,6 +110,7 @@ internal static class Core
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
+        private static Dictionary<ulong, Dictionary<string, (List<int>, List<int>)>> playerClasses = [];
         private static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> playerPrestiges = [];
 
         // professions
@@ -160,8 +162,8 @@ internal static class Core
         private static Dictionary<ulong, (Entity, int)> familiarActives = [];
         private static Dictionary<ulong, string> familiarSet = [];
         private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
-        
-        
+
+
         [Serializable]
         public class FamiliarExperienceData
         {
@@ -200,12 +202,18 @@ internal static class Core
             get => playerExperience;
             set => playerExperience = value;
         }
+        public static Dictionary<ulong, Dictionary<string, (List<int>, List<int>)>> PlayerClasses
+        {
+            get => playerClasses;
+            set => playerClasses = value;
+        }
 
         public static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> PlayerPrestiges
         {
             get => playerPrestiges;
             set => playerPrestiges = value;
         }
+
         
         public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
         {
@@ -432,6 +440,7 @@ internal static class Core
         private static readonly Dictionary<string, string> filePaths = new()
         {
             {"Experience", JsonFiles.PlayerExperienceJson},
+            {"Classes", JsonFiles.PlayerClassesJson },
             {"Prestiges", JsonFiles.PlayerPrestigesJson },
             {"PlayerBools", JsonFiles.PlayerBoolsJson},
             {"Woodcutting", JsonFiles.PlayerWoodcuttingJson},
@@ -512,6 +521,8 @@ internal static class Core
         }
 
         public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
+
+        public static void LoadPlayerClasses() => LoadData(ref playerClasses, "Classes");
 
         public static void LoadPlayerPrestiges() => LoadData(ref playerPrestiges, "Prestiges");
 
@@ -605,6 +616,8 @@ internal static class Core
             }
         }
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
+
+        public static void SavePlayerClasses() => SaveData(PlayerClasses, "Classes");
 
         public static void SavePlayerPrestiges() => SaveData(PlayerPrestiges, "Prestiges");
 
@@ -729,6 +742,7 @@ internal static class Core
     {
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerLevelingPath, "player_experience.json");
         public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
+        public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigPath, "player_classes.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
@@ -766,5 +780,9 @@ internal static class Core
         public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.PlayerBloodPath, "player_blood_stats.json");
         public static readonly string PlayerFamiliarActivesJson = Path.Combine(Plugin.PlayerFamiliarsPath, "player_familiar_actives.json");
         public static readonly string PlayerFamiliarSetsJson = Path.Combine(Plugin.FamiliarUnlocksPath, "player_familiar_sets.json");
+    }
+    public static List<int> ParseConfigString(string configString)
+    {
+        return configString.Split(',').Select(int.Parse).ToList();
     }
 }

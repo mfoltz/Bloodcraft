@@ -1,11 +1,14 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Systems.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Bloodcraft.Commands
 {
@@ -105,6 +108,61 @@ namespace Bloodcraft.Commands
             }
         }
 
+        [Command(name: "chooseClass", shortHand: "cc", adminOnly: false, usage: ".cc [Class]", description: "Sets player level.")]
+        public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
+        {
+            if (!Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value)
+            {
+                ctx.Reply("Classes are not enabled.");
+                return;
+            }
+
+            if (!Enum.TryParse(className, true, out PlayerClasses parsedClassType))
+            {
+                parsedClassType = Enum.GetValues(typeof(PlayerClasses))
+                                     .Cast<PlayerClasses>()
+                                     .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
+
+                if (parsedClassType == default)
+                {
+                    ctx.Reply("Invalid class, use .classes to see options.");
+                    return;
+                }
+            }
+
+            ulong steamId = ctx.Event.User.PlatformId;
+
+            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+            {
+                if (classes.Keys.Count > 0)
+                {
+                    ctx.Reply("You have already chosen a class.");
+                    return;
+                }
+                string weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
+                string bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
+                List<int> classWeaponStats = Core.ParseConfigString(weaponConfigEntry);
+                List<int> classBloodStats = Core.ParseConfigString(bloodConfigEntry);
+
+                classes[parsedClassType.ToString()] = (classWeaponStats, classBloodStats);
+                Core.DataStructures.PlayerClasses[steamId] = classes;
+                Core.DataStructures.SavePlayerClasses();
+                ctx.Reply($"You have chosen <color=white>{parsedClassType}</color>");
+            }
+        }
+        [Command(name: "listClasses", shortHand: "classes", adminOnly: false, usage: ".classes", description: "Sets player level.")]
+        public static void ListClasses(ChatCommandContext ctx)
+        {
+            if (!Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value)
+            {
+                ctx.Reply("Classes are not enabled.");
+                return;
+            }
+
+            string classTypes = string.Join(", ", Enum.GetNames(typeof(LevelingSystem.PlayerClasses)));
+            ctx.Reply($"Available Classes: <color=white>{classTypes}</color>");
+        }
+
         [Command(name: "playerPrestige", shortHand: "prestige", adminOnly: false, usage: ".prestige [PrestigeType]", description: "Handles player prestiging.")]
         public unsafe static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
@@ -148,7 +206,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "getPrestige", shortHand: "gp", adminOnly: false, usage: ".gp [PrestigeType]", description: "Shows information about player's prestige status.")]
+        [Command(name: "getPrestige", shortHand: "gpr", adminOnly: false, usage: ".gpr [PrestigeType]", description: "Shows information about player's prestige status.")]
         public unsafe static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
             if (!Plugin.PrestigeSystem.Value)

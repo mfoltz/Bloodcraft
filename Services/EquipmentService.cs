@@ -6,7 +6,7 @@ using Unity.Entities;
 
 namespace Bloodcraft.Services
 {
-    internal class EquipmentService // add finding all entities and restoring levels if leveling and or expertise turned off
+    internal class EquipmentService // unused atm
     {
         public readonly Dictionary<PrefabGUID, float> ArmorLevelSources = [];
         public readonly Dictionary<PrefabGUID, float> WeaponLevelSources = [];

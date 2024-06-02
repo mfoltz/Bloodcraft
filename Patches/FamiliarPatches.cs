@@ -92,5 +92,28 @@ class FamiliarPatches
         }
     }
 
+    [HarmonyPatch(typeof(FollowerSystem), nameof(FollowerSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(ref FollowerSystem __instance)
+    {
+        Core.Log.LogInfo("FollowerSystem.OnUpdate");
+        NativeArray<Entity> entities = __instance.__query_652683813_0.ToEntityArray(Allocator.TempJob);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                entity.LogComponentTypes();
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogError(ex);
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+
 
 }

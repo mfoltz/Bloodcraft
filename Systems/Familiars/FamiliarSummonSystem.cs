@@ -10,6 +10,7 @@ namespace Bloodcraft.Systems.Familiars
     internal class FamiliarSummonSystem
     {
         static readonly PrefabGUID playerFaction = new(1106458752);
+        static readonly PrefabGUID traderFaction = new(30052367);
         public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
         {
             EntityCommandBufferSystem entityCommandBufferSystem = Core.EntityCommandBufferSystem;
@@ -43,12 +44,11 @@ namespace Bloodcraft.Systems.Familiars
             UnitLevel unitLevel = familiar.Read<UnitLevel>();
             HandleFamiliarModifications(player, familiar, unitLevel.Level._Value);
         }
-        static void HandleFamiliarModifications(Entity player, Entity familiar, int level)
+        public static void HandleFamiliarModifications(Entity player, Entity familiar, int level)
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
             ModifyFollowerAndTeam(player, familiar);
-            ModifyDamageStats(familiar, level); // modify familiar damage category stats to 10% of original
-            //ModifyUnitTier(familiar, level); // modify unit tier based on level
+            ModifyDamageStats(familiar, level);
             ModifyAggro(familiar);
             if (familiar.Has<ServantConvertable>()) ModifyConvertable(familiar);
             ModifyCollision(familiar);
@@ -57,21 +57,22 @@ namespace Bloodcraft.Systems.Familiars
         
         static void ModifyFollowerAndTeam(Entity player, Entity familiar)
         {
-            Team team = player.Read<Team>();
-            familiar.Write(team);
-
-            TeamReference teamReference = player.Read<TeamReference>();
-            familiar.Write(teamReference);
+            
+            ModifyTeamBuff modifyTeamBuff = new ModifyTeamBuff { Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam };
+            familiar.Add<ModifyTeamBuff>();
+            familiar.Write(modifyTeamBuff);
 
             FactionReference factionReference = familiar.Read<FactionReference>();
             factionReference.FactionGuid._Value = playerFaction;
+            //factionReference.FactionGuid._Value = traderFaction;
             familiar.Write(factionReference);
             
+
             Follower follower = familiar.Read<Follower>();
             follower.Followed._Value = player;
             follower.ModeModifiable._Value = 1;
             familiar.Write(follower);
-
+            
             UnitStats unitStats = familiar.Read<UnitStats>();
             unitStats.PvPProtected._Value = true;
             familiar.Write(unitStats);
@@ -85,25 +86,39 @@ namespace Bloodcraft.Systems.Familiars
             bloodConsumeSource.BloodQuality = level / (float)Plugin.MaxFamiliarLevel.Value * 100;
             bloodConsumeSource.CanBeConsumed = false;
             familiar.Write(bloodConsumeSource);
+
+            familiar.Add<BlockFeedBuff>();
         }
         public static void ModifyDamageStats(Entity familiar, int level)
         {
-            float scalingFactor = 0.1f + (level / (float)Plugin.MaxFamiliarLevel.Value) * 0.9f; // Calculate scaling factor
+            float scalingFactor = 0.1f + (level / (float)Plugin.MaxFamiliarLevel.Value)*0.9f; // Calculate scaling factor
             float healthScalingFactor = 1.0f + (level / (float)Plugin.MaxFamiliarLevel.Value) * 4.0f; // Calculate scaling factor for max health
 
+            /*
             DamageCategoryStats damageStats = familiar.Read<DamageCategoryStats>();
             damageStats.DamageVsUndeads._Value = scalingFactor;
             damageStats.DamageVsHumans._Value = scalingFactor;
             damageStats.DamageVsDemons._Value = scalingFactor;
-            damageStats.DamageVsMechanical._Value*= scalingFactor;
+            damageStats.DamageVsMechanical._Value = scalingFactor;
             damageStats.DamageVsBeasts._Value = scalingFactor;
             damageStats.DamageVsLightArmor._Value = scalingFactor;
             damageStats.DamageVsVBloods._Value = scalingFactor;
             damageStats.DamageVsMagic._Value = scalingFactor;
+            damageStats.DamageVsVampires._Value = scalingFactor;
             familiar.Write(damageStats);
+            */
+
+            UnitStats unitStats = familiar.Read<UnitStats>();
+            unitStats.PhysicalPower._Value *= scalingFactor;
+            unitStats.SpellPower._Value *= scalingFactor;
+            familiar.Write(unitStats);
+
+            UnitLevel unitLevel = familiar.Read<UnitLevel>();
+            unitLevel.Level._Value = level;
+            familiar.Write(unitLevel);
 
             Health health = familiar.Read<Health>();
-            int baseHealth = 500;
+            int baseHealth = 250;
             health.MaxHealth._Value = baseHealth * healthScalingFactor;
             health.Value = health.MaxHealth._Value;
             familiar.Write(health);
@@ -132,7 +147,6 @@ namespace Bloodcraft.Systems.Familiars
             {
                 tier = 0;
             }
-
             unitLevelServerData.HealthUnitBaseStatsTypeInt._Value = tier;
             unitLevelServerData.UnitBaseStatsTypeInt._Value = tier;
             familiar.Write(unitLevelServerData);

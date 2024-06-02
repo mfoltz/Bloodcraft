@@ -29,6 +29,22 @@ internal static class CreateGameplayEventOnDestroySystemPatch
             foreach (Entity entity in entities)
             {
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+
+                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
+                {
+                    if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                    {
+                        //Core.Log.LogInfo(prefabGUID.LookupName());
+                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entity.Read<Buff>().Target);
+                        if (familiar != Entity.Null)
+                        {
+                            Follower follower = familiar.Read<Follower>();
+                            follower.ModeModifiable._Value = 0;
+                            familiar.Write(follower);
+                        }
+                    }
+                }
+
                 if (Plugin.ProfessionSystem.Value && prefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;

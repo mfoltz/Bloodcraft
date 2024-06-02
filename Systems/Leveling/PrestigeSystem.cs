@@ -121,19 +121,23 @@ public class PrestigeSystem
 
     public static void DisplayPrestigeInfo(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel, int maxPrestigeLevel)
     {
-        float reductionFactor = MathF.Pow(1 - Plugin.PrestigeRatesReducer.Value, prestigeLevel);
+        float reductionFactor = 1.0f;
         float gainMultiplier = 1.0f;
-
-        if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-            prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
-        {
-            gainMultiplier = 1 + (Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel);
-        }
 
         if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
         {
-            string reductionPercentage = ((1 - reductionFactor) * 100).ToString("F2") + "%";
-            string gainPercentage = ((gainMultiplier - 1) * 100).ToString("F2") + "%";
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+                prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+            {
+                // Apply flat rate reduction for leveling experience
+                reductionFactor = Plugin.LevelingPrestigeReducer.Value * expPrestigeLevel;
+
+                // Apply rate gain with linear increase for expertise/legacy
+                gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel;
+            }
+
+            string reductionPercentage = (reductionFactor * 100).ToString("F2") + "%";
+            string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
             ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
             ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
@@ -142,14 +146,24 @@ public class PrestigeSystem
         }
         else
         {
-            float combinedFactor = gainMultiplier * reductionFactor;
-            string percentageReductionString = ((1 - reductionFactor) * 100).ToString("F0") + "%";
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+                prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+            {
+                // Apply flat rate reduction for leveling experience
+                reductionFactor = Plugin.LevelingPrestigeReducer.Value * expPrestigeLevel;
+
+                // Apply rate gain with linear increase for expertise/legacy
+                gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel;
+            }
+
+            float combinedFactor = gainMultiplier - reductionFactor;
+            string percentageReductionString = (reductionFactor * 100).ToString("F2") + "%";
 
             // Fixed additive stat gain increase based on base value
             float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * prestigeLevel;
             string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
-            string totalEffectString = ((combinedFactor - 1) * 100).ToString("F2") + "%";
+            string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
 
             ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
             ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
@@ -186,17 +200,14 @@ public class PrestigeSystem
     private static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
-        float expReductionFactor = MathF.Pow(1 - Plugin.PrestigeRatesReducer.Value, prestigeLevel);
-        string reductionPercentage = ((1 - expReductionFactor) * 100).ToString("F2") + "%";
 
-        float gainMultiplier = 1.0f;
-        if (Core.DataStructures.PlayerPrestiges.TryGetValue(ctx.Event.User.PlatformId, out var prestigeData) &&
-            prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
-        {
-            gainMultiplier = 1 + (Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel);
-        }
+        float levelingReducer = Plugin.LevelingPrestigeReducer.Value * prestigeLevel;
 
-        string gainPercentage = ((gainMultiplier - 1) * 100).ToString("F2") + "%";
+        string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
+
+        float gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * prestigeLevel;
+
+        string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
         ctx.Reply($"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
 
@@ -204,19 +215,20 @@ public class PrestigeSystem
     {
         int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
-        float reductionFactor = MathF.Pow(1 - Plugin.PrestigeRatesReducer.Value, prestigeLevel);
-        float gainMultiplier = 1 + (Plugin.PrestigeRatesMultiplier.Value * expPrestige);
-        float combinedFactor = gainMultiplier * reductionFactor;
+        float ratesReduction = prestigeLevel * Plugin.PrestigeRatesReducer.Value; // Example: 0.1 (10%)
+        float ratesMultiplier = expPrestige * Plugin.PrestigeRatesMultiplier.Value;
 
-        string percentageReductionString = ((1 - reductionFactor) * 100).ToString("F0") + "%";
+        float combinedFactor = ratesMultiplier - ratesReduction;
+
+        string percentageReductionString = (ratesReduction * 100).ToString("F0") + "%";
 
         // Fixed additive stat gain increase based on base value
         float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * prestigeLevel;
         string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
-        string totalEffectString = ((combinedFactor - 1) * 100).ToString("F2") + "%";
+        string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
 
-        ctx.Reply($"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total effect on growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+        ctx.Reply($"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }
 
 }
