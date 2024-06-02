@@ -167,8 +167,6 @@ UPDATED, NOW CURRENT (5/30)
   Factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.
 - **Prestige Rates Multiplier**: `PrestigeRatesMultiplier` (float, default: 0.15)  
   Factor by which rates are increased in expertise/legacy per increment of prestige in leveling.
-- **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
-  The maximum number of prestiges a player can reach in leveling.
 - **Starting Player Level**: `StartingLevel` (int, default: 0)  
   The starting level for players. Use this to skip the first few journal quests for now until I think of a better solution.
 - **Unit Leveling Multiplier**: `UnitLevelingMultiplier` (float, default: 7.5)  
