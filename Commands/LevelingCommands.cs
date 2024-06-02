@@ -205,6 +205,38 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
             }
         }
+        [Command(name: "resetPrestige", shortHand: "rpr", adminOnly: true, usage: ".rpr [PrestigeType]", description: "Handles resetting prestiging.")]
+        public unsafe static void ResetPrestige(ChatCommandContext ctx, string prestigeType)
+        {
+            if (!Plugin.PrestigeSystem.Value)
+            {
+                ctx.Reply("Prestiging is not enabled.");
+                return;
+            }
+
+            if (!Enum.TryParse(prestigeType, true, out PrestigeSystem.PrestigeType parsedPrestigeType))
+            {
+                // Attempt a substring match with existing enum names
+                parsedPrestigeType = Enum.GetValues(typeof(PrestigeSystem.PrestigeType))
+                                         .Cast<PrestigeSystem.PrestigeType>()
+                                         .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
+
+                if (parsedPrestigeType == default)
+                {
+                    ctx.Reply("Invalid prestige, use .lpp to see options.");
+                    return;
+                }
+            }
+
+            var steamId = ctx.Event.User.PlatformId;
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
+            {
+                prestigeData[parsedPrestigeType] = 0;
+                Core.DataStructures.SavePlayerPrestiges();
+                ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> prestige reset.");
+            }
+        }
 
         [Command(name: "getPrestige", shortHand: "gpr", adminOnly: false, usage: ".gpr [PrestigeType]", description: "Shows information about player's prestige status.")]
         public unsafe static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)

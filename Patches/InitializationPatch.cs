@@ -6,14 +6,12 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal class InitializationPatch
 {
-    
     static readonly ComponentType[] FamiliarComponents =
             [
                 ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
@@ -27,9 +25,6 @@ internal class InitializationPatch
         Core.Initialize();
         SetFamiliarsOnSpawn();
     }
-
-   
-
     static void SetFamiliarsOnSpawn()
     {
         EntityQuery familiarQuery = Core.EntityManager.CreateEntityQuery(new EntityQueryDesc

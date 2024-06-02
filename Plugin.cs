@@ -32,6 +32,7 @@ public class Plugin : BasePlugin
 
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
+    private static ConfigEntry<string> _prestigeBuffs;
     private static ConfigEntry<int> _maxLevelingPrestiges;
     private static ConfigEntry<float> _levelingPrestigeReducer; // separate factor for reducing experience gain in leveling per level of leveling prestige
     private static ConfigEntry<float> _prestigeRatesReducer; //reduces gains by this percent per level of prestige for expertise/legacy, they get raised by prestiging in leveling
@@ -122,8 +123,13 @@ public class Plugin : BasePlugin
     //private static ConfigEntry<float> _vBloodUnlockChance;
 
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
+
+
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
+
+    public static ConfigEntry<string> PrestigeBuffs => _prestigeBuffs;
     public static ConfigEntry<int> MaxLevelingPrestiges => _maxLevelingPrestiges;
+
 
     public static ConfigEntry<float> LevelingPrestigeReducer => _levelingPrestigeReducer;
     public static ConfigEntry<float> PrestigeRatesReducer => _prestigeRatesReducer;
@@ -251,6 +257,7 @@ public class Plugin : BasePlugin
 
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
+        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,0,0,0,0,0,0,0,0,0", "The prefabGUID hashes for prestige buffs, use 0 to skip.");
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
         _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
         _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy.");

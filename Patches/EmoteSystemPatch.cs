@@ -7,7 +7,6 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
-using static ProjectM.SpawnBuffsAuthoring.SpawnBuffElement_Editor;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;

@@ -1,4 +1,5 @@
 ﻿using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -57,7 +58,6 @@ namespace Bloodcraft.Systems.Familiars
         
         static void ModifyFollowerAndTeam(Entity player, Entity familiar)
         {
-            
             ModifyTeamBuff modifyTeamBuff = new ModifyTeamBuff { Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam };
             familiar.Add<ModifyTeamBuff>();
             familiar.Write(modifyTeamBuff);
@@ -66,11 +66,10 @@ namespace Bloodcraft.Systems.Familiars
             factionReference.FactionGuid._Value = playerFaction;
             //factionReference.FactionGuid._Value = traderFaction;
             familiar.Write(factionReference);
-            
 
             Follower follower = familiar.Read<Follower>();
             follower.Followed._Value = player;
-            follower.ModeModifiable._Value = 1;
+            follower.ModeModifiable._Value = 0;
             familiar.Write(follower);
             
             UnitStats unitStats = familiar.Read<UnitStats>();
@@ -118,7 +117,7 @@ namespace Bloodcraft.Systems.Familiars
             familiar.Write(unitLevel);
 
             Health health = familiar.Read<Health>();
-            int baseHealth = 250;
+            int baseHealth = 300;
             health.MaxHealth._Value = baseHealth * healthScalingFactor;
             health.Value = health.MaxHealth._Value;
             familiar.Write(health);

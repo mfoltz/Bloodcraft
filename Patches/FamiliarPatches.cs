@@ -2,8 +2,10 @@
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
@@ -47,7 +49,7 @@ class FamiliarPatches
             entities.Dispose();
         }
     }
-   
+
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
@@ -91,18 +93,26 @@ class FamiliarPatches
             entities.Dispose();
         }
     }
-
-    [HarmonyPatch(typeof(FollowerSystem), nameof(FollowerSystem.OnUpdate))]
+    /*
+    [HarmonyPatch(typeof(PlayerCombatBuffSystem_OnAggro), nameof(PlayerCombatBuffSystem_OnAggro.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePrefix(ref FollowerSystem __instance)
+    static void OnUpdatePrefix(PlayerCombatBuffSystem_OnAggro __instance)
     {
-        Core.Log.LogInfo("FollowerSystem.OnUpdate");
-        NativeArray<Entity> entities = __instance.__query_652683813_0.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_928948733_0.ToEntityArray(Allocator.TempJob);
         try
         {
             foreach (Entity entity in entities)
             {
-                entity.LogComponentTypes();
+                InverseAggroEvents.Added added = entity.Read<InverseAggroEvents.Added>(); // producer player, consumer familiar
+                if (added.Producer.Has<PlayerCharacter>() && added.Consumer.Has<Follower>() && added.Consumer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
+                {
+                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(added.Consumer.Read<Follower>().Followed._Value);
+                    if (familiar.Equals(added.Consumer))
+                    {
+                        // if familiar is the consumer, prevent targeting the player producer
+                        DestroyUtility.CreateDestroyEvent(Core.EntityManager, entity, DestroyReason.Default, DestroyDebugReason.None);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -114,6 +124,6 @@ class FamiliarPatches
             entities.Dispose();
         }
     }
-
-
+    */
+    
 }

@@ -51,6 +51,7 @@ internal static class ServerBootstrapSystemPatch
                 { "BloodLogging", false },
                 { "FamiliarLogging", false },
                 { "SpellLock", false },
+                { "ShiftLock", false },
                 { "Grouping", false },
                 { "Emotes", false },
                 { "Binding", false }

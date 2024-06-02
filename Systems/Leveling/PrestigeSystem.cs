@@ -1,5 +1,11 @@
 ﻿using Bloodcraft.Patches;
+using ProjectM.Network;
+using ProjectM;
+using Stunlock.Core;
+using Unity.Entities;
 using VampireCommandFramework;
+using ProjectM.Scripting;
+using static ProjectM.SpawnBuffsAuthoring.SpawnBuffElement_Editor;
 
 namespace Bloodcraft.Systems.Leveling;
 
@@ -196,10 +202,53 @@ public class PrestigeSystem
             HandleOtherPrestige(ctx, steamId, parsedPrestigeType, updatedPrestigeLevel);
         }
     }
-
-    private static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
+    static void HandlePrestigeBuff(Entity player, PrefabGUID buffPrefab)
+    {
+        ServerGameManager serverGameManager = Core.ServerGameManager;
+        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
+        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        {
+            BuffPrefabGUID = buffPrefab,
+        };
+        FromCharacter fromCharacter = new()
+        {
+            Character = player,
+            User = player.Read<PlayerCharacter>().UserEntity,
+        };
+        // apply level up buff here
+        debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+        if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buff))
+        {
+            if (buff.Has<RemoveBuffOnGameplayEvent>())
+            {
+                buff.Remove<RemoveBuffOnGameplayEvent>();
+            }
+            if (buff.Has<RemoveBuffOnGameplayEventEntry>())
+            {
+                buff.Remove<RemoveBuffOnGameplayEventEntry>();
+            }
+            if (buff.Has<CreateGameplayEventsOnSpawn>())
+            {
+                buff.Remove<CreateGameplayEventsOnSpawn>();
+            }
+            if (buff.Has<GameplayEventListeners>())
+            {
+                buff.Remove<GameplayEventListeners>();
+            }
+            if (!buff.Has<Buff_Persists_Through_Death>())
+            {
+                buff.Write(new Buff_Persists_Through_Death());
+            }
+        }
+    }
+    
+    static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
+
+        //List<int> buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
+        //PrefabGUID buffPrefab = new(buffs[prestigeLevel-1]);
+        //if (!buffPrefab.GuidHash.Equals(0)) HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
 
         float levelingReducer = Plugin.LevelingPrestigeReducer.Value * prestigeLevel;
 
@@ -211,7 +260,7 @@ public class PrestigeSystem
         ctx.Reply($"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
 
-    private static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel)
+    static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel)
     {
         int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 

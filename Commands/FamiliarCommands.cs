@@ -12,6 +12,8 @@ namespace Bloodcraft.Commands
 {
     public class FamiliarCommands
     {
+        static readonly PrefabGUID combatBuff = new(581443919);
+
         [Command(name: "bindFamiliar", shortHand: "bind", adminOnly: false, usage: ".bind [#]", description: "Activates specified familiar from current list.")]
         public static void BindFamiliar(ChatCommandContext ctx, int choice)
         {
@@ -19,6 +21,12 @@ namespace Bloodcraft.Commands
             Entity character = ctx.Event.SenderCharacterEntity;
             Entity userEntity = ctx.Event.SenderUserEntity;
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+
+            if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _))
+            {
+                ctx.Reply("You can't bind a familiar while in combat.");
+                return;
+            }
 
             if (familiar != Entity.Null)
             {

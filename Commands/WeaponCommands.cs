@@ -324,5 +324,42 @@ namespace Bloodcraft.Commands
                 ctx.Reply($"You must be at least level {Plugin.FirstSlot.Value} in Sanguimancy to use this. Both slots are unlocked at {Plugin.SecondSlot.Value}");
             }
         }
+
+        [Command(name: "shiftLock", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
+        public static void ShiftPlayerSpells(ChatCommandContext ctx)
+        {
+            if (!Plugin.ExpertiseSystem.Value)
+            {
+                ctx.Reply("Expertise is not enabled.");
+                return;
+            }
+            if (!Plugin.Sanguimancy.Value)
+            {
+                ctx.Reply("Sanguimancy is not enabled.");
+                return;
+            }
+
+            var user = ctx.Event.User;
+            var SteamID = user.PlatformId;
+
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= Plugin.SecondSlot.Value)
+            {
+                if (bools["ShiftLock"])
+                {
+                    bools["SpellLock"] = false;
+                    ctx.Reply("Shift spell <color=red>disabled</color>.");
+                }
+                else
+                {
+                    bools["SpellLock"] = true;
+                    ctx.Reply("Shift spell <color=green>enabled</color>.");
+                }
+                Core.DataStructures.SavePlayerBools();
+            }
+            else
+            {
+                ctx.Reply($"You must be at least level {Plugin.SecondSlot.Value} in Sanguimancy to use this.");
+            }
+        }
     }
 }
