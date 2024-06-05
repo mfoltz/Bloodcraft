@@ -1,4 +1,5 @@
 using BepInEx.Logging;
+using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
@@ -7,6 +8,7 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.CastleBuilding;
+using ProjectM.Gameplay.WarEvents;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
@@ -31,15 +33,13 @@ internal static class Core
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
     public static SpawnTransformSystem_OnSpawn SpawnTransformSystem_OnSpawn { get; internal set; }
 
+    public static WarEventDebugSystem WarEventDebugSystem { get; internal set; }
 
-    //public static GetCharacterHUDSystem GetCharacterHUDSystem { get; internal set; }
-
-    //public static CommonClientDataSystem CommonClientDataSystem { get; internal set; }
+    public static GameDataSystem GameDataSystem { get; internal set; }
 
     //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future journal quest 560247139 Journal_GettingReadyForTheHunt
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
-
     public static ManualLogSource Log => Plugin.LogInstance;
 
     private static bool hasInitialized;
@@ -48,7 +48,7 @@ internal static class Core
     public static void Initialize()
     {
         if (hasInitialized) return;
-
+        
         PrefabCollectionSystem = Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
@@ -57,7 +57,10 @@ internal static class Core
         ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
         EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
         SpawnTransformSystem_OnSpawn = Server.GetExistingSystemManaged<SpawnTransformSystem_OnSpawn>();
-        //GetCharacterHUDSystem = Server.GetExistingSystemManaged<GetCharacterHUDSystem>();
+        WarEventDebugSystem = Server.GetExistingSystemManaged<WarEventDebugSystem>();
+
+
+        GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
         //CommonClientDataSystem = Server.GetExistingSystemManaged<CommonClientDataSystem>();
         //EquipmentService = new(); 
         // Initialize utility services
@@ -110,7 +113,7 @@ internal static class Core
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
-        private static Dictionary<ulong, Dictionary<string, (List<int>, List<int>)>> playerClasses = [];
+        private static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)>> playerClasses = [];
         private static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> playerPrestiges = [];
 
         // professions
@@ -202,7 +205,7 @@ internal static class Core
             get => playerExperience;
             set => playerExperience = value;
         }
-        public static Dictionary<ulong, Dictionary<string, (List<int>, List<int>)>> PlayerClasses
+        public static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)>> PlayerClasses
         {
             get => playerClasses;
             set => playerClasses = value;

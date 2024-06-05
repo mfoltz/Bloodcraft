@@ -4,7 +4,7 @@ using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
+using ProjectM.Shared.WarEvents;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -32,6 +32,8 @@ internal static class DeathEventListenerSystemPatch
             {
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
+                bool gateBoss = deathEvent.Died.Read<PrefabGUID>().LookupName().ToLower().Contains("gateboss");
+
 
                 if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
                 {
@@ -48,13 +50,13 @@ internal static class DeathEventListenerSystemPatch
                 {
                     if (deathEvent.Died.Has<Movement>())
                     {
-                        if (!isStatChangeInvalid && !hasVBloodConsumeSource) // only process non-feed related deaths here
+                        if (!isStatChangeInvalid && (!hasVBloodConsumeSource || gateBoss)) // only process non-feed related deaths here
                         {
                             if (Leveling) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
                             if (Expertise) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                             if (Familiars) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
                         }
-                        if (Familiars && !hasVBloodConsumeSource) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                        if (Familiars && (!hasVBloodConsumeSource || gateBoss)) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
                     }
                     else
                     {
@@ -67,7 +69,7 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Killer.Has<Follower>() && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // player familiar kills
                 {
                     var followedPlayer = deathEvent.Killer.Read<Follower>().Followed._Value;
-                    if (!hasVBloodConsumeSource)
+                    if (!hasVBloodConsumeSource || gateBoss)
                     {
                         if (Leveling) LevelingSystem.UpdateLeveling(followedPlayer, deathEvent.Died);
                         if (Familiars) FamiliarLevelingSystem.UpdateFamiliar(followedPlayer, deathEvent.Died);
@@ -76,7 +78,7 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // player summon kills
                 {
                     Entity killer = deathEvent.Killer.Read<EntityOwner>().Owner;
-                    if (Leveling && !hasVBloodConsumeSource)
+                    if (Leveling && (!hasVBloodConsumeSource || gateBoss))
                     {
                         LevelingSystem.UpdateLeveling(killer, deathEvent.Died);
                     }

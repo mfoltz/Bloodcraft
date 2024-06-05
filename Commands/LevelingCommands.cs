@@ -1,6 +1,5 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
@@ -8,7 +7,6 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
-using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Bloodcraft.Commands
 {
@@ -117,17 +115,10 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            if (!Enum.TryParse(className, true, out PlayerClasses parsedClassType))
+            if (!TryParseClassName(className, out var parsedClassType))
             {
-                parsedClassType = Enum.GetValues(typeof(PlayerClasses))
-                                     .Cast<PlayerClasses>()
-                                     .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
-
-                if (parsedClassType == default)
-                {
-                    ctx.Reply("Invalid class, use .classes to see options.");
-                    return;
-                }
+                ctx.Reply("Invalid class, use .classes to see options.");
+                return;
             }
 
             ulong steamId = ctx.Event.User.PlatformId;
@@ -144,12 +135,177 @@ namespace Bloodcraft.Commands
                 List<int> classWeaponStats = Core.ParseConfigString(weaponConfigEntry);
                 List<int> classBloodStats = Core.ParseConfigString(bloodConfigEntry);
 
-                classes[parsedClassType.ToString()] = (classWeaponStats, classBloodStats);
+                classes[parsedClassType] = (classWeaponStats, classBloodStats);
                 Core.DataStructures.PlayerClasses[steamId] = classes;
                 Core.DataStructures.SavePlayerClasses();
                 ctx.Reply($"You have chosen <color=white>{parsedClassType}</color>");
             }
         }
+        /*
+        [Command(name: "changeClass", shortHand: "change", adminOnly: false, usage: ".change [Class]", description: "Change classes.")]
+        public static void ClassChangeCommand(ChatCommandContext ctx, string className)
+        {
+            if (!Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value)
+            {
+                ctx.Reply("Classes are not enabled.");
+                return;
+            }
+
+            if (!Enum.TryParse(className, true, out PlayerClasses parsedClassType))
+            {
+                parsedClassType = Enum.GetValues(typeof(PlayerClasses))
+                                     .Cast<PlayerClasses>()
+                                     .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
+
+                if (parsedClassType == default)
+                {
+                    ctx.Reply("Invalid class, use .classes to see options.");
+                    return;
+                }
+            }
+
+            ulong steamId = ctx.Event.User.PlatformId;
+            int level = 0;
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
+            {
+                level = prestigeLevel;
+            }
+            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+            {
+                if (!Plugin.ChangeClassItem.Value.Equals(0))
+                {
+                    PrefabGUID item = new(Plugin.ChangeClassItem.Value);
+                    int quantity = Plugin.ChangeClassItemQuantity.Value;
+                    // Check if the player has the item to reset stats
+                    if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && Core.ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+                    {
+                        if (Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
+                        {
+                            if (level > 0)
+                            {
+                                LevelingSystem.PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+                                
+                                List<int> buffs = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
+                                BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
+                                EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+                                for (int i = 0; i < level; i++)
+                                {
+                                    PrefabGUID buffPrefab = new(buffs[i]);
+                                    if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out var buff))
+                                    {
+                                        BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
+                                    }
+                                }
+
+                                
+                            }
+                            classes.Clear();
+                        }
+                        else
+                        {
+                            ctx.Reply($"You do not have the required item to change classes ({item.LookupName()}x{quantity})");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        ctx.Reply($"You do not have the required item to change classes ({item.LookupName()}x{quantity})");
+                        return;
+                    }
+
+                }
+                else
+                {
+                    if (level > 0)
+                    {
+                        LevelingSystem.PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+                       
+                        List<int> buffs = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
+                        BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
+                        EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+                        for (int i = 0; i < level; i++)
+                        {
+                            PrefabGUID buffPrefab = new(buffs[i]);
+                            if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out var buff))
+                            {
+                                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
+                            }
+                        }
+
+                        
+                    }
+                }
+
+                classes.Clear();
+                
+                string weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
+                string bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
+                List<int> classWeaponStats = Core.ParseConfigString(weaponConfigEntry);
+                List<int> classBloodStats = Core.ParseConfigString(bloodConfigEntry);
+
+                classes[parsedClassType] = (classWeaponStats, classBloodStats);
+                if (level > 0)
+                {
+                    for (int i = 0; i < level; i++)
+                    {
+                        List<int> buffs = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[parsedClassType]);
+                        if (buffs.Count == 0 || buffs[i].Equals(0)) continue;
+                        PrefabGUID buffPrefab = new(buffs[level - 1]);
+                        
+                        PrestigeSystem.HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
+                    }
+                    
+                }
+
+                Core.DataStructures.PlayerClasses[steamId] = classes;
+                Core.DataStructures.SavePlayerClasses();
+                ctx.Reply($"You have changed to <color=white>{parsedClassType}</color>");
+            }
+        }
+        */
+
+        [Command(name: "changeClass", shortHand: "change", adminOnly: false, usage: ".change [Class]", description: "Change classes.")]
+        public static void ClassChangeCommand(ChatCommandContext ctx, string className)
+        {
+            if (!Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value)
+            {
+                ctx.Reply("Classes are not enabled.");
+                return;
+            }
+
+            if (!TryParseClassName(className, out var parsedClassType))
+            {
+                ctx.Reply("Invalid class, use .classes to see options.");
+                return;
+            }
+
+            ulong steamId = ctx.Event.User.PlatformId;
+            Entity character = ctx.Event.SenderCharacterEntity;
+            int level = PrestigeSystem.GetExperiencePrestigeLevel(steamId);
+
+            if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+            {
+                ctx.Reply("Class data not found.");
+                return;
+            }
+
+            if (Plugin.ChangeClassItem.Value != 0 && !HandleClassChangeItem(ctx, classes, level))
+            {
+                return;
+            }
+
+            if (level > 0)
+            {
+                PrestigeSystem.RemoveCurrentBuffs(ctx, classes.Keys.FirstOrDefault(), level);
+            }
+
+            classes.Clear();
+            UpdateClassData(character, parsedClassType, classes, level);
+            Core.DataStructures.PlayerClasses[steamId] = classes;
+            Core.DataStructures.SavePlayerClasses();
+            ctx.Reply($"You have changed to <color=white>{parsedClassType}</color>");
+        }
+
         [Command(name: "listClasses", shortHand: "classes", adminOnly: false, usage: ".classes", description: "Sets player level.")]
         public static void ListClasses(ChatCommandContext ctx)
         {
@@ -162,7 +318,7 @@ namespace Bloodcraft.Commands
             string classTypes = string.Join(", ", Enum.GetNames(typeof(LevelingSystem.PlayerClasses)));
             ctx.Reply($"Available Classes: <color=white>{classTypes}</color>");
         }
-
+        /*
         [Command(name: "playerPrestige", shortHand: "prestige", adminOnly: false, usage: ".prestige [PrestigeType]", description: "Handles player prestiging.")]
         public unsafe static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
@@ -171,7 +327,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Prestiging is not enabled.");
                 return;
             }
-
+            
             if (!Enum.TryParse(prestigeType, true, out PrestigeSystem.PrestigeType parsedPrestigeType))
             {
                 // Attempt a substring match with existing enum names
@@ -184,6 +340,54 @@ namespace Bloodcraft.Commands
                     ctx.Reply("Invalid prestige, use .lpp to see options.");
                     return;
                 }
+            }
+            if (Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value && Core.DataStructures.PlayerClasses.TryGetValue(ctx.Event.User.PlatformId, out var classes) && classes.Keys.Count == 0 && parsedPrestigeType.Equals(PrestigeSystem.PrestigeType.Experience))
+            {
+                ctx.Reply("You must choose a class before prestiging in experience.");
+                return;
+            }
+            var steamId = ctx.Event.User.PlatformId;
+            var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+
+            if (handler == null)
+            {
+                ctx.Reply("Invalid prestige type.");
+                return;
+            }
+
+            var xpData = handler.GetExperienceData(steamId);
+            if (PrestigeSystem.CanPrestige(steamId, parsedPrestigeType, xpData.Key))
+            {
+                PrestigeSystem.PerformPrestige(ctx, steamId, parsedPrestigeType, handler);
+            }
+            else
+            {
+                ctx.Reply($"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
+            }
+        }
+        */
+        [Command(name: "playerPrestige", shortHand: "prestige", adminOnly: false, usage: ".prestige [PrestigeType]", description: "Handles player prestiging.")]
+        public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
+        {
+            if (!Plugin.PrestigeSystem.Value)
+            {
+                ctx.Reply("Prestiging is not enabled.");
+                return;
+            }
+
+            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+            {
+                ctx.Reply("Invalid prestige, use .lpp to see options.");
+                return;
+            }
+
+            if ((Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value) &&
+                Core.DataStructures.PlayerClasses.TryGetValue(ctx.Event.User.PlatformId, out var classes) &&
+                classes.Keys.Count == 0 &&
+                parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+            {
+                ctx.Reply("You must choose a class before prestiging in experience.");
+                return;
             }
 
             var steamId = ctx.Event.User.PlatformId;
@@ -206,6 +410,36 @@ namespace Bloodcraft.Commands
             }
         }
         [Command(name: "resetPrestige", shortHand: "rpr", adminOnly: true, usage: ".rpr [PrestigeType]", description: "Handles resetting prestiging.")]
+        public static void ResetPrestige(ChatCommandContext ctx, string prestigeType)
+        {
+            if (!Plugin.PrestigeSystem.Value)
+            {
+                ctx.Reply("Prestiging is not enabled.");
+                return;
+            }
+
+            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+            {
+                ctx.Reply("Invalid prestige, use .lpp to see options.");
+                return;
+            }
+
+            var steamId = ctx.Event.User.PlatformId;
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
+            {
+                if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+                {
+                    PrestigeSystem.RemoveAllBuffs(ctx, steamId, prestigeLevel);
+                }
+
+                prestigeData[parsedPrestigeType] = 0;
+                Core.DataStructures.SavePlayerPrestiges();
+                ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> prestige reset.");
+            }
+        }
+        /*
+        [Command(name: "resetPrestige", shortHand: "rpr", adminOnly: true, usage: ".rpr [PrestigeType]", description: "Handles resetting prestiging.")]
         public unsafe static void ResetPrestige(ChatCommandContext ctx, string prestigeType)
         {
             if (!Plugin.PrestigeSystem.Value)
@@ -227,17 +461,44 @@ namespace Bloodcraft.Commands
                     return;
                 }
             }
-
+            List<int> buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
+            List<int> classBuffs = [];
             var steamId = ctx.Event.User.PlatformId;
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
             {
+                if (parsedPrestigeType.Equals(PrestigeSystem.PrestigeType.Experience))
+                {
+                    BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
+                    EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+                    if (Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value)
+                    {
+                        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+                        {
+                            LevelingSystem.PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+                            classBuffs = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
+                        }
+                    }
+                    for (int i = 0; i < prestigeLevel; i++)
+                    {                    
+                        PrefabGUID buffPrefab = new(buffs[i]);
+                        if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out var buff))
+                        {
+                            BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
+                        }
+                        if (classBuffs.Count == 0 || classBuffs[i].Equals(0)) continue;
+                        buffPrefab = new(classBuffs[i]);
+                        if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out var classBuff))
+                        {
+                            BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
+                        }
+                    }
+                }
                 prestigeData[parsedPrestigeType] = 0;
                 Core.DataStructures.SavePlayerPrestiges();
                 ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> prestige reset.");
             }
         }
-
+        */
         [Command(name: "getPrestige", shortHand: "gpr", adminOnly: false, usage: ".gpr [PrestigeType]", description: "Shows information about player's prestige status.")]
         public unsafe static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
@@ -247,17 +508,10 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            if (!Enum.TryParse(prestigeType, true, out PrestigeSystem.PrestigeType parsedPrestigeType))
+            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
             {
-                parsedPrestigeType = Enum.GetValues(typeof(PrestigeSystem.PrestigeType))
-                                         .Cast<PrestigeSystem.PrestigeType>()
-                                         .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
-
-                if (parsedPrestigeType == default)
-                {
-                    ctx.Reply("Invalid prestige, use .lpp to see options.");
-                    return;
-                }
+                ctx.Reply("Invalid prestige, use .lpp to see options.");
+                return;
             }
 
             var steamId = ctx.Event.User.PlatformId;

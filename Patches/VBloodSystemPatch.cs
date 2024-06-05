@@ -4,6 +4,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.UI;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -34,4 +35,5 @@ internal class VBloodSystemPatch
             Core.Log.LogError($"Error in VBloodSystemPatch: {e}");
         }
     }
+    
 }

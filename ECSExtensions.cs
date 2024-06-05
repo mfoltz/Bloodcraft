@@ -88,6 +88,22 @@ public static class ECSExtensions
         Core.Log.LogInfo("===");
     }
 
+    public static void LogComponentsMatching(this Entity entity, string match)
+    {
+        NativeArray<ComponentType>.Enumerator enumerator = Core.EntityManager.GetComponentTypes(entity).GetEnumerator();
+        Core.Log.LogInfo("===");
+        while (enumerator.MoveNext())
+        {
+            if (enumerator.Current.ToString().ToLower().Contains(match))
+            {
+                ComponentType current = enumerator.Current;
+                Core.Log.LogInfo($"{current}");
+            }
+            
+        }
+        Core.Log.LogInfo("===");
+    }
+
     public static void Add<T>(this Entity entity)
     {
         var ct = new ComponentType(Il2CppType.Of<T>());

@@ -57,7 +57,6 @@ namespace Bloodcraft.Systems.Expertise
             ulong steamID = user.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
 
-            if (weaponType.Equals(WeaponType.Unarmed) && !Plugin.Sanguimancy.Value) return; // check for sanguimancy setting
 
             if (entityManager.HasComponent<UnitStats>(Victim))
             {

@@ -53,7 +53,7 @@ namespace Bloodcraft.Systems.Professions
                 ProfessionValue = original.Read<EntityCategory>().ResourceLevel._Value;
             }
 
-            if (Victim.Read<UnitLevel>().Level > ProfessionValue)
+            if (Victim.Read<UnitLevel>().Level > ProfessionValue && !Victim.Read<PrefabGUID>().LookupName().ToLower().Contains("iron"))
             {
                 ProfessionValue = Victim.Read<UnitLevel>().Level;
             }
@@ -113,7 +113,9 @@ namespace Bloodcraft.Systems.Professions
                             {
                                 if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
                                 {
-                                    if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, level))
+                                    int bonus = level / 5;
+                                    if (bonus.Equals(0)) return;
+                                    if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                     {
                                         string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.LookupName());
                                         if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{level}</color> received from {handler.GetProfessionName()}");

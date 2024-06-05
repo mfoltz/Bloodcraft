@@ -55,7 +55,7 @@ internal static class EquipmentPatches
             foreach (Entity entity in entities)
             {
                 if (entity.Equals(Entity.Null)) continue;
-                if (Plugin.ExpertiseSystem.Value && Plugin.Sanguimancy.Value && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (Plugin.ExpertiseSystem.Value && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;

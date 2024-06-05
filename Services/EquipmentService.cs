@@ -54,6 +54,7 @@ namespace Bloodcraft.Services
                     }
                     baseEntity.Write(new WeaponLevelSource { Level = 0 });
                 }
+
             }
         }
     }

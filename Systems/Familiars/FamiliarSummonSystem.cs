@@ -11,7 +11,6 @@ namespace Bloodcraft.Systems.Familiars
     internal class FamiliarSummonSystem
     {
         static readonly PrefabGUID playerFaction = new(1106458752);
-        static readonly PrefabGUID traderFaction = new(30052367);
         public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
         {
             EntityCommandBufferSystem entityCommandBufferSystem = Core.EntityCommandBufferSystem;
@@ -156,14 +155,20 @@ namespace Bloodcraft.Systems.Familiars
         {
             AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
             aggroConsumer.MaxDistanceFromPreCombatPosition = 20f;
-            aggroConsumer.ProximityRadius = 20f;
+            aggroConsumer.ProximityRadius = 25f;
             familiar.Write(aggroConsumer);
+            
         }
         static void ModifyConvertable(Entity familiar)
         {
             ServantConvertable convertable = familiar.Read<ServantConvertable>();
             convertable.ConvertToUnit = new(0);
             familiar.Write(convertable);
+
+            if (familiar.Has<CharmSource>())
+            {
+                familiar.Remove<CharmSource>();
+            }
         }
         static void ModifyCollision(Entity familiar)
         {
@@ -173,6 +178,7 @@ namespace Bloodcraft.Systems.Familiars
         }
         static void ModifyDropTable(Entity familiar)
         {
+            if (!familiar.Has<DropTableBuffer>()) return;
             var buffer = familiar.ReadBuffer<DropTableBuffer>();
             for (int i = 0; i < buffer.Length; i++)
             {

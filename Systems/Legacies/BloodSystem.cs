@@ -92,6 +92,7 @@ namespace Bloodcraft.Systems.Legacy
                     if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige) && legacyPrestige > 0)
                     {
                         changeFactor -= (Plugin.PrestigeRatesReducer.Value * legacyPrestige);
+                        changeFactor = MathF.Max(changeFactor, 0);
                     }
 
                     // Apply rate gain with linear increase
@@ -101,6 +102,7 @@ namespace Bloodcraft.Systems.Legacy
                         
                     }
                 }
+
 
                 BloodValue *= changeFactor;
 

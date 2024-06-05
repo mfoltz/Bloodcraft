@@ -17,6 +17,11 @@ namespace Bloodcraft.Commands
         [Command(name: "bindFamiliar", shortHand: "bind", adminOnly: false, usage: ".bind [#]", description: "Activates specified familiar from current list.")]
         public static void BindFamiliar(ChatCommandContext ctx, int choice)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             Entity character = ctx.Event.SenderCharacterEntity;
             Entity userEntity = ctx.Event.SenderUserEntity;
@@ -54,6 +59,8 @@ namespace Bloodcraft.Commands
                 Core.DataStructures.FamiliarActives[steamId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
                 FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[choice -1]);
+                //character.Add<AlertAllies>();
+                
             }
             else
             {
@@ -73,6 +80,8 @@ namespace Bloodcraft.Commands
                 DestroyUtility.CreateDestroyEvent(Core.EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
                 Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
                 Core.DataStructures.SavePlayerFamiliarActives();
+               
+
                 ctx.Reply("Familiar unbound.");
             }
             else if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Item1.Equals(Entity.Null) && !data.Item2.Equals(0))
@@ -80,12 +89,14 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Couldn't find familiar, assuming dead and unbinding...");
                 Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
                 Core.DataStructures.SavePlayerFamiliarActives();
+                
             }
             else if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
             {
                 DestroyUtility.CreateDestroyEvent(Core.EntityManager, data.Item1, DestroyReason.Default, DestroyDebugReason.None);
                 Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
                 Core.DataStructures.SavePlayerFamiliarActives();
+               
                 ctx.Reply("Familiar unbound.");
             }
         }
@@ -93,6 +104,11 @@ namespace Bloodcraft.Commands
         [Command(name: "listFamiliars", shortHand: "lf", adminOnly: false, usage: ".lf", description: "Lists unlocked familiars from current set.")]
         public static void ListFamiliars(ChatCommandContext ctx)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
             string set = Core.DataStructures.FamiliarSet[steamId];
@@ -116,6 +132,11 @@ namespace Bloodcraft.Commands
         [Command(name: "familiarSets", shortHand: "famsets", adminOnly: false, usage: ".famsets", description: "Shows the available familiar lists.")]
         public static void ListFamiliarSets(ChatCommandContext ctx)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
             if (data.UnlockedFamiliars.Keys.Count > 0)
@@ -137,6 +158,11 @@ namespace Bloodcraft.Commands
         [Command(name: "chooseFamiliarSet", shortHand: "cfs", adminOnly: false, usage: ".cfs [Name]", description: "Choose active set of familiars.")]
         public static void ChooseSet(ChatCommandContext ctx, string name)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
             if (data.UnlockedFamiliars.TryGetValue(name, out var _))
@@ -153,6 +179,11 @@ namespace Bloodcraft.Commands
         [Command(name: "setRename", shortHand: "sr", adminOnly: false, usage: ".sr [CurrentName] [NewName]", description: "Renames set.")]
         public static void RenameSet(ChatCommandContext ctx, string current, string name)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
             if (data.UnlockedFamiliars.TryGetValue(current, out var familiarSet))
@@ -180,6 +211,11 @@ namespace Bloodcraft.Commands
         [Command(name: "transplantFamiliar", shortHand: "tf", adminOnly: false, usage: ".tf [SetName]", description: "Moves active familiar to specified set.")]
         public static void TransplantFamiliar(ChatCommandContext ctx, string name)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
             if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count < 10)
@@ -206,10 +242,46 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Couldn't find set or set is full.");
             }
         }
+        [Command(name: "addFamiliar", shortHand: "af", adminOnly: true, usage: ".af [PrefabGUID]", description: "Unit testing.")]
+        public static void AddFamiliar(ChatCommandContext ctx, int unit)
+        {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
+            ulong steamId = ctx.User.PlatformId;
+            UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
+            if (Core.DataStructures.FamiliarSet.TryGetValue(steamId, out var activeSet) && activeSet.Length < 10)
+            {
+                // Remove the old set
+                if (Core.PrefabCollectionSystem.PrefabLookupMap.TryGetValue(new(unit), out var _))
+                {
+                    // Add to set
+                    data.UnlockedFamiliars[activeSet].Add(unit);
+                    Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
+                    ctx.Reply($"<color=green>{unit}</color> added to <color=white>{activeSet}</color>.");
+                }
+                else
+                {
+                    ctx.Reply("Invalid unit.");
+                    return;
+                }
+            }
+            else
+            {
+                ctx.Reply("Set full, choose another.");
+            }
+        }
 
         [Command(name: "removeFamiliar", shortHand: "rf", adminOnly: false, usage: ".rf [#]", description: "Removes familiar from current set permanently.")]
         public static void RemoveFamiliarFromSet(ChatCommandContext ctx, int choice)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong steamId = ctx.User.PlatformId;
             UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
             if (Core.DataStructures.FamiliarSet.TryGetValue(steamId, out var activeSet) && data.UnlockedFamiliars.TryGetValue(activeSet, out var familiarSet))
@@ -236,6 +308,11 @@ namespace Bloodcraft.Commands
         [Command(name: "toggleFamiliar", shortHand: "toggle", usage: ".toggle", description: "Calls or dismisses familar.", adminOnly: false)]
         public static void ToggleFamiliar(ChatCommandContext ctx)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong platformId = ctx.User.PlatformId;
             Entity character = ctx.Event.SenderCharacterEntity;
             Entity userEntity = ctx.Event.SenderUserEntity;
@@ -245,6 +322,11 @@ namespace Bloodcraft.Commands
         [Command(name: "toggleCombat", shortHand: "combat", usage: ".combat", description: "Enables or disables combat for familiar.", adminOnly: false)]
         public static void ToggleCombat(ChatCommandContext ctx)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             ulong platformId = ctx.User.PlatformId;
             Entity character = ctx.Event.SenderCharacterEntity;
             Entity userEntity = ctx.Event.SenderUserEntity;
@@ -266,6 +348,11 @@ namespace Bloodcraft.Commands
         [Command(name: "listEmoteActions", shortHand: "le", usage: ".le", description: "List emote actions.", adminOnly: false)]
         public static void ListEmotes(ChatCommandContext ctx)
         {
+            if (!Plugin.FamiliarSystem.Value)
+            {
+                ctx.Reply("Familiars are not enabled.");
+                return;
+            }
             List<string> emoteInfoList = [];
             foreach (var emote in EmoteSystemPatch.actions)
             {
@@ -293,7 +380,7 @@ namespace Bloodcraft.Commands
                 var xpData = FamiliarLevelingSystem.GetFamiliarExperience(steamId, data.Item2);
                 int progress = (int)(xpData.Value - FamiliarLevelingSystem.ConvertLevelToXp(xpData.Key));
                 int percent = FamiliarLevelingSystem.GetLevelProgress(steamId, data.Item2);
-                ctx.Reply($"You're familiar is level [<color=white>{xpData.Key}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+                ctx.Reply($"Your familiar is level [<color=white>{xpData.Key}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
             }
             else
             {
@@ -356,6 +443,7 @@ namespace Bloodcraft.Commands
                     DestroyUtility.CreateDestroyEvent(Core.EntityManager, buffer[i].Entity._Entity, DestroyReason.Default, DestroyDebugReason.None);
                 }
             }
+            ctx.Reply("Familiar actives cleared and followerBuffer purged.");
         }
     }
 }

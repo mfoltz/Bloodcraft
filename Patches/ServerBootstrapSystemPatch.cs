@@ -5,6 +5,8 @@ using ProjectM;
 using Steamworks;
 using Stunlock.Network;
 using Unity.Entities;
+using static Bloodcraft.Core;
+using Unity.Services.Authentication.Internal;
 using static Bloodcraft.Core.DataStructures;
 using User = ProjectM.Network.User;
 
@@ -32,6 +34,7 @@ internal static class ServerBootstrapSystemPatch
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
                 { "FamiliarLogging", false },
+                { "ShiftLock", false },
                 { "SpellLock", false },
                 { "Grouping", false },
                 { "Emotes", false }
@@ -123,20 +126,19 @@ internal static class ServerBootstrapSystemPatch
         
         if (Plugin.ExpertiseSystem.Value)
         {
-            if (Plugin.Sanguimancy.Value)
+           
+            if (!Core.DataStructures.PlayerSanguimancy.ContainsKey(steamId))
             {
-                if (!Core.DataStructures.PlayerSanguimancy.ContainsKey(steamId))
-                {
-                    Core.DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                    Core.DataStructures.SavePlayerSanguimancy();
-                }
-
-                if (!Core.DataStructures.PlayerSanguimancySpells.ContainsKey(steamId))
-                {
-                    Core.DataStructures.PlayerSanguimancySpells.Add(steamId, (0, 0));
-                    Core.DataStructures.SavePlayerSanguimancySpells();
-                }
+                Core.DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerSanguimancy();
             }
+
+            if (!Core.DataStructures.PlayerSanguimancySpells.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerSanguimancySpells.Add(steamId, (0, 0));
+                Core.DataStructures.SavePlayerSanguimancySpells();
+            }
+            
 
             if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
             {

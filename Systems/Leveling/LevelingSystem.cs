@@ -6,6 +6,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using VampireCommandFramework;
 using static Bloodcraft.Core;
 
 namespace Bloodcraft.Systems.Experience
@@ -18,9 +19,12 @@ namespace Bloodcraft.Systems.Experience
         static readonly float EXPPower = 2f; // power for calculating level from xp
         static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value; // maximum level
         static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
-        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; // scaling multiplier for experience, boosts exp at lower levels
+        static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; //
+        static readonly float UnitSpawnerMultiplier = Plugin.UnitSpawnerMultiplier.Value;
+        static readonly float WarEventMultiplier = Plugin.WarEventMultiplier.Value;
 
         static readonly PrefabGUID levelUpBuff = new(-1133938228);
+        static readonly PrefabGUID warEventTrash = new(2090187901);
 
         public enum PlayerClasses
         {
@@ -42,6 +46,16 @@ namespace Bloodcraft.Systems.Experience
             { PlayerClasses.DeathMage, (Plugin.DeathMageWeapon.Value, Plugin.DeathMageBlood.Value) }
         };
 
+        public static readonly Dictionary<PlayerClasses, string> ClassPrestigeBuffsMap = new()
+        {
+            { PlayerClasses.BloodKnight, Plugin.BloodKnightBuffs.Value },
+            { PlayerClasses.DemonHunter, Plugin.DemonHunterBuffs.Value },
+            { PlayerClasses.VampireLord, Plugin.VampireLordBuffs.Value },
+            { PlayerClasses.ShadowBlade, Plugin.ShadowBladeBuffs.Value },
+            { PlayerClasses.ArcaneSorcerer, Plugin.ArcaneSorcererBuffs.Value },
+            { PlayerClasses.DeathMage, Plugin.DeathMageBuffs.Value }
+        };
+
         public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
         {
             EntityManager entityManager = Core.EntityManager;
@@ -58,9 +72,16 @@ namespace Bloodcraft.Systems.Experience
         {
             PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
             Entity userEntity = player.UserEntity;
-            int groupMultiplier = 1;
+            float groupMultiplier = 1;
+
+            if (IsVBlood(Core.EntityManager, victimEntity))
+            {
+                ProcessExperienceGain(entityManager, killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
+                return;
+            }
+
             HashSet<Entity> participants = GetParticipants(killerEntity, userEntity); // want list of participants to process experience for
-            if (participants.Count > 1) groupMultiplier = (int)GroupMultiplier; // if more than 1 participant, apply group multiplier
+            if (participants.Count > 1) groupMultiplier = GroupMultiplier; // if more than 1 participant, apply group multiplier
             foreach (Entity participant in participants)
             {
                 ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
@@ -116,13 +137,16 @@ namespace Bloodcraft.Systems.Experience
             return players;
         }
 
-        static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, int groupMultiplier)
+        static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, float groupMultiplier)
         {
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
             Health health = entityManager.GetComponentData<Health>(victimEntity);
+
             bool isVBlood = IsVBlood(entityManager, victimEntity);
             int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
             float gainedXP = CalculateExperienceGained(victimLevel.Level._Value, isVBlood);
+            //Core.Log.LogInfo($"Gained XP before nerfing unit spawner: {gainedXP}");
+
             //Core.Log.LogInfo($"Gained XP before adding bonus from health of unit: {gainedXP}");
             gainedXP += additionalXP;
             //Core.Log.LogInfo($"Gained XP after adding bonus from health of unit: {gainedXP}");
@@ -136,6 +160,27 @@ namespace Bloodcraft.Systems.Experience
                 gainedXP *= expReductionFactor;
             }
             //Core.Log.LogInfo($"Gained XP after reducing for prestige: {gainedXP}");
+            if (UnitSpawnerMultiplier < 1 && victimEntity.Has<IsMinion>() && victimEntity.Read<IsMinion>().Value)
+            {
+                gainedXP *= UnitSpawnerMultiplier;
+                if (gainedXP == 0) return;
+            }
+            if (WarEventMultiplier < 1 && victimEntity.Has<SpawnBuffElement>())
+            {
+                // nerf experience gain from war event units
+                var spawnBuffElement = victimEntity.ReadBuffer<SpawnBuffElement>();
+                for (int i = 0; i < spawnBuffElement.Length; i++)
+                {
+                    //Core.Log.LogInfo(spawnBuffElement[i].Buff.LookupName());
+                    //Core.Log.LogInfo(spawnBuffElement[i].Buff.GuidHash);
+                    if (spawnBuffElement[i].Buff.Equals(warEventTrash))
+                    {
+                        //Core.Log.LogInfo($"Gained XP before nerfing warevent: {gainedXP}");
+                        gainedXP *= WarEventMultiplier;
+                        break;
+                    }
+                }
+            }
             gainedXP *= groupMultiplier;
             UpdatePlayerExperience(SteamID, gainedXP);
 
@@ -266,16 +311,86 @@ namespace Bloodcraft.Systems.Experience
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
-        
+
         static float ApplyScalingFactor(float gainedXP, int currentLevel, int victimLevel)
         {
             float k = LevelScalingMultiplier; // You can adjust this constant to control the tapering effect
             int levelDifference = currentLevel - victimLevel;
             //float scalingFactor =
-            if (k == 0) return gainedXP;
+            if (k <= 0) return gainedXP;
             float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
             return gainedXP * scalingFactor;
         }
-        
+
+        public static bool TryParseClassName(string className, out PlayerClasses parsedClassType)
+        {
+            // Attempt to parse the className string to the PlayerClasses enum.
+            if (Enum.TryParse(className, true, out parsedClassType))
+            {
+                return true; // Successfully parsed
+            }
+
+            // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
+            parsedClassType = Enum.GetValues(typeof(PlayerClasses))
+                                 .Cast<PlayerClasses>()
+                                 .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
+
+            // Check if a valid enum value was found that contains the input string.
+            if (!parsedClassType.Equals(default(PlayerClasses)))
+            {
+                return true; // Found a matching enum value
+            }
+
+            // If no match is found, return false and set the out parameter to default value.
+            parsedClassType = default;
+            return false; // Parsing failed
+        }
+
+        public static bool HandleClassChangeItem(ChatCommandContext ctx, IDictionary<PlayerClasses, (List<int>, List<int>)> classes, int level)
+        {
+            PrefabGUID item = new(Plugin.ChangeClassItem.Value);
+            int quantity = Plugin.ChangeClassItemQuantity.Value;
+
+            if (!InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
+                Core.ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
+            {
+                ctx.Reply($"You do not have the required item to change classes ({item.LookupName()}x{quantity})");
+                return false;
+            }
+
+            if (!Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
+            {
+                ctx.Reply($"Failed to remove the required item ({item.LookupName()}x{quantity})");
+                return false;
+            }
+
+            if (level > 0)
+            {
+                PrestigeSystem.RemoveCurrentBuffs(ctx, classes.Keys.FirstOrDefault(), level);
+            }
+
+            return true;
+        }
+
+        public static void UpdateClassData(Entity character, PlayerClasses parsedClassType, IDictionary<PlayerClasses, (List<int>, List<int>)> classes, int level)
+        {
+            var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
+            var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
+            var classWeaponStats = Core.ParseConfigString(weaponConfigEntry);
+            var classBloodStats = Core.ParseConfigString(bloodConfigEntry);
+
+            classes[parsedClassType] = (classWeaponStats, classBloodStats);
+
+            if (level > 0)
+            {
+                var buffs = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[parsedClassType]);
+                for (int i = 0; i < level; i++)
+                {
+                    if (buffs.Count == 0 || buffs[i] == 0) continue;
+                    var buffPrefab = new PrefabGUID(buffs[level - 1]);
+                    PrestigeSystem.HandlePrestigeBuff(character, buffPrefab);
+                }
+            }
+        }
     }
 }

@@ -123,5 +123,6 @@ namespace Bloodcraft.Commands
             string toggleColor = BuildingCostsDebugSetting.Value ? "<color=green>enabled</color>" : "<color=red>disabled</color>";
             ctx.Reply($"Building costs removed: {toggleColor}");
         }
+        
     }
 }

@@ -139,20 +139,30 @@ public class BuffPatch
                     {
                         continue;
                     }
-                    var legacyData = bloodHandler.GetLegacyData(steamID);
-                    int legacyKey = legacyData.Key;
+
+                    float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
 
                     if (Plugin.PrestigeSystem.Value && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
                     {
-                        legacyKey = bloodPrestige * 10;
+                        legacyKey = (float)bloodPrestige * Plugin.PrestigeBloodQuality.Value;
+                        if (legacyKey > 0)
+                        {
+                            bloodQualityChange.Quality += legacyKey;
+                            bloodQualityChange.ForceReapplyBuff = true;
+                            entity.Write(bloodQualityChange);
+                        }
+                    }
+                    else if (!Plugin.PrestigeSystem.Value)
+                    {
+                        if (legacyKey > 0)
+                        {
+                            bloodQualityChange.Quality += legacyKey;
+                            bloodQualityChange.ForceReapplyBuff = true;
+                            entity.Write(bloodQualityChange);
+                        }
                     }
 
-                    if (legacyData.Key > 0)
-                    {
-                        bloodQualityChange.Quality += legacyData.Key;
-                        bloodQualityChange.ForceReapplyBuff = true;
-                        entity.Write(bloodQualityChange);
-                    }
+                    
                 }
             }
         }

@@ -33,6 +33,12 @@ public class Plugin : BasePlugin
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<string> _prestigeBuffs;
+    private static ConfigEntry<string> _bloodKnightBuffs;
+    private static ConfigEntry<string> _demonHunterBuffs;
+    private static ConfigEntry<string> _vampireLordBuffs;
+    private static ConfigEntry<string> _shadowBladeBuffs;
+    private static ConfigEntry<string> _arcaneSorcererBuffs;
+    private static ConfigEntry<string> _deathMageBuffs;
     private static ConfigEntry<int> _maxLevelingPrestiges;
     private static ConfigEntry<float> _levelingPrestigeReducer; // separate factor for reducing experience gain in leveling per level of leveling prestige
     private static ConfigEntry<float> _prestigeRatesReducer; //reduces gains by this percent per level of prestige for expertise/legacy, they get raised by prestiging in leveling
@@ -44,14 +50,18 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodLevelingMultiplier;
     private static ConfigEntry<float> _groupLevelingMultiplier;
     private static ConfigEntry<float> _levelScalingMultiplier;
+    private static ConfigEntry<float> _warEventMultiplier;
+    private static ConfigEntry<float> _unitSpawnerMultiplier;
     private static ConfigEntry<bool> _playerGrouping;
     private static ConfigEntry<int> _maxGroupSize;
+    private static ConfigEntry<int> _changeClassItem;
+    private static ConfigEntry<int> _changeClassItemQuantity;
 
     private static ConfigEntry<bool> _expertiseSystem;
     private static ConfigEntry<int> _maxExpertisePrestiges;
-    private static ConfigEntry<bool> _sanguimancy;
-    private static ConfigEntry<int> _firstSlot;
-    private static ConfigEntry<int> _secondSlot;
+    private static ConfigEntry<bool> _unarmedSlots;
+    private static ConfigEntry<bool> _weaponShiftSlot;
+    private static ConfigEntry<bool> _unarmedShiftDash;
     private static ConfigEntry<int> _maxExpertiseLevel;
     private static ConfigEntry<float> _unitExpertiseMultiplier;
     private static ConfigEntry<float> _vBloodExpertiseMultiplier;
@@ -75,6 +85,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<bool> _bloodSystem;
     private static ConfigEntry<int> _maxLegacyPrestiges;
     private static ConfigEntry<bool> _bloodQualityBonus;
+    private static ConfigEntry<float> _prestigeBloodQuality;
     private static ConfigEntry<int> _maxBloodLevel;
     private static ConfigEntry<float> _unitLegacyMultiplier;
     private static ConfigEntry<float> _vBloodLegacyMultipler;
@@ -128,6 +139,18 @@ public class Plugin : BasePlugin
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
 
     public static ConfigEntry<string> PrestigeBuffs => _prestigeBuffs;
+
+    public static ConfigEntry<string> BloodKnightBuffs => _bloodKnightBuffs;
+
+    public static ConfigEntry<string> DemonHunterBuffs => _demonHunterBuffs;
+
+    public static ConfigEntry<string> VampireLordBuffs => _vampireLordBuffs;
+
+    public static ConfigEntry<string> ShadowBladeBuffs => _shadowBladeBuffs;
+
+    public static ConfigEntry<string> ArcaneSorcererBuffs => _arcaneSorcererBuffs;
+
+    public static ConfigEntry<string> DeathMageBuffs => _deathMageBuffs;
     public static ConfigEntry<int> MaxLevelingPrestiges => _maxLevelingPrestiges;
 
 
@@ -144,12 +167,24 @@ public class Plugin : BasePlugin
     public static ConfigEntry<int> MaxGroupSize => _maxGroupSize;
     public static ConfigEntry<bool> PlayerGrouping => _playerGrouping;
 
+    public static ConfigEntry<float> WarEventMultiplier => _warEventMultiplier;
+
+    public static ConfigEntry<float> UnitSpawnerMultiplier => _unitSpawnerMultiplier;
+
+    public static ConfigEntry<int> ChangeClassItem => _changeClassItem;
+
+
+    public static ConfigEntry<int> ChangeClassItemQuantity => _changeClassItemQuantity;
+
     public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
 
     public static ConfigEntry<int> MaxExpertisePrestiges => _maxExpertisePrestiges;
-    public static ConfigEntry<bool> Sanguimancy => _sanguimancy;
-    public static ConfigEntry<int> FirstSlot => _firstSlot;
-    public static ConfigEntry<int> SecondSlot => _secondSlot;
+
+    public static ConfigEntry<bool> UnarmedSlots => _unarmedSlots;
+
+    public static ConfigEntry<bool> WeaponShiftSlot => _weaponShiftSlot;
+
+    public static ConfigEntry<bool> UnarmedShiftDash => _unarmedShiftDash;
     public static ConfigEntry<int> MaxExpertiseLevel => _maxExpertiseLevel;
     public static ConfigEntry<float> UnitExpertiseMultiplier => _unitExpertiseMultiplier;
     public static ConfigEntry<float> VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier;
@@ -173,6 +208,7 @@ public class Plugin : BasePlugin
     public static ConfigEntry<bool> BloodSystem => _bloodSystem;
     public static ConfigEntry<int> MaxLegacyPrestiges => _maxLegacyPrestiges;
     public static ConfigEntry<bool> BloodQualityBonus => _bloodQualityBonus;
+    public static ConfigEntry<float> PrestigeBloodQuality => _prestigeBloodQuality;
     public static ConfigEntry<int> MaxBloodLevel => _maxBloodLevel;
     public static ConfigEntry<float> UnitLegacyMultiplier => _unitLegacyMultiplier;
     public static ConfigEntry<float> VBloodLegacyMultipler => _vBloodLegacyMultipler;
@@ -257,7 +293,13 @@ public class Plugin : BasePlugin
 
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
-        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,0,0,0,0,0,0,0,0,0", "The prefabGUID hashes for prestige buffs, use 0 to skip.");
+        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The prefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
+        _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,0,-714434113,0,-534491790,0,-1055766373,0,-584203677,0", "The prefabGUID hashes for blood knight prestige buffs, use 0 to skip.");
+        _demonHunterBuffs = InitConfigEntry("Config", "DemonHunterBuffs", "-154702686,0,-285745649,0,-1510965956,0,-536284884,0,210193036,0", "The prefabGUID hashes for demon hunter prestige buffs, use 0 to skip.");
+        _vampireLordBuffs = InitConfigEntry("Config", "VampireLordBuffs", "-1266262267,0,-1413561088,0,1103099361,0,1558171501,0,1828387635,0", "The prefabGUID hashes for vampire lord prestige buffs, use 0 to skip.");
+        _shadowBladeBuffs = InitConfigEntry("Config", "ShadowBladeBuffs", "894725875,0,997154800,0,-1576592687,0,-285745649,0,-536284884,0", "The prefabGUID hashes for shadow blade prestige buffs, use 0 to skip.");
+        _arcaneSorcererBuffs = InitConfigEntry("Config", "ArcaneSorcererBuffs", "-901503997,0,884683323,0,-993492354,0,-1859298707,0,2145997375,0", "The prefabGUID hashes for arcane sorcerer buffs, use 0 to skip.");
+        _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "1643157297,0,1159173627,0,1006510207,0,997154800,0,-1413561088,0", "The prefabGUID hashes for death mage buffs, use 0 to skip.");
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
         _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
         _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy.");
@@ -267,16 +309,21 @@ public class Plugin : BasePlugin
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
         _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 10f, "The multiplier for experience gained from units.");
         _vBloodLevelingMultiplier = InitConfigEntry("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
+        _warEventMultiplier = InitConfigEntry("Config", "WarEventMultiplier", 0.15f, "The multiplier for experience gained from war event trash spawns.");
+        _unitSpawnerMultiplier = InitConfigEntry("Config", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners.");
+        _changeClassItem = InitConfigEntry("Config", "ChangeClassItem", 0, "Item PrefabGUID cost for changing class.");
+        _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 0, "Quantity of item required for resetting class stats.");
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
-        _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "TBD");
+
+        _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
         _playerGrouping = InitConfigEntry("Config", "PlayerGrouping", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
         _maxGroupSize = InitConfigEntry("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
 
         _expertiseSystem = InitConfigEntry("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _maxExpertisePrestiges = InitConfigEntry("Config", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise.");
-        _sanguimancy = InitConfigEntry("Config", "Sanguimancy", false, "Enable or disable sanguimancy (extra spells for unarmed expertise).");
-        _firstSlot = InitConfigEntry("Config", "FirstSlot", 25, "Level of sanguimancy required for first slot unlock.");
-        _secondSlot = InitConfigEntry("Config", "SecondSlot", 50, "Level of sanguimancy required for second slot unlock.");
+        _unarmedSlots = InitConfigEntry("Config", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots.");
+        _weaponShiftSlot = InitConfigEntry("Config", "WeaponShiftSlot", false, "Enable or disable using extra spell on shift for weapons.");
+        _unarmedShiftDash = InitConfigEntry("Config", "UnarmedShiftDash", false, "Enable or disable the ability to dash with shift on unarmed.");
         _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
         _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
         _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
@@ -299,7 +346,8 @@ public class Plugin : BasePlugin
 
         _bloodSystem = InitConfigEntry("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
         _maxLegacyPrestiges = InitConfigEntry("Config", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies.");
-        _bloodQualityBonus = InitConfigEntry("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using prestige prestige level in legacy will take over the value for this at legacyPrestigeLevel*10 for now).");
+        _bloodQualityBonus = InitConfigEntry("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using presige, legacy level will be used with _prestigeBloodQuality multiplier below).");
+        _prestigeBloodQuality = InitConfigEntry("Config", "PrestigeBloodQuality", 5f, "Blood quality bonus per prestige legacy level.");
         _maxBloodLevel = InitConfigEntry("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
         _unitLegacyMultiplier = InitConfigEntry("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
         _vBloodLegacyMultipler = InitConfigEntry("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
@@ -336,6 +384,7 @@ public class Plugin : BasePlugin
         _statSyngergyMultiplier = InitConfigEntry("Config", "StatSynergyMultiplier", 2f, "Multiplier for class stat synergies to base stat cap.");
         _bloodKnightWeapon = InitConfigEntry("Config", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies.");
         _bloodKnightBlood = InitConfigEntry("Config", "BloodKnightBlood", "0,2,3,11", "Blood Knight blood synergies.");
+
 
         _demonHunterWeapon = InitConfigEntry("Config", "DemonHunterWeapon", "1,2,8,9", "Demon Hunter weapon synergies.");
         _demonHunterBlood = InitConfigEntry("Config", "DemonHunterBlood", "2,5,7,9", "Demon Hunter blood synergies.");
@@ -403,13 +452,12 @@ public class Plugin : BasePlugin
             {
                 loadFunction();
             }
-            if (Sanguimancy.Value)
+          
+            foreach (var loadFunction in loadSanguimancy)
             {
-                foreach (var loadFunction in loadSanguimancy)
-                {
-                    loadFunction();
-                }
+                loadFunction();
             }
+            
         }
         if (BloodSystem.Value)
         {

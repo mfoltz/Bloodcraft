@@ -1,6 +1,7 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
+using ProjectM.CastleBuilding;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
@@ -23,11 +24,7 @@ namespace Bloodcraft.Commands
 
 
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
-            {
-                ctx.Reply("Sanguimancy is not enabled.");
-                return;
-            }
+            
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler == null)
             {
@@ -121,11 +118,7 @@ namespace Bloodcraft.Commands
 
             ulong steamID = ctx.Event.User.PlatformId;
             //ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-            if (WeaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
-            {
-                ctx.Reply("Sanguimancy is not enabled.");
-                return;
-            }
+            
             if (WeaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
                ctx.Reply("You cannot choose weapon stats for the fishing pole.");
@@ -164,11 +157,7 @@ namespace Bloodcraft.Commands
             ulong steamID = ctx.Event.User.PlatformId;
             ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
-            {
-                ctx.Reply("Sanguimancy is not enabled.");
-                return;
-            }
+           
             if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
                 ctx.Reply("You cannot reset weapon stats for fishing pole as none can be chosen.");
@@ -194,6 +183,7 @@ namespace Bloodcraft.Commands
                     ctx.Reply($"You do not have the required item to reset your weapon stats ({item.LookupName()}x{quantity})");
                     return;
                 }
+                
             }
 
             PlayerWeaponUtilities.ResetStats(steamID, weaponType);
@@ -228,11 +218,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Invalid weapon type.");
                 return;
             }
-            if (weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !Plugin.Sanguimancy.Value)
-            {
-                ctx.Reply("Sanguimancy is not enabled.");
-                return;
-            }
+            
             var expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
             if (expertiseHandler == null)
@@ -292,21 +278,16 @@ namespace Bloodcraft.Commands
         [Command(name: "lockSpells", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
         public static void LockPlayerSpells(ChatCommandContext ctx)
         {
-            if (!Plugin.ExpertiseSystem.Value)
+            if (!Plugin.UnarmedSlots.Value && !Plugin.WeaponShiftSlot.Value)
             {
-                ctx.Reply("Expertise is not enabled.");
-                return;
-            }
-            if (!Plugin.Sanguimancy.Value)
-            {
-                ctx.Reply("Sanguimancy is not enabled.");
+                ctx.Reply("Extra spell slots are not enabled.");
                 return;
             }
 
             var user = ctx.Event.User;
             var SteamID = user.PlatformId;
 
-            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= Plugin.FirstSlot.Value)
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data))
             {
                 bools["SpellLock"] = !bools["SpellLock"];
                 if (bools["SpellLock"])
@@ -319,30 +300,22 @@ namespace Bloodcraft.Commands
                 }
                 Core.DataStructures.SavePlayerBools();
             }
-            else
-            {
-                ctx.Reply($"You must be at least level {Plugin.FirstSlot.Value} in Sanguimancy to use this. Both slots are unlocked at {Plugin.SecondSlot.Value}");
-            }
+            
         }
 
         [Command(name: "shiftLock", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
         public static void ShiftPlayerSpells(ChatCommandContext ctx)
         {
-            if (!Plugin.ExpertiseSystem.Value)
+            if (!Plugin.UnarmedSlots.Value && !Plugin.WeaponShiftSlot.Value)
             {
-                ctx.Reply("Expertise is not enabled.");
-                return;
-            }
-            if (!Plugin.Sanguimancy.Value)
-            {
-                ctx.Reply("Sanguimancy is not enabled.");
+                ctx.Reply("Extra spell slots are not enabled.");
                 return;
             }
 
             var user = ctx.Event.User;
             var SteamID = user.PlatformId;
 
-            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data) && data.Key >= Plugin.SecondSlot.Value)
+            if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data))
             {
                 if (bools["ShiftLock"])
                 {
@@ -356,10 +329,38 @@ namespace Bloodcraft.Commands
                 }
                 Core.DataStructures.SavePlayerBools();
             }
-            else
+           
+        }
+        [Command(name: "setSpells", shortHand: "spell", adminOnly: true, usage: ".spell [Slot] [PrefabGUID]", description: "Manually sets spells for testing.")]
+        public static void SetSpellCommand(ChatCommandContext ctx, int slot, int ability)
+        {
+            if (!Plugin.UnarmedSlots.Value && !Plugin.WeaponShiftSlot.Value)
             {
-                ctx.Reply($"You must be at least level {Plugin.SecondSlot.Value} in Sanguimancy to use this.");
+                ctx.Reply("Extra spell slots are not enabled.");
+                return;
             }
+            if (slot < 1 || slot > 2)
+            {
+                ctx.Reply("Invalid slot.");
+                return;
+            }
+            var user = ctx.Event.User;
+            var SteamID = user.PlatformId;
+
+            if (Core.DataStructures.PlayerSanguimancySpells.TryGetValue(SteamID, out var spells))
+            {
+                if (slot == 1)
+                {
+                    spells.Item1 = ability;
+                }
+                else
+                {
+                    spells.Item2 = ability;
+                }
+                Core.DataStructures.PlayerSanguimancySpells[SteamID] = spells;
+                Core.DataStructures.SavePlayerSanguimancySpells();
+            }
+
         }
     }
 }
