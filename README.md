@@ -1,5 +1,6 @@
 ## Table of Contents
 
+*This is out of date at the moment, on the to-do list
 UPDATED, NOW CURRENT (5/30)
 
 - [Features](#features)
