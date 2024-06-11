@@ -28,15 +28,16 @@ internal static class CreateGameplayEventOnDestroySystemPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 
                 if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
-                        //Core.Log.LogInfo(prefabGUID.LookupName());
+                        //Core.Log.LogInfo(prefabGUID.GetPrefabName());
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entity.Read<Buff>().Target);
-                        if (familiar != Entity.Null)
+                        if (familiar != Entity.Null && Core.EntityManager.Exists(familiar))
                         {
                             Follower follower = familiar.Read<Follower>();
                             follower.ModeModifiable._Value = 0;
@@ -73,6 +74,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                         ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }
+
                 if (prefabGUID.GuidHash.Equals(-1106009274) && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // feed complete kills
                 {
                     Entity died = entity.Read<SpellTarget>().Target._Entity;

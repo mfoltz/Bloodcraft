@@ -4,12 +4,10 @@ using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Transforms;
 
 namespace Bloodcraft.Patches;
 
@@ -28,39 +26,40 @@ class FamiliarPatches
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    Core.Log.LogInfo(behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().LookupName());
+                    Core.Log.LogInfo(behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().GetPrefabName());
                     Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.PreviousState.ToString()}|{behaviourTreeStateChangedEvent.NewState.ToString()}");
                     BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
+                        Entity familiar = behaviourTreeStateChangedEvent.Entity;
 
-                        
                         behaviourTreeState.Value = GenericEnemyState.Follow;
                         behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
                         
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
-                    }
-                    /*
-                    if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat))
-                    {
-                        // check for player in alertbuffer?
-                        Core.Log.LogInfo(behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().LookupName());
-                        Core.Log.LogInfo("Preventing fam attack on player...");
-
-                        AggroConsumer aggroConsumer = behaviourTreeStateChangedEvent.Entity.Read<AggroConsumer>();
-                        if (aggroConsumer.AggroTarget._Entity.Has<PlayerCharacter>())
-                        {
-                            behaviourTreeState.Value = GenericEnemyState.Follow;
-                            behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
-
-                            entity.Write(behaviourTreeStateChangedEvent);
-                            behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
-                        }
-
                         
+                        if (familiar.Has<MinionMaster>())
+                        {
+                            Core.FamiliarService.HandleFamiliarMinions(familiar);
+                        }
                     }
-                    */
+                    
+                    if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat)) // simulate player target?
+                    {
+                        if (behaviourTreeStateChangedEvent.Entity.Has<AggroBuffer>())
+                        {
+                            var buffer = behaviourTreeStateChangedEvent.Entity.ReadBuffer<AggroBuffer>();
+                            for (int i = 0; i < buffer.Length; i++)
+                            {
+                                AggroBuffer item = buffer[i];
+                                item.IsPlayer = true;
+                                buffer[i] = item;
+                                //Core.Log.LogInfo("Set IsPlayer to true...");
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -98,7 +97,7 @@ class FamiliarPatches
                             FamiliarSummonSystem.HandleFamiliar(user.LocalCharacter._Entity, entity);
                             bools["Binding"] = false;
                             Core.DataStructures.SavePlayerBools();
-                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.LookupName()}</color>");
+                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.GetPrefabName()}</color>");
                         }
                     }
                 }
@@ -116,37 +115,29 @@ class FamiliarPatches
         {
             entities.Dispose();
         }
-    }
-
-    [HarmonyPatch(typeof(PlayerCombatBuffSystem_OnAggro), nameof(PlayerCombatBuffSystem_OnAggro.OnUpdate))]
-    [HarmonyPostfix]
-    static void OnUpdatePostix(PlayerCombatBuffSystem_OnAggro __instance)
+    }   
+    
+    [HarmonyPatch(typeof(InteractValidateAndStopSystemServer), nameof(InteractValidateAndStopSystemServer.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(InteractValidateAndStopSystemServer __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_928948733_0.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.TempJob);
         try
         {
             foreach (Entity entity in entities)
             {
-                InverseAggroEvents.Added added = entity.Read<InverseAggroEvents.Added>();
-                Entity consumer = added.Consumer;
-                Entity target = added.Producer;
-                if (target.Has<PlayerCharacter>())
+                if (entity.TryGetComponent(out EntityOwner entityOwner))
                 {
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(target);
-                    if (familiar != Entity.Null)
+                    if (entityOwner.Owner.Has<PlayerCharacter>() && entity.Read<PrefabGUID>().GuidHash.Equals(-986064531)) // player using waygate
                     {
-                        //AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-                        //aggroConsumer.AggroTarget._Entity = consumer;
-                        //entity.Write(aggroConsumer);
-                        //Core.Log.LogInfo($"Familiar set to attack.");
-                        float distance = UnityEngine.Vector3.Distance(familiar.Read<LocalToWorld>().Position, target.Read<LocalToWorld>().Position);
-                        if (distance > 25f)
+                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
+                        Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
+                        if (Core.EntityManager.Exists(familiar) && !familiar.Has<Disabled>()) 
                         {
-                            familiar.Write(new Translation { Value = target.Read<LocalToWorld>().Position });
-                            Core.Log.LogInfo($"Familiar returned to owner.");
+                            EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, userEntity.Read<User>().PlatformId); // auto dismiss familiar 
                         }
                     }
-                }
+                }         
             }
         }
         catch (Exception ex)
@@ -157,29 +148,5 @@ class FamiliarPatches
         {
             entities.Dispose();
         }
-    }
-
-    [HarmonyPatch(typeof(LinkMinionToOwnerOnSpawnSystem), nameof(LinkMinionToOwnerOnSpawnSystem.OnUpdate))]
-    [HarmonyPostfix]
-    static void OnUpdatePostix(LinkMinionToOwnerOnSpawnSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                Core.Log.LogInfo($"Linking minion to owner | {entity.Read<PrefabGUID>().LookupName()}");
-                entity.LogComponentTypes();
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogError(ex);
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-
+    }  
 }

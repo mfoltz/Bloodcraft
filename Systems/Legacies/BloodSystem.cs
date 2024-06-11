@@ -54,7 +54,7 @@ namespace Bloodcraft.Systems.Legacy
             { new PrefabGUID(1558171501), BloodType.Draculin }, // speed bonus
             { new PrefabGUID(-488475343), BloodType.Immortal }, // phys/spell bonus
             { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
-            { new PrefabGUID(-534491790), BloodType.Brute } // primary life leech
+            { new PrefabGUID(1828387635), BloodType.Brute } // primary life leech
         };
 
         public static void UpdateLegacy(Entity Killer, Entity Victim)

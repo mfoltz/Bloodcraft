@@ -35,7 +35,7 @@ namespace Bloodcraft.Systems.Familiars
             PlayerCharacter playerCharacter = entityManager.GetComponentData<PlayerCharacter>(player);
             Entity userEntity = playerCharacter.UserEntity;
             Entity familiarEntity = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
-            if (familiarEntity == Entity.Null) return;
+            if (familiarEntity == Entity.Null || !Core.EntityManager.Exists(familiarEntity)) return;
             ulong steamId = userEntity.Read<User>().PlatformId;
             PrefabGUID familiarUnit = familiarEntity.Read<PrefabGUID>();
             int familiarId = familiarUnit.GuidHash;

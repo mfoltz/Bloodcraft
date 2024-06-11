@@ -1,5 +1,4 @@
 ﻿using ProjectM;
-using ProjectM.Behaviours;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -35,8 +34,10 @@ namespace Bloodcraft.Systems.Familiars
                 Roam = false,
                 Team = SpawnDebugEvent.TeamEnum.Ally,
                 Level = level,
-                Position = character.Read<LocalToWorld>().Position
+                Position = character.Read<LocalToWorld>().Position,
+                DyeIndex = 0
             };
+
             debugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
         }
         public static void HandleFamiliar(Entity player, Entity familiar)
@@ -53,6 +54,8 @@ namespace Bloodcraft.Systems.Familiars
             if (familiar.Has<ServantConvertable>()) ModifyConvertable(familiar);
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
+            PreventDisableFamiliar(familiar);
+            
         }
         
         static void ModifyFollowerAndTeam(Entity player, Entity familiar)
@@ -70,13 +73,15 @@ namespace Bloodcraft.Systems.Familiars
             follower.Followed._Value = player;
             follower.ModeModifiable._Value = 0;
             familiar.Write(follower);
-            
             UnitStats unitStats = familiar.Read<UnitStats>();
             unitStats.PvPProtected._Value = true;
             familiar.Write(unitStats);
 
-            var buffer = player.ReadBuffer<FollowerBuffer>();
-            buffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
+            var followerBuffer = player.ReadBuffer<FollowerBuffer>();
+            followerBuffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
+            //AggroFactionMultiplierBufferElement aggro = new AggroFactionMultiplierBufferElement { FactionIndex = player.Read<Team>().FactionIndex, Multiplier = 0f };
+            //var aggroBuffer = Core.EntityManager.AddBuffer<AggroFactionMultiplierBufferElement>(familiar);
+            //aggroBuffer.Add(aggro);
         }
         public static void ModifyBloodSource(Entity familiar, int level)
         {
@@ -116,10 +121,51 @@ namespace Bloodcraft.Systems.Familiars
             familiar.Write(unitLevel);
 
             Health health = familiar.Read<Health>();
-            int baseHealth = 300;
+            int baseHealth = 500;
             health.MaxHealth._Value = baseHealth * healthScalingFactor;
             health.Value = health.MaxHealth._Value;
             familiar.Write(health);
+
+            if (familiar.Has<MaxMinionsPerPlayerElement>()) // make vbloods summon?
+            {
+                familiar.Remove<MaxMinionsPerPlayerElement>();
+            }
+            if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from tanks
+            {
+                var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    if (buffer[i].SpawnPrefab.LookupName().ToLower().Contains("pilot"))
+                    {
+                        var item = buffer[i];
+                        item.SpawnPrefab = new(0);
+                        buffer[i] = item;
+                        break;
+                    }
+                }
+            }
+            if (familiar.Has<Immortal>())
+            {
+                familiar.Remove<Immortal>();
+                if (!familiar.Has<ApplyBuffOnGameplayEvent>()) return;
+                var buffer = familiar.ReadBuffer<ApplyBuffOnGameplayEvent>();
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    var item = buffer[i];
+                    if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
+                    {
+                        item.Buff0 = new(0);
+                        buffer[i] = item;
+                        break;
+                    }
+                }
+            }
+        }
+        static void PreventDisableFamiliar(Entity familiar)
+        {
+            ModifiableBool modifiableBool = new ModifiableBool { _Value = false };
+            CanPreventDisableWhenNoPlayersInRange canPreventDisable = new CanPreventDisableWhenNoPlayersInRange { CanDisable = modifiableBool };
+            Core.EntityManager.AddComponentData(familiar, canPreventDisable);
         }
         static void ModifyUnitTier(Entity familiar, int level)
         {
@@ -154,10 +200,9 @@ namespace Bloodcraft.Systems.Familiars
         static void ModifyAggro(Entity familiar)
         {
             AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-            aggroConsumer.MaxDistanceFromPreCombatPosition = 20f;
+            aggroConsumer.MaxDistanceFromPreCombatPosition = 30f;
             aggroConsumer.ProximityRadius = 25f;
-            familiar.Write(aggroConsumer);
-            
+            familiar.Write(aggroConsumer);   
         }
         static void ModifyConvertable(Entity familiar)
         {
@@ -169,6 +214,9 @@ namespace Bloodcraft.Systems.Familiars
             {
                 familiar.Remove<CharmSource>();
             }
+            // testing
+            //NameableInteractable nameableInteractable = new NameableInteractable { Name = "Bob", OnlyAllyRename = true, OnlyAllySee = false };
+            //Core.EntityManager.SetComponentData(familiar, nameableInteractable);
         }
         static void ModifyCollision(Entity familiar)
         {
@@ -192,13 +240,17 @@ namespace Bloodcraft.Systems.Familiars
             public static Entity FindPlayerFamiliar(Entity characterEntity)
             {
                 var followers = characterEntity.ReadBuffer<FollowerBuffer>();
-                foreach (var follower in followers)
+                ulong platformId = characterEntity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                if (Core.DataStructures.FamiliarActives.TryGetValue(platformId, out var data) && Core.EntityManager.Exists(data.Item1))
                 {
-                    PrefabGUID prefabGUID = follower.Entity._Entity.Read<PrefabGUID>();
-                    ulong platformId = characterEntity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (Core.DataStructures.FamiliarActives.TryGetValue(platformId, out var data) && data.Item2.Equals(prefabGUID.GuidHash))
+                    return data.Item1;
+                }
+                else
+                {
+                    foreach (var follower in followers)
                     {
-                        return follower.Entity._Entity;
+                        PrefabGUID prefabGUID = follower.Entity._Entity.Read<PrefabGUID>();
+                        if (prefabGUID.GuidHash.Equals(data.Item2)) return follower.Entity._Entity;
                     }
                 }
                 return Entity.Null;

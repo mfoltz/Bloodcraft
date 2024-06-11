@@ -133,10 +133,10 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.SavePlayerSanguimancy();
             }
 
-            if (!Core.DataStructures.PlayerSanguimancySpells.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerSpells.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerSanguimancySpells.Add(steamId, (0, 0));
-                Core.DataStructures.SavePlayerSanguimancySpells();
+                Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
+                Core.DataStructures.SavePlayerSpells();
             }
             
 
@@ -293,7 +293,7 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.PlayerPrestiges.Add(steamId, prestigeDict);
                 Core.DataStructures.SavePlayerPrestiges();
             }
-            if (user.LocalCharacter._Entity != Entity.Null) GearOverride.SetLevel(user.LocalCharacter._Entity);
+            if (Core.EntityManager.Exists(user.LocalCharacter._Entity)) GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
 
         if (Plugin.FamiliarSystem.Value)
@@ -318,6 +318,11 @@ internal static class ServerBootstrapSystemPatch
             {
                 Core.DataStructures.PlayerClasses.Add(steamId, []);
                 Core.DataStructures.SavePlayerClasses();
+            }
+            if (!Core.DataStructures.PlayerSpells.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
+                Core.DataStructures.SavePlayerSpells();
             }
         }
 

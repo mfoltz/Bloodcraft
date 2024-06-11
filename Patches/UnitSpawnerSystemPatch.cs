@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.WarEvents;
-using ProjectM.Shared.WarEvents;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -27,9 +25,9 @@ public class UnitSpawnerPatch
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Core.Log.LogInfo(ex.Message);
+            Core.Log.LogError($"Exited UnitSpawnerReactSystem hook early: {e}");
         }
         finally
         {
@@ -37,4 +35,5 @@ public class UnitSpawnerPatch
         }
     }
     
+
 }

@@ -9,13 +9,14 @@ namespace Bloodcraft.Systems.Familiars
     public class FamiliarUnlockSystem
     {
         private static readonly float UnitChance = Plugin.UnitUnlockChance.Value;
-        //private static readonly float VBloodChance = Plugin.VBloodUnlockChance.Value;
+        private static readonly float VBloodChance = Plugin.VBloodUnlockChance.Value;
+        static readonly bool allowVBloods = Plugin.AllowVBloods.Value;
         static readonly Random Random = new();
 
         // List of banned PrefabGUIDs
-        static readonly HashSet<PrefabGUID> ExemptPrefabs = new()
+        public static List<int> ExemptPrefabs = new()
         {
-            // Add banned PrefabGUID hash codes here
+            // Add banned PrefabGUID for this list in config
         };
 
         public static void HandleUnitUnlock(Entity killer, Entity died)
@@ -23,22 +24,22 @@ namespace Bloodcraft.Systems.Familiars
             EntityCategory diedCategory = died.Read<EntityCategory>();
             PrefabGUID diedPrefab = died.Read<PrefabGUID>();
             string lowerName = diedPrefab.LookupName().ToLower();
-
-            if (died.Has<MinionMaster>() || died.Has<Minion>() ||  died.Has<VBloodConsumeSource>()) return; // component checks
-            if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("werewolf") || lowerName.Contains("horse") || lowerName.Contains("crystal")) return; // prefab name checks
-            if (IsBanned(diedPrefab)) return; // banned prefab checks
+            //Core.Log.LogInfo(lowerName);
+            if (died.Has<Minion>()) return; // component checks
+            if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("crystal") || lowerName.Contains("werewolf")) return; // prefab name checks
+            if (IsBanned(diedPrefab)) return; // banned prefab checks, no using currently
             if ((int)diedCategory.UnitCategory < 5)
             {
                 HandleRoll(UnitChance, died, killer);
             }
             else if (lowerName.Contains("vblood"))
             {
-                //HandleRoll(VBloodChance, died, killer);
+                if (allowVBloods) HandleRoll(VBloodChance, died, killer);
             }
         }
         static bool IsBanned(PrefabGUID prefab)
         {
-            return ExemptPrefabs.Contains(prefab);
+            return ExemptPrefabs.Contains(prefab.GuidHash);
         }
         static void HandleRoll(float dropChance, Entity died, Entity killer)
         {
@@ -83,7 +84,7 @@ namespace Bloodcraft.Systems.Familiars
                 currentList.Add(familiarKey);
                 FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
 
-                var message = $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().LookupName()}</color>";
+                var message = $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>";
                 ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, message);
             }
         }

@@ -6,11 +6,9 @@ using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft;
-
 public static class ECSExtensions
 {
-    private static EntityManager EntityManager { get; } = Core.Server.EntityManager;
-
+    static EntityManager EntityManager { get; } = Core.EntityManager;
     public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -29,7 +27,6 @@ public static class ECSExtensions
             EntityManager.SetComponentDataRaw(entity, ct.TypeIndex, p, size);
         }
     }
-
     // Helper function to marshal a struct to a byte array
     public static byte[] StructureToByteArray<T>(T structure) where T : struct
     {
@@ -43,7 +40,6 @@ public static class ECSExtensions
 
         return byteArray;
     }
-
     public static unsafe T Read<T>(this Entity entity) where T : struct
     {
         // Get the ComponentType for T
@@ -57,28 +53,46 @@ public static class ECSExtensions
 
         return componentData;
     }
-
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
     {
-        return Core.Server.EntityManager.GetBuffer<T>(entity);
+        return EntityManager.GetBuffer<T>(entity);
     }
+   
 
+    public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
+    {
+        componentData = default;
+        if (entity.Has<T>())
+        {
+            componentData = entity.Read<T>();
+            return true;
+        }
+        return false;
+    }
+    
     public static bool Has<T>(this Entity entity)
     {
         var ct = new ComponentType(Il2CppType.Of<T>());
         return EntityManager.HasComponent(entity, ct);
     }
-
+  
     public static string LookupName(this PrefabGUID prefabGuid)
     {
         var prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
             ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
     }
-
+    public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
+    {
+        if (!Core.Localization.prefabNames.TryGetValue(itemPrefabGUID._Value, out var itemLocalizationHash))
+        {
+            return itemPrefabGUID.LookupName();
+        }
+        return Core.Localization.GetLocalization(itemLocalizationHash);
+    }
     public static void LogComponentTypes(this Entity entity)
     {
-        NativeArray<ComponentType>.Enumerator enumerator = Core.EntityManager.GetComponentTypes(entity).GetEnumerator();
+        NativeArray<ComponentType>.Enumerator enumerator = EntityManager.GetComponentTypes(entity).GetEnumerator();
         Core.Log.LogInfo("===");
         while (enumerator.MoveNext())
         {
@@ -87,23 +101,6 @@ public static class ECSExtensions
         }
         Core.Log.LogInfo("===");
     }
-
-    public static void LogComponentsMatching(this Entity entity, string match)
-    {
-        NativeArray<ComponentType>.Enumerator enumerator = Core.EntityManager.GetComponentTypes(entity).GetEnumerator();
-        Core.Log.LogInfo("===");
-        while (enumerator.MoveNext())
-        {
-            if (enumerator.Current.ToString().ToLower().Contains(match))
-            {
-                ComponentType current = enumerator.Current;
-                Core.Log.LogInfo($"{current}");
-            }
-            
-        }
-        Core.Log.LogInfo("===");
-    }
-
     public static void Add<T>(this Entity entity)
     {
         var ct = new ComponentType(Il2CppType.Of<T>());

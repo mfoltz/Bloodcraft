@@ -128,7 +128,7 @@ namespace Bloodcraft.Systems.Expertise
                 Entity character = user.LocalCharacter._Entity;
                 Equipment equipment = character.Read<Equipment>();
                 message = $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]";
-                if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
+                //if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
                 if (newLevel < MaxExpertiseLevel) ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
             }
             if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])

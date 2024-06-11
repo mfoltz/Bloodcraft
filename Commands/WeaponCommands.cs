@@ -1,12 +1,14 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
-using ProjectM.CastleBuilding;
 using ProjectM.Network;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponStats;
+
 
 namespace Bloodcraft.Commands
 {
@@ -180,7 +182,7 @@ namespace Bloodcraft.Commands
                 }
                 else
                 {
-                    ctx.Reply($"You do not have the required item to reset your weapon stats ({item.LookupName()}x{quantity})");
+                    ctx.Reply($"You do not have the required item to reset your weapon stats ({item.GetPrefabName()}x{quantity})");
                     return;
                 }
                 
@@ -199,7 +201,7 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            Entity foundUserEntity = Core.FindUserOnline(name);
+            Entity foundUserEntity = GetUserByName(name, true);
             if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");
@@ -234,7 +236,7 @@ namespace Bloodcraft.Commands
             var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
             expertiseHandler.UpdateExpertiseData(steamId, xpData);
             expertiseHandler.SaveChanges();
-            if (Plugin.LevelingSystem.Value) GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
+            //if (Plugin.LevelingSystem.Value) GearOverride.SetWeaponItemLevel(equipment, level, Core.EntityManager);
 
             ctx.Reply($"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
         }
@@ -278,9 +280,9 @@ namespace Bloodcraft.Commands
         [Command(name: "lockSpells", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
         public static void LockPlayerSpells(ChatCommandContext ctx)
         {
-            if (!Plugin.UnarmedSlots.Value && !Plugin.WeaponShiftSlot.Value)
+            if (!Plugin.UnarmedSlots.Value)
             {
-                ctx.Reply("Extra spell slots are not enabled.");
+                ctx.Reply("Extra spell slots for unarmed are not enabled.");
                 return;
             }
 
@@ -306,12 +308,16 @@ namespace Bloodcraft.Commands
         [Command(name: "shiftLock", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
         public static void ShiftPlayerSpells(ChatCommandContext ctx)
         {
-            if (!Plugin.UnarmedSlots.Value && !Plugin.WeaponShiftSlot.Value)
+            if (!Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value)
             {
-                ctx.Reply("Extra spell slots are not enabled.");
+                ctx.Reply("Classes are not enabled and spells can't be set to shift.");
                 return;
             }
-
+            if (!Plugin.ShiftSlots.Value)
+            {
+                ctx.Reply("Shift slots are not enabled.");
+                return;
+            }
             var user = ctx.Event.User;
             var SteamID = user.PlatformId;
 
@@ -319,22 +325,23 @@ namespace Bloodcraft.Commands
             {
                 if (bools["ShiftLock"])
                 {
-                    bools["SpellLock"] = false;
+                    bools["ShiftLock"] = false;
                     ctx.Reply("Shift spell <color=red>disabled</color>.");
                 }
                 else
                 {
-                    bools["SpellLock"] = true;
+                    bools["ShiftLock"] = true;
                     ctx.Reply("Shift spell <color=green>enabled</color>.");
                 }
                 Core.DataStructures.SavePlayerBools();
             }
            
         }
+
         [Command(name: "setSpells", shortHand: "spell", adminOnly: true, usage: ".spell [Slot] [PrefabGUID]", description: "Manually sets spells for testing.")]
         public static void SetSpellCommand(ChatCommandContext ctx, int slot, int ability)
         {
-            if (!Plugin.UnarmedSlots.Value && !Plugin.WeaponShiftSlot.Value)
+            if (!Plugin.UnarmedSlots.Value)
             {
                 ctx.Reply("Extra spell slots are not enabled.");
                 return;
@@ -347,7 +354,7 @@ namespace Bloodcraft.Commands
             var user = ctx.Event.User;
             var SteamID = user.PlatformId;
 
-            if (Core.DataStructures.PlayerSanguimancySpells.TryGetValue(SteamID, out var spells))
+            if (Core.DataStructures.PlayerSpells.TryGetValue(SteamID, out var spells))
             {
                 if (slot == 1)
                 {
@@ -357,10 +364,41 @@ namespace Bloodcraft.Commands
                 {
                     spells.Item2 = ability;
                 }
-                Core.DataStructures.PlayerSanguimancySpells[SteamID] = spells;
-                Core.DataStructures.SavePlayerSanguimancySpells();
+                Core.DataStructures.PlayerSpells[SteamID] = spells;
+                Core.DataStructures.SavePlayerSpells();
             }
 
+        }
+        [Command(name: "resetWeaponLevels", shortHand: "rwl", adminOnly: false, usage: ".rwl", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
+        public static void ResetWeaponLevels(ChatCommandContext ctx)
+        {
+            Entity character = ctx.Event.SenderCharacterEntity;
+
+            if (InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, character, out Entity inventoryEntity) && Core.ServerGameManager.TryGetBuffer<InventoryBuffer>(inventoryEntity, out var inventoryBuffer))
+            {
+                for (int i = 0; i < inventoryBuffer.Length; i++)
+                {
+                    Entity itemEntity = inventoryBuffer[i].ItemEntity._Entity;
+                    if (itemEntity.Has<WeaponLevelSource>())
+                    {
+                        Entity originalWeapon = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[itemEntity.Read<PrefabGUID>()];
+                        WeaponLevelSource weaponLevelSource = originalWeapon.Read<WeaponLevelSource>();
+                        if (itemEntity.Has<UpgradeableLegendaryItem>())
+                        {
+                            int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                            var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
+                            PrefabGUID prefabGUID = buffer[tier].TierPrefab;
+                            weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID].Read<WeaponLevelSource>();
+                        }
+                        itemEntity.Write(weaponLevelSource);
+                    }
+                }
+                ctx.Reply("Set weapon levels to original values.");
+            }
+            else
+            {
+                ctx.Reply("You do not have an inventory.");
+            }         
         }
     }
 }

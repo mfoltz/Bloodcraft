@@ -5,6 +5,7 @@ using ProjectM.Shared.WarEvents;
 using Unity.Collections;
 using Unity.Entities;
 /*
+
 [HarmonyPatch]
 internal class WarEventSystemPatch
 {
@@ -17,29 +18,25 @@ internal class WarEventSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                //entity.LogComponentTypes();
-                WarEvent warEvent = entity.Read<WarEvent>();
-                var buffer = warEvent.Entity.ReadBuffer<WarEvent_ChildReference>();
-                for (int i = 0; i < buffer.Length; i++)
+                if (!entity.Has<WarEvent>())
                 {
-                    Entity child = buffer[i].Entity;
-                    var nestedBuffer = child.ReadBuffer<WarEvent_ChildReference>();
-                    for (int j = 0; j < nestedBuffer.Length; j++)
-                    {
-                        nestedBuffer[j].Entity.LogComponentTypes();
-                    }
-
+                    continue;
                 }
+                //entity.LogComponentTypes(); so I want to add a chance for majors to be primals, and I want to modify the stats of the unit compositions?
+                
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Core.Log.LogInfo(ex.Message);
+            Core.Log.LogError($"Exited WarEventSystem hook early: {e}");
         }
         finally
         {
             entities.Dispose();
         }
     }
+   
 }
+
+
 */

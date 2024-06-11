@@ -4,6 +4,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Commands
 {
@@ -70,7 +71,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Professions are not enabled.");
                 return;
             }
-            Entity foundUserEntity = Core.FindUserOnline(name);
+            Entity foundUserEntity = GetUserByName(name, true);
             if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");

@@ -32,7 +32,7 @@ internal static class DeathEventListenerSystemPatch
             {
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
-                bool gateBoss = deathEvent.Died.Read<PrefabGUID>().LookupName().ToLower().Contains("gateboss");
+                bool gateBoss = deathEvent.Died.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("gateboss");
 
 
                 if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
@@ -56,7 +56,7 @@ internal static class DeathEventListenerSystemPatch
                             if (Expertise) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                             if (Familiars) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
                         }
-                        if (Familiars && (!hasVBloodConsumeSource || gateBoss)) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                        if (Familiars) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
                     }
                     else
                     {
@@ -78,9 +78,10 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // player summon kills
                 {
                     Entity killer = deathEvent.Killer.Read<EntityOwner>().Owner;
-                    if (Leveling && (!hasVBloodConsumeSource || gateBoss))
+                    if (!hasVBloodConsumeSource || gateBoss)
                     {
-                        LevelingSystem.UpdateLeveling(killer, deathEvent.Died);
+                        if (Leveling) LevelingSystem.UpdateLeveling(killer, deathEvent.Died);
+                        if (Expertise) ExpertiseSystem.UpdateExpertise(killer, deathEvent.Died);
                     }
                 }
                 

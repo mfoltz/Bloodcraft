@@ -1,21 +1,22 @@
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Behaviours;
-using ProjectM.CastleBuilding;
 using ProjectM.Gameplay.WarEvents;
 using ProjectM.Network;
+using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
+using System.Collections;
 using System.Text.Json;
-using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft;
@@ -31,20 +32,26 @@ internal static class Core
     public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
     public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
-    public static SpawnTransformSystem_OnSpawn SpawnTransformSystem_OnSpawn { get; internal set; }
+    //public static WarEventSystem WarEventSystem { get; internal set; }
 
-    public static WarEventDebugSystem WarEventDebugSystem { get; internal set; }
-
+    public static Unity.Mathematics.Random Random = new();
+    public static WarEventRegistrySystem WarEventRegistrySystem { get; internal set; }
     public static GameDataSystem GameDataSystem { get; internal set; }
+    public static FamiliarService FamiliarService { get; internal set; }
+    public static LocalizationService Localization { get; } = new();
+    public static PlayerService PlayerService { get; } = new();
 
-    //public static EquipmentService EquipmentService { get; internal set; } may revisit this in the future journal quest 560247139 Journal_GettingReadyForTheHunt
-    public static double ServerTime => ServerGameManager.ServerTime;
+    //public static WarEventService WarEventService { get; internal set; }
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
+    //public static ShapeshiftSystem ShapeshiftSystem { get; internal set;}
+    public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
+    public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
+    public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
-    private static bool hasInitialized;
+    static MonoBehaviour monoBehaviour;
 
-    
+    private static bool hasInitialized;
     public static void Initialize()
     {
         if (hasInitialized) return;
@@ -56,21 +63,19 @@ internal static class Core
         ModifyUnitStatBuffSystem_Spawn = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Spawn>();
         ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
         EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
-        SpawnTransformSystem_OnSpawn = Server.GetExistingSystemManaged<SpawnTransformSystem_OnSpawn>();
-        WarEventDebugSystem = Server.GetExistingSystemManaged<WarEventDebugSystem>();
-
-
         GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
-        //CommonClientDataSystem = Server.GetExistingSystemManaged<CommonClientDataSystem>();
-        //EquipmentService = new(); 
+        //WarEventSystem = Server.GetExistingSystemManaged<WarEventSystem>();
+        WarEventRegistrySystem = Server.GetExistingSystemManaged<WarEventRegistrySystem>();
+        NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
+        ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
+        //ShapeshiftSystem = Server.GetExistingSystemManaged<ShapeshiftSystem>();
+        FamiliarService = new();
+        //WarEventService = new();
         // Initialize utility services
-        //UnitStatSet();
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
         hasInitialized = true;
     }
-
-
-    private static World GetWorld(string name)
+    static World GetWorld(string name)
     {
         foreach (var world in World.s_AllWorlds)
         {
@@ -81,23 +86,15 @@ internal static class Core
         }
         return null;
     }
-
-    
-    public static Entity FindUserOnline(string name)
+    public static void StartCoroutine(IEnumerator routine)
     {
-        NativeArray<Entity> _userEntities = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<User>()).ToEntityArray(Allocator.Temp);
-        try
+        if (monoBehaviour == null)
         {
-            foreach (Entity entity in _userEntities)
-            {
-                if (Core.EntityManager.Exists(entity) && entity.Read<User>().CharacterName.Value.ToLower().Equals(name.ToLower())) return entity;
-            }
+            var go = new GameObject("Bloodcraft");
+            monoBehaviour = go.AddComponent<IgnorePhysicsDebugSystem>();
+            UnityEngine.Object.DontDestroyOnLoad(go);
         }
-        finally
-        {
-            _userEntities.Dispose();
-        }
-        return Entity.Null;
+        monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
     public class DataStructures
     {
@@ -142,8 +139,8 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
 
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed
-        private static Dictionary<ulong, (int, int)> playerSanguimancySpells = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed and needs to be renamed to match the rest
+        private static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> playerSpells = [];
 
         // blood legacies
 
@@ -344,10 +341,10 @@ internal static class Core
             set => playerSanguimancy = value;
         }
 
-        public static Dictionary<ulong, (int, int)> PlayerSanguimancySpells
+        public static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> PlayerSpells
         {
-            get => playerSanguimancySpells;
-            set => playerSanguimancySpells = value;
+            get => playerSpells;
+            set => playerSpells = value;
         }
 
         public static Dictionary<ulong, Dictionary<ExpertiseSystem.WeaponType, List<WeaponStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats
@@ -466,7 +463,7 @@ internal static class Core
             {"LongbowExpertise", JsonFiles.PlayerLongbowExpertiseJson},
             {"WhipExpertise", JsonFiles.PlayerWhipExpertiseJson},
             {"Sanguimancy", JsonFiles.PlayerSanguimancyJson},
-            {"SanguimancySpells", JsonFiles.PlayerSanguimancySpellsJson},
+            {"PlayerSpells", JsonFiles.PlayerSpellsJson},
             {"WeaponStats", JsonFiles.PlayerWeaponStatsJson},
             {"WorkerLegacy", JsonFiles.PlayerWorkerLegacyJson},
             {"WarriorLegacy", JsonFiles.PlayerWarriorLegacyJson},
@@ -571,7 +568,7 @@ internal static class Core
 
         public static void LoadPlayerSanguimancy() => LoadData(ref playerSanguimancy, "Sanguimancy");
 
-        public static void LoadPlayerSanguimancySpells() => LoadData(ref playerSanguimancySpells, "SanguimancySpells");
+        public static void LoadPlayerSpells() => LoadData(ref playerSpells, "PlayerSpells");
 
         public static void LoadPlayerWeaponStats() => LoadData(ref playerWeaponStats, "WeaponStats");
 
@@ -666,7 +663,7 @@ internal static class Core
 
         public static void SavePlayerSanguimancy() => SaveData(PlayerSanguimancy, "Sanguimancy");
 
-        public static void SavePlayerSanguimancySpells() => SaveData(PlayerSanguimancySpells, "SanguimancySpells");
+        public static void SavePlayerSpells() => SaveData(PlayerSpells, "PlayerSpells");
 
         public static void SavePlayerWeaponStats() => SaveData(PlayerWeaponStats, "WeaponStats");
 
@@ -696,7 +693,6 @@ internal static class Core
 
         public static void SavePlayerFamiliarSets() => SaveData(FamiliarSet, "FamiliarSets");
     }
-
     public static class FamiliarExperienceManager
     {
         private static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_experience.json");
@@ -768,7 +764,7 @@ internal static class Core
         public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_unarmed.json");
         public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_whip.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sanguimancy.json");
-        public static readonly string PlayerSanguimancySpellsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sanguimancy_spells.json");
+        public static readonly string PlayerSpellsJson = Path.Combine(Plugin.PlayerLevelingPath, "player_spells.json");
         public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_weapon_stats.json");
         public static readonly string PlayerWorkerLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_worker.json");
         public static readonly string PlayerWarriorLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_warrior.json");
@@ -786,6 +782,10 @@ internal static class Core
     }
     public static List<int> ParseConfigString(string configString)
     {
+        if (string.IsNullOrEmpty(configString))
+        {
+            return [];
+        }
         return configString.Split(',').Select(int.Parse).ToList();
-    }
+    }  
 }

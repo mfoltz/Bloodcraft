@@ -95,7 +95,7 @@ namespace Bloodcraft.Systems.Professions
                 PrefabGUID fish = fishDrops[index];
                 if (serverGameManager.TryAddInventoryItem(Killer, fish, bonus))
                 {
-                    string name = ProfessionUtilities.FormatMaterialName(fishDrops[index].LookupName());
+                    string name = ProfessionUtilities.FormatMaterialName(fishDrops[index].GetPrefabName());
                     if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
                 }
             }
@@ -111,13 +111,13 @@ namespace Bloodcraft.Systems.Professions
                             var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                             foreach (var dropTableData in dropTableDataBuffer)
                             {
-                                if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
+                                if (dropTableData.ItemGuid.GetPrefabName().ToLower().Contains("ingredient"))
                                 {
                                     int bonus = level / 5;
                                     if (bonus.Equals(0)) return;
                                     if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                     {
-                                        string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.LookupName());
+                                        string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.GetPrefabName());
                                         if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{level}</color> received from {handler.GetProfessionName()}");
                                         break;
                                     }
@@ -135,13 +135,13 @@ namespace Bloodcraft.Systems.Professions
                                 var itemDataDropGroupBuffer = prefabEntity.ReadBuffer<ItemDataDropGroupBuffer>();
                                 foreach (var itemDataDropGroup in itemDataDropGroupBuffer)
                                 {
-                                    Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.LookupName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
+                                    Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.GetPrefabName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                                 }
                             }
                             */
                             break;
                         default:
-                            //Core.Log.LogInfo($"{drop.DropTableGuid.LookupName()} | {drop.DropTrigger}");
+                            //Core.Log.LogInfo($"{drop.DropTableGuid.GetPrefabName()} | {drop.DropTrigger}");
                             break;
                     }
                 }
@@ -315,7 +315,7 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, int> location in FishingMultipliers)
             {
-                if (prefab.LookupName().ToLower().Contains(location.Key))
+                if (prefab.GetPrefabName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
                 }
@@ -327,11 +327,11 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, List<PrefabGUID>> location in FishingAreaDrops)
             {
-                if (prefab.LookupName().ToLower().Contains(location.Key))
+                if (prefab.GetPrefabName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
                 }
-                else if (prefab.LookupName().ToLower().Contains("general"))
+                else if (prefab.GetPrefabName().ToLower().Contains("general"))
                 {
                     return FarbaneFishDrops;
                 }
@@ -343,7 +343,7 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, int> location in WoodcuttingMultipliers)
             {
-                if (prefab.LookupName().ToLower().Contains(location.Key))
+                if (prefab.GetPrefabName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
                 }
@@ -355,7 +355,7 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, int> tier in TierMultiplier)
             {
-                if (prefab.LookupName().ToLower().Contains(tier.Key))
+                if (prefab.GetPrefabName().ToLower().Contains(tier.Key))
                 {
                     return tier.Value;
                 }

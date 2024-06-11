@@ -13,6 +13,7 @@ namespace Bloodcraft.Commands
     public class FamiliarCommands
     {
         static readonly PrefabGUID combatBuff = new(581443919);
+        static readonly PrefabGUID pvpBuff = new(697095869);
 
         [Command(name: "bindFamiliar", shortHand: "bind", adminOnly: false, usage: ".bind [#]", description: "Activates specified familiar from current list.")]
         public static void BindFamiliar(ChatCommandContext ctx, int choice)
@@ -27,7 +28,7 @@ namespace Bloodcraft.Commands
             Entity userEntity = ctx.Event.SenderUserEntity;
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
 
-            if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _))
+            if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _))
             {
                 ctx.Reply("You can't bind a familiar while in combat.");
                 return;
@@ -77,11 +78,10 @@ namespace Bloodcraft.Commands
 
             if (familiar != Entity.Null)
             {
+                if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
                 DestroyUtility.CreateDestroyEvent(Core.EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
                 Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
                 Core.DataStructures.SavePlayerFamiliarActives();
-               
-
                 ctx.Reply("Familiar unbound.");
             }
             else if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Item1.Equals(Entity.Null) && !data.Item2.Equals(0))
@@ -93,6 +93,7 @@ namespace Bloodcraft.Commands
             }
             else if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
             {
+                if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
                 DestroyUtility.CreateDestroyEvent(Core.EntityManager, data.Item1, DestroyReason.Default, DestroyDebugReason.None);
                 Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
                 Core.DataStructures.SavePlayerFamiliarActives();
@@ -118,7 +119,7 @@ namespace Bloodcraft.Commands
                 foreach (var famKey in famKeys)
                 {
                     PrefabGUID famPrefab = new(famKey);
-                    ctx.Reply($"<color=white>{count}</color>: <color=green>{famPrefab.LookupName()}</color>");
+                    ctx.Reply($"<color=white>{count}</color>: <color=green>{famPrefab.GetPrefabName()}</color>");
                     count++;
                 }
             }
@@ -234,7 +235,7 @@ namespace Bloodcraft.Commands
                         }
                     }
                     PrefabGUID prefabGUID = new(actives.Item2);
-                    ctx.Reply($"<color=green>{prefabGUID.LookupName()}</color> moved to <color=white>{name}</color>.");
+                    ctx.Reply($"<color=green>{prefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
                 }
             }
             else
@@ -255,9 +256,15 @@ namespace Bloodcraft.Commands
             if (Core.DataStructures.FamiliarSet.TryGetValue(steamId, out var activeSet) && activeSet.Length < 10)
             {
                 // Remove the old set
-                if (Core.PrefabCollectionSystem.PrefabLookupMap.TryGetValue(new(unit), out var _))
+                if (Core.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(unit), out var Entity))
                 {
                     // Add to set
+                    if (!Entity.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("char"))
+                    {
+                        ctx.Reply("Invalid unit.");
+                        return;
+                    }
+
                     data.UnlockedFamiliars[activeSet].Add(unit);
                     Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
                     ctx.Reply($"<color=green>{unit}</color> added to <color=white>{activeSet}</color>.");
@@ -297,7 +304,7 @@ namespace Bloodcraft.Commands
                 familiarSet.RemoveAt(choice - 1);
                 Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
 
-                ctx.Reply($"<color=green>{familiarId.LookupName()}</color> removed from <color=white>{activeSet}</color>.");
+                ctx.Reply($"<color=green>{familiarId.GetPrefabName()}</color> removed from <color=white>{activeSet}</color>.");
             }
             else
             {
@@ -356,7 +363,7 @@ namespace Bloodcraft.Commands
             List<string> emoteInfoList = [];
             foreach (var emote in EmoteSystemPatch.actions)
             {
-                string emoteName = emote.Key.LookupName();
+                string emoteName = emote.Key.GetPrefabName();
                 string actionName = emote.Value.Method.Name;
                 emoteInfoList.Add($"<color=#FFC0CB>{emoteName}</color>: <color=yellow>{actionName}</color>");
             }
@@ -405,11 +412,14 @@ namespace Bloodcraft.Commands
 
             if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.Item2.Equals(0))
             {
+                Entity player = ctx.Event.SenderCharacterEntity;
+                Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
                 KeyValuePair<int, float> newXP = new(level, FamiliarLevelingSystem.ConvertLevelToXp(level));
                 FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
                 xpData.FamiliarExperience[data.Item2] = newXP;
                 FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
-                ctx.Reply($"You're familiar has been set to level <color=white>{level}</color>, rebind to update stats.");
+                FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, level);
+                ctx.Reply($"You're familiar has been set to level <color=white>{level}</color>.");
             }
             else
             {

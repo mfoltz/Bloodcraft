@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>0.4.4</Version>
+	<Version>0.9.0</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	<BepInExPluginGuid>com.zfolmt.Bloodcraft</BepInExPluginGuid>
@@ -15,11 +15,14 @@
     <Optimize>True</Optimize>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Other\**" />
-    <EmbeddedResource Remove="Other\**" />
-    <None Remove="Other\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Localization\Prefabs.json" />
+		<None Remove="Localization\English.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Localization\Prefabs.json" />
+		<EmbeddedResource Include="Localization\English.json" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" />

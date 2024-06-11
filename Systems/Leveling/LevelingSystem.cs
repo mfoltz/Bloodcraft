@@ -1,13 +1,22 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Systems.Leveling;
+using Il2CppSystem.Data;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
+using ProjectM.Scripting;
+using ProjectM.Shared.Systems;
+using Steamworks;
 using Stunlock.Core;
+using System.Runtime.InteropServices;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Core;
+using static ProjectM.Scripting.ServerScriptMapper;
 
 namespace Bloodcraft.Systems.Experience
 {
@@ -56,18 +65,36 @@ namespace Bloodcraft.Systems.Experience
             { PlayerClasses.DeathMage, Plugin.DeathMageBuffs.Value }
         };
 
+        public static readonly Dictionary<PlayerClasses, string> ClassSpellsMap = new()
+        {
+            { PlayerClasses.BloodKnight, Plugin.BloodKnightSpells.Value },
+            { PlayerClasses.DemonHunter, Plugin.DemonHunterSpells.Value },
+            { PlayerClasses.VampireLord, Plugin.VampireLordSpells.Value },
+            { PlayerClasses.ShadowBlade, Plugin.ShadowBladeSpells.Value },
+            { PlayerClasses.ArcaneSorcerer, Plugin.ArcaneSorcererSpells.Value },
+            { PlayerClasses.DeathMage, Plugin.DeathMageSpells.Value }   
+        };
+
+        public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassApplyBuffOnDamageDealtMap = new()
+        {
+            { PlayerClasses.BloodKnight, new(-1246704569) }, // leech
+            { PlayerClasses.DemonHunter, new(-1576512627) }, // static
+            { PlayerClasses.VampireLord, new(27300215) }, // chill
+            { PlayerClasses.ShadowBlade, new(348724578) }, // ignite
+            { PlayerClasses.ArcaneSorcerer, new(1723455773) }, // weaken
+            { PlayerClasses.DeathMage, new(-1246704569) } // condemn
+        };
+
         public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
         {
             EntityManager entityManager = Core.EntityManager;
             if (!IsValidVictim(entityManager, victimEntity)) return;
             HandleExperienceUpdate(entityManager, killerEntity, victimEntity);
         }
-
         static bool IsValidVictim(EntityManager entityManager, Entity victimEntity)
         {
             return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
         }
-
         static void HandleExperienceUpdate(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
         {
             PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
@@ -89,7 +116,6 @@ namespace Bloodcraft.Systems.Experience
                 ProcessExperienceGain(entityManager, participant, victimEntity, steamId, groupMultiplier);
             }
         }
-
         static HashSet<Entity> GetParticipants(Entity killer, Entity userEntity)
         {
             float3 killerPosition = killer.Read<LocalToWorld>().Position;
@@ -136,7 +162,6 @@ namespace Bloodcraft.Systems.Experience
             }
             return players;
         }
-
         static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, float groupMultiplier)
         {
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
@@ -171,7 +196,7 @@ namespace Bloodcraft.Systems.Experience
                 var spawnBuffElement = victimEntity.ReadBuffer<SpawnBuffElement>();
                 for (int i = 0; i < spawnBuffElement.Length; i++)
                 {
-                    //Core.Log.LogInfo(spawnBuffElement[i].Buff.LookupName());
+                    //Core.Log.LogInfo(spawnBuffElement[i].Buff.GetPrefabName());
                     //Core.Log.LogInfo(spawnBuffElement[i].Buff.GuidHash);
                     if (spawnBuffElement[i].Buff.Equals(warEventTrash))
                     {
@@ -247,6 +272,8 @@ namespace Bloodcraft.Systems.Experience
                 };
                 // apply level up buff here
                 debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+
+                ApplyClassBuffsAtThresholds(characterEntity, SteamID, debugEventsSystem, fromCharacter);
             }
             NotifyPlayer(entityManager, userEntity, SteamID, (int)gainedXP, leveledUp);
         }
@@ -345,8 +372,462 @@ namespace Bloodcraft.Systems.Experience
             parsedClassType = default;
             return false; // Parsing failed
         }
+        static unsafe void ApplyClassBuffsAtThresholds(Entity characterEntity, ulong SteamID, DebugEventsSystem debugEventsSystem, FromCharacter fromCharacter)
+        {
+            ServerGameManager serverGameManager = Core.ServerGameManager;
+            var buffs = GetClassBuffs(SteamID);
+            //int levelStep = 20;
+            int levelStep = MaxPlayerLevel / buffs.Count;
+            int prestigeLevel = PrestigeSystem.GetExperiencePrestigeLevel(SteamID);
+            int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
+            if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count )
+            {
+                int buffIndex = playerLevel / levelStep - 1;
 
-        public static bool HandleClassChangeItem(ChatCommandContext ctx, IDictionary<PlayerClasses, (List<int>, List<int>)> classes, int level)
+                ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                {
+                    BuffPrefabGUID = new(buffs[buffIndex])
+                };
+                /*
+                if (prestigeLevel > 0 && serverGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity prestigeBuff)) // if present, modify based on prestige level?
+                {
+                    // each class gets an applyBuffOnDamageTypeDealt effect? like BloodKnight gets one that has a chance to proc leech, that I could somewhat safely scale with prestige level easily
+                    Core.Log.LogInfo($"Proceeding to class check for on hit extra buff components to add...");
+                    if (Core.DataStructures.PlayerClasses.TryGetValue(SteamID, out var classes) && classes.Keys.Count > 0) // so basically if prestiged already and at the level threshold again, handle the buff matching the index and scale for prestige
+                    {
+                        PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+                        switch (buffIndex)
+                        {
+                            case 0:
+                                
+
+
+                                Core.Log.LogInfo($"absorb buff...");
+                                if (!prestigeBuff.Has<AbsorbBuff>()) prestigeBuff.Add<AbsorbBuff>();
+                                prestigeBuff.Write(new AbsorbBuff
+                                {
+                                    AbsorbCap = 100f,
+                                    AbsorbModifier = 1f,
+                                    AbsorbValue = 50,
+                                });
+
+                                Core.Log.LogInfo($"Applied absorb to blood buff {buffIndex} for {playerClass}");
+
+                                DynamicBuffer<GameplayEventListeners> buffer;
+                                if (!prestigeBuff.Has<GameplayEventListeners>()) buffer = Core.EntityManager.AddBuffer<GameplayEventListeners>(prestigeBuff);
+                                var otherBuffer = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[new(-429891372)].ReadBuffer<GameplayEventListeners>();
+                                buffer = otherBuffer;
+
+
+                                Core.Log.LogInfo($"on hit buff...");
+                                Buff_ApplyBuffOnDamageTypeDealt_DataShared onHitBuff = new()
+                                {
+                                    ProcBuff = ClassApplyBuffOnDamageDealtMap[playerClass],
+                                    ProcChance = 1f,
+                                };
+                                if (!prestigeBuff.Has<Buff_ApplyBuffOnDamageTypeDealt_DataShared>()) prestigeBuff.Add<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
+                                prestigeBuff.Write(onHitBuff);
+                                break;
+                                
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                break;
+                        }
+                    }
+                }
+                */
+                debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                if (serverGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff)) // if present, modify based on prestige level
+                {
+                    //Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.GetPrefabName()} for class buff, modifying...");
+                       
+                    HandleBloodBuff(firstBuff);
+
+                    if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
+                    {
+                        firstBuff.Remove<RemoveBuffOnGameplayEvent>();
+                    }
+                    if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
+                    {
+                        firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
+                    }
+                    if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
+                    {
+                        firstBuff.Remove<CreateGameplayEventsOnSpawn>();
+                    }
+                    
+                    if (firstBuff.Has<GameplayEventListeners>())
+                    {
+                        firstBuff.Remove<GameplayEventListeners>();
+                    }
+                    
+                    if (!firstBuff.Has<Buff_Persists_Through_Death>())
+                    {
+                        firstBuff.Add<Buff_Persists_Through_Death>();
+                    }
+                    if (firstBuff.Has<LifeTime>())
+                    {
+                        LifeTime lifeTime = firstBuff.Read<LifeTime>();
+                        lifeTime.Duration = -1;
+                        lifeTime.EndAction = LifeTimeEndAction.None;
+                        firstBuff.Write(lifeTime);
+                    }
+                        
+                }
+                
+            }
+        }
+        static void HandleBloodBuff(Entity buff, int prestigeLevel = 0)
+        {
+            // so at every prestige need to take away and reapply buff with new values
+            //Core.Log.LogInfo($"Handling blood buff... {buff.Read<PrefabGUID>().GetPrefabName()}");
+
+            if (buff.Has<BloodBuff_HealReceivedProc_DataShared>())
+            {
+                var healReceivedProc = buff.Read<BloodBuff_HealReceivedProc_DataShared>();
+                // modifications
+                healReceivedProc.RequiredBloodPercentage = 0;
+                buff.Write(healReceivedProc);
+            }
+
+            if (buff.Has<BloodBuffScript_Brute_HealthRegenBonus>())
+            {
+                var bruteHealthRegenBonus = buff.Read<BloodBuffScript_Brute_HealthRegenBonus>();
+                // modifications
+                bruteHealthRegenBonus.RequiredBloodPercentage = 0;
+                bruteHealthRegenBonus.MinHealthRegenIncrease = bruteHealthRegenBonus.MaxHealthRegenIncrease;
+                buff.Write(bruteHealthRegenBonus);
+            }
+
+            if (buff.Has<BloodBuffScript_Brute_NulifyAndEmpower>())
+            {
+                var bruteNulifyAndEmpower = buff.Read<BloodBuffScript_Brute_NulifyAndEmpower>();
+                // modifications
+                bruteNulifyAndEmpower.RequiredBloodPercentage = 0;
+                buff.Write(bruteNulifyAndEmpower);
+            }
+
+            if (buff.Has<BloodBuff_Brute_PhysLifeLeech_DataShared>())
+            {
+                var brutePhysLifeLeech = buff.Read<BloodBuff_Brute_PhysLifeLeech_DataShared>();
+                // modifications
+                brutePhysLifeLeech.RequiredBloodPercentage = 0;
+                brutePhysLifeLeech.MinIncreasedPhysicalLifeLeech = brutePhysLifeLeech.MaxIncreasedPhysicalLifeLeech;
+                buff.Write(brutePhysLifeLeech);
+            }
+
+            if (buff.Has<BloodBuff_Brute_RecoverOnKill_DataShared>())
+            {
+                var bruteRecoverOnKill = buff.Read<BloodBuff_Brute_RecoverOnKill_DataShared>();
+                // modifications
+                bruteRecoverOnKill.RequiredBloodPercentage = 0;
+                bruteRecoverOnKill.MinHealingReceivedValue = bruteRecoverOnKill.MaxHealingReceivedValue;
+                buff.Write(bruteRecoverOnKill);
+            }
+
+            if (buff.Has<BloodBuff_Creature_SpeedBonus_DataShared>())
+            {
+                var creatureSpeedBonus = buff.Read<BloodBuff_Creature_SpeedBonus_DataShared>();
+                // modifications
+                creatureSpeedBonus.RequiredBloodPercentage = 0;
+                creatureSpeedBonus.MinMovementSpeedIncrease = creatureSpeedBonus.MaxMovementSpeedIncrease;
+                buff.Write(creatureSpeedBonus);
+            }
+
+            if (buff.Has<BloodBuff_SunResistance_DataShared>())
+            {
+                var sunResistance = buff.Read<BloodBuff_SunResistance_DataShared>();
+                // modifications
+                sunResistance.RequiredBloodPercentage = 0;
+                sunResistance.MinBonus = sunResistance.MaxBonus;
+                buff.Write(sunResistance);
+            }
+
+            if (buff.Has<BloodBuffScript_Draculin_BloodMendBonus>())
+            {
+                var draculinBloodMendBonus = buff.Read<BloodBuffScript_Draculin_BloodMendBonus>();
+                // modifications
+                draculinBloodMendBonus.RequiredBloodPercentage = 0;
+                draculinBloodMendBonus.MinBonusHealing = draculinBloodMendBonus.MaxBonusHealing;
+                buff.Write(draculinBloodMendBonus);
+            }
+            
+            if (buff.Has<Script_BloodBuff_CCReduction_DataShared>())
+            {
+                var bloodBuffCCReduction = buff.Read<Script_BloodBuff_CCReduction_DataShared>();
+                // modifications
+                bloodBuffCCReduction.RequiredBloodPercentage = 0;
+                bloodBuffCCReduction.MinBonus = bloodBuffCCReduction.MaxBonus;
+                buff.Write(bloodBuffCCReduction);
+            }
+            
+            if (buff.Has<Script_BloodBuff_Draculin_ImprovedBite_DataShared>())
+            {
+                var draculinImprovedBite = buff.Read<Script_BloodBuff_Draculin_ImprovedBite_DataShared>();
+                // modifications
+                draculinImprovedBite.RequiredBloodPercentage = 0;
+                buff.Write(draculinImprovedBite);
+            }
+            
+            if (buff.Has<BloodBuffScript_LastStrike>())
+            {
+                var lastStrike = buff.Read<BloodBuffScript_LastStrike>();
+                // modifications
+                lastStrike.RequiredBloodQuality = 0;
+                lastStrike.LastStrikeBonus_Min = lastStrike.LastStrikeBonus_Max;
+                buff.Write(lastStrike);
+            }
+
+            if (buff.Has<BloodBuff_Draculin_SpeedBonus_DataShared>())
+            {
+                var draculinSpeedBonus = buff.Read<BloodBuff_Draculin_SpeedBonus_DataShared>();
+                // modifications
+                draculinSpeedBonus.RequiredBloodPercentage = 0;
+                draculinSpeedBonus.MinMovementSpeedIncrease = draculinSpeedBonus.MaxMovementSpeedIncrease;
+                buff.Write(draculinSpeedBonus);
+            }
+
+            if (buff.Has<BloodBuff_AllResistance_DataShared>())
+            {
+                var allResistance = buff.Read<BloodBuff_AllResistance_DataShared>();
+                // modifications
+                allResistance.RequiredBloodPercentage = 0;
+                allResistance.MinBonus = allResistance.MaxBonus;
+                buff.Write(allResistance);
+            }
+
+            if (buff.Has<BloodBuff_BiteToMutant_DataShared>())
+            {
+                var biteToMutant = buff.Read<BloodBuff_BiteToMutant_DataShared>();
+                // modifications
+                biteToMutant.RequiredBloodPercentage = 0;
+
+                buff.Write(biteToMutant);
+            }
+
+            if (buff.Has<BloodBuff_BloodConsumption_DataShared>())
+            {
+                var bloodConsumption = buff.Read<BloodBuff_BloodConsumption_DataShared>();
+                // modifications
+                bloodConsumption.RequiredBloodPercentage = 0;
+                bloodConsumption.MinBonus = bloodConsumption.MaxBonus;
+                buff.Write(bloodConsumption);
+            }        
+
+            if (buff.Has<BloodBuff_HealthRegeneration_DataShared>())
+            {
+                var healthRegeneration = buff.Read<BloodBuff_HealthRegeneration_DataShared>();
+                // modifications
+                healthRegeneration.RequiredBloodPercentage = 0;
+                healthRegeneration.MinBonus = healthRegeneration.MaxBonus;
+                buff.Write(healthRegeneration);
+            }
+
+            if (buff.Has<BloodBuff_ApplyMovementSpeedOnShapeshift_DataShared>())
+            {
+                var applyMovementSpeedOnShapeshift = buff.Read<BloodBuff_ApplyMovementSpeedOnShapeshift_DataShared>();
+                // modifications
+                applyMovementSpeedOnShapeshift.RequiredBloodPercentage = 0;
+                applyMovementSpeedOnShapeshift.MinBonus = applyMovementSpeedOnShapeshift.MaxBonus;
+                buff.Write(applyMovementSpeedOnShapeshift);
+            }
+
+            if (buff.Has<BloodBuff_PrimaryAttackLifeLeech_DataShared>())
+            {
+                var primaryAttackLifeLeech = buff.Read<BloodBuff_PrimaryAttackLifeLeech_DataShared>();
+                // modifications
+                primaryAttackLifeLeech.RequiredBloodPercentage = 0;
+                primaryAttackLifeLeech.MinBonus = primaryAttackLifeLeech.MaxBonus;
+                buff.Write(primaryAttackLifeLeech);
+            }
+            
+            if (buff.Has<BloodBuff_PrimaryProc_FreeCast_DataShared>())
+            {
+                var primaryProcFreeCast = buff.Read<BloodBuff_PrimaryProc_FreeCast_DataShared>(); // scholar one I think
+                // modifications
+                primaryProcFreeCast.RequiredBloodPercentage = 0;
+                primaryProcFreeCast.MinBonus = primaryProcFreeCast.MaxBonus;
+                buff.Write(primaryProcFreeCast);
+            }
+            
+            if (buff.Has<BloodBuff_Rogue_AttackSpeedBonus_DataShared>())
+            {
+                var rogueAttackSpeedBonus = buff.Read<BloodBuff_Rogue_AttackSpeedBonus_DataShared>();
+                // modifications
+                rogueAttackSpeedBonus.RequiredBloodPercentage = 0;
+                buff.Write(rogueAttackSpeedBonus);
+                if (buff.Has<BloodBuff_Rogue_SpeedBonus_DataShared>()) // dracula blood
+                {
+                    var rogueSpeedBonus = buff.Read<BloodBuff_Rogue_SpeedBonus_DataShared>();
+                    rogueSpeedBonus.RequiredBloodPercentage = 0;
+                    buff.Write(rogueSpeedBonus);
+                }
+            }
+
+            if (buff.Has<BloodBuff_CritAmplifyProc_DataShared>())
+            {
+                var critAmplifyProc = buff.Read<BloodBuff_CritAmplifyProc_DataShared>();
+                // modifications
+                critAmplifyProc.RequiredBloodPercentage = 0;
+                critAmplifyProc.MinBonus = critAmplifyProc.MaxBonus;
+                buff.Write(critAmplifyProc);
+            }
+
+            if (buff.Has<BloodBuff_PhysCritChanceBonus_DataShared>())
+            {
+                var physCritChanceBonus = buff.Read<BloodBuff_PhysCritChanceBonus_DataShared>();
+                // modifications
+                physCritChanceBonus.RequiredBloodPercentage = 0;
+                physCritChanceBonus.MinPhysicalCriticalStrikeChance = physCritChanceBonus.MaxPhysicalCriticalStrikeChance;
+                buff.Write(physCritChanceBonus);
+            }
+
+            if (buff.Has<BloodBuff_Rogue_SpeedBonus_DataShared>())
+            {
+                var rogueSpeedBonus = buff.Read<BloodBuff_Rogue_SpeedBonus_DataShared>();
+                // modifications
+                rogueSpeedBonus.RequiredBloodPercentage = 0;
+                rogueSpeedBonus.MinMovementSpeedIncrease = rogueSpeedBonus.MaxMovementSpeedIncrease;
+                buff.Write(rogueSpeedBonus);
+            }
+
+            if (buff.Has<BloodBuff_ReducedTravelCooldown_DataShared>())
+            {
+                var reducedTravelCooldown = buff.Read<BloodBuff_ReducedTravelCooldown_DataShared>();
+                // modifications
+                reducedTravelCooldown.RequiredBloodPercentage = 0;
+                reducedTravelCooldown.MinBonus = reducedTravelCooldown.MaxBonus;
+                buff.Write(reducedTravelCooldown);
+            }
+            if (buff.Has<BloodBuff_Scholar_SpellCooldown_DataShared>())
+            {
+                var scholarSpellCooldown = buff.Read<BloodBuff_Scholar_SpellCooldown_DataShared>();
+                // modifications
+                scholarSpellCooldown.RequiredBloodPercentage = 0;
+                scholarSpellCooldown.MinCooldownReduction = scholarSpellCooldown.MaxCooldownReduction;
+                buff.Write(scholarSpellCooldown);
+            }
+            if (buff.Has<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>())
+            {
+                var scholarSpellCritChanceBonus = buff.Read<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>();
+                // modifications
+                scholarSpellCritChanceBonus.RequiredBloodPercentage = 0;
+                scholarSpellCritChanceBonus.MinSpellCriticalStrikeChance = scholarSpellCritChanceBonus.MaxSpellCriticalStrikeChance;
+                buff.Write(scholarSpellCritChanceBonus);
+            }
+
+            if (buff.Has<BloodBuff_Scholar_SpellPowerBonus_DataShared>())
+            {
+                var scholarSpellPowerBonus = buff.Read<BloodBuff_Scholar_SpellPowerBonus_DataShared>();
+                // modifications
+                scholarSpellPowerBonus.RequiredBloodPercentage = 0;
+                scholarSpellPowerBonus.MinSpellPowerIncrease = scholarSpellPowerBonus.MaxSpellPowerIncrease;
+                buff.Write(scholarSpellPowerBonus);
+                if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>()) // dracula blood 
+                {
+                    var warriorPhysDamageBonus = buff.Read<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
+                    warriorPhysDamageBonus.RequiredBloodPercentage = 0;
+                    warriorPhysDamageBonus.MinPhysDamageIncrease = warriorPhysDamageBonus.MaxPhysDamageIncrease;
+                    buff.Write(warriorPhysDamageBonus);
+                }
+            }
+
+            if (buff.Has<BloodBuff_SpellLifeLeech_DataShared>())
+            {
+                var spellLifeLeech = buff.Read<BloodBuff_SpellLifeLeech_DataShared>();
+                // modifications
+                spellLifeLeech.RequiredBloodPercentage = 0;
+                spellLifeLeech.MinBonus = spellLifeLeech.MaxBonus;
+                buff.Write(spellLifeLeech);
+            }
+
+            if (buff.Has<BloodBuff_Warrior_DamageReduction_DataShared>())
+            {
+                var warriorDamageReduction = buff.Read<BloodBuff_Warrior_DamageReduction_DataShared>();
+                // modifications
+                warriorDamageReduction.RequiredBloodPercentage = 0;
+                warriorDamageReduction.MinDamageReduction = warriorDamageReduction.MaxDamageReduction;
+                buff.Write(warriorDamageReduction);
+            }
+
+            if (buff.Has<BloodBuff_Warrior_PhysCritDamageBonus_DataShared>())
+            {
+                var warriorPhysCritDamageBonus = buff.Read<BloodBuff_Warrior_PhysCritDamageBonus_DataShared>();
+                // modifications
+                warriorPhysCritDamageBonus.RequiredBloodPercentage = 0;
+                warriorPhysCritDamageBonus.MinWeaponCriticalStrikeDamageIncrease = warriorPhysCritDamageBonus.MaxWeaponCriticalStrikeDamageIncrease;
+                buff.Write(warriorPhysCritDamageBonus);
+            }
+
+            if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>())
+            {
+                var warriorPhysDamageBonus = buff.Read<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
+                // modifications
+                warriorPhysDamageBonus.RequiredBloodPercentage = 0;
+                warriorPhysDamageBonus.MinPhysDamageIncrease = warriorPhysDamageBonus.MaxPhysDamageIncrease;
+                buff.Write(warriorPhysDamageBonus);
+            }
+
+            if (buff.Has<BloodBuff_Warrior_PhysicalBonus_DataShared>())
+            {
+                var warriorPhysicalBonus = buff.Read<BloodBuff_Warrior_PhysicalBonus_DataShared>();
+                // modifications
+                warriorPhysicalBonus.RequiredBloodPercentage = 0;
+                warriorPhysicalBonus.MinWeaponPowerIncrease = warriorPhysicalBonus.MaxWeaponPowerIncrease;
+                buff.Write(warriorPhysicalBonus);
+            }
+
+            if (buff.Has<BloodBuff_Warrior_WeaponCooldown_DataShared>())
+            {
+                var warriorWeaponCooldown = buff.Read<BloodBuff_Warrior_WeaponCooldown_DataShared>();
+                // modifications
+                warriorWeaponCooldown.RequiredBloodPercentage = 0;
+                warriorWeaponCooldown.MinCooldownReduction = warriorWeaponCooldown.MaxCooldownReduction;
+                buff.Write(warriorWeaponCooldown);
+            }
+
+            if (buff.Has<BloodBuff_Brute_100_DataShared>())
+            {
+                var bruteEffect = buff.Read<BloodBuff_Brute_100_DataShared>();
+                bruteEffect.RequiredBloodPercentage = 0;
+                bruteEffect.MinHealthRegainPercentage = bruteEffect.MaxHealthRegainPercentage;
+                buff.Write(bruteEffect);
+            }
+
+            if (buff.Has<BloodBuff_Rogue_100_DataShared>())
+            {
+                var rogueEffect = buff.Read<BloodBuff_Rogue_100_DataShared>();
+                rogueEffect.RequiredBloodPercentage = 0;
+                buff.Write(rogueEffect);
+            }
+
+            if (buff.Has<BloodBuff_Warrior_100_DataShared>())
+            {
+                var warriorEffect = buff.Read<BloodBuff_Warrior_100_DataShared>();
+                warriorEffect.RequiredBloodPercentage = 0;
+                buff.Write(warriorEffect);
+            }
+
+            if (buff.Has<BloodBuffScript_Scholar_MovementSpeedOnCast>())
+            {
+                var scholarEffect = buff.Read<BloodBuffScript_Scholar_MovementSpeedOnCast>();
+                scholarEffect.RequiredBloodPercentage = 0;
+                scholarEffect.ChanceToGainMovementOnCast_Min = scholarEffect.ChanceToGainMovementOnCast_Max;
+                buff.Write(scholarEffect);
+            }
+            if (buff.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
+            {
+                var bruteAttackSpeedBonus = buff.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
+                bruteAttackSpeedBonus.MinValue = bruteAttackSpeedBonus.MaxValue;
+                bruteAttackSpeedBonus.RequiredBloodPercentage = 0;
+                buff.Write(bruteAttackSpeedBonus);
+            }
+        }
+
+        public static bool HandleClassChangeItem(ChatCommandContext ctx, Dictionary<PlayerClasses, (List<int>, List<int>)> classes, ulong steamId)
         {
             PrefabGUID item = new(Plugin.ChangeClassItem.Value);
             int quantity = Plugin.ChangeClassItemQuantity.Value;
@@ -354,26 +835,24 @@ namespace Bloodcraft.Systems.Experience
             if (!InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
                 Core.ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
             {
-                ctx.Reply($"You do not have the required item to change classes ({item.LookupName()}x{quantity})");
+                ctx.Reply($"You do not have the required item to change classes ({item.GetPrefabName()}x{quantity})");
                 return false;
             }
 
             if (!Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
             {
-                ctx.Reply($"Failed to remove the required item ({item.LookupName()}x{quantity})");
+                ctx.Reply($"Failed to remove the required item ({item.GetPrefabName()}x{quantity})");
                 return false;
             }
 
-            if (level > 0)
-            {
-                PrestigeSystem.RemoveCurrentBuffs(ctx, classes.Keys.FirstOrDefault(), level);
-            }
+            RemoveClassBuffs(ctx, steamId);
 
             return true;
         }
 
-        public static void UpdateClassData(Entity character, PlayerClasses parsedClassType, IDictionary<PlayerClasses, (List<int>, List<int>)> classes, int level)
+        public static void UpdateClassData(Entity character, PlayerClasses parsedClassType, Dictionary<PlayerClasses, (List<int>, List<int>)> classes, ulong steamId)
         {
+            DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
             var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
             var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
             var classWeaponStats = Core.ParseConfigString(weaponConfigEntry);
@@ -381,16 +860,137 @@ namespace Bloodcraft.Systems.Experience
 
             classes[parsedClassType] = (classWeaponStats, classBloodStats);
 
-            if (level > 0)
+            Core.DataStructures.PlayerClasses[steamId] = classes;
+            Core.DataStructures.SavePlayerClasses();
+
+            FromCharacter fromCharacter = new()
             {
-                var buffs = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[parsedClassType]);
-                for (int i = 0; i < level; i++)
+                Character = character,
+                User = character.Read<PlayerCharacter>().UserEntity,
+            };
+
+            ApplyClassBuffs(character, steamId, debugEventsSystem, fromCharacter);
+        }
+
+        public static void ApplyClassBuffs(Entity character, ulong steamId, DebugEventsSystem debugEventsSystem, FromCharacter fromCharacter)
+        {
+            ServerGameManager serverGameManager = Core.ServerGameManager;
+            var buffs = GetClassBuffs(steamId);
+            int levelStep = 20;
+
+            int playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
+            int numBuffsToApply = playerLevel / levelStep;
+
+            if (numBuffsToApply > 0 && numBuffsToApply <= buffs.Count)
+            {
+                //Core.Log.LogInfo($"Applying {numBuffsToApply} class buff(s) at level {playerLevel}");
+
+                for (int i = 0; i < numBuffsToApply; i++)
                 {
-                    if (buffs.Count == 0 || buffs[i] == 0) continue;
-                    var buffPrefab = new PrefabGUID(buffs[level - 1]);
-                    PrestigeSystem.HandlePrestigeBuff(character, buffPrefab);
+                    ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                    {
+                        BuffPrefabGUID = new(buffs[i])
+                    };
+
+                    debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                    if (serverGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff))
+                    {
+                        //Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for class buff");
+
+                        HandleBloodBuff(firstBuff);
+
+                        if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
+                        {
+                            firstBuff.Remove<RemoveBuffOnGameplayEvent>();
+                        }
+                        if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
+                        {
+                            firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
+                        }
+                        if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
+                        {
+                            firstBuff.Remove<CreateGameplayEventsOnSpawn>();
+                        }
+                        if (firstBuff.Has<GameplayEventListeners>())
+                        {
+                            firstBuff.Remove<GameplayEventListeners>();
+                        }
+                        if (!firstBuff.Has<Buff_Persists_Through_Death>())
+                        {
+                            firstBuff.Write(new Buff_Persists_Through_Death());
+                        }
+                        if (firstBuff.Has<LifeTime>())
+                        {
+                            LifeTime lifeTime = firstBuff.Read<LifeTime>();
+                            lifeTime.Duration = -1;
+                            lifeTime.EndAction = LifeTimeEndAction.None;
+                            firstBuff.Write(lifeTime);
+                        }
+                        //Core.Log.LogInfo($"Proceeding to class check for on hit extra buff components to add...");
+                        /*
+                        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
+                        {
+                            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+                            switch (i)
+                            {
+                                case 0:
+                                    Core.Log.LogInfo($"Applying on damage dealt debuff components for {playerClass}...");
+                                    if (!firstBuff.Has<Buff_ApplyBuffOnDamageTypeDealt_DataShared>()) firstBuff.Add<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
+                                    Buff_ApplyBuffOnDamageTypeDealt_DataShared applyOnHit = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[new(-429891372)].Read<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
+                                    applyOnHit.ProcBuff = ClassApplyBuffOnDamageDealtMap[playerClass];
+                                    applyOnHit.ProcChance = 1f;
+                                    firstBuff.Write(applyOnHit);
+                                    Core.Log.LogInfo($"Applied {ClassApplyBuffOnDamageDealtMap[playerClass].LookupName()} to blood buff {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for {playerClass}");
+                                    break;
+                                case 1:
+                                    break;
+                                case 2:
+                                    break;
+                                case 3:
+                                    break;
+                            }
+                        }
+                        */
+
+                    }
                 }
             }
+        }
+
+        public static void RemoveClassBuffs(ChatCommandContext ctx, ulong steamId)
+        {
+            List<int> buffs = GetClassBuffs(steamId);
+            var buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
+            var entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+
+            for (int i = 0; i < buffs.Count; i++)
+            {
+                if (buffs[i] == 0) continue;
+                PrefabGUID buffPrefab = new(buffs[i]);
+                if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out var buff))
+                {
+                    BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
+                }
+            }
+        }
+
+        public static List<int> GetClassBuffs(ulong steamId)
+        {
+            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
+            {
+                var playerClass = classes.Keys.FirstOrDefault();
+                return Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
+            }
+            return [];
+        }
+        public static List<int> GetClassSpells(ulong steamId)
+        {
+            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
+            {
+                var playerClass = classes.Keys.FirstOrDefault();
+                return Core.ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
+            }
+            return [];
         }
     }
 }

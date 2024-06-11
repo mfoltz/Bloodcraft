@@ -1,10 +1,7 @@
-using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Professions;
 using HarmonyLib;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Network;
 using Stunlock.Core;
-using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Patches;
@@ -12,53 +9,59 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal class InitializationPatch
 {
-    static readonly ComponentType[] FamiliarComponents =
-            [
-                ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
-                ComponentType.ReadOnly(Il2CppType.Of<UnitStats>())
-            ];
+    //static readonly PrefabGUID primalBosses = new(-1264407246);
+    //static readonly PrefabGUID primalWaves = new(-1264407246);
+    //static readonly int primalWaveMultiplier = Plugin.PrimalWaveMultiplier.Value;
 
     [HarmonyPatch(typeof(SpawnTeamSystem_OnPersistenceLoad), nameof(SpawnTeamSystem_OnPersistenceLoad.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix()
     {
         Core.Initialize();
-        SetFamiliarsOnSpawn();
+        //if (Plugin.WarEventSystem.Value) ModifyPrimalUC();
+        if (Plugin.FamiliarSystem.Value) Core.FamiliarService.HandleFamiliarsOnSpawn();
+        //RecipeSystem.HandleRecipes();
     }
-    static void SetFamiliarsOnSpawn()
+
+    /*
+    static void ModifyPrimalUC()
     {
-        EntityQuery familiarQuery = Core.EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = FamiliarComponents,
-            Options = EntityQueryOptions.IncludeAll
-        });
+        //Entity baseEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[primalBosses];
 
-        NativeArray<Entity> familiars = familiarQuery.ToEntityArray(Allocator.Temp);
-        try
+        //var groupBuffer = baseEntity.ReadBuffer<UnitCompositionGroupEntry>();
+        var bossBuffer = baseEntity.ReadBuffer<UnitCompositionGroupUnitEntry>();
+
+        //groupBuffer.RemoveRange(1, groupBuffer.Length - 1);
+        
+        for (int i = 0; i < bossBuffer.Length; i++)
         {
-            foreach (Entity familiar in familiars)
-            {
-                Follower follower = familiar.Read<Follower>();
-                PrefabGUID prefabGUID = familiar.Read<PrefabGUID>();
-                
-                if (follower.Followed._Value.Has<PlayerCharacter>())
-                {
-                    //Core.Log.LogInfo($"{prefabGUID.LookupName()}");
-                    //Core.Log.LogInfo($"Following player character...");
-                    ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.Item2.Equals(prefabGUID.GuidHash) && Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(prefabGUID.GuidHash, out var xpData))
-                    {
-                        FamiliarSummonSystem.HandleFamiliarModifications(follower.Followed._Value, familiar, xpData.Key);
-                    }
-                }
-               
-            }
+            UnitCompositionGroupUnitEntry entry = bossBuffer[i];
+            //Core.Log.LogInfo($"{entry.Unit.GetPrefabName()} | {entry.UnitBaseStatsType.ToString()}");
+            entry.UnitBaseStatsType = UnitBaseStatsType.Boss;
+            entry.CustomVBloodUnit = new(-740796338);
+            entry.IsVBloodUnit = true;
+            //entry.Unit = new(-740796338);
+            //UnitCompositionGroupEntry groupEntry = groupBuffer[i];
+            //groupEntry.UnitsStartIndex = 0;
+            //groupEntry.UnitsCount = bossBuffer.Length;
+            //groupBuffer[i] = groupEntry;
+            bossBuffer[i] = entry;
         }
-        finally
+        
+        //baseEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[primalWaves];
+        //baseEntity.LogComponentTypes();
+        //var groupBuffer = baseEntity.ReadBuffer<UnitCompositionGroupEntry>();
+
+        var unitBuffer = baseEntity.ReadBuffer<UnitCompositionGroupUnitEntry>();
+
+        for (int i = 0; i < unitBuffer.Length; i++)
         {
-            familiars.Dispose();
-            familiarQuery.Dispose();
+            UnitCompositionGroupUnitEntry entry = unitBuffer[i];
+            //Core.Log.LogInfo($"{entry.Unit.GetPrefabName()} | {entry.UnitBaseStatsType.ToString()}");
+            entry.IsVBloodUnit = true;
+            entry.Unit = new(282791819);
+            unitBuffer[i] = entry;
         }
     }
-
+    */
 }

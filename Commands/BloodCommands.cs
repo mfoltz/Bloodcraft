@@ -6,6 +6,8 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
+
 using static Bloodcraft.Systems.Legacies.BloodStats;
 
 namespace Bloodcraft.Commands
@@ -181,7 +183,7 @@ namespace Bloodcraft.Commands
                 }
                 else
                 {
-                    ctx.Reply($"You do not have the required item to reset your blood stats ({item.LookupName()}x{quantity})");
+                    ctx.Reply($"You do not have the required item to reset your blood stats ({item.GetPrefabName()}x{quantity})");
                     return;
                 }
             }
@@ -220,7 +222,7 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Blood Legacies are not enabled.");
                 return;
             }
-            Entity foundUserEntity = Core.FindUserOnline(name);
+            Entity foundUserEntity = GetUserByName(name, true);
             if (foundUserEntity.Equals(Entity.Null))
             {
                 ctx.Reply("Player not found.");

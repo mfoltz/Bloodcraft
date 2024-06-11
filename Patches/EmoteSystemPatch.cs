@@ -77,10 +77,11 @@ internal class EmoteSystemPatch
             if (!familiar.Has<Disabled>())
             {
                 entityManager.AddComponent<Disabled>(familiar);
-
+                
                 Follower follower = familiar.Read<Follower>();
                 follower.Followed._Value = Entity.Null;
                 familiar.Write(follower);
+                
                 data = (familiar, data.Item2);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
@@ -89,14 +90,14 @@ internal class EmoteSystemPatch
             }
             else if (familiar.Has<Disabled>())
             {
+                familiar.Write(new Translation { Value = character.Read<LocalToWorld>().Position });
                 familiar.Remove<Disabled>();
 
+                
                 Follower follower = familiar.Read<Follower>();
                 follower.Followed._Value = character;
                 familiar.Write(follower);
-
-                familiar.Write(new Translation { Value = character.Read<LocalToWorld>().Position });
-
+                
                 data = (Entity.Null, data.Item2);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
@@ -152,11 +153,7 @@ internal class EmoteSystemPatch
                 ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
             }
             else // if not, disable combat
-            {
-                
-
-
-                
+            {  
                 FactionReference factionReference = familiar.Read<FactionReference>();
                 factionReference.FactionGuid._Value = ignoredFaction;
                 familiar.Write(factionReference);
@@ -181,7 +178,6 @@ internal class EmoteSystemPatch
                     Character = familiar,
                     User = userEntity,
                 };
-
                 debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                 if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
                 {
@@ -204,7 +200,6 @@ internal class EmoteSystemPatch
                     }
                     
                 }
-                
                 ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
             }
         }
@@ -213,5 +208,4 @@ internal class EmoteSystemPatch
             ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
         }
     }
-  
 }
