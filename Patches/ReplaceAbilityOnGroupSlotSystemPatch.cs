@@ -25,11 +25,11 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     if (Plugin.UnarmedSlots.Value && entity.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var unarmedSpells))
                     {
-                        HandleUnarmed(entity, unarmedSpells, steamId);
+                        HandleUnarmed(entity, character, unarmedSpells, steamId);
                     }
                     else if (Plugin.PrestigeSystem.Value && entity.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("weapon") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var playerSpells) && !playerSpells.ClassSpell.Equals(0))
                     {
-                        HandleWeapon(entity, steamId, playerSpells);
+                        HandleWeapon(entity, character, steamId, playerSpells);
                     }
                     else if (!entity.Has<WeaponLevel>())
                     {
@@ -48,7 +48,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         }
     }
 
-    static void HandleUnarmed(Entity entity, (int, int, int) spellTuple, ulong steamId)
+    static void HandleUnarmed(Entity entity, Entity player, (int, int, int) spellTuple, ulong steamId)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
         if (!spellTuple.Item1.Equals(0))
@@ -77,33 +77,37 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 
         if (!spellTuple.Item3.Equals(0))
         {
+            PrefabGUID prefabGUID = new(spellTuple.Item3);
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
-                NewGroupId = new(spellTuple.Item3),
+                NewGroupId = prefabGUID,
                 CopyCooldown = true,
                 Priority = 0,
             };
             buffer.Add(buff);
+            if (!spellTuple.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, prefabGUID, 60f);
         }
-            
-        
+
+
     }
-    static void HandleWeapon(Entity entity, ulong steamId, (int, int, int) playerSpells)
+    static void HandleWeapon(Entity entity, Entity player, ulong steamId, (int, int, int) playerSpells)
     {
         if (!Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) || !bools["ShiftLock"]) return;
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>(); // prevent people switching jewels if item with spellmod is equipped?
 
         if (!playerSpells.Item3.Equals(0))
         {
+            PrefabGUID prefabGUID = new(playerSpells.Item3);
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
-                NewGroupId = new(playerSpells.Item3),
+                NewGroupId = prefabGUID,
                 CopyCooldown = true,
                 Priority = 0,
             };
             buffer.Add(buff);
+            if (!playerSpells.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, prefabGUID, 60f);
         }
     }
     static void HandleSpells(Entity entity, ulong steamId)
