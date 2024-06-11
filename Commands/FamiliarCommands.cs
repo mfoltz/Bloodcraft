@@ -259,7 +259,7 @@ namespace Bloodcraft.Commands
                 if (Core.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(unit), out var Entity))
                 {
                     // Add to set
-                    if (!Entity.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("char"))
+                    if (!Entity.Read<PrefabGUID>().LookupName().ToLower().Contains("char"))
                     {
                         ctx.Reply("Invalid unit.");
                         return;

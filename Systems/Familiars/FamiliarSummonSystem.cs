@@ -137,10 +137,7 @@ namespace Bloodcraft.Systems.Familiars
                 {
                     if (buffer[i].SpawnPrefab.LookupName().ToLower().Contains("pilot"))
                     {
-                        var item = buffer[i];
-                        item.SpawnPrefab = new(0);
-                        buffer[i] = item;
-                        break;
+                        familiar.Remove<SpawnPrefabOnGameplayEvent>();
                     }
                 }
             }
