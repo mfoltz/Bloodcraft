@@ -86,12 +86,12 @@ internal class FamiliarService
             foreach (Entity familiar in familiars)
             {
                 Follower follower = familiar.Read<Follower>();
-                PrefabGUID prefabGUID = familiar.Read<PrefabGUID>();
+                PrefabGUID PrefabGUID = familiar.Read<PrefabGUID>();
 
                 if (follower.Followed._Value.Has<PlayerCharacter>())
                 {
                     ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.Item2.Equals(prefabGUID.GuidHash) && Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(prefabGUID.GuidHash, out var xpData))
+                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.Item2.Equals(PrefabGUID.GuidHash) && Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(PrefabGUID.GuidHash, out var xpData))
                     {
                         if (!actives.Item1.Equals(Entity.Null) && !Core.EntityManager.Exists(actives.Item1))
                         {

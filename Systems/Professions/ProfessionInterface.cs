@@ -29,12 +29,12 @@ namespace Bloodcraft.Systems.Professions
             new HarvestingHandler(),
             new EnchantingHandler()
         ];
-        public static IProfessionHandler GetProfessionHandler(PrefabGUID prefabGUID, string context = "")
+        public static IProfessionHandler GetProfessionHandler(PrefabGUID PrefabGUID, string conText = "")
         {
-            string itemTypeName = prefabGUID.LookupName().ToLower();
+            string itemTypeName = PrefabGUID.LookupName().ToLower();
 
-            // Check context to decide on a handler
-            switch (context)
+            // Check conText to decide on a handler
+            switch (conText)
             {
                 case "woodcutting":
                     return new WoodcuttingHandler();

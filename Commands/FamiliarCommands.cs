@@ -234,8 +234,8 @@ namespace Bloodcraft.Commands
                             Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
                         }
                     }
-                    PrefabGUID prefabGUID = new(actives.Item2);
-                    ctx.Reply($"<color=green>{prefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
+                    PrefabGUID PrefabGUID = new(actives.Item2);
+                    ctx.Reply($"<color=green>{PrefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
                 }
             }
             else

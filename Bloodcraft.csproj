@@ -16,12 +16,45 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<None Remove="Localization\d22bd1wl.1ps~" />
 		<None Remove="Localization\Prefabs.json" />
 		<None Remove="Localization\English.json" />
+		<None Remove="Localization\Brazilian.json" />
+		<None Remove="Localization\French.json" />
+		<None Remove="Localization\German.json" />
+		<None Remove="Localization\Hungarian.json" />
+		<None Remove="Localization\Italian.json" />
+		<None Remove="Localization\Japanese.json" />
+		<None Remove="Localization\Koreana.json" />
+		<None Remove="Localization\Latam.json" />
+		<None Remove="Localization\Polish.json" />
+		<None Remove="Localization\Russian.json" />
+		<None Remove="Localization\SChinese.json" />
+		<None Remove="Localization\TChinese.json" />
+		<None Remove="Localization\Thai.json" />
+		<None Remove="Localization\Turkish.json" />
+		<None Remove="Localization\Spanish.json" />
+		<None Remove="Localization\Vietnamese.json" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Localization\Prefabs.json" />
 		<EmbeddedResource Include="Localization\English.json" />
+		<EmbeddedResource Include="Localization\Brazilian.json" />
+		<EmbeddedResource Include="Localization\French.json" />
+		<EmbeddedResource Include="Localization\German.json" />
+		<EmbeddedResource Include="Localization\Hungarian.json" />
+		<EmbeddedResource Include="Localization\Italian.json" />
+		<EmbeddedResource Include="Localization\Japanese.json" />
+		<EmbeddedResource Include="Localization\Koreana.json" />
+		<EmbeddedResource Include="Localization\Latam.json" />
+		<EmbeddedResource Include="Localization\Polish.json" />
+		<EmbeddedResource Include="Localization\Russian.json" />
+		<EmbeddedResource Include="Localization\SChinese.json" />
+		<EmbeddedResource Include="Localization\TChinese.json" />
+		<EmbeddedResource Include="Localization\Thai.json" />
+		<EmbeddedResource Include="Localization\Turkish.json" />
+		<EmbeddedResource Include="Localization\Spanish.json" />
+		<EmbeddedResource Include="Localization\Vietnamese.json" />
 	</ItemGroup>
 
   <ItemGroup>

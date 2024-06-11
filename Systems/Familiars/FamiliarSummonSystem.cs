@@ -246,8 +246,8 @@ namespace Bloodcraft.Systems.Familiars
                 {
                     foreach (var follower in followers)
                     {
-                        PrefabGUID prefabGUID = follower.Entity._Entity.Read<PrefabGUID>();
-                        if (prefabGUID.GuidHash.Equals(data.Item2)) return follower.Entity._Entity;
+                        PrefabGUID PrefabGUID = follower.Entity._Entity.Read<PrefabGUID>();
+                        if (PrefabGUID.GuidHash.Equals(data.Item2)) return follower.Entity._Entity;
                     }
                 }
                 return Entity.Null;

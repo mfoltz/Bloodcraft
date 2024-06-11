@@ -39,6 +39,7 @@ internal static class Core
     public static GameDataSystem GameDataSystem { get; internal set; }
     public static FamiliarService FamiliarService { get; internal set; }
     public static LocalizationService Localization { get; } = new();
+
     public static PlayerService PlayerService { get; } = new();
 
     //public static WarEventService WarEventService { get; internal set; }

@@ -29,13 +29,13 @@ internal static class CreateGameplayEventOnDestroySystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
-                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+                PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
+                if (Plugin.FamiliarSystem.Value && PrefabGUID.LookupName().ToLower().Contains("combat"))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
-                        //Core.Log.LogInfo(prefabGUID.GetPrefabName());
+                        //Core.Log.LogInfo(PrefabGUID.GetPrefabName());
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entity.Read<Buff>().Target);
                         if (familiar != Entity.Null && Core.EntityManager.Exists(familiar))
                         {
@@ -46,7 +46,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     }
                 }
 
-                if (Plugin.ProfessionSystem.Value && prefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
+                if (Plugin.ProfessionSystem.Value && PrefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
@@ -75,7 +75,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     }
                 }
 
-                if (prefabGUID.GuidHash.Equals(-1106009274) && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // feed complete kills
+                if (PrefabGUID.GuidHash.Equals(-1106009274) && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // feed complete kills
                 {
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;

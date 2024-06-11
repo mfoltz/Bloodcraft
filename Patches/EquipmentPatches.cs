@@ -93,8 +93,8 @@ internal static class EquipmentPatches
                             {
                                 int tier = weaponEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                                 var buffer = weaponEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
-                                PrefabGUID prefabGUID = buffer[tier].TierPrefab;
-                                weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID].Read<WeaponLevelSource>();
+                                PrefabGUID PrefabGUID = buffer[tier].TierPrefab;
+                                weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID].Read<WeaponLevelSource>();
                             }
                             weaponEntity.Write(weaponLevelSource);
                         }
@@ -157,8 +157,8 @@ internal static class EquipmentPatches
                         {
                             int tier = weaponEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                             var buffer = weaponEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
-                            PrefabGUID prefabGUID = buffer[tier].TierPrefab;
-                            weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID].Read<WeaponLevelSource>();
+                            PrefabGUID PrefabGUID = buffer[tier].TierPrefab;
+                            weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID].Read<WeaponLevelSource>();
                         }
                         equipment.WeaponLevel._Value = weaponLevelSource.Level * (3/10);
                         character.Write(equipment);

@@ -53,8 +53,8 @@ internal static class CraftingPatches
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
                         ulong steamId = fromCharacter.User.Read<User>().PlatformId;
                         StartCraftItemEvent startCraftItemEvent = entity.Read<StartCraftItemEvent>();
-                        PrefabGUID prefabGUID = startCraftItemEvent.RecipeId;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
+                        PrefabGUID PrefabGUID = startCraftItemEvent.RecipeId;
+                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID];
                         var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                         PrefabGUID itemPrefab = buffer[0].Guid;
                                                 // Ensure the player’s job list exists
@@ -113,8 +113,8 @@ internal static class CraftingPatches
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
                         ulong steamId = fromCharacter.User.Read<User>().PlatformId;
                         StopCraftItemEvent stopCraftItemEvent = entity.Read<StopCraftItemEvent>();
-                        PrefabGUID prefabGUID = stopCraftItemEvent.RecipeGuid;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
+                        PrefabGUID PrefabGUID = stopCraftItemEvent.RecipeGuid;
+                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID];
                         var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                         PrefabGUID itemPrefab = buffer[0].Guid;
                         if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))

@@ -6,6 +6,8 @@ namespace Bloodcraft.Services;
 
 public class LocalizationService
 {
+
+    static readonly string LanguageLocalization = Plugin.LanguageLocalization.Value;
     struct Code
     {
         public string Key { get; set; }
@@ -28,6 +30,27 @@ public class LocalizationService
     public Dictionary<string, string> localization = [];
     public Dictionary<int, string> prefabNames = [];
 
+    static readonly Dictionary<string, string> LocalizationMapping = new()
+    {
+        {"English", "Bloodcraft.Localization.English.json"},
+        {"German", "Bloodcraft.Localization.German.json"},
+        {"French", "Bloodcraft.Localization.French.json"},
+        {"Spanish", "Bloodcraft.Localization.Spanish.json"},
+        {"Italian", "Bloodcraft.Localization.Italian.json"},
+        {"Japanese", "Bloodcraft.Localization.Japanese.json"},
+        {"Koreana", "Bloodcraft.Localization.Koreana.json"},
+        {"Portuguese", "Bloodcraft.Localization.Portuguese.json"},
+        {"Russian", "Bloodcraft.Localization.Russian.json"},
+        {"SimplifiedChinese", "Bloodcraft.Localization.SChinese.json"},
+        {"TraditionalChinese", "Bloodcraft.Localization.TChinese.json"},
+        {"Hungarian", "Bloodcraft.Localization.Hungarian.json"},
+        {"Latam", "Bloodcraft.Localization.Latam.json"},
+        {"Polish", "Bloodcraft.Localization.Polish.json"},
+        {"Thai", "Bloodcraft.Localization.Thai.json"},
+        {"Turkish", "Bloodcraft.Localization.Turkish.json"},
+        {"Vietnamese", "Bloodcraft.Localization.Vietnamese.json"},
+        {"Brazilian", "Bloodcraft.Localization.Brazilian.json"}
+    };
     public LocalizationService()
     {
         LoadLocalization();
@@ -36,7 +59,10 @@ public class LocalizationService
 
     void LoadLocalization()
     {
-        var resourceName = "Bloodcraft.Localization.English.json";
+        var resourceName = LocalizationMapping.ContainsKey(LanguageLocalization) ? LocalizationMapping[LanguageLocalization] : "Bloodcraft.Localization.English.json";
+
+        //Core.Log.LogInfo($"Loading localization file: {resourceName}");
+
         var assembly = Assembly.GetExecutingAssembly();
         var stream = assembly.GetManifestResourceStream(resourceName);
         
@@ -57,13 +83,13 @@ public class LocalizationService
         prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
     }
 
-    public string GetLocalization(string guid)
+    public string GetLocalization(string Guid)
     {
-        if (localization.TryGetValue(guid, out var text))
+        if (localization.TryGetValue(Guid, out var Text))
         {
-            return text;
+            return Text;
         }
-        return $"<Localization not found for {guid}>";
+        return $"<Localization not found for {Guid}>";
     }
 
 }

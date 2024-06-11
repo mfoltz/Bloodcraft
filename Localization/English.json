@@ -13190,7 +13190,7 @@
     },
     {
       "Guid": "c0350e6a-4c16-46c4-8cbc-af67d976b382",
-      "Text": "Vampires fight each other for these powerful artefacts. This device shall guide me..."
+      "Text": "Vampires fight each other for these powerful artefacts. This device shall Guide me..."
     },
     {
       "Guid": "87d3f92c-06fd-4150-a2fc-191c16a5001d",
@@ -19122,7 +19122,7 @@
     },
     {
       "Guid": "21c97823-91b0-4188-878a-bff47877cc54",
-      "Text": "{text} ({minutes}m)"
+      "Text": "{Text} ({minutes}m)"
     },
     {
       "Guid": "9b9fa1d3-7803-48d5-8e49-d6462d089708",
@@ -20450,7 +20450,7 @@
     },
     {
       "Guid": "7fce21ae-d190-48a5-92e7-fa1f35ed3b51",
-      "Text": "Set texture quality"
+      "Text": "Set Texture quality"
     },
     {
       "Guid": "3701af98-bb87-4d4c-86f0-45dbca694ad6",
@@ -21866,7 +21866,7 @@
     },
     {
       "Guid": "efa2171f-889b-49ff-94ba-e2d05cd86fa5",
-      "Text": "According to your country’s data protection laws, you’re below the minimum age of consent to access this game's online communication features.\\n\\nYou can still play V Rising, but text and voice chat will be disabled. Once you reach the minimum legal age, these features will unlock automatically.\\n\\nFor more information, please send us an email to <link=AgeGateEmail><red2><u>info@playvrising.com</u></c></link>."
+      "Text": "According to your country’s data protection laws, you’re below the minimum age of consent to access this game's online communication features.\\n\\nYou can still play V Rising, but Text and voice chat will be disabled. Once you reach the minimum legal age, these features will unlock automatically.\\n\\nFor more information, please send us an email to <link=AgeGateEmail><red2><u>info@playvrising.com</u></c></link>."
     },
     {
       "Guid": "2a84ab93-dfdb-48d8-869f-eb9939ddec34",
@@ -25922,7 +25922,7 @@
     },
     {
       "Guid": "d1aa65e5-ff1d-483b-8200-40195f6e3563",
-      "Text": "Connecting {connecting_text}"
+      "Text": "Connecting {connecting_Text}"
     },
     {
       "Guid": "45c58246-b5aa-44b0-929f-c51e11b5566e",
@@ -25954,7 +25954,7 @@
     },
     {
       "Guid": "925a043e-4363-4137-b6e9-59ccbf424bbd",
-      "Text": "Loading {loading_text}"
+      "Text": "Loading {loading_Text}"
     },
     {
       "Guid": "d4842320-2c0d-477b-b3fb-cc00dc8f230b",
@@ -25982,7 +25982,7 @@
     },
     {
       "Guid": "77bd6232-0f0d-440d-a50a-d4295f8bfa71",
-      "Text": "Prewarming Shaders {preWarming_text}"
+      "Text": "Prewarming Shaders {preWarming_Text}"
     },
     {
       "Guid": "d787eaa1-e380-46a1-a767-499a19f1f3cb",
@@ -28526,7 +28526,7 @@
     },
     {
       "Guid": "8e9a10c4-1ada-46fe-9c84-e142760fdc45",
-      "Text": "GhostVillageDesc text needs to be added"
+      "Text": "GhostVillageDesc Text needs to be added"
     },
     {
       "Guid": "de2b1608-54cd-4de8-af51-a7350c938a4b",
@@ -28598,7 +28598,7 @@
     },
     {
       "Guid": "9fcf5068-5b2b-4bad-8ed1-2e27b524fd6c",
-      "Text": "QuartzQuarryDesc text needs to be added"
+      "Text": "QuartzQuarryDesc Text needs to be added"
     },
     {
       "Guid": "baa4ab76-de8e-4daa-8024-d3ac39c3f919",
@@ -29134,7 +29134,7 @@
     },
     {
       "Guid": "30441c4d-6238-4135-9a6e-d8ae20e5896d",
-      "Text": "SilverlightValleyDesc text needs to be added"
+      "Text": "SilverlightValleyDesc Text needs to be added"
     },
     {
       "Guid": "94da3604-bce9-4975-b62a-dae8409b9f58",

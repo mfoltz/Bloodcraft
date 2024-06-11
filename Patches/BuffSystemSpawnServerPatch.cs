@@ -41,7 +41,7 @@ public class BuffPatch
             {
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
 
-                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();    
+                PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();    
 
                 if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
@@ -50,12 +50,12 @@ public class BuffPatch
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
                     if (Core.EntityManager.Exists(familiar))
                     {
-                        Core.Log.LogInfo(prefabGUID.LookupName());
-                        if (prefabGUID.Equals(draculaReturnHide))
+                        //Core.Log.LogInfo(PrefabGUID.LookupName());
+                        if (PrefabGUID.Equals(draculaReturnHide))
                         {
                             DestroyUtility.CreateDestroyEvent(Core.EntityManager, entity, DestroyReason.Default, DestroyDebugReason.None);
                         }
-                        if (prefabGUID.Equals(draculaFinal))
+                        if (PrefabGUID.Equals(draculaFinal))
                         {
                             //Core.ServerGameManager.ForceCastAbilityGroup(familiar, 15);
                             //Core.Log.LogInfo("Forcing evolution...");
@@ -73,7 +73,7 @@ public class BuffPatch
                             // apply level up buff here
                             debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);   
                         }
-                        if (prefabGUID.Equals(swordBuff))
+                        if (PrefabGUID.Equals(swordBuff))
                         {
                             //Core.Log.LogInfo("Sword buff found.");
                             if (Core.ServerGameManager.TryGetBuff(familiar, highlordSwordBuff.ToIdentifier(), out Entity swordPermabuff))
@@ -85,7 +85,7 @@ public class BuffPatch
                     }
                 }
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
+                if (Plugin.FamiliarSystem.Value && PrefabGUID.LookupName().ToLower().Contains("combat"))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
@@ -121,9 +121,9 @@ public class BuffPatch
                         }
                     }
                 }
-                if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.ProfessionSystem.Value && PrefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
-                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
+                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID, "alchemy");
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int level = handler.GetExperienceData(steamId).Key;
                     if (entity.Has<LifeTime>())
@@ -143,7 +143,7 @@ public class BuffPatch
                         }
                     }
                 }
-                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.FamiliarSystem.Value && PrefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -152,7 +152,7 @@ public class BuffPatch
                         DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
                         {
-                            BuffPrefabGUID = prefabGUID,
+                            BuffPrefabGUID = PrefabGUID,
                         };
                         FromCharacter fromCharacter = new()
                         {
@@ -162,7 +162,7 @@ public class BuffPatch
                         debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                     }
                 }
-                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.FamiliarSystem.Value && PrefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -193,7 +193,7 @@ public class BuffPatch
                     }
                 }
 
-                if (Plugin.BloodSystem.Value && prefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
+                if (Plugin.BloodSystem.Value && PrefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
                 {
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
@@ -229,10 +229,10 @@ public class BuffPatch
             foreach (Entity entity in entities)
             {
                 PrefabGUID buffPrefab = entity.Read<PrefabGUID>();
-                PrefabGUID prefabGUID = entity.Read<Buff>().Target.Read<PrefabGUID>();
+                PrefabGUID PrefabGUID = entity.Read<Buff>().Target.Read<PrefabGUID>();
 
                 string buffCheck = buffPrefab.LookupName().ToLower();
-                string targetCheck = prefabGUID.LookupName().ToLower();
+                string targetCheck = PrefabGUID.LookupName().ToLower();
 
                 if (!targetCheck.Contains("werewolf") || !targetCheck.Contains("geomancer")) continue;
                 if (Plugin.FamiliarSystem.Value && buffCheck.Contains("shapeshift") || buffCheck.Contains("transform"))
@@ -244,7 +244,7 @@ public class BuffPatch
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
                         if (familiar != Entity.Null)
                         {
-                            if (Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(prefabGUID.GuidHash, out var xpData))
+                            if (Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(PrefabGUID.GuidHash, out var xpData))
                             {
                                 Core.Log.LogInfo("Handling werewolf familiar or geomancer...");
                                 FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, xpData.Key);

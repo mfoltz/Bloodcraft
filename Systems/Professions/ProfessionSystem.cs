@@ -27,14 +27,14 @@ namespace Bloodcraft.Systems.Professions
             if (!Victim.Has<UnitLevel>() || Victim.Has<Movement>()) return;
             //var VictimLevel = entityManager.GetComponentData<UnitLevel>(Victim);
 
-            PrefabGUID prefabGUID = new(0);
+            PrefabGUID PrefabGUID = new(0);
             if (entityManager.HasComponent<YieldResourcesOnDamageTaken>(Victim) && entityManager.HasComponent<EntityCategory>(Victim))
             {
                 //Victim.LogComponentTypes();
                 var yield = Victim.ReadBuffer<YieldResourcesOnDamageTaken>();
                 if (yield.IsCreated && !yield.IsEmpty)
                 {
-                    prefabGUID = yield[0].ItemType;
+                    PrefabGUID = yield[0].ItemType;
                 }
             }
             else
@@ -65,13 +65,13 @@ namespace Bloodcraft.Systems.Professions
 
             ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
 
-            IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID);
+            IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID);
 
             if (handler != null)
             {
                 if (handler.GetProfessionName().Contains("Woodcutting"))
                 {
-                    ProfessionValue *= ProfessionUtilities.GetWoodcuttingModifier(prefabGUID);
+                    ProfessionValue *= ProfessionUtilities.GetWoodcuttingModifier(PrefabGUID);
                 }
 
                 SetProfession(user, SteamID, ProfessionValue, handler);

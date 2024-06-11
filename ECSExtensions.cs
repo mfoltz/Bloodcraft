@@ -76,11 +76,11 @@ public static class ECSExtensions
         return EntityManager.HasComponent(entity, ct);
     }
   
-    public static string LookupName(this PrefabGUID prefabGuid)
+    public static string LookupName(this PrefabGUID PrefabGUID)
     {
         var prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
-        return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
-            ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
+        return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(PrefabGUID)
+            ? prefabCollectionSystem.PrefabGuidToNameDictionary[PrefabGUID] + " " + PrefabGUID : "Guid Not Found").ToString();
     }
     public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
     {

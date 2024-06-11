@@ -387,8 +387,8 @@ namespace Bloodcraft.Commands
                         {
                             int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                             var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
-                            PrefabGUID prefabGUID = buffer[tier].TierPrefab;
-                            weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID].Read<WeaponLevelSource>();
+                            PrefabGUID PrefabGUID = buffer[tier].TierPrefab;
+                            weaponLevelSource = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID].Read<WeaponLevelSource>();
                         }
                         itemEntity.Write(weaponLevelSource);
                     }

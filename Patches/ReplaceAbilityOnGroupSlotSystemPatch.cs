@@ -77,16 +77,16 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 
         if (!spellTuple.Item3.Equals(0))
         {
-            PrefabGUID prefabGUID = new(spellTuple.Item3);
+            PrefabGUID PrefabGUID = new(spellTuple.Item3);
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
-                NewGroupId = prefabGUID,
+                NewGroupId = PrefabGUID,
                 CopyCooldown = true,
                 Priority = 0,
             };
             buffer.Add(buff);
-            if (!spellTuple.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, prefabGUID, 60f);
+            if (!spellTuple.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, PrefabGUID, 60f);
         }
 
 
@@ -98,16 +98,16 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 
         if (!playerSpells.Item3.Equals(0))
         {
-            PrefabGUID prefabGUID = new(playerSpells.Item3);
+            PrefabGUID PrefabGUID = new(playerSpells.Item3);
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
-                NewGroupId = prefabGUID,
+                NewGroupId = PrefabGUID,
                 CopyCooldown = true,
                 Priority = 0,
             };
             buffer.Add(buff);
-            if (!playerSpells.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, prefabGUID, 60f);
+            if (!playerSpells.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, PrefabGUID, 60f);
         }
     }
     static void HandleSpells(Entity entity, ulong steamId)

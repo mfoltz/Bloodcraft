@@ -22,11 +22,11 @@ namespace Bloodcraft.Commands
                 return;
             }
             EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
-            PrefabGUID achievementPrefabGuid = new(560247139); // Journal_GettingReadyForTheHunt
+            PrefabGUID achievementPrefabGUID = new(560247139); // Journal_GettingReadyForTheHunt
             Entity userEntity = ctx.Event.SenderUserEntity;
             Entity characterEntity = ctx.Event.SenderCharacterEntity;
             Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
-            Core.ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGuid, userEntity, characterEntity, achievementOwnerEntity, false, true);
+            Core.ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
             ctx.Reply("You are now prepared for the hunt.");
         }
 

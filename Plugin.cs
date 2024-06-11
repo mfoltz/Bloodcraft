@@ -30,6 +30,7 @@ public class Plugin : BasePlugin
     public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "FamiliarLeveling");
     public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "FamiliarUnlocks");
 
+    private static ConfigEntry<string> _languageLocalization;
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<string> _prestigeBuffs;
@@ -144,6 +145,7 @@ public class Plugin : BasePlugin
     //private static ConfigEntry<bool> _warEventSystem;
     //private static ConfigEntry<int> _primalInterval;
 
+    public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
 
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
@@ -317,27 +319,28 @@ public class Plugin : BasePlugin
             CreateDirectories(path);
         }
         
+        _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese");
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
-        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The prefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
+        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
         _prestigeLevelsToUnlockClassSpells = InitConfigEntry("Config", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.");
         
-        _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,-714434113,-534491790,-1055766373", "The prefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs), so if max l ");
+        _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,-714434113,-534491790,-1055766373", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs), so if max l ");
         _bloodKnightSpells = InitConfigEntry("Config", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige.");
 
-        _demonHunterBuffs = InitConfigEntry("Config", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-536284884", "The prefabGUID hashes for demon hunter leveling blood buffs");
+        _demonHunterBuffs = InitConfigEntry("Config", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-536284884", "The PrefabGUID hashes for demon hunter leveling blood buffs");
         _demonHunterSpells = InitConfigEntry("Config", "DemonHunterSpells", "-433204738,1611191665,-328617085,-1161896955", "Demon Hunter shift spells, granted at levels of prestige");
 
-        _vampireLordBuffs = InitConfigEntry("Config", "VampireLordBuffs", "-1266262267,-1413561088,1103099361,1558171501", "The prefabGUID hashes for vampire lord leveling blood buffs");
+        _vampireLordBuffs = InitConfigEntry("Config", "VampireLordBuffs", "-1266262267,-1413561088,1103099361,1558171501", "The PrefabGUID hashes for vampire lord leveling blood buffs");
         _vampireLordSpells = InitConfigEntry("Config", "VampireLordSpells", "-433204738,716346677,1450902136,-254080557", "Vampire Lord shift spells, granted at levels of prestige");
 
-        _shadowBladeBuffs = InitConfigEntry("Config", "ShadowBladeBuffs", "894725875,997154800,-1576592687,-285745649", "The prefabGUID hashes for shadow blade leveling blood buffs");
+        _shadowBladeBuffs = InitConfigEntry("Config", "ShadowBladeBuffs", "894725875,997154800,-1576592687,-285745649", "The PrefabGUID hashes for shadow blade leveling blood buffs");
         _shadowBladeSpells = InitConfigEntry("Config", "ShadowBladeSpells", "-433204738,94933870,642767950,1922493152", "Shadow Blade shift spells, granted at levels of prestige");
 
-        _arcaneSorcererBuffs = InitConfigEntry("Config", "ArcaneSorcererBuffs", "-901503997,884683323,-993492354,-1859298707", "The prefabGUID hashes for arcane leveling blood buffs");
+        _arcaneSorcererBuffs = InitConfigEntry("Config", "ArcaneSorcererBuffs", "-901503997,884683323,-993492354,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs");
         _arcaneSorcererSpells = InitConfigEntry("Config", "ArcaneSorcererSpells", "-433204738,495259674,1217615468,-1503327574", "Arcane Sorcerer shift spells, granted at levels of prestige");
         
-        _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "1643157297,1159173627,1006510207,997154800", "The prefabGUID hashes for death mage leveling blood buffs");
+        _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "1643157297,1159173627,1006510207,997154800", "The PrefabGUID hashes for death mage leveling blood buffs");
         _deathMageSpells = InitConfigEntry("Config", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige");
 
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
@@ -414,7 +417,7 @@ public class Plugin : BasePlugin
         _familiarSystem = InitConfigEntry("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
         _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
         _allowVBloods = InitConfigEntry("Config", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).");
-        _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The prefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs instead, no bans by default.");
+        _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs instead, no bans by default.");
         _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");

@@ -26,8 +26,8 @@ class FamiliarPatches
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    Core.Log.LogInfo(behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().GetPrefabName());
-                    Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.PreviousState.ToString()}|{behaviourTreeStateChangedEvent.NewState.ToString()}");
+                    //Core.Log.LogInfo(behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().GetPrefabName());
+                    //Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.PreviousState.ToString()}|{behaviourTreeStateChangedEvent.NewState.ToString()}");
                     BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
