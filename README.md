@@ -1,6 +1,6 @@
 ## Table of Contents
 
-UPDATED, NOW CURRENT (5/30)
+*This is out of date at the moment, on the to-do list
 
 - [Features](#features)
 - [Commands](#commands)
