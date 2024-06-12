@@ -794,6 +794,13 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Group disbanded.");
             }
         }
-       
+        /*
+        [Command(name: "testCommand", shortHand: "testc", adminOnly: true, usage: ".testc", description: "shapeshift test")]
+        public static void TestCommand(ChatCommandContext ctx)
+        {
+            
+        }
+        */
+
     }
 }

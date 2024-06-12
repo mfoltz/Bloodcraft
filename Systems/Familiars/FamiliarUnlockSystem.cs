@@ -28,11 +28,11 @@ namespace Bloodcraft.Systems.Familiars
             if (died.Has<Minion>()) return; // component checks
             if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("crystal") || lowerName.Contains("werewolf")) return; // prefab name checks
             if (IsBanned(diedPrefab)) return; // banned prefab checks, no using currently
-            if ((int)diedCategory.UnitCategory < 5)
+            if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5)
             {
                 HandleRoll(UnitChance, died, killer);
             }
-            else if (lowerName.Contains("vblood"))
+            else if (died.Has<VBloodConsumeSource>())
             {
                 if (allowVBloods) HandleRoll(VBloodChance, died, killer);
             }
