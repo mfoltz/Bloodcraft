@@ -37,7 +37,8 @@ internal static class ServerBootstrapSystemPatch
                 { "ShiftLock", false },
                 { "SpellLock", false },
                 { "Grouping", false },
-                { "Emotes", false }
+                { "Emotes", false },
+                {"Binding", false }
             });
             Core.DataStructures.SavePlayerBools();
         }

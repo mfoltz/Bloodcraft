@@ -34,9 +34,16 @@ namespace Bloodcraft.Systems.Familiars
             if (!entityManager.HasComponent<PlayerCharacter>(player)) return;
             PlayerCharacter playerCharacter = entityManager.GetComponentData<PlayerCharacter>(player);
             Entity userEntity = playerCharacter.UserEntity;
+
+            ulong steamId = userEntity.Read<User>().PlatformId;
+
+            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Item1.Equals(Entity.Null)) return; // don't process if familiar not out
+
             Entity familiarEntity = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
             if (familiarEntity == Entity.Null || !Core.EntityManager.Exists(familiarEntity)) return;
-            ulong steamId = userEntity.Read<User>().PlatformId;
+
+            if (familiarEntity.Has<Aggroable>() && !familiarEntity.Read<Aggroable>().Value._Value) return; // don't process if familiar combat disabled
+
             PrefabGUID familiarUnit = familiarEntity.Read<PrefabGUID>();
             int familiarId = familiarUnit.GuidHash;
             ProcessExperienceGain(entityManager, familiarEntity, victimEntity, steamId, familiarId);

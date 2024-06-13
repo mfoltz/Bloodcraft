@@ -29,6 +29,7 @@ internal static class DeathEventListenerSystemPatch
         bool Expertise = Plugin.ExpertiseSystem.Value;
         bool Familiars = Plugin.FamiliarSystem.Value;
         bool Professions = Plugin.ProfessionSystem.Value;
+        bool raidWatcher = Plugin.RaidMonitor.Value;
 
         try
         {
@@ -37,7 +38,7 @@ internal static class DeathEventListenerSystemPatch
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
                 bool gateBoss = deathEvent.Died.Read<PrefabGUID>().LookupName().ToLower().Contains("gateboss");
-                bool raidWatcher = Plugin.RaidMonitor.Value;
+                
                 //Core.Log.LogInfo($"{deathEvent.Died.Read<PrefabGUID>().LookupName()} | {deathEvent.StatChangeReason.ToString()}");
 
                 if (raidWatcher && deathEvent.Died.Has<AnnounceCastleBreached>() && deathEvent.StatChangeReason.Equals(StatChangeReason.StatChangeSystem_0))

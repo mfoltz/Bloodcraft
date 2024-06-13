@@ -1,3 +1,13 @@
+`0.9.2`
+- made sure familiars won't get exp if not in combat or not out and active
+- 'binding' key will get added to player_bools file without needing to regenerate_
+
+`0.9.1`
+- fixed harvesting bonus
+- fixed class spells not all having cooldowns
+- vblood unlocks moved from death event hook to vblood hook, should give all players involved in feed a chance at unlocking and prevent random unlocks from VBlood familiars
+- added RaidMonitor, see readme for details. Need guinea pigs for this one since it's hard to test raids alone :P
+
 `0.9.0`
 - Started keeping changelog
 - removed weapon visual expertise tracking thing, was proving too difficult to manage and avoid buggy behavior. added command for players to restore weapon levels to what they should be
