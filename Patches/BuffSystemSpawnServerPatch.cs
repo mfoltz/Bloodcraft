@@ -43,7 +43,7 @@ public class BuffPatch
 
                 PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();    
 
-                if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
+                if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // 914043867 golem
                 {
                     Entity player = entity.Read<Buff>().Target.Read<Follower>().Followed._Value;
                     //entity.LogComponentTypes();

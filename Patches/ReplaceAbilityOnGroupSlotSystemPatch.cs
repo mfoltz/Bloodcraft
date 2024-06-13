@@ -10,6 +10,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ReplaceAbilityOnGroupSlotSystemPatch
 {
+    public static Dictionary<PrefabGUID, int> ClassSpells = [];
+
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
@@ -48,26 +50,26 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         }
     }
 
-    static void HandleUnarmed(Entity entity, Entity player, (int, int, int) spellTuple, ulong steamId)
+    static void HandleUnarmed(Entity entity, Entity player, (int, int, int) playerSpells, ulong steamId)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
-        if (!spellTuple.Item1.Equals(0))
+        if (!playerSpells.Item1.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 1,
-                NewGroupId = new(spellTuple.Item1),
+                NewGroupId = new(playerSpells.Item1),
                 CopyCooldown = true,
                 Priority = 0,
             };
             buffer.Add(buff);
         }
-        if (!spellTuple.Item2.Equals(0))
+        if (!playerSpells.Item2.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 4,
-                NewGroupId = new(spellTuple.Item2),
+                NewGroupId = new(playerSpells.Item2),
                 CopyCooldown = true,
                 Priority = 0,
             };
@@ -75,9 +77,9 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         }
         if (!Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) || !bools["ShiftLock"]) return;
 
-        if (!spellTuple.Item3.Equals(0))
+        if (!playerSpells.Item3.Equals(0))
         {
-            PrefabGUID PrefabGUID = new(spellTuple.Item3);
+            PrefabGUID PrefabGUID = new(playerSpells.Item3);
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
@@ -86,10 +88,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                 Priority = 0,
             };
             buffer.Add(buff);
-            if (!spellTuple.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, PrefabGUID, 60f);
         }
-
-
     }
     static void HandleWeapon(Entity entity, Entity player, ulong steamId, (int, int, int) playerSpells)
     {
@@ -107,7 +106,6 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                 Priority = 0,
             };
             buffer.Add(buff);
-            if (!playerSpells.Item3.Equals(-433204738)) Core.ServerGameManager.SetAbilityCooldown(player, PrefabGUID, 60f);
         }
     }
     static void HandleSpells(Entity entity, ulong steamId)
@@ -135,4 +133,31 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         }
     }
 
+    [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(AbilityRunScriptsSystem __instance)
+    {
+        NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {   
+                AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
+                PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
+                if (postCast.Character.Has<PlayerCharacter>() && ClassSpells.ContainsKey(abilityGroupPrefab))
+                {
+                    float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab] * 15f;
+                    Core.ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            Core.Log.LogError($"Error in AbilityRunScriptsSystem: {e}");
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
 }

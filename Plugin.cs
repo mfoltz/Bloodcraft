@@ -31,6 +31,7 @@ public class Plugin : BasePlugin
     public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "FamiliarUnlocks");
 
     private static ConfigEntry<string> _languageLocalization;
+    private static ConfigEntry<bool> _raidMonitor;
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<string> _prestigeBuffs;
@@ -115,6 +116,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<int> _maxFamiliarLevel;
     private static ConfigEntry<bool> _allowVBloods;
     private static ConfigEntry<string> _bannedUnits;
+    private static ConfigEntry<string> _bannedTypes;
     private static ConfigEntry<float> _unitFamiliarMultiplier;
     private static ConfigEntry<float> _vBloodFamiliarMultiplier;
     private static ConfigEntry<float> _unitUnlockChance;
@@ -146,6 +148,8 @@ public class Plugin : BasePlugin
     //private static ConfigEntry<int> _primalInterval;
 
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
+
+    public static ConfigEntry<bool> RaidMonitor => _raidMonitor;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
 
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
@@ -261,6 +265,8 @@ public class Plugin : BasePlugin
     public static ConfigEntry<bool> AllowVBloods => _allowVBloods;
 
     public static ConfigEntry<string> BannedUnits => _bannedUnits;
+
+    public static ConfigEntry<string> BannedTypes => _bannedTypes;
     public static ConfigEntry<float> UnitFamiliarMultiplier => _unitFamiliarMultiplier;
     public static ConfigEntry<float> VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier;
     public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
@@ -320,6 +326,7 @@ public class Plugin : BasePlugin
         }
         
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese");
+        _raidMonitor = InitConfigEntry("Config", "PreventRaidInterference", false, "Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed in territory for duration of the raid once breach by raiders is detected).");
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
         _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
@@ -418,6 +425,7 @@ public class Plugin : BasePlugin
         _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
         _allowVBloods = InitConfigEntry("Config", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).");
         _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs instead, no bans by default.");
+        _bannedTypes = InitConfigEntry("Config", "BannedTypes", "", "The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)");
         _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");

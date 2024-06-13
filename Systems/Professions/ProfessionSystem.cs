@@ -95,8 +95,8 @@ namespace Bloodcraft.Systems.Professions
                 PrefabGUID fish = fishDrops[index];
                 if (serverGameManager.TryAddInventoryItem(Killer, fish, bonus))
                 {
-                    string name = ProfessionUtilities.FormatMaterialName(fishDrops[index].GetPrefabName());
-                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                    //string name = ProfessionUtilities.FormatMaterialName(fishDrops[index].GetPrefabName());
+                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
                 }
             }
             else if (prefabEntity.Has<DropTableBuffer>())
@@ -111,14 +111,14 @@ namespace Bloodcraft.Systems.Professions
                             var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                             foreach (var dropTableData in dropTableDataBuffer)
                             {
-                                if (dropTableData.ItemGuid.GetPrefabName().ToLower().Contains("ingredient"))
+                                if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
                                 {
                                     int bonus = level / 5;
                                     if (bonus.Equals(0)) return;
                                     if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                     {
-                                        string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.GetPrefabName());
-                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{name}</color>x<color=white>{level}</color> received from {handler.GetProfessionName()}");
+                                        //string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.GetPrefabName());
+                                        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
                                         break;
                                     }
                                 }
@@ -147,7 +147,6 @@ namespace Bloodcraft.Systems.Professions
                 }
             }
         }
-
         public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
         {
             EntityManager entityManager = Core.EntityManager;
@@ -158,7 +157,6 @@ namespace Bloodcraft.Systems.Professions
             var xpData = handler.GetExperienceData(steamID);
             UpdateProfessionExperience(entityManager, user, steamID, xpData, value, handler);
         }
-
         static void UpdateProfessionExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
         {
             float newExperience = xpData.Value + gainedXP;
@@ -182,7 +180,6 @@ namespace Bloodcraft.Systems.Professions
             // Notify player about the changes
             NotifyPlayer(entityManager, user, steamID, gainedXP, leveledUp, handler);
         }
-
         static void NotifyPlayer(EntityManager entityManager, User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
         {
             string professionName = handler.GetProfessionName();
@@ -229,7 +226,6 @@ namespace Bloodcraft.Systems.Professions
         }
         
     }
-
     public class ProfessionUtilities
     {
         static readonly Dictionary<string, int> FishingMultipliers = new()
@@ -310,7 +306,6 @@ namespace Bloodcraft.Systems.Professions
             { "t08", 8 },
             { "t09", 9 },
         };
-
         public static int GetFishingModifier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> location in FishingMultipliers)
@@ -322,7 +317,6 @@ namespace Bloodcraft.Systems.Professions
             }
             return 1;
         }
-
         public static List<PrefabGUID> GetFishingAreaDrops(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, List<PrefabGUID>> location in FishingAreaDrops)
@@ -338,7 +332,6 @@ namespace Bloodcraft.Systems.Professions
             }
             throw new InvalidOperationException("Unrecognized fishing area");
         }
-
         public static int GetWoodcuttingModifier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> location in WoodcuttingMultipliers)
@@ -350,7 +343,6 @@ namespace Bloodcraft.Systems.Professions
             }
             return 1;
         }
-
         public static int GetTierMultiplier(PrefabGUID prefab)
         {
             foreach (KeyValuePair<string, int> tier in TierMultiplier)
@@ -362,7 +354,6 @@ namespace Bloodcraft.Systems.Professions
             }
             return 1;
         }
-
         public static string FormatMaterialName(string prefabName)
         {
             int prefabIndex = prefabName.IndexOf("Prefab");

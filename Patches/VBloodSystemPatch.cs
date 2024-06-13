@@ -4,7 +4,6 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.UI;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -24,10 +23,14 @@ internal class VBloodSystemPatch
             {
                 Entity vBlood = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
                 Entity player = vBloodConsumed.Target;
-                if (Plugin.LevelingSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) LevelingSystem.UpdateLeveling(player, vBlood);
-                if (Plugin.ExpertiseSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) ExpertiseSystem.UpdateExpertise(player, vBlood);
-                if (Plugin.BloodSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) BloodSystem.UpdateLegacy(player, vBlood);
-                if (Plugin.FamiliarSystem.Value && vBloodConsumed.Target.Has<PlayerCharacter>()) FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
+
+                bool playerCheck = vBloodConsumed.Target.Has<PlayerCharacter>();
+
+                if (Plugin.LevelingSystem.Value && playerCheck) LevelingSystem.UpdateLeveling(player, vBlood);
+                if (Plugin.ExpertiseSystem.Value && playerCheck) ExpertiseSystem.UpdateExpertise(player, vBlood);
+                if (Plugin.BloodSystem.Value && playerCheck) BloodSystem.UpdateLegacy(player, vBlood);
+                if (Plugin.FamiliarSystem.Value && playerCheck) FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
+                if (Plugin.FamiliarSystem.Value && playerCheck) FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
             }
         }
         catch (System.Exception e)

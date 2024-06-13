@@ -1,10 +1,12 @@
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.CastleBuilding;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Shared.WarEvents;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -15,6 +17,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
+    static readonly PrefabGUID siegeGolem = new(914043867);
+
     [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(DeathEventListenerSystem __instance)
@@ -32,8 +36,17 @@ internal static class DeathEventListenerSystemPatch
             {
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
-                bool gateBoss = deathEvent.Died.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("gateboss");
+                bool gateBoss = deathEvent.Died.Read<PrefabGUID>().LookupName().ToLower().Contains("gateboss");
+                bool raidWatcher = Plugin.RaidMonitor.Value;
+                //Core.Log.LogInfo($"{deathEvent.Died.Read<PrefabGUID>().LookupName()} | {deathEvent.StatChangeReason.ToString()}");
 
+                if (raidWatcher && deathEvent.Died.Has<AnnounceCastleBreached>() && deathEvent.StatChangeReason.Equals(StatChangeReason.StatChangeSystem_0))
+                {
+                    if (Core.ServerGameManager.TryGetBuff(deathEvent.Killer, siegeGolem.ToIdentifier(), out Entity buff)) // if this was done by a player with a siege golem buff, start raid service
+                    {
+                        RaidService.StartRaidMonitor(deathEvent.Killer, deathEvent.Died);
+                    }
+                }
 
                 if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
                 {
@@ -56,7 +69,7 @@ internal static class DeathEventListenerSystemPatch
                             if (Expertise) ExpertiseSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                             if (Familiars) FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
                         }
-                        if (Familiars) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                        if (Familiars && !hasVBloodConsumeSource) FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
                     }
                     else
                     {
@@ -84,7 +97,6 @@ internal static class DeathEventListenerSystemPatch
                         if (Expertise) ExpertiseSystem.UpdateExpertise(killer, deathEvent.Died);
                     }
                 }
-                
             }
         }
         catch (Exception e)
@@ -96,4 +108,5 @@ internal static class DeathEventListenerSystemPatch
             deathEvents.Dispose();
         }
     }
+    
 }

@@ -14,10 +14,8 @@ namespace Bloodcraft.Systems.Familiars
         static readonly Random Random = new();
 
         // List of banned PrefabGUIDs
-        public static List<int> ExemptPrefabs = new()
-        {
-            // Add banned PrefabGUID for this list in config
-        };
+        public static List<int> ExemptPrefabs = [];
+        public static List<string> ExemptTypes = [];
 
         public static void HandleUnitUnlock(Entity killer, Entity died)
         {
@@ -27,7 +25,10 @@ namespace Bloodcraft.Systems.Familiars
             //Core.Log.LogInfo(lowerName);
             if (died.Has<Minion>()) return; // component checks
             if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("crystal") || lowerName.Contains("werewolf")) return; // prefab name checks
-            if (IsBanned(diedPrefab)) return; // banned prefab checks, no using currently
+            if (IsBannedUnit(diedPrefab)) return; // banned prefab checks, no using currently
+            if (IsBannedType(diedCategory)) return; // banned type checks, no using currently
+
+
             if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5)
             {
                 HandleRoll(UnitChance, died, killer);
@@ -37,10 +38,15 @@ namespace Bloodcraft.Systems.Familiars
                 if (allowVBloods) HandleRoll(VBloodChance, died, killer);
             }
         }
-        static bool IsBanned(PrefabGUID prefab)
+        static bool IsBannedUnit(PrefabGUID prefab)
         {
             return ExemptPrefabs.Contains(prefab.GuidHash);
         }
+        static bool IsBannedType(EntityCategory category)
+        {
+            return ExemptTypes.Contains(category.UnitCategory.ToString());
+        }
+
         static void HandleRoll(float dropChance, Entity died, Entity killer)
         {
             if (RollForChance(dropChance)) HandleUnlock(died, killer);

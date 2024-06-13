@@ -1,5 +1,7 @@
+using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
@@ -41,14 +43,17 @@ internal static class Core
     public static GameDataSystem GameDataSystem { get; internal set; }
     public static FamiliarService FamiliarService { get; internal set; }
     public static LocalizationService Localization { get; } = new();
-
+    //public static ZoomModifierBuffSystem ZoomModifierBuffSystem { get; internal set; }
     public static PlayerService PlayerService { get; } = new();
 
     //public static WarEventService WarEventService { get; internal set; }
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
+
     //public static ShapeshiftSystem ShapeshiftSystem { get; internal set;}
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
+
+    //public static ServerGameSettings ServerGameSettings { get; internal set; }
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -68,16 +73,30 @@ internal static class Core
         ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
         EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
         GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
+        //ServerGameSettings = Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings;
         //WarEventSystem = Server.GetExistingSystemManaged<WarEventSystem>();
         WarEventRegistrySystem = Server.GetExistingSystemManaged<WarEventRegistrySystem>();
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
+        //ZoomModifierBuffSystem = Server.GetOrCreateSystemManaged<ZoomModifierBuffSystem>();
+        
+
         //ShapeshiftSystem = Server.GetExistingSystemManaged<ShapeshiftSystem>();
         FamiliarService = new();
+        ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = GetSpellPrefabs();
         //WarEventService = new();
         // Initialize utility services
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
         hasInitialized = true;
+    }
+    static Dictionary<PrefabGUID, int> GetSpellPrefabs()
+    {
+        Dictionary<PrefabGUID, int> spellPrefabs = [];
+        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
+        {
+            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Prefab = new PrefabGUID(x), Index = index}).ToList().ForEach(x => spellPrefabs.TryAdd(x.Prefab, x.Index));
+        }
+        return spellPrefabs;
     }
     static World GetWorld(string name)
     {

@@ -42,9 +42,10 @@ internal class FamiliarService
         });
         if (Plugin.FamiliarSystem.Value)
         {
-            List<int> bans = Core.ParseConfigString(Plugin.BannedUnits.Value);
-            if (bans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = bans;
-          
+            List<int> unitBans = Core.ParseConfigString(Plugin.BannedUnits.Value);
+            List<string> typeBans = [..(Plugin.BannedTypes.Value).Split(',')];
+            if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
+            if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
             //familiarMonoBehaviour = (new GameObject("FamiliarService")).AddComponent<IgnorePhysicsDebugSystem>();
             //familiarMonoBehaviour.StartCoroutine(UpdateLoop().WrapToIl2Cpp());
         }

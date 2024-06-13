@@ -2,6 +2,7 @@ using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Patches;
@@ -21,8 +22,45 @@ internal class InitializationPatch
         //if (Plugin.WarEventSystem.Value) ModifyPrimalUC();
         if (Plugin.FamiliarSystem.Value) Core.FamiliarService.HandleFamiliarsOnSpawn();
         //RecipeSystem.HandleRecipes();
+        //ZoomTest();
     }
-
+    /*
+    static void ZoomTest()
+    {
+        NativeArray<Entity> entities = Core.ZoomModifierBuffSystem.__query_2086938463_0.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                entity.LogComponentTypes();
+            }
+        }
+        catch (System.Exception e)
+        {
+            Core.Log.LogError($"Error in ZoomTest: {e}");
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+        entities = Core.ZoomModifierBuffSystem.__query_2086938463_1.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                entity.LogComponentTypes();
+            }
+        }
+        catch (System.Exception e)
+        {
+            Core.Log.LogError($"Error in ZoomTest: {e}");
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    */
     /*
     static void ModifyPrimalUC()
     {

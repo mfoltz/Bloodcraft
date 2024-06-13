@@ -266,7 +266,7 @@ namespace Bloodcraft.Systems.Experience
                 // apply level up buff here
                 debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
 
-                ApplyClassBuffsAtThresholds(characterEntity, SteamID, debugEventsSystem, fromCharacter); // get prestige level before this and do prestigeClassBuff version of method with if/else
+                if (Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value) ApplyClassBuffsAtThresholds(characterEntity, SteamID, debugEventsSystem, fromCharacter); // get prestige level before this and do prestigeClassBuff version of method with if/else
             }
             NotifyPlayer(entityManager, userEntity, SteamID, (int)gainedXP, leveledUp);
         }
@@ -296,30 +296,25 @@ namespace Bloodcraft.Systems.Experience
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
             }
         }
-
         public static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion
             return (int)(EXPConstant * Math.Sqrt(xp));
         }
-
         public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
             return (int)Math.Pow(level / EXPConstant, EXPPower);
         }
-
         static float GetXp(ulong SteamID)
         {
             if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
             return 0;
         }
-
         static int GetLevel(ulong SteamID)
         {
             return ConvertXpToLevel(GetXp(SteamID));
         }
-
         public static int GetLevelProgress(ulong SteamID)
         {
             float currentXP = GetXp(SteamID);
@@ -331,7 +326,6 @@ namespace Bloodcraft.Systems.Experience
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
-
         static float ApplyScalingFactor(float gainedXP, int currentLevel, int victimLevel)
         {
             float k = LevelScalingMultiplier; // You can adjust this constant to control the tapering effect
@@ -341,7 +335,6 @@ namespace Bloodcraft.Systems.Experience
             float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
             return gainedXP * scalingFactor;
         }
-
         public static bool TryParseClassName(string className, out PlayerClasses parsedClassType)
         {
             // Attempt to parse the className string to the PlayerClasses enum.
@@ -371,104 +364,13 @@ namespace Bloodcraft.Systems.Experience
             var buffs = GetClassBuffs(SteamID);
             //int levelStep = 20;
             int levelStep = MaxPlayerLevel / buffs.Count;
-            int prestigeLevel = PrestigeSystem.GetExperiencePrestigeLevel(SteamID);
+
+            if (buffs.Count == 0) return;
+
             int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
             if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count )
             {
                 int buffIndex = playerLevel / levelStep - 1;
-
-                
-                /*
-                if (prestigeLevel > 0) // if present, modify based on prestige level?
-                {
-                    ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                    {
-                        BuffPrefabGUID = new(-429891372) // mugging powersurge for it's components, prefectly ethical
-                    };
-
-                    debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                    if (serverGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff)) // if present, modify based on prestige level
-                    {
-                        Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for class buff, modifying...");
-
-                        Buff buff = firstBuff.Read<Buff>();
-                        buff.BuffType = BuffType.Parallel;
-                        firstBuff.Write(buff);
-
-                        if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
-                        {
-                            firstBuff.Remove<RemoveBuffOnGameplayEvent>();
-                        }
-                        if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
-                        {
-                            firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
-                        }
-                        if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
-                        {
-                            firstBuff.Remove<CreateGameplayEventsOnSpawn>();
-                        }
-                        if (!firstBuff.Has<Buff_Persists_Through_Death>())
-                        {
-                            firstBuff.Add<Buff_Persists_Through_Death>();
-                        }
-                        if (firstBuff.Has<LifeTime>())
-                        {
-                            LifeTime lifeTime = firstBuff.Read<LifeTime>();
-                            lifeTime.Duration = -1;
-                            lifeTime.EndAction = LifeTimeEndAction.None;
-                            firstBuff.Write(lifeTime);
-                        }
-                        if (Core.DataStructures.PlayerClasses.TryGetValue(SteamID, out var classes) && classes.Keys.Count > 0) // so basically if prestiged already and at the level threshold again, handle the buff matching the index and scale for prestige
-                        {
-                            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
-                            Buff_ApplyBuffOnDamageTypeDealt_DataShared onHitBuff = firstBuff.Read<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
-                            onHitBuff.ProcBuff = ClassApplyBuffOnDamageDealtMap[playerClass];
-                            onHitBuff.ProcChance = 1;
-                            firstBuff.Write(onHitBuff);
-
-                            Core.Log.LogInfo($"Applied {onHitBuff.ProcBuff.GetPrefabName()} to class buff, removing uneeded components...");
-
-                            if (firstBuff.Has<Buff_EmpowerDamageDealtByType_DataShared>())
-                            {
-                                firstBuff.Remove<Buff_EmpowerDamageDealtByType_DataShared>();
-                            }
-                            if (firstBuff.Has<ModifyMovementSpeedBuff>())
-                            {
-                                firstBuff.Remove<ModifyMovementSpeedBuff>();
-                            }
-                            if (firstBuff.Has<CreateGameplayEventOnBuffReapply>())
-                            {
-                                firstBuff.Remove<CreateGameplayEventOnBuffReapply>();
-                            }
-                            if (firstBuff.Has<AdjustLifetimeOnGameplayEvent>())
-                            {
-                                firstBuff.Remove<AdjustLifetimeOnGameplayEvent>();
-                            }
-                            if (firstBuff.Has<ApplyBuffOnGameplayEvent>())
-                            {
-                                firstBuff.Remove<CreateGameplayEventsOnSpawn>();
-                            }
-                            if (firstBuff.Has<SpellModSetComponent>())
-                            {
-                                firstBuff.Remove<SpellModSetComponent>();
-                            }
-                            if (firstBuff.Has<ApplyBuffOnGameplayEvent>())
-                            {
-                                firstBuff.Remove<ApplyBuffOnGameplayEvent>();
-                            }
-                            if (firstBuff.Has<SpellModArithmetic>())
-                            {
-                                firstBuff.Remove<SpellModArithmetic>();
-                            }
-
-                           
-                        }
-
-                    }
-                    // each class gets an applyBuffOnDamageTypeDealt effect? like BloodKnight gets one that has a chance to proc leech, that I could somewhat safely scale with prestige level easily
-                    
-                }
-                */
                 
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
@@ -913,6 +815,9 @@ namespace Bloodcraft.Systems.Experience
         {
             ServerGameManager serverGameManager = Core.ServerGameManager;
             var buffs = GetClassBuffs(steamId);
+
+            if (buffs.Count == 0) return;
+
             int levelStep = 20;
 
             int playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
@@ -999,6 +904,8 @@ namespace Bloodcraft.Systems.Experience
             List<int> buffs = GetClassBuffs(steamId);
             var buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
             var entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+
+            if (buffs.Count == 0) return;
 
             for (int i = 0; i < buffs.Count; i++)
             {
