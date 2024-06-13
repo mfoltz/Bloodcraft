@@ -1,6 +1,6 @@
 ## Table of Contents
 
-*This is out of date at the moment, on the to-do list
+UPDATED (6/13)
 
 - [Features](#features)
 - [Commands](#commands)
@@ -8,13 +8,15 @@
 
 ## Features
 
-- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and, in the case of unarmed, extra skills (unarmed also has stats as of second release). Experience for this is gained per kill based on equipped weapon. Stat choices are configurable from 1 to 5 per weapon. Resetting choices is free by default but can be made to cost items. Will be linking these to classes in some way hopefully sooner rather than later.
-- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch. Mining/woodcutting/harvesting provide bonus yields per resource harvest, fishing provide bonus fish every 20 levels based on the area fished in, alchemy enhances consumable duration and effects, and blacksmithing/enchanting/tailoring increases durability in armors/weapons crafted. Do note you only receive experience for crafting if you own the station/placed it if in a clan, plan on improving that and revamping these a bit in the future.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill (should apply to all kills that can be linked back to the player) and can skip level 20 quest to track vbloods with .quickStart (.start). Still tuning this as needed but the config options should be there to support whatever kind of leveling experience you're looking to provide at this point (within reason :P). Experience sharing in clan or group has a max distance of 25f (4-5 floor lengths).
-- **Blood Legacies:** Provides further stat customization for legacies (blood types) similar to expertise with a different set of stats. Experience for this is gained per feed kill/execute for equipped blood type. Blood quality increase option still exists as well if you prefer or would like to use both. Stat choices are configurable from 1 to 5 per blood. Resetting choices is free by default but can be made to cost items. Much like weapons, will be linking these to classes in some way hopefully sooner rather than later.
-- **Prestige:** Prestige in leveling, expertise, and legacies! Each increment in leveling prestige will reduce experience gained for leveling by the rate reducer and increase expertise/legacy experience gains by the rate multiplier. Prestiging in expertise/legacies will increase their stat bonuses by the stat multiplier per increment and will reduce experience gains in that individual prestige by the rate reducer per increment. Plan on adding to this and adjusting as needed based on feedback but the foundation for a loop of continuous progression supported by various mod features and systems has been laid and will absolutely be expanded on in the future.
-- **Familiars:** Every kill of a valid unit is a chance to unlock that unit as a familiar! They will level up, fight for you, and you can collect them all. Only one familiar can be summoned at a time. They can be toggled (called/dismissed) without fully unbinding them to quickly use waygates and perform other actions normally prohibited by having a follower (charmed human, for example). Each set can hold 10 and more sets will be created once the one being added to is full. You can choose the active set by name (default is FamiliarsList1, FamiliarsList2, etc) and the sets can be renamed. To summon a familiar from your current set, .lf to see the units available and use .bind #; to choose a different one, use .unbind, and if it gets weird or buggy at any point .resetfams can be used to clear your active familiar data and followerBuffer. All units have the same stats as usual, however their damage categories to unit types are heavily reduced at lower levels and will scale back up to normal as their level increases. Base health is 500 and will scale with their level too. More ways to customize them along the journey and at max level will be available in the future. Problem units are not able to be unlocked right now and include VBloods, MinionMasters (anything that summons other units), traders, carriages, and werewolves (these actually stay allied now when they transform now but the game changes their stats back, will revisit in the future along with phase changing units like VBloods when able).
-- **Synergies:** Classes! Soft allows for the encouragement of stat choices without restricting choice while hard will only allow the stats for that class to be chosen. Additionally, each class has a config spot for 4 blood buffs (the correct prefabs for this start with AB_BloodBuff_) that are granted every 20 levels while leveling up (I'm just assuming everybody uses 90 for max levels which this works well for, will change that later if needed) and apply permanently. They do not stack with buffs from the same blood type (if a player has the scholar free cast proc buff from class and also has 100% scholar blood, chance will still be 15%, not 30%). The only modification made at buff application besides making them last forever is reducing required quality to 0% so they are always active at full strength and this should work for pretty much any blood buff unless I missed some (including ones that aren't in vanilla, -1583573438 for example, although I'll admit I haven't verified if they all work as you'd expect from the name :P). Additionally, each class will unlock one spell they can put in the shift slot (don't use spells normally available to the player, there's a weird bug with equipping jewels in spells in that slot but doesn't happen if it's a spell that can't be jeweled -taps forehead-) per level of prestige as configured.
+- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and optionally adds extra spell slots to unarmed. Expertise is gained per kill based on equipped weapon. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
+- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch. Mining/woodcutting/harvesting provide bonus yields per resource harvest, fishing provide bonus fish every 20 levels based on the area fished in, alchemy enhances consumable duration and effects, and blacksmithing/enchanting/tailoring increases durability in armors/weapons crafted. Do note you only receive experience for crafting and extra durability is only applied if you own the station/placed it if in a clan, plan on improving that and revamping these a bit in the future.
+- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill (should apply to all kills that can be linked back to the player) and can complete level 20 quest to track vbloods with .quickStart (.start). Still tuning this as needed but the config options should be there to support whatever kind of leveling experience you're looking to provide at this point (within reason :P). Experience sharing in clan or group has a max distance of 25f (4-5 floor lengths). Recently added options to control experience gain from units spawned via vermin nest and other unit spawners along with nerfing rift trash experience if you so desire. Can now tune how much experience higher level players receive from lower level kills as well.
+- **Blood Legacies:** Provides further stat customization for legacies (blood types) similar to expertise with a different set of stats. Experience for this is gained per feed kill/execute for equipped blood type. Old blood quality enhancement option still exists for those who would like to use it, although do note if using prestige as well the quality gain will be based on legacy prestige level in that blood. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
+- **Prestiging:** Prestige in leveling, expertise, and legacies! Each increment in leveling prestige will reduce experience rate gain for leveling by the leveling rate reducer (separate from the expertise/legacy rate reducer) and increase expertise/legacy rate gains by the rate multiplier. Prestiging in expertise/legacies will increase their max stat bonuses per level by the stat multiplier and will reduce rate gains in that individual prestige category by the rate reducer per increment. Configurable buffs will be permanently applied to the player each prestige level in experience (can skip levels by leaving prefab as 0). Prestiging is also configurably tied to unlocking extra spells for classes to use on shift (you can use any abilityGroup prefabs here but don't use normal player spells unless you like weird weapon cloning bugs when equipping jewels. also, some NPC spells don't really work as expected when used by players so do some testing before swapping these out and make sure they behave. can test spells with '.spell [1/2] [AbilityGroupPrefab]' to manually place them on unarmed)
+- **Familiars:** Every kill of a valid unit is a chance to unlock that unit as a familiar, now including VBloods and summoners! VBloods can be toggled on/off and unit types can be configurably allowed (humans, demons, beasts, etc) although do note that some category bans will supercede VBlood checks (if humans are banned, Vincent will be banned as well even if VBloods are enabled); there is also a list for individual unit bans. They will level up, fight for you, and you can collect them all. Only one familiar can be summoned at a time. They can be toggled (called/dismissed) without fully unbinding them to quickly use waygates (attempting to use a waygate with a familiar out will dismiss it automatically now and using it will then summon the familiar again so it is there after teleporting) and perform other actions normally prohibited by having a follower like a charmed human. Each set can hold 10 and more sets will be created once the one being added to is full. You can choose the active set by name (default is FamiliarsList1, FamiliarsList2, etc), remove familiars from sets, move familiars between sets, and the sets can be renamed. To summon a familiar from your current set (which can be chosen with .cfs [Name]), .lf to see the units available and use .bind #; to choose a different one, use .unbind, and if it gets weird or buggy at any point .resetfams can be used to clear your active familiar data and followerBuffer. All units have the same stats as usual, however their phys/spell power starts at 10% at level 1 and will scale to 100% again when they reach max level. Base health is 500 and will scale with up to 2500 at max level. Traders, carriages, horses, crystals (looking at you dracula blood crystal thing) and werewolves are unavailable. Werewolves will be in the pool once I add handling for their transformations but the rest will likely stay banned (if you manually add one of them to your unlocks as an admin that's on you :P). Can't bind in combat or pvp combat.
+- **Classes:** Soft synergies allows for the encouragement of stat choices without restricting choices while hard synergies will only allow the stats for that class to be chosen. Both soft or hard will apply the synergy multiplier to the max stat bonuses for that class for weapon expertise/blood legacies. Additionally, each class has a config spot for 4 blood buffs (the correct prefabs for this start with AB_BloodBuff_) that are granted every MaxPlayerLevel/#buffs while leveling up (with 4 buffs and 90 being the max, they'll be applied at 22, 44, 66, and 88) and apply permanently at max strength without regard to the blood quality or type the player possesses (can be skipped with 0 in the spot). They do not stack with buffs from the same blood type (if a player has the scholar free cast proc buff from class and also has 100% scholar blood, those chances will not stack) which maintains a sense of balance while allowing each class to have a persistent theme/identity that can be earned without excessive grinding. Classes also get extra spells to use on shift that are configurable, both the spell and at what level of prestige they are earned at but do keep in mind the considerations mentioned in the prestige section. Will probably be changing at least a few aspects of these new class systems in the future but am overall happy with where they're at in the sense that they allow for a lot of customization and can be made to feel as unique as you'd like. Tried to make decent thematic choices for the default blood buffs and spells per class but no promises :P. Changing classes should properly remove and apply buffs based on level.
+- **Raid Monitor:** Detects castle breach events and takes note of the clans involved (raiding clan, castle-owner clan) and will punish others who try to interfere in the territory for the duration of the breach. Tested this as much as I could on my own for basic functioning and seemed good, should be able to handle multiple raids although I haven't specifically tried that yet. Can be toggled.
+  
 ## Commands
 
 ### Blood Commands
@@ -25,7 +27,7 @@
   - Enables or disables blood legacy logging.
   - Shortcut: *.log bl*
 - `.chooseBloodStat [Blood] [Stat]`
-  - Chooses 1 of 2 (maximum number of stat choices can be configured up to 5) total stats a blood will apply scaling bonuses towards based on legacy level.
+  - Chooses stat bonus to apply to a blood type that scales with that blood legacy level.
   - Shortcut: *.cbs [Blood] [Stat]*
 - `.setBloodLegacy [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
@@ -59,6 +61,9 @@
 - `.getPrestige [PrestigeType]`
   - Shows information about player's prestige status and rates for entered type of prestige.
   - Shortcut: *.gp [PrestigeType]*
+- `.resetPrestige [Name] [PrestigeType]` 🔒
+  - Resets prestige type and removes buffs gained from prestiges in leveling if applicable.
+  - Shortcut: *.rpr [Name] [PrestigeType]*
 - `.listPlayerPrestiges`
   - Lists prestiges available to the player.
   - Shortcut: *.lpp*
@@ -74,6 +79,24 @@
 - `.groupDisband`
   - Disbands exp sharing group.
   - Shortcut: *.disband*
+- `.chooseClass [Class]`
+  - Chooses class (see options with .classes)
+  - Shortcut: *.cc [Class]*
+- `.chooseClassSpell [#]`
+  - Choose class spell (see options with .lcs)
+  - Shortcut: *.cs [#]*
+- `.changeClass [Class]`
+  - Changes to specified class.
+  - Shortcut: *.change [Class]*
+- `.listClasses`
+  - List classes.
+  - Shortcut: *.classes*
+- `.listClassBuffs`
+  - List class buffs.
+  - Shortcut: *.lcb*
+- `.listClassSpells`
+  - List class spells.
+  - Shortcut: *.classes*
 
 ### Profession Commands
 - `.getProfessionProgress [Profession]`
@@ -97,7 +120,7 @@
   - Enables or disables expertise logging.
   - Shortcut: *.log e*
 - `.chooseWeaponStat [Weapon] [Stat]`
-  - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
+  - Chooses stat bonus to apply to a weapon type that scales based on expertise level.
   - Shortcut: *.cws [Weapon] [Stat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
@@ -109,8 +132,17 @@
   - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
   - Shortcut: *.rws*
 - `.lockSpell`
-  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough (requirements for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
+- `.shift`
+  - Toggles set class spell on shift. Works for unarmed and weapons.
+  - Shortcut: *.lock*
+- `.setSpells [Slot] [AbilityGroupPrefab]` 🔒
+  - Manually set spells in unarmed slots. Useful for testing but do be mindful, some NPC spells are fairly dangerous- and not in an OP sort of way :P
+  - Shortcut: *.spell [Slot] [AbilityGroupPrefab]*
+- `.restoreWeaponLevels`
+  - Restores weapon levels in player inventory to what they should be if they had been modified via expertise level in earlier versions of the mod. Don't use unless needed.
+  - Shortcut: *.rwl*
  
 ### Familiar Commands
 - `.bindFamiliar [#]`
@@ -128,9 +160,21 @@
 - `.chooseFamiliarSet [Name]`
   - Choose active set of familiars to bind from.
   - Shortcut: *.cfs [Name]*
+- `.setRename [CurrentName] [NewName]`
+  - Renames set.
+  - Shortcut: *.sr [CurrentName] [NewName]*
+- `.transplantFamiliar [SetName]`
+  - Move active familiar to different set.
+  - Shortcut: *.tf [SetName]*
 - `.toggleFamiliar`
   - Calls or dismisses familar. Wave also does this if .emotes is toggled on.
   - Shortcut: *.toggle*
+- `.addFamiliar [CharPrefab]` 🔒
+  - Adds familiar to active list.
+  - Shortcut: *.af [CharPrefab]*
+- `.removeFamiliar [#]`
+  - Removes familiar from unlocks.
+  - Shortcut: *.rf [#]*
 - `.toggleEmotes`
   - Toggles emote commands (only 1 right now) on.
   - Shortcut: *.emotes*
@@ -152,11 +196,45 @@
  
 ## Configuration
 
+### General
+- **LanguageLocalization**: `LanguageLocalization` (string, default: English)
+  The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
+- **RaidMonitor**: `PreventRaidInterference` (bool, default: false)
+  Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed unpunished in territory for duration of the raid once breach by raiders is detected).
+  
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
   Enable or disable the leveling system.
 - **Enable Prestige System**: `PrestigeSystem` (bool, default: false)  
   Enable or disable the prestige system.
+- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850")
+  The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list.
+- **Prestige Levels to Unlock Class Spells:** `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3")
+  The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.
+- **Blood Knight Buffs:** BloodKnightBuffs (string, default: "1828387635,-714434113,-534491790,-1055766373")
+  The PrefabGUID hashes for blood knight leveling blood buffs.
+- **Blood Knight Spells:** BloodKnightSpells (string, default: "-433204738,-1161896955,1957691133,-7407393")
+  Blood Knight shift spells, granted at levels of prestige.
+- **Demon Hunter Buffs:** DemonHunterBuffs (string, default: "-154702686,-285745649,-1510965956,-536284884")
+  The PrefabGUID hashes for demon hunter leveling blood buffs.
+- **Demon Hunter Spells:** DemonHunterSpells (string, default: "-433204738,1611191665,-328617085,-1161896955")
+  Demon Hunter shift spells, granted at levels of prestige.
+- **Vampire Lord Buffs:** VampireLordBuffs (string, default: "-1266262267,-1413561088,1103099361,1558171501")
+  The PrefabGUID hashes for vampire lord leveling blood buffs.
+- **Vampire Lord Spells:** VampireLordSpells (string, default: "-433204738,716346677,1450902136,-254080557")
+  Vampire Lord shift spells, granted at levels of prestige.
+- **Shadow Blade Buffs:** ShadowBladeBuffs (string, default: "894725875,997154800,-1576592687,-285745649")
+  The PrefabGUID hashes for shadow blade leveling blood buffs.
+- **Shadow Blade Spells:** ShadowBladeSpells (string, default: "-433204738,94933870,642767950,1922493152")
+  Shadow Blade shift spells, granted at levels of prestige.
+- **Arcane Sorcerer Buffs:** ArcaneSorcererBuffs (string, default: "-901503997,884683323,-993492354,-1859298707")
+  The PrefabGUID hashes for arcane sorcerer leveling blood buffs.
+- **Arcane Sorcerer Spells:** ArcaneSorcererSpells (string, default: "-433204738,495259674,1217615468,-1503327574")
+  Arcane Sorcerer shift spells, granted at levels of prestige.
+- **Death Mage Buffs:** DeathMageBuffs (string, default: "1643157297,1159173627,1006510207,997154800")
+  The PrefabGUID hashes for death mage leveling blood buffs.
+- **Death Mage Spells:** DeathMageSpells (string, default: "-433204738,234226418,1619461812,1006960825")
+  Demon Hunter shift spells, granted at levels of prestige.
 - **Max Player Level**: `MaxLevel` (int, default: 90)  
   The maximum level a player can reach.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
@@ -173,26 +251,34 @@
   Multiplier for experience gained from units.
 - **VBlood Leveling Multiplier**: `VBloodLevelingMultiplier` (float, default: 15)  
   Multiplier for experience gained from VBloods.
+- **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)  
+  The multiplier for experience gained from war event trash spawns.
+- **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0.2)  
+  The multiplier for experience gained from unit spawners.
 - **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)  
   Multiplier for experience gained from group kills.
-- **Scaling Leveling Multiplier**: `LevelScalingMultiplier` (float, default: 0.025)  
-  Scaling multiplier for tapering (reducing) experience gained at higher levels. Can be set to 0 if you don't want that.
+- **Scaling Leveling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
+  Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
 - **Player Grouping**: `PlayerGrouping` (bool, default: false)  
   Enable or disable the ability to group with players not in your clan for experience sharing.
 - **Max Group Size**: `MaxGroupSize` (int, default: 5)  
   The maximum number of players that can share experience in a group.
-
+- **Change Class Item**: `ChangeClassItem` (int, default: 0)  
+  Item PrefabGUID for changing classes.
+- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 0)  
+  Quantity of item cost required to change class.
+  
 ### Expertise System
 - **Enable Expertise System**: `ExpertiseSystem` (bool, default: false)  
   Enable or disable the expertise system.
-- **Enable Sanguimancy**: `Sanguimancy` (bool, default: false)  
-  Enable or disable sanguimancy (unarmed expertise, note that expertise must also be enabled for this to work).
-- **First Slot Unlock**: `FirstSlot` (int, default: 25)  
-  Level to unlock first spell slot for unarmed.
-- **Second Slot Unlock**: `SecondSlot` (int, default: 50)  
-  Level to unlock second spell slot for unarmed.
+- **Unarmed Slots**: `UnarmedSlots` (bool, default: false)  
+  Enables extra spell slots for unarmed.
+- **Second Slot Unlock**: `ShiftSlot` (bool, default: false)  
+  Enables class spell on shift.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 99)  
   Maximum level in weapon expertise.
+- **Max Expertise Prestiges**: `MaxExpertisePrestiges` (int, default: 10)  
+  Maximum prestiges for weapon expertise.
 - **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (float, default: 2)  
   Multiplier for expertise gained from units.
 - **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (float, default: 5)  
@@ -235,6 +321,12 @@
   Enable or disable the blood legacy system.
 - **Max Blood Level**: `MaxBloodLevel` (int, default: 99)  
   Maximum level in blood legacies.
+- **Max Legacy Prestiges**: `MaxLegacyPrestiges` (int, default: 10)  
+  Maximum prestiges in legacies.
+- **Blood Quality Bonus**: `BloodQualityBonus` (bool, default: false)  
+  Enable or disable blood quality bonus (if using presige, legacy level will be used with PrestigeBloodQuality multiplier below)
+- **Prestige Blood Quality**: `PrestigeBloodQuality` (float, default: 5)  
+  Blood quality bonus per prestige legacy level.
 - **Unit Legacy Multiplier**: `UnitLegacyMultiplier` (float, default: 5)  
   Multiplier for essence gained from units.
 - **VBlood Legacy Multiplier**: `VBloodLegacyMultipler` (float, default: 15)  
@@ -283,6 +375,12 @@
 ### Familiar System
 - **Enable Familiar System**: `FamiliarSystem` (bool, default: false)  
   Enable or disable the familiar system.
+- **Allow VBloods**: `AllowVBloods` (bool, default: false)  
+  Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).
+- **Banned Units**: `BannedUnits` (string, default: "")  
+  Prefabs for banned units go here.
+- **Banned Types**: `BannedTypes` (string, default: "")  
+  The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)
 - **Max Familiar Level**: `MaxFamiliarLevel` (int, default: 90)  
   Maximum level familiars can reach.
 - **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 5)  
@@ -291,5 +389,41 @@
   Multiplier for experience gained from VBloods.
 - **Unit Unlock Chance**: `UnitUnlockChance` (float, default: 0.05)  
   The chance for a unit to unlock a familiar when killed.
+- **VBlood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)  
+  The chance for a VBlood to unlock a familiar when killed.
+
+### Class System
+- **Soft Synergies**: `SoftSynergies` (bool, default: false)
+  Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard synergies at the same time).
+- **Hard Synergies**: `HardSynergies` (bool, default: false)
+  Allow class synergies (turns on classes and restricts stat choices, do not use this and soft synergies at the same time).
+- **Stat Synergy Multiplier**: `StatSynergyMultiplier` (float, default: 2)
+  Multiplier for class stat synergies to max stat bonus.
+- **Blood Knight Weapons:** `BloodKnightWeapon` (string, default: "0,3,5,6")
+  Blood Knight weapon synergies.
+- **Blood Knight Blood:** `BloodKnightBlood` (string, default: "0,2,3,11")
+  Blood Knight blood synergies.
+- **Demon Hunter Weapons:** `DemonHunterWeapon` (string, default: "1,2,8,9")
+  Demon Hunter weapon synergies.
+- **Demon Hunter Blood:** `DemonHunterBlood` (string, default: "2,5,7,9")
+  Demon Hunter blood synergies.
+- **Vampire Lord Weapons:** `VampireLordWeapon` (string, default: "0,5,6,7")
+  Vampire Lord weapon synergies.
+- **Vampire Lord Blood:** `VampireLordBlood` (string, default: "1,4,8,11")
+  Blood Knight blood synergies.
+- **Shadow Blade Weapons:** `ShadowBladeWeapon` (string, default: "1,2,3,4")
+  Shadow Blade weapon synergies.
+- **Shadow Blade Blood:** `ShadowBladeBlood` (string, default: "3,7,8,10")
+  Shadow Blade blood synergies.
+- **Arcane Sorcerer Weapons:** `ArcaneSorcererWeapon` (string, default: "4,7,10,11")
+  Arcane Sorcerer weapon synergies.
+- **Arcane Sorcerer Blood:** `ArcaneSorcererBlood` (string, default: "0,6,8,10")
+  Arcane Sorcerer blood synergies.
+- **Death Mage Weapons:** `DeathMageWeapon` (string, default: "0,3,4,7")
+  Death Mage weapon synergies.
+- **Death Mage Blood:** `DeathMageBlood` (string, default: "2,6,9,10")
+  Death Mage blood synergies.
+
+  
 
 
