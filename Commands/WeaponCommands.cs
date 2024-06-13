@@ -369,7 +369,7 @@ namespace Bloodcraft.Commands
             }
 
         }
-        [Command(name: "resetWeaponLevels", shortHand: "rwl", adminOnly: false, usage: ".rwl", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
+        [Command(name: "restoreWeaponLevels", shortHand: "rwl", adminOnly: false, usage: ".rwl", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
         public static void ResetWeaponLevels(ChatCommandContext ctx)
         {
             Entity character = ctx.Event.SenderCharacterEntity;

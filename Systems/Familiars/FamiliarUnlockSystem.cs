@@ -29,11 +29,15 @@ namespace Bloodcraft.Systems.Familiars
             if (IsBannedType(diedCategory)) return; // banned type checks, no using currently
 
 
-            if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5)
+            if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5) // units
             {
                 HandleRoll(UnitChance, died, killer);
             }
-            else if (died.Has<VBloodConsumeSource>())
+            else if (died.Has<VBloodConsumeSource>()) // VBloods
+            {
+                if (allowVBloods) HandleRoll(VBloodChance, died, killer);
+            }
+            else if (died.Has<VBloodUnit>()) // Shadow VBloods
             {
                 if (allowVBloods) HandleRoll(VBloodChance, died, killer);
             }

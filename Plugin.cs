@@ -372,7 +372,7 @@ public class Plugin : BasePlugin
         _expertiseSystem = InitConfigEntry("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _maxExpertisePrestiges = InitConfigEntry("Config", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise.");
         _unarmedSlots = InitConfigEntry("Config", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots.");
-        _shiftSlots = InitConfigEntry("Config", "ShiftSlots", false, "Enable or disable using class spell on shift.");
+        _shiftSlots = InitConfigEntry("Config", "ShiftSlot", false, "Enable or disable using class spell on shift.");
         _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
         _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
         _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");

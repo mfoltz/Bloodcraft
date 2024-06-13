@@ -537,8 +537,8 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "resetPrestige", shortHand: "rpr", adminOnly: true, usage: ".rpr [PrestigeType]", description: "Handles resetting prestiging.")]
-        public static void ResetPrestige(ChatCommandContext ctx, string prestigeType)
+        [Command(name: "resetPrestige", shortHand: "rpr", adminOnly: true, usage: ".rpr [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
+        public static void ResetPrestige(ChatCommandContext ctx, string name, string prestigeType)
         {
             if (!Plugin.PrestigeSystem.Value)
             {
@@ -552,7 +552,17 @@ namespace Bloodcraft.Commands
                 return;
             }
 
-            var steamId = ctx.Event.User.PlatformId;
+            Entity foundUserEntity = GetUserByName(name, true);
+
+            if (foundUserEntity.Equals(Entity.Null))
+            {
+                ctx.Reply("Player not found...");
+                return;
+            }
+
+            User foundUser = foundUserEntity.Read<User>();
+            ulong steamId = foundUser.PlatformId;
+
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
                 prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
             {
@@ -563,7 +573,7 @@ namespace Bloodcraft.Commands
 
                 prestigeData[parsedPrestigeType] = 0;
                 Core.DataStructures.SavePlayerPrestiges();
-                ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> prestige reset.");
+                ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{foundUser.CharacterName}</color>.");
             }
         }
 

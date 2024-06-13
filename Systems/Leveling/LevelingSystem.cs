@@ -363,9 +363,10 @@ namespace Bloodcraft.Systems.Experience
             ServerGameManager serverGameManager = Core.ServerGameManager;
             var buffs = GetClassBuffs(SteamID);
             //int levelStep = 20;
+            if (buffs.Count == 0) return;
             int levelStep = MaxPlayerLevel / buffs.Count;
 
-            if (buffs.Count == 0) return;
+            
 
             int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
             if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count )
@@ -816,9 +817,9 @@ namespace Bloodcraft.Systems.Experience
             ServerGameManager serverGameManager = Core.ServerGameManager;
             var buffs = GetClassBuffs(steamId);
 
-            if (buffs.Count == 0) return;
 
-            int levelStep = 20;
+            if (buffs.Count == 0) return;
+            int levelStep = MaxPlayerLevel / buffs.Count;
 
             int playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
             int numBuffsToApply = playerLevel / levelStep;
