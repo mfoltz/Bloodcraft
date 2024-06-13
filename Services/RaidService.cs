@@ -127,7 +127,7 @@ public class RaidService
                                     Character = character,
                                     User = userEntity,
                                 };
-                                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent); // apply vampiric curse to interlopers
+                                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent); // apply green fire from iron mines w/e it's called
                             }
                         }
                     });
