@@ -1,6 +1,6 @@
 ## Table of Contents
 
-Foundational features are fairly complete and stable at this point.
+UPDATED (6/13)
 
 - [Features](#features)
 - [Commands](#commands)
@@ -120,7 +120,7 @@ Foundational features are fairly complete and stable at this point.
   - Enables or disables expertise logging.
   - Shortcut: *.log e*
 - `.chooseWeaponStat [Weapon] [Stat]`
-  - Chooses 1 of 2 (maximum number of stat choices can be configured) total stats a weapon will apply as bonuses towards based on expertise.
+  - Chooses stat bonus to apply to a weapon type that scales based on expertise level.
   - Shortcut: *.cws [Weapon] [Stat]*
 - `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
@@ -132,8 +132,17 @@ Foundational features are fairly complete and stable at this point.
   - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
   - Shortcut: *.rws*
 - `.lockSpell`
-  - Enables registering spells to use in unarmed slots if unarmed expertise (sanguimancy) is high enough (requirements for unlocked slots are configurable). Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.lock*
+- `.shift`
+  - Toggles set class spell on shift. Works for unarmed and weapons.
+  - Shortcut: *.lock*
+- `.setSpells [Slot] [AbilityGroupPrefab]` 🔒
+  - Manually set spells in unarmed slots. Useful for testing but do be mindful, some NPC spells are fairly dangerous- and not in an OP sort of way :P
+  - Shortcut: *.spell [Slot] [AbilityGroupPrefab]*
+- `.restoreWeaponLevels`
+  - Restores weapon levels in player inventory to what they should be if they had been modified via expertise level in earlier versions of the mod. Don't use unless needed.
+  - Shortcut: *.rwl*
  
 ### Familiar Commands
 - `.bindFamiliar [#]`
@@ -151,9 +160,21 @@ Foundational features are fairly complete and stable at this point.
 - `.chooseFamiliarSet [Name]`
   - Choose active set of familiars to bind from.
   - Shortcut: *.cfs [Name]*
+- `.setRename [CurrentName] [NewName]`
+  - Renames set.
+  - Shortcut: *.sr [CurrentName] [NewName]*
+- `.transplantFamiliar [SetName]`
+  - Move active familiar to different set.
+  - Shortcut: *.tf [SetName]*
 - `.toggleFamiliar`
   - Calls or dismisses familar. Wave also does this if .emotes is toggled on.
   - Shortcut: *.toggle*
+- `.addFamiliar [CharPrefab]` 🔒
+  - Adds familiar to active list.
+  - Shortcut: *.af [CharPrefab]*
+- `.removeFamiliar [#]`
+  - Removes familiar from unlocks.
+  - Shortcut: *.rf [#]*
 - `.toggleEmotes`
   - Toggles emote commands (only 1 right now) on.
   - Shortcut: *.emotes*
@@ -175,11 +196,45 @@ Foundational features are fairly complete and stable at this point.
  
 ## Configuration
 
+### General
+- **LanguageLocalization**: `LanguageLocalization` (string, default: English)
+  The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
+- **RaidMonitor**: `PreventRaidInterference` (bool, default: false)
+  Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed unpunished in territory for duration of the raid once breach by raiders is detected).
+  
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
   Enable or disable the leveling system.
 - **Enable Prestige System**: `PrestigeSystem` (bool, default: false)  
   Enable or disable the prestige system.
+- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850")
+  The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list.
+- **Prestige Levels to Unlock Class Spells:** `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3")
+  The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.
+- **Blood Knight Buffs:** BloodKnightBuffs (string, default: "1828387635,-714434113,-534491790,-1055766373")
+  The PrefabGUID hashes for blood knight leveling blood buffs.
+- **Blood Knight Spells:** BloodKnightSpells (string, default: "-433204738,-1161896955,1957691133,-7407393")
+  Blood Knight shift spells, granted at levels of prestige.
+- **Demon Hunter Buffs:** DemonHunterBuffs (string, default: "-154702686,-285745649,-1510965956,-536284884")
+  The PrefabGUID hashes for demon hunter leveling blood buffs.
+- **Demon Hunter Spells:** DemonHunterSpells (string, default: "-433204738,1611191665,-328617085,-1161896955")
+  Demon Hunter shift spells, granted at levels of prestige.
+- **Vampire Lord Buffs:** VampireLordBuffs (string, default: "-1266262267,-1413561088,1103099361,1558171501")
+  The PrefabGUID hashes for vampire lord leveling blood buffs.
+- **Vampire Lord Spells:** VampireLordSpells (string, default: "-433204738,716346677,1450902136,-254080557")
+  Vampire Lord shift spells, granted at levels of prestige.
+- **Shadow Blade Buffs:** ShadowBladeBuffs (string, default: "894725875,997154800,-1576592687,-285745649")
+  The PrefabGUID hashes for shadow blade leveling blood buffs.
+- **Shadow Blade Spells:** ShadowBladeSpells (string, default: "-433204738,94933870,642767950,1922493152")
+  Shadow Blade shift spells, granted at levels of prestige.
+- **Arcane Sorcerer Buffs:** ArcaneSorcererBuffs (string, default: "-901503997,884683323,-993492354,-1859298707")
+  The PrefabGUID hashes for arcane sorcerer leveling blood buffs.
+- **Arcane Sorcerer Spells:** ArcaneSorcererSpells (string, default: "-433204738,495259674,1217615468,-1503327574")
+  Arcane Sorcerer shift spells, granted at levels of prestige.
+- **Death Mage Buffs:** DeathMageBuffs (string, default: "1643157297,1159173627,1006510207,997154800")
+  The PrefabGUID hashes for death mage leveling blood buffs.
+- **Death Mage Spells:** DeathMageSpells (string, default: "-433204738,234226418,1619461812,1006960825")
+  Demon Hunter shift spells, granted at levels of prestige.
 - **Max Player Level**: `MaxLevel` (int, default: 90)  
   The maximum level a player can reach.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
@@ -196,26 +251,34 @@ Foundational features are fairly complete and stable at this point.
   Multiplier for experience gained from units.
 - **VBlood Leveling Multiplier**: `VBloodLevelingMultiplier` (float, default: 15)  
   Multiplier for experience gained from VBloods.
+- **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)  
+  The multiplier for experience gained from war event trash spawns.
+- **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0.2)  
+  The multiplier for experience gained from unit spawners.
 - **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)  
   Multiplier for experience gained from group kills.
-- **Scaling Leveling Multiplier**: `LevelScalingMultiplier` (float, default: 0.025)  
-  Scaling multiplier for tapering (reducing) experience gained at higher levels. Can be set to 0 if you don't want that.
+- **Scaling Leveling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
+  Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
 - **Player Grouping**: `PlayerGrouping` (bool, default: false)  
   Enable or disable the ability to group with players not in your clan for experience sharing.
 - **Max Group Size**: `MaxGroupSize` (int, default: 5)  
   The maximum number of players that can share experience in a group.
-
+- **Change Class Item**: `ChangeClassItem` (int, default: 0)  
+  Item PrefabGUID for changing classes.
+- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 0)  
+  Quantity of item cost required to change class.
+  
 ### Expertise System
 - **Enable Expertise System**: `ExpertiseSystem` (bool, default: false)  
   Enable or disable the expertise system.
-- **Enable Sanguimancy**: `Sanguimancy` (bool, default: false)  
-  Enable or disable sanguimancy (unarmed expertise, note that expertise must also be enabled for this to work).
-- **First Slot Unlock**: `FirstSlot` (int, default: 25)  
-  Level to unlock first spell slot for unarmed.
-- **Second Slot Unlock**: `SecondSlot` (int, default: 50)  
-  Level to unlock second spell slot for unarmed.
+- **Unarmed Slots**: `UnarmedSlots` (bool, default: false)  
+  Enables extra spell slots for unarmed.
+- **Second Slot Unlock**: `ShiftSlot` (bool, default: false)  
+  Enables class spell on shift.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 99)  
   Maximum level in weapon expertise.
+- **Max Expertise Prestiges**: `MaxExpertisePrestiges` (int, default: 10)  
+  Maximum prestiges for weapon expertise.
 - **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (float, default: 2)  
   Multiplier for expertise gained from units.
 - **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (float, default: 5)  
@@ -258,6 +321,12 @@ Foundational features are fairly complete and stable at this point.
   Enable or disable the blood legacy system.
 - **Max Blood Level**: `MaxBloodLevel` (int, default: 99)  
   Maximum level in blood legacies.
+- **Max Legacy Prestiges**: `MaxLegacyPrestiges` (int, default: 10)  
+  Maximum prestiges in legacies.
+- **Blood Quality Bonus**: `BloodQualityBonus` (bool, default: false)  
+  Enable or disable blood quality bonus (if using presige, legacy level will be used with PrestigeBloodQuality multiplier below)
+- **Prestige Blood Quality**: `PrestigeBloodQuality` (float, default: 5)  
+  Blood quality bonus per prestige legacy level.
 - **Unit Legacy Multiplier**: `UnitLegacyMultiplier` (float, default: 5)  
   Multiplier for essence gained from units.
 - **VBlood Legacy Multiplier**: `VBloodLegacyMultipler` (float, default: 15)  
@@ -306,6 +375,12 @@ Foundational features are fairly complete and stable at this point.
 ### Familiar System
 - **Enable Familiar System**: `FamiliarSystem` (bool, default: false)  
   Enable or disable the familiar system.
+- **Allow VBloods**: `AllowVBloods` (bool, default: false)  
+  Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).
+- **Banned Units**: `BannedUnits` (string, default: "")  
+  Prefabs for banned units go here.
+- **Banned Types**: `BannedTypes` (string, default: "")  
+  The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)
 - **Max Familiar Level**: `MaxFamiliarLevel` (int, default: 90)  
   Maximum level familiars can reach.
 - **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 5)  
@@ -314,5 +389,41 @@ Foundational features are fairly complete and stable at this point.
   Multiplier for experience gained from VBloods.
 - **Unit Unlock Chance**: `UnitUnlockChance` (float, default: 0.05)  
   The chance for a unit to unlock a familiar when killed.
+- **VBlood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)  
+  The chance for a VBlood to unlock a familiar when killed.
+
+### Class System
+- **Soft Synergies**: `SoftSynergies` (bool, default: false)
+  Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard synergies at the same time).
+- **Hard Synergies**: `HardSynergies` (bool, default: false)
+  Allow class synergies (turns on classes and restricts stat choices, do not use this and soft synergies at the same time).
+- **Stat Synergy Multiplier**: `StatSynergyMultiplier` (float, default: 2)
+  Multiplier for class stat synergies to max stat bonus.
+- **Blood Knight Weapons:** `BloodKnightWeapon` (string, default: "0,3,5,6")
+  Blood Knight weapon synergies.
+- **Blood Knight Blood:** `BloodKnightBlood` (string, default: "0,2,3,11")
+  Blood Knight blood synergies.
+- **Demon Hunter Weapons:** `DemonHunterWeapon` (string, default: "1,2,8,9")
+  Demon Hunter weapon synergies.
+- **Demon Hunter Blood:** `DemonHunterBlood` (string, default: "2,5,7,9")
+  Demon Hunter blood synergies.
+- **Vampire Lord Weapons:** `VampireLordWeapon` (string, default: "0,5,6,7")
+  Vampire Lord weapon synergies.
+- **Vampire Lord Blood:** `VampireLordBlood` (string, default: "1,4,8,11")
+  Blood Knight blood synergies.
+- **Shadow Blade Weapons:** `ShadowBladeWeapon` (string, default: "1,2,3,4")
+  Shadow Blade weapon synergies.
+- **Shadow Blade Blood:** `ShadowBladeBlood` (string, default: "3,7,8,10")
+  Shadow Blade blood synergies.
+- **Arcane Sorcerer Weapons:** `ArcaneSorcererWeapon` (string, default: "4,7,10,11")
+  Arcane Sorcerer weapon synergies.
+- **Arcane Sorcerer Blood:** `ArcaneSorcererBlood` (string, default: "0,6,8,10")
+  Arcane Sorcerer blood synergies.
+- **Death Mage Weapons:** `DeathMageWeapon` (string, default: "0,3,4,7")
+  Death Mage weapon synergies.
+- **Death Mage Blood:** `DeathMageBlood` (string, default: "2,6,9,10")
+  Death Mage blood synergies.
+
+  
 
 
