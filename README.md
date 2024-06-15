@@ -186,7 +186,7 @@ UPDATED (6/13)
   - Shortcut: *.get fl*
 - `.setFamiliarLevel [Level]` 🔒
   - Set current familiar level. Rebind to force updating stats if that doesn't happen when this is used.
-  - Shortcut: *.sf [Level]*
+  - Shortcut: *.sfl [Level]*
 - `.getFamiliarStats`
   - Display current familiar stats (WIP).
   - Shortcut: *.get fs*
