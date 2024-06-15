@@ -1,16 +1,12 @@
-﻿using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
-using Il2CppSystem.Data;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -41,7 +37,7 @@ internal static class EquipmentPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -106,7 +102,7 @@ internal static class EquipmentPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogWarning($"Exited WeaponLevelSystem_Spawn system early: (note - if this is happening at first character spawn it just kinda does that, can't get it to stop and doesn't seem to affect anything else so moving on with my life for now) {e}");
+            Core.Log.LogInfo($"Exited WeaponLevelSystem_Spawn system early: (note - if this is happening at first character spawn it just kinda does that, can't get it to stop and doesn't seem to affect anything else so moving on with my life for now) {e}");
         }
         finally
         {
@@ -169,7 +165,7 @@ internal static class EquipmentPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -194,7 +190,7 @@ internal static class EquipmentPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -219,7 +215,7 @@ internal static class EquipmentPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -245,7 +241,7 @@ internal static class EquipmentPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited LevelPrefix early: {e}");
+            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -277,7 +273,7 @@ internal static class EquipmentPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -303,7 +299,7 @@ internal static class EquipmentPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -420,7 +416,7 @@ internal static class EquipmentPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {

@@ -87,7 +87,7 @@ internal static class CraftingPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited StartCraftingSystem hook early: {e}");
+            Core.Log.LogInfo($"Exited StartCraftingSystem hook early: {e}");
         }
         finally
         {
@@ -137,7 +137,7 @@ internal static class CraftingPatches
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited StopCraftingSystem hook early: {e}");
+            Core.Log.LogInfo($"Exited StopCraftingSystem hook early: {e}");
         }
         finally
         {

@@ -14,7 +14,6 @@ namespace Bloodcraft.Systems.Legacy
         static readonly float VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
         static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
         static readonly int BloodPower = 2; // power for calculating level from xp
-
         public enum BloodType
         {
             Worker,

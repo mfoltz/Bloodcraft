@@ -1,0 +1,502 @@
+{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "поздравляю"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "бонус"
+        },
+        {
+            "Original": "received",
+            "Translation": "получено"
+        },
+        {
+            "Original": "from",
+            "Translation": "из"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "профессионализм"
+        },
+        {
+            "Original": "in",
+            "Translation": "в"
+        },
+        {
+            "Original": "improved",
+            "Translation": "улучшено"
+        },
+        {
+            "Original": "to",
+            "Translation": "до"
+        },
+        {
+            "Original": "you",
+            "Translation": "вы"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "престижный"
+        },
+        {
+            "Original": "growth",
+            "Translation": "рост"
+        },
+        {
+            "Original": "rate",
+            "Translation": "скорость"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "уменьшено"
+        },
+        {
+            "Original": "by",
+            "Translation": "на"
+        },
+        {
+            "Original": "and",
+            "Translation": "и"
+        },
+        {
+            "Original": "stat",
+            "Translation": "статистика"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "бонусы"
+        },
+        {
+            "Original": "the",
+            "Translation": "этот"
+        },
+        {
+            "Original": "total",
+            "Translation": "итого"
+        },
+        {
+            "Original": "change",
+            "Translation": "изменение"
+        },
+        {
+            "Original": "with",
+            "Translation": "с"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "выравнивание"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "престиж"
+        },
+        {
+            "Original": "is",
+            "Translation": "есть"
+        },
+        {
+            "Original": "rates",
+            "Translation": "ставки"
+        },
+        {
+            "Original": "for",
+            "Translation": "для"
+        },
+        {
+            "Original": "current",
+            "Translation": "текущий"
+        },
+        {
+            "Original": "level",
+            "Translation": "уровень"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "улучшение"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "опыт"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "наследие"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "уменьшение"
+        },
+        {
+            "Original": "including",
+            "Translation": "включая"
+        },
+        {
+            "Original": "you've",
+            "Translation": "вы"
+        },
+        {
+            "Original": "reached",
+            "Translation": "достигли"
+        },
+        {
+            "Original": "do",
+            "Translation": "делать"
+        },
+        {
+            "Original": "not",
+            "Translation": "не"
+        },
+        {
+            "Original": "have",
+            "Translation": "иметь"
+        },
+        {
+            "Original": "required",
+            "Translation": "требуемый"
+        },
+        {
+            "Original": "item",
+            "Translation": "предмет"
+        },
+        {
+            "Original": "classes",
+            "Translation": "классы"
+        },
+        {
+            "Original": "failed",
+            "Translation": "не удалось"
+        },
+        {
+            "Original": "remove",
+            "Translation": "удалить"
+        },
+        {
+            "Original": "experience",
+            "Translation": "опыт"
+        },
+        {
+            "Original": "essence",
+            "Translation": "сущность"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "наследие"
+        },
+        {
+            "Original": "new",
+            "Translation": "новый"
+        },
+        {
+            "Original": "unit",
+            "Translation": "единица"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "разблокировано"
+        },
+        {
+            "Original": "set",
+            "Translation": "набор"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "оружие"
+        },
+        {
+            "Original": "levels",
+            "Translation": "уровни"
+        },
+        {
+            "Original": "original",
+            "Translation": "оригинал"
+        },
+        {
+            "Original": "value",
+            "Translation": "значение"
+        },
+        {
+            "Original": "extra",
+            "Translation": "дополнительный"
+        },
+        {
+            "Original": "spell",
+            "Translation": "заклинание"
+        },
+        {
+            "Original": "slots",
+            "Translation": "слоты"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "включено"
+        },
+        {
+            "Original": "are",
+            "Translation": "есть"
+        },
+        {
+            "Original": "shift",
+            "Translation": "смена"
+        },
+        {
+            "Original": "spells",
+            "Translation": "заклинания"
+        },
+        {
+            "Original": "want",
+            "Translation": "хотеть"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "безоружный"
+        },
+        {
+            "Original": "when",
+            "Translation": "когда"
+        },
+        {
+            "Original": "done",
+            "Translation": "сделано"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "переключить"
+        },
+        {
+            "Original": "this",
+            "Translation": "это"
+        },
+        {
+            "Original": "again",
+            "Translation": "снова"
+        },
+        {
+            "Original": "available",
+            "Translation": "доступный"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "недействительный"
+        },
+        {
+            "Original": "type",
+            "Translation": "тип"
+        },
+        {
+            "Original": "player",
+            "Translation": "игрок"
+        },
+        {
+            "Original": "found",
+            "Translation": "найдено"
+        },
+        {
+            "Original": "reset",
+            "Translation": "сброс"
+        },
+        {
+            "Original": "been",
+            "Translation": "был"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "выбранный"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "разрешено"
+        },
+        {
+            "Original": "apply",
+            "Translation": "применить"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "переоборудование"
+        },
+        {
+            "Original": "choice",
+            "Translation": "выбор"
+        },
+        {
+            "Original": "options",
+            "Translation": "опции"
+        },
+        {
+            "Original": "logging",
+            "Translation": "вход в систему"
+        },
+        {
+            "Original": "now",
+            "Translation": "сейчас"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "не имеешь"
+        },
+        {
+            "Original": "gained",
+            "Translation": "полученный"
+        },
+        {
+            "Original": "yet",
+            "Translation": "еще"
+        },
+        {
+            "Original": "profession",
+            "Translation": "профессия"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "отключено"
+        },
+        {
+            "Original": "you're",
+            "Translation": "вы"
+        },
+        {
+            "Original": "must",
+            "Translation": "должен"
+        },
+        {
+            "Original": "between",
+            "Translation": "между"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "подготовлено"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "охота"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "эмоции"
+        },
+        {
+            "Original": "actions",
+            "Translation": "действия"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "фамильяры"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "фамильяр"
+        },
+        {
+            "Original": "combat",
+            "Translation": "бой"
+        },
+        {
+            "Original": "active",
+            "Translation": "активный"
+        },
+        {
+            "Original": "or",
+
+
+            "Translation": "или"
+        },
+        {
+            "Original": "couldn't",
+            "Translation": "не смог"
+        },
+        {
+            "Original": "find",
+            "Translation": "найти"
+        },
+        {
+            "Original": "actives",
+            "Translation": "активы"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "очищено"
+        },
+        {
+            "Original": "followers",
+            "Translation": "подписчики"
+        },
+        {
+            "Original": "added",
+            "Translation": "добавлено"
+        },
+        {
+            "Original": "full",
+            "Translation": "полный"
+        },
+        {
+            "Original": "rename",
+            "Translation": "переименовать"
+        },
+        {
+            "Original": "locate",
+            "Translation": "найти"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "развязан"
+        },
+        {
+            "Original": "bound",
+            "Translation": "связанный"
+        },
+        {
+            "Original": "already",
+            "Translation": "уже"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "не"
+        },
+        {
+            "Original": "seem",
+            "Translation": "кажется"
+        },
+        {
+            "Original": "correct",
+            "Translation": "правильный"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "развязка"
+        },
+        {
+            "Original": "try",
+            "Translation": "попробовать"
+        },
+        {
+            "Original": "list",
+            "Translation": "список"
+        },
+        {
+            "Original": "selected",
+            "Translation": "выбрано"
+        },
+        {
+            "Original": "use",
+            "Translation": "использовать"
+        },
+        {
+            "Original": "choose",
+            "Translation": "выбрать"
+        },
+        {
+            "Original": "while",
+            "Translation": "пока"
+        },
+        {
+            "Original": "blood",
+            "Translation": "кровь"
+        },
+        {
+            "Original": "progress",
+            "Translation": "прогресс"
+        }
+    ]
+}

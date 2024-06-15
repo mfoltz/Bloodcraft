@@ -23,12 +23,13 @@ namespace Bloodcraft.Commands
                 ctx.Reply("Familiars are not enabled.");
                 return;
             }
+
             ulong steamId = ctx.User.PlatformId;
             Entity character = ctx.Event.SenderCharacterEntity;
             Entity userEntity = ctx.Event.SenderUserEntity;
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
 
-            if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _))
+            if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpBuff.ToIdentifier(), out Entity _))
             {
                 ctx.Reply("You can't bind a familiar while in combat.");
                 return;
@@ -340,7 +341,7 @@ namespace Bloodcraft.Commands
             EmoteSystemPatch.CombatMode(userEntity, character, platformId);
         }
 
-        [Command(name: "toggleEmotes", shortHand: "emotes", usage: ".emotes", description: "Toggle emote commands.", adminOnly: false)]
+        [Command(name: "familiarEmotes", shortHand: "fe", usage: ".fe", description: "Toggle emote commands.", adminOnly: false)]
         public static void ToggleEmotes(ChatCommandContext ctx)
         {
             ulong platformId = ctx.User.PlatformId;
@@ -348,6 +349,18 @@ namespace Bloodcraft.Commands
             {
                 bools["Emotes"] = !bools["Emotes"];
                 Core.DataStructures.SavePlayerBools();
+
+                /*
+                if (!EmoteSystemPatch.Coordinator.FamiliarEmotes.TryGetValue(platformId, out bool emotes))
+                {
+                    EmoteSystemPatch.Coordinator.FamiliarEmotes[platformId] = bools["Emotes"];
+                }
+                else
+                {
+                    emotes = bools["Emotes"];
+                } 
+                */
+
                 ctx.Reply($"Emotes for familiars are {(bools["Emotes"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
             }
         }
@@ -453,7 +466,7 @@ namespace Bloodcraft.Commands
                     DestroyUtility.CreateDestroyEvent(Core.EntityManager, buffer[i].Entity._Entity, DestroyReason.Default, DestroyDebugReason.None);
                 }
             }
-            ctx.Reply("Familiar actives cleared and followerBuffer purged.");
+            ctx.Reply("Familiar actives and followers cleared.");
         }
     }
 }

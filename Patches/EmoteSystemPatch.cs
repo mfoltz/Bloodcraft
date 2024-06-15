@@ -12,8 +12,16 @@ using User = ProjectM.Network.User;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal class EmoteSystemPatch
+public static class EmoteSystemPatch
 {
+    /*
+    public static class Coordinator
+    {
+        public static Dictionary<ulong, bool> FamiliarEmotes { get; set; } = [];
+        public static Dictionary<ulong, bool> AuraEmotes { get; set; } = [];
+    }
+    */
+
     static readonly PrefabGUID invulnerableBuff = new(-480024072);
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
     static readonly PrefabGUID playerFaction = new(1106458752);
@@ -40,7 +48,12 @@ internal class EmoteSystemPatch
                 Entity character = fromCharacter.Character;
 
                 ulong steamId = userEntity.Read<User>().PlatformId;
-
+                /*
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["Emotes"] && (!Coordinator.AuraEmotes.ContainsKey(steamId) || !Coordinator.AuraEmotes[steamId]))
+                {
+                    if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(userEntity, character, steamId);
+                }
+                */
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["Emotes"])
                 {
                     if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(userEntity, character, steamId);
@@ -70,7 +83,7 @@ internal class EmoteSystemPatch
 
             if (familiar == Entity.Null)
             {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable.");
+                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable.");
                 return;
             }
 
@@ -107,7 +120,7 @@ internal class EmoteSystemPatch
         }
         else
         {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar to enable/disable.");
+            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar to enable or disable.");
         }
     }
     public static void CombatMode(Entity userEntity, Entity character, ulong playerId)
@@ -205,7 +218,7 @@ internal class EmoteSystemPatch
         }
         else
         {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
+            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
         }
     }
 }

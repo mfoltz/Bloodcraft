@@ -1,0 +1,500 @@
+{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "gratulálok"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "bónusz"
+        },
+        {
+            "Original": "received",
+            "Translation": "kapott"
+        },
+        {
+            "Original": "from",
+            "Translation": "tól"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "jártasság"
+        },
+        {
+            "Original": "in",
+            "Translation": "ban"
+        },
+        {
+            "Original": "improved",
+            "Translation": "javított"
+        },
+        {
+            "Original": "to",
+            "Translation": "ig"
+        },
+        {
+            "Original": "you",
+            "Translation": "te"
+        },
+        {
+            "Original": "have",
+            "Translation": "van"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "megbecsült"
+        },
+        {
+            "Original": "growth",
+            "Translation": "növekedés"
+        },
+        {
+            "Original": "rate",
+            "Translation": "arány"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "csökkentett"
+        },
+        {
+            "Original": "by",
+            "Translation": "által"
+        },
+        {
+            "Original": "and",
+            "Translation": "és"
+        },
+        {
+            "Original": "stat",
+            "Translation": "statisztika"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "bónuszok"
+        },
+        {
+            "Original": "the",
+            "Translation": "a"
+        },
+        {
+            "Original": "total",
+            "Translation": "teljes"
+        },
+        {
+            "Original": "change",
+            "Translation": "változás"
+        },
+        {
+            "Original": "with",
+            "Translation": "val"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "szintezés"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "presztízs"
+        },
+        {
+            "Original": "is",
+            "Translation": "van"
+        },
+        {
+            "Original": "rates",
+            "Translation": "arányok"
+        },
+        {
+            "Original": "for",
+            "Translation": "ért"
+        },
+        {
+            "Original": "current",
+            "Translation": "aktuális"
+        },
+        {
+            "Original": "level",
+            "Translation": "szint"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "fejlesztés"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "szakértelem"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "örökségek"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "csökkentés"
+        },
+        {
+            "Original": "including",
+            "Translation": "beleértve"
+        },
+        {
+            "Original": "you've",
+            "Translation": "te már"
+        },
+        {
+            "Original": "reached",
+            "Translation": "elérte"
+        },
+        {
+            "Original": "do",
+            "Translation": "csinál"
+        },
+        {
+            "Original": "not",
+            "Translation": "nem"
+        },
+        {
+            "Original": "required",
+            "Translation": "szükséges"
+        },
+        {
+            "Original": "item",
+            "Translation": "tétel"
+        },
+        {
+            "Original": "classes",
+            "Translation": "osztályok"
+        },
+        {
+            "Original": "failed",
+            "Translation": "sikertelen"
+        },
+        {
+            "Original": "remove",
+            "Translation": "eltávolít"
+        },
+        {
+            "Original": "experience",
+            "Translation": "tapasztalat"
+        },
+        {
+            "Original": "essence",
+            "Translation": "lényeg"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "örökség"
+        },
+        {
+            "Original": "new",
+            "Translation": "új"
+        },
+        {
+            "Original": "set",
+            "Translation": "beállítás"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "fegyver"
+        },
+        {
+            "Original": "levels",
+            "Translation": "szintek"
+        },
+        {
+            "Original": "original",
+            "Translation": "eredeti"
+        },
+        {
+            "Original": "value",
+            "Translation": "érték"
+        },
+        {
+            "Original": "extra",
+            "Translation": "extra"
+        },
+        {
+            "Original": "spell",
+            "Translation": "varázslat"
+        },
+        {
+            "Original": "slots",
+            "Translation": "helyek"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "engedélyezett"
+        },
+        {
+            "Original": "are",
+            "Translation": "vannak"
+        },
+        {
+            "Original": "shift",
+            "Translation": "műszak"
+        },
+        {
+            "Original": "spells",
+            "Translation": "varázslatok"
+        },
+        {
+            "Original": "want",
+            "Translation": "akar"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "fegyvertelen"
+        },
+        {
+            "Original": "when",
+            "Translation": "amikor"
+        },
+        {
+            "Original": "done",
+            "Translation": "kész"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "váltás"
+        },
+        {
+            "Original": "this",
+            "Translation": "ez"
+        },
+        {
+            "Original": "again",
+            "Translation": "ismét"
+        },
+        {
+            "Original": "available",
+            "Translation": "elérhető"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "érvénytelen"
+        },
+        {
+            "Original": "type",
+            "Translation": "típus"
+        },
+        {
+            "Original": "player",
+            "Translation": "játékos"
+        },
+        {
+            "Original": "found",
+            "Translation": "talált"
+        },
+        {
+            "Original": "reset",
+            "Translation": "visszaállítás"
+        },
+        {
+            "Original": "been",
+            "Translation": "volt"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "választott"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "megengedett"
+        },
+        {
+            "Original": "apply",
+            "Translation": "alkalmaz"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "újrafelszerelés"
+        },
+        {
+            "Original": "choice",
+            "Translation": "választás"
+        },
+        {
+            "Original": "options",
+            "Translation": "opciók"
+        },
+        {
+            "Original": "logging",
+            "Translation": "naplózás"
+        },
+        {
+            "Original": "now",
+            "Translation": "most"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "nincs"
+        },
+        {
+            "Original": "gained",
+            "Translation": "nyert"
+        },
+        {
+            "Original": "yet",
+            "Translation": "még"
+        },
+        {
+            "Original": "profession",
+            "Translation": "szakma"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "tiltva"
+        },
+        {
+            "Original": "you're",
+            "Translation": "te vagy"
+        },
+        {
+            "Original": "must",
+            "Translation": "kell"
+        },
+        {
+            "Original": "between",
+            "Translation": "között"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "kész"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "vadászat"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "emóták"
+        },
+        {
+            "Original": "actions",
+            "Translation": "akciók"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "familiárisok"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "familiáris"
+        },
+        {
+            "Original": "combat",
+            "Translation": "harc"
+        },
+        {
+            "Original": "active",
+            "Translation ": "aktív"
+        },
+        {
+            "Original": "or",
+            "Translation": "vagy"
+        },
+        {
+            "Original": "couldn't",
+            "Translation": "nem tudott"
+        },
+        {
+            "Original": "find",
+            "Translation": "találni"
+        },
+        {
+            "Original": "actives",
+            "Translation": "aktívak"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "tisztított"
+        },
+        {
+            "Original": "followers",
+            "Translation": "követők"
+        },
+        {
+            "Original": "unit",
+            "Translation": "egység"
+        },
+        {
+            "Original": "added",
+            "Translation": "hozzáadva"
+        },
+        {
+            "Original": "full",
+            "Translation": "tele"
+        },
+        {
+            "Original": "rename",
+            "Translation": "átnevezés"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "feloldva"
+        },
+        {
+            "Original": "locate",
+            "Translation": "helyezze"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "kötetlen"
+        },
+        {
+            "Original": "bound",
+            "Translation": "kötött"
+        },
+        {
+            "Original": "already",
+            "Translation": "már"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "nem"
+        },
+        {
+            "Original": "seem",
+            "Translation": "tűnik"
+        },
+        {
+            "Original": "correct",
+            "Translation": "helyes"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "feloldás"
+        },
+        {
+            "Original": "try",
+            "Translation": "próbálja"
+        },
+        {
+            "Original": "list",
+            "Translation": "lista"
+        },
+        {
+            "Original": "selected",
+            "Translation": "kiválasztott"
+        },
+        {
+            "Original": "use",
+            "Translation": "használat"
+        },
+        {
+            "Original": "choose",
+            "Translation": "választani"
+        },
+        {
+            "Original": "while",
+            "Translation": "míg"
+        },
+        {
+            "Original": "blood",
+            "Translation": "vér"
+        },
+        {
+            "Original": "progress",
+            "Translation": "haladás"
+        }
+    ]
+}

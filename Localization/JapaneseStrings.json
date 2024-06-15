@@ -1,0 +1,500 @@
+{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "おめでとう"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "ボーナス"
+        },
+        {
+            "Original": "received",
+            "Translation": "受け取った"
+        },
+        {
+            "Original": "from",
+            "Translation": "から"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "熟練度"
+        },
+        {
+            "Original": "in",
+            "Translation": "で"
+        },
+        {
+            "Original": "improved",
+            "Translation": "改善された"
+        },
+        {
+            "Original": "to",
+            "Translation": "に"
+        },
+        {
+            "Original": "you",
+            "Translation": "あなた"
+        },
+        {
+            "Original": "have",
+            "Translation": "持っている"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "名声を得た"
+        },
+        {
+            "Original": "growth",
+            "Translation": "成長"
+        },
+        {
+            "Original": "rate",
+            "Translation": "速度"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "減少した"
+        },
+        {
+            "Original": "by",
+            "Translation": "によって"
+        },
+        {
+            "Original": "and",
+            "Translation": "と"
+        },
+        {
+            "Original": "stat",
+            "Translation": "統計"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "ボーナス"
+        },
+        {
+            "Original": "the",
+            "Translation": "その"
+        },
+        {
+            "Original": "total",
+            "Translation": "合計"
+        },
+        {
+            "Original": "change",
+            "Translation": "変更"
+        },
+        {
+            "Original": "with",
+            "Translation": "とともに"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "レベルアップ"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "名声"
+        },
+        {
+            "Original": "is",
+            "Translation": "は"
+        },
+        {
+            "Original": "rates",
+            "Translation": "レート"
+        },
+        {
+            "Original": "for",
+            "Translation": "のために"
+        },
+        {
+            "Original": "current",
+            "Translation": "現在の"
+        },
+        {
+            "Original": "level",
+            "Translation": "レベル"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "改善"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "専門知識"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "遺産"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "減少"
+        },
+        {
+            "Original": "including",
+            "Translation": "含む"
+        },
+        {
+            "Original": "you've",
+            "Translation": "あなたは"
+        },
+        {
+            "Original": "reached",
+            "Translation": "到達した"
+        },
+        {
+            "Original": "do",
+            "Translation": "する"
+        },
+        {
+            "Original": "not",
+            "Translation": "ない"
+        },
+        {
+            "Original": "required",
+            "Translation": "必要な"
+        },
+        {
+            "Original": "item",
+            "Translation": "アイテム"
+        },
+        {
+            "Original": "classes",
+            "Translation": "クラス"
+        },
+        {
+            "Original": "failed",
+            "Translation": "失敗した"
+        },
+        {
+            "Original": "remove",
+            "Translation": "削除する"
+        },
+        {
+            "Original": "experience",
+            "Translation": "経験"
+        },
+        {
+            "Original": "essence",
+            "Translation": "本質"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "遺産"
+        },
+        {
+            "Original": "new",
+            "Translation": "新しい"
+        },
+        {
+            "Original": "unit",
+            "Translation": "ユニット"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "解除された"
+        },
+        {
+            "Original": "set",
+            "Translation": "設定する"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "武器"
+        },
+        {
+            "Original": "levels",
+            "Translation": "レベル"
+        },
+        {
+            "Original": "original",
+            "Translation": "元の"
+        },
+        {
+            "Original": "value",
+            "Translation": "価値"
+        },
+        {
+            "Original": "extra",
+            "Translation": "追加の"
+        },
+        {
+            "Original": "spell",
+            "Translation": "呪文"
+        },
+        {
+            "Original": "slots",
+            "Translation": "スロット"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "有効"
+        },
+        {
+            "Original": "are",
+            "Translation": "である"
+        },
+        {
+            "Original": "shift",
+            "Translation": "シフト"
+        },
+        {
+            "Original": "spells",
+            "Translation": "呪文"
+        },
+        {
+            "Original": "want",
+            "Translation": "欲しい"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "武器を持たない"
+        },
+        {
+            "Original": "when",
+            "Translation": "いつ"
+        },
+        {
+            "Original": "done",
+            "Translation": "完了"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "切り替え"
+        },
+        {
+            "Original": "this",
+            "Translation": "これ"
+        },
+        {
+            "Original": "again",
+            "Translation": "再び"
+        },
+        {
+            "Original": "available",
+            "Translation": "利用可能"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "無効"
+        },
+        {
+            "Original": "type",
+            "Translation": "タイプ"
+        },
+        {
+            "Original": "player",
+            "Translation": "プレイヤー"
+        },
+        {
+            "Original": "found",
+            "Translation": "見つかった"
+        },
+        {
+            "Original": "reset",
+            "Translation": "リセット"
+        },
+        {
+            "Original": "been",
+            "Translation": "された"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "選ばれた"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "許可された"
+        },
+        {
+            "Original": "apply",
+            "Translation": "適用する"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "再装備する"
+        },
+        {
+            "Original": "choice",
+            "Translation": "選択"
+        },
+        {
+            "Original": "options",
+            "Translation": "オプション"
+        },
+        {
+            "Original": "logging",
+            "Translation": "ログイン"
+        },
+        {
+            "Original": "now",
+            "Translation": "今"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "持っていない"
+        },
+        {
+            "Original": "gained",
+            "Translation": "獲得した"
+        },
+        {
+            "Original": "yet",
+            "Translation": "まだ"
+        },
+        {
+            "Original": "profession",
+            "Translation": "職業"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "無効"
+        },
+        {
+            "Original": "you're",
+            "Translation": "あなたは"
+        },
+        {
+            "Original": "must",
+            "Translation": "しなければならない"
+        },
+        {
+            "Original": "between",
+            "Translation": "間"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "準備された"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "狩り"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "感情表現"
+        },
+        {
+            "Original": "actions",
+            "Translation": "アクション"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "使い魔"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "使い魔"
+        },
+        {
+            "Original": "combat",
+            "Translation": "戦闘"
+        },
+        {
+            "Original": "active",
+            "Translation": "アクティブ"
+        },
+        {
+            "Original": "or",
+            "Translation": "または"
+        },
+        {
+            "Original": "couldn't",
+            " Translation": "できなかった"
+        },
+        {
+            "Original": "find",
+            "Translation": "見つける"
+        },
+        {
+            "Original": "actives",
+            "Translation": "アクティブ"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "クリアされた"
+        },
+        {
+            "Original": "followers",
+            "Translation": "フォロワー"
+        },
+        {
+            "Original": "added",
+            "Translation": "追加された"
+        },
+        {
+            "Original": "full",
+            "Translation": "満"
+        },
+        {
+            "Original": "rename",
+            "Translation": "名前を変更する"
+        },
+        {
+            "Original": "locate",
+            "Translation": "見つける"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "解除された"
+        },
+        {
+            "Original": "bound",
+            "Translation": "バウンド"
+        },
+        {
+            "Original": "already",
+            "Translation": "すでに"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "ない"
+        },
+        {
+            "Original": "seem",
+            "Translation": "見える"
+        },
+        {
+            "Original": "correct",
+            "Translation": "正しい"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "バインド解除"
+        },
+        {
+            "Original": "try",
+            "Translation": "試す"
+        },
+        {
+            "Original": "list",
+            "Translation": "リスト"
+        },
+        {
+            "Original": "selected",
+            "Translation": "選択された"
+        },
+        {
+            "Original": "use",
+            "Translation": "使う"
+        },
+        {
+            "Original": "choose",
+            "Translation": "選ぶ"
+        },
+        {
+            "Original": "while",
+            "Translation": "間"
+        },
+        {
+            "Original": "blood",
+            "Translation": "血"
+        },
+        {
+            "Original": "progress",
+            "Translation": "進行"
+        }
+    ]
+}

@@ -93,7 +93,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited GameplayEventsSystem hook early: {e}");
+            Core.Log.LogInfo($"Exited GameplayEventsSystem hook early: {e}");
         }
         finally
         {

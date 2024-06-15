@@ -1,6 +1,5 @@
 ﻿using ProjectM;
 using ProjectM.CastleBuilding;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -127,7 +126,12 @@ public class RaidService
                                     Character = character,
                                     User = userEntity,
                                 };
-                                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent); // apply vampiric curse to interlopers
+                                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent); // apply green fire to interlopers and block healing
+                                if (ServerGameManager.TryGetBuff(character, debuff.ToIdentifier(), out Entity debuffEntity))
+                                {
+                                    debuffEntity.Add<BlockHealBuff>();
+                                    debuffEntity.Write(new BlockHealBuff { PercentageBlocked = 1f });
+                                }
                             }
                         }
                     });

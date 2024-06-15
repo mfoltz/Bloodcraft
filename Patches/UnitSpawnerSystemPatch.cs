@@ -27,13 +27,11 @@ public class UnitSpawnerPatch
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited UnitSpawnerReactSystem hook early: {e}");
+            Core.Log.LogInfo($"Exited UnitSpawnerReactSystem hook early: {e}");
         }
         finally
         {
             entities.Dispose();
         }
     }
-    
-
 }

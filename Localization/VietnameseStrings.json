@@ -1,0 +1,502 @@
+{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "chúc mừng"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "tiền thưởng"
+        },
+        {
+            "Original": "received",
+            "Translation": "đã nhận"
+        },
+        {
+            "Original": "from",
+            "Translation": "từ"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "thành thạo"
+        },
+        {
+            "Original": "in",
+            "Translation": "trong"
+        },
+        {
+            "Original": "improved",
+            "Translation": "cải thiện"
+        },
+        {
+            "Original": "to",
+            "Translation": "đến"
+        },
+        {
+            "Original": "you",
+            "Translation": "bạn"
+        },
+        {
+            "Original": "have",
+            "Translation": "có"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "được vinh danh"
+        },
+        {
+            "Original": "growth",
+            "Translation": "tăng trưởng"
+        },
+        {
+            "Original": "rate",
+            "Translation": "tốc độ"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "giảm"
+        },
+        {
+            "Original": "by",
+            "Translation": "bởi"
+        },
+        {
+            "Original": "and",
+            "Translation": "và"
+        },
+        {
+            "Original": "stat",
+            "Translation": "thống kê"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "tiền thưởng"
+        },
+        {
+            "Original": "the",
+            "Translation": "các"
+        },
+        {
+            "Original": "total",
+            "Translation": "tổng cộng"
+        },
+        {
+            "Original": "change",
+            "Translation": "thay đổi"
+        },
+        {
+            "Original": "with",
+            "Translation": "với"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "lên cấp"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "uy tín"
+        },
+        {
+            "Original": "is",
+            "Translation": "là"
+        },
+        {
+            "Original": "rates",
+            "Translation": "tỷ lệ"
+        },
+        {
+            "Original": "for",
+            "Translation": "cho"
+        },
+        {
+            "Original": "current",
+            "Translation": "hiện tại"
+        },
+        {
+            "Original": "level",
+            "Translation": "cấp độ"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "cải tiến"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "chuyên môn"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "di sản"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "giảm"
+        },
+        {
+            "Original": "including",
+            "Translation": "bao gồm"
+        },
+        {
+            "Original": "you've",
+            "Translation": "bạn đã"
+        },
+        {
+            "Original": "reached",
+            "Translation": "đạt được"
+        },
+        {
+            "Original": "do",
+            "Translation": "làm"
+        },
+        {
+            "Original": "not",
+            "Translation": "không"
+        },
+        {
+            "Original": "required",
+            "Translation": "cần thiết"
+        },
+        {
+            "Original": "item",
+            "Translation": "mục"
+        },
+        {
+            "Original": "classes",
+            "Translation": "lớp học"
+        },
+        {
+            "Original": "failed",
+            "Translation": "thất bại"
+        },
+        {
+            "Original": "remove",
+            "Translation": "loại bỏ"
+        },
+        {
+            "Original": "experience",
+            "Translation": "kinh nghiệm"
+        },
+        {
+            "Original": "essence",
+            "Translation": "bản chất"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "di sản"
+        },
+        {
+            "Original": "new",
+            "Translation": "mới"
+        },
+        {
+            "Original": "unit",
+            "Translation": "đơn vị"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "mở khóa"
+        },
+        {
+            "Original": "set",
+            "Translation": "thiết lập"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "vũ khí"
+        },
+        {
+            "Original": "levels",
+            "Translation": "cấp độ"
+        },
+        {
+            "Original": "original",
+            "Translation": "ban đầu"
+        },
+        {
+            "Original": "value",
+            "Translation": "giá trị"
+        },
+        {
+            "Original": "extra",
+            "Translation": "thêm"
+        },
+        {
+            "Original": "spell",
+            "Translation": "phép thuật"
+        },
+        {
+            "Original": "slots",
+            "Translation": "khe"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "kích hoạt"
+        },
+        {
+            "Original": "are",
+            "Translation": "là"
+        },
+        {
+            "Original": "shift",
+            "Translation": "chuyển đổi"
+        },
+        {
+            "Original": "spells",
+            "Translation": "phép thuật"
+        },
+        {
+            "Original": "want",
+            "Translation": "muốn"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "không vũ trang"
+        },
+        {
+            "Original": "when",
+            "Translation": "khi"
+        },
+        {
+            "Original": "done",
+            "Translation": "hoàn thành"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "chuyển đổi"
+        },
+        {
+            "Original": "this",
+            "Translation": "điều này"
+        },
+        {
+            "Original": "again",
+            "Translation": "lại"
+        },
+        {
+            "Original": "available",
+            "Translation": "có sẵn"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "không hợp lệ"
+        },
+        {
+            "Original": "type",
+            "Translation": "loại"
+        },
+        {
+            "Original": "player",
+            "Translation": "người chơi"
+        },
+        {
+            "Original": "found",
+            "Translation": "tìm thấy"
+        },
+        {
+            "Original": "reset",
+            "Translation": "đặt lại"
+        },
+        {
+            "Original": "been",
+            "Translation": "được"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "được chọn"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "được phép"
+        },
+        {
+            "Original": "apply",
+            "Translation": "áp dụng"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "trang bị lại"
+        },
+        {
+            "Original": "choice",
+            "Translation": "lựa chọn"
+        },
+        {
+            "Original": "options",
+            "Translation": "tùy chọn"
+        },
+        {
+            "Original": "logging",
+            "Translation": "ghi nhật ký"
+        },
+        {
+            "Original": "now",
+            "Translation": "bây giờ"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "chưa"
+        },
+        {
+            "Original": "gained",
+            "Translation": "đạt được"
+        },
+        {
+            "Original": "yet",
+            "Translation": "chưa"
+        },
+        {
+            "Original": "profession",
+            "Translation": "nghề nghiệp"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "vô hiệu hóa"
+        },
+        {
+            "Original": "you're",
+            "Translation": "bạn"
+        },
+        {
+            "Original": "must",
+            "Translation": "phải"
+        },
+        {
+            "Original": "between",
+            "Translation": "giữa"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "chuẩn bị"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "săn bắn"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "biểu cảm"
+        },
+        {
+            "Original": "actions",
+            "Translation": "hành động"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "thân quen"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "thân quen"
+        },
+        {
+            "Original": "combat",
+            "Translation": "chiến đấu"
+        },
+        {
+            "Original": "active",
+
+
+            "Translation": "hoạt động"
+        },
+        {
+            "Original": "or",
+            "Translation": "hoặc"
+        },
+        {
+            "Original": "couldn't",
+            "Translation": "không thể"
+        },
+        {
+            "Original": "find",
+            "Translation": "tìm"
+        },
+        {
+            "Original": "actives",
+            "Translation": "hoạt động"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "xóa"
+        },
+        {
+            "Original": "followers",
+            "Translation": "người theo dõi"
+        },
+        {
+            "Original": "added",
+            "Translation": "đã thêm"
+        },
+        {
+            "Original": "full",
+            "Translation": "đầy đủ"
+        },
+        {
+            "Original": "rename",
+            "Translation": "đổi tên"
+        },
+        {
+            "Original": "locate",
+            "Translation": "định vị"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "không ràng buộc"
+        },
+        {
+            "Original": "bound",
+            "Translation": "ràng buộc"
+        },
+        {
+            "Original": "already",
+            "Translation": "đã"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "không"
+        },
+        {
+            "Original": "seem",
+            "Translation": "có vẻ"
+        },
+        {
+            "Original": "correct",
+            "Translation": "đúng"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "tháo gỡ"
+        },
+        {
+            "Original": "try",
+            "Translation": "thử"
+        },
+        {
+            "Original": "list",
+            "Translation": "danh sách"
+        },
+        {
+            "Original": "selected",
+            "Translation": "đã chọn"
+        },
+        {
+            "Original": "use",
+            "Translation": "sử dụng"
+        },
+        {
+            "Original": "choose",
+            "Translation": "chọn"
+        },
+        {
+            "Original": "while",
+            "Translation": "trong khi"
+        },
+        {
+            "Original": "blood",
+            "Translation": "máu"
+        },
+        {
+            "Original": "progress",
+            "Translation": "tiến độ"
+        }
+    ]
+}

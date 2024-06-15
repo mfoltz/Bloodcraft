@@ -146,7 +146,7 @@ public class PrestigeSystem
 
             ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
             ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-            ctx.Reply($"Growth rate improvement for expertise/legacies: <color=green>{gainPercentage}</color>");
+            ctx.Reply($"Growth rate improvement for expertise and legacies: <color=green>{gainPercentage}</color>");
             ctx.Reply($"Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>");
         }
         else

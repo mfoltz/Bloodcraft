@@ -1,0 +1,500 @@
+{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "축하합니다"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "보너스"
+        },
+        {
+            "Original": "received",
+            "Translation": "받음"
+        },
+        {
+            "Original": "from",
+            "Translation": "부터"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "능숙도"
+        },
+        {
+            "Original": "in",
+            "Translation": "에"
+        },
+        {
+            "Original": "improved",
+            "Translation": "향상된"
+        },
+        {
+            "Original": "to",
+            "Translation": "로"
+        },
+        {
+            "Original": "you",
+            "Translation": "당신"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "명예를 얻음"
+        },
+        {
+            "Original": "growth",
+            "Translation": "성장"
+        },
+        {
+            "Original": "rate",
+            "Translation": "비율"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "감소됨"
+        },
+        {
+            "Original": "by",
+            "Translation": "으로"
+        },
+        {
+            "Original": "and",
+            "Translation": "그리고"
+        },
+        {
+            "Original": "stat",
+            "Translation": "통계"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "보너스"
+        },
+        {
+            "Original": "the",
+            "Translation": "그"
+        },
+        {
+            "Original": "total",
+            "Translation": "총"
+        },
+        {
+            "Original": "change",
+            "Translation": "변경"
+        },
+        {
+            "Original": "with",
+            "Translation": "함께"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "레벨업"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "명성"
+        },
+        {
+            "Original": "is",
+            "Translation": "이다"
+        },
+        {
+            "Original": "rates",
+            "Translation": "비율"
+        },
+        {
+            "Original": "for",
+            "Translation": "를 위한"
+        },
+        {
+            "Original": "current",
+            "Translation": "현재의"
+        },
+        {
+            "Original": "level",
+            "Translation": "레벨"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "향상"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "전문 지식"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "유산"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "감소"
+        },
+        {
+            "Original": "including",
+            "Translation": "포함"
+        },
+        {
+            "Original": "you've",
+            "Translation": "당신은"
+        },
+        {
+            "Original": "reached",
+            "Translation": "도달한"
+        },
+        {
+            "Original": "do",
+            "Translation": "하다"
+        },
+        {
+            "Original": "not",
+            "Translation": "않다"
+        },
+        {
+            "Original": "have",
+            "Translation": "가지다"
+        },
+        {
+            "Original": "required",
+            "Translation": "필요한"
+        },
+        {
+            "Original": "item",
+            "Translation": "아이템"
+        },
+        {
+            "Original": "classes",
+            "Translation": "클래스"
+        },
+        {
+            "Original": "failed",
+            "Translation": "실패한"
+        },
+        {
+            "Original": "remove",
+            "Translation": "제거"
+        },
+        {
+            "Original": "experience",
+            "Translation": "경험"
+        },
+        {
+            "Original": "essence",
+            "Translation": "본질"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "유산"
+        },
+        {
+            "Original": "new",
+            "Translation": "새로운"
+        },
+        {
+            "Original": "unit",
+            "Translation": "유닛"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "잠금 해제된"
+        },
+        {
+            "Original": "set",
+            "Translation": "설정"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "무기"
+        },
+        {
+            "Original": "levels",
+            "Translation": "레벨"
+        },
+        {
+            "Original": "original",
+            "Translation": "원래의"
+        },
+        {
+            "Original": "value",
+            "Translation": "가치"
+        },
+        {
+            "Original": "extra",
+            "Translation": "추가"
+        },
+        {
+            "Original": "spell",
+            "Translation": "주문"
+        },
+        {
+            "Original": "slots",
+            "Translation": "슬롯"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "활성화됨"
+        },
+        {
+            "Original": "are",
+            "Translation": "이다"
+        },
+        {
+            "Original": "shift",
+            "Translation": "변경"
+        },
+        {
+            "Original": "spells",
+            "Translation": "주문"
+        },
+        {
+            "Original": "want",
+            "Translation": "원하다"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "비무장"
+        },
+        {
+            "Original": "when",
+            "Translation": "언제"
+        },
+        {
+            "Original": "done",
+            "Translation": "완료됨"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "전환"
+        },
+        {
+            "Original": "this",
+            "Translation": "이것"
+        },
+        {
+            "Original": "again",
+            "Translation": "다시"
+        },
+        {
+            "Original": "available",
+            "Translation": "사용 가능"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "잘못된"
+        },
+        {
+            "Original": "type",
+            "Translation": "유형"
+        },
+        {
+            "Original": "player",
+            "Translation": "플레이어"
+        },
+        {
+            "Original": "found",
+            "Translation": "찾음"
+        },
+        {
+            "Original": "reset",
+            "Translation": "리셋"
+        },
+        {
+            "Original": "been",
+            "Translation": "있다"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "선택된"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "허용된"
+        },
+        {
+            "Original": "apply",
+            "Translation": "적용"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "재장착"
+        },
+        {
+            "Original": "choice",
+            "Translation": "선택"
+        },
+        {
+            "Original": "options",
+            "Translation": "옵션"
+        },
+        {
+            "Original": "logging",
+            "Translation": "로그인 중"
+        },
+        {
+            "Original": "now",
+            "Translation": "지금"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "하지 않았다"
+        },
+        {
+            "Original": "gained",
+            "Translation": "획득한"
+        },
+        {
+            "Original": "yet",
+            "Translation": "아직"
+        },
+        {
+            "Original": "profession",
+            "Translation": "직업"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "비활성화됨"
+        },
+        {
+            "Original": "you're",
+            "Translation": "당신은"
+        },
+        {
+            "Original": "must",
+            "Translation": "해야 한다"
+        },
+        {
+            "Original": "between",
+            "Translation": "사이"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "준비된"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "사냥"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "이모트"
+        },
+        {
+            "Original": "actions",
+            "Translation": "행동"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "패밀리어"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "패밀리어"
+        },
+        {
+            "Original": "combat",
+            "Translation": "전투"
+        },
+        {
+            "Original": "active",
+            "Translation": "활성"
+        },
+        {
+            "Original": "or",
+            "Translation": "또는"
+        },
+        {
+            "Original": "couldn't",
+            "Translation": "할수 없었다"
+        },
+        {
+            "Original": "find",
+            "Translation": "찾다"
+        },
+        {
+            "Original": "actives",
+            "Translation": "활성"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "삭제됨"
+        },
+        {
+            "Original": "followers",
+            "Translation": "팔로워"
+        },
+        {
+            "Original": "added",
+            "Translation": "추가됨"
+        },
+        {
+            "Original": "full",
+            "Translation": "가득 찬"
+        },
+        {
+            "Original": "rename",
+            "Translation": "이름 변경"
+        },
+        {
+            "Original": "locate",
+            "Translation": "위치하다"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "해제된"
+        },
+        {
+            "Original": "bound",
+            "Translation": "묶인"
+        },
+        {
+            "Original": "already",
+            "Translation": "이미"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "하지 않다"
+        },
+        {
+            "Original": "seem",
+            "Translation": "보이다"
+        },
+        {
+            "Original": "correct",
+            "Translation": "올바른"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "바인딩 해제"
+        },
+        {
+            "Original": "try",
+            "Translation": "시도"
+        },
+        {
+            "Original": "list",
+            "Translation": "리스트"
+        },
+        {
+            "Original": "selected",
+            "Translation": "선택됨"
+        },
+        {
+            "Original": "use",
+            "Translation": "사용"
+        },
+        {
+            "Original": "choose",
+            "Translation": "선택"
+        },
+        {
+            "Original": "while",
+            "Translation": "동안"
+        },
+        {
+            "Original": "blood",
+            "Translation": "피"
+        },
+        {
+            "Original": "progress",
+            "Translation": "진행"
+        }
+    ]
+}

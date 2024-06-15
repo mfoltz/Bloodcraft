@@ -34,7 +34,7 @@ internal static class ScriptSpawnServerPatch
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited ScriptSpawnServer hook early: {e}");
+            Core.Log.LogInfo($"Exited ScriptSpawnServer hook early: {e}");
         }
         finally
         {

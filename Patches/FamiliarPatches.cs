@@ -65,7 +65,7 @@ class FamiliarPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -109,7 +109,7 @@ class FamiliarPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -142,7 +142,7 @@ class FamiliarPatches
         }
         catch (Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {

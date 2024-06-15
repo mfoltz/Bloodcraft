@@ -78,7 +78,7 @@ public static class ECSExtensions
   
     public static string LookupName(this PrefabGUID PrefabGUID)
     {
-        var prefabCollectionSystem = Core.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
         return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(PrefabGUID)
             ? prefabCollectionSystem.PrefabGuidToNameDictionary[PrefabGUID] + " " + PrefabGUID : "Guid Not Found").ToString();
     }

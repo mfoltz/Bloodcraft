@@ -5,7 +5,6 @@ using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Shared;
@@ -211,7 +210,7 @@ public class BuffPatch
         }
         catch (System.Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -256,7 +255,7 @@ public class BuffPatch
         }
         catch (System.Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -315,7 +314,11 @@ public class BuffPatch
         }
         catch (System.Exception ex)
         {
-            Core.Log.LogError(ex);
+            Core.Log.LogInfo(ex);
+        }
+        finally
+        {
+            entities.Dispose();
         }
     }
 }

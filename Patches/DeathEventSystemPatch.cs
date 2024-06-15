@@ -102,7 +102,7 @@ internal static class DeathEventListenerSystemPatch
         }
         catch (Exception e)
         {
-            Core.Log.LogError($"Exited DeathEventListenerSystem hook early: {e}");
+            Core.Log.LogInfo($"Exited DeathEventListenerSystem hook early: {e}");
         }
         finally
         {

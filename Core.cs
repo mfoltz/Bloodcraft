@@ -80,7 +80,7 @@ internal static class Core
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
         //ZoomModifierBuffSystem = Server.GetOrCreateSystemManaged<ZoomModifierBuffSystem>();
         
-
+        
         //ShapeshiftSystem = Server.GetExistingSystemManaged<ShapeshiftSystem>();
         FamiliarService = new();
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = GetSpellPrefabs();

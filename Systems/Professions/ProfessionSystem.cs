@@ -310,7 +310,7 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, int> location in FishingMultipliers)
             {
-                if (prefab.GetPrefabName().ToLower().Contains(location.Key))
+                if (prefab.LookupName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
                 }
@@ -321,11 +321,11 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, List<PrefabGUID>> location in FishingAreaDrops)
             {
-                if (prefab.GetPrefabName().ToLower().Contains(location.Key))
+                if (prefab.LookupName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
                 }
-                else if (prefab.GetPrefabName().ToLower().Contains("general"))
+                else if (prefab.LookupName().ToLower().Contains("general"))
                 {
                     return FarbaneFishDrops;
                 }
@@ -336,7 +336,7 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, int> location in WoodcuttingMultipliers)
             {
-                if (prefab.GetPrefabName().ToLower().Contains(location.Key))
+                if (prefab.LookupName().ToLower().Contains(location.Key))
                 {
                     return location.Value;
                 }
@@ -347,48 +347,12 @@ namespace Bloodcraft.Systems.Professions
         {
             foreach (KeyValuePair<string, int> tier in TierMultiplier)
             {
-                if (prefab.GetPrefabName().ToLower().Contains(tier.Key))
+                if (prefab.LookupName().ToLower().Contains(tier.Key))
                 {
                     return tier.Value;
                 }
             }
             return 1;
-        }
-        public static string FormatMaterialName(string prefabName)
-        {
-            int prefabIndex = prefabName.IndexOf("Prefab");
-            if (prefabIndex != -1)
-            {
-                // Remove everything after 'Prefab' including 'Prefab'
-                prefabName = prefabName[..prefabIndex].TrimEnd();
-            }
-            string name = prefabName.Replace("Item_Ingredient_", "");
-            if (name.ToLower().Contains("mineral"))
-            {
-                name = name.Replace("Mineral_", "");
-                name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
-            }
-            else if (name.ToLower().Contains("wood"))
-            {
-                string[] parts = name.Split('_');
-                if (parts.Length > 1)
-                {
-                    name = parts[1] + " " + parts[0];
-                    if (name.ToLower().Contains("standard")) name = name.Replace("Standard", "");
-                }
-            }
-            else if (name.ToLower().Contains("plant"))
-            {
-                name = name.Replace("Plant_", "");
-                name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
-            }
-            else if (name.ToLower().Contains("fish"))
-            {
-                name = name.Replace("Fish_", "");
-                name = Regex.Replace(name, "_T\\d{2}$", "");
-                name = Regex.Replace(name, "(?<=.)([A-Z])", " $1");
-            }
-            return name;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Bloodcraft.Systems.Experience
             { PlayerClasses.VampireLord, Plugin.VampireLordSpells.Value },
             { PlayerClasses.ShadowBlade, Plugin.ShadowBladeSpells.Value },
             { PlayerClasses.ArcaneSorcerer, Plugin.ArcaneSorcererSpells.Value },
-            { PlayerClasses.DeathMage, Plugin.DeathMageSpells.Value }   
+            { PlayerClasses.DeathMage, Plugin.DeathMageSpells.Value }
         };
 
         public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassApplyBuffOnDamageDealtMap = new()
@@ -84,17 +84,19 @@ namespace Bloodcraft.Systems.Experience
             if (!IsValidVictim(entityManager, victimEntity)) return;
             HandleExperienceUpdate(entityManager, killerEntity, victimEntity);
         }
+
         static bool IsValidVictim(EntityManager entityManager, Entity victimEntity)
         {
             return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
         }
+
         static void HandleExperienceUpdate(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
         {
             PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
             Entity userEntity = player.UserEntity;
             float groupMultiplier = 1;
 
-            if (IsVBlood(Core.EntityManager, victimEntity))
+            if (IsVBlood(entityManager, victimEntity))
             {
                 ProcessExperienceGain(entityManager, killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
                 return;
@@ -109,6 +111,7 @@ namespace Bloodcraft.Systems.Experience
                 ProcessExperienceGain(entityManager, participant, victimEntity, steamId, groupMultiplier);
             }
         }
+
         static HashSet<Entity> GetParticipants(Entity killer, Entity userEntity)
         {
             float3 killerPosition = killer.Read<LocalToWorld>().Position;
@@ -155,6 +158,7 @@ namespace Bloodcraft.Systems.Experience
             }
             return players;
         }
+
         static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, float groupMultiplier)
         {
             UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
@@ -296,25 +300,30 @@ namespace Bloodcraft.Systems.Experience
                 ServerChatUtils.SendSystemMessageToClient(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
             }
         }
+
         public static int ConvertXpToLevel(float xp)
         {
             // Assuming a basic square root scaling for experience to level conversion
             return (int)(EXPConstant * Math.Sqrt(xp));
         }
+
         public static int ConvertLevelToXp(int level)
         {
             // Reversing the formula used in ConvertXpToLevel for consistency
             return (int)Math.Pow(level / EXPConstant, EXPPower);
         }
+
         static float GetXp(ulong SteamID)
         {
             if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
             return 0;
         }
+
         static int GetLevel(ulong SteamID)
         {
             return ConvertXpToLevel(GetXp(SteamID));
         }
+
         public static int GetLevelProgress(ulong SteamID)
         {
             float currentXP = GetXp(SteamID);
@@ -326,6 +335,7 @@ namespace Bloodcraft.Systems.Experience
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
+
         static float ApplyScalingFactor(float gainedXP, int currentLevel, int victimLevel)
         {
             float k = LevelScalingMultiplier; // You can adjust this constant to control the tapering effect
@@ -335,6 +345,7 @@ namespace Bloodcraft.Systems.Experience
             float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
             return gainedXP * scalingFactor;
         }
+
         public static bool TryParseClassName(string className, out PlayerClasses parsedClassType)
         {
             // Attempt to parse the className string to the PlayerClasses enum.
@@ -358,6 +369,7 @@ namespace Bloodcraft.Systems.Experience
             parsedClassType = default;
             return false; // Parsing failed
         }
+
         static void ApplyClassBuffsAtThresholds(Entity characterEntity, ulong SteamID, DebugEventsSystem debugEventsSystem, FromCharacter fromCharacter)
         {
             ServerGameManager serverGameManager = Core.ServerGameManager;
@@ -366,13 +378,11 @@ namespace Bloodcraft.Systems.Experience
             if (buffs.Count == 0) return;
             int levelStep = MaxPlayerLevel / buffs.Count;
 
-            
-
             int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
-            if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count )
+            if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count)
             {
                 int buffIndex = playerLevel / levelStep - 1;
-                
+
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
                     BuffPrefabGUID = new(buffs[buffIndex])
@@ -413,13 +423,10 @@ namespace Bloodcraft.Systems.Experience
                         lifeTime.EndAction = LifeTimeEndAction.None;
                         firstBuff.Write(lifeTime);
                     }
-
                 }
-                
-                
-                
             }
         }
+
         static void HandleBloodBuff(Entity buff, int prestigeLevel = 0)
         {
             // so at every prestige need to take away and reapply buff with new values
@@ -494,7 +501,7 @@ namespace Bloodcraft.Systems.Experience
                 draculinBloodMendBonus.MinBonusHealing = draculinBloodMendBonus.MaxBonusHealing;
                 buff.Write(draculinBloodMendBonus);
             }
-            
+
             if (buff.Has<Script_BloodBuff_CCReduction_DataShared>())
             {
                 var bloodBuffCCReduction = buff.Read<Script_BloodBuff_CCReduction_DataShared>();
@@ -503,7 +510,7 @@ namespace Bloodcraft.Systems.Experience
                 bloodBuffCCReduction.MinBonus = bloodBuffCCReduction.MaxBonus;
                 buff.Write(bloodBuffCCReduction);
             }
-            
+
             if (buff.Has<Script_BloodBuff_Draculin_ImprovedBite_DataShared>())
             {
                 var draculinImprovedBite = buff.Read<Script_BloodBuff_Draculin_ImprovedBite_DataShared>();
@@ -511,7 +518,7 @@ namespace Bloodcraft.Systems.Experience
                 draculinImprovedBite.RequiredBloodPercentage = 0;
                 buff.Write(draculinImprovedBite);
             }
-            
+
             if (buff.Has<BloodBuffScript_LastStrike>())
             {
                 var lastStrike = buff.Read<BloodBuffScript_LastStrike>();
@@ -555,7 +562,7 @@ namespace Bloodcraft.Systems.Experience
                 bloodConsumption.RequiredBloodPercentage = 0;
                 bloodConsumption.MinBonus = bloodConsumption.MaxBonus;
                 buff.Write(bloodConsumption);
-            }        
+            }
 
             if (buff.Has<BloodBuff_HealthRegeneration_DataShared>())
             {
@@ -583,7 +590,7 @@ namespace Bloodcraft.Systems.Experience
                 primaryAttackLifeLeech.MinBonus = primaryAttackLifeLeech.MaxBonus;
                 buff.Write(primaryAttackLifeLeech);
             }
-            
+
             if (buff.Has<BloodBuff_PrimaryProc_FreeCast_DataShared>())
             {
                 var primaryProcFreeCast = buff.Read<BloodBuff_PrimaryProc_FreeCast_DataShared>(); // scholar one I think
@@ -592,7 +599,7 @@ namespace Bloodcraft.Systems.Experience
                 primaryProcFreeCast.MinBonus = primaryProcFreeCast.MaxBonus;
                 buff.Write(primaryProcFreeCast);
             }
-            
+
             if (buff.Has<BloodBuff_Rogue_AttackSpeedBonus_DataShared>())
             {
                 var rogueAttackSpeedBonus = buff.Read<BloodBuff_Rogue_AttackSpeedBonus_DataShared>();
@@ -666,7 +673,7 @@ namespace Bloodcraft.Systems.Experience
                 scholarSpellPowerBonus.RequiredBloodPercentage = 0;
                 scholarSpellPowerBonus.MinSpellPowerIncrease = scholarSpellPowerBonus.MaxSpellPowerIncrease;
                 buff.Write(scholarSpellPowerBonus);
-                if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>()) // dracula blood 
+                if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>()) // dracula blood
                 {
                     var warriorPhysDamageBonus = buff.Read<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
                     warriorPhysDamageBonus.RequiredBloodPercentage = 0;
@@ -817,7 +824,6 @@ namespace Bloodcraft.Systems.Experience
             ServerGameManager serverGameManager = Core.ServerGameManager;
             var buffs = GetClassBuffs(steamId);
 
-
             if (buffs.Count == 0) return;
             int levelStep = MaxPlayerLevel / buffs.Count;
 
@@ -885,16 +891,18 @@ namespace Bloodcraft.Systems.Experience
                                     firstBuff.Write(applyOnHit);
                                     Core.Log.LogInfo($"Applied {ClassApplyBuffOnDamageDealtMap[playerClass].LookupName()} to blood buff {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for {playerClass}");
                                     break;
+
                                 case 1:
                                     break;
+
                                 case 2:
                                     break;
+
                                 case 3:
                                     break;
                             }
                         }
                         */
-
                     }
                 }
             }
@@ -928,6 +936,7 @@ namespace Bloodcraft.Systems.Experience
             }
             return [];
         }
+
         public static List<int> GetClassSpells(ulong steamId)
         {
             if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)

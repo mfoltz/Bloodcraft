@@ -12,6 +12,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal class VBloodSystemPatch
 {
+    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(VBloodSystem __instance)
@@ -19,9 +21,32 @@ internal class VBloodSystemPatch
         NativeList<VBloodConsumed> events = __instance.EventList;
         try
         {
+            List<VBloodConsumed> uniqueEvents = [];
+
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-                Entity vBlood = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
+                // Check if the event is already in the list
+                bool isDuplicate = false;
+                foreach (VBloodConsumed uniqueEvent in uniqueEvents)
+                {
+                    if (uniqueEvent.Source.Equals(vBloodConsumed.Source) && uniqueEvent.Target.Equals(vBloodConsumed.Target))
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                // Add the event to the list if it is not a duplicate
+                if (!isDuplicate)
+                {
+                    uniqueEvents.Add(vBloodConsumed);
+                }
+            }
+
+            foreach (VBloodConsumed vBloodConsumed in uniqueEvents)
+            {
+                //Core.Log.LogInfo($"VBloodConsumed events: {events.Length} | Unique events: {uniqueEvents.Count}");
+
+                Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
                 Entity player = vBloodConsumed.Target;
 
                 bool playerCheck = vBloodConsumed.Target.Has<PlayerCharacter>();
@@ -33,10 +58,9 @@ internal class VBloodSystemPatch
                 if (Plugin.FamiliarSystem.Value && playerCheck) FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
-            Core.Log.LogError($"Error in VBloodSystemPatch: {e}");
+            Core.Log.LogInfo($"Error in VBloodSystemPatch: {e}");
         }
     }
-    
 }

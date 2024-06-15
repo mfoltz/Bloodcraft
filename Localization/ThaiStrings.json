@@ -1,0 +1,500 @@
+﻿{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "ขอแสดงความยินดี"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "โบนัส"
+        },
+        {
+            "Original": "received",
+            "Translation": "ได้รับ"
+        },
+        {
+            "Original": "from",
+            "Translation": "จาก"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "ความชำนาญ"
+        },
+        {
+            "Original": "in",
+            "Translation": "ใน"
+        },
+        {
+            "Original": "improved",
+            "Translation": "ปรับปรุง"
+        },
+        {
+            "Original": "to",
+            "Translation": "ถึง"
+        },
+        {
+            "Original": "you",
+            "Translation": "คุณ"
+        },
+        {
+            "Original": "have",
+            "Translation": "มี"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "มีชื่อเสียง"
+        },
+        {
+            "Original": "growth",
+            "Translation": "การเจริญเติบโต"
+        },
+        {
+            "Original": "rate",
+            "Translation": "อัตรา"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "ลดลง"
+        },
+        {
+            "Original": "by",
+            "Translation": "โดย"
+        },
+        {
+            "Original": "and",
+            "Translation": "และ"
+        },
+        {
+            "Original": "stat",
+            "Translation": "สถิติ"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "โบนัส"
+        },
+        {
+            "Original": "the",
+            "Translation": "ที่"
+        },
+        {
+            "Original": "total",
+            "Translation": "รวม"
+        },
+        {
+            "Original": "change",
+            "Translation": "เปลี่ยนแปลง"
+        },
+        {
+            "Original": "with",
+            "Translation": "กับ"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "การปรับระดับ"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "ชื่อเสียง"
+        },
+        {
+            "Original": "is",
+            "Translation": "คือ"
+        },
+        {
+            "Original": "rates",
+            "Translation": "อัตรา"
+        },
+        {
+            "Original": "for",
+            "Translation": "สำหรับ"
+        },
+        {
+            "Original": "current",
+            "Translation": "ปัจจุบัน"
+        },
+        {
+            "Original": "level",
+            "Translation": "ระดับ"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "การปรับปรุง"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "ความเชี่ยวชาญ"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "มรดก"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "การลดลง"
+        },
+        {
+            "Original": "including",
+            "Translation": "รวมถึง"
+        },
+        {
+            "Original": "you've",
+            "Translation": "คุณได้"
+        },
+        {
+            "Original": "reached",
+            "Translation": "ถึง"
+        },
+        {
+            "Original": "do",
+            "Translation": "ทำ"
+        },
+        {
+            "Original": "not",
+            "Translation": "ไม่"
+        },
+        {
+            "Original": "required",
+            "Translation": "ที่ต้องการ"
+        },
+        {
+            "Original": "item",
+            "Translation": "รายการ"
+        },
+        {
+            "Original": "classes",
+            "Translation": "ชั้นเรียน"
+        },
+        {
+            "Original": "failed",
+            "Translation": "ล้มเหลว"
+        },
+        {
+            "Original": "remove",
+            "Translation": "ลบ"
+        },
+        {
+            "Original": "experience",
+            "Translation": "ประสบการณ์"
+        },
+        {
+            "Original": "essence",
+            "Translation": "สาระสำคัญ"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "มรดก"
+        },
+        {
+            "Original": "new",
+            "Translation": "ใหม่"
+        },
+        {
+            "Original": "unit",
+            "Translation": "หน่วย"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "ปลดล็อค"
+        },
+        {
+            "Original": "set",
+            "Translation": "ตั้งค่า"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "อาวุธ"
+        },
+        {
+            "Original": "levels",
+            "Translation": "ระดับ"
+        },
+        {
+            "Original": "original",
+            "Translation": "ต้นฉบับ"
+        },
+        {
+            "Original": "value",
+            "Translation": "ค่า"
+        },
+        {
+            "Original": "extra",
+            "Translation": "พิเศษ"
+        },
+        {
+            "Original": "spell",
+            "Translation": "เวทมนตร์"
+        },
+        {
+            "Original": "slots",
+            "Translation": "สล็อต"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "เปิดใช้งาน"
+        },
+        {
+            "Original": "are",
+            "Translation": "เป็น"
+        },
+        {
+            "Original": "shift",
+            "Translation": "เปลี่ยน"
+        },
+        {
+            "Original": "spells",
+            "Translation": "เวทมนตร์"
+        },
+        {
+            "Original": "want",
+            "Translation": "ต้องการ"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "ไม่มีอาวุธ"
+        },
+        {
+            "Original": "when",
+            "Translation": "เมื่อ"
+        },
+        {
+            "Original": "done",
+            "Translation": "เสร็จสิ้น"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "สลับ"
+        },
+        {
+            "Original": "this",
+            "Translation": "นี้"
+        },
+        {
+            "Original": "again",
+            "Translation": "อีกครั้ง"
+        },
+        {
+            "Original": "available",
+            "Translation": "ใช้ได้"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "ไม่ถูกต้อง"
+        },
+        {
+            "Original": "type",
+            "Translation": "ประเภท"
+        },
+        {
+            "Original": "player",
+            "Translation": "ผู้เล่น"
+        },
+        {
+            "Original": "found",
+            "Translation": "พบ"
+        },
+        {
+            "Original": "reset",
+            "Translation": "รีเซ็ต"
+        },
+        {
+            "Original": "been",
+            "Translation": "ถูก"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "เลือก"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "อนุญาต"
+        },
+        {
+            "Original": "apply",
+            "Translation": "ใช้"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "เตรียมอุปกรณ์ใหม่"
+        },
+        {
+            "Original": "choice",
+            "Translation": "ทางเลือก"
+        },
+        {
+            "Original": "options",
+            "Translation": "ตัวเลือก"
+        },
+        {
+            "Original": "logging",
+            "Translation": "การบันทึก"
+        },
+        {
+            "Original": "now",
+            "Translation": "ตอนนี้"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "ยังไม่มี"
+        },
+        {
+            "Original": "gained",
+            "Translation": "ได้รับ"
+        },
+        {
+            "Original": "yet",
+            "Translation": "ยัง"
+        },
+        {
+            "Original": "profession",
+            "Translation": "อาชีพ"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "ปิดใช้งาน"
+        },
+        {
+            "Original": "you're",
+            "Translation": "คุณคือ"
+        },
+        {
+            "Original": "must",
+            "Translation": "ต้อง"
+        },
+        {
+            "Original": "between",
+            "Translation": "ระหว่าง"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "เตรียมพร้อม"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "ล่าสัตว์"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "อิโมติคอน"
+        },
+        {
+            "Original": "actions",
+            "Translation": "การกระทำ"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "ผู้คุ้นเคย"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "ผู้คุ้นเคย"
+        },
+        {
+            "Original": "combat",
+            "Translation": "การต่อสู้"
+        },
+        {
+            "Original": "active",
+            "Translation": "ใช้งานอยู่"
+        },
+        {
+            "Original": "or",
+            "Translation": "หรือ"
+        },
+        {
+            "Original": "couldn't",
+            "Translation": "ไม่สามารถ"
+        },
+        {
+            "Original": "find",
+            "Translation": "ค้นหา"
+        },
+        {
+            "Original": "actives",
+            "Translation": "การใช้งาน"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "ล้าง"
+        },
+        {
+            "Original": "followers",
+            "Translation": "ผู้ติดตาม"
+        },
+        {
+            "Original": "added",
+            "Translation": "เพิ่ม"
+        },
+        {
+            "Original": "full",
+            "Translation": "เต็ม"
+        },
+        {
+            "Original": "rename",
+            "Translation": "เปลี่ยนชื่อ"
+        },
+        {
+            "Original": "locate",
+            "Translation": "ค้นหา"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "ไม่ถูกผูกมัด"
+        },
+        {
+            "Original": "bound",
+            "Translation": "ถูกผูกมัด"
+        },
+        {
+            "Original": "already",
+            "Translation": "แล้ว"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "ไม่"
+        },
+        {
+            "Original": "seem",
+            "Translation": "ดูเหมือน"
+        },
+        {
+            "Original": "correct",
+            "Translation": "ถูกต้อง"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "ปลดล็อค"
+        },
+        {
+            "Original": "try",
+            "Translation": "ลอง"
+        },
+        {
+            "Original": "list",
+            "Translation": "รายการ"
+        },
+        {
+            "Original": "selected",
+            "Translation": "เลือกแล้ว"
+        },
+        {
+            "Original": "use",
+            "Translation": "ใช้"
+        },
+        {
+            "Original": "choose",
+            "Translation": "เลือก"
+        },
+        {
+            "Original": "while",
+            "Translation": "ในขณะที่"
+        },
+        {
+            "Original": "blood",
+            "Translation": "เลือด"
+        },
+        {
+            "Original": "progress",
+            "Translation": "ความคืบหน้า"
+        }
+    ]
+}

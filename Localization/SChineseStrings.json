@@ -1,0 +1,500 @@
+{
+    "Words": [
+        {
+            "Original": "congratulations",
+            "Translation": "恭喜"
+        },
+        {
+            "Original": "bonus",
+            "Translation": "奖金"
+        },
+        {
+            "Original": "received",
+            "Translation": "收到"
+        },
+        {
+            "Original": "from",
+            "Translation": "从"
+        },
+        {
+            "Original": "proficiency",
+            "Translation": "熟练度"
+        },
+        {
+            "Original": "in",
+            "Translation": "在"
+        },
+        {
+            "Original": "improved",
+            "Translation": "改善"
+        },
+        {
+            "Original": "to",
+            "Translation": "到"
+        },
+        {
+            "Original": "you",
+            "Translation": "你"
+        },
+        {
+            "Original": "have",
+            "Translation": "有"
+        },
+        {
+            "Original": "prestiged",
+            "Translation": "提升"
+        },
+        {
+            "Original": "growth",
+            "Translation": "增长"
+        },
+        {
+            "Original": "rate",
+            "Translation": "速度"
+        },
+        {
+            "Original": "reduced",
+            "Translation": "减少"
+        },
+        {
+            "Original": "by",
+            "Translation": "由"
+        },
+        {
+            "Original": "and",
+            "Translation": "和"
+        },
+        {
+            "Original": "stat",
+            "Translation": "统计"
+        },
+        {
+            "Original": "bonuses",
+            "Translation": "奖金"
+        },
+        {
+            "Original": "the",
+            "Translation": "这个"
+        },
+        {
+            "Original": "total",
+            "Translation": "总计"
+        },
+        {
+            "Original": "change",
+            "Translation": "改变"
+        },
+        {
+            "Original": "with",
+            "Translation": "和"
+        },
+        {
+            "Original": "leveling",
+            "Translation": "升级"
+        },
+        {
+            "Original": "prestige",
+            "Translation": "声望"
+        },
+        {
+            "Original": "is",
+            "Translation": "是"
+        },
+        {
+            "Original": "rates",
+            "Translation": "速率"
+        },
+        {
+            "Original": "for",
+            "Translation": "为了"
+        },
+        {
+            "Original": "current",
+            "Translation": "当前"
+        },
+        {
+            "Original": "level",
+            "Translation": "级别"
+        },
+        {
+            "Original": "improvement",
+            "Translation": "改进"
+        },
+        {
+            "Original": "expertise",
+            "Translation": "专业知识"
+        },
+        {
+            "Original": "legacies",
+            "Translation": "遗产"
+        },
+        {
+            "Original": "reduction",
+            "Translation": "减少"
+        },
+        {
+            "Original": "including",
+            "Translation": "包括"
+        },
+        {
+            "Original": "you've",
+            "Translation": "你已经"
+        },
+        {
+            "Original": "reached",
+            "Translation": "到达"
+        },
+        {
+            "Original": "do",
+            "Translation": "做"
+        },
+        {
+            "Original": "not",
+            "Translation": "不"
+        },
+        {
+            "Original": "required",
+            "Translation": "需要"
+        },
+        {
+            "Original": "item",
+            "Translation": "物品"
+        },
+        {
+            "Original": "classes",
+            "Translation": "类别"
+        },
+        {
+            "Original": "failed",
+            "Translation": "失败"
+        },
+        {
+            "Original": "remove",
+            "Translation": "移除"
+        },
+        {
+            "Original": "experience",
+            "Translation": "经验"
+        },
+        {
+            "Original": "essence",
+            "Translation": "本质"
+        },
+        {
+            "Original": "legacy",
+            "Translation": "遗产"
+        },
+        {
+            "Original": "new",
+            "Translation": "新"
+        },
+        {
+            "Original": "unit",
+            "Translation": "单位"
+        },
+        {
+            "Original": "unlocked",
+            "Translation": "解锁"
+        },
+        {
+            "Original": "set",
+            "Translation": "设置"
+        },
+        {
+            "Original": "weapon",
+            "Translation": "武器"
+        },
+        {
+            "Original": "levels",
+            "Translation": "级别"
+        },
+        {
+            "Original": "original",
+            "Translation": "原始"
+        },
+        {
+            "Original": "value",
+            "Translation": "价值"
+        },
+        {
+            "Original": "extra",
+            "Translation": "额外"
+        },
+        {
+            "Original": "spell",
+            "Translation": "咒语"
+        },
+        {
+            "Original": "slots",
+            "Translation": "槽位"
+        },
+        {
+            "Original": "enabled",
+            "Translation": "启用"
+        },
+        {
+            "Original": "are",
+            "Translation": "是"
+        },
+        {
+            "Original": "shift",
+            "Translation": "切换"
+        },
+        {
+            "Original": "spells",
+            "Translation": "咒语"
+        },
+        {
+            "Original": "want",
+            "Translation": "想要"
+        },
+        {
+            "Original": "unarmed",
+            "Translation": "未武装"
+        },
+        {
+            "Original": "when",
+            "Translation": "当"
+        },
+        {
+            "Original": "done",
+            "Translation": "完成"
+        },
+        {
+            "Original": "toggle",
+            "Translation": "切换"
+        },
+        {
+            "Original": "this",
+            "Translation": "这个"
+        },
+        {
+            "Original": "again",
+            "Translation": "再一次"
+        },
+        {
+            "Original": "available",
+            "Translation": "可用"
+        },
+        {
+            "Original": "invalid",
+            "Translation": "无效"
+        },
+        {
+            "Original": "type",
+            "Translation": "类型"
+        },
+        {
+            "Original": "player",
+            "Translation": "玩家"
+        },
+        {
+            "Original": "found",
+            "Translation": "发现"
+        },
+        {
+            "Original": "reset",
+            "Translation": "重置"
+        },
+        {
+            "Original": "been",
+            "Translation": "已经"
+        },
+        {
+            "Original": "chosen",
+            "Translation": "选择"
+        },
+        {
+            "Original": "allowed",
+            "Translation": "允许"
+        },
+        {
+            "Original": "apply",
+            "Translation": "应用"
+        },
+        {
+            "Original": "reequipping",
+            "Translation": "重新装备"
+        },
+        {
+            "Original": "choice",
+            "Translation": "选择"
+        },
+        {
+            "Original": "options",
+            "Translation": "选项"
+        },
+        {
+            "Original": "logging",
+            "Translation": "记录"
+        },
+        {
+            "Original": "now",
+            "Translation": "现在"
+        },
+        {
+            "Original": "haven't",
+            "Translation": "没有"
+        },
+        {
+            "Original": "gained",
+            "Translation": "获得"
+        },
+        {
+            "Original": "yet",
+            "Translation": "尚未"
+        },
+        {
+            "Original": "profession",
+            "Translation": "职业"
+        },
+        {
+            "Original": "disabled",
+            "Translation": "禁用"
+        },
+        {
+            "Original": "you're",
+            "Translation": "你是"
+        },
+        {
+            "Original": "must",
+            "Translation": "必须"
+        },
+        {
+            "Original": "between",
+            "Translation": "之间"
+        },
+        {
+            "Original": "prepared",
+            "Translation": "准备"
+        },
+        {
+            "Original": "hunt",
+            "Translation": "狩猎"
+        },
+        {
+            "Original": "emotes",
+            "Translation": "表情"
+        },
+        {
+            "Original": "actions",
+            "Translation": "动作"
+        },
+        {
+            "Original": "familiars",
+            "Translation": "宠物"
+        },
+        {
+            "Original": "familiar",
+            "Translation": "宠物"
+        },
+        {
+            "Original": "combat",
+            "Translation": "战斗"
+        },
+        {
+            "Original": "active",
+            "Translation": "活跃"
+        },
+        {
+            "Original": "or",
+            "Translation": "或者"
+        },
+        {
+            "Original": "couldn't",
+            "Translation": "不能"
+        },
+        {
+            "Original": "find",
+            "Translation": "找到"
+        },
+        {
+            "Original": "actives",
+            "Translation": "活动"
+        },
+        {
+            "Original": "cleared",
+            "Translation": "清除"
+        },
+        {
+            "Original": "followers",
+            "Translation": "追随者"
+        },
+        {
+            "Original": "added",
+            "Translation": "添加"
+        },
+        {
+            "Original": "full",
+            "Translation": "满"
+        },
+        {
+            "Original": "rename",
+            "Translation": "重命名"
+        },
+        {
+            "Original": "locate",
+            "Translation": "定位"
+        },
+        {
+            "Original": "unbound",
+            "Translation": "未绑定"
+        },
+        {
+            "Original": "bound",
+            "Translation": "绑定"
+        },
+        {
+            "Original": "already",
+            "Translation": "已经"
+        },
+        {
+            "Original": "doesn't",
+            "Translation": "不"
+        },
+        {
+            "Original": "seem",
+            "Translation": "似乎"
+        },
+        {
+            "Original": "correct",
+            "Translation": "正确"
+        },
+        {
+            "Original": "unbinding",
+            "Translation": "解绑"
+        },
+        {
+            "Original": "try",
+            "Translation": "尝试"
+        },
+        {
+            "Original": "list",
+            "Translation": "列表"
+        },
+        {
+            "Original": "selected",
+            "Translation": "已选择"
+        },
+        {
+            "Original": "use",
+            "Translation": "使用"
+        },
+        {
+            "Original": "choose",
+            "Translation": "选择"
+        },
+        {
+            "Original": "while",
+            "Translation": "当"
+        },
+        {
+            "Original": "blood",
+            "Translation": "血液"
+        },
+        {
+            "Original": "progress",
+            "Translation": "进度"
+        }
+    ]
+}

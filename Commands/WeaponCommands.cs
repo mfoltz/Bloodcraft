@@ -30,7 +30,7 @@ namespace Bloodcraft.Commands
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler == null)
             {
-                ctx.Reply($"No expertise handler found for {weaponType}.");
+                ctx.Reply($"Invalid weapon.");
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace Bloodcraft.Commands
             // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
             if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
             {
-                ctx.Reply($"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> experience (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
+                ctx.Reply($"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
                 if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
                     List<KeyValuePair<WeaponStatManager.WeaponStatType, string>> bonusWeaponStats = [];
@@ -123,7 +123,7 @@ namespace Bloodcraft.Commands
             
             if (WeaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
-               ctx.Reply("You cannot choose weapon stats for the fishing pole.");
+               ctx.Reply("Invalid weapon.");
                 return;
             }
 
@@ -162,7 +162,7 @@ namespace Bloodcraft.Commands
            
             if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
             {
-                ctx.Reply("You cannot reset weapon stats for fishing pole as none can be chosen.");
+                ctx.Reply("Invalid weapon.");
                 return;
             }
 
@@ -294,7 +294,7 @@ namespace Bloodcraft.Commands
                 bools["SpellLock"] = !bools["SpellLock"];
                 if (bools["SpellLock"])
                 {
-                    ctx.Reply("Change spells to the ones you want in your unarmed slot(s). When done, toggle this again.");
+                    ctx.Reply("Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
                 }
                 else
                 {
@@ -395,10 +395,7 @@ namespace Bloodcraft.Commands
                 }
                 ctx.Reply("Set weapon levels to original values.");
             }
-            else
-            {
-                ctx.Reply("You do not have an inventory.");
-            }         
+                    
         }
     }
 }

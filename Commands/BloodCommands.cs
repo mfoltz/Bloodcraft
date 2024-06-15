@@ -1,4 +1,5 @@
 using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using ProjectM;
@@ -11,21 +12,39 @@ using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodStats;
 
 namespace Bloodcraft.Commands
-{
-    public static class BloodCommands
+{ 
+    public class BloodCommands
     {
+        //static LocalizationService LocalizationService => Core.Localization;
+
         [Command(name: "getBloodLegacyProgress", shortHand: "gbl", adminOnly: false, usage: ".gbl [BloodType]", description: "Display your current blood legacy progress.")]
         public static void GetLegacyCommand(ChatCommandContext ctx, string blood)
         {
             if (!Plugin.BloodSystem.Value)
             {
-                ctx.Reply("Blood Legacies are not enabled.");
+                string message = "Blood Legacies are not enabled.";
+                if (LocalizationService.LanguageLocalization == "English")
+                {
+                    ctx.Reply(message);
+                }
+                else
+                {
+                    ctx.Reply(Core.Localization.GetLocalizedWords(message));
+                }
                 return;
             }
 
             if (!Enum.TryParse<BloodSystem.BloodType>(blood, true, out var bloodType))
             {
-                ctx.Reply("Invalid blood type, use .lbl to see options.");
+                string message = "Invalid blood type, use .lbl to see options.";
+                if (LocalizationService.LanguageLocalization == "English")
+                {
+                    ctx.Reply(message);
+                }
+                else
+                {
+                    ctx.Reply(Core.Localization.GetLocalizedWords(message));
+                }
                 return;
             }
 
@@ -33,14 +52,31 @@ namespace Bloodcraft.Commands
             IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
             if (bloodHandler == null)
             {
-                ctx.Reply("Invalid blood type.");
+                string message = "Invalid blood type.";
+                if (LocalizationService.LanguageLocalization == "English")
+                {
+                    ctx.Reply(message);
+                }
+                else
+                {
+                    ctx.Reply(Core.Localization.GetLocalizedWords(message));
+                }
                 return;
             }
             var data = bloodHandler.GetLegacyData(steamID);
             int progress = (int)(data.Value - BloodSystem.ConvertLevelToXp(data.Key));
             if (data.Key > 0)
             {
-                ctx.Reply($"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
+                string message = $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>";
+                if (LocalizationService.LanguageLocalization == "English")
+                {
+                    ctx.Reply(message);
+                }
+                else
+                {
+                    ctx.Reply(Core.Localization.GetLocalizedWords(message));
+                }
+
                 if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamID, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
                 {
                     List<KeyValuePair<BloodStatManager.BloodStatType, string>> bonusBloodStats = [];
@@ -59,26 +95,45 @@ namespace Bloodcraft.Commands
                             bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
                         }
                     }
-                    /*
-                    string bonuses = string.Join(", ", bonusBloodStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    
-                    ctx.Reply($"Current blood stat bonuses: {bonuses}");
-                    */
                     for (int i = 0; i < bonusBloodStats.Count; i += 6)
                     {
                         var batch = bonusBloodStats.Skip(i).Take(6);
                         string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                        ctx.Reply($"Current blood stat bonuses: {bonuses}");
+                        string bonusMessage = $"Current blood stat bonuses: {bonuses}";
+                        if (LocalizationService.LanguageLocalization == "English")
+                        {
+                            ctx.Reply(bonusMessage);
+                        }
+                        else
+                        {
+                            ctx.Reply(Core.Localization.GetLocalizedWords(bonusMessage));
+                        }
                     }
                 }
                 else
                 {
-                    ctx.Reply("No bonuses from current legacy.");
+                    string noBonusMessage = "No bonuses from current legacy.";
+                    if (LocalizationService.LanguageLocalization == "English")
+                    {
+                        ctx.Reply(noBonusMessage);
+                    }
+                    else
+                    {
+                        ctx.Reply(Core.Localization.GetLocalizedWords(noBonusMessage));
+                    }
                 }
             }
             else
             {
-                ctx.Reply($"No progress in <color=red>{bloodHandler.GetBloodType()}</color> yet. ");
+                string message = $"No progress in <color=red>{bloodHandler.GetBloodType()}</color> yet.";
+                if (LocalizationService.LanguageLocalization == "English")
+                {
+                    ctx.Reply(message);
+                }
+                else
+                {
+                    ctx.Reply(Core.Localization.GetLocalizedWords(message));
+                }
             }
         }
 

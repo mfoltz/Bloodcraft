@@ -1,13 +1,18 @@
-using Stunlock.Core;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
+using Match = System.Text.RegularExpressions.Match;
+using Regex = System.Text.RegularExpressions.Regex;
+using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
 namespace Bloodcraft.Services;
 
 public class LocalizationService
 {
+    static readonly string regexPattern = @"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)";
+    static readonly Regex regex = new(regexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    static readonly string LanguageLocalization = Plugin.LanguageLocalization.Value;
+    public static readonly string LanguageLocalization = Plugin.LanguageLocalization.Value;
     struct Code
     {
         public string Key { get; set; }
@@ -21,14 +26,22 @@ public class LocalizationService
         public string Text { get; set; }
     }
 
+    struct Words
+    {
+        public string Original { get; set; }
+        public string Translation { get; set; }
+    }
+
     struct LocalizationFile
     {
         public Code[] Codes { get; set; }
         public Node[] Nodes { get; set; }
+        public Words[] Words { get; set; }
     }
 
     public Dictionary<string, string> localization = [];
     public Dictionary<int, string> prefabNames = [];
+    public Dictionary<string, string> localizedWords = [];
 
     static readonly Dictionary<string, string> LocalizationMapping = new()
     {
@@ -51,13 +64,34 @@ public class LocalizationService
         {"Vietnamese", "Bloodcraft.Localization.Vietnamese.json"},
         {"Brazilian", "Bloodcraft.Localization.Brazilian.json"}
     };
+
+    static readonly Dictionary<string, string> LanguageMapping = new()
+    {
+        {"German", "Bloodcraft.Localization.GermanStrings.json"},
+        {"French", "Bloodcraft.Localization.FrenchStrings.json"},
+        {"Spanish", "Bloodcraft.Localization.SpanishStrings.json"},
+        {"Italian", "Bloodcraft.Localization.ItalianStrings.json"},
+        {"Japanese", "Bloodcraft.Localization.JapaneseStrings.json"},
+        {"Koreana", "Bloodcraft.Localization.KoreanaStrings.json"},
+        {"Portuguese", "Bloodcraft.Localization.PortugueseStrings.json"},
+        {"Russian", "Bloodcraft.Localization.RussianStrings.json"},
+        {"SimplifiedChinese", "Bloodcraft.Localization.SChineseStrings.json"},
+        {"TraditionalChinese", "Bloodcraft.Localization.TChineseStrings.json"},
+        {"Hungarian", "Bloodcraft.Localization.HungarianStrings.json"},
+        {"Latam", "Bloodcraft.Localization.LatamStrings.json"},
+        {"Polish", "Bloodcraft.Localization.PolishStrings.json"},
+        {"Thai", "Bloodcraft.Localization.ThaiStrings.json"},
+        {"Turkish", "Bloodcraft.Localization.TurkishStrings.json"},
+        {"Vietnamese", "Bloodcraft.Localization.VietnameseStrings.json"},
+        {"Brazilian", "Bloodcraft.Localization.BrazilianStrings.json"}
+    };
+
     public LocalizationService()
     {
-        LoadLocalization();
+        LoadLocalizations();
         LoadPrefabNames();
     }
-
-    void LoadLocalization()
+    void LoadLocalizations()
     {
         var resourceName = LocalizationMapping.ContainsKey(LanguageLocalization) ? LocalizationMapping[LanguageLocalization] : "Bloodcraft.Localization.English.json";
 
@@ -66,10 +100,26 @@ public class LocalizationService
         var assembly = Assembly.GetExecutingAssembly();
         var stream = assembly.GetManifestResourceStream(resourceName);
         
-        using StreamReader reader = new(stream);
-        string jsonContent = reader.ReadToEnd();
+        using StreamReader localizationReader = new(stream);
+        string jsonContent = localizationReader.ReadToEnd();
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-        localization = localizationFile.Nodes.ToDictionary(x => x.Guid, x => x.Text);   
+        localization = localizationFile.Nodes.ToDictionary(x => x.Guid, x => x.Text);
+
+        if (LanguageLocalization == "English")
+        {
+            return;
+        }
+
+        resourceName = LanguageMapping.ContainsKey(LanguageLocalization) ? LanguageMapping[LanguageLocalization] : "";
+
+        if (string.IsNullOrEmpty(resourceName)) return;
+
+        stream = assembly.GetManifestResourceStream(resourceName);
+
+        using StreamReader languageReader = new(stream);
+        jsonContent = languageReader.ReadToEnd();
+        localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
+        localizedWords = localizationFile.Words.OrderByDescending(x => x.Original.Length).ToDictionary(x => x.Original.ToLower(), x => x.Translation);
     }
 
     void LoadPrefabNames()
@@ -91,5 +141,58 @@ public class LocalizationService
         }
         return $"<Localization not found for {Guid}>";
     }
+    public string GetLocalizedWords(string message)
+    {
+        Core.Log.LogInfo($"Before: {message}");
 
+        StringBuilder result = new();
+        int lastIndex = 0;
+
+        foreach (Match match in regex.Matches(message).Cast<Match>())
+        {   
+            result.Append(message, lastIndex, match.Index - lastIndex);
+
+            if (match.Groups["open"].Success)
+            {
+                // Return tags as is
+                result.Append(match.Value);
+            }
+            else if (match.Groups["word"].Success)
+            {
+                // Perform case-insensitive replacement for matched words
+                string word = match.Value;
+                string wordLower = word.ToLower();
+
+                if (localizedWords.TryGetValue(wordLower, out string localizedWord))
+                {
+                    // Preserve the original case of the word
+                    if (char.IsUpper(word[0]))
+                    {
+                        if (localizedWord.Length > 1)
+                        {
+                            localizedWord = char.ToUpper(localizedWord[0]) + localizedWord[1..];
+                        }
+                        else
+                        {
+                            localizedWord = char.ToUpper(localizedWord[0]).ToString();
+                        }
+                    }
+                    result.Append(localizedWord);
+                }
+                else
+                {
+                    result.Append(word); // Use the original case of the word
+                }
+            }
+            lastIndex = match.Index + match.Length;
+        }
+        if (lastIndex < message.Length)
+        {
+            result.Append(message, lastIndex, message.Length - lastIndex);
+        }
+
+        string translatedMessage = result.ToString();
+        Core.Log.LogInfo($"After: {translatedMessage}");
+        return translatedMessage;
+    }
 }

@@ -1,3 +1,9 @@
+`0.9.3`
+- changed handling of VBloodConsumed events to prevent feeds with multiple players providing gains equal to the number of players per player (this one is difficult to test alone, fingers crossed :P)
+- messages to players now localized if the base game supports the language (thanks ChatGPT <3 if any of the translations are wrong or offensive it is not intentional, probably missed a word or two here and there as well but pretty happy with this for first pass)
+- added command to list prestige buff names
+- Anti-raid interference debuff should block healing now to prevent countering with heal pots. If that seems spotty I'll just light people on fire instead~
+
 `0.9.2`
 - made sure familiars won't get exp if not in combat or not out and active
 - 'binding' key will get added to player_bools file without needing to regenerate_

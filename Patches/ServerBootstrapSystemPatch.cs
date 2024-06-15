@@ -326,6 +326,5 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.SavePlayerSpells();
             }
         }
-
     }
 }

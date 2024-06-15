@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>0.9.2</Version>
+	<Version>0.9.3</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	<BepInExPluginGuid>com.zfolmt.Bloodcraft</BepInExPluginGuid>
@@ -35,6 +35,22 @@
 		<None Remove="Localization\Turkish.json" />
 		<None Remove="Localization\Spanish.json" />
 		<None Remove="Localization\Vietnamese.json" />
+		<None Remove="Localization\BrazilianStrings.json" />
+		<None Remove="Localization\FrenchStrings.json" />
+		<None Remove="Localization\GermanStrings.json" />
+		<None Remove="Localization\HungarianStrings.json" />
+		<None Remove="Localization\ItalianStrings.json" />
+		<None Remove="Localization\JapaneseStrings.json" />
+		<None Remove="Localization\KoreanaStrings.json" />
+		<None Remove="Localization\LatamStrings.json" />
+		<None Remove="Localization\PolishStrings.json" />
+		<None Remove="Localization\RussianStrings.json" />
+		<None Remove="Localization\SChineseStrings.json" />
+		<None Remove="Localization\TChineseStrings.json" />
+		<None Remove="Localization\ThaiStrings.json" />
+		<None Remove="Localization\TurkishStrings.json" />
+		<None Remove="Localization\SpanishStrings.json" />
+		<None Remove="Localization\VietnameseStrings.json" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Localization\Prefabs.json" />
@@ -55,6 +71,22 @@
 		<EmbeddedResource Include="Localization\Turkish.json" />
 		<EmbeddedResource Include="Localization\Spanish.json" />
 		<EmbeddedResource Include="Localization\Vietnamese.json" />
+		<EmbeddedResource Include="Localization\BrazilianStrings.json" />
+		<EmbeddedResource Include="Localization\FrenchStrings.json" />
+		<EmbeddedResource Include="Localization\GermanStrings.json" />
+		<EmbeddedResource Include="Localization\HungarianStrings.json" />
+		<EmbeddedResource Include="Localization\ItalianStrings.json" />
+		<EmbeddedResource Include="Localization\JapaneseStrings.json" />
+		<EmbeddedResource Include="Localization\KoreanaStrings.json" />
+		<EmbeddedResource Include="Localization\LatamStrings.json" />
+		<EmbeddedResource Include="Localization\PolishStrings.json" />
+		<EmbeddedResource Include="Localization\RussianStrings.json" />
+		<EmbeddedResource Include="Localization\SChineseStrings.json" />
+		<EmbeddedResource Include="Localization\TChineseStrings.json" />
+		<EmbeddedResource Include="Localization\ThaiStrings.json" />
+		<EmbeddedResource Include="Localization\TurkishStrings.json" />
+		<EmbeddedResource Include="Localization\SpanishStrings.json" />
+		<EmbeddedResource Include="Localization\VietnameseStrings.json" />
 	</ItemGroup>
 
   <ItemGroup>
@@ -76,8 +108,4 @@
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Users\mitch\source\Repos\Bloodcraft" />
 		<Message Text="DLL Server Copied OK" Importance="High" />
 	</Target>
-	
-	
-	
-    
 </Project>

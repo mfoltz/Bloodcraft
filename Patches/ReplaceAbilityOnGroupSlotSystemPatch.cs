@@ -153,7 +153,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         }
         catch (System.Exception e)
         {
-            Core.Log.LogError($"Error in AbilityRunScriptsSystem: {e}");
+            Core.Log.LogInfo($"Error in AbilityRunScriptsSystem: {e}");
         }
         finally
         {
