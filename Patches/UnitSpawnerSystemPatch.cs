@@ -6,7 +6,7 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-public class UnitSpawnerPatch
+internal static class UnitSpawnerPatch
 {
     static readonly float UnitSpawnerMultiplier = Plugin.UnitSpawnerMultiplier.Value;
    

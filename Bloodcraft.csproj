@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>0.9.3</Version>
+	<Version>0.9.4</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	<BepInExPluginGuid>com.zfolmt.Bloodcraft</BepInExPluginGuid>
@@ -108,4 +108,5 @@
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Users\mitch\source\Repos\Bloodcraft" />
 		<Message Text="DLL Server Copied OK" Importance="High" />
 	</Target>
+	
 </Project>

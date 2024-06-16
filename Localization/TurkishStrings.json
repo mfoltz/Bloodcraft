@@ -153,6 +153,10 @@
             "Translation": "değil"
         },
         {
+            "Original": "no",
+            "Translation": "hayır"
+        },
+        {
             "Original": "required",
             "Translation": "gereken"
         },

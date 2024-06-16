@@ -157,6 +157,10 @@
             "Translation": "requerido"
         },
         {
+            "Original": "no",
+            "Translation": "no"
+        },
+        {
             "Original": "item",
             "Translation": "artículo"
         },

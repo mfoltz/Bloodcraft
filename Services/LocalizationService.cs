@@ -1,6 +1,10 @@
+using ProjectM;
+using ProjectM.Network;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Unity.Entities;
+using VampireCommandFramework;
 using Match = System.Text.RegularExpressions.Match;
 using Regex = System.Text.RegularExpressions.Regex;
 using RegexOptions = System.Text.RegularExpressions.RegexOptions;
@@ -132,6 +136,28 @@ public class LocalizationService
         string jsonContent = reader.ReadToEnd();
         prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
     }
+    public static void HandleReply(ChatCommandContext ctx, string message)
+    {
+        if (LanguageLocalization == "English")
+        {
+            ctx.Reply(message);
+        }
+        else
+        {
+            ctx.Reply(Core.Localization.GetLocalizedWords(message));
+        }
+    }
+    public static void HandleServerReply(EntityManager entityManager, User user, string message)
+    {
+        if (LanguageLocalization == "English")
+        {
+            ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
+        }
+        else
+        {
+            ServerChatUtils.SendSystemMessageToClient(entityManager, user, Core.Localization.GetLocalizedWords(message));
+        }
+    }
 
     public string GetLocalization(string Guid)
     {
@@ -143,8 +169,6 @@ public class LocalizationService
     }
     public string GetLocalizedWords(string message)
     {
-        Core.Log.LogInfo($"Before: {message}");
-
         StringBuilder result = new();
         int lastIndex = 0;
 
@@ -190,9 +214,7 @@ public class LocalizationService
         {
             result.Append(message, lastIndex, message.Length - lastIndex);
         }
-
         string translatedMessage = result.ToString();
-        Core.Log.LogInfo($"After: {translatedMessage}");
         return translatedMessage;
     }
 }

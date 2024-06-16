@@ -25,11 +25,11 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (Plugin.UnarmedSlots.Value && entity.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var unarmedSpells))
+                    if (Plugin.UnarmedSlots.Value && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var unarmedSpells))
                     {
                         HandleUnarmed(entity, character, unarmedSpells, steamId);
                     }
-                    else if (Plugin.PrestigeSystem.Value && entity.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("weapon") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var playerSpells) && !playerSpells.ClassSpell.Equals(0))
+                    else if (Plugin.PrestigeSystem.Value && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("weapon") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var playerSpells) && !playerSpells.ClassSpell.Equals(0))
                     {
                         HandleWeapon(entity, character, steamId, playerSpells);
                     }
@@ -40,16 +40,15 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                 }
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
-            Core.Log.LogError($"Error in ReplaceAbilityOnGroupSlotPatch: {e}");
+            Core.Log.LogInfo($"Error in ReplaceAbilityOnGroupSlotPatch: {e}");
         }
         finally
         {
             entities.Dispose();
         }
     }
-
     static void HandleUnarmed(Entity entity, Entity player, (int, int, int) playerSpells, ulong steamId)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
@@ -151,7 +150,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                 }
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Core.Log.LogInfo($"Error in AbilityRunScriptsSystem: {e}");
         }

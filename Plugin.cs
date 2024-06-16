@@ -32,6 +32,7 @@ public class Plugin : BasePlugin
 
     private static ConfigEntry<string> _languageLocalization;
     private static ConfigEntry<bool> _raidMonitor;
+    private static ConfigEntry<bool> _damageIntruders;
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<string> _prestigeBuffs;
@@ -55,8 +56,9 @@ public class Plugin : BasePlugin
     private static ConfigEntry<float> _levelScalingMultiplier;
     private static ConfigEntry<float> _warEventMultiplier;
     private static ConfigEntry<float> _unitSpawnerMultiplier;
-    private static ConfigEntry<bool> _playerGrouping;
-    private static ConfigEntry<int> _maxGroupSize;
+    private static ConfigEntry<bool> _playerAlliances;
+    private static ConfigEntry<int> _maxAllianceSize;
+    private static ConfigEntry<float> _expShareDistance;
     private static ConfigEntry<int> _changeClassItem;
     private static ConfigEntry<int> _changeClassItemQuantity;
 
@@ -150,6 +152,8 @@ public class Plugin : BasePlugin
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
 
     public static ConfigEntry<bool> RaidMonitor => _raidMonitor;
+
+    public static ConfigEntry<bool> DamageIntruders => _damageIntruders;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
 
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
@@ -181,8 +185,12 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
     public static ConfigEntry<float> GroupLevelingMultiplier => _groupLevelingMultiplier;
     public static ConfigEntry<float> LevelScalingMultiplier => _levelScalingMultiplier;
-    public static ConfigEntry<int> MaxGroupSize => _maxGroupSize;
-    public static ConfigEntry<bool> PlayerGrouping => _playerGrouping;
+    public static ConfigEntry<int> MaxAllianceSize => _maxAllianceSize;
+    public static ConfigEntry<float> ExpShareDistance => _expShareDistance;
+    public static ConfigEntry<bool> PlayerAlliances => _playerAlliances;
+
+
+
 
     public static ConfigEntry<float> WarEventMultiplier => _warEventMultiplier;
 
@@ -327,6 +335,8 @@ public class Plugin : BasePlugin
         
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
         _raidMonitor = InitConfigEntry("Config", "PreventRaidInterference", false, "Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed in territory for duration of the raid once breach by raiders is detected).");
+        _damageIntruders = InitConfigEntry("Config", "DamageIntruders", false, "Enable or disable damaging raid intruders if RaidMonitor is enabled.");
+        
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
         _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
@@ -366,8 +376,9 @@ public class Plugin : BasePlugin
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
 
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
-        _playerGrouping = InitConfigEntry("Config", "PlayerGrouping", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
-        _maxGroupSize = InitConfigEntry("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
+        _playerAlliances = InitConfigEntry("Config", "PlayerAlliances", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
+        _maxAllianceSize = InitConfigEntry("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
+        _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is about 5 floor tile lengths.");
 
         _expertiseSystem = InitConfigEntry("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
         _maxExpertisePrestiges = InitConfigEntry("Config", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise.");
@@ -484,6 +495,10 @@ public class Plugin : BasePlugin
     static void LoadAllData()
     {
         Core.DataStructures.LoadPlayerBools();
+        if (PlayerAlliances.Value)
+        {
+            Core.DataStructures.LoadPlayerAlliances();
+        }
         if (LevelingSystem.Value)
         {
             foreach (var loadFunction in loadLeveling)

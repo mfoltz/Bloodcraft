@@ -4,58 +4,44 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal class VBloodSystemPatch
+internal static class VBloodSystemPatch
 {
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+
+    static Dictionary<ulong, DateTime> lastUpdateCache = [];
 
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(VBloodSystem __instance)
     {
         NativeList<VBloodConsumed> events = __instance.EventList;
+        DateTime now = DateTime.Now;
         try
         {
-            List<VBloodConsumed> uniqueEvents = [];
-
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-                // Check if the event is already in the list
-                bool isDuplicate = false;
-                foreach (VBloodConsumed uniqueEvent in uniqueEvents)
-                {
-                    if (uniqueEvent.Source.Equals(vBloodConsumed.Source) && uniqueEvent.Target.Equals(vBloodConsumed.Target))
-                    {
-                        isDuplicate = true;
-                        break;
-                    }
-                }
-                // Add the event to the list if it is not a duplicate
-                if (!isDuplicate)
-                {
-                    uniqueEvents.Add(vBloodConsumed);
-                }
-            }
-
-            foreach (VBloodConsumed vBloodConsumed in uniqueEvents)
-            {
                 //Core.Log.LogInfo($"VBloodConsumed events: {events.Length} | Unique events: {uniqueEvents.Count}");
+                Entity player = vBloodConsumed.Target;
+                ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+
+                if (lastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
+                
+                lastUpdateCache[steamId] = now;
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
-                Entity player = vBloodConsumed.Target;
 
-                bool playerCheck = vBloodConsumed.Target.Has<PlayerCharacter>();
-
-                if (Plugin.LevelingSystem.Value && playerCheck) LevelingSystem.UpdateLeveling(player, vBlood);
-                if (Plugin.ExpertiseSystem.Value && playerCheck) ExpertiseSystem.UpdateExpertise(player, vBlood);
-                if (Plugin.BloodSystem.Value && playerCheck) BloodSystem.UpdateLegacy(player, vBlood);
-                if (Plugin.FamiliarSystem.Value && playerCheck) FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
-                if (Plugin.FamiliarSystem.Value && playerCheck) FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
+                if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(player, vBlood);
+                if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(player, vBlood);
+                if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(player, vBlood);
+                if (Plugin.FamiliarSystem.Value) FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
+                if (Plugin.FamiliarSystem.Value) FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
             }
         }
         catch (Exception e)

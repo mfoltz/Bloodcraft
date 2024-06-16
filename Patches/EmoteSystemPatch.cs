@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using User = ProjectM.Network.User;
+using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Patches;
 
@@ -83,7 +84,7 @@ public static class EmoteSystemPatch
 
             if (familiar == Entity.Null)
             {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable.");
+                HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable.");
                 return;
             }
 
@@ -98,8 +99,8 @@ public static class EmoteSystemPatch
                 data = (familiar, data.Item2);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
-             
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
+
+                HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
             }
             else if (familiar.Has<Disabled>())
             {
@@ -114,13 +115,13 @@ public static class EmoteSystemPatch
                 data = (Entity.Null, data.Item2);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
+                HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
             }
 
         }
         else
         {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar to enable or disable.");
+            HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar to enable or disable.");
         }
     }
     public static void CombatMode(Entity userEntity, Entity character, ulong playerId)
@@ -138,7 +139,7 @@ public static class EmoteSystemPatch
 
             if (familiar == Entity.Null)
             {
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
+                HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
                 return;
             }
 
@@ -163,7 +164,7 @@ public static class EmoteSystemPatch
                 aggroable.AggroFactor._Value = 1f;
                 familiar.Write(aggroable);
                 
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
+                HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
             }
             else // if not, disable combat
             {  
@@ -213,12 +214,12 @@ public static class EmoteSystemPatch
                     }
                     
                 }
-                ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
+                HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
             }
         }
         else
         {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
+            HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
         }
     }
 }

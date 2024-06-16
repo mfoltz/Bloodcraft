@@ -5,9 +5,9 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Leveling;
-
 public class PrestigeSystem
 {
     public enum PrestigeType
@@ -170,11 +170,11 @@ public class PrestigeSystem
 
             string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
 
-            ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
-            ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-            ctx.Reply($"Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>{percentageReductionString}</color>");
-            ctx.Reply($"Stat bonuses improvement: <color=green>{statGainString}</color>");
-            ctx.Reply($"Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>");
+            HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
+            HandleReply(ctx, $"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
+            HandleReply(ctx, $"Growth rate reduction from <color=#90EE90>{parsedPrestigeType}</color> prestige level: <color=yellow>{percentageReductionString}</color>");
+            HandleReply(ctx, $"Stat bonuses improvement: <color=green>{statGainString}</color>");
+            HandleReply(ctx, $"Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>");
         }
     }
 
@@ -316,7 +316,7 @@ public class PrestigeSystem
         float gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * prestigeLevel;
 
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
-        ctx.Reply($"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
+        HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
 
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel)
@@ -336,7 +336,7 @@ public class PrestigeSystem
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
 
-        ctx.Reply($"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+        HandleReply(ctx, $"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }
     public static void RemovePrestigeBuffs(ChatCommandContext ctx, int prestigeLevel)
     {

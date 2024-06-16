@@ -8,11 +8,12 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-class FamiliarPatches
+internal static class FamiliarPatches
 {
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -97,7 +98,7 @@ class FamiliarPatches
                             FamiliarSummonSystem.HandleFamiliar(user.LocalCharacter._Entity, entity);
                             bools["Binding"] = false;
                             Core.DataStructures.SavePlayerBools();
-                            ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.GetPrefabName()}</color>");
+                            HandleServerReply(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.GetPrefabName()}</color>");
                         }
                     }
                 }
@@ -148,5 +149,39 @@ class FamiliarPatches
         {
             entities.Dispose();
         }
-    }  
+    }
+
+    [HarmonyPatch(typeof(LinkMinionToOwnerOnSpawnSystem), nameof(LinkMinionToOwnerOnSpawnSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance) // get EntityOwner (familiar), apply ModifyTeamBuff
+    {
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
+                {
+                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                    if (Core.EntityManager.Exists(familiar) && familiar.Read<PrefabGUID>().GuidHash.Equals(entityOwner.Owner.Read<PrefabGUID>().GuidHash))
+                    {
+                        ModifyTeamBuff modifyTeamBuff = new()
+                        {
+                            Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam,
+                        };
+                        entity.Add<ModifyTeamBuff>();
+                        entity.Write(modifyTeamBuff);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo(ex);
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
 }

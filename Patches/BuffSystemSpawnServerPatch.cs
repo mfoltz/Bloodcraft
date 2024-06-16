@@ -5,7 +5,6 @@ using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -17,7 +16,7 @@ using Unity.Transforms;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-public class BuffPatch
+internal static class BuffSpawnSystemPatches
 {
     static readonly PrefabGUID draculaReturnHide = new(404387047);
     static readonly PrefabGUID draculaFinal = new(1269681960); // final stage buff Dracula, force him to evolve -2005193286 (ability group)
@@ -40,7 +39,7 @@ public class BuffPatch
             {
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
 
-                PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();    
+                PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
 
                 if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // 914043867 golem
                 {
@@ -58,7 +57,7 @@ public class BuffPatch
                         {
                             //Core.ServerGameManager.ForceCastAbilityGroup(familiar, 15);
                             //Core.Log.LogInfo("Forcing evolution...");
-                            
+
                             DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
                             ApplyBuffDebugEvent applyBuffDebugEvent = new()
                             {
@@ -70,7 +69,7 @@ public class BuffPatch
                                 User = player.Read<PlayerCharacter>().UserEntity,
                             };
                             // apply level up buff here
-                            debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);   
+                            debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                         }
                         if (PrefabGUID.Equals(swordBuff))
                         {
@@ -78,7 +77,7 @@ public class BuffPatch
                             if (Core.ServerGameManager.TryGetBuff(familiar, highlordSwordBuff.ToIdentifier(), out Entity swordPermabuff))
                             {
                                 //Core.Log.LogInfo("Highlord sword buff found.");
-                                if (swordPermabuff.Has<AmplifyBuff>()) swordPermabuff.Remove<AmplifyBuff>(); 
+                                if (swordPermabuff.Has<AmplifyBuff>()) swordPermabuff.Remove<AmplifyBuff>();
                             }
                         }
                     }
@@ -245,7 +244,7 @@ public class BuffPatch
                         {
                             if (Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(PrefabGUID.GuidHash, out var xpData))
                             {
-                                Core.Log.LogInfo("Handling werewolf familiar or geomancer...");
+                                //Core.Log.LogInfo("Handling werewolf familiar or geomancer...");
                                 FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, xpData.Key);
                             }
                         }
@@ -253,7 +252,7 @@ public class BuffPatch
                 }
             }
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Core.Log.LogInfo(ex);
         }
@@ -261,64 +260,5 @@ public class BuffPatch
         {
             entities.Dispose();
         }
-    }
-
-    [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(StatChangeMutationSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._StatChangeEventQuery.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (Plugin.BloodSystem.Value && Plugin.BloodQualityBonus.Value && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
-                {
-                    StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
-                    //statChangeEvent.StatChangeEntity.LogComponentTypes();
-                    BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
-                    Blood blood = statChangeEvent.Entity.Read<Blood>();
-                    BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
-                    ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-                    IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
-                    var bloodQualityBuff = statChangeEvent.Entity.ReadBuffer<BloodQualityBuff>();
-                    if (bloodHandler == null)
-                    {
-                        continue;
-                    }
-
-                    float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
-
-                    if (Plugin.PrestigeSystem.Value && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
-                    {
-                        legacyKey = (float)bloodPrestige * Plugin.PrestigeBloodQuality.Value;
-                        if (legacyKey > 0)
-                        {
-                            bloodQualityChange.Quality += legacyKey;
-                            bloodQualityChange.ForceReapplyBuff = true;
-                            entity.Write(bloodQualityChange);
-                        }
-                    }
-                    else if (!Plugin.PrestigeSystem.Value)
-                    {
-                        if (legacyKey > 0)
-                        {
-                            bloodQualityChange.Quality += legacyKey;
-                            bloodQualityChange.ForceReapplyBuff = true;
-                            entity.Write(bloodQualityChange);
-                        }
-                    }
-                }
-            }
-        }
-        catch (System.Exception ex)
-        {
-            Core.Log.LogInfo(ex);
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
+    } 
 }

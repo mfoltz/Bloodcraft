@@ -2,12 +2,8 @@
 using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
-using Steamworks;
 using Stunlock.Network;
 using Unity.Entities;
-using static Bloodcraft.Core;
-using Unity.Services.Authentication.Internal;
-using static Bloodcraft.Core.DataStructures;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -24,7 +20,6 @@ internal static class ServerBootstrapSystemPatch
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
-       
         if (!Core.DataStructures.PlayerBools.ContainsKey(steamId))
         {
             Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
@@ -38,7 +33,7 @@ internal static class ServerBootstrapSystemPatch
                 { "SpellLock", false },
                 { "Grouping", false },
                 { "Emotes", false },
-                {"Binding", false }
+                { "Binding", false }
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -124,10 +119,10 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.SavePlayerEnchanting();
             }
         }
-        
+
         if (Plugin.ExpertiseSystem.Value)
         {
-           
+
             if (!Core.DataStructures.PlayerSanguimancy.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
@@ -139,7 +134,7 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
                 Core.DataStructures.SavePlayerSpells();
             }
-            
+
 
             if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
             {
@@ -196,7 +191,7 @@ internal static class ServerBootstrapSystemPatch
             }
 
             if (!Core.DataStructures.PlayerLongbowExpertise.ContainsKey(steamId))
-            {       
+            {
                 Core.DataStructures.PlayerLongbowExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
                 Core.DataStructures.SavePlayerLongbowExpertise();
             }

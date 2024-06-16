@@ -124,7 +124,7 @@ internal static class CraftingPatches
                             {
                                 if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
                                 {
-                                    Core.Log.LogInfo($"Removing Craft: {itemPrefab.GetPrefabName()}");
+                                    //Core.Log.LogInfo($"Removing Craft: {itemPrefab.GetPrefabName()}");
                                     playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
                                     if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
                                     break;

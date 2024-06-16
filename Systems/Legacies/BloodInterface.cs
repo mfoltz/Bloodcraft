@@ -1,220 +1,218 @@
-﻿namespace Bloodcraft.Systems.Legacy
+﻿namespace Bloodcraft.Systems.Legacy;
+public interface IBloodHandler
 {
-    public interface IBloodHandler
+    void AddLegacy(ulong steamID, float experience);
+
+    void SaveChanges();
+
+    KeyValuePair<int, float> GetLegacyData(ulong steamID);
+
+    void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData);
+
+    BloodSystem.BloodType GetBloodType();
+}
+
+public static class BloodHandlerFactory
+{
+    public static IBloodHandler GetBloodHandler(BloodSystem.BloodType bloodType)
     {
-        void AddLegacy(ulong steamID, float experience);
-
-        void SaveChanges();
-
-        KeyValuePair<int, float> GetLegacyData(ulong steamID);
-
-        void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData);
-
-        BloodSystem.BloodType GetBloodType();
+        return bloodType switch
+        {
+            BloodSystem.BloodType.Worker => new WorkerHandler(),
+            BloodSystem.BloodType.Warrior => new WarriorHandler(),
+            BloodSystem.BloodType.Scholar => new ScholarHandler(),
+            BloodSystem.BloodType.Rogue => new RogueHandler(),
+            BloodSystem.BloodType.Mutant => new MutantHandler(),
+            BloodSystem.BloodType.VBlood => new VBloodHandler(),
+            BloodSystem.BloodType.Draculin => new DraculinHandler(),
+            BloodSystem.BloodType.Immortal => new ImmortalHandler(),
+            BloodSystem.BloodType.Creature => new CreatureHandler(),
+            BloodSystem.BloodType.Brute => new BruteHandler(),
+            _ => null,
+        };
     }
+}
 
-    public static class BloodHandlerFactory
+public abstract class BaseBloodHandler : IBloodHandler
+{
+    protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
+
+    public void AddLegacy(ulong steamID, float experience)
     {
-        public static IBloodHandler GetBloodHandler(BloodSystem.BloodType bloodType)
+        if (DataStructure.TryGetValue(steamID, out var currentData))
         {
-            return bloodType switch
-            {
-                BloodSystem.BloodType.Worker => new WorkerHandler(),
-                BloodSystem.BloodType.Warrior => new WarriorHandler(),
-                BloodSystem.BloodType.Scholar => new ScholarHandler(),
-                BloodSystem.BloodType.Rogue => new RogueHandler(),
-                BloodSystem.BloodType.Mutant => new MutantHandler(),
-                BloodSystem.BloodType.VBlood => new VBloodHandler(),
-                BloodSystem.BloodType.Draculin => new DraculinHandler(),
-                BloodSystem.BloodType.Immortal => new ImmortalHandler(),
-                BloodSystem.BloodType.Creature => new CreatureHandler(),
-                BloodSystem.BloodType.Brute => new BruteHandler(),
-                _ => null,
-            };
+            DataStructure[steamID] = new KeyValuePair<int, float>(currentData.Key, currentData.Value + experience);
         }
-    }
-
-    public abstract class BaseBloodHandler : IBloodHandler
-    {
-        protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
-
-        public void AddLegacy(ulong steamID, float experience)
+        else
         {
-            if (DataStructure.TryGetValue(steamID, out var currentData))
-            {
-                DataStructure[steamID] = new KeyValuePair<int, float>(currentData.Key, currentData.Value + experience);
-            }
-            else
-            {
-                DataStructure.Add(steamID, new KeyValuePair<int, float>(0, experience));
-            }
-        }
-
-        public KeyValuePair<int, float> GetLegacyData(ulong steamID)
-        {
-            if (DataStructure.TryGetValue(steamID, out var xpData))
-                return xpData;
-            return new KeyValuePair<int, float>(0, 0);
-        }
-
-        public void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData)
-        {
-            DataStructure[steamID] = xpData;
-        }
-
-        public abstract void SaveChanges();
-
-        public abstract BloodSystem.BloodType GetBloodType();
-    }
-
-    // Implementations for each weapon type
-    public class WorkerHandler : BaseBloodHandler
-    {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWorkerLegacy;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerWorkerLegacy();
-        }
-
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Worker;
+            DataStructure.Add(steamID, new KeyValuePair<int, float>(0, experience));
         }
     }
 
-    public class WarriorHandler : BaseBloodHandler
+    public KeyValuePair<int, float> GetLegacyData(ulong steamID)
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWarriorLegacy;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerWarriorLegacy();
-        }
-
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Warrior;
-        }
+        if (DataStructure.TryGetValue(steamID, out var xpData))
+            return xpData;
+        return new KeyValuePair<int, float>(0, 0);
     }
 
-    public class ScholarHandler : BaseBloodHandler
+    public void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData)
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerScholarLegacy;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerScholarLegacy();
-        }
-
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Scholar;
-        }
+        DataStructure[steamID] = xpData;
     }
 
-    public class RogueHandler : BaseBloodHandler
+    public abstract void SaveChanges();
+
+    public abstract BloodSystem.BloodType GetBloodType();
+}
+
+// Implementations for each weapon type
+public class WorkerHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWorkerLegacy;
+
+    public override void SaveChanges()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerRogueLegacy;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerRogueLegacy();
-        }
-
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Rogue;
-        }
+        Core.DataStructures.SavePlayerWorkerLegacy();
     }
 
-    public class MutantHandler : BaseBloodHandler
+    public override BloodSystem.BloodType GetBloodType()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMutantLegacy;
+        return BloodSystem.BloodType.Worker;
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerMutantLegacy();
-        }
+public class WarriorHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWarriorLegacy;
 
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Mutant;
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerWarriorLegacy();
     }
 
-    public class VBloodHandler : BaseBloodHandler
+    public override BloodSystem.BloodType GetBloodType()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerVBloodLegacy;
+        return BloodSystem.BloodType.Warrior;
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerVBloodLegacy();
-        }
+public class ScholarHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerScholarLegacy;
 
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.VBlood;
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerScholarLegacy();
     }
 
-    public class DraculinHandler : BaseBloodHandler
+    public override BloodSystem.BloodType GetBloodType()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerDraculinLegacy;
+        return BloodSystem.BloodType.Scholar;
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerDraculinLegacy();
-        }
+public class RogueHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerRogueLegacy;
 
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Draculin;
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerRogueLegacy();
     }
 
-    public class ImmortalHandler : BaseBloodHandler
+    public override BloodSystem.BloodType GetBloodType()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerImmortalLegacy;
+        return BloodSystem.BloodType.Rogue;
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerImmortalLegacy();
-        }
+public class MutantHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMutantLegacy;
 
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Immortal;
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerMutantLegacy();
     }
 
-    public class CreatureHandler : BaseBloodHandler
+    public override BloodSystem.BloodType GetBloodType()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCreatureLegacy;
+        return BloodSystem.BloodType.Mutant;
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerCreatureLegacy();
-        }
+public class VBloodHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerVBloodLegacy;
 
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Creature;
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerVBloodLegacy();
     }
 
-    public class BruteHandler : BaseBloodHandler
+    public override BloodSystem.BloodType GetBloodType()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerBruteLegacy;
+        return BloodSystem.BloodType.VBlood;
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerBruteLegacy();
-        }
+public class DraculinHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerDraculinLegacy;
 
-        public override BloodSystem.BloodType GetBloodType()
-        {
-            return BloodSystem.BloodType.Brute;
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerDraculinLegacy();
+    }
+
+    public override BloodSystem.BloodType GetBloodType()
+    {
+        return BloodSystem.BloodType.Draculin;
+    }
+}
+
+public class ImmortalHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerImmortalLegacy;
+
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerImmortalLegacy();
+    }
+
+    public override BloodSystem.BloodType GetBloodType()
+    {
+        return BloodSystem.BloodType.Immortal;
+    }
+}
+
+public class CreatureHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCreatureLegacy;
+
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerCreatureLegacy();
+    }
+
+    public override BloodSystem.BloodType GetBloodType()
+    {
+        return BloodSystem.BloodType.Creature;
+    }
+}
+
+public class BruteHandler : BaseBloodHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerBruteLegacy;
+
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerBruteLegacy();
+    }
+
+    public override BloodSystem.BloodType GetBloodType()
+    {
+        return BloodSystem.BloodType.Brute;
     }
 }

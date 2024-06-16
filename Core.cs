@@ -37,6 +37,7 @@ internal static class Core
     public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
     //public static WarEventSystem WarEventSystem { get; internal set; }
+    public static ModificationsRegistry ModificationsRegistry { get; internal set; }
 
     public static Unity.Mathematics.Random Random = new();
     public static WarEventRegistrySystem WarEventRegistrySystem { get; internal set; }
@@ -78,6 +79,7 @@ internal static class Core
         WarEventRegistrySystem = Server.GetExistingSystemManaged<WarEventRegistrySystem>();
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
+        ModificationsRegistry = ServerScriptMapper.GetSingleton<ModificationsRegistry>();
         //ZoomModifierBuffSystem = Server.GetOrCreateSystemManaged<ZoomModifierBuffSystem>();
         
         
@@ -439,17 +441,16 @@ internal static class Core
             get => playerBloodStats;
             set => playerBloodStats = value;
         }
-        // cache-only
 
-        private static Dictionary<ulong, List<Entity>> playerGroups = [];
+        private static Dictionary<ulong, HashSet<string>> playerAlliances = []; // userEntities of players in the same alliance
 
-        public static Dictionary<ulong, List<Entity>> PlayerGroups
+        public static Dictionary<ulong, HashSet<string>> PlayerAlliances
         {
-            get => playerGroups;
-            set => playerGroups = value;
+            get => playerAlliances;
+            set => playerAlliances = value;
         }
 
-
+        // cache-only
         private static Dictionary<ulong, List<(PrefabGUID, int)>> playerCraftingJobs = [];
 
         public static Dictionary<ulong, List<(PrefabGUID, int)>> PlayerCraftingJobs
@@ -466,6 +467,7 @@ internal static class Core
             {"Classes", JsonFiles.PlayerClassesJson },
             {"Prestiges", JsonFiles.PlayerPrestigesJson },
             {"PlayerBools", JsonFiles.PlayerBoolsJson},
+            {"PlayerAlliances", JsonFiles.PlayerAlliancesJson},
             {"Woodcutting", JsonFiles.PlayerWoodcuttingJson},
             {"Mining", JsonFiles.PlayerMiningJson},
             {"Fishing", JsonFiles.PlayerFishingJson},
@@ -501,7 +503,6 @@ internal static class Core
             {"BloodStats", JsonFiles.PlayerBloodStatsJson},
             {"FamiliarActives", JsonFiles.PlayerFamiliarActivesJson},
             {"FamiliarSets", JsonFiles.PlayerFamiliarSetsJson }
-
         };
 
         // Generic method to save any type of dictionary.
@@ -550,6 +551,8 @@ internal static class Core
         public static void LoadPlayerPrestiges() => LoadData(ref playerPrestiges, "Prestiges");
 
         public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
+
+        public static void LoadPlayerAlliances() => LoadData(ref playerAlliances, "PlayerAlliances");
 
         public static void LoadPlayerWoodcutting() => LoadData(ref playerWoodcutting, "Woodcutting");
 
@@ -645,6 +648,8 @@ internal static class Core
         public static void SavePlayerPrestiges() => SaveData(PlayerPrestiges, "Prestiges");
 
         public static void SavePlayerBools() => SaveData(PlayerBools, "PlayerBools");
+
+        public static void SavePlayerAlliances() => SaveData(PlayerAlliances, "PlayerAlliances");
 
         public static void SavePlayerWoodcutting() => SaveData(PlayerWoodcutting, "Woodcutting");
 
@@ -766,6 +771,7 @@ internal static class Core
         public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
         public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigPath, "player_classes.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
+        public static readonly string PlayerAlliancesJson = Path.Combine(Plugin.ConfigPath, "player_alliances.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
         public static readonly string PlayerFishingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_fishing.json");

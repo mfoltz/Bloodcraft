@@ -3,6 +3,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Core;
+using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Familiars
 {
@@ -94,8 +95,7 @@ namespace Bloodcraft.Systems.Familiars
                 currentList.Add(familiarKey);
                 FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
 
-                var message = $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>";
-                ServerChatUtils.SendSystemMessageToClient(Core.EntityManager, user, message);
+                HandleServerReply(Core.EntityManager, user, $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
             }
         }
         static bool RollForChance(float chance)

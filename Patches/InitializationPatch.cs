@@ -1,9 +1,5 @@
-using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
-using Stunlock.Core;
-using Unity.Collections;
-using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 

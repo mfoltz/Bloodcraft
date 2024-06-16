@@ -6,21 +6,26 @@ using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Services;
 public class RaidService
 {
+    static readonly bool PlayerAlliances = Plugin.PlayerAlliances.Value;
+
+    static readonly bool DamageIntruders = Plugin.DamageIntruders.Value;
     static EntityManager EntityManager => Core.EntityManager;
     static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly PrefabGUID debuff = new(-1572696947);
 
-    static HashSet<Entity> onlinePlayers = [];
-    public static Dictionary<Entity, HashSet<Entity>> raidParticipants = []; // castleHeart entity and players allowed in territory for the raid (owner clan, raiding clan)
+    //static Dictionary<string, Entity> onlinePlayers = []; // player name and userEntity
+    static Dictionary<Entity, HashSet<Entity>> raidParticipants = []; // castleHeart entity and players allowed in territory for the raid (owner clan, raiding clan, alliance members if applicable)
 
     static bool active = false;
-   
+    static DateTime lastMessage = DateTime.MinValue;
+
     public static void StartRaidMonitor(Entity raider, Entity breached)
     {
         Entity heartEntity = breached.Has<CastleHeartConnection>() ? breached.Read<CastleHeartConnection>().CastleHeartEntity._Entity : Entity.Null;
@@ -29,16 +34,17 @@ public class RaidService
         {
             Core.Log.LogInfo("Starting raid monitor...");
 
-            raidParticipants.Clear();
-            onlinePlayers = GetUsers().ToHashSet<Entity>();
-
+            raidParticipants.Clear(); // clear previous raid participants, this should be empty here anyway but just incase
+            //onlinePlayers = GetUsers().Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity }).ToDictionary(user => user.CharacterName, user => user.Entity); // get map of online player names to entities for easier handling
+            
             if (!heartEntity.Equals(Entity.Null)) raidParticipants.TryAdd(heartEntity, GetRaidParticipants(raider, breached));
             
-            Core.StartCoroutine(MonitorInterlopers());
+            Core.StartCoroutine(RaidMonitor());
         }
         else if (active) // if active update onlinePlayers and add new territory participants
         {
-            onlinePlayers = GetUsers().ToHashSet<Entity>();
+            //onlinePlayers = GetUsers().Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity }).ToDictionary(user => user.CharacterName, user => user.Entity); // update player map
+            
             if (!heartEntity.Equals(Entity.Null)) raidParticipants.TryAdd(heartEntity, GetRaidParticipants(raider, breached));
         }
     }
@@ -47,33 +53,55 @@ public class RaidService
         HashSet<Entity> participants = [];
 
         Entity playerUserEntity = breached.Read<UserOwner>().Owner._Entity;
-        User playerUser = playerUserEntity.Read<User>();
+        User playerUser = playerUserEntity.Read<User>(); // add alliance members of castle owner, should raid alliance members be included here? probably
 
         Entity clanEntity = EntityManager.Exists(playerUser.ClanEntity._Entity) ? playerUser.ClanEntity._Entity : Entity.Null;
 
-        if (!clanEntity.Equals(Entity.Null))
+        if (!clanEntity.Equals(Entity.Null)) // add owner clan members to raid participants
         {
             var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
             for (int i = 0; i < userBuffer.Length; i++)
             {
-                participants.Add(userBuffer[i].UserEntity);
+                participants.Add(userBuffer[i].UserEntity); // add clan members without checking if online since they might be in the territory and don't want them to take damage
             }
         }
-        else
+        else // if no clan just add owner to raid participants
         {
             participants.Add(playerUserEntity);
+        }
+
+        if (PlayerAlliances && Core.DataStructures.PlayerAlliances.TryGetValue(playerUser.PlatformId, out var alliance)) //check if owner is alliance leader, add members to raid participants
+        {
+            foreach (string name in alliance)
+            {
+                if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
+            }
+        }
+        else if (PlayerAlliances)
+        {
+            foreach (var groupEntry in Core.DataStructures.PlayerAlliances) // check if owner is in an alliance, add members to raid participants
+            {
+                if (groupEntry.Value.Contains(playerUser.CharacterName.Value)) 
+                {
+                    foreach (string name in groupEntry.Value)
+                    {
+                        if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
+                    }
+                    break;
+                }
+            }
         }
 
         playerUserEntity = raider.Read<PlayerCharacter>().UserEntity;
         playerUser = playerUserEntity.Read<User>();
         clanEntity = EntityManager.Exists(playerUser.ClanEntity._Entity) ? playerUser.ClanEntity._Entity : Entity.Null;
 
-        if (!clanEntity.Equals(Entity.Null))
+        if (!clanEntity.Equals(Entity.Null)) // add raider clan members to raid participants
         {
             var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
             for (int i = 0; i < userBuffer.Length; i++)
             {
-                participants.Add(userBuffer[i].UserEntity);
+                if (userBuffer[i].UserEntity.Read<User>().IsConnected) participants.Add(userBuffer[i].UserEntity); // for raiders only add clan members that are online
             }
         }
         else
@@ -81,28 +109,49 @@ public class RaidService
             participants.Add(playerUserEntity);
         }
 
+        if (PlayerAlliances && Core.DataStructures.PlayerAlliances.TryGetValue(playerUser.PlatformId, out var raiderAlliance)) //check if raider is an alliance leader, add members to raid participants
+        {
+            foreach (string name in raiderAlliance)
+            {
+                if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
+            }
+        }
+        else if (PlayerAlliances)
+        {
+            foreach (var groupEntry in Core.DataStructures.PlayerAlliances) // check if raider is in an alliance, add members to raid participants
+            {
+                if (groupEntry.Value.Contains(playerUser.CharacterName.Value)) 
+                {
+                    foreach (string name in groupEntry.Value)
+                    {
+                        if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
+                    }
+                    break;
+                }
+            }
+        }
+
         return participants;
     }
-    static IEnumerator MonitorInterlopers()
+    static IEnumerator RaidMonitor()
     {
         active = true;
         yield return null;
         while (true)
         {
-            //float raidDuration = (float)DateTime.Now.Subtract(raidStart).TotalSeconds;
             if (raidParticipants.Keys.Count == 0)
             {
                 active = false;
-                onlinePlayers.Clear();
                 Core.Log.LogInfo("Stopping raid monitor...");
                 yield break;
             }
-
-            foreach (Entity userEntity in onlinePlayers) // validate player presence in raided territories
+            bool sendMessage = (DateTime.Now - lastMessage).TotalSeconds >= 10;
+            List<Entity> heartEntities = [.. raidParticipants.Keys];
+            foreach (KeyValuePair<string, Entity> player in playerCache) // validate player presence in raided territories
             {
-                List<Entity> heartEntities = [..raidParticipants.Keys];
-
-                Entity character = userEntity.Read<User>().LocalCharacter._Entity;
+                Entity userEntity = player.Value;
+                User user = userEntity.Read<User>();
+                Entity character = user.LocalCharacter._Entity;
                 if (character.TryGetComponent(out TilePosition pos))
                 {
                     heartEntities.ForEach(heartEntity =>
@@ -115,7 +164,7 @@ public class RaidService
                         }
                         if (!raidParticipants[heartEntity].Contains(userEntity) && CastleTerritoryExtensions.IsTileInTerritory(EntityManager, pos.Tile, ref castleHeart.CastleTerritoryEntity, out CastleTerritory _))
                         {
-                            if (!ServerGameManager.TryGetBuff(character, debuff.ToIdentifier(), out Entity _))
+                            if (DamageIntruders && !ServerGameManager.TryGetBuff(character, debuff.ToIdentifier(), out Entity _))
                             {
                                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                                 {
@@ -133,11 +182,13 @@ public class RaidService
                                     debuffEntity.Write(new BlockHealBuff { PercentageBlocked = 1f });
                                 }
                             }
+                            if (sendMessage) HandleServerReply(EntityManager, user, "You are not allowed in this territory during a raid.");                
                         }
                     });
                 }
                 yield return null;
             }
+            if (sendMessage) lastMessage = DateTime.Now;
             yield return null;
         }
     }

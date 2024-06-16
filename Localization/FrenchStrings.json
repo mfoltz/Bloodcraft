@@ -145,6 +145,10 @@
             "Translation": "atteint"
         },
         {
+            "Original": "no",
+            "Translation": "non"
+        },
+        {
             "Original": "do",
             "Translation": "faire"
         },
@@ -413,8 +417,6 @@
             "Translation": "actifs"
         },
         {
-
-
             "Original": "cleared",
             "Translation": "effacé"
         },

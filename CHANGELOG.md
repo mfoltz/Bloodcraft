@@ -1,3 +1,12 @@
+`0.9.4`
+- applied localization to all messages in mod as was meant to be done in 0.9.3
+- added config option for exp share distance
+- groups rebranded to alliances, exp sharing unchanged if leveling is active, for raid monitor the raid instigator's alliance members will be allowed in the territory as will the alliance members of the castle owner (clans of both still included by default)
+- fmailiar minion summons should be allied with players now although I haven't quite picked up on when they decide to do this or not which is making it difficult to verify
+- added cooldown for VBloodConsumed processing that should take care of multiple gains if more than 1 player is participating in the feed
+- Shadow VBloods obtainable
+- config option to change exp sharing distance
+
 `0.9.3`
 - changed handling of VBloodConsumed events to prevent feeds with multiple players providing gains equal to the number of players per player (this one is difficult to test alone, fingers crossed :P)
 - messages to players now localized if the base game supports the language (thanks ChatGPT <3 if any of the translations are wrong or offensive it is not intentional, probably missed a word or two here and there as well but pretty happy with this for first pass)

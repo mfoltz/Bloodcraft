@@ -153,6 +153,10 @@
             "Translation": "ない"
         },
         {
+            "Original": "no",
+            "Translation": "いいえ"
+        },
+        {
             "Original": "required",
             "Translation": "必要な"
         },

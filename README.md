@@ -67,6 +67,9 @@ UPDATED (6/13)
 - `.listPlayerPrestiges`
   - Lists prestiges available to the player.
   - Shortcut: *.lpp*
+- `.listPrestigeBuffs`
+  - Lists prestige buffs available.
+  - Shortcut: *.lpb*
 - `.toggleGrouping`
   - Toggles being able to be invited to group with players not in clan for exp sharing.
   - Shortcut: *.grouping*

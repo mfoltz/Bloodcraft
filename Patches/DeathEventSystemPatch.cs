@@ -4,8 +4,6 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.CastleBuilding;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
@@ -89,7 +87,7 @@ internal static class DeathEventListenerSystemPatch
                         if (Familiars) FamiliarLevelingSystem.UpdateFamiliar(followedPlayer, deathEvent.Died);
                     }
                 }
-                else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // player summon kills
+                else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>()) // player summon kills
                 {
                     Entity killer = deathEvent.Killer.Read<EntityOwner>().Owner;
                     if (!hasVBloodConsumeSource || gateBoss)

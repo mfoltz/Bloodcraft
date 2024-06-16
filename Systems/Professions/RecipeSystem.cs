@@ -3,8 +3,6 @@ using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Systems.Professions;
-
-
 public class RecipeSystem
 {
     static readonly PrefabGUID advancedGrinder = new(-178579946);
