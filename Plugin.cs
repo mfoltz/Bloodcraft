@@ -377,7 +377,7 @@ public class Plugin : BasePlugin
 
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
         _playerAlliances = InitConfigEntry("Config", "PlayerAlliances", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
-        _maxAllianceSize = InitConfigEntry("Config", "MaxGroupSize", 5, "The maximum number of players that can share experience in a group.");
+        _maxAllianceSize = InitConfigEntry("Config", "MaxAllianceSize", 5, "The maximum number of players that can share experience in a group.");
         _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is about 5 floor tile lengths.");
 
         _expertiseSystem = InitConfigEntry("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");

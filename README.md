@@ -70,18 +70,21 @@ UPDATED (6/13)
 - `.listPrestigeBuffs`
   - Lists prestige buffs available.
   - Shortcut: *.lpb*
-- `.toggleGrouping`
-  - Toggles being able to be invited to group with players not in clan for exp sharing.
-  - Shortcut: *.grouping*
-- `.groupAdd [Player]`
-  - Adds player to group for exp sharing if they permit it in settings.
+- `.toggleAlliances`
+  - Toggles alliance invites.
+  - Shortcut: *.invites*
+- `.allianceAdd [Player]`
+  - Adds player to alliance.
   - Shortcut: *.ga [Player]*
-- `.groupRemove [Player]`
-  - Removes player from group for exp sharing.
-  - Shortcut: *.gr [Player]*
-- `.groupDisband`
-  - Disbands exp sharing group.
+- `.allianceRemove [Player]`
+  - Removes player from alliance.
+  - Shortcut: *.ar [Player]*
+- `.allianceDisband`
+  - Disbands alliance.
   - Shortcut: *.disband*
+- `.listAllianceMembers`
+  - Lists alliance members.
+  - Shortcut: *.lam*
 - `.chooseClass [Class]`
   - Chooses class (see options with .classes)
   - Shortcut: *.cc [Class]*
@@ -200,10 +203,12 @@ UPDATED (6/13)
 ## Configuration
 
 ### General
-- **LanguageLocalization**: `LanguageLocalization` (string, default: English)
+- **Language Localization**: `LanguageLocalization` (string, default: English)
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
-- **RaidMonitor**: `PreventRaidInterference` (bool, default: false)
+- **Raid Monitor**: `PreventRaidInterference` (bool, default: false)
   Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed unpunished in territory for duration of the raid once breach by raiders is detected).
+- **Damage Intruders**: `DamageIntruders` (bool, default: false)
+  Enable or disable damaging raid intruders if RaidMonitor is enabled. They will be unable to heal for the duration of the debuff.
   
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
@@ -214,29 +219,29 @@ UPDATED (6/13)
   The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list.
 - **Prestige Levels to Unlock Class Spells:** `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3")
   The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.
-- **Blood Knight Buffs:** BloodKnightBuffs (string, default: "1828387635,-714434113,-534491790,-1055766373")
+- **Blood Knight Buffs:** `BloodKnightBuffs` (string, default: "1828387635,-714434113,-534491790,-1055766373")
   The PrefabGUID hashes for blood knight leveling blood buffs.
-- **Blood Knight Spells:** BloodKnightSpells (string, default: "-433204738,-1161896955,1957691133,-7407393")
+- **Blood Knight Spells:** `BloodKnightSpells` (string, default: "-433204738,-1161896955,1957691133,-7407393")
   Blood Knight shift spells, granted at levels of prestige.
-- **Demon Hunter Buffs:** DemonHunterBuffs (string, default: "-154702686,-285745649,-1510965956,-536284884")
+- **Demon Hunter Buffs:** `DemonHunterBuffs` (string, default: "-154702686,-285745649,-1510965956,-536284884")
   The PrefabGUID hashes for demon hunter leveling blood buffs.
-- **Demon Hunter Spells:** DemonHunterSpells (string, default: "-433204738,1611191665,-328617085,-1161896955")
+- **Demon Hunter Spells:** `DemonHunterSpells` (string, default: "-433204738,1611191665,-328617085,-1161896955")
   Demon Hunter shift spells, granted at levels of prestige.
-- **Vampire Lord Buffs:** VampireLordBuffs (string, default: "-1266262267,-1413561088,1103099361,1558171501")
+- **Vampire Lord Buffs:** `VampireLordBuffs` (string, default: "-1266262267,-1413561088,1103099361,1558171501")
   The PrefabGUID hashes for vampire lord leveling blood buffs.
-- **Vampire Lord Spells:** VampireLordSpells (string, default: "-433204738,716346677,1450902136,-254080557")
+- **Vampire Lord Spells:** `VampireLordSpells` (string, default: "-433204738,716346677,1450902136,-254080557")
   Vampire Lord shift spells, granted at levels of prestige.
-- **Shadow Blade Buffs:** ShadowBladeBuffs (string, default: "894725875,997154800,-1576592687,-285745649")
+- **Shadow Blade Buffs:** `ShadowBladeBuffs` (string, default: "894725875,997154800,-1576592687,-285745649")
   The PrefabGUID hashes for shadow blade leveling blood buffs.
-- **Shadow Blade Spells:** ShadowBladeSpells (string, default: "-433204738,94933870,642767950,1922493152")
+- **Shadow Blade Spells:** `ShadowBladeSpells` (string, default: "-433204738,94933870,642767950,1922493152")
   Shadow Blade shift spells, granted at levels of prestige.
-- **Arcane Sorcerer Buffs:** ArcaneSorcererBuffs (string, default: "-901503997,884683323,-993492354,-1859298707")
+- **Arcane Sorcerer Buffs:** `ArcaneSorcererBuffs` (string, default: "-901503997,884683323,-993492354,-1859298707")
   The PrefabGUID hashes for arcane sorcerer leveling blood buffs.
-- **Arcane Sorcerer Spells:** ArcaneSorcererSpells (string, default: "-433204738,495259674,1217615468,-1503327574")
+- **Arcane Sorcerer Spells:** `ArcaneSorcererSpells` (string, default: "-433204738,495259674,1217615468,-1503327574")
   Arcane Sorcerer shift spells, granted at levels of prestige.
-- **Death Mage Buffs:** DeathMageBuffs (string, default: "1643157297,1159173627,1006510207,997154800")
+- **Death Mage Buffs:** `DeathMageBuffs` (string, default: "1643157297,1159173627,1006510207,997154800")
   The PrefabGUID hashes for death mage leveling blood buffs.
-- **Death Mage Spells:** DeathMageSpells (string, default: "-433204738,234226418,1619461812,1006960825")
+- **Death Mage Spells:** `DeathMageSpells` (string, default: "-433204738,234226418,1619461812,1006960825")
   Demon Hunter shift spells, granted at levels of prestige.
 - **Max Player Level**: `MaxLevel` (int, default: 90)  
   The maximum level a player can reach.
@@ -257,15 +262,17 @@ UPDATED (6/13)
 - **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)  
   The multiplier for experience gained from war event trash spawns.
 - **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0.2)  
-  The multiplier for experience gained from unit spawners.
+  The multiplier for experience gained from unit spawners (vermin nest, graves).
 - **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)  
   Multiplier for experience gained from group kills.
-- **Scaling Leveling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
+- **Experience Share Distance**: `ExpShareDistance` (float, default: 25)
+  Default is about 5 floor tile lengths.
+- **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
-- **Player Grouping**: `PlayerGrouping` (bool, default: false)  
-  Enable or disable the ability to group with players not in your clan for experience sharing.
-- **Max Group Size**: `MaxGroupSize` (int, default: 5)  
-  The maximum number of players that can share experience in a group.
+- **Player Alliances**: `PlayerGrouping` (bool, default: false)  
+  Enable or disable player alliances.
+- **Max Alliance Size**: `MaxAllianceSize` (int, default: 5)  
+  The maximum number of players that can form an alliance.
 - **Change Class Item**: `ChangeClassItem` (int, default: 0)  
   Item PrefabGUID for changing classes.
 - **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 0)  
