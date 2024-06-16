@@ -5,7 +5,6 @@
 - fmailiar minion summons should be allied with players now although I haven't quite picked up on when they decide to do this or not which is making it difficult to verify
 - added cooldown for VBloodConsumed processing that should take care of multiple gains if more than 1 player is participating in the feed
 - Shadow VBloods obtainable
-- config option to change exp sharing distance
 
 `0.9.3`
 - changed handling of VBloodConsumed events to prevent feeds with multiple players providing gains equal to the number of players per player (this one is difficult to test alone, fingers crossed :P)
