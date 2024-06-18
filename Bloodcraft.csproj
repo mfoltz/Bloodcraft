@@ -4,10 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>0.9.4</Version>
+	<Version>0.9.6</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-	<BepInExPluginGuid>com.zfolmt.Bloodcraft</BepInExPluginGuid>
+	<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>
 	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 

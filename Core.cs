@@ -1,4 +1,3 @@
-using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Patches;
@@ -22,7 +21,6 @@ using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft;
-
 internal static class Core
 {
     public static World Server { get; } = GetWorld("Server") ?? throw new System.Exception("There is no Server world (yet)...");
@@ -32,7 +30,6 @@ internal static class Core
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
     public static DebugEventsSystem DebugEventsSystem { get; internal set; }
     public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
-
     public static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem { get; internal set; }
     public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
@@ -451,12 +448,21 @@ internal static class Core
         }
 
         // cache-only
+
         private static Dictionary<ulong, List<(PrefabGUID, int)>> playerCraftingJobs = [];
 
         public static Dictionary<ulong, List<(PrefabGUID, int)>> PlayerCraftingJobs
         {
             get => playerCraftingJobs;
             set => playerCraftingJobs = value;
+        }
+
+        private static Dictionary<ulong, int> playerMaxWeaponLevels = [];
+
+        public static Dictionary<ulong, int> PlayerMaxWeaponLevels
+        {
+            get => playerMaxWeaponLevels;
+            set => playerMaxWeaponLevels = value;
         }
 
 
@@ -528,7 +534,7 @@ internal static class Core
                 }
                 else
                 {
-                    var data = System.Text.Json.JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
                     dataStructure = data ?? []; // Ensure non-null assignment
                 }
             }
@@ -634,11 +640,11 @@ internal static class Core
             }
             catch (IOException ex)
             {
-                Log.LogError($"Failed to write {key} data to file: {ex.Message}");
+                Log.LogInfo($"Failed to write {key} data to file: {ex.Message}");
             }
-            catch (System.Text.Json.JsonException ex)
+            catch (JsonException ex)
             {
-                Log.LogError($"JSON serialization error when saving {key} data: {ex.Message}");
+                Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");

@@ -180,6 +180,15 @@ public class RaidService
                                 {
                                     debuffEntity.Add<BlockHealBuff>();
                                     debuffEntity.Write(new BlockHealBuff { PercentageBlocked = 1f });
+                                    if (debuffEntity.TryGetComponent(out LifeTime lifeTime))
+                                    {
+                                        lifeTime.Duration = 10f;
+                                        debuffEntity.Write(lifeTime);
+                                    }
+                                    var buffer = debuffEntity.ReadBuffer<CreateGameplayEventsOnTick>();
+                                    CreateGameplayEventsOnTick bufferEntry = buffer[0];
+                                    bufferEntry.MaxTicks = 10;
+                                    buffer[0] = bufferEntry;
                                 }
                             }
                             if (sendMessage) HandleServerReply(EntityManager, user, "You are not allowed in this territory during a raid.");                

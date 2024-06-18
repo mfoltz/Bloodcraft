@@ -6,8 +6,7 @@ using Unity.Entities;
 using Unity.Transforms;
 
 namespace Bloodcraft.Systems.Familiars;
-
-internal class FamiliarSummonSystem
+internal static class FamiliarSummonSystem
 {
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
 
@@ -207,6 +206,7 @@ internal class FamiliarSummonSystem
         // testing
         //NameableInteractable nameableInteractable = new NameableInteractable { Name = "Bob", OnlyAllyRename = true, OnlyAllySee = false };
         //Core.EntityManager.SetComponentData(familiar, nameableInteractable);
+        
     }
     static void ModifyCollision(Entity familiar)
     {
@@ -246,5 +246,4 @@ internal class FamiliarSummonSystem
             return Entity.Null;
         }
     }
-
 }

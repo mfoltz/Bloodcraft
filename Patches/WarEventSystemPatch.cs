@@ -4,8 +4,10 @@ using ProjectM.Gameplay.WarEvents;
 using ProjectM.Shared.WarEvents;
 using Unity.Collections;
 using Unity.Entities;
-/*
 
+namespace Bloodcraft.Patches;
+
+/*
 [HarmonyPatch]
 internal class WarEventSystemPatch
 {
@@ -37,6 +39,4 @@ internal class WarEventSystemPatch
     }
    
 }
-
-
 */

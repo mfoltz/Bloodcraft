@@ -1,3 +1,14 @@
+`0.9.6`
+- if leveling is not active, unarmed weapon level will match the highest weapon level you've equipped (cache only, will need to equip a weapon at least once after restarts)
+- added handling for removing lingering weapon level on player gearscore if leveling was on and then turned off
+- scaffolding for clan-based alliances in and seems to be working but locking that to 'false' in config until I have a bit more time to test it
+- PlayerCache now clears before updating, should fix any errors that previously popped up in console
+- duration for raid debuff increased to 10 seconds
+
+`0.9.5`
+- teleporting now correctly summons familiar again upon second attempt of waygate use so it is with you after traveling
+- familiar actives data cleared on server start to prevent issues with being unable to bind/unbind again until using .resetfams
+
 `0.9.4`
 - applied localization to all messages in mod as was meant to be done in 0.9.3
 - added config option for exp share distance

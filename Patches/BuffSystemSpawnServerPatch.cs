@@ -237,6 +237,7 @@ internal static class BuffSpawnSystemPatches
                 {
                     if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                     {
+                        
                         Entity player = entity.Read<Buff>().Target.Read<Follower>().Followed._Value;
                         ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);

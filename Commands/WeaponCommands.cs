@@ -319,7 +319,7 @@ internal static class WeaponCommands
             HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
             return;
         }
-        if (!Plugin.ShiftSlots.Value)
+        if (!Plugin.ShiftSlot.Value)
         {
             HandleReply(ctx, "Shift slots are not enabled.");
             return;

@@ -27,7 +27,6 @@ internal static class VBloodSystemPatch
         {
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-                //Core.Log.LogInfo($"VBloodConsumed events: {events.Length} | Unique events: {uniqueEvents.Count}");
                 Entity player = vBloodConsumed.Target;
                 ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 

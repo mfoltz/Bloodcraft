@@ -133,9 +133,14 @@ internal static class FamiliarPatches
                     {
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
+                        ulong steamID = userEntity.Read<User>().PlatformId;
                         if (Core.EntityManager.Exists(familiar) && !familiar.Has<Disabled>()) 
                         {
-                            EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, userEntity.Read<User>().PlatformId); // auto dismiss familiar 
+                            EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, steamID); // auto dismiss familiar 
+                        }
+                        else if (Core.EntityManager.Exists(familiar) && familiar.Has<Disabled>())
+                        {
+                            EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, steamID); // auto dismiss familiar 
                         }
                     }
                 }         

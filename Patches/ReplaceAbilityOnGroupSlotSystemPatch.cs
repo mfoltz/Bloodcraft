@@ -12,6 +12,12 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 {
     public static Dictionary<PrefabGUID, int> ClassSpells = [];
 
+    static readonly bool UnarmedSlots = Plugin.UnarmedSlots.Value;
+
+    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
+
+    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
@@ -25,11 +31,11 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (Plugin.UnarmedSlots.Value && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var unarmedSpells))
+                    if (UnarmedSlots && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("unarmed") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var unarmedSpells))
                     {
                         HandleUnarmed(entity, character, unarmedSpells, steamId);
                     }
-                    else if (Plugin.PrestigeSystem.Value && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("weapon") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var playerSpells) && !playerSpells.ClassSpell.Equals(0))
+                    else if (Prestige && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("weapon") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var playerSpells) && !playerSpells.ClassSpell.Equals(0))
                     {
                         HandleWeapon(entity, character, steamId, playerSpells);
                     }
@@ -52,6 +58,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
     static void HandleUnarmed(Entity entity, Entity player, (int, int, int) playerSpells, ulong steamId)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
+
         if (!playerSpells.Item1.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()

@@ -218,7 +218,7 @@ public class PrestigeSystem
         debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
         if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buff))
         {
-            Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
+            //Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
             //buff.LogComponentTypes();
             if (buff.Has<RemoveBuffOnGameplayEvent>())
             {

@@ -1,6 +1,6 @@
 ## Table of Contents
 
-UPDATED (6/13)
+UPDATED (6/16)
 
 - [Features](#features)
 - [Commands](#commands)
@@ -193,9 +193,6 @@ UPDATED (6/13)
 - `.setFamiliarLevel [Level]` 🔒
   - Set current familiar level. Rebind to force updating stats if that doesn't happen when this is used.
   - Shortcut: *.sfl [Level]*
-- `.getFamiliarStats`
-  - Display current familiar stats (WIP).
-  - Shortcut: *.get fs*
 - `.resetFamiliars`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.resetfams*

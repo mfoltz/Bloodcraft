@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Shared;

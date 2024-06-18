@@ -91,20 +91,25 @@ internal class FamiliarService
 
                 if (follower.Followed._Value.Has<PlayerCharacter>())
                 {
+                    Entity playerFamiliar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value); 
                     ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.Item2.Equals(PrefabGUID.GuidHash) && Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(PrefabGUID.GuidHash, out var xpData))
+
+                    if (!Core.EntityManager.Exists(playerFamiliar) || playerFamiliar.Equals(Entity.Null))
                     {
-                        if (!actives.Item1.Equals(Entity.Null) && !Core.EntityManager.Exists(actives.Item1))
+                        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives))
                         {
                             actives = new(Entity.Null, 0);
                             Core.DataStructures.FamiliarActives[steamId] = actives;
                             Core.DataStructures.SavePlayerFamiliarActives();
                         }
-                        else
-                        {
-                            FamiliarSummonSystem.HandleFamiliarModifications(follower.Followed._Value, familiar, xpData.Key);
-                        }
                     }
+                    else if (Core.EntityManager.Exists(playerFamiliar) && playerFamiliar.Read<PrefabGUID>().GuidHash.Equals(PrefabGUID.GuidHash))
+                    {
+                        if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
+                        DestroyUtility.CreateDestroyEvent(Core.EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
+                        Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
+                        Core.DataStructures.SavePlayerFamiliarActives();
+                    }            
                 }
             }
         }
