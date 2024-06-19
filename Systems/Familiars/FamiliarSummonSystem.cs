@@ -89,7 +89,6 @@ internal static class FamiliarSummonSystem
         bloodConsumeSource.BloodQuality = level / (float)Plugin.MaxFamiliarLevel.Value * 100;
         bloodConsumeSource.CanBeConsumed = false;
         familiar.Write(bloodConsumeSource);
-
         familiar.Add<BlockFeedBuff>();
     }
     public static void ModifyDamageStats(Entity familiar, int level)
@@ -244,6 +243,6 @@ internal static class FamiliarSummonSystem
                 }
             }
             return Entity.Null;
-        }
+        } 
     }
 }

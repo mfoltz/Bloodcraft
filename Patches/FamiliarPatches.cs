@@ -15,6 +15,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class FamiliarPatches
 {
+    static readonly PrefabGUID dominateBuff = new(-1447419822);
+
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
@@ -134,6 +136,12 @@ internal static class FamiliarPatches
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
+
+                        if (Core.ServerGameManager.TryGetBuff(entityOwner.Owner, dominateBuff.ToIdentifier(), out Entity _))
+                        {
+                            continue;
+                        }
+
                         if (Core.EntityManager.Exists(familiar) && !familiar.Has<Disabled>()) 
                         {
                             EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, steamID); // auto dismiss familiar 

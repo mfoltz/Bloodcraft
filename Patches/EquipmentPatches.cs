@@ -194,6 +194,7 @@ internal static class EquipmentPatches
             entities.Dispose();
         }
     }
+
     [HarmonyPatch(typeof(ArmorLevelSystem_Spawn), nameof(ArmorLevelSystem_Spawn.OnUpdate))]
     [HarmonyPostfix]
     static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
@@ -376,8 +377,6 @@ internal static class EquipmentPatches
                             }
                         }
                     }
-
-
                 }
             }
         }

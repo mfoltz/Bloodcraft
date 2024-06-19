@@ -119,7 +119,9 @@ public class LevelingSystem
         float3 killerPosition = killer.Read<Translation>().Value;
         User killerUser = userEntity.Read<User>();
         HashSet<Entity> players = [killer];
+
         // check for exp sharing group here too
+        /*
         if (PlayerAlliances && Core.DataStructures.PlayerAlliances.TryGetValue(killerUser.PlatformId, out var group)) //check if group leader, add members
         {
             foreach (string name in group)
@@ -154,6 +156,28 @@ public class LevelingSystem
                 }
             }
         }
+        */
+        if (PlayerAlliances)
+        {
+            foreach (var groupEntry in Core.DataStructures.PlayerAlliances)
+            {
+                if (groupEntry.Value.Contains(killerUser.CharacterName.Value))
+                {
+                    foreach (string name in groupEntry.Value)
+                    {
+                        if (PlayerService.playerCache.TryGetValue(name, out var player))
+                        {
+                            //Core.Log.LogInfo($"Adding {name} to participants if online...");
+                            if (!player.Read<User>().IsConnected) continue;
+                            var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
+                            if (distance > ExpShareDistance) continue;
+                            players.Add(player.Read<User>().LocalCharacter._Entity);
+                        }
+                    }
+                    break;
+                }
+            }
+        }   
 
         if (killerUser.ClanEntity._Entity.Equals(Entity.Null)) return players;
         Entity clanEntity = killerUser.ClanEntity._Entity;
@@ -450,6 +474,7 @@ public class LevelingSystem
             // modifications
             healReceivedProc.RequiredBloodPercentage = 0;
             buff.Write(healReceivedProc);
+            return;
         }
 
         if (buff.Has<BloodBuffScript_Brute_HealthRegenBonus>())
@@ -459,6 +484,7 @@ public class LevelingSystem
             bruteHealthRegenBonus.RequiredBloodPercentage = 0;
             bruteHealthRegenBonus.MinHealthRegenIncrease = bruteHealthRegenBonus.MaxHealthRegenIncrease;
             buff.Write(bruteHealthRegenBonus);
+            return;
         }
 
         if (buff.Has<BloodBuffScript_Brute_NulifyAndEmpower>())
@@ -467,6 +493,7 @@ public class LevelingSystem
             // modifications
             bruteNulifyAndEmpower.RequiredBloodPercentage = 0;
             buff.Write(bruteNulifyAndEmpower);
+            return;
         }
 
         if (buff.Has<BloodBuff_Brute_PhysLifeLeech_DataShared>())
@@ -476,6 +503,7 @@ public class LevelingSystem
             brutePhysLifeLeech.RequiredBloodPercentage = 0;
             brutePhysLifeLeech.MinIncreasedPhysicalLifeLeech = brutePhysLifeLeech.MaxIncreasedPhysicalLifeLeech;
             buff.Write(brutePhysLifeLeech);
+            return;
         }
 
         if (buff.Has<BloodBuff_Brute_RecoverOnKill_DataShared>())
@@ -485,6 +513,7 @@ public class LevelingSystem
             bruteRecoverOnKill.RequiredBloodPercentage = 0;
             bruteRecoverOnKill.MinHealingReceivedValue = bruteRecoverOnKill.MaxHealingReceivedValue;
             buff.Write(bruteRecoverOnKill);
+            return;
         }
 
         if (buff.Has<BloodBuff_Creature_SpeedBonus_DataShared>())
@@ -494,6 +523,7 @@ public class LevelingSystem
             creatureSpeedBonus.RequiredBloodPercentage = 0;
             creatureSpeedBonus.MinMovementSpeedIncrease = creatureSpeedBonus.MaxMovementSpeedIncrease;
             buff.Write(creatureSpeedBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_SunResistance_DataShared>())
@@ -503,6 +533,7 @@ public class LevelingSystem
             sunResistance.RequiredBloodPercentage = 0;
             sunResistance.MinBonus = sunResistance.MaxBonus;
             buff.Write(sunResistance);
+            return;
         }
 
         if (buff.Has<BloodBuffScript_Draculin_BloodMendBonus>())
@@ -512,6 +543,7 @@ public class LevelingSystem
             draculinBloodMendBonus.RequiredBloodPercentage = 0;
             draculinBloodMendBonus.MinBonusHealing = draculinBloodMendBonus.MaxBonusHealing;
             buff.Write(draculinBloodMendBonus);
+            return;
         }
 
         if (buff.Has<Script_BloodBuff_CCReduction_DataShared>())
@@ -521,6 +553,7 @@ public class LevelingSystem
             bloodBuffCCReduction.RequiredBloodPercentage = 0;
             bloodBuffCCReduction.MinBonus = bloodBuffCCReduction.MaxBonus;
             buff.Write(bloodBuffCCReduction);
+            return;
         }
 
         if (buff.Has<Script_BloodBuff_Draculin_ImprovedBite_DataShared>())
@@ -529,6 +562,7 @@ public class LevelingSystem
             // modifications
             draculinImprovedBite.RequiredBloodPercentage = 0;
             buff.Write(draculinImprovedBite);
+            return;
         }
 
         if (buff.Has<BloodBuffScript_LastStrike>())
@@ -538,6 +572,7 @@ public class LevelingSystem
             lastStrike.RequiredBloodQuality = 0;
             lastStrike.LastStrikeBonus_Min = lastStrike.LastStrikeBonus_Max;
             buff.Write(lastStrike);
+            return;
         }
 
         if (buff.Has<BloodBuff_Draculin_SpeedBonus_DataShared>())
@@ -547,6 +582,7 @@ public class LevelingSystem
             draculinSpeedBonus.RequiredBloodPercentage = 0;
             draculinSpeedBonus.MinMovementSpeedIncrease = draculinSpeedBonus.MaxMovementSpeedIncrease;
             buff.Write(draculinSpeedBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_AllResistance_DataShared>())
@@ -556,6 +592,7 @@ public class LevelingSystem
             allResistance.RequiredBloodPercentage = 0;
             allResistance.MinBonus = allResistance.MaxBonus;
             buff.Write(allResistance);
+            return;
         }
 
         if (buff.Has<BloodBuff_BiteToMutant_DataShared>())
@@ -563,8 +600,8 @@ public class LevelingSystem
             var biteToMutant = buff.Read<BloodBuff_BiteToMutant_DataShared>();
             // modifications
             biteToMutant.RequiredBloodPercentage = 0;
-
             buff.Write(biteToMutant);
+            return;
         }
 
         if (buff.Has<BloodBuff_BloodConsumption_DataShared>())
@@ -574,6 +611,7 @@ public class LevelingSystem
             bloodConsumption.RequiredBloodPercentage = 0;
             bloodConsumption.MinBonus = bloodConsumption.MaxBonus;
             buff.Write(bloodConsumption);
+            return;
         }
 
         if (buff.Has<BloodBuff_HealthRegeneration_DataShared>())
@@ -583,6 +621,7 @@ public class LevelingSystem
             healthRegeneration.RequiredBloodPercentage = 0;
             healthRegeneration.MinBonus = healthRegeneration.MaxBonus;
             buff.Write(healthRegeneration);
+            return;
         }
 
         if (buff.Has<BloodBuff_ApplyMovementSpeedOnShapeshift_DataShared>())
@@ -592,6 +631,7 @@ public class LevelingSystem
             applyMovementSpeedOnShapeshift.RequiredBloodPercentage = 0;
             applyMovementSpeedOnShapeshift.MinBonus = applyMovementSpeedOnShapeshift.MaxBonus;
             buff.Write(applyMovementSpeedOnShapeshift);
+            return;
         }
 
         if (buff.Has<BloodBuff_PrimaryAttackLifeLeech_DataShared>())
@@ -601,6 +641,7 @@ public class LevelingSystem
             primaryAttackLifeLeech.RequiredBloodPercentage = 0;
             primaryAttackLifeLeech.MinBonus = primaryAttackLifeLeech.MaxBonus;
             buff.Write(primaryAttackLifeLeech);
+            return;
         }
 
         if (buff.Has<BloodBuff_PrimaryProc_FreeCast_DataShared>())
@@ -610,6 +651,7 @@ public class LevelingSystem
             primaryProcFreeCast.RequiredBloodPercentage = 0;
             primaryProcFreeCast.MinBonus = primaryProcFreeCast.MaxBonus;
             buff.Write(primaryProcFreeCast);
+            return;
         }
 
         if (buff.Has<BloodBuff_Rogue_AttackSpeedBonus_DataShared>())
@@ -623,7 +665,9 @@ public class LevelingSystem
                 var rogueSpeedBonus = buff.Read<BloodBuff_Rogue_SpeedBonus_DataShared>();
                 rogueSpeedBonus.RequiredBloodPercentage = 0;
                 buff.Write(rogueSpeedBonus);
+                return;
             }
+            return;
         }
 
         if (buff.Has<BloodBuff_CritAmplifyProc_DataShared>())
@@ -633,6 +677,7 @@ public class LevelingSystem
             critAmplifyProc.RequiredBloodPercentage = 0;
             critAmplifyProc.MinBonus = critAmplifyProc.MaxBonus;
             buff.Write(critAmplifyProc);
+            return;
         }
 
         if (buff.Has<BloodBuff_PhysCritChanceBonus_DataShared>())
@@ -642,6 +687,7 @@ public class LevelingSystem
             physCritChanceBonus.RequiredBloodPercentage = 0;
             physCritChanceBonus.MinPhysicalCriticalStrikeChance = physCritChanceBonus.MaxPhysicalCriticalStrikeChance;
             buff.Write(physCritChanceBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_Rogue_SpeedBonus_DataShared>())
@@ -651,6 +697,7 @@ public class LevelingSystem
             rogueSpeedBonus.RequiredBloodPercentage = 0;
             rogueSpeedBonus.MinMovementSpeedIncrease = rogueSpeedBonus.MaxMovementSpeedIncrease;
             buff.Write(rogueSpeedBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_ReducedTravelCooldown_DataShared>())
@@ -660,7 +707,9 @@ public class LevelingSystem
             reducedTravelCooldown.RequiredBloodPercentage = 0;
             reducedTravelCooldown.MinBonus = reducedTravelCooldown.MaxBonus;
             buff.Write(reducedTravelCooldown);
+            return;
         }
+
         if (buff.Has<BloodBuff_Scholar_SpellCooldown_DataShared>())
         {
             var scholarSpellCooldown = buff.Read<BloodBuff_Scholar_SpellCooldown_DataShared>();
@@ -668,7 +717,9 @@ public class LevelingSystem
             scholarSpellCooldown.RequiredBloodPercentage = 0;
             scholarSpellCooldown.MinCooldownReduction = scholarSpellCooldown.MaxCooldownReduction;
             buff.Write(scholarSpellCooldown);
+            return;
         }
+
         if (buff.Has<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>())
         {
             var scholarSpellCritChanceBonus = buff.Read<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>();
@@ -676,6 +727,7 @@ public class LevelingSystem
             scholarSpellCritChanceBonus.RequiredBloodPercentage = 0;
             scholarSpellCritChanceBonus.MinSpellCriticalStrikeChance = scholarSpellCritChanceBonus.MaxSpellCriticalStrikeChance;
             buff.Write(scholarSpellCritChanceBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_Scholar_SpellPowerBonus_DataShared>())
@@ -691,7 +743,9 @@ public class LevelingSystem
                 warriorPhysDamageBonus.RequiredBloodPercentage = 0;
                 warriorPhysDamageBonus.MinPhysDamageIncrease = warriorPhysDamageBonus.MaxPhysDamageIncrease;
                 buff.Write(warriorPhysDamageBonus);
+                return;
             }
+            return;
         }
 
         if (buff.Has<BloodBuff_SpellLifeLeech_DataShared>())
@@ -701,6 +755,7 @@ public class LevelingSystem
             spellLifeLeech.RequiredBloodPercentage = 0;
             spellLifeLeech.MinBonus = spellLifeLeech.MaxBonus;
             buff.Write(spellLifeLeech);
+            return;
         }
 
         if (buff.Has<BloodBuff_Warrior_DamageReduction_DataShared>())
@@ -710,6 +765,7 @@ public class LevelingSystem
             warriorDamageReduction.RequiredBloodPercentage = 0;
             warriorDamageReduction.MinDamageReduction = warriorDamageReduction.MaxDamageReduction;
             buff.Write(warriorDamageReduction);
+            return;
         }
 
         if (buff.Has<BloodBuff_Warrior_PhysCritDamageBonus_DataShared>())
@@ -719,6 +775,7 @@ public class LevelingSystem
             warriorPhysCritDamageBonus.RequiredBloodPercentage = 0;
             warriorPhysCritDamageBonus.MinWeaponCriticalStrikeDamageIncrease = warriorPhysCritDamageBonus.MaxWeaponCriticalStrikeDamageIncrease;
             buff.Write(warriorPhysCritDamageBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>())
@@ -728,6 +785,7 @@ public class LevelingSystem
             warriorPhysDamageBonus.RequiredBloodPercentage = 0;
             warriorPhysDamageBonus.MinPhysDamageIncrease = warriorPhysDamageBonus.MaxPhysDamageIncrease;
             buff.Write(warriorPhysDamageBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_Warrior_PhysicalBonus_DataShared>())
@@ -737,6 +795,7 @@ public class LevelingSystem
             warriorPhysicalBonus.RequiredBloodPercentage = 0;
             warriorPhysicalBonus.MinWeaponPowerIncrease = warriorPhysicalBonus.MaxWeaponPowerIncrease;
             buff.Write(warriorPhysicalBonus);
+            return;
         }
 
         if (buff.Has<BloodBuff_Warrior_WeaponCooldown_DataShared>())
@@ -746,6 +805,7 @@ public class LevelingSystem
             warriorWeaponCooldown.RequiredBloodPercentage = 0;
             warriorWeaponCooldown.MinCooldownReduction = warriorWeaponCooldown.MaxCooldownReduction;
             buff.Write(warriorWeaponCooldown);
+            return;
         }
 
         if (buff.Has<BloodBuff_Brute_100_DataShared>())
@@ -754,6 +814,7 @@ public class LevelingSystem
             bruteEffect.RequiredBloodPercentage = 0;
             bruteEffect.MinHealthRegainPercentage = bruteEffect.MaxHealthRegainPercentage;
             buff.Write(bruteEffect);
+            return;
         }
 
         if (buff.Has<BloodBuff_Rogue_100_DataShared>())
@@ -761,6 +822,7 @@ public class LevelingSystem
             var rogueEffect = buff.Read<BloodBuff_Rogue_100_DataShared>();
             rogueEffect.RequiredBloodPercentage = 0;
             buff.Write(rogueEffect);
+            return;
         }
 
         if (buff.Has<BloodBuff_Warrior_100_DataShared>())
@@ -768,6 +830,7 @@ public class LevelingSystem
             var warriorEffect = buff.Read<BloodBuff_Warrior_100_DataShared>();
             warriorEffect.RequiredBloodPercentage = 0;
             buff.Write(warriorEffect);
+            return;
         }
 
         if (buff.Has<BloodBuffScript_Scholar_MovementSpeedOnCast>())
@@ -776,13 +839,16 @@ public class LevelingSystem
             scholarEffect.RequiredBloodPercentage = 0;
             scholarEffect.ChanceToGainMovementOnCast_Min = scholarEffect.ChanceToGainMovementOnCast_Max;
             buff.Write(scholarEffect);
+            return;
         }
+
         if (buff.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
         {
             var bruteAttackSpeedBonus = buff.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
             bruteAttackSpeedBonus.MinValue = bruteAttackSpeedBonus.MaxValue;
             bruteAttackSpeedBonus.RequiredBloodPercentage = 0;
             buff.Write(bruteAttackSpeedBonus);
+            return;
         }
     }
 
@@ -957,5 +1023,258 @@ public class LevelingSystem
             return Core.ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
         }
         return [];
+    }
+
+    public class AllianceUtilities
+    {
+        public static bool CheckClanLeadership(ChatCommandContext ctx, Entity ownerClanEntity)
+        {
+            if (ownerClanEntity.Equals(Entity.Null))
+            {
+                return true;
+            }
+
+            Entity userEntity = ctx.Event.SenderUserEntity;
+            return userEntity.TryGetComponent(out ClanRole clanRole) && !clanRole.Value.Equals(ClanRoleEnum.Leader);
+        }
+
+        public static void HandleClanAlliance(ChatCommandContext ctx, ulong ownerId, string name)
+        {
+            if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
+            {
+                Core.DataStructures.PlayerAlliances[ownerId] = [];
+            }
+
+            HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId];
+            HashSet<string> members = [];
+            Entity clanEntity = PlayerService.GetClanByName(name);
+
+            if (clanEntity.Equals(Entity.Null))
+            {
+                HandleReply(ctx, "Clan/leader not found...");
+                return;
+            }
+
+            if (!TryAddClanMembers(ctx, ownerId, clanEntity, members))
+            {
+                return;
+            }
+
+            AddMembersToAlliance(ctx, alliance, members);
+        }
+
+        public static bool TryAddClanMembers(ChatCommandContext ctx, ulong ownerId, Entity clanEntity, HashSet<string> members)
+        {
+            var clanBuffer = clanEntity.ReadBuffer<ClanMemberStatus>();
+            int leaderIndex = GetClanLeaderIndex(clanBuffer);
+
+            if (leaderIndex == -1)
+            {
+                HandleReply(ctx, "Couldn't find clan leader to verify consent.");
+                return false;
+            }
+
+            var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
+            for (int i = 0; i < userBuffer.Length; i++)
+            {
+                var users = userBuffer[i];
+                User user = users.UserEntity.Read<User>();
+
+                if (i == leaderIndex && !IsClanLeaderInvitesEnabled(user))
+                {
+                    HandleReply(ctx, "Clan leader does not have alliances invites enabled.");
+                    return false;
+                }
+                members.Add(user.CharacterName.Value);
+            }
+            return true;
+        }
+        public static void RemoveClanFromAlliance(ChatCommandContext ctx, HashSet<string> alliance, string clanName)
+        {
+            List<string> removed = [];
+            Entity clanEntity = PlayerService.GetClanByName(clanName);
+
+            if (clanEntity.Equals(Entity.Null))
+            {
+                HandleReply(ctx, "Clan not found...");
+                return;
+            }
+
+            foreach (string memberName in alliance)
+            {
+                string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(memberName, StringComparison.OrdinalIgnoreCase));
+                if (PlayerService.playerCache.TryGetValue(playerKey, out var player))
+                {
+                    Entity playerClanEntity = player.Read<User>().ClanEntity._Entity;
+                    ClanTeam clanTeam = playerClanEntity.Read<ClanTeam>();
+                    if (clanTeam.Name.Value.Equals(clanName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        alliance.Remove(memberName);
+                        removed.Add(memberName);
+                    }
+                }
+            }
+            string replyMessage = removed.Count > 0 ? string.Join(", ", removed.Select(member => $"<color=green>{member}</color>")) : "No members from clan found to remove.";
+            if (removed.Count > 0) replyMessage += " removed from alliance.";
+            HandleReply(ctx, replyMessage);
+            Core.DataStructures.SavePlayerAlliances();
+        }
+        public static int GetClanLeaderIndex(DynamicBuffer<ClanMemberStatus> clanBuffer)
+        {
+            for (int i = 0; i < clanBuffer.Length; i++)
+            {
+                if (clanBuffer[i].ClanRole.Equals(ClanRoleEnum.Leader))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public static bool IsClanLeaderInvitesEnabled(User user)
+        {
+            return Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["Grouping"];
+        }
+
+        public static void AddMembersToAlliance(ChatCommandContext ctx, HashSet<string> alliance, HashSet<string> members)
+        {
+            if (members.Count > 0 && alliance.Count + members.Count < Plugin.MaxAllianceSize.Value)
+            {
+                string membersAdded = string.Join(", ", members.Select(member => $"<color=green>{member}</color>"));
+                alliance.UnionWith(members);
+                HandleReply(ctx, $"{membersAdded} were added to the alliance.");
+                Core.DataStructures.SavePlayerAlliances();
+            }
+            else if (members.Count == 0)
+            {
+                HandleReply(ctx, "Couldn't find any clan members to add.");
+            }
+            else
+            {
+                HandleReply(ctx, "Alliance would exceed max size by adding found clan members.");
+            }
+        }
+
+        public static void HandlePlayerAlliance(ChatCommandContext ctx, ulong ownerId, string name)
+        {
+            if (PlayerService.playerCache.TryGetValue(name, out Entity player))
+            {
+                if (player.Equals(Entity.Null))
+                {
+                    HandleReply(ctx, "Player not found...");
+                    return;
+                }
+
+                User foundUser = player.Read<User>();
+                if (foundUser.PlatformId == ownerId)
+                {
+                    HandleReply(ctx, "Player not found...");
+                    return;
+                }
+
+                string playerName = foundUser.CharacterName.Value;
+                if (IsPlayerEligibleForAlliance(foundUser, ownerId, playerName))
+                {
+                    AddPlayerToAlliance(ctx, ownerId, playerName);
+                }
+                else
+                {
+                    HandleReply(ctx, $"<color=green>{playerName}</color> does not have alliances enabled or is already in an alliance.");
+                }
+            }
+            else
+            {
+                HandleReply(ctx, "Player not found...");
+            }  
+        }
+
+        public static bool IsPlayerEligibleForAlliance(User foundUser, ulong ownerId, string playerName)
+        {
+            if (Core.DataStructures.PlayerBools.TryGetValue(foundUser.PlatformId, out var bools) && bools["Grouping"])
+            {
+                if (!Core.DataStructures.PlayerAlliances.ContainsKey(foundUser.PlatformId) && (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId) || !Core.DataStructures.PlayerAlliances[ownerId].Contains(playerName)))
+                {
+                    bools["Grouping"] = false;
+                    Core.DataStructures.SavePlayerBools();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static void AddPlayerToAlliance(ChatCommandContext ctx, ulong ownerId, string playerName)
+        {
+            if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
+            {
+                Core.DataStructures.PlayerAlliances[ownerId] = [];
+            }
+
+            string ownerName = ctx.Event.User.CharacterName.Value;
+            HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId];
+
+            if (alliance.Count < Plugin.MaxAllianceSize.Value && !alliance.Contains(playerName))
+            {
+                alliance.Add(playerName);
+
+                if (!alliance.Contains(ownerName)) // add owner to alliance for simplified processing elsewhere
+                {
+                    alliance.Add(ownerName);
+                }
+
+                Core.DataStructures.SavePlayerAlliances();
+                HandleReply(ctx, $"<color=green>{playerName}</color> added to alliance.");
+            }
+            else
+            {
+                HandleReply(ctx, $"Alliance is full or <color=green>{playerName}</color> is already in the alliance.");
+            }
+        }
+        public static void RemovePlayerFromAlliance(ChatCommandContext ctx, HashSet<string> alliance, string playerName)
+        {
+            if (alliance.FirstOrDefault(n => n.Equals(playerName, StringComparison.OrdinalIgnoreCase)) != null)
+            {
+                alliance.Remove(playerName);
+                Core.DataStructures.SavePlayerAlliances();
+                HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from alliance.");
+            }
+            else
+            {
+                HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in alliance.");
+            }
+        }
+        public static void ListPersonalAllianceMembers(ChatCommandContext ctx, Dictionary<ulong, HashSet<string>> playerAlliances)
+        {
+            ulong ownerId = ctx.Event.User.PlatformId;
+            string playerName = ctx.Event.User.CharacterName.Value;
+            HashSet<string> members = playerAlliances.ContainsKey(ownerId) ? playerAlliances[ownerId] : playerAlliances.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
+            string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
+            HandleReply(ctx, replyMessage);
+        }
+
+        public static void ListAllianceMembersByName(ChatCommandContext ctx, string name, Dictionary<ulong, HashSet<string>> playerAlliances)
+        {
+            string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerCache.TryGetValue(playerKey, out var player))
+            {
+                ulong steamId = player.Read<User>().PlatformId;
+                string playerName = player.Read<User>().CharacterName.Value;
+                HashSet<string> members = playerAlliances.ContainsKey(steamId) ? playerAlliances[steamId] : playerAlliances.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
+                string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
+                HandleReply(ctx, replyMessage);
+            }
+            else
+            {
+                foreach (var groupEntry in playerAlliances)
+                {
+                    playerKey = groupEntry.Value.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    if (!string.IsNullOrEmpty(playerKey))
+                    {
+                        string replyMessage = groupEntry.Value.Count > 0 ? string.Join(", ", groupEntry.Value.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
+                        HandleReply(ctx, replyMessage);
+                        return;
+                    }
+                }
+            }
+        }
     }
 }

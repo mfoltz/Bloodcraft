@@ -85,6 +85,9 @@ UPDATED (6/16)
 - `.listAllianceMembers`
   - Lists alliance members.
   - Shortcut: *.lam*
+- `.leaveAlliance`
+  - Leaves alliance.
+  - Shortcut: *.leave*
 - `.chooseClass [Class]`
   - Chooses class (see options with .classes)
   - Shortcut: *.cc [Class]*
@@ -268,6 +271,8 @@ UPDATED (6/16)
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
 - **Player Alliances**: `PlayerGrouping` (bool, default: false)  
   Enable or disable player alliances.
+- **Prevent Friendly Fire**: `PreventFriendlyFire` (bool, default: false)  
+  True to prevent damage between players in same alliance, false to allow.
 - **Max Alliance Size**: `MaxAllianceSize` (int, default: 5)  
   The maximum number of players that can form an alliance.
 - **Change Class Item**: `ChangeClassItem` (int, default: 0)  

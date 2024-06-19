@@ -1,14 +1,19 @@
 using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using Unity.DebugDisplay;
 using Unity.Entities;
+using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Experience.LevelingSystem.AllianceUtilities;
+
 
 namespace Bloodcraft.Commands;
 internal static class LevelingCommands
@@ -495,8 +500,9 @@ internal static class LevelingCommands
             return;
         }
 
-        var SteamID = ctx.Event.User.PlatformId;
+        ulong SteamID = ctx.Event.User.PlatformId;
         Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
+        string name = ctx.Event.User.CharacterName.Value;
 
         if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
         {
@@ -513,6 +519,12 @@ internal static class LevelingCommands
             }
         }
 
+        if (Core.DataStructures.PlayerAlliances.Any(kvp => kvp.Value.Contains(name)))
+        {
+            HandleReply(ctx, "You are already in an alliance. Leave or disband before enabling invites.");
+            return;
+        }
+
         if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["Grouping"] = !bools["Grouping"];
@@ -523,7 +535,7 @@ internal static class LevelingCommands
 
     [Command(name: "allianceAdd", shortHand: "aa", adminOnly: false, usage: ".aa [Player/Clan]", description: "Adds player/clan to alliance if invites are toggled (if clan based owner of clan must toggle).")]
     public static void AllianceAddCommand(ChatCommandContext ctx, string name)
-    {
+    {  
         if (!PlayerAlliances)
         {
             HandleReply(ctx, "Alliances are not enabled.");
@@ -533,9 +545,33 @@ internal static class LevelingCommands
         ulong ownerId = ctx.Event.User.PlatformId;
         Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
 
-        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
+        if (ClanAlliances)
         {
-            HandleReply(ctx, "You must be the leader of a clan to invite clans to an alliance.");
+            if (CheckClanLeadership(ctx, ownerClanEntity))
+            {
+                HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
+                return;
+            }
+
+            HandleClanAlliance(ctx, ownerId, name);
+        }
+        else
+        {
+            HandlePlayerAlliance(ctx, ownerId, name);
+        }
+        /*
+        if (!PlayerAlliances)
+        {
+            HandleReply(ctx, "Alliances are not enabled.");
+            return;
+        }
+
+        ulong ownerId = ctx.Event.User.PlatformId;
+        Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
+
+        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null))
+        {
+            HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
             return;
         }
         else if (ClanAlliances)
@@ -543,7 +579,7 @@ internal static class LevelingCommands
             Entity userEntity = ctx.Event.SenderUserEntity;
             if (userEntity.TryGetComponent(out ClanRole clanRole) && !clanRole.Value.Equals(ClanRoleEnum.Leader))
             {
-                HandleReply(ctx, "You must be the leader of a clan to invite clans to an alliance.");
+                HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
                 return;
             }
         }    
@@ -559,9 +595,10 @@ internal static class LevelingCommands
             HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId];
             HashSet<string> members = [];
             Entity clanEntity = GetClanByName(name);
+
             if (clanEntity.Equals(Entity.Null))
             {
-                HandleReply(ctx, "Clan not found...");
+                HandleReply(ctx, "Clan/leader not found...");
                 return;
             }
 
@@ -588,7 +625,7 @@ internal static class LevelingCommands
             {
                 var users = userBuffer[i];
                 User user = users.UserEntity.Read<User>();
-                if (i == leaderIndex && Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && !bools["Grouping"]) // check for toggle here on leader
+                if (i == leaderIndex && Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && !bools["Grouping"]) // check for invites here on leader
                 {
                     HandleReply(ctx, "Clan leader does not have alliances invites enabled.");
                     return;
@@ -640,7 +677,7 @@ internal static class LevelingCommands
 
                 if (alliance.Count < Plugin.MaxAllianceSize.Value && !alliance.Contains(playerName))
                 {
-                    alliance.Add(playerName);
+                    alliance.Add(playerName); // would need to add the playerTeam TeamReference entity for every player in the alliance to the TeamAllies buffer of... every other TeamAllies buffer on every TeamReference entity on every other player in the alliance, oof
                     Core.DataStructures.SavePlayerAlliances();
                     HandleReply(ctx, $"<color=green>{foundUser.CharacterName.Value}</color> added to alliance.");
                 }
@@ -653,7 +690,8 @@ internal static class LevelingCommands
             {
                 HandleReply(ctx, $"<color=green>{foundUser.CharacterName.Value}</color> does not have alliances enabled or they are the owner of an alliance.");
             }
-        }  
+        }
+        */
     }
 
     [Command(name: "allianceRemove", shortHand: "ar", adminOnly: false, usage: ".ar [Player/Clan]", description: "Removes player or clan from alliance.")]
@@ -668,19 +706,10 @@ internal static class LevelingCommands
         ulong ownerId = ctx.Event.User.PlatformId;
         Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
 
-        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
+        if (ClanAlliances && CheckClanLeadership(ctx, ownerClanEntity))
         {
             HandleReply(ctx, "You must be the leader of a clan to remove clans from an alliance.");
             return;
-        }
-        else if (ClanAlliances)
-        {
-            Entity userEntity = ctx.Event.SenderUserEntity;
-            if (userEntity.TryGetComponent(out ClanRole clanRole) && !clanRole.Value.Equals(ClanRoleEnum.Leader))
-            {
-                HandleReply(ctx, "You must be the leader of a clan to remove clans from an alliance.");
-                return;
-            }
         }
 
         if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
@@ -691,6 +720,15 @@ internal static class LevelingCommands
 
         HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId]; // check size and if player is already present in group before adding
 
+        if (ClanAlliances)
+        {
+            RemoveClanFromAlliance(ctx, alliance, name);
+        }
+        else
+        {
+            RemovePlayerFromAlliance(ctx, alliance, name);
+        }
+        /*
         if (ClanAlliances) // find members of alliance with matching clan name and remove
         {
             List<string> removed = [];
@@ -698,7 +736,7 @@ internal static class LevelingCommands
             Entity clanEntity = GetClanByName(name);
             if (clanEntity.Equals(Entity.Null))
             {
-                HandleReply(ctx, "Clan not found...");
+                HandleReply(ctx, "Clan/leader not found...");
                 return;
             }
             foreach (string memberName in alliance)
@@ -734,7 +772,7 @@ internal static class LevelingCommands
                 HandleReply(ctx, $"<color=green>{char.ToUpper(name[0]) + name[1..].ToLower()}</color> not found in alliance.");
             }
         }
-        
+        */
     }
 
     [Command(name: "listAllianceMembers", shortHand: "lam", adminOnly: false, usage: ".lam [Player]", description: "Lists alliance members of your alliance or the alliance you are in or the members in the alliance of the player entered if found.")]
@@ -748,6 +786,15 @@ internal static class LevelingCommands
 
         Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerAlliances;
 
+        if (string.IsNullOrEmpty(name))
+        {
+            ListPersonalAllianceMembers(ctx, playerAlliances);
+        }
+        else
+        {
+            ListAllianceMembersByName(ctx, name, playerAlliances);
+        }
+        /*
         if (string.IsNullOrEmpty(name)) // get personal alliance members if no name entered
         {
             ulong ownerId = ctx.Event.User.PlatformId;
@@ -781,6 +828,7 @@ internal static class LevelingCommands
                 }
             }
         }
+        */
     }
 
     [Command(name: "allianceDisband", shortHand: "disband", adminOnly: false, usage: ".disband", description: "Disbands alliance.")]
@@ -795,19 +843,10 @@ internal static class LevelingCommands
         ulong ownerId = ctx.Event.User.PlatformId;
         Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
 
-        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
+        if (ClanAlliances && CheckClanLeadership(ctx, ownerClanEntity))
         {
-            HandleReply(ctx, "You must be the leader of a clan to disband your alliance.");
+            HandleReply(ctx, "You must be the leader of your clan to disband the alliance.");
             return;
-        }
-        else if (ClanAlliances)
-        {
-            Entity userEntity = ctx.Event.SenderUserEntity;
-            if (userEntity.TryGetComponent(out ClanMemberStatus memberStatus) && !memberStatus.Equals(ClanRoleEnum.Leader))
-            {
-                HandleReply(ctx, "You must be the leader of a clan to disband your alliance.");
-                return;
-            }
         }
 
         if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId)) 
@@ -815,114 +854,115 @@ internal static class LevelingCommands
             HandleReply(ctx, "You don't have an alliance to disband.");
             return;
         }
+       
+        Core.DataStructures.PlayerAlliances.Remove(ownerId);
+        HandleReply(ctx, "Alliance disbanded.");
+        Core.DataStructures.SavePlayerAlliances();   
+    }
+
+    [Command(name: "leaveAlliance", shortHand: "leave", adminOnly: false, usage: ".leave", description: "Leaves alliance if in one.")]
+    public static void LeaveAllianceCommand(ChatCommandContext ctx)
+    {
+        if (!PlayerAlliances)
+        {
+            HandleReply(ctx, "Alliances are not enabled.");
+            return;
+        }
+
+        ulong ownerId = ctx.Event.User.PlatformId;
+        Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
+        string playerName = ctx.Event.User.CharacterName.Value;
+
+        if (ClanAlliances && CheckClanLeadership(ctx, ownerClanEntity))
+        {
+            HandleReply(ctx, "You must be the leader of a clan to leave an alliance.");
+            return;
+        }
+
+        if (Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
+        {
+            HandleReply(ctx, "You can't leave your own alliance. Disband it instead.");
+            return;
+        }
+
+        if (ClanAlliances)
+        {
+            var alliance = Core.DataStructures.PlayerAlliances.Values.FirstOrDefault(set => set.Contains(playerName));
+            if (alliance != null)
+            {
+                RemoveClanFromAlliance(ctx, alliance, ownerClanEntity.Read<ClanTeam>().Name.Value);
+            }
+            else
+            {
+                HandleReply(ctx, "Your clan is not in an alliance.");
+            }
+            
+        }
         else
         {
-            Core.DataStructures.PlayerAlliances.Remove(ownerId);
-            HandleReply(ctx, "Alliance disbanded.");
+            var alliance = Core.DataStructures.PlayerAlliances.Values.FirstOrDefault(set => set.Contains(playerName));
+            if (alliance != null)
+            {
+                RemovePlayerFromAlliance(ctx, alliance, playerName);
+            }
+            else
+            {
+                HandleReply(ctx, "You're not in an alliance.");
+            }    
+        }
+        /*
+        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
+        {
+            HandleReply(ctx, "You must be the leader of a clan to remove it from an alliance.");
+            return;
+        }
+        else if (ClanAlliances)
+        {
+            Entity userEntity = ctx.Event.SenderUserEntity;
+            if (userEntity.TryGetComponent(out ClanMemberStatus memberStatus) && !memberStatus.Equals(ClanRoleEnum.Leader))
+            {
+                HandleReply(ctx, "You must be the leader of a clan to remove it from an alliance.");
+                return;
+            }
+        }
+
+
+        if (ClanAlliances)
+        {
+            // find alliance that this clan leader is in, remove matching clan members
+            List<string> removed = [];
+            var alliance = Core.DataStructures.PlayerAlliances.Values.FirstOrDefault(set => set.Contains(playerName)); // this set has the clan members
+            foreach (var member in alliance)
+            {
+                if (playerCache.TryGetValue(member, out var player))
+                {
+                    Entity playerClanEntity = player.Read<User>().ClanEntity._Entity;
+                    if (playerClanEntity.Equals(ownerClanEntity))
+                    {
+                        alliance.Remove(member);
+                        removed.Add(member);
+                    }
+                }
+            }
+            string replyMessage = removed.Count > 0 ? string.Join(", ", removed.Select(member => $"<color=green>{member}</color>")) : "Failed to leave the alliance.";
+            if (removed.Count > 0) replyMessage += " removed from alliance.";
+            HandleReply(ctx, replyMessage);
             Core.DataStructures.SavePlayerAlliances();
         }
-    }
-
-    /*
-    [Command(name: "bufftest", shortHand: "bufftest", adminOnly: true, usage: ".bufftest", description: "buff test")]
-    public static void TestCommand(ChatCommandContext ctx)
-    {
-      
-        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
-        ServerGameManager serverGameManager = Core.ServerGameManager;
-        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        else
         {
-            BuffPrefabGUID = new(-429891372) // mugging powersurge for it's components, prefectly ethical
-        };
-        FromCharacter fromCharacter = new()
-        {
-            Character = ctx.Event.SenderCharacterEntity,
-            User = ctx.Event.SenderUserEntity
-        };
-
-
-        debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-        if (serverGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff)) // if present, modify based on prestige level
-        {
-            Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for class buff, modifying...");
-
-            Buff buff = firstBuff.Read<Buff>();
-            buff.BuffType = BuffType.Parallel;
-            firstBuff.Write(buff);
-
-            if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
+            var alliance = Core.DataStructures.PlayerAlliances.Values.FirstOrDefault(set => set.Contains(playerName));
+            if (alliance != null)
             {
-                firstBuff.Remove<RemoveBuffOnGameplayEvent>();
+                alliance.Remove(playerName);
+                HandleReply(ctx, "You have left the alliance.");
+                Core.DataStructures.SavePlayerAlliances();
             }
-            if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
+            else
             {
-                firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
+                HandleReply(ctx, "You are not in an alliance.");
             }
-            if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
-            {
-                firstBuff.Remove<CreateGameplayEventsOnSpawn>();
-            }
-            if (!firstBuff.Has<Buff_Persists_Through_Death>())
-            {
-                firstBuff.Add<Buff_Persists_Through_Death>();
-            }
-            if (firstBuff.Has<LifeTime>())
-            {
-                LifeTime lifeTime = firstBuff.Read<LifeTime>();
-                lifeTime.Duration = -1;
-                lifeTime.EndAction = LifeTimeEndAction.None;
-                firstBuff.Write(lifeTime);
-            }
-            if (Core.DataStructures.PlayerClasses.TryGetValue(ctx.Event.User.PlatformId, out var classes) && classes.Keys.Count > 0) // so basically if prestiged already and at the level threshold again, handle the buff matching the index and scale for prestige
-            {
-                PlayerClasses playerClass = classes.Keys.FirstOrDefault();
-                Buff_ApplyBuffOnDamageTypeDealt_DataShared onHitBuff = firstBuff.Read<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
-                onHitBuff.ProcBuff = ClassApplyBuffOnDamageDealtMap[playerClass];
-                onHitBuff.ProcChance = 1;
-                firstBuff.Write(onHitBuff);
-
-                Core.Log.LogInfo($"Applied {onHitBuff.ProcBuff.GetPrefabName()} to class buff, removing uneeded components...");
-
-                if (firstBuff.Has<Buff_EmpowerDamageDealtByType_DataShared>())
-                {
-                    firstBuff.Remove<Buff_EmpowerDamageDealtByType_DataShared>();
-                }
-                if (firstBuff.Has<ModifyMovementSpeedBuff>())
-                {
-                    firstBuff.Remove<ModifyMovementSpeedBuff>();
-                }
-                if (firstBuff.Has<CreateGameplayEventOnBuffReapply>())
-                {
-                    firstBuff.Remove<CreateGameplayEventOnBuffReapply>();
-                }
-                if (firstBuff.Has<AdjustLifetimeOnGameplayEvent>())
-                {
-                    firstBuff.Remove<AdjustLifetimeOnGameplayEvent>();
-                }
-                if (firstBuff.Has<ApplyBuffOnGameplayEvent>())
-                {
-                    firstBuff.Remove<CreateGameplayEventsOnSpawn>();
-                }
-                if (firstBuff.Has<SpellModSetComponent>())
-                {
-                    firstBuff.Remove<SpellModSetComponent>();
-                }
-                if (firstBuff.Has<ApplyBuffOnGameplayEvent>())
-                {
-                    firstBuff.Remove<ApplyBuffOnGameplayEvent>();
-                }
-                if (firstBuff.Has<SpellModArithmetic>())
-                {
-                    firstBuff.Remove<SpellModArithmetic>();
-                }
-
-                       
-            }
-
         }
-                // each class gets an applyBuffOnDamageTypeDealt effect? like BloodKnight gets one that has a chance to proc leech, that I could somewhat safely scale with prestige level easily       
+        */
     }
-
-    
-    */
 }

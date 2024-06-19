@@ -26,6 +26,7 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID draculaEvolve = new(-2005193286);
     static readonly PrefabGUID swordBuff = new(-6635580);
     static readonly PrefabGUID highlordSwordBuff = new(-916946628);
+    static readonly PrefabGUID dominateAbility = new(-1908054166);
 
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
@@ -39,7 +40,8 @@ internal static class BuffSpawnSystemPatches
             {
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
 
-                PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
+                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+                //Core.Log.LogInfo(prefabGUID.LookupName());
 
                 if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // 914043867 golem
                 {
@@ -49,11 +51,11 @@ internal static class BuffSpawnSystemPatches
                     if (Core.EntityManager.Exists(familiar))
                     {
                         //Core.Log.LogInfo(PrefabGUID.LookupName());
-                        if (PrefabGUID.Equals(draculaReturnHide))
+                        if (prefabGUID.Equals(draculaReturnHide))
                         {
                             DestroyUtility.CreateDestroyEvent(Core.EntityManager, entity, DestroyReason.Default, DestroyDebugReason.None);
                         }
-                        if (PrefabGUID.Equals(draculaFinal))
+                        if (prefabGUID.Equals(draculaFinal))
                         {
                             //Core.ServerGameManager.ForceCastAbilityGroup(familiar, 15);
                             //Core.Log.LogInfo("Forcing evolution...");
@@ -71,7 +73,7 @@ internal static class BuffSpawnSystemPatches
                             // apply level up buff here
                             debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                         }
-                        if (PrefabGUID.Equals(swordBuff))
+                        if (prefabGUID.Equals(swordBuff))
                         {
                             //Core.Log.LogInfo("Sword buff found.");
                             if (Core.ServerGameManager.TryGetBuff(familiar, highlordSwordBuff.ToIdentifier(), out Entity swordPermabuff))
@@ -83,7 +85,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 }
 
-                if (Plugin.FamiliarSystem.Value && PrefabGUID.LookupName().ToLower().Contains("combat"))
+                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
@@ -119,9 +121,9 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                if (Plugin.ProfessionSystem.Value && PrefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
-                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID, "alchemy");
+                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int level = handler.GetExperienceData(steamId).Key;
                     if (entity.Has<LifeTime>())
@@ -141,7 +143,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                if (Plugin.FamiliarSystem.Value && PrefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -150,7 +152,7 @@ internal static class BuffSpawnSystemPatches
                         DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
                         {
-                            BuffPrefabGUID = PrefabGUID,
+                            BuffPrefabGUID = prefabGUID,
                         };
                         FromCharacter fromCharacter = new()
                         {
@@ -160,7 +162,7 @@ internal static class BuffSpawnSystemPatches
                         debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                     }
                 }
-                if (Plugin.FamiliarSystem.Value && PrefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -191,7 +193,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 }
 
-                if (Plugin.BloodSystem.Value && PrefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
+                if (Plugin.BloodSystem.Value && prefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
                 {
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
@@ -261,5 +263,43 @@ internal static class BuffSpawnSystemPatches
         {
             entities.Dispose();
         }
-    } 
+    }
+    [HarmonyPatch(typeof(ShapeshiftSystem), nameof(ShapeshiftSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePostix(ShapeshiftSystem __instance)
+    {
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
+                FromCharacter fromCharacter = entity.Read<FromCharacter>();
+                //Core.Log.LogInfo(enterShapeshiftEvent.Shapeshift.LookupName());
+                if (enterShapeshiftEvent.Shapeshift.Equals(dominateAbility))
+                {
+                    Entity character = fromCharacter.Character;
+                    Entity userEntity = fromCharacter.User;
+                    ulong steamId = userEntity.Read<User>().PlatformId;
+
+                    //Core.Log.LogInfo("Dominate buff found, dismissing familiar if present and not disabled...");
+
+                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+                    if (familiar != Entity.Null || !familiar.Has<Disabled>())
+                    {
+                        //Core.Log.LogInfo("Familiar found, dismissing...");
+                        EmoteSystemPatch.CallDismiss(userEntity, character, steamId);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo(ex);
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
 }

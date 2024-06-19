@@ -1,3 +1,8 @@
+`0.9.7`
+- familiars can't be bound or called when dominating presence is active and will be automatically dismissed if present when activated
+- added PreventFriendlyFire option for alliances, enable to prevent friendly fire between alliance members (only affects direct damage, does not prevent debuffs or enable buffs)
+- familiars will not do damage to players on PvE servers and will not do damage to alliance members on PvP servers if PreventFriendlyFire is enabled
+
 `0.9.6`
 - if leveling is not active, unarmed weapon level will match the highest weapon level you've equipped (cache only, will need to equip a weapon at least once after restarts)
 - added handling for removing lingering weapon level on player gearscore if leveling was on and then turned off

@@ -22,7 +22,7 @@ public static class EmoteSystemPatch
         public static Dictionary<ulong, bool> AuraEmotes { get; set; } = [];
     }
     */
-
+    static readonly PrefabGUID dominateBuff = new(-1447419822);
     static readonly PrefabGUID invulnerableBuff = new(-480024072);
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
     static readonly PrefabGUID playerFaction = new(1106458752);
@@ -57,7 +57,11 @@ public static class EmoteSystemPatch
                 */
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["Emotes"])
                 {
-                    if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(userEntity, character, steamId);
+                    if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
+                    else if (Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+                    {
+                        HandleServerReply(Core.EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
+                    }
                 }
             }
         }
@@ -73,6 +77,7 @@ public static class EmoteSystemPatch
     public static void CallDismiss(Entity userEntity, Entity character, ulong playerId)
     {
         EntityManager entityManager = Core.EntityManager;
+
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives

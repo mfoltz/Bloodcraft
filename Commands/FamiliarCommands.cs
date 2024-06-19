@@ -14,6 +14,7 @@ internal static class FamiliarCommands
 {
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpBuff = new(697095869);
+    static readonly PrefabGUID dominateBuff = new(-1447419822);
 
     [Command(name: "bindFamiliar", shortHand: "bind", adminOnly: false, usage: ".bind [#]", description: "Activates specified familiar from current list.")]
     public static void BindFamiliar(ChatCommandContext ctx, int choice)
@@ -29,9 +30,9 @@ internal static class FamiliarCommands
         Entity userEntity = ctx.Event.SenderUserEntity;
         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
 
-        if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpBuff.ToIdentifier(), out Entity _))
+        if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
         {
-            HandleReply(ctx, "You can't bind a familiar while in combat.");
+            HandleReply(ctx, "You can't bind a familiar while in combat or dominating presence is active.");
             return;
         }
 
@@ -100,6 +101,10 @@ internal static class FamiliarCommands
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
             HandleReply(ctx, "Familiar unbound.");
+        }
+        else
+        {
+            HandleReply(ctx, "Couldn't find familiar to unbind.");
         }
     }
 
@@ -324,6 +329,13 @@ internal static class FamiliarCommands
         ulong platformId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
+
+        if (Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+        {
+            HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
+            return;
+        }
+
         EmoteSystemPatch.CallDismiss(userEntity, character, platformId);
     }
 

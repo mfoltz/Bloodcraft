@@ -23,7 +23,7 @@ using static Bloodcraft.Core.DataStructures;
 namespace Bloodcraft;
 internal static class Core
 {
-    public static World Server { get; } = GetWorld("Server") ?? throw new System.Exception("There is no Server world (yet)...");
+    public static World Server { get; } = GetWorld("Server") ?? throw new Exception("There is no Server world (yet)...");
     public static EntityManager EntityManager { get; } = Server.EntityManager;
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
     public static ServerGameSettingsSystem ServerGameSettingsSystem { get; internal set; }
@@ -41,6 +41,7 @@ internal static class Core
     public static GameDataSystem GameDataSystem { get; internal set; }
     public static FamiliarService FamiliarService { get; internal set; }
     public static LocalizationService Localization { get; } = new();
+
     //public static ZoomModifierBuffSystem ZoomModifierBuffSystem { get; internal set; }
     public static PlayerService PlayerService { get; } = new();
 
@@ -51,7 +52,7 @@ internal static class Core
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
 
-    //public static ServerGameSettings ServerGameSettings { get; internal set; }
+    public static ServerGameSettings ServerGameSettings { get; internal set; }
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -71,19 +72,18 @@ internal static class Core
         ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
         EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
         GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
-        //ServerGameSettings = Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings;
+        ServerGameSettings = Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings;
         //WarEventSystem = Server.GetExistingSystemManaged<WarEventSystem>();
         WarEventRegistrySystem = Server.GetExistingSystemManaged<WarEventRegistrySystem>();
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
         ModificationsRegistry = ServerScriptMapper.GetSingleton<ModificationsRegistry>();
-        //ZoomModifierBuffSystem = Server.GetOrCreateSystemManaged<ZoomModifierBuffSystem>();
-        
-        
+        //ZoomModifierBuffSystem = Server.GetOrCreateSystemManaged<ZoomModifierBuffSystem>();    
         //ShapeshiftSystem = Server.GetExistingSystemManaged<ShapeshiftSystem>();
         FamiliarService = new();
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = GetSpellPrefabs();
         //WarEventService = new();
+
         // Initialize utility services
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
         hasInitialized = true;
@@ -181,7 +181,7 @@ internal static class Core
         // familiar data
 
         private static Dictionary<ulong, UnlockedFamiliarData> unlockedFamiliars = [];
-        private static Dictionary<ulong, (Entity, int)> familiarActives = [];
+        private static Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = [];
         private static Dictionary<ulong, string> familiarSet = [];
         private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
 
@@ -198,7 +198,7 @@ internal static class Core
             public Dictionary<string, List<int>> UnlockedFamiliars { get; set; } = [];
         }
 
-        public static Dictionary<ulong, (Entity, int)> FamiliarActives
+        public static Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives
         {
             get => familiarActives;
             set => familiarActives = value;

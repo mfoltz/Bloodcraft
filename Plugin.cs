@@ -59,6 +59,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<bool> _playerAlliances;
     private static ConfigEntry<int> _maxAllianceSize;
     private static ConfigEntry<bool> _clanBasedAlliances;
+    private static ConfigEntry<bool> _preventFriendlyFire;
     private static ConfigEntry<float> _expShareDistance;
     private static ConfigEntry<int> _changeClassItem;
     private static ConfigEntry<int> _changeClassItemQuantity;
@@ -155,6 +156,7 @@ public class Plugin : BasePlugin
     public static ConfigEntry<bool> RaidMonitor => _raidMonitor;
 
     public static ConfigEntry<bool> DamageIntruders => _damageIntruders;
+
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
 
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
@@ -190,6 +192,8 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> ExpShareDistance => _expShareDistance;
     public static ConfigEntry<bool> PlayerAlliances => _playerAlliances;
     public static ConfigEntry<bool> ClanBasedAlliances => _clanBasedAlliances;
+
+    public static ConfigEntry<bool> PreventFriendlyFire => _preventFriendlyFire;
 
     public static ConfigEntry<float> WarEventMultiplier => _warEventMultiplier;
 
@@ -377,6 +381,7 @@ public class Plugin : BasePlugin
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
         _playerAlliances = InitConfigEntry("Config", "PlayerAlliances", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
         _clanBasedAlliances = InitConfigEntry("Config", "ClanBasedAlliances", false, "If true, clan leaders will decide if the entire clan participates in alliances. If false, it will be up to the individual.");
+        _preventFriendlyFire = InitConfigEntry("Config", "PreventFriendlyFire", false, "True to prevent damage between players in alliances, false to allow. (damage only at the moment)");
         _maxAllianceSize = InitConfigEntry("Config", "MaxAllianceSize", 5, "The maximum number of players that can share experience in a group.");
         _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is about 5 floor tile lengths.");
 

@@ -86,37 +86,20 @@ internal class FamiliarService
         {
             foreach (Entity familiar in familiars)
             {
-                Follower follower = familiar.Read<Follower>();
-                PrefabGUID PrefabGUID = familiar.Read<PrefabGUID>();
-
-                if (follower.Followed._Value.Has<PlayerCharacter>())
-                {
-                    Entity playerFamiliar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value); 
-                    ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-                    if (!Core.EntityManager.Exists(playerFamiliar) || playerFamiliar.Equals(Entity.Null))
-                    {
-                        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives))
-                        {
-                            actives = new(Entity.Null, 0);
-                            Core.DataStructures.FamiliarActives[steamId] = actives;
-                            Core.DataStructures.SavePlayerFamiliarActives();
-                        }
-                    }
-                    else if (Core.EntityManager.Exists(playerFamiliar) && playerFamiliar.Read<PrefabGUID>().GuidHash.Equals(PrefabGUID.GuidHash))
-                    {
-                        if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
-                        DestroyUtility.CreateDestroyEvent(Core.EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
-                        Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
-                        Core.DataStructures.SavePlayerFamiliarActives();
-                    }            
-                }
+                //Core.Log.LogInfo("Destroying player familiar...");
+                if (familiar.Has<MinionMaster>()) HandleFamiliarMinions(familiar);
+                DestroyUtility.Destroy(Core.EntityManager, familiar, DestroyDebugReason.None);
             }
+            foreach (var actives in Core.DataStructures.FamiliarActives)
+            {
+                Core.DataStructures.FamiliarActives[actives.Key] = new(Entity.Null, 0);
+            }
+            Core.DataStructures.SavePlayerFamiliarActives();
         }
         finally
         {
             familiars.Dispose();
-        }
+        }      
     }
     public void HandleFamiliarMinions(Entity familiar)
     {

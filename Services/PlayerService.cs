@@ -24,7 +24,7 @@ internal class PlayerService
 
 	static EntityQuery ClansQuery;
 
-	public static Dictionary<string, Entity> playerCache = [];
+	public static Dictionary<string, Entity> playerCache = []; //player name, player userEntity
 	public PlayerService()
 	{
 		ActiveUsersQuery = Core.EntityManager.CreateEntityQuery(UserComponent);
