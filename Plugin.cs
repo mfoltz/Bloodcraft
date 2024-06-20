@@ -9,27 +9,27 @@ using VampireCommandFramework;
 namespace Bloodcraft;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-public class Plugin : BasePlugin
+internal class Plugin : BasePlugin
 {
     private Harmony _harmony;
     internal static Plugin Instance { get; private set; }
     public static ManualLogSource LogInstance => Instance.Log;
 
-    public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
-
+    public static readonly string ConfigFiles = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME); // Bloodcraft folder
+    
     // old paths to migrate data if needed
-    public static readonly string OldPlayerExperiencePath = Path.Combine(ConfigPath, "ExperienceLeveling");
+    //public static readonly string OldPlayerExperiencePath = Path.Combine(ConfigFiles, "ExperienceLeveling"); // new folder in Bloodcraft folder
 
     // current paths
-    public static readonly string PlayerLevelingPath = Path.Combine(ConfigPath, "PlayerLeveling");
-
-    public static readonly string PlayerExpertisePath = Path.Combine(ConfigPath, "WeaponExpertise");
-    public static readonly string PlayerBloodPath = Path.Combine(ConfigPath, "BloodLegacies");
-    public static readonly string PlayerProfessionPath = Path.Combine(ConfigPath, "Professions");
-    public static readonly string PlayerFamiliarsPath = Path.Combine(ConfigPath, "Familiars");
+    public static readonly string PlayerLevelingPath = Path.Combine(ConfigFiles, "PlayerLeveling");
+    public static readonly string PlayerExpertisePath = Path.Combine(ConfigFiles, "WeaponExpertise");
+    public static readonly string PlayerBloodPath = Path.Combine(ConfigFiles, "BloodLegacies");
+    public static readonly string PlayerProfessionPath = Path.Combine(ConfigFiles, "Professions");
+    public static readonly string PlayerFamiliarsPath = Path.Combine(ConfigFiles, "Familiars");
     public static readonly string FamiliarExperiencePath = Path.Combine(PlayerFamiliarsPath, "FamiliarLeveling");
     public static readonly string FamiliarUnlocksPath = Path.Combine(PlayerFamiliarsPath, "FamiliarUnlocks");
 
+    // config entries
     private static ConfigEntry<string> _languageLocalization;
     private static ConfigEntry<bool> _raidMonitor;
     private static ConfigEntry<bool> _damageIntruders;
@@ -121,6 +121,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<bool> _allowVBloods;
     private static ConfigEntry<string> _bannedUnits;
     private static ConfigEntry<string> _bannedTypes;
+    private static ConfigEntry<float> _vBloodDamageMultiplier;
     private static ConfigEntry<float> _unitFamiliarMultiplier;
     private static ConfigEntry<float> _vBloodFamiliarMultiplier;
     private static ConfigEntry<float> _unitUnlockChance;
@@ -148,9 +149,7 @@ public class Plugin : BasePlugin
     private static ConfigEntry<string> _deathMageBlood;
     private static ConfigEntry<string> _deathMageSpells;
 
-    //private static ConfigEntry<bool> _warEventSystem;
-    //private static ConfigEntry<int> _primalInterval;
-
+    // public getters, kinda verbose might just get rid of these
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
 
     public static ConfigEntry<bool> RaidMonitor => _raidMonitor;
@@ -283,6 +282,8 @@ public class Plugin : BasePlugin
     public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
     public static ConfigEntry<float> VBloodUnlockChance => _vBloodUnlockChance;
 
+    public static ConfigEntry<float> VBloodDamageMultiplier => _vBloodDamageMultiplier;
+
     public static ConfigEntry<bool> SoftSynergies => _softSynergies;
     public static ConfigEntry<bool> HardSynergies => _hardSynergies;
 
@@ -323,19 +324,44 @@ public class Plugin : BasePlugin
         LoadAllData();
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }
-    static void InitConfig()
+    /*
+    static void MigrateData()
     {
-        if (Directory.Exists(OldPlayerExperiencePath))
+        try
         {
-            // Move contents from the old path to the new path
-            Directory.Move(OldPlayerExperiencePath, PlayerLevelingPath);
+            if (File.Exists(OldConfigFile) && !File.Exists(NewConfigFile)) // migrate old config data
+            {
+                File.Copy(OldConfigFile, NewConfigFile);
+                Core.Log.LogInfo($"Migrated {OldConfigFile} => {NewConfigFile}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo($"Failed to migrate old config: {ex}");
         }
 
-        foreach (string path in directoryPaths)
+        try
+        {
+            if (Directory.Exists(OldPlayerExperiencePath) && Directory.Exists(PlayerLevelingPath)) // migrate old exp data if path exists
+            {
+                // Move contents from the old path to the new path
+                Directory.Move(OldPlayerExperiencePath, PlayerLevelingPath);
+                Core.Log.LogInfo($"Migrated {OldPlayerExperiencePath} => {PlayerLevelingPath}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo($"Failed to migrate old player experience data: {ex}");
+        }
+    }
+    */
+    static void InitConfig()
+    {
+        foreach (string path in directoryPaths) // make sure directories exist
         {
             CreateDirectories(path);
         }
-        
+
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
         _raidMonitor = InitConfigEntry("Config", "PreventRaidInterference", false, "Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed in territory for duration of the raid once breach by raiders is detected).");
         _damageIntruders = InitConfigEntry("Config", "DamageIntruders", false, "Enable or disable damaging raid intruders if RaidMonitor is enabled.");
@@ -364,18 +390,18 @@ public class Plugin : BasePlugin
         _deathMageSpells = InitConfigEntry("Config", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige");
 
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
-        _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
+        _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.10f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
         _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy.");
-        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.25f, "Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.");
+        _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.10f, "Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.");
         _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.10f, "Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
-        _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 10f, "The multiplier for experience gained from units.");
+        _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 7.5f, "The multiplier for experience gained from units.");
         _vBloodLevelingMultiplier = InitConfigEntry("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _warEventMultiplier = InitConfigEntry("Config", "WarEventMultiplier", 0.15f, "The multiplier for experience gained from war event trash spawns.");
-        _unitSpawnerMultiplier = InitConfigEntry("Config", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners.");
-        _changeClassItem = InitConfigEntry("Config", "ChangeClassItem", 0, "Item PrefabGUID cost for changing class.");
-        _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 0, "Quantity of item required for changing class.");
+        _unitSpawnerMultiplier = InitConfigEntry("Config", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs).");
+        _changeClassItem = InitConfigEntry("Config", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class.");
+        _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 1000, "Quantity of item required for changing class.");
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
 
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
@@ -393,21 +419,21 @@ public class Plugin : BasePlugin
         _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
         _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
         _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
-        _resetExpertiseItem = InitConfigEntry("Config", "ResetExpertiseItem", 0, "Item PrefabGUID cost for resetting weapon stats.");
-        _resetExpertiseItemQuantity = InitConfigEntry("Config", "ResetExpertiseItemQuantity", 0, "Quantity of item required for resetting stats.");
+        _resetExpertiseItem = InitConfigEntry("Config", "ResetExpertiseItem", 576389135, "Item PrefabGUID cost for resetting weapon stats.");
+        _resetExpertiseItemQuantity = InitConfigEntry("Config", "ResetExpertiseItemQuantity", 500, "Quantity of item required for resetting stats.");
 
         _maxHealth = InitConfigEntry("Config", "MaxHealth", 250f, "The base cap for maximum health.");
         _movementSpeed = InitConfigEntry("Config", "MovementSpeed", 0.25f, "The base cap for movement speed.");
-        _primaryAttackSpeed = InitConfigEntry("Config", "PrimaryAttackSpeed", 0.25f, "The base cap for primary attack speed.");
-        _physicalLifeLeech = InitConfigEntry("Config", "PhysicalLifeLeech", 0.15f, "The base cap for physical life leech.");
-        _spellLifeLeech = InitConfigEntry("Config", "SpellLifeLeech", 0.15f, "The base cap for spell life leech.");
-        _primaryLifeLeech = InitConfigEntry("Config", "PrimaryLifeLeech", 0.25f, "The base cap for primary life leech.");
-        _physicalPower = InitConfigEntry("Config", "PhysicalPower", 15f, "The base cap for physical power.");
-        _spellPower = InitConfigEntry("Config", "SpellPower", 15f, "The base cap for spell power.");
-        _physicalCritChance = InitConfigEntry("Config", "PhysicalCritChance", 0.15f, "The base cap for physical critical strike chance.");
-        _physicalCritDamage = InitConfigEntry("Config", "PhysicalCritDamage", 0.75f, "The base cap for physical critical strike damage.");
-        _spellCritChance = InitConfigEntry("Config", "SpellCritChance", 0.15f, "The base cap for spell critical strike chance.");
-        _spellCritDamage = InitConfigEntry("Config", "SpellCritDamage", 0.75f, "The base cap for spell critical strike damage.");
+        _primaryAttackSpeed = InitConfigEntry("Config", "PrimaryAttackSpeed", 0.10f, "The base cap for primary attack speed.");
+        _physicalLifeLeech = InitConfigEntry("Config", "PhysicalLifeLeech", 0.10f, "The base cap for physical life leech.");
+        _spellLifeLeech = InitConfigEntry("Config", "SpellLifeLeech", 0.10f, "The base cap for spell life leech.");
+        _primaryLifeLeech = InitConfigEntry("Config", "PrimaryLifeLeech", 0.15f, "The base cap for primary life leech.");
+        _physicalPower = InitConfigEntry("Config", "PhysicalPower", 10f, "The base cap for physical power.");
+        _spellPower = InitConfigEntry("Config", "SpellPower", 10f, "The base cap for spell power.");
+        _physicalCritChance = InitConfigEntry("Config", "PhysicalCritChance", 0.10f, "The base cap for physical critical strike chance.");
+        _physicalCritDamage = InitConfigEntry("Config", "PhysicalCritDamage", 0.50f, "The base cap for physical critical strike damage.");
+        _spellCritChance = InitConfigEntry("Config", "SpellCritChance", 0.10f, "The base cap for spell critical strike chance.");
+        _spellCritDamage = InitConfigEntry("Config", "SpellCritDamage", 0.50f, "The base cap for spell critical strike damage.");
 
         _bloodSystem = InitConfigEntry("Config", "BloodSystem", false, "Enable or disable the blood legacy system.");
         _maxLegacyPrestiges = InitConfigEntry("Config", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies.");
@@ -417,17 +443,17 @@ public class Plugin : BasePlugin
         _unitLegacyMultiplier = InitConfigEntry("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
         _vBloodLegacyMultipler = InitConfigEntry("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
         _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
-        _resetLegacyItem = InitConfigEntry("Config", "ResetLegacyItem", 0, "Item PrefabGUID cost for resetting blood stats.");
-        _resetLegacyItemQuantity = InitConfigEntry("Config", "ResetLegacyItemQuantity", 0, "Quantity of item required for resetting blood stats.");
+        _resetLegacyItem = InitConfigEntry("Config", "ResetLegacyItem", 576389135, "Item PrefabGUID cost for resetting blood stats.");
+        _resetLegacyItemQuantity = InitConfigEntry("Config", "ResetLegacyItemQuantity", 500, "Quantity of item required for resetting blood stats.");
 
-        _healingReceived = InitConfigEntry("Config", "HealingReceived", 0.25f, "The base cap for healing received.");
-        _damageReduction = InitConfigEntry("Config", "DamageReduction", 0.10f, "The base cap for damage reduction.");
-        _physicalResistance = InitConfigEntry("Config", "PhysicalResistance", 0.20f, "The base cap for physical resistance.");
-        _spellResistance = InitConfigEntry("Config", "SpellResistance", 0.20f, "The base cap for spell resistance.");
+        _healingReceived = InitConfigEntry("Config", "HealingReceived", 0.15f, "The base cap for healing received.");
+        _damageReduction = InitConfigEntry("Config", "DamageReduction", 0.05f, "The base cap for damage reduction.");
+        _physicalResistance = InitConfigEntry("Config", "PhysicalResistance", 0.10f, "The base cap for physical resistance.");
+        _spellResistance = InitConfigEntry("Config", "SpellResistance", 0.10f, "The base cap for spell resistance.");
         _resourceYield = InitConfigEntry("Config", "ResourceYield", 0.25f, "The base cap for resource yield.");
-        _ccReduction = InitConfigEntry("Config", "CCReduction", 0.25f, "The base cap for crowd control reduction.");
-        _spellCooldownRecoveryRate = InitConfigEntry("Config", "SpellCooldownRecoveryRate", 0.15f, "The base cap for spell cooldown recovery rate.");
-        _weaponCooldownRecoveryRate = InitConfigEntry("Config", "WeaponCooldownRecoveryRate", 0.15f, "The base cap for weapon cooldown recovery rate.");
+        _ccReduction = InitConfigEntry("Config", "CCReduction", 0.20f, "The base cap for crowd control reduction.");
+        _spellCooldownRecoveryRate = InitConfigEntry("Config", "SpellCooldownRecoveryRate", 0.10f, "The base cap for spell cooldown recovery rate.");
+        _weaponCooldownRecoveryRate = InitConfigEntry("Config", "WeaponCooldownRecoveryRate", 0.10f, "The base cap for weapon cooldown recovery rate.");
         _ultimateCooldownRecoveryRate = InitConfigEntry("Config", "UltimateCooldownRecoveryRate", 0.20f, "The base cap for ultimate cooldown recovery rate.");
         _minionDamage = InitConfigEntry("Config", "MinionDamage", 0.25f, "The base cap for minion damage.");
         _shieldAbsorb = InitConfigEntry("Config", "ShieldAbsorb", 0.50f, "The base cap for shield absorb.");
@@ -436,12 +462,13 @@ public class Plugin : BasePlugin
         _professionSystem = InitConfigEntry("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
         _maxProfessionLevel = InitConfigEntry("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
         _professionMultiplier = InitConfigEntry("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
-
+      
         _familiarSystem = InitConfigEntry("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
         _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
         _allowVBloods = InitConfigEntry("Config", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).");
-        _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs instead, no bans by default.");
+        _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.");
         _bannedTypes = InitConfigEntry("Config", "BannedTypes", "", "The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)");
+        _vBloodDamageMultiplier = InitConfigEntry("Config", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods).");
         _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
@@ -449,7 +476,7 @@ public class Plugin : BasePlugin
 
         _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");
         _hardSynergies = InitConfigEntry("Config", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).");
-        _statSyngergyMultiplier = InitConfigEntry("Config", "StatSynergyMultiplier", 2f, "Multiplier for class stat synergies to base stat cap.");
+        _statSyngergyMultiplier = InitConfigEntry("Config", "StatSynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap.");
         _bloodKnightWeapon = InitConfigEntry("Config", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies.");
         _bloodKnightBlood = InitConfigEntry("Config", "BloodKnightBlood", "0,2,3,11", "Blood Knight blood synergies.");
         _demonHunterWeapon = InitConfigEntry("Config", "DemonHunterWeapon", "1,2,8,9", "Demon Hunter weapon synergies.");
@@ -462,9 +489,6 @@ public class Plugin : BasePlugin
         _arcaneSorcererBlood = InitConfigEntry("Config", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies.");
         _deathMageWeapon = InitConfigEntry("Config", "DeathMageWeapon", "0,3,4,7", "Death Mage weapon synergies.");
         _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,6,9,10", "Death Mage blood synergies.");
-
-        //_warEventSystem = InitConfigEntry("Config", "WarEventSystem", false, "Enable or disable the war event system.");
-        //_primalInterval = InitConfigEntry("Config", "PrimalInterval", 5, "Minutes between primals.");
     }
     static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
     {
@@ -472,16 +496,21 @@ public class Plugin : BasePlugin
         var entry = Instance.Config.Bind(section, key, defaultValue, description);
 
         // Check if the key exists in the configuration file and retrieve its current value
-        var configFile = Path.Combine(ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
-        if (File.Exists(configFile))
+        var newFile = Path.Combine(Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+        //var oldFile = Path.Combine(Paths.ConfigPath, "com.zfolmt.Bloodcraft.cfg");
+
+        //var configFile = File.Exists(newFile) ? newFile : oldFile;
+
+        if (File.Exists(newFile))
         {
-            var config = new ConfigFile(configFile, true);
+            var config = new ConfigFile(newFile, true);
             if (config.TryGetEntry(section, key, out ConfigEntry<T> existingEntry))
             {
                 // If the entry exists, update the value to the existing value
                 entry.Value = existingEntry.Value;
             }
-        }
+        } 
+
         return entry;
     }
     static void CreateDirectories(string path)
@@ -610,7 +639,7 @@ public class Plugin : BasePlugin
 
     static readonly List<string> directoryPaths =
         [
-        ConfigPath,
+        ConfigFiles,
         PlayerLevelingPath,
         PlayerExpertisePath,
         PlayerBloodPath,

@@ -4,7 +4,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -88,10 +87,6 @@ internal static class StatChangeSystemPatches
             {
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
 
-                //dealDamageEvent.SpellSource.Read<EntityOwner>().Owner.LogComponentTypes();
-
-                //Core.Log.LogInfo(GameMode.ToString());
-
                 if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
                 {
                     if (PlayerAlliances && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
@@ -127,62 +122,6 @@ internal static class StatChangeSystemPatches
                                 Core.EntityManager.DestroyEntity(entity);
                             }
                         }
-                        
-                    }
-                } 
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-    /*
-    [HarmonyPatch(typeof(AbilityCastStarted_SetupAbilityTargetSystem_Shared), nameof(AbilityCastStarted_SetupAbilityTargetSystem_Shared.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(AbilityCastStarted_SetupAbilityTargetSystem_Shared __instance)
-    {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!PlayerAlliances) continue;
-                AbilityCastStartedEvent abilityCastStartedEvent = entity.Read<AbilityCastStartedEvent>();
-                //entity.LogComponentTypes();
-                if (abilityCastStartedEvent.a.TryGetComponent(out EntityOwner targetEntityOwner) && targetEntityOwner.Owner.TryGetComponent(out PlayerCharacter target))
-                {
-                    Core.Log.LogInfo("Checking target...");
-                    if (dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
-                    {
-                        Core.Log.LogInfo("Checking source...");
-                        Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerAlliances;
-                        string targetName = target.Name.Value;
-                        string sourceName = source.Name.Value;
-                        ulong steamId = source.UserEntity.Read<User>().PlatformId;
-                        Core.Log.LogInfo($"Checking alliance for {sourceName} and {targetName}...");
-                        if (Core.DataStructures.PlayerAlliances.TryGetValue(steamId, out var alliance) && alliance.Contains(targetName)) //check if owner is alliance leader
-                        {
-                            //entity.LogComponentTypes();
-                            Core.Log.LogInfo("Destroying damage entity (target in leader alliance)");
-                            Core.EntityManager.DestroyEntity(entity);
-                            //DestroyUtility.Destroy(Core.EntityManager, entity, DestroyDebugReason.None);
-
-                        }
-                        else // check if otherwise allied
-                        {
-                            if (playerAlliances.Values.Any(set => set.Contains(targetName) && set.Contains(sourceName)))
-                            {
-                                entity.LogComponentTypes();
-                                Core.Log.LogInfo("Destroying damage entity (target and source in same alliance)");
-                                Core.EntityManager.DestroyEntity(entity);
-                                //DestroyUtility.Destroy(Core.EntityManager, entity, DestroyDebugReason.None);
-                            }
-                        }
                     }
                 }
             }
@@ -196,5 +135,4 @@ internal static class StatChangeSystemPatches
             entities.Dispose();
         }
     }
-    */
 }

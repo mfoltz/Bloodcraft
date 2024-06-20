@@ -9,6 +9,7 @@ namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
 {
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static readonly float VBloodDamageMultiplier = Plugin.VBloodDamageMultiplier.Value;
 
     static readonly PrefabGUID playerFaction = new(1106458752);
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
@@ -115,6 +116,16 @@ internal static class FamiliarSummonSystem
         health.MaxHealth._Value = baseHealth * healthScalingFactor;
         health.Value = health.MaxHealth._Value;
         familiar.Write(health);
+
+        if (VBloodDamageMultiplier != 1f)
+        {
+            DamageCategoryStats damageCategoryStats = familiar.Read<DamageCategoryStats>();
+            if (damageCategoryStats.DamageVsVBloods._Value != VBloodDamageMultiplier)
+            {
+                damageCategoryStats.DamageVsVBloods._Value *= VBloodDamageMultiplier;
+                familiar.Write(damageCategoryStats);
+            }
+        }
 
         if (familiar.Has<MaxMinionsPerPlayerElement>()) // make vbloods summon?
         {

@@ -468,7 +468,6 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
             {
                 float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodType, bloodStatType);
 
-
                 bool found = false;
                 for (int i = 0; i < buffer.Length; i++)
                 {
@@ -545,7 +544,6 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 {
                     maxBonus *= SynergyMultiplier;
                 }
-                
             }
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
             {
@@ -553,7 +551,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 maxBonus *= gainFactor;
             }
             
-            float scaledBonus = maxBonus * ((float)xpData.Key / MaxBloodLevel); // Scale bonus up to 99%
+            float scaledBonus = maxBonus * ((float)xpData.Key / MaxBloodLevel); // Scale bonus up to maxLevel then full effect
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error

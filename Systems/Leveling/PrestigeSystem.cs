@@ -248,7 +248,6 @@ public class PrestigeSystem
                 buff.Write(lifeTime);
             }
         }
-
     }
     /*
     public static void HandleBloodBuff(Entity player, PrefabGUID buffPrefab, int prestigeLevel)
@@ -318,7 +317,6 @@ public class PrestigeSystem
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
         HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
-
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel)
     {
         int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
@@ -349,7 +347,6 @@ public class PrestigeSystem
             RemoveBuff(ctx, buffs[i], buffSpawner, entityCommandBuffer);
         }
     }
-
     public static void ApplyPrestigeBuffs(ChatCommandContext ctx, int prestigeLevel)
     {
         var buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
@@ -375,20 +372,6 @@ public class PrestigeSystem
                prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel) &&
                prestigeLevel > 0 ? prestigeLevel : 0;
     }
-    /*
-    public static bool TryParsePrestigeType(string prestigeType, out PrestigeSystem.PrestigeType parsedPrestigeType)
-    {
-        if (!Enum.TryParse(prestigeType, true, out parsedPrestigeType))
-        {
-            parsedPrestigeType = Enum.GetValues(typeof(PrestigeSystem.PrestigeType))
-                                     .Cast<PrestigeSystem.PrestigeType>()
-                                     .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
-
-        }
-
-        return true;
-    }
-    */
     public static bool TryParsePrestigeType(string prestigeType, out PrestigeSystem.PrestigeType parsedPrestigeType)
     {
         // Attempt to parse the prestigeType string to the PrestigeType enum.
@@ -412,5 +395,4 @@ public class PrestigeSystem
         parsedPrestigeType = default;
         return false; // Parsing failed
     }
-
 }

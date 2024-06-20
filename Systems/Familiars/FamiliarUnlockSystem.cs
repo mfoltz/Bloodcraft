@@ -30,7 +30,6 @@ internal static class FamiliarUnlockSystem
         if (IsBannedUnit(diedPrefab)) return; // banned prefab checks, no using currently
         if (IsBannedType(diedCategory)) return; // banned type checks, no using currently
 
-
         if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5) // units
         {
             HandleRoll(UnitChance, died, killer);

@@ -1,3 +1,10 @@
+`0.9.8`
+- trimmed message size for .lcb to prevent exceeding chat limit when translating replies
+- added option to control damage familiars deal to VBloods (leave at 1 for no change, set to 0.2 for 20% damage, etc)
+- adjusted default values to be somewhat more balanced, added default costs for resetting class/expertise/legacy, won't change existing config settings if you already have them set
+- unit category bans for familiars should be more consistently applying if they were not before
+- removed synthetic/isolating languages from word replacement translation (Japanese, Koreana, SChinese, TChinese, Thai, Vietnamese)
+
 `0.9.7`
 - familiars can't be bound or called when dominating presence is active and will be automatically dismissed if present when activated
 - added PreventFriendlyFire option for alliances, enable to prevent friendly fire between alliance members (only affects direct damage, does not prevent debuffs or enable buffs)

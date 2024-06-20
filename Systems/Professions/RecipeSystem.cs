@@ -1,4 +1,5 @@
 ﻿using ProjectM;
+using ProjectM.Gameplay.Systems;
 using Stunlock.Core;
 using Unity.Entities;
 
@@ -47,33 +48,41 @@ public class RecipeSystem
 
         stationEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[fabricator];
         recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[copperWires];
-        Entity extractEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[extractShard];
+        //Entity extractEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[extractShard];
 
         recipeData = recipeEntity.Read<RecipeData>();
-        RecipeData extractData = extractEntity.Read<RecipeData>();
+        //RecipeData extractData = extractEntity.Read<RecipeData>();
 
-        extractData.AlwaysUnlocked = true;
-        extractData.HideInStation = false;
-        extractData.HudSortingOrder = 0;
+        //extractData.AlwaysUnlocked = true;
+        //extractData.HideInStation = false;
+        //extractData.HudSortingOrder = 0;
 
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;
         recipeData.HudSortingOrder = 0;
 
-        extractEntity.Write(extractData);
+        //extractEntity.Write(extractData);
         recipeEntity.Write(recipeData);
 
         recipeMap[copperWires] = recipeData;
-        recipeMap[extractShard] = extractData;
+        //recipeMap[extractShard] = extractData;
 
         Core.GameDataSystem.RegisterRecipes();
 
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = copperWires, Disabled = false, Unlocked = true });
-        refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = extractShard, Disabled = false, Unlocked = true });
+        //refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = extractShard, Disabled = false, Unlocked = true });
 
         stationEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[smallFurnace];
         recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[silverIngot];
+        var requirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
+        requirementBuffer.Add(new RecipeRequirementBuffer { Guid = copperWires, Amount = 5 });
+
+        var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
+        var item = outputBuffer[0];
+        item.Guid = primalShard;
+        item.Amount = 10;
+        outputBuffer[0] = item;
 
         recipeData = recipeEntity.Read<RecipeData>();
 
@@ -89,6 +98,7 @@ public class RecipeSystem
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = silverIngot, Disabled = false, Unlocked = true });
 
+        /*
         stationEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[artisanTable];
         recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[draculaShard];
 
@@ -106,34 +116,34 @@ public class RecipeSystem
         reqBuffer.Add(new RecipeRequirementBuffer { Guid = vampiricDust, Amount = 20 });
         reqBuffer.Add(new RecipeRequirementBuffer { Guid = onyxTear, Amount = 10 });
         reqBuffer.Add(new RecipeRequirementBuffer { Guid = primalShard, Amount = 100 });
-
-        recipeMap[draculaShard] = recipeData;
+        
+        //recipeMap[draculaShard] = recipeData;
 
         Core.GameDataSystem.RegisterRecipes();
 
         var workBuffer = stationEntity.ReadBuffer<WorkstationRecipesBuffer>();
-        workBuffer.Add(new WorkstationRecipesBuffer { RecipeGuid = draculaShard});
+        //workBuffer.Add(new WorkstationRecipesBuffer { RecipeGuid = draculaShard});
 
-        stationEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[anvil];
-        recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[shadowSlashers];
+        //stationEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[anvil];
+        //recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[shadowSlashers];
 
-        recipeData = recipeEntity.Read<RecipeData>();
+        //recipeData = recipeEntity.Read<RecipeData>();
         
-        recipeData.AlwaysUnlocked = true;
-        recipeData.HideInStation = false;
-        recipeData.HudSortingOrder = 1;
-        recipeData.IgnoreServerSettings = true;
-        recipeEntity.Write(recipeData);
+        //recipeData.AlwaysUnlocked = true;
+        //recipeData.HideInStation = false;
+        //recipeData.HudSortingOrder = 1;
+        //recipeData.IgnoreServerSettings = true;
+        //recipeEntity.Write(recipeData);
 
         var outputBuffer = Core.EntityManager.AddBuffer<RecipeOutputBuffer>(recipeEntity);
         outputBuffer.Add(new RecipeOutputBuffer { Guid = primalShard, Amount = 250 });
 
-        recipeMap[shadowSlashers] = recipeData;
-        stationEntity.Remove<WorkstationRecipesBuffer>();
-        workBuffer = Core.EntityManager.AddBuffer<WorkstationRecipesBuffer>(stationEntity);
-        workBuffer.Add(new WorkstationRecipesBuffer { RecipeGuid = shadowSlashers });
-        refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = shadowSlashers, Disabled = false, Unlocked = true });
-
+        //recipeMap[shadowSlashers] = recipeData;
+        //stationEntity.Remove<WorkstationRecipesBuffer>();
+        //workBuffer = Core.EntityManager.AddBuffer<WorkstationRecipesBuffer>(stationEntity);
+        //workBuffer.Add(new WorkstationRecipesBuffer { RecipeGuid = shadowSlashers });
+        //refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = shadowSlashers, Disabled = false, Unlocked = true });
+        */
         Core.GameDataSystem.RegisterRecipes();
         Core.GameDataSystem.RegisterItems();
         Core.GameDataSystem.RegisterBlueprints();

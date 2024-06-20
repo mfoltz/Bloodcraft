@@ -5,8 +5,8 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
-using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Services.LocalizationService;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Services;
 public class RaidService
@@ -29,7 +29,7 @@ public class RaidService
     public static void StartRaidMonitor(Entity raider, Entity breached)
     {
         Entity heartEntity = breached.Has<CastleHeartConnection>() ? breached.Read<CastleHeartConnection>().CastleHeartEntity._Entity : Entity.Null;
-
+        
         if (!active) // if not active start monitor loop after clearing caches
         {
             Core.Log.LogInfo("Starting raid monitor...");
@@ -44,16 +44,17 @@ public class RaidService
         else if (active) // if active update onlinePlayers and add new territory participants
         {
             //onlinePlayers = GetUsers().Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity }).ToDictionary(user => user.CharacterName, user => user.Entity); // update player map
-            
             if (!heartEntity.Equals(Entity.Null)) raidParticipants.TryAdd(heartEntity, GetRaidParticipants(raider, breached));
         }
     }
     static HashSet<Entity> GetRaidParticipants(Entity raider, Entity breached)
     {
         HashSet<Entity> participants = [];
+        Dictionary<ulong, HashSet<string>> alliances = Core.DataStructures.PlayerAlliances;
 
         Entity playerUserEntity = breached.Read<UserOwner>().Owner._Entity;
         User playerUser = playerUserEntity.Read<User>(); // add alliance members of castle owner, should raid alliance members be included here? probably
+        string playerName = playerUser.CharacterName.Value;
 
         Entity clanEntity = EntityManager.Exists(playerUser.ClanEntity._Entity) ? playerUser.ClanEntity._Entity : Entity.Null;
 
@@ -70,30 +71,21 @@ public class RaidService
             participants.Add(playerUserEntity);
         }
 
-        if (PlayerAlliances && Core.DataStructures.PlayerAlliances.TryGetValue(playerUser.PlatformId, out var alliance)) //check if owner is alliance leader, add members to raid participants
+        if (PlayerAlliances && alliances.Values.Any(set => set.Contains(playerName)))
         {
-            foreach (string name in alliance)
-            {
-                if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
-            }
-        }
-        else if (PlayerAlliances)
-        {
-            foreach (var groupEntry in Core.DataStructures.PlayerAlliances) // check if owner is in an alliance, add members to raid participants
-            {
-                if (groupEntry.Value.Contains(playerUser.CharacterName.Value)) 
-                {
-                    foreach (string name in groupEntry.Value)
-                    {
-                        if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
-                    }
-                    break;
-                }
-            }
+            var members = alliances
+                .Where(groupEntry => groupEntry.Value.Contains(playerUser.CharacterName.Value))
+                .SelectMany(groupEntry => groupEntry.Value)
+                .Where(name => playerCache.TryGetValue(name, out var _))
+                .Select(name => playerCache[name])
+                .ToHashSet();
+            participants.UnionWith(members);
         }
 
         playerUserEntity = raider.Read<PlayerCharacter>().UserEntity;
         playerUser = playerUserEntity.Read<User>();
+        playerName = playerUser.CharacterName.Value;
+
         clanEntity = EntityManager.Exists(playerUser.ClanEntity._Entity) ? playerUser.ClanEntity._Entity : Entity.Null;
 
         if (!clanEntity.Equals(Entity.Null)) // add raider clan members to raid participants
@@ -104,31 +96,20 @@ public class RaidService
                 if (userBuffer[i].UserEntity.Read<User>().IsConnected) participants.Add(userBuffer[i].UserEntity); // for raiders only add clan members that are online
             }
         }
-        else
+        else // if no clan just add raider to raid participants
         {
             participants.Add(playerUserEntity);
         }
 
-        if (PlayerAlliances && Core.DataStructures.PlayerAlliances.TryGetValue(playerUser.PlatformId, out var raiderAlliance)) //check if raider is an alliance leader, add members to raid participants
+        if (PlayerAlliances && alliances.Values.Any(set => set.Contains(playerName)))
         {
-            foreach (string name in raiderAlliance)
-            {
-                if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
-            }
-        }
-        else if (PlayerAlliances)
-        {
-            foreach (var groupEntry in Core.DataStructures.PlayerAlliances) // check if raider is in an alliance, add members to raid participants
-            {
-                if (groupEntry.Value.Contains(playerUser.CharacterName.Value)) 
-                {
-                    foreach (string name in groupEntry.Value)
-                    {
-                        if (playerCache.TryGetValue(name, out var player)) participants.Add(player);
-                    }
-                    break;
-                }
-            }
+            var members = alliances
+                .Where(groupEntry => groupEntry.Value.Contains(playerUser.CharacterName.Value))
+                .SelectMany(groupEntry => groupEntry.Value)
+                .Where(name => playerCache.TryGetValue(name, out var _))
+                .Select(name => playerCache[name])
+                .ToHashSet();
+            participants.UnionWith(members);
         }
 
         return participants;

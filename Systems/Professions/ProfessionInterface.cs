@@ -1,9 +1,10 @@
 ﻿using Stunlock.Core;
+using Unity.Jobs;
 
 namespace Bloodcraft.Systems.Professions
 {
     
-    public interface IProfessionHandler
+    public interface IProfessionHandler 
     {
         void AddExperience(ulong steamID, float experience);
 

@@ -3,7 +3,6 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -19,7 +18,6 @@ internal class FamiliarService
     static readonly ComponentType[] FamiliarComponents =
         [
             ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
-            ComponentType.ReadOnly(Il2CppType.Of<ModifyTeamBuff>())
         ];
 
     //readonly IgnorePhysicsDebugSystem familiarMonoBehaviour;
@@ -43,7 +41,7 @@ internal class FamiliarService
         if (Plugin.FamiliarSystem.Value)
         {
             List<int> unitBans = Core.ParseConfigString(Plugin.BannedUnits.Value);
-            List<string> typeBans = [..(Plugin.BannedTypes.Value).Split(',')];
+            List<string> typeBans = Plugin.BannedTypes.Value.Split(',').Select(s => s.Trim()).ToList();
             if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
             if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
             //familiarMonoBehaviour = (new GameObject("FamiliarService")).AddComponent<IgnorePhysicsDebugSystem>();
@@ -81,24 +79,27 @@ internal class FamiliarService
     */
     public void HandleFamiliarsOnSpawn()
     {
-        NativeArray<Entity> familiars = familiarQuery.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> followers = familiarQuery.ToEntityArray(Allocator.Temp);
         try
         {
-            foreach (Entity familiar in familiars)
+            foreach (Entity follower in followers)
             {
-                //Core.Log.LogInfo("Destroying player familiar...");
-                if (familiar.Has<MinionMaster>()) HandleFamiliarMinions(familiar);
-                DestroyUtility.Destroy(Core.EntityManager, familiar, DestroyDebugReason.None);
+                if (follower.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
+                {
+                    if (follower.Has<MinionMaster>()) HandleFamiliarMinions(follower);
+                    DestroyUtility.CreateDestroyEvent(Core.EntityManager, follower, DestroyReason.Default, DestroyDebugReason.None);
+                    ulong steamId = follower.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives))
+                    {
+                        Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
+                        Core.DataStructures.SavePlayerFamiliarActives();
+                    }
+                }
             }
-            foreach (var actives in Core.DataStructures.FamiliarActives)
-            {
-                Core.DataStructures.FamiliarActives[actives.Key] = new(Entity.Null, 0);
-            }
-            Core.DataStructures.SavePlayerFamiliarActives();
         }
         finally
         {
-            familiars.Dispose();
+            followers.Dispose();
         }      
     }
     public void HandleFamiliarMinions(Entity familiar)

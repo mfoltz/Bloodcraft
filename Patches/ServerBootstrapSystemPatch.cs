@@ -2,6 +2,7 @@
 using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Shared;
 using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -20,6 +21,7 @@ internal static class ServerBootstrapSystemPatch
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
+
         if (!Core.DataStructures.PlayerBools.ContainsKey(steamId))
         {
             Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
@@ -322,4 +324,39 @@ internal static class ServerBootstrapSystemPatch
             }
         }
     }
+    /*
+    [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
+    [HarmonyPrefix]
+    static void OnUserDisconnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
+    {
+        int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
+        ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
+        Entity userEntity = serverClient.UserEntity;
+        User user = __instance.EntityManager.GetComponentData<User>(userEntity);
+        ulong steamId = user.PlatformId;
+        try
+        {
+            Entity character = user.LocalCharacter._Entity;
+            if (Plugin.FamiliarSystem.Value && character != Entity.Null)
+            {
+                var buffer = character.ReadBuffer<FollowerBuffer>();
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    Entity familiar = buffer[i].Entity._Entity;
+                    if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
+                    DestroyUtility.Destroy(Core.EntityManager, familiar, DestroyDebugReason.None);
+                }
+                if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var _))
+                {
+                    Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
+                    Core.DataStructures.SavePlayerFamiliarActives();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo(ex);
+        }
+    }
+    */
 }

@@ -57,8 +57,6 @@ public static class ECSExtensions
     {
         return EntityManager.GetBuffer<T>(entity);
     }
-   
-
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
         componentData = default;
@@ -75,7 +73,6 @@ public static class ECSExtensions
         var ct = new ComponentType(Il2CppType.Of<T>());
         return EntityManager.HasComponent(entity, ct);
     }
-  
     public static string LookupName(this PrefabGUID PrefabGUID)
     {
         PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
@@ -106,7 +103,6 @@ public static class ECSExtensions
         var ct = new ComponentType(Il2CppType.Of<T>());
         EntityManager.AddComponent(entity, ct);
     }
-
     public static void Remove<T>(this Entity entity)
     {
         var ct = new ComponentType(Il2CppType.Of<T>());

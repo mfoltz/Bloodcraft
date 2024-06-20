@@ -296,9 +296,15 @@ internal static class LevelingCommands
             string replyMessage = string.Join(", ", perks.Select((perk, index) =>
             {
                 int level = (index + 1) * step;
-                return $"<color=white>{new PrefabGUID(perk).LookupName()}</color> at level <color=yellow>{level}</color>";
+                string prefab = new PrefabGUID(perk).LookupName();
+                int prefabIndex = prefab.IndexOf("Prefab");
+                if (prefabIndex != -1)
+                {
+                    prefab = prefab[..prefabIndex].TrimEnd();
+                }
+                return $"<color=white>{prefab}</color> at level <color=yellow>{level}</color>";
             }));
-            HandleReply(ctx, $"{playerClass} perks: {replyMessage}");
+            HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
         }
         else
         {

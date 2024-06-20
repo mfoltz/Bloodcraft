@@ -161,5 +161,7 @@ namespace Bloodcraft.Systems.Familiars
 
             return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
         }
+
+
     }
 }

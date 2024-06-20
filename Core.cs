@@ -7,8 +7,8 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
+using Il2CppInterop.Runtime.Injection;
 using ProjectM;
-using ProjectM.Gameplay.WarEvents;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
@@ -33,26 +33,16 @@ internal static class Core
     public static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem { get; internal set; }
     public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
-    //public static WarEventSystem WarEventSystem { get; internal set; }
-    public static ModificationsRegistry ModificationsRegistry { get; internal set; }
-
-    public static Unity.Mathematics.Random Random = new();
-    public static WarEventRegistrySystem WarEventRegistrySystem { get; internal set; }
     public static GameDataSystem GameDataSystem { get; internal set; }
-    public static FamiliarService FamiliarService { get; internal set; }
+    public static FamiliarService FamiliarService { get; } = new();
     public static LocalizationService Localization { get; } = new();
-
-    //public static ZoomModifierBuffSystem ZoomModifierBuffSystem { get; internal set; }
     public static PlayerService PlayerService { get; } = new();
-
-    //public static WarEventService WarEventService { get; internal set; }
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
-
-    //public static ShapeshiftSystem ShapeshiftSystem { get; internal set;}
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
-
     public static ServerGameSettings ServerGameSettings { get; internal set; }
+    //public static InitializationSystemGroup InitializationSystemGroup { get; internal set; }
+    //public static SimulationSystemGroup SimulationSystemGroup { get; internal set; }
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -62,7 +52,8 @@ internal static class Core
     public static void Initialize()
     {
         if (hasInitialized) return;
-        
+
+        // Initialize utility services
         PrefabCollectionSystem = Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
@@ -73,30 +64,24 @@ internal static class Core
         EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
         GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
         ServerGameSettings = Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings;
-        //WarEventSystem = Server.GetExistingSystemManaged<WarEventSystem>();
-        WarEventRegistrySystem = Server.GetExistingSystemManaged<WarEventRegistrySystem>();
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
-        ModificationsRegistry = ServerScriptMapper.GetSingleton<ModificationsRegistry>();
-        //ZoomModifierBuffSystem = Server.GetOrCreateSystemManaged<ZoomModifierBuffSystem>();    
-        //ShapeshiftSystem = Server.GetExistingSystemManaged<ShapeshiftSystem>();
-        FamiliarService = new();
-        ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = GetSpellPrefabs();
-        //WarEventService = new();
+        ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = LevelingSystem.GetSpellPrefabs();
 
-        // Initialize utility services
+        // simulation group initialization
+        //InitializationSystemGroup = Server.GetExistingSystemManaged<InitializationSystemGroup>();
+        //SimulationSystemGroup = Server.GetExistingSystemManaged<SimulationSystemGroup>();
+        ///Core.Log.LogInfo("Injecting DamageEventSystem into Il2Cpp domain...");
+        //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
+
+        // job system initialization
+        //Core.Log.LogInfo("Proceeding to DamageEventSystem OnCreate...");
+        //Server.GetOrCreateSystemManaged<DamageEventSystem>();
+
         Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
         hasInitialized = true;
     }
-    static Dictionary<PrefabGUID, int> GetSpellPrefabs()
-    {
-        Dictionary<PrefabGUID, int> spellPrefabs = [];
-        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
-        {
-            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Prefab = new PrefabGUID(x), Index = index}).ToList().ForEach(x => spellPrefabs.TryAdd(x.Prefab, x.Index));
-        }
-        return spellPrefabs;
-    }
+    
     static World GetWorld(string name)
     {
         foreach (var world in World.s_AllWorlds)
@@ -775,9 +760,9 @@ internal static class Core
     {
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerLevelingPath, "player_experience.json");
         public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
-        public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigPath, "player_classes.json");
-        public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigPath, "player_bools.json");
-        public static readonly string PlayerAlliancesJson = Path.Combine(Plugin.ConfigPath, "player_alliances.json");
+        public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigFiles, "player_classes.json");
+        public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigFiles, "player_bools.json");
+        public static readonly string PlayerAlliancesJson = Path.Combine(Plugin.ConfigFiles, "player_alliances.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
         public static readonly string PlayerFishingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_fishing.json");

@@ -1004,7 +1004,15 @@ public class LevelingSystem
             }
         }
     }
-
+    public static Dictionary<PrefabGUID, int> GetSpellPrefabs()
+    {
+        Dictionary<PrefabGUID, int> spellPrefabs = [];
+        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
+        {
+            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) Core.ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Prefab = new PrefabGUID(x), Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Prefab, x.Index));
+        }
+        return spellPrefabs;
+    }
     public static List<int> GetClassBuffs(ulong steamId)
     {
         if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
