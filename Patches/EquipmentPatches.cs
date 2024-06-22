@@ -19,9 +19,7 @@ namespace Bloodcraft.Patches;
 internal static class EquipmentPatches
 {
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
-
     static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-
     static readonly bool Professions = Plugin.ProfessionSystem.Value;
 
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]

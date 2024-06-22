@@ -1,8 +1,11 @@
-﻿using Bloodcraft.Systems.Familiars;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Familiars;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Shared;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -11,7 +14,6 @@ internal class FamiliarService
 {
     static readonly ComponentType[] MinionComponents =
         [
-            ComponentType.ReadOnly(Il2CppType.Of<EntityOwner>()),
             ComponentType.ReadOnly(Il2CppType.Of<Minion>())
         ];
 
@@ -30,7 +32,7 @@ internal class FamiliarService
         minionQuery = Core.EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = MinionComponents,
-            Options = EntityQueryOptions.Default
+            Options = EntityQueryOptions.IncludeDisabledEntities
         });
 
         familiarQuery = Core.EntityManager.CreateEntityQuery(new EntityQueryDesc
@@ -46,9 +48,9 @@ internal class FamiliarService
             if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
             //familiarMonoBehaviour = (new GameObject("FamiliarService")).AddComponent<IgnorePhysicsDebugSystem>();
             //familiarMonoBehaviour.StartCoroutine(UpdateLoop().WrapToIl2Cpp());
+
         }
     }
-
     /*
     IEnumerator UpdateLoop()
     {
@@ -86,7 +88,7 @@ internal class FamiliarService
             {
                 if (follower.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    if (follower.Has<MinionMaster>()) HandleFamiliarMinions(follower);
+                    //if (follower.Has<MinionMaster>()) HandleFamiliarMinions(follower);
                     DestroyUtility.CreateDestroyEvent(Core.EntityManager, follower, DestroyReason.Default, DestroyDebugReason.None);
                     ulong steamId = follower.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives))
@@ -104,15 +106,25 @@ internal class FamiliarService
     }
     public void HandleFamiliarMinions(Entity familiar)
     {
+        if (FamiliarPatches.familiarMinions.ContainsKey(familiar))
+        {
+            foreach (Entity minion in FamiliarPatches.familiarMinions[familiar])
+            {
+                //Core.Log.LogInfo($"Destroying minion...");
+                DestroyUtility.CreateDestroyEvent(Core.EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
+            }
+            FamiliarPatches.familiarMinions.Remove(familiar);
+        }
+    }
+    public void CleanUpMinions()
+    {
         NativeArray<Entity> minions = minionQuery.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity minion in minions)
             {
-                if (minion.Read<EntityOwner>().Owner.Equals(familiar))
-                {
-                    DestroyUtility.CreateDestroyEvent(Core.EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
-                }
+                //if (minion.Has<PrefabGUID>()) Core.Log.LogInfo($"Cleaning up minion: {minion.Read<PrefabGUID>().LookupName()}");
+                DestroyUtility.CreateDestroyEvent(Core.EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
             }
         }
         finally

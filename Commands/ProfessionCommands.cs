@@ -1,11 +1,10 @@
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Services.LocalizationService;
-using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Commands;
 internal static class ProfessionCommands
@@ -21,7 +20,7 @@ internal static class ProfessionCommands
     {
         if (!Plugin.ProfessionSystem.Value)
         {
-            HandleReply(ctx, "Professions are not enabled.");
+            LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
 
@@ -32,7 +31,7 @@ internal static class ProfessionCommands
             bools["ProfessionLogging"] = !bools["ProfessionLogging"];
         }
         Core.DataStructures.SavePlayerBools();
-        HandleReply(ctx, $"Profession logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Profession logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "getProfessionProgress", shortHand: "gp", adminOnly: false, usage: ".gp [Profession]", description: "Display your current profession progress.")]
@@ -40,7 +39,7 @@ internal static class ProfessionCommands
     {
         if (!Plugin.ProfessionSystem.Value)
         {
-            HandleReply(ctx, "Professions are not enabled.");
+            LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
         ulong steamID = ctx.Event.User.PlatformId;
@@ -48,18 +47,18 @@ internal static class ProfessionCommands
         IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(empty, profession.ToLower());
         if (professionHandler == null)
         {
-            HandleReply(ctx, "Invalid profession.");
+            LocalizationService.HandleReply(ctx, "Invalid profession.");
             return;
         }
         var data = professionHandler.GetExperienceData(steamID);
         int progress = (int)(data.Value - ProfessionSystem.ConvertLevelToXp(data.Key));
         if (data.Key > 0)
         {
-            HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
         }
         else
         {
-            HandleReply(ctx, $"No progress in {professionHandler.GetProfessionName()} yet.");
+            LocalizationService.HandleReply(ctx, $"No progress in {professionHandler.GetProfessionName()} yet.");
         }
     }
 
@@ -68,26 +67,26 @@ internal static class ProfessionCommands
     {
         if (!Plugin.ProfessionSystem.Value)
         {
-            HandleReply(ctx, "Professions are not enabled.");
+            LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
-        Entity foundUserEntity = GetUserByName(name, true);
+        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
         if (foundUserEntity.Equals(Entity.Null))
         {
-            HandleReply(ctx, "Player not found...");
+            LocalizationService.HandleReply(ctx, "Player not found...");
             return;
         }
         User foundUser = foundUserEntity.Read<User>();
         if (level < 0 || level > Plugin.MaxProfessionLevel.Value)
         {
-            HandleReply(ctx, $"Level must be between 0 and {Plugin.MaxProfessionLevel.Value}.");
+            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {Plugin.MaxProfessionLevel.Value}.");
             return;
         }
         PrefabGUID empty = new(0);
         IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(empty, profession.ToLower());
         if (professionHandler == null)
         {
-            HandleReply(ctx, "Invalid profession.");
+            LocalizationService.HandleReply(ctx, "Invalid profession.");
             return;
         }
 
@@ -96,18 +95,18 @@ internal static class ProfessionCommands
         professionHandler.UpdateExperienceData(steamId, new KeyValuePair<int, float>(level, xp));
         professionHandler.SaveChanges();
 
-        HandleReply(ctx, $"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
+        LocalizationService.HandleReply(ctx, $"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
     }
     [Command(name: "listProfessions", shortHand: "lp", adminOnly: false, usage: ".lp", description: "Lists professions available.")]
     public static void ListProfessionsCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ProfessionSystem.Value)
         {
-            HandleReply(ctx, "Professions are not enabled.");
+            LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
         string professions = ProfessionHandlerFactory.GetAllProfessions();
-        HandleReply(ctx, $"Available professions: {professions}");
+        LocalizationService.HandleReply(ctx, $"Available professions: {professions}");
     }
 
 
@@ -122,6 +121,6 @@ internal static class ProfessionCommands
         existingSystem.SetDebugSetting(user.Index, ref BuildingCostsDebugSetting);
 
         string toggleColor = BuildingCostsDebugSetting.Value ? "<color=green>enabled</color>" : "<color=red>disabled</color>";
-        HandleReply(ctx, $"Building costs removed: {toggleColor}");
+        LocalizationService.HandleReply(ctx, $"Building costs removed: {toggleColor}");
     }
 }

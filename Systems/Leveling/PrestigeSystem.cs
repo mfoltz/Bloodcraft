@@ -215,91 +215,45 @@ public class PrestigeSystem
             User = player.Read<PlayerCharacter>().UserEntity,
         };
         // apply level up buff here
-        debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-        if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buff))
+        
+        if (!serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity _))
         {
+            debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             //Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
             //buff.LogComponentTypes();
-            if (buff.Has<RemoveBuffOnGameplayEvent>())
+            if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buff))
             {
-                buff.Remove<RemoveBuffOnGameplayEvent>();
-            }
-            if (buff.Has<RemoveBuffOnGameplayEventEntry>())
-            {
-                buff.Remove<RemoveBuffOnGameplayEventEntry>();
-            }
-            if (buff.Has<CreateGameplayEventsOnSpawn>())
-            {
-                buff.Remove<CreateGameplayEventsOnSpawn>();
-            }
-            if (buff.Has<GameplayEventListeners>())
-            {
-                buff.Remove<GameplayEventListeners>();
-            }
-            if (!buff.Has<Buff_Persists_Through_Death>())
-            {
-                buff.Write(new Buff_Persists_Through_Death());
-            }
-            if (buff.Has<LifeTime>())
-            {
-                LifeTime lifeTime = buff.Read<LifeTime>();
-                lifeTime.Duration = -1;
-                lifeTime.EndAction = LifeTimeEndAction.None;
-                buff.Write(lifeTime);
+                if (buff.Has<RemoveBuffOnGameplayEvent>())
+                {
+                    buff.Remove<RemoveBuffOnGameplayEvent>();
+                }
+                if (buff.Has<RemoveBuffOnGameplayEventEntry>())
+                {
+                    buff.Remove<RemoveBuffOnGameplayEventEntry>();
+                }
+                if (buff.Has<CreateGameplayEventsOnSpawn>())
+                {
+                    buff.Remove<CreateGameplayEventsOnSpawn>();
+                }
+                if (buff.Has<GameplayEventListeners>())
+                {
+                    buff.Remove<GameplayEventListeners>();
+                }
+                if (!buff.Has<Buff_Persists_Through_Death>())
+                {
+                    buff.Write(new Buff_Persists_Through_Death());
+                }
+                if (buff.Has<LifeTime>())
+                {
+                    LifeTime lifeTime = buff.Read<LifeTime>();
+                    lifeTime.Duration = -1;
+                    lifeTime.EndAction = LifeTimeEndAction.None;
+                    buff.Write(lifeTime);
+                }
             }
         }
     }
-    /*
-    public static void HandleBloodBuff(Entity player, PrefabGUID buffPrefab, int prestigeLevel)
-    {
-        ServerGameManager serverGameManager = Core.ServerGameManager;
-        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
-        ApplyBuffDebugEvent applyBuffDebugEvent = new()
-        {
-            BuffPrefabGUID = buffPrefab,
-        };
-        FromCharacter fromCharacter = new()
-        {
-            Character = player,
-            User = player.Read<PlayerCharacter>().UserEntity,
-        };
-        // remove blood class buffs and reapply with new values
-        if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buff))
-        {
 
-            Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
-            //buff.LogComponentTypes();
-            if (buff.Has<RemoveBuffOnGameplayEvent>())
-            {
-                buff.Remove<RemoveBuffOnGameplayEvent>();
-            }
-            if (buff.Has<RemoveBuffOnGameplayEventEntry>())
-            {
-                buff.Remove<RemoveBuffOnGameplayEventEntry>();
-            }
-            if (buff.Has<CreateGameplayEventsOnSpawn>())
-            {
-                buff.Remove<CreateGameplayEventsOnSpawn>();
-            }
-            if (buff.Has<GameplayEventListeners>())
-            {
-                buff.Remove<GameplayEventListeners>();
-            }
-            if (!buff.Has<Buff_Persists_Through_Death>())
-            {
-                buff.Write(new Buff_Persists_Through_Death());
-            }
-            if (buff.Has<LifeTime>())
-            {
-                LifeTime lifeTime = buff.Read<LifeTime>();
-                lifeTime.Duration = -1;
-                lifeTime.EndAction = LifeTimeEndAction.None;
-                buff.Write(lifeTime);
-            }
-        }
-
-    }
-    */
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
@@ -349,14 +303,44 @@ public class PrestigeSystem
     }
     public static void ApplyPrestigeBuffs(ChatCommandContext ctx, int prestigeLevel)
     {
-        var buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
-        var buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
-        var entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
-
+        List<int> buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
+        if (buffs.Count == 0) return;
         for (int i = 0; i < prestigeLevel; i++)
         {
-            RemoveBuff(ctx, buffs[i], buffSpawner, entityCommandBuffer);
+            PrefabGUID buffPrefab = new(buffs[i]);
+            if (buffPrefab.GuidHash == 0) continue;
+            HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
         }
+    }
+    public static void ApplyExperiencePrestigeEffects(ChatCommandContext ctx, ulong playerId, int level)
+    {
+        float levelingReducer = Plugin.LevelingPrestigeReducer.Value * level;
+
+        string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
+
+        float gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * level;
+
+        string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
+        HandleReply(ctx, $"Player <color=green>{ctx.Name}</color> has prestiged in <color=#90EE90>Experience</color>[<color=white>{level}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
+    }
+    public static void ApplyOtherPrestigeEffects(ChatCommandContext ctx, ulong playerId, PrestigeSystem.PrestigeType parsedPrestigeType, int level)
+    {
+        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
+
+        float ratesReduction = level * Plugin.PrestigeRatesReducer.Value; // Example: 0.1 (10%)
+        float ratesMultiplier = expPrestige * Plugin.PrestigeRatesMultiplier.Value;
+
+        float combinedFactor = ratesMultiplier - ratesReduction;
+
+        string percentageReductionString = (ratesReduction * 100).ToString("F0") + "%";
+
+        // Fixed additive stat gain increase based on base value
+        float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * level;
+        string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
+
+        string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
+
+        HandleReply(ctx, $"Player <color=green>{ctx.Name}</color> has prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{level}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }
     static void RemoveBuff(ChatCommandContext ctx, int buffId, BuffUtility.BuffSpawner buffSpawner, EntityCommandBuffer entityCommandBuffer)
     {

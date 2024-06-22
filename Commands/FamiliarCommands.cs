@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -7,13 +8,13 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
-using static Bloodcraft.Services.LocalizationService;
+using Unity.Collections;
 
 namespace Bloodcraft.Commands;
 internal static class FamiliarCommands
 {
     static readonly PrefabGUID combatBuff = new(581443919);
-    static readonly PrefabGUID pvpBuff = new(697095869);
+    static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
 
     [Command(name: "bindFamiliar", shortHand: "bind", adminOnly: false, usage: ".bind [#]", description: "Activates specified familiar from current list.")]
@@ -21,7 +22,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
 
@@ -30,15 +31,15 @@ internal static class FamiliarCommands
         Entity userEntity = ctx.Event.SenderUserEntity;
         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
 
-        if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+        if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
         {
-            HandleReply(ctx, "You can't bind a familiar while in combat or dominating presence is active.");
+            LocalizationService.HandleReply(ctx, "You can't bind a familiar while in combat or dominating presence is active.");
             return;
         }
 
         if (familiar != Entity.Null)
         {
-            HandleReply(ctx, "You already have an active familiar.");
+            LocalizationService.HandleReply(ctx, "You already have an active familiar.");
             return;
         }
 
@@ -46,7 +47,7 @@ internal static class FamiliarCommands
 
         if (string.IsNullOrEmpty(set))
         {
-            HandleReply(ctx, "You don't have a set selected. Use .famsets to see available sets then choose one with .cfs [SetName]");
+            LocalizationService.HandleReply(ctx, "You don't have a set selected. Use .famsets to see available sets then choose one with .cfs [SetName]");
             return;
         }
 
@@ -55,7 +56,7 @@ internal static class FamiliarCommands
             Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
             if (choice < 1 || choice > famKeys.Count)
             {
-                HandleReply(ctx, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>)");
                 return;
             }
             data = new(Entity.Null, famKeys[choice - 1]);
@@ -67,7 +68,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            HandleReply(ctx, "Couldn't find familiar or familiar already active.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar or familiar already active.");
         }
     }
 
@@ -80,31 +81,31 @@ internal static class FamiliarCommands
 
         if (familiar != Entity.Null)
         {
-            if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
+            if (FamiliarPatches.familiarMinions.ContainsKey(familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
             DestroyUtility.CreateDestroyEvent(Core.EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
-            HandleReply(ctx, "Familiar unbound.");
+            LocalizationService.HandleReply(ctx, "Familiar unbound.");
         }
         else if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Item1.Equals(Entity.Null) && !data.Item2.Equals(0))
         {
-            HandleReply(ctx, "Couldn't find familiar, assuming dead and unbinding...");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar, assuming dead and unbinding...");
 
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
             
         }
-        else if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
+        else if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
         {
-            if (familiar.Has<MinionMaster>()) Core.FamiliarService.HandleFamiliarMinions(familiar);
-            DestroyUtility.CreateDestroyEvent(Core.EntityManager, data.Item1, DestroyReason.Default, DestroyDebugReason.None);
+            if (FamiliarPatches.familiarMinions.ContainsKey(data.Familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
+            DestroyUtility.CreateDestroyEvent(Core.EntityManager, data.Familiar, DestroyReason.Default, DestroyDebugReason.None);
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
-            HandleReply(ctx, "Familiar unbound.");
+            LocalizationService.HandleReply(ctx, "Familiar unbound.");
         }
         else
         {
-            HandleReply(ctx, "Couldn't find familiar to unbind.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar to unbind.");
         }
     }
 
@@ -113,7 +114,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -125,13 +126,13 @@ internal static class FamiliarCommands
             foreach (var famKey in famKeys)
             {
                 PrefabGUID famPrefab = new(famKey);
-                HandleReply(ctx, $"<color=white>{count}</color>: <color=green>{famPrefab.GetPrefabName()}</color>");
+                LocalizationService.HandleReply(ctx, $"<color=white>{count}</color>: <color=green>{famPrefab.GetPrefabName()}</color>");
                 count++;
             }
         }
         else
         {
-            HandleReply(ctx, "Couldn't locate set.");
+            LocalizationService.HandleReply(ctx, "Couldn't locate set.");
         }
     }
 
@@ -140,7 +141,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -153,11 +154,11 @@ internal static class FamiliarCommands
                 sets.Add(key);
             }
             string fams = string.Join(", ", sets.Select(set => $"<color=white>{set}</color>"));
-            HandleReply(ctx, $"Available Familiar Sets: {fams}");
+            LocalizationService.HandleReply(ctx, $"Available Familiar Sets: {fams}");
         }
         else
         {
-            HandleReply(ctx, "You don't have any unlocked familiars yet.");
+            LocalizationService.HandleReply(ctx, "You don't have any unlocked familiars yet.");
         }
     }
 
@@ -166,7 +167,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -174,20 +175,21 @@ internal static class FamiliarCommands
         if (data.UnlockedFamiliars.TryGetValue(name, out var _))
         {
             Core.DataStructures.FamiliarSet[steamId] = name;
-            HandleReply(ctx, $"Active Familiar Set: <color=white>{name}</color>");
+            LocalizationService.HandleReply(ctx, $"Active Familiar Set: <color=white>{name}</color>");
             Core.DataStructures.SavePlayerFamiliarSets();
         }
         else
         {
-            HandleReply(ctx, "Couldn't find set.");
+            LocalizationService.HandleReply(ctx, "Couldn't find set.");
         }
     }
+
     [Command(name: "setRename", shortHand: "sr", adminOnly: false, usage: ".sr [CurrentName] [NewName]", description: "Renames set.")]
     public static void RenameSet(ChatCommandContext ctx, string current, string name)
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -207,19 +209,20 @@ internal static class FamiliarCommands
             // Save changes back to the FamiliarUnlocksManager
             Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
 
-            HandleReply(ctx, $"<color=white>{current}</color> renamed to <color=yellow>{name}</color>.");
+            LocalizationService.HandleReply(ctx, $"<color=white>{current}</color> renamed to <color=yellow>{name}</color>.");
         }
         else
         {
-            HandleReply(ctx, "Couldn't find set to rename.");
+            LocalizationService.HandleReply(ctx, "Couldn't find set to rename.");
         }
     }
+
     [Command(name: "transplantFamiliar", shortHand: "tf", adminOnly: false, usage: ".tf [SetName]", description: "Moves active familiar to specified set.")]
     public static void TransplantFamiliar(ChatCommandContext ctx, string name)
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -240,20 +243,21 @@ internal static class FamiliarCommands
                     }
                 }
                 PrefabGUID PrefabGUID = new(actives.Item2);
-                HandleReply(ctx, $"<color=green>{PrefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{PrefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
             }
         }
         else
         {
-            HandleReply(ctx, "Couldn't find set or set is full.");
+            LocalizationService.HandleReply(ctx, "Couldn't find set or set is full.");
         }
     }
+
     [Command(name: "addFamiliar", shortHand: "af", adminOnly: true, usage: ".af [PrefabGUID]", description: "Unit testing.")]
     public static void AddFamiliar(ChatCommandContext ctx, int unit)
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -266,24 +270,24 @@ internal static class FamiliarCommands
                 // Add to set
                 if (!Entity.Read<PrefabGUID>().LookupName().ToLower().Contains("char"))
                 {
-                    HandleReply(ctx, "Invalid unit.");
+                    LocalizationService.HandleReply(ctx, "Invalid unit.");
                     return;
                 }
 
                 data.UnlockedFamiliars[activeSet].Add(unit);
                 Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
-                HandleReply(ctx, $"<color=green>{unit}</color> added to <color=white>{activeSet}</color>.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{unit}</color> added to <color=white>{activeSet}</color>.");
 
             }
             else
             {
-                HandleReply(ctx, "Invalid unit.");
+                LocalizationService.HandleReply(ctx, "Invalid unit.");
                 return;
             }
         }
         else
         {
-            HandleReply(ctx, "Set full, choose another.");
+            LocalizationService.HandleReply(ctx, "Set full, choose another.");
         }
     }
 
@@ -292,7 +296,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong steamId = ctx.User.PlatformId;
@@ -302,19 +306,19 @@ internal static class FamiliarCommands
             // Remove the old set
             if (choice < 1 || choice > familiarSet.Count)
             {
-                HandleReply(ctx, $"Invalid choice, please use 1 to {familiarSet.Count} (Current List:<color=white>{familiarSet}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid choice, please use 1 to {familiarSet.Count} (Current List:<color=white>{familiarSet}</color>)");
                 return;
             }
             PrefabGUID familiarId = new(familiarSet[choice - 1]);
             // remove from set
             familiarSet.RemoveAt(choice - 1);
             Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
-            HandleReply(ctx, $"<color=green>{familiarId.GetPrefabName()}</color> removed from <color=white>{activeSet}</color>.");
+            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetPrefabName()}</color> removed from <color=white>{activeSet}</color>.");
 
         }
         else
         {
-            HandleReply(ctx, "Couldn't find set to remove from.");
+            LocalizationService.HandleReply(ctx, "Couldn't find set to remove from.");
         }
     }
 
@@ -323,7 +327,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         ulong platformId = ctx.User.PlatformId;
@@ -332,7 +336,7 @@ internal static class FamiliarCommands
 
         if (Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
         {
-            HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
+            LocalizationService.HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
             return;
         }
 
@@ -342,11 +346,18 @@ internal static class FamiliarCommands
     [Command(name: "toggleCombat", shortHand: "combat", usage: ".combat", description: "Enables or disables combat for familiar.", adminOnly: false)]
     public static void ToggleCombat(ChatCommandContext ctx)
     {
+
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
+        if (!Plugin.FamiliarCombat.Value)
+        {
+            LocalizationService.HandleReply(ctx, "Familiar combat is not enabled.");
+            return;
+        }
+
         ulong platformId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
@@ -373,7 +384,7 @@ internal static class FamiliarCommands
             } 
             */
 
-            HandleReply(ctx, $"Emotes for familiars are {(bools["Emotes"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
+            LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(bools["Emotes"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
         }
     }
 
@@ -382,7 +393,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         List<string> emoteInfoList = [];
@@ -393,7 +404,7 @@ internal static class FamiliarCommands
             emoteInfoList.Add($"<color=#FFC0CB>{emoteName}</color>: <color=yellow>{actionName}</color>");
         }
         string emotes = string.Join(", ", emoteInfoList);
-        HandleReply(ctx, emotes);
+        LocalizationService.HandleReply(ctx, emotes);
     }
 
     [Command(name: "getFamiliarLevel", shortHand: "get fl", adminOnly: false, usage: ".get fl", description: "Display current familiar leveling progress.")]
@@ -401,7 +412,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
 
@@ -412,11 +423,11 @@ internal static class FamiliarCommands
             var xpData = FamiliarLevelingSystem.GetFamiliarExperience(steamId, data.Item2);
             int progress = (int)(xpData.Value - FamiliarLevelingSystem.ConvertLevelToXp(xpData.Key));
             int percent = FamiliarLevelingSystem.GetLevelProgress(steamId, data.Item2);
-            HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
         }
         else
         {
-            HandleReply(ctx, "Couldn't find any experience for familiar.");
+            LocalizationService.HandleReply(ctx, "Couldn't find any experience for familiar.");
         }
     }
 
@@ -425,14 +436,15 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
         if (level < 1 || level > Plugin.MaxFamiliarLevel.Value)
         {
-            HandleReply(ctx, $"Level must be between 1 and {Plugin.MaxFamiliarLevel.Value}");
+            LocalizationService.HandleReply(ctx, $"Level must be between 1 and {Plugin.MaxFamiliarLevel.Value}");
             return;
         }
+
         ulong steamId = ctx.Event.User.PlatformId;
 
         if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.Item2.Equals(0))
@@ -444,12 +456,12 @@ internal static class FamiliarCommands
             xpData.FamiliarExperience[data.Item2] = newXP;
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
             FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, level);
-            HandleReply(ctx, $"Your familiar has been set to level <color=white>{level}</color>.");
+            LocalizationService.HandleReply(ctx, $"Your familiar has been set to level <color=white>{level}</color>.");
 
         }
         else
         {
-            HandleReply(ctx, "Couldn't find active familiar to set level for.");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar to set level for.");
         }
     }
 
@@ -458,7 +470,7 @@ internal static class FamiliarCommands
     {
         if (!Plugin.FamiliarSystem.Value)
         {
-            HandleReply(ctx, "Familiars are not enabled.");
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
 
@@ -479,6 +491,6 @@ internal static class FamiliarCommands
                 DestroyUtility.CreateDestroyEvent(Core.EntityManager, buffer[i].Entity._Entity, DestroyReason.Default, DestroyDebugReason.None);
             }
         }
-        HandleReply(ctx, "Familiar actives and followers cleared.");
+        LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
 }

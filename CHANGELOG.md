@@ -1,3 +1,15 @@
+`0.9.9`
+- added damage config for damage dealt to players by familiars
+- familiar summons now properly being yeeted after combat
+- various issues related to initialization should be tempered if not resolved
+- added set player prestige level/type command for admins
+- added set player spell slots command for admins
+- added sync prestige buffs command for players, applies missing prestige buffs if applicable
+- added config for familiar combat being on (combat mode can be toggled by player) or off (cannot be toggled by player, permanently off)
+- added config multiplier for experience from non-hostile units (does not apply to Beatrice the Tailor and Ben the Old Wanderer)
+- alliances no longer make player immune to various unintended damage types
+- gatebosses give rate gains
+
 `0.9.8`
 - trimmed message size for .lcb to prevent exceeding chat limit when translating replies
 - added option to control damage familiars deal to VBloods (leave at 1 for no change, set to 0.2 for 20% damage, etc)

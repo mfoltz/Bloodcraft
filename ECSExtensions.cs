@@ -4,11 +4,12 @@ using Stunlock.Core;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
+using Bloodcraft.Services;
 
 namespace Bloodcraft;
 public static class ECSExtensions
 {
-    static EntityManager EntityManager { get; } = Core.EntityManager;
+    static EntityManager EntityManager => Core.EntityManager;
     public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -67,7 +68,6 @@ public static class ECSExtensions
         }
         return false;
     }
-    
     public static bool Has<T>(this Entity entity)
     {
         var ct = new ComponentType(Il2CppType.Of<T>());
@@ -81,11 +81,11 @@ public static class ECSExtensions
     }
     public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
     {
-        if (!Core.Localization.prefabNames.TryGetValue(itemPrefabGUID._Value, out var itemLocalizationHash))
+        if (!LocalizationService.prefabNames.TryGetValue(itemPrefabGUID._Value, out var itemLocalizationHash))
         {
             return itemPrefabGUID.LookupName();
         }
-        return Core.Localization.GetLocalization(itemLocalizationHash);
+        return LocalizationService.GetLocalization(itemLocalizationHash);
     }
     public static void LogComponentTypes(this Entity entity)
     {

@@ -1,5 +1,6 @@
 ﻿using ProjectM;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
@@ -8,8 +9,13 @@ using Unity.Transforms;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
 {
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
     static readonly float VBloodDamageMultiplier = Plugin.VBloodDamageMultiplier.Value;
+    static readonly float PlayerVampireDamageMultiplier = Plugin.PlayerVampireDamageMultiplier.Value;
+    static readonly bool FamiliarCombat = Plugin.FamiliarCombat.Value;
+    static readonly PrefabGUID invulnerableBuff = new(-480024072);
+    static readonly PrefabGUID ignoredFaction = new(-1430861195);
 
     static readonly PrefabGUID playerFaction = new(1106458752);
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
@@ -29,7 +35,7 @@ internal static class FamiliarSummonSystem
             level = xpData.Key;
         }
 
-        var debugEvent = new SpawnDebugEvent
+        SpawnDebugEvent debugEvent = new()
         {
             PrefabGuid = new(famKey),
             Control = false,
@@ -57,8 +63,46 @@ internal static class FamiliarSummonSystem
         ModifyCollision(familiar);
         ModifyDropTable(familiar);
         PreventDisableFamiliar(familiar);
+        if (!FamiliarCombat) DisableCombat(player, familiar);
     }
-    
+    static void DisableCombat(Entity player, Entity familiar)
+    {
+        FactionReference factionReference = familiar.Read<FactionReference>();
+        factionReference.FactionGuid._Value = ignoredFaction;
+        familiar.Write(factionReference);
+
+        AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+        aggroConsumer.Active._Value = false;
+        familiar.Write(aggroConsumer);
+
+        Aggroable aggroable = familiar.Read<Aggroable>();
+        aggroable.Value._Value = false;
+        aggroable.DistanceFactor._Value = 0f;
+        aggroable.AggroFactor._Value = 0f;
+        familiar.Write(aggroable);
+
+        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
+        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        {
+            BuffPrefabGUID = invulnerableBuff,
+        };
+        FromCharacter fromCharacter = new()
+        {
+            Character = familiar,
+            User = player.Read<PlayerCharacter>().UserEntity,
+        };
+        debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+        if (ServerGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
+        {
+            if (invlunerableBuff.Has<LifeTime>())
+            {
+                var lifetime = invlunerableBuff.Read<LifeTime>();
+                lifetime.Duration = -1;
+                lifetime.EndAction = LifeTimeEndAction.None;
+                invlunerableBuff.Write(lifetime);
+            }
+        }
+    }
     static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
         ModifyTeamBuff modifyTeamBuff = new ModifyTeamBuff { Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam };
@@ -123,6 +167,15 @@ internal static class FamiliarSummonSystem
             if (damageCategoryStats.DamageVsVBloods._Value != VBloodDamageMultiplier)
             {
                 damageCategoryStats.DamageVsVBloods._Value *= VBloodDamageMultiplier;
+                familiar.Write(damageCategoryStats);
+            }
+        }
+        if (PlayerVampireDamageMultiplier != 1f)
+        {
+            DamageCategoryStats damageCategoryStats = familiar.Read<DamageCategoryStats>();
+            if (damageCategoryStats.DamageVsVampires._Value != PlayerVampireDamageMultiplier)
+            {
+                damageCategoryStats.DamageVsVampires._Value *= PlayerVampireDamageMultiplier;
                 familiar.Write(damageCategoryStats);
             }
         }

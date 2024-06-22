@@ -5,11 +5,10 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
-using static Bloodcraft.Services.LocalizationService;
-using static Bloodcraft.Services.PlayerService;
+using Bloodcraft.Services;
 
 namespace Bloodcraft.Services;
-public class RaidService
+internal class RaidService
 {
     static readonly bool PlayerAlliances = Plugin.PlayerAlliances.Value;
 
@@ -25,7 +24,6 @@ public class RaidService
 
     static bool active = false;
     static DateTime lastMessage = DateTime.MinValue;
-
     public static void StartRaidMonitor(Entity raider, Entity breached)
     {
         Entity heartEntity = breached.Has<CastleHeartConnection>() ? breached.Read<CastleHeartConnection>().CastleHeartEntity._Entity : Entity.Null;
@@ -76,8 +74,8 @@ public class RaidService
             var members = alliances
                 .Where(groupEntry => groupEntry.Value.Contains(playerUser.CharacterName.Value))
                 .SelectMany(groupEntry => groupEntry.Value)
-                .Where(name => playerCache.TryGetValue(name, out var _))
-                .Select(name => playerCache[name])
+                .Where(name => PlayerService.playerCache.TryGetValue(name, out var _))
+                .Select(name => PlayerService.playerCache[name])
                 .ToHashSet();
             participants.UnionWith(members);
         }
@@ -106,8 +104,8 @@ public class RaidService
             var members = alliances
                 .Where(groupEntry => groupEntry.Value.Contains(playerUser.CharacterName.Value))
                 .SelectMany(groupEntry => groupEntry.Value)
-                .Where(name => playerCache.TryGetValue(name, out var _))
-                .Select(name => playerCache[name])
+                .Where(name => PlayerService.playerCache.TryGetValue(name, out var _))
+                .Select(name => PlayerService.playerCache[name])
                 .ToHashSet();
             participants.UnionWith(members);
         }
@@ -128,7 +126,7 @@ public class RaidService
             }
             bool sendMessage = (DateTime.Now - lastMessage).TotalSeconds >= 10;
             List<Entity> heartEntities = [.. raidParticipants.Keys];
-            foreach (KeyValuePair<string, Entity> player in playerCache) // validate player presence in raided territories
+            foreach (KeyValuePair<string, Entity> player in PlayerService.playerCache) // validate player presence in raided territories
             {
                 Entity userEntity = player.Value;
                 User user = userEntity.Read<User>();
@@ -172,7 +170,7 @@ public class RaidService
                                     buffer[0] = bufferEntry;
                                 }
                             }
-                            if (sendMessage) HandleServerReply(EntityManager, user, "You are not allowed in this territory during a raid.");                
+                            if (sendMessage) LocalizationService.HandleServerReply(EntityManager, user, "You are not allowed in this territory during a raid.");                
                         }
                     });
                 }

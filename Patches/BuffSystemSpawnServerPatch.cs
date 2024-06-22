@@ -121,6 +121,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
+
                 if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
@@ -129,7 +130,7 @@ internal static class BuffSpawnSystemPatches
                     if (entity.Has<LifeTime>())
                     {
                         LifeTime lifeTime = entity.Read<LifeTime>();
-                        lifeTime.Duration *= (1 + level / Plugin.MaxProfessionLevel.Value);
+                        if (lifeTime.Duration != -1) lifeTime.Duration *= (1 + level / Plugin.MaxProfessionLevel.Value);
                         entity.Write(lifeTime);
                     }
                     if (entity.Has<ModifyUnitStatBuff_DOTS>())
@@ -143,6 +144,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
+
                 if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
@@ -162,6 +164,7 @@ internal static class BuffSpawnSystemPatches
                         debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                     }
                 }
+
                 if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
@@ -193,64 +196,18 @@ internal static class BuffSpawnSystemPatches
                     }
                 }
 
-                if (Plugin.BloodSystem.Value && prefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
+                if (prefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
                 {
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;
-                    BloodSystem.UpdateLegacy(killer, died);
+                    if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(killer, died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
                     if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
                     if (Plugin.FamiliarSystem.Value)
                     {
                         FamiliarLevelingSystem.UpdateFamiliar(killer, died);
                         FamiliarUnlockSystem.HandleUnitUnlock(killer, died);
-                    }
-                }
-            }
-        }
-        catch (System.Exception ex)
-        {
-            Core.Log.LogInfo(ex);
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-
-    [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
-    [HarmonyPostfix]
-    static void OnUpdatePostix(BuffSystem_Spawn_Server __instance)
-    {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                PrefabGUID buffPrefab = entity.Read<PrefabGUID>();
-                PrefabGUID PrefabGUID = entity.Read<Buff>().Target.Read<PrefabGUID>();
-
-                string buffCheck = buffPrefab.LookupName().ToLower();
-                string targetCheck = PrefabGUID.LookupName().ToLower();
-
-                if (!targetCheck.Contains("werewolf") || !targetCheck.Contains("geomancer")) continue;
-                if (Plugin.FamiliarSystem.Value && buffCheck.Contains("shapeshift") || buffCheck.Contains("transform"))
-                {
-                    if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
-                    {
-                        
-                        Entity player = entity.Read<Buff>().Target.Read<Follower>().Followed._Value;
-                        ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
-                        if (familiar != Entity.Null)
-                        {
-                            if (Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(PrefabGUID.GuidHash, out var xpData))
-                            {
-                                //Core.Log.LogInfo("Handling werewolf familiar or geomancer...");
-                                FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, xpData.Key);
-                            }
-                        }
                     }
                 }
             }
@@ -264,9 +221,10 @@ internal static class BuffSpawnSystemPatches
             entities.Dispose();
         }
     }
+
     [HarmonyPatch(typeof(ShapeshiftSystem), nameof(ShapeshiftSystem.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePostix(ShapeshiftSystem __instance)
+    static void OnUpdatePrefix(ShapeshiftSystem __instance)
     {
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try

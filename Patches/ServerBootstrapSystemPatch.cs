@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Shared;
+using Stunlock.Core;
 using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -325,7 +326,7 @@ internal static class ServerBootstrapSystemPatch
         }
     }
     /*
-    [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
+    [HarmonyPatch(typeof(WorldBootstrapUtilities), nameof(WorldBootstrapUtilities.Cor))]
     [HarmonyPrefix]
     static void OnUserDisconnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
@@ -359,4 +360,5 @@ internal static class ServerBootstrapSystemPatch
         }
     }
     */
+    
 }

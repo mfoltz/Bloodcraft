@@ -1,25 +1,25 @@
 ﻿using Bloodcraft.Systems.Experience;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-/* // nothing to see here
+/*
 namespace Bloodcraft.Services;
-public partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
+internal partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
 {
-    EntityQuery damageEventQuery;
-    // Custom job class inheriting from IJob, definitely know what I'm doing here
-    public class DealDamageJob(IntPtr pointer) : IJob(pointer)
+    public NativeArray<DealDamageEvent> DealDamageSystemEvents;
+    IntPtr JobPtr;
+
+    // Custom job class inheriting from IJobParallelFor, definitely know what I'm doing here
+    class DealDamageJob(IntPtr pointer) : IJob(pointer)
     {
         public NativeArray<DealDamageEvent> DealDamageEvents;
         public override void Execute()
         {
-            foreach(DealDamageEvent dealDamageEvent in DealDamageEvents)
+            foreach (DealDamageEvent dealDamageEvent in DealDamageEvents)
             {
-                Core.Log.LogInfo("DealDamageJob OnUpdate executing...");
-                Execute(in dealDamageEvent);
+                Execute(in dealDamageEvent); // Call the static method
             }
         }
         public static void Execute(in DealDamageEvent dealDamageEvent)
@@ -40,26 +40,36 @@ public partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
     }
     public override void OnCreate()
     {
-        damageEventQuery = Core.Server.GetExistingSystemManaged<DealDamageSystem>()._Query;   
+        // OnCreate
+        //IJobExtensions.EarlyJobInit<DealDamageJob(IntPtr.Zero)>();
+        //JobPtr = IJobExtensions.GetReflectionData<DealDamageJob>();
+    }
+    public override void OnDestroy()
+    {
+        // OnDestroy
     }
     public override void OnUpdate()
     {
-        // Retrieve the deal damage events
-        NativeArray<DealDamageEvent> dealDamageEvents = damageEventQuery.ToComponentDataArray<DealDamageEvent>(Allocator.TempJob);
+        // Retrieve the deal damage events, check array length
+        NativeArray<DealDamageEvent> dealDamageEvents = DealDamageSystemEvents;
 
+        if (!DealDamageSystemEvents.IsCreated || DealDamageSystemEvents.Length == 0)
+        {
+            return;
+        }
+        
         // Create an instance of the custom job handler
-        IntPtr jobPtr = IJobExtensions.GetReflectionData<IJob>();
-        var job = new DealDamageJob(jobPtr)
+        DealDamageJob job = new(JobPtr)
         {
             DealDamageEvents = dealDamageEvents
         };
 
         // Execute the job
-        job.Execute();
-        
+        JobHandle jobHandle = IJobExtensions.Schedule(job);
+        jobHandle.Complete();
+
         // Dispose the native array
-        dealDamageEvents.Dispose();
+        dealDamageEvents.Dispose();   
     }
 }
 */
-

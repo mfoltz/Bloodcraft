@@ -16,9 +16,6 @@ internal class Plugin : BasePlugin
     public static ManualLogSource LogInstance => Instance.Log;
 
     public static readonly string ConfigFiles = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME); // Bloodcraft folder
-    
-    // old paths to migrate data if needed
-    //public static readonly string OldPlayerExperiencePath = Path.Combine(ConfigFiles, "ExperienceLeveling"); // new folder in Bloodcraft folder
 
     // current paths
     public static readonly string PlayerLevelingPath = Path.Combine(ConfigFiles, "PlayerLeveling");
@@ -54,6 +51,7 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodLevelingMultiplier;
     private static ConfigEntry<float> _groupLevelingMultiplier;
     private static ConfigEntry<float> _levelScalingMultiplier;
+    private static ConfigEntry<float> _docileUnitMultiplier;
     private static ConfigEntry<float> _warEventMultiplier;
     private static ConfigEntry<float> _unitSpawnerMultiplier;
     private static ConfigEntry<bool> _playerAlliances;
@@ -117,11 +115,13 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<float> _professionMultiplier;
 
     private static ConfigEntry<bool> _familiarSystem;
+    private static ConfigEntry<bool> _familiarCombat;
     private static ConfigEntry<int> _maxFamiliarLevel;
     private static ConfigEntry<bool> _allowVBloods;
     private static ConfigEntry<string> _bannedUnits;
     private static ConfigEntry<string> _bannedTypes;
     private static ConfigEntry<float> _vBloodDamageMultiplier;
+    private static ConfigEntry<float> _playerVampireDamageMultiplier;
     private static ConfigEntry<float> _unitFamiliarMultiplier;
     private static ConfigEntry<float> _vBloodFamiliarMultiplier;
     private static ConfigEntry<float> _unitUnlockChance;
@@ -151,32 +151,19 @@ internal class Plugin : BasePlugin
 
     // public getters, kinda verbose might just get rid of these
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
-
     public static ConfigEntry<bool> RaidMonitor => _raidMonitor;
-
     public static ConfigEntry<bool> DamageIntruders => _damageIntruders;
-
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
-
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
-
     public static ConfigEntry<string> PrestigeBuffs => _prestigeBuffs;
-
     public static ConfigEntry<string> PrestigeLevelsToUnlockClassSpells => _prestigeLevelsToUnlockClassSpells;
-
     public static ConfigEntry<string> BloodKnightBuffs => _bloodKnightBuffs;
-
     public static ConfigEntry<string> DemonHunterBuffs => _demonHunterBuffs;
-
     public static ConfigEntry<string> VampireLordBuffs => _vampireLordBuffs;
-
     public static ConfigEntry<string> ShadowBladeBuffs => _shadowBladeBuffs;
-
     public static ConfigEntry<string> ArcaneSorcererBuffs => _arcaneSorcererBuffs;
-
     public static ConfigEntry<string> DeathMageBuffs => _deathMageBuffs;
     public static ConfigEntry<int> MaxLevelingPrestiges => _maxLevelingPrestiges;
-
     public static ConfigEntry<float> LevelingPrestigeReducer => _levelingPrestigeReducer;
     public static ConfigEntry<float> PrestigeRatesReducer => _prestigeRatesReducer;
     public static ConfigEntry<float> PrestigeStatMultiplier => _prestigeStatMultiplier;
@@ -191,32 +178,22 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> ExpShareDistance => _expShareDistance;
     public static ConfigEntry<bool> PlayerAlliances => _playerAlliances;
     public static ConfigEntry<bool> ClanBasedAlliances => _clanBasedAlliances;
-
     public static ConfigEntry<bool> PreventFriendlyFire => _preventFriendlyFire;
-
+    public static ConfigEntry<float> DocileUnitMultiplier => _docileUnitMultiplier;
     public static ConfigEntry<float> WarEventMultiplier => _warEventMultiplier;
-
     public static ConfigEntry<float> UnitSpawnerMultiplier => _unitSpawnerMultiplier;
-
     public static ConfigEntry<int> ChangeClassItem => _changeClassItem;
-
     public static ConfigEntry<int> ChangeClassItemQuantity => _changeClassItemQuantity;
-
     public static ConfigEntry<bool> ExpertiseSystem => _expertiseSystem;
-
     public static ConfigEntry<int> MaxExpertisePrestiges => _maxExpertisePrestiges;
-
     public static ConfigEntry<bool> UnarmedSlots => _unarmedSlots;
-
     public static ConfigEntry<bool> ShiftSlot => _shiftSlots;
-
     public static ConfigEntry<int> MaxExpertiseLevel => _maxExpertiseLevel;
     public static ConfigEntry<float> UnitExpertiseMultiplier => _unitExpertiseMultiplier;
     public static ConfigEntry<float> VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier;
     public static ConfigEntry<int> ExpertiseStatChoices => _expertiseStatChoices;
     public static ConfigEntry<int> ResetExpertiseItem => _resetExpertiseItem;
     public static ConfigEntry<int> ResetExpertiseItemQuantity => _resetExpertiseItemQuantity;
-
     public static ConfigEntry<float> MaxHealth => _maxHealth;
     public static ConfigEntry<float> MovementSpeed => _movementSpeed;
     public static ConfigEntry<float> PrimaryAttackSpeed => _primaryAttackSpeed;
@@ -229,7 +206,6 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> PhysicalCritDamage => _physicalCritDamage;
     public static ConfigEntry<float> SpellCritChance => _spellCritChance;
     public static ConfigEntry<float> SpellCritDamage => _spellCritDamage;
-
     public static ConfigEntry<bool> BloodSystem => _bloodSystem;
     public static ConfigEntry<int> MaxLegacyPrestiges => _maxLegacyPrestiges;
     public static ConfigEntry<bool> BloodQualityBonus => _bloodQualityBonus;
@@ -240,81 +216,56 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<int> LegacyStatChoices => _legacyStatChoices;
     public static ConfigEntry<int> ResetLegacyItem => _resetLegacyItem;
     public static ConfigEntry<int> ResetLegacyItemQuantity => _resetLegacyItemQuantity;
-
     public static ConfigEntry<float> HealingReceived => _healingReceived;
-
     public static ConfigEntry<float> DamageReduction => _damageReduction;
-
     public static ConfigEntry<float> PhysicalResistance => _physicalResistance;
-
     public static ConfigEntry<float> SpellResistance => _spellResistance;
-
     public static ConfigEntry<float> ResourceYield => _resourceYield;
-
     public static ConfigEntry<float> CCReduction => _ccReduction;
-
     public static ConfigEntry<float> SpellCooldownRecoveryRate => _spellCooldownRecoveryRate;
-
     public static ConfigEntry<float> WeaponCooldownRecoveryRate => _weaponCooldownRecoveryRate;
-
     public static ConfigEntry<float> UltimateCooldownRecoveryRate => _ultimateCooldownRecoveryRate;
-
     public static ConfigEntry<float> MinionDamage => _minionDamage;
-
     public static ConfigEntry<float> ShieldAbsorb => _shieldAbsorb;
-
     public static ConfigEntry<float> BloodEfficiency => _bloodEfficiency;
-
     public static ConfigEntry<bool> ProfessionSystem => _professionSystem;
     public static ConfigEntry<int> MaxProfessionLevel => _maxProfessionLevel;
     public static ConfigEntry<float> ProfessionMultiplier => _professionMultiplier;
-
     public static ConfigEntry<bool> FamiliarSystem => _familiarSystem;
+    public static ConfigEntry<bool> FamiliarCombat => _familiarCombat;
     public static ConfigEntry<int> MaxFamiliarLevel => _maxFamiliarLevel;
-
     public static ConfigEntry<bool> AllowVBloods => _allowVBloods;
-
     public static ConfigEntry<string> BannedUnits => _bannedUnits;
-
     public static ConfigEntry<string> BannedTypes => _bannedTypes;
     public static ConfigEntry<float> UnitFamiliarMultiplier => _unitFamiliarMultiplier;
     public static ConfigEntry<float> VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier;
     public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
     public static ConfigEntry<float> VBloodUnlockChance => _vBloodUnlockChance;
-
     public static ConfigEntry<float> VBloodDamageMultiplier => _vBloodDamageMultiplier;
-
+    public static ConfigEntry<float> PlayerVampireDamageMultiplier => _playerVampireDamageMultiplier;
     public static ConfigEntry<bool> SoftSynergies => _softSynergies;
     public static ConfigEntry<bool> HardSynergies => _hardSynergies;
-
     public static ConfigEntry<float> StatSynergyMultiplier => _statSyngergyMultiplier;
     public static ConfigEntry<string> BloodKnightWeapon => _bloodKnightWeapon;
     public static ConfigEntry<string> BloodKnightBlood => _bloodKnightBlood;
-
     public static ConfigEntry<string> BloodKnightSpells => _bloodKnightSpells;
     public static ConfigEntry<string> DemonHunterWeapon => _demonHunterWeapon;
     public static ConfigEntry<string> DemonHunterBlood => _demonHunterBlood;
-
     public static ConfigEntry<string> DemonHunterSpells => _demonHunterSpells;
     public static ConfigEntry<string> VampireLordWeapon => _vampireLordWeapon;
     public static ConfigEntry<string> VampireLordBlood => _vampireLordBlood;
-
     public static ConfigEntry<string> VampireLordSpells => _vampireLordSpells;
     public static ConfigEntry<string> ShadowBladeWeapon => _shadowBladeWeapon;
     public static ConfigEntry<string> ShadowBladeBlood => _shadowBladeBlood;
-
     public static ConfigEntry<string> ShadowBladeSpells => _shadowBladeSpells;
     public static ConfigEntry<string> ArcaneSorcererWeapon => _arcaneSorcererWeapon;
     public static ConfigEntry<string> ArcaneSorcererBlood => _arcaneSorcererBlood;
-
     public static ConfigEntry<string> ArcaneSorcererSpells => _arcaneSorcererSpells;
     public static ConfigEntry<string> DeathMageWeapon => _deathMageWeapon;
     public static ConfigEntry<string> DeathMageBlood => _deathMageBlood;
 
     public static ConfigEntry<string> DeathMageSpells => _deathMageSpells;
 
-    //public static ConfigEntry<bool> WarEventSystem => _warEventSystem;
-    //public static ConfigEntry<int> PrimalInterval => _primalInterval;
     public override void Load()
     {
         Instance = this;
@@ -324,6 +275,7 @@ internal class Plugin : BasePlugin
         LoadAllData();
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }
+
     /*
     static void MigrateData()
     {
@@ -355,6 +307,7 @@ internal class Plugin : BasePlugin
         }
     }
     */
+
     static void InitConfig()
     {
         foreach (string path in directoryPaths) // make sure directories exist
@@ -365,12 +318,12 @@ internal class Plugin : BasePlugin
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
         _raidMonitor = InitConfigEntry("Config", "PreventRaidInterference", false, "Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed in territory for duration of the raid once breach by raiders is detected).");
         _damageIntruders = InitConfigEntry("Config", "DamageIntruders", false, "Enable or disable damaging raid intruders if RaidMonitor is enabled.");
-        
+
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
         _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
         _prestigeLevelsToUnlockClassSpells = InitConfigEntry("Config", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.");
-        
+
         _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,-714434113,-534491790,-1055766373", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs), so if max l ");
         _bloodKnightSpells = InitConfigEntry("Config", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige.");
 
@@ -385,7 +338,7 @@ internal class Plugin : BasePlugin
 
         _arcaneSorcererBuffs = InitConfigEntry("Config", "ArcaneSorcererBuffs", "-901503997,884683323,-993492354,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs");
         _arcaneSorcererSpells = InitConfigEntry("Config", "ArcaneSorcererSpells", "-433204738,495259674,1217615468,-1503327574", "Arcane Sorcerer shift spells, granted at levels of prestige");
-        
+
         _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "1643157297,1159173627,1006510207,997154800", "The PrefabGUID hashes for death mage leveling blood buffs");
         _deathMageSpells = InitConfigEntry("Config", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige");
 
@@ -398,7 +351,8 @@ internal class Plugin : BasePlugin
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
         _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 7.5f, "The multiplier for experience gained from units.");
         _vBloodLevelingMultiplier = InitConfigEntry("Config", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods.");
-        _warEventMultiplier = InitConfigEntry("Config", "WarEventMultiplier", 0.15f, "The multiplier for experience gained from war event trash spawns.");
+        _docileUnitMultiplier = InitConfigEntry("Config", "DocileUnitMultiplier", 0.15f, "The multiplier for experience gained from docile units.");
+        _warEventMultiplier = InitConfigEntry("Config", "WarEventMultiplier", 0.2f, "The multiplier for experience gained from war event trash spawns.");
         _unitSpawnerMultiplier = InitConfigEntry("Config", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs).");
         _changeClassItem = InitConfigEntry("Config", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class.");
         _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 1000, "Quantity of item required for changing class.");
@@ -462,13 +416,15 @@ internal class Plugin : BasePlugin
         _professionSystem = InitConfigEntry("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
         _maxProfessionLevel = InitConfigEntry("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
         _professionMultiplier = InitConfigEntry("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
-      
+
         _familiarSystem = InitConfigEntry("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
+        _familiarCombat = InitConfigEntry("Config", "FamiliarCombat", true, "Enable or disable combat for familiars.");
         _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
         _allowVBloods = InitConfigEntry("Config", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).");
         _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.");
         _bannedTypes = InitConfigEntry("Config", "BannedTypes", "", "The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)");
         _vBloodDamageMultiplier = InitConfigEntry("Config", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods).");
+        _playerVampireDamageMultiplier = InitConfigEntry("Config", "PlayerVampireDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to players. probably).");
         _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
@@ -490,6 +446,7 @@ internal class Plugin : BasePlugin
         _deathMageWeapon = InitConfigEntry("Config", "DeathMageWeapon", "0,3,4,7", "Death Mage weapon synergies.");
         _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,6,9,10", "Death Mage blood synergies.");
     }
+
     static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
     {
         // Bind the configuration entry and get its value
@@ -497,9 +454,6 @@ internal class Plugin : BasePlugin
 
         // Check if the key exists in the configuration file and retrieve its current value
         var newFile = Path.Combine(Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
-        //var oldFile = Path.Combine(Paths.ConfigPath, "com.zfolmt.Bloodcraft.cfg");
-
-        //var configFile = File.Exists(newFile) ? newFile : oldFile;
 
         if (File.Exists(newFile))
         {
@@ -509,10 +463,11 @@ internal class Plugin : BasePlugin
                 // If the entry exists, update the value to the existing value
                 entry.Value = existingEntry.Value;
             }
-        } 
+        }
 
         return entry;
     }
+
     static void CreateDirectories(string path)
     {
         if (!Directory.Exists(path))
@@ -520,12 +475,14 @@ internal class Plugin : BasePlugin
             Directory.CreateDirectory(path);
         }
     }
+
     public override bool Unload()
     {
         Config.Clear();
         _harmony.UnpatchSelf();
         return true;
     }
+
     static void LoadAllData()
     {
         Core.DataStructures.LoadPlayerBools();

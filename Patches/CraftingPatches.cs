@@ -11,32 +11,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CraftingPatches
 {
-    /*
-    [HarmonyPatch(typeof(UpdateCraftingSystem), nameof(UpdateCraftingSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(UpdateCraftingSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
-        //NativeList<Entity> crafts = __instance._CraftingEntities;
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                // want better way to track crafting but idk
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogError($"Exited UpdateCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-    */
-
-
     [HarmonyPatch(typeof(StartCraftingSystem), nameof(StartCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(StartCraftingSystem __instance)

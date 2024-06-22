@@ -7,16 +7,24 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes;
+using Il2CppSystem.ComponentModel;
+using Il2CppSystem.ComponentModel.Design;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
+using ProjectM.Terrain;
 using Stunlock.Core;
 using System.Collections;
 using System.Text.Json;
+using Unity.Burst;
 using Unity.Entities;
+using Unity.Jobs;
+using Unity.Services.Core.Internal;
 using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
@@ -36,19 +44,17 @@ internal static class Core
     public static GameDataSystem GameDataSystem { get; internal set; }
     public static FamiliarService FamiliarService { get; } = new();
     public static LocalizationService Localization { get; } = new();
-    public static PlayerService PlayerService { get; } = new();
+    public static PlayerService Players { get; } = new();
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
     public static ServerGameSettings ServerGameSettings { get; internal set; }
-    //public static InitializationSystemGroup InitializationSystemGroup { get; internal set; }
-    //public static SimulationSystemGroup SimulationSystemGroup { get; internal set; }
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour monoBehaviour;
 
-    private static bool hasInitialized;
+    public static bool hasInitialized;
     public static void Initialize()
     {
         if (hasInitialized) return;
@@ -66,19 +72,20 @@ internal static class Core
         ServerGameSettings = Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings;
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
-        ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = LevelingSystem.GetSpellPrefabs();
 
-        // simulation group initialization
-        //InitializationSystemGroup = Server.GetExistingSystemManaged<InitializationSystemGroup>();
-        //SimulationSystemGroup = Server.GetExistingSystemManaged<SimulationSystemGroup>();
-        ///Core.Log.LogInfo("Injecting DamageEventSystem into Il2Cpp domain...");
+        ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = LevelingSystem.GetSpellPrefabs();
+        if (Plugin.FamiliarSystem.Value)
+        {
+            FamiliarService.HandleFamiliarsOnSpawn();
+            FamiliarService.CleanUpMinions();
+        }
+
+        // update system group after injecting system
         //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
 
         // job system initialization
-        //Core.Log.LogInfo("Proceeding to DamageEventSystem OnCreate...");
-        //Server.GetOrCreateSystemManaged<DamageEventSystem>();
+        //DamageEventSystem = Server.GetOrCreateSystemManaged<DamageEventSystem>();
 
-        Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
         hasInitialized = true;
     }
     
@@ -102,6 +109,14 @@ internal static class Core
             UnityEngine.Object.DontDestroyOnLoad(go);
         }
         monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    }
+    public static void StopCoroutine(IEnumerator routine)
+    {
+        if (monoBehaviour == null)
+        {
+            return;
+        }
+        monoBehaviour.StopCoroutine(routine.WrapToIl2Cpp());
     }
     public class DataStructures
     {
@@ -809,3 +824,7 @@ internal static class Core
         return configString.Split(',').Select(int.Parse).ToList();
     }  
 }
+
+
+
+

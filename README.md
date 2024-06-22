@@ -2,6 +2,7 @@
 
 UPDATED (6/16)
 
+
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
@@ -52,9 +53,9 @@ UPDATED (6/16)
 - `.setLevel [Player] [Level]` 🔒
   - Sets player experience level.
   - Shorcut: *.sl [Player] [Level]*
-- `.quickStart`
+- `.prepareForTheHunt`
   - Completes GettingReadyForTheHunt if not already completed. 
-  - Shortcut: *.start*
+  - Shortcut: *.prepare*
 - `.playerPrestige [PrestigeType]`
   - Handles all player prestiging. Must be at max configured level for experience, expertise, or legacies to be eligible.
   - Shortcut: *.prestige [PrestigeType]*
@@ -247,11 +248,11 @@ UPDATED (6/16)
   The maximum level a player can reach.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
   The maximum number of prestiges a player can reach in leveling.
-- **Prestige Rates Reducer**: `PrestigeRatesReducer` (float, default: 0.20)  
+- **Prestige Rates Reducer**: `PrestigeRatesReducer` (float, default: 0.10)  
   Factor by which rates are reduced in expertise/legacy/experience per increment of prestige in expertise, legacy or experience.
-- **Prestige Stat Multiplier**: `PrestigeStatMultiplier` (float, default: 0.25)  
+- **Prestige Stat Multiplier**: `PrestigeStatMultiplier` (float, default: 0.10)  
   Factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.
-- **Prestige Rates Multiplier**: `PrestigeRatesMultiplier` (float, default: 0.15)  
+- **Prestige Rates Multiplier**: `PrestigeRatesMultiplier` (float, default: 0.10)  
   Factor by which rates are increased in expertise/legacy per increment of prestige in leveling.
 - **Starting Player Level**: `StartingLevel` (int, default: 0)  
   The starting level for players. Use this to skip the first few journal quests for now until I think of a better solution.
@@ -261,8 +262,10 @@ UPDATED (6/16)
   Multiplier for experience gained from VBloods.
 - **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)  
   The multiplier for experience gained from war event trash spawns.
-- **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0.2)  
+- **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0)  
   The multiplier for experience gained from unit spawners (vermin nest, graves).
+- **Docile Unit Multiplier**: `UnitSpawnerMultiplier` (float, default: 0.15)  
+  The multiplier for experience gained from non-aggressive units.
 - **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)  
   Multiplier for experience gained from group kills.
 - **Experience Share Distance**: `ExpShareDistance` (float, default: 25)
@@ -275,9 +278,9 @@ UPDATED (6/16)
   True to prevent damage between players in same alliance, false to allow.
 - **Max Alliance Size**: `MaxAllianceSize` (int, default: 5)  
   The maximum number of players that can form an alliance.
-- **Change Class Item**: `ChangeClassItem` (int, default: 0)  
+- **Change Class Item**: `ChangeClassItem` (int, default: 576389135)  
   Item PrefabGUID for changing classes.
-- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 0)  
+- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 1000)  
   Quantity of item cost required to change class.
   
 ### Expertise System
@@ -297,9 +300,9 @@ UPDATED (6/16)
   Multiplier for expertise gained from VBloods.
 - **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 2)  
   The maximum number of stat choices a player can choose for weapon expertise per weapon.
-- **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 0)  
+- **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)  
   Item PrefabGUID cost for resetting expertise stats.
-- **Reset Expertise Item Quantity**: `ResetExpertiseItemQuantity` (int, default: 0)  
+- **Reset Expertise Item Quantity**: `ResetExpertiseItemQuantity` (int, default: 500)  
   Quantity of item cost required for resetting expertise stats.
 
 ### Expertise Stats
@@ -307,25 +310,25 @@ UPDATED (6/16)
   Base cap for max health.
 - **Movement Speed**: `MovementSpeed` (float, default: 0.25)  
   Base cap for movement speed.
-- **Primary Attack Speed**: `PrimaryAttackSpeed` (float, default: 0.25)  
+- **Primary Attack Speed**: `PrimaryAttackSpeed` (float, default: 0.10)  
   Base cap for primary attack speed.
-- **Physical Lifeleech**: `PhysicalLifeLeech` (float, default: 0.15)  
+- **Physical Lifeleech**: `PhysicalLifeLeech` (float, default: 0.10)  
   Base cap for physical lifeleech.
-- **Spell Lifeleech**: `SpellLifeLeech` (float, default: 0.15)  
+- **Spell Lifeleech**: `SpellLifeLeech` (float, default: 0.10)  
   Base cap for spell lifeleech.
-- **Primary Lifeleech**: `PrimaryLifeleech` (float, default: 0.25)  
+- **Primary Lifeleech**: `PrimaryLifeleech` (float, default: 0.15)  
   Base cap for primary lifeleech.
-- **Physical Power**: `PhysicalPower` (float, default: 15.0)  
+- **Physical Power**: `PhysicalPower` (float, default: 10)  
   Base cap for physical power.
-- **Spell Power**: `SpellPower` (float, default: 15.0)  
+- **Spell Power**: `SpellPower` (float, default: 10)  
   Base cap for spell power.
-- **Physical Crit Chance**: `PhysicalCritChance` (float, default: 0.15)  
+- **Physical Crit Chance**: `PhysicalCritChance` (float, default: 0.10)  
   Base cap for physical critical strike chance.
-- **Physical Crit Damage**: `PhysicalCritDamage` (float, default: 0.75)  
+- **Physical Crit Damage**: `PhysicalCritDamage` (float, default: 0.50)  
   Base cap for physical critical strike damage.
-- **Spell Crit Chance**: `SpellCritChance` (float, default: 0.15)  
+- **Spell Crit Chance**: `SpellCritChance` (float, default: 0.10)  
   Base cap for spell critical strike chance.
-- **Spell Crit Damage**: `SpellCritDamage` (float, default: 0.75)  
+- **Spell Crit Damage**: `SpellCritDamage` (float, default: 0.50)  
   Base cap for spell critical strike damage.
 
 ### Blood System
@@ -345,27 +348,27 @@ UPDATED (6/16)
   Multiplier for essence gained from VBloods.
 - **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 2)  
   The maximum number of stat choices a player can choose for weapon expertise per weapon.
-- **Reset Legacy Item**: `ResetLegacyItem` (int, default: 0)  
+- **Reset Legacy Item**: `ResetLegacyItem` (int, default: 576389135)  
   Item PrefabGUID cost for resetting legacy stats.
-- **Reset Legacy Item Quantity**: `ResetLegacyItemQuantity` (int, default: 0)  
+- **Reset Legacy Item Quantity**: `ResetLegacyItemQuantity` (int, default: 500)  
   Quantity of item cost required for resetting legacy stats.
 
 ### Legacy Stats
-- **Healing Received**: `HealingReceived` (float, default: 0.25)  
+- **Healing Received**: `HealingReceived` (float, default: 0.15)  
   The base cap for healing received.
-- **Damage Reduction**: `DamageReduction` (float, default: 0.10)  
+- **Damage Reduction**: `DamageReduction` (float, default: 0.05)  
   The base cap for damage reduction.
-- **Physical Resistance**: `PhysicalResistance` (float, default: 0.20)  
+- **Physical Resistance**: `PhysicalResistance` (float, default: 0.10)  
   The base cap for physical resistance.
-- **Spell Resistance**: `SpellResistance` (float, default: 0.20)  
+- **Spell Resistance**: `SpellResistance` (float, default: 0.10)  
   The base cap for spell resistance.
 - **Resource Yield**: `ResourceYield` (float, default: 0.25)  
   The base cap for blood drain.
-- **Crowd Control Reduction**: `CCReduction` (float, default: 0.25)  
+- **Crowd Control Reduction**: `CCReduction` (float, default: 0.20)  
   The base cap for crowd control reduction.
-- **Spell Cooldown Recovery Rate**: `SpellCooldownRecoveryRate` (float, default: 0.15)  
+- **Spell Cooldown Recovery Rate**: `SpellCooldownRecoveryRate` (float, default: 0.10)  
   The base cap for spell cooldown recovery rate.
-- **Weapon Cooldown Recovery Rate**: `WeaponCooldownRecoveryRate` (float, default: 0.15)  
+- **Weapon Cooldown Recovery Rate**: `WeaponCooldownRecoveryRate` (float, default: 0.10)  
   The base cap for weapon cooldown recovery rate.
 - **Ultimate Cooldown Recovery Rate**: `UltimateCooldownRecoveryRate` (float, default: 0.20)  
   The base cap for ultimate cooldown recovery rate.
@@ -399,6 +402,10 @@ UPDATED (6/16)
   Multiplier for experience gained from units.
 - **VBlood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)  
   Multiplier for experience gained from VBloods.
+- **VBlood Damage Multiplier**: `VBloodDamageMultiplier` (float, default: 1)  
+  Controls damage to VBloods by familiars.
+- **Player Damage Multiplier**: `PlayerDamageMultiplier` (float, default: 1)  
+  Controls damage to players by familiars.
 - **Unit Unlock Chance**: `UnitUnlockChance` (float, default: 0.05)  
   The chance for a unit to unlock a familiar when killed.
 - **VBlood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)  

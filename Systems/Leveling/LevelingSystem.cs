@@ -23,13 +23,15 @@ public class LevelingSystem
     static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
     static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value; //
     static readonly float UnitSpawnerMultiplier = Plugin.UnitSpawnerMultiplier.Value;
+    static readonly float DocileUnitMultiplier = Plugin.DocileUnitMultiplier.Value;
     static readonly float WarEventMultiplier = Plugin.WarEventMultiplier.Value;
     static readonly float ExpShareDistance = Plugin.ExpShareDistance.Value;
     static readonly bool PlayerAlliances = Plugin.PlayerAlliances.Value;
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
-
+    static readonly PrefabGUID critterFaction = new(10678632);
+    static readonly PrefabGUID ignoredFaction = new(-1430861195);
     public enum PlayerClasses
     {
         BloodKnight,
@@ -120,43 +122,6 @@ public class LevelingSystem
         User killerUser = userEntity.Read<User>();
         HashSet<Entity> players = [killer];
 
-        // check for exp sharing group here too
-        /*
-        if (PlayerAlliances && Core.DataStructures.PlayerAlliances.TryGetValue(killerUser.PlatformId, out var group)) //check if group leader, add members
-        {
-            foreach (string name in group)
-            {
-                if (PlayerService.playerCache.TryGetValue(name, out var player)) // userEntities from player cache
-                {
-                    //Core.Log.LogInfo($"Adding {name} to participants if online...");
-                    if (!player.Read<User>().IsConnected) continue;
-                    var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
-                    if (distance > ExpShareDistance) continue;
-                    players.Add(player.Read<User>().LocalCharacter._Entity);
-                }
-            }
-        }
-        else if (PlayerAlliances) // if not leader but in alliance, add members
-        {
-            foreach (var groupEntry in Core.DataStructures.PlayerAlliances)
-            {
-                if (groupEntry.Value.Contains(killerUser.CharacterName.Value))
-                {
-                    foreach (string name in groupEntry.Value)
-                    {
-                        if (PlayerService.playerCache.TryGetValue(name, out var player))
-                        {
-                            if (!player.Read<User>().IsConnected) continue;
-                            var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
-                            if (distance > ExpShareDistance) continue;
-                            players.Add(player.Read<User>().LocalCharacter._Entity);
-                        }    
-                    }
-                    break;
-                }
-            }
-        }
-        */
         if (PlayerAlliances)
         {
             foreach (var groupEntry in Core.DataStructures.PlayerAlliances)
@@ -223,6 +188,7 @@ public class LevelingSystem
             gainedXP *= UnitSpawnerMultiplier;
             if (gainedXP == 0) return;
         }
+
         if (WarEventMultiplier < 1 && victimEntity.Has<SpawnBuffElement>())
         {
             // nerf experience gain from war event units
@@ -239,9 +205,19 @@ public class LevelingSystem
                 }
             }
         }
-        gainedXP *= groupMultiplier;
-        UpdatePlayerExperience(SteamID, gainedXP);
 
+        if (DocileUnitMultiplier < 1 && victimEntity.Has<AggroConsumer>() && !isVBlood)
+        {
+            if (victimEntity.Read<AggroConsumer>().AlertDecayPerSecond == 99)
+            {
+                gainedXP *= 0.2f;
+                Core.Log.LogInfo($"Gained XP from non-hostile unit: {gainedXP}");
+            }
+        }
+
+        gainedXP *= groupMultiplier;
+
+        UpdatePlayerExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel);
     }
 
@@ -256,7 +232,6 @@ public class LevelingSystem
         if (isVBlood) return baseXP * VBloodMultiplier;
         return baseXP * UnitMultiplier;
     }
-
     static void UpdatePlayerExperience(ulong SteamID, float gainedXP)
     {
         // Retrieve the current experience and level from the player's data structure.
@@ -282,7 +257,6 @@ public class LevelingSystem
         // Save the experience data
         Core.DataStructures.SavePlayerExperience();
     }
-
     static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, float gainedXP, int currentLevel)
     {
         EntityManager entityManager = Core.EntityManager;
@@ -918,74 +892,47 @@ public class LevelingSystem
                 {
                     BuffPrefabGUID = new(buffs[i])
                 };
-
-                debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                if (serverGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff))
+                if (!serverGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity _))
                 {
-                    //Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for class buff");
+                    debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                    if (serverGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff))
+                    {
+                        //Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for class buff");
 
-                    HandleBloodBuff(firstBuff);
+                        HandleBloodBuff(firstBuff);
 
-                    if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
-                    {
-                        firstBuff.Remove<RemoveBuffOnGameplayEvent>();
-                    }
-                    if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
-                    {
-                        firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
-                    }
-                    if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
-                    {
-                        firstBuff.Remove<CreateGameplayEventsOnSpawn>();
-                    }
-                    if (firstBuff.Has<GameplayEventListeners>())
-                    {
-                        firstBuff.Remove<GameplayEventListeners>();
-                    }
-                    if (!firstBuff.Has<Buff_Persists_Through_Death>())
-                    {
-                        firstBuff.Write(new Buff_Persists_Through_Death());
-                    }
-                    if (firstBuff.Has<LifeTime>())
-                    {
-                        LifeTime lifeTime = firstBuff.Read<LifeTime>();
-                        lifeTime.Duration = -1;
-                        lifeTime.EndAction = LifeTimeEndAction.None;
-                        firstBuff.Write(lifeTime);
-                    }
-                    //Core.Log.LogInfo($"Proceeding to class check for on hit extra buff components to add...");
-                    /*
-                    if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
-                    {
-                        PlayerClasses playerClass = classes.Keys.FirstOrDefault();
-                        switch (i)
+                        if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
                         {
-                            case 0:
-                                Core.Log.LogInfo($"Applying on damage dealt debuff components for {playerClass}...");
-                                if (!firstBuff.Has<Buff_ApplyBuffOnDamageTypeDealt_DataShared>()) firstBuff.Add<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
-                                Buff_ApplyBuffOnDamageTypeDealt_DataShared applyOnHit = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[new(-429891372)].Read<Buff_ApplyBuffOnDamageTypeDealt_DataShared>();
-                                applyOnHit.ProcBuff = ClassApplyBuffOnDamageDealtMap[playerClass];
-                                applyOnHit.ProcChance = 1f;
-                                firstBuff.Write(applyOnHit);
-                                Core.Log.LogInfo($"Applied {ClassApplyBuffOnDamageDealtMap[playerClass].LookupName()} to blood buff {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for {playerClass}");
-                                break;
-
-                            case 1:
-                                break;
-
-                            case 2:
-                                break;
-
-                            case 3:
-                                break;
+                            firstBuff.Remove<RemoveBuffOnGameplayEvent>();
+                        }
+                        if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
+                        {
+                            firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
+                        }
+                        if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
+                        {
+                            firstBuff.Remove<CreateGameplayEventsOnSpawn>();
+                        }
+                        if (firstBuff.Has<GameplayEventListeners>())
+                        {
+                            firstBuff.Remove<GameplayEventListeners>();
+                        }
+                        if (!firstBuff.Has<Buff_Persists_Through_Death>())
+                        {
+                            firstBuff.Write(new Buff_Persists_Through_Death());
+                        }
+                        if (firstBuff.Has<LifeTime>())
+                        {
+                            LifeTime lifeTime = firstBuff.Read<LifeTime>();
+                            lifeTime.Duration = -1;
+                            lifeTime.EndAction = LifeTimeEndAction.None;
+                            firstBuff.Write(lifeTime);
                         }
                     }
-                    */
                 }
             }
         }
     }
-
     public static void RemoveClassBuffs(ChatCommandContext ctx, ulong steamId)
     {
         List<int> buffs = GetClassBuffs(steamId);
@@ -1022,7 +969,6 @@ public class LevelingSystem
         }
         return [];
     }
-
     public static List<int> GetClassSpells(ulong steamId)
     {
         if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
@@ -1032,7 +978,6 @@ public class LevelingSystem
         }
         return [];
     }
-
     public class AllianceUtilities
     {
         public static bool CheckClanLeadership(ChatCommandContext ctx, Entity ownerClanEntity)
@@ -1070,7 +1015,6 @@ public class LevelingSystem
 
             AddMembersToAlliance(ctx, alliance, members);
         }
-
         public static bool TryAddClanMembers(ChatCommandContext ctx, ulong ownerId, Entity clanEntity, HashSet<string> members)
         {
             var clanBuffer = clanEntity.ReadBuffer<ClanMemberStatus>();
@@ -1111,7 +1055,7 @@ public class LevelingSystem
             foreach (string memberName in alliance)
             {
                 string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(memberName, StringComparison.OrdinalIgnoreCase));
-                if (PlayerService.playerCache.TryGetValue(playerKey, out var player))
+                if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerCache.TryGetValue(playerKey, out var player))
                 {
                     Entity playerClanEntity = player.Read<User>().ClanEntity._Entity;
                     ClanTeam clanTeam = playerClanEntity.Read<ClanTeam>();
@@ -1138,12 +1082,10 @@ public class LevelingSystem
             }
             return -1;
         }
-
         public static bool IsClanLeaderInvitesEnabled(User user)
         {
             return Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["Grouping"];
         }
-
         public static void AddMembersToAlliance(ChatCommandContext ctx, HashSet<string> alliance, HashSet<string> members)
         {
             if (members.Count > 0 && alliance.Count + members.Count < Plugin.MaxAllianceSize.Value)
@@ -1162,10 +1104,10 @@ public class LevelingSystem
                 HandleReply(ctx, "Alliance would exceed max size by adding found clan members.");
             }
         }
-
         public static void HandlePlayerAlliance(ChatCommandContext ctx, ulong ownerId, string name)
         {
-            if (PlayerService.playerCache.TryGetValue(name, out Entity player))
+            string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerCache.TryGetValue(playerKey, out Entity player))
             {
                 if (player.Equals(Entity.Null))
                 {
@@ -1195,7 +1137,6 @@ public class LevelingSystem
                 HandleReply(ctx, "Player not found...");
             }  
         }
-
         public static bool IsPlayerEligibleForAlliance(User foundUser, ulong ownerId, string playerName)
         {
             if (Core.DataStructures.PlayerBools.TryGetValue(foundUser.PlatformId, out var bools) && bools["Grouping"])
@@ -1209,7 +1150,6 @@ public class LevelingSystem
             }
             return false;
         }
-
         public static void AddPlayerToAlliance(ChatCommandContext ctx, ulong ownerId, string playerName)
         {
             if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
@@ -1239,9 +1179,10 @@ public class LevelingSystem
         }
         public static void RemovePlayerFromAlliance(ChatCommandContext ctx, HashSet<string> alliance, string playerName)
         {
-            if (alliance.FirstOrDefault(n => n.Equals(playerName, StringComparison.OrdinalIgnoreCase)) != null)
+            string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(playerKey) && alliance.FirstOrDefault(n => n.Equals(playerKey)) != null)
             {
-                alliance.Remove(playerName);
+                alliance.Remove(playerKey);
                 Core.DataStructures.SavePlayerAlliances();
                 HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from alliance.");
             }
@@ -1258,7 +1199,6 @@ public class LevelingSystem
             string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
             HandleReply(ctx, replyMessage);
         }
-
         public static void ListAllianceMembersByName(ChatCommandContext ctx, string name, Dictionary<ulong, HashSet<string>> playerAlliances)
         {
             string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));

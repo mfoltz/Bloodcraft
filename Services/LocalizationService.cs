@@ -10,8 +10,7 @@ using Regex = System.Text.RegularExpressions.Regex;
 using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
 namespace Bloodcraft.Services;
-
-public class LocalizationService
+internal class LocalizationService
 {
     static readonly string regexPattern = @"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)";
     static readonly Regex regex = new(regexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -23,19 +22,16 @@ public class LocalizationService
         public string Value { get; set; }
         public string Description { get; set; }
     }
-
     struct Node
     {
         public string Guid { get; set; }
         public string Text { get; set; }
     }
-
     struct Words
     {
         public string Original { get; set; }
         public string Translation { get; set; }
     }
-
     struct LocalizationFile
     {
         public Code[] Codes { get; set; }
@@ -43,9 +39,9 @@ public class LocalizationService
         public Words[] Words { get; set; }
     }
 
-    public Dictionary<string, string> localization = [];
-    public Dictionary<int, string> prefabNames = [];
-    public Dictionary<string, string> localizedWords = [];
+    public static Dictionary<string, string> localization = [];
+    public static Dictionary<int, string> prefabNames = [];
+    public static Dictionary<string, string> localizedWords = [];
 
     static readonly Dictionary<string, string> LocalizationMapping = new()
     {
@@ -89,13 +85,12 @@ public class LocalizationService
         //{"Vietnamese", "Bloodcraft.Localization.VietnameseStrings.json"},
         {"Brazilian", "Bloodcraft.Localization.BrazilianStrings.json"}
     };
-
     public LocalizationService()
     {
         LoadLocalizations();
         LoadPrefabNames();
     }
-    void LoadLocalizations()
+    static void LoadLocalizations()
     {
         var resourceName = LocalizationMapping.ContainsKey(LanguageLocalization) ? LocalizationMapping[LanguageLocalization] : "Bloodcraft.Localization.English.json";
 
@@ -126,7 +121,7 @@ public class LocalizationService
         localizedWords = localizationFile.Words.OrderByDescending(x => x.Original.Length).ToDictionary(x => x.Original.ToLower(), x => x.Translation);
     }
 
-    void LoadPrefabNames()
+    static void LoadPrefabNames()
     {
         var resourceName = "Bloodcraft.Localization.Prefabs.json";
         var assembly = Assembly.GetExecutingAssembly();
@@ -144,7 +139,7 @@ public class LocalizationService
         }
         else
         {
-            ctx.Reply(Core.Localization.GetLocalizedWords(message));
+            ctx.Reply(GetLocalizedWords(message));
         }
     }
     public static void HandleServerReply(EntityManager entityManager, User user, string message)
@@ -155,11 +150,10 @@ public class LocalizationService
         }
         else
         {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, user, Core.Localization.GetLocalizedWords(message));
+            ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
         }
     }
-
-    public string GetLocalization(string Guid)
+    public static string GetLocalization(string Guid)
     {
         if (localization.TryGetValue(Guid, out var Text))
         {
@@ -167,7 +161,7 @@ public class LocalizationService
         }
         return $"<Localization not found for {Guid}>";
     }
-    public string GetLocalizedWords(string message)
+    public static string GetLocalizedWords(string message)
     {
         StringBuilder result = new();
         int lastIndex = 0;

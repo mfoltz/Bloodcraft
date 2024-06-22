@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Services;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
@@ -8,7 +9,6 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Patches;
 
@@ -17,11 +17,13 @@ internal static class FamiliarPatches
 {
     static readonly PrefabGUID dominateBuff = new(-1447419822);
 
+    public static Dictionary<Entity, HashSet<Entity>> familiarMinions = [];
+
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
@@ -41,13 +43,11 @@ internal static class FamiliarPatches
                         
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
-                        
-                        if (familiar.Has<MinionMaster>())
+                        if (familiarMinions.ContainsKey(familiar))
                         {
                             Core.FamiliarService.HandleFamiliarMinions(familiar);
                         }
                     }
-                    
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat)) // simulate player target?
                     {
                         if (behaviourTreeStateChangedEvent.Entity.Has<AggroBuffer>())
@@ -80,7 +80,7 @@ internal static class FamiliarPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
@@ -100,7 +100,7 @@ internal static class FamiliarPatches
                             FamiliarSummonSystem.HandleFamiliar(user.LocalCharacter._Entity, entity);
                             bools["Binding"] = false;
                             Core.DataStructures.SavePlayerBools();
-                            HandleServerReply(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.GetPrefabName()}</color>");
+                            LocalizationService.HandleServerReply(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.GetPrefabName()}</color>");
                         }
                     }
                 }
@@ -124,14 +124,14 @@ internal static class FamiliarPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(InteractValidateAndStopSystemServer __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
                 if (entity.TryGetComponent(out EntityOwner entityOwner))
                 {
-                    if (entityOwner.Owner.Has<PlayerCharacter>() && entity.Read<PrefabGUID>().GuidHash.Equals(-986064531)) // player using waygate
+                    if (entityOwner.Owner.Has<PlayerCharacter>() && entity.Read<PrefabGUID>().GuidHash.Equals(-986064531) || entity.Read<PrefabGUID>().GuidHash.Equals(985937733)) // player using waygate
                     {
                         Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
@@ -163,27 +163,32 @@ internal static class FamiliarPatches
             entities.Dispose();
         }
     }
-
+    
     [HarmonyPatch(typeof(LinkMinionToOwnerOnSpawnSystem), nameof(LinkMinionToOwnerOnSpawnSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance) // get EntityOwner (familiar), apply ModifyTeamBuff
     {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
                 if (entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
                 {
+                    //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
-                    if (Core.EntityManager.Exists(familiar) && familiar.Read<PrefabGUID>().GuidHash.Equals(entityOwner.Owner.Read<PrefabGUID>().GuidHash))
+                    if (familiar != Entity.Null)
                     {
-                        ModifyTeamBuff modifyTeamBuff = new()
+                        if (!familiarMinions.ContainsKey(familiar))
                         {
-                            Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam,
-                        };
-                        entity.Add<ModifyTeamBuff>();
-                        entity.Write(modifyTeamBuff);
+                            familiarMinions.Add(familiar, [entity]);
+                            //Core.Log.LogInfo("Added new minion entry...");
+                        }
+                        else
+                        {
+                            familiarMinions[familiar].Add(entity);
+                            //Core.Log.LogInfo("Added minion to existing entry...");
+                        }
                     }
                 }
             }

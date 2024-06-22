@@ -4,6 +4,8 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Scripting;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -12,10 +14,12 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class StatChangeSystemPatches
 {
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
     static readonly bool PlayerAlliances = Plugin.PlayerAlliances.Value;
     static readonly bool Familiars = Plugin.FamiliarSystem.Value;
     static readonly bool PreventFriendlyFire = Plugin.PreventFriendlyFire.Value;
+    static readonly PrefabGUID pvpProtBuff = new(1111481396);
 
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -80,12 +84,14 @@ internal static class StatChangeSystemPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(DealDamageSystem __instance)
     {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
         try
         {
             foreach (Entity entity in entities)
             {
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
+
+                if (dealDamageEvent.MainType != MainDamageType.Physical || dealDamageEvent.MainType != MainDamageType.Spell) continue;
 
                 if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
                 {
@@ -110,7 +116,15 @@ internal static class StatChangeSystemPatches
                                 Core.EntityManager.DestroyEntity(entity);
                             }
                         }
-                        else if (PlayerAlliances && PreventFriendlyFire && GameMode.Equals(GameModeType.PvP)) // check for alliance in PvP
+                        else if (GameMode.Equals(GameModeType.PvP) && ServerGameManager.TryGetBuff(dealDamageEvent.Target, pvpProtBuff.ToIdentifier(), out Entity _))
+                        {
+                            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            if (familiar != Entity.Null)
+                            {
+                                Core.EntityManager.DestroyEntity(entity);
+                            }
+                        }
+                        else if (GameMode.Equals(GameModeType.PvP) && PlayerAlliances && PreventFriendlyFire) // check for alliance in PvP
                         {
                             Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerAlliances;
                             string targetName = target.Name.Value;
@@ -125,6 +139,8 @@ internal static class StatChangeSystemPatches
                     }
                 }
             }
+            //Core.DamageEventSystem.DealDamageSystemEvents = __instance._Query.ToComponentDataArray<DealDamageEvent>(Allocator.TempJob);
+            //Core.DamageEventSystem.OnUpdate();
         }
         catch (Exception ex)
         {
@@ -132,6 +148,7 @@ internal static class StatChangeSystemPatches
         }
         finally
         {
+            //if (Core.DamageEventSystem.DealDamageSystemEvents.IsCreated) Core.DamageEventSystem.DealDamageSystemEvents.Dispose();
             entities.Dispose();
         }
     }

@@ -5,15 +5,10 @@ using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
-using Unity.DebugDisplay;
 using Unity.Entities;
-using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodcraft.Services.LocalizationService;
-using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
 using static Bloodcraft.Systems.Experience.LevelingSystem.AllianceUtilities;
-
 
 namespace Bloodcraft.Commands;
 internal static class LevelingCommands
@@ -27,12 +22,12 @@ internal static class LevelingCommands
     static readonly bool Prestige = Plugin.PrestigeSystem.Value;
     static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
 
-    [Command(name: "quickStart", shortHand: "start", adminOnly: false, usage: ".start", description: "Completes GettingReadyForTheHunt if not already completed.")]
+    [Command(name: "prepareForTheHunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
     public static void QuickStartCommand(ChatCommandContext ctx)
     {
         if (!Leveling)
         {
-            HandleReply(ctx, "Leveling is not enabled.");
+            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
         EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
@@ -41,7 +36,7 @@ internal static class LevelingCommands
         Entity characterEntity = ctx.Event.SenderCharacterEntity;
         Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
         Core.ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
-        HandleReply(ctx, "You are now prepared for the hunt.");
+        LocalizationService.HandleReply(ctx, "You are now prepared for the hunt.");
     }
 
     [Command(name: "logLevelingProgress", shortHand: "log l", adminOnly: false, usage: ".log l", description: "Toggles leveling progress logging.")]
@@ -49,7 +44,7 @@ internal static class LevelingCommands
     {
         if (!Leveling)
         {
-            HandleReply(ctx, "Leveling is not enabled.");
+            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
         var SteamID = ctx.Event.User.PlatformId;
@@ -59,7 +54,7 @@ internal static class LevelingCommands
             bools["ExperienceLogging"] = !bools["ExperienceLogging"];
         }
         Core.DataStructures.SavePlayerBools();
-        HandleReply(ctx, $"Leveling experience logging {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "getLevelingProgress", shortHand: "get l", adminOnly: false, usage: ".get l", description: "Display current leveling progress.")]
@@ -67,7 +62,7 @@ internal static class LevelingCommands
     {
         if (!Leveling)
         {
-            HandleReply(ctx, "Leveling is not enabled.");
+            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
         ulong steamId = ctx.Event.User.PlatformId;
@@ -76,11 +71,11 @@ internal static class LevelingCommands
             int level = levelKvp.Key;
             int progress = (int)(levelKvp.Value - LevelingSystem.ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
-            HandleReply(ctx, $"You're level [<color=white>{level}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
         }
         else
         {
-            HandleReply(ctx, "No experience yet.");
+            LocalizationService.HandleReply(ctx, "No experience yet.");
         }
     }
 
@@ -89,21 +84,21 @@ internal static class LevelingCommands
     {
         if (!Leveling)
         {
-            HandleReply(ctx, "Leveling is not enabled.");
+            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
 
-        Entity foundUserEntity = GetUserByName(name, true);
+        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
         if (foundUserEntity.Equals(Entity.Null))
         {
-            HandleReply(ctx, "Player not found...");
+            LocalizationService.HandleReply(ctx, "Player not found...");
             return;
         }
         User foundUser = foundUserEntity.Read<User>();
 
         if (level < 0 || level > MaxPlayerLevel)
         {
-            HandleReply(ctx, $"Level must be between 0 and {MaxPlayerLevel}");
+            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {MaxPlayerLevel}");
             return;
         }
         ulong steamId = foundUser.PlatformId;
@@ -113,11 +108,11 @@ internal static class LevelingCommands
             Core.DataStructures.PlayerExperience[steamId] = xpData;
             Core.DataStructures.SavePlayerExperience();
             GearOverride.SetLevel(foundUser.LocalCharacter._Entity);
-            HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");
+            LocalizationService.HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");
         }
         else
         {
-            HandleReply(ctx, "No experience found.");
+            LocalizationService.HandleReply(ctx, "No experience found.");
         }
     }
 
@@ -126,13 +121,13 @@ internal static class LevelingCommands
     {
         if (!SoftSynergies && !HardSynergies)
         {
-            HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
 
         if (!TryParseClassName(className, out var parsedClassType))
         {
-            HandleReply(ctx, "Invalid class, use .classes to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid class, use .classes to see options.");
             return;
         }
 
@@ -142,11 +137,11 @@ internal static class LevelingCommands
         {
             if (classes.Keys.Count > 0)
             {
-                HandleReply(ctx, "You have already chosen a class.");
+                LocalizationService.HandleReply(ctx, "You have already chosen a class.");
                 return;
             }
             UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
-            HandleReply(ctx, $"You have chosen <color=white>{parsedClassType}</color>");
+            LocalizationService.HandleReply(ctx, $"You have chosen <color=white>{parsedClassType}</color>");
         }
     }
 
@@ -155,12 +150,12 @@ internal static class LevelingCommands
     {
         if (!SoftSynergies && !HardSynergies)
         {
-            HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
         if (!ShiftSlot)
         {
-            HandleReply(ctx, "Shift slots are not enabled for class spells.");
+            LocalizationService.HandleReply(ctx, "Shift slots are not enabled for class spells.");
             return;
         }
 
@@ -170,7 +165,7 @@ internal static class LevelingCommands
         {
             if (classes.Keys.Count == 0)
             {
-                HandleReply(ctx, "You haven't chosen a class yet.");
+                LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
                 return;
             }
             PlayerClasses playerClass = classes.Keys.FirstOrDefault();
@@ -178,7 +173,7 @@ internal static class LevelingCommands
             {
                 if (prestigeLevel < Core.ParseConfigString(Plugin.PrestigeLevelsToUnlockClassSpells.Value)[choice - 1])
                 {
-                    HandleReply(ctx, "You do not have the required prestige level for that spell.");
+                    LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                     return;
                 }
 
@@ -186,13 +181,13 @@ internal static class LevelingCommands
 
                 if (spells.Count == 0)
                 {
-                    HandleReply(ctx, "No spells found for class.");
+                    LocalizationService.HandleReply(ctx, "No spells found for class.");
                     return;
                 }
 
                 if (choice < 1 || choice > spells.Count)
                 {
-                    HandleReply(ctx, $"Invalid spell choice. (Use 1-{spells.Count})");
+                    LocalizationService.HandleReply(ctx, $"Invalid spell choice. (Use 1-{spells.Count})");
                     return;
                 }
 
@@ -202,17 +197,17 @@ internal static class LevelingCommands
                     Core.DataStructures.PlayerSpells[steamId] = spellsData;
                     Core.DataStructures.SavePlayerSpells();
 
-                    HandleReply(ctx, $"You have chosen spell <color=#CBC3E3>{new PrefabGUID(spells[choice - 1]).LookupName()}</color> from <color=white>{playerClass}</color>, it will be available on weapons and unarmed if .shift is enabled.");
+                    LocalizationService.HandleReply(ctx, $"You have chosen spell <color=#CBC3E3>{new PrefabGUID(spells[choice - 1]).LookupName()}</color> from <color=white>{playerClass}</color>, it will be available on weapons and unarmed if .shift is enabled.");
                 }
             }
             else
             {
-                HandleReply(ctx, "You haven't prestiged in leveling yet.");
+                LocalizationService.HandleReply(ctx, "You haven't prestiged in leveling yet.");
             }
         }
         else
         {
-            HandleReply(ctx, "You haven't chosen a class yet.");
+            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
         }
     }
 
@@ -221,13 +216,13 @@ internal static class LevelingCommands
     {
         if (!SoftSynergies && !HardSynergies)
         {
-            HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
 
         if (!TryParseClassName(className, out var parsedClassType))
         {
-            HandleReply(ctx, "Invalid class, use .classes to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid class, use .classes to see options.");
             return;
         }
 
@@ -236,13 +231,13 @@ internal static class LevelingCommands
 
         if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
         {
-            HandleReply(ctx, "You haven't chosen a class yet.");
+            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
             return;
         }
 
         if (Plugin.ChangeClassItem.Value != 0 && !HandleClassChangeItem(ctx, classes, steamId))
         {
-            HandleReply(ctx, $"You do not have the required item to change classes. ({new PrefabGUID(Plugin.ChangeClassItem.Value).GetPrefabName()}x{Plugin.ChangeClassItemQuantity.Value})");
+            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes. ({new PrefabGUID(Plugin.ChangeClassItem.Value).GetPrefabName()}x{Plugin.ChangeClassItemQuantity.Value})");
             return;
         }
 
@@ -250,36 +245,24 @@ internal static class LevelingCommands
 
         classes.Clear();
         UpdateClassData(character, parsedClassType, classes, steamId);
-        HandleReply(ctx, $"You have changed to <color=white>{parsedClassType}</color>");
+        LocalizationService.HandleReply(ctx, $"You have changed to <color=white>{parsedClassType}</color>");
     }
-
-    [Command(name: "listClasses", shortHand: "classes", adminOnly: false, usage: ".classes", description: "Sets player level.")]
-    public static void ListClasses(ChatCommandContext ctx)
+    [Command(name: "syncClassBuffs", shortHand: "scb", adminOnly: false, usage: ".scb", description: "Applies class buffs appropriately if not present.")]
+    public static void SyncClassBuffsCommand(ChatCommandContext ctx)
     {
         if (!SoftSynergies && !HardSynergies)
         {
-            HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
 
-        string classTypes = string.Join(", ", Enum.GetNames(typeof(LevelingSystem.PlayerClasses)));
-        HandleReply(ctx, $"Available Classes: <color=white>{classTypes}</color>");
-    }
+        var steamId = ctx.Event.User.PlatformId;
 
-    [Command(name: "listClassBuffs", shortHand: "lcb", adminOnly: false, usage: ".lcb", description: "Shows perks that can be gained from class.")]
-    public static void ClassPerks(ChatCommandContext ctx)
-    {
-        if (!SoftSynergies && !HardSynergies)
-        {
-            HandleReply(ctx, "Classes are not enabled.");
-            return;
-        }
-        ulong steamId = ctx.Event.User.PlatformId;
         if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
         {
             if (classes.Keys.Count == 0)
             {
-                HandleReply(ctx, "You haven't chosen a class yet.");
+                LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
                 return;
             }
             PlayerClasses playerClass = classes.Keys.FirstOrDefault();
@@ -287,13 +270,62 @@ internal static class LevelingCommands
 
             if (perks.Count == 0)
             {
-                HandleReply(ctx, "Class buffs not found.");
+                LocalizationService.HandleReply(ctx, "Class buffs not found.");
+                return;
+            }
+
+            FromCharacter fromCharacter = new()
+            {
+                Character = ctx.Event.SenderCharacterEntity,
+                User = ctx.Event.SenderUserEntity
+            };
+
+            ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, Core.DebugEventsSystem, fromCharacter);
+            LocalizationService.HandleReply(ctx, $"Class buffs applied for <color=white>{playerClass}</color>");
+        }
+    }
+
+    [Command(name: "listClasses", shortHand: "classes", adminOnly: false, usage: ".classes", description: "Sets player level.")]
+    public static void ListClasses(ChatCommandContext ctx)
+    {
+        if (!SoftSynergies && !HardSynergies)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+
+        string classTypes = string.Join(", ", Enum.GetNames(typeof(LevelingSystem.PlayerClasses)));
+        LocalizationService.HandleReply(ctx, $"Available Classes: <color=white>{classTypes}</color>");
+    }
+
+    [Command(name: "listClassBuffs", shortHand: "lcb", adminOnly: false, usage: ".lcb", description: "Shows perks that can be gained from class.")]
+    public static void ClassPerks(ChatCommandContext ctx)
+    {
+        if (!SoftSynergies && !HardSynergies)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+        ulong steamId = ctx.Event.User.PlatformId;
+        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+        {
+            if (classes.Keys.Count == 0)
+            {
+                LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
+                return;
+            }
+            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+            List<int> perks = LevelingSystem.GetClassBuffs(steamId);
+
+            if (perks.Count == 0)
+            {
+                LocalizationService.HandleReply(ctx, "Class buffs not found.");
                 return;
             }
 
             int step = MaxPlayerLevel / perks.Count;
 
-            string replyMessage = string.Join(", ", perks.Select((perk, index) =>
+            var classBuffs = perks.Select((perk, index) =>
             {
                 int level = (index + 1) * step;
                 string prefab = new PrefabGUID(perk).LookupName();
@@ -303,21 +335,27 @@ internal static class LevelingCommands
                     prefab = prefab[..prefabIndex].TrimEnd();
                 }
                 return $"<color=white>{prefab}</color> at level <color=yellow>{level}</color>";
-            }));
-            HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
+            }).ToList();
+
+            for (int i = 0; i < classBuffs.Count; i += 6)
+            {
+                var batch = classBuffs.Skip(i).Take(6);
+                string replyMessage = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
+            }
         }
         else
         {
-            HandleReply(ctx, "You haven't chosen a class yet.");
+            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
         }
     }
 
-    [Command(name: "listClassSpells", shortHand: "lcs", adminOnly: false, usage: ".lcs", description: "Shows perks that can be gained from class.")]
+    [Command(name: "listClassSpells", shortHand: "lcs", adminOnly: false, usage: ".lcs", description: "Shows spells that can be gained from class.")]
     public static void ListClassSpells(ChatCommandContext ctx)
     {
         if (!SoftSynergies && !HardSynergies)
         {
-            HandleReply(ctx, "Classes are not enabled.");
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
         ulong steamId = ctx.Event.User.PlatformId;
@@ -325,17 +363,39 @@ internal static class LevelingCommands
         {
             if (classes.Keys.Count == 0)
             {
-                HandleReply(ctx, "You haven't chosen a class yet.");
+                LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
                 return;
             }
             PlayerClasses playerClass = classes.Keys.FirstOrDefault();
             List<int> perks = LevelingSystem.GetClassSpells(steamId);
-            string replyMessage = string.Join("", perks.Select(perk => $"<color=white>{new PrefabGUID(perk).LookupName()}</color>"));
-            HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
+
+            if (perks.Count == 0)
+            {
+                LocalizationService.HandleReply(ctx, "Class spells not found.");
+                return;
+            }
+
+            var classSpells = perks.Select(perk =>
+            {
+                string prefab = new PrefabGUID(perk).LookupName();
+                int prefabIndex = prefab.IndexOf("Prefab");
+                if (prefabIndex != -1)
+                {
+                    prefab = prefab[..prefabIndex].TrimEnd();
+                }
+                return $"<color=white>{prefab}</color>";
+            }).ToList();
+
+            for (int i = 0; i < classSpells.Count; i += 6)
+            {
+                var batch = classSpells.Skip(i).Take(6);
+                string replyMessage = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
+            }
         }
         else
         {
-            HandleReply(ctx, "You haven't chosen a class yet.");
+            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
         }
     }
 
@@ -344,13 +404,13 @@ internal static class LevelingCommands
     {
         if (!Prestige)
         {
-            HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
             return;
         }
 
@@ -359,7 +419,7 @@ internal static class LevelingCommands
             classes.Keys.Count == 0 &&
             parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
         {
-            HandleReply(ctx, "You must choose a class before prestiging in experience.");
+            LocalizationService.HandleReply(ctx, "You must choose a class before prestiging in experience.");
             return;
         }
 
@@ -368,7 +428,7 @@ internal static class LevelingCommands
 
         if (handler == null)
         {
-            HandleReply(ctx, "Invalid prestige type.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
             return;
         }
 
@@ -379,8 +439,77 @@ internal static class LevelingCommands
         }
         else
         {
-            HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
+            LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
         }
+    }
+
+    [Command(name: "setPlayerPrestige", shortHand: "spr", adminOnly: true, usage: ".spr [PlayerID] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
+    public static void SetPlayerPrestigeCommand(ChatCommandContext ctx, string name, string prestigeType, int level)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige type, use .lpp to see options.");
+            return;
+        }
+
+        Entity userEntity = PlayerService.GetUserByName(name, true);
+        ulong playerId = userEntity.Read<User>().PlatformId;
+
+        if ((SoftSynergies || HardSynergies) &&
+            Core.DataStructures.PlayerClasses.TryGetValue(playerId, out var classes) &&
+            classes.Keys.Count == 0 &&
+            parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+        {
+            LocalizationService.HandleReply(ctx, "The player must choose a class before prestiging in experience.");
+            return;
+        }
+
+        var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+
+        if (handler == null)
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            return;
+        }
+
+        if (!Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestigeData))
+        {
+            prestigeData = [];
+            Core.DataStructures.PlayerPrestiges[playerId] = prestigeData;
+        }
+
+        if (!prestigeData.ContainsKey(parsedPrestigeType))
+        {
+            prestigeData[parsedPrestigeType] = 0;
+        }
+
+        if (level > PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType])
+        {
+            LocalizationService.HandleReply(ctx, $"The maximum level for {parsedPrestigeType} prestige is {PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType]}.");
+            return;
+        }
+
+        prestigeData[parsedPrestigeType] = level;
+        handler.SaveChanges();
+
+        // Apply effects based on the prestige type
+        if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+        {
+            PrestigeSystem.ApplyPrestigeBuffs(ctx, level);
+            PrestigeSystem.ApplyExperiencePrestigeEffects(ctx, playerId, level);
+        }
+        else
+        {
+            PrestigeSystem.ApplyOtherPrestigeEffects(ctx, playerId, parsedPrestigeType, level);
+        }
+
+        LocalizationService.HandleReply(ctx, $"Player {playerId} has been set to level {level} in {parsedPrestigeType} prestige.");
     }
 
     [Command(name: "listPrestigeBuffs", shortHand: "lpb", adminOnly: false, usage: ".lpb", description: "Lists prestige buff names.")]
@@ -388,7 +517,7 @@ internal static class LevelingCommands
     {
         if (!Prestige)
         {
-            HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
             return;
         }
 
@@ -396,38 +525,50 @@ internal static class LevelingCommands
 
         if (buffs.Count == 0)
         {
-            HandleReply(ctx, "Prestiging buffs not found.");
+            LocalizationService.HandleReply(ctx, "Prestiging buffs not found.");
             return;
         }
-        string replyMessage = string.Join(", ", buffs.Select((buff, index) =>
-        {
-            int level = index++;
-            return $"<color=white>{new PrefabGUID(buff).LookupName()}</color> at prestige <color=yellow>{level}</color>";
-        }));
-        HandleReply(ctx, replyMessage);
-    }
 
+        var prestigeBuffs = buffs.Select((buff, index) =>
+        {
+            int level = index + 1;
+            string prefab = new PrefabGUID(buff).LookupName();
+            int prefabIndex = prefab.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                prefab = prefab[..prefabIndex].TrimEnd();
+            }
+            return $"<color=white>{prefab}</color> at prestige <color=yellow>{level}</color>";
+        }).ToList();
+
+        for (int i = 0; i < prestigeBuffs.Count; i += 6)
+        {
+            var batch = prestigeBuffs.Skip(i).Take(6);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, replyMessage);
+        }
+    }
   
     [Command(name: "resetPrestige", shortHand: "rpr", adminOnly: true, usage: ".rpr [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
     public static void ResetPrestige(ChatCommandContext ctx, string name, string prestigeType)
     {
         if (!Prestige)
         {
-            HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
             return;
         }
 
-        Entity foundUserEntity = GetUserByName(name, true);
+        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
 
         if (foundUserEntity.Equals(Entity.Null))
         {
-            HandleReply(ctx, "Player not found...");
+            LocalizationService.HandleReply(ctx, "Player not found...");
             return;
         }
 
@@ -441,26 +582,47 @@ internal static class LevelingCommands
             {
                 PrestigeSystem.RemovePrestigeBuffs(ctx, prestigeLevel);
             }
-
             prestigeData[parsedPrestigeType] = 0;
             Core.DataStructures.SavePlayerPrestiges();
-            HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{foundUser.CharacterName}</color>.");
+            LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{foundUser.CharacterName}</color>.");
         }
     }
-    
 
-    [Command(name: "getPrestige", shortHand: "gpr", adminOnly: false, usage: ".gpr [PrestigeType]", description: "Shows information about player's prestige status.")]
-    public unsafe static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
+    [Command(name: "syncPrestigeBuffs", shortHand: "spb", adminOnly: false, usage: ".spb", description: "Applies prestige buffs appropriately if not present.")]
+    public static void SyncPrestigeBuffsCommand(ChatCommandContext ctx)
     {
         if (!Prestige)
         {
-            HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        var steamId = ctx.Event.User.PlatformId;
+
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
+        {
+            PrestigeSystem.ApplyPrestigeBuffs(ctx, prestigeLevel);
+            LocalizationService.HandleReply(ctx, "Prestige buffs applied.");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{PrestigeSystem.PrestigeType.Experience}</color>.");
+        }
+    }
+
+    [Command(name: "getPrestige", shortHand: "gpr", adminOnly: false, usage: ".gpr [PrestigeType]", description: "Shows information about player's prestige status.")]
+    public static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
             return;
         }
 
         if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
             return;
         }
 
@@ -469,7 +631,7 @@ internal static class LevelingCommands
 
         if (handler == null)
         {
-            HandleReply(ctx, "Invalid prestige type.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
             return;
         }
 
@@ -481,7 +643,7 @@ internal static class LevelingCommands
         }
         else
         {
-            HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
+            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
         }
     }
 
@@ -490,11 +652,11 @@ internal static class LevelingCommands
     {
         if (!Prestige)
         {
-            HandleReply(ctx, "Prestiging is not enabled.");
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
             return;
         }
         string prestigeTypes = string.Join(", ", Enum.GetNames(typeof(PrestigeSystem.PrestigeType)));
-        HandleReply(ctx, $"Available Prestiges: <color=#90EE90>{prestigeTypes}</color>");
+        LocalizationService.HandleReply(ctx, $"Available Prestiges: <color=#90EE90>{prestigeTypes}</color>");
     }
 
     [Command(name: "toggleAllianceInvites", shortHand: "invites", adminOnly: false, usage: ".invites", description: "Toggles being able to be invited to an alliance. Allowed in raids of allied players and share exp if applicable.")]
@@ -502,7 +664,7 @@ internal static class LevelingCommands
     {
         if (!PlayerAlliances)
         {
-            HandleReply(ctx, "Alliances are not enabled.");
+            LocalizationService.HandleReply(ctx, "Alliances are not enabled.");
             return;
         }
 
@@ -512,7 +674,7 @@ internal static class LevelingCommands
 
         if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
         {
-            HandleReply(ctx, "You must be the leader of a clan to toggle alliance invites.");
+            LocalizationService.HandleReply(ctx, "You must be the leader of a clan to toggle alliance invites.");
             return;
         }
         else if (ClanAlliances)
@@ -520,14 +682,14 @@ internal static class LevelingCommands
             Entity userEntity = ctx.Event.SenderUserEntity;
             if (userEntity.TryGetComponent(out ClanRole clanRole) && !clanRole.Value.Equals(ClanRoleEnum.Leader))
             {
-                HandleReply(ctx, "You must be the leader of a clan to toggle alliance invites.");
+                LocalizationService.HandleReply(ctx, "You must be the leader of a clan to toggle alliance invites.");
                 return;
             }
         }
 
         if (Core.DataStructures.PlayerAlliances.Any(kvp => kvp.Value.Contains(name)))
         {
-            HandleReply(ctx, "You are already in an alliance. Leave or disband before enabling invites.");
+            LocalizationService.HandleReply(ctx, "You are already in an alliance. Leave or disband if owned before enabling invites.");
             return;
         }
 
@@ -536,7 +698,7 @@ internal static class LevelingCommands
             bools["Grouping"] = !bools["Grouping"];
         }
         Core.DataStructures.SavePlayerBools();
-        HandleReply(ctx, $"Alliance invites {(bools["Grouping"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Alliance invites {(bools["Grouping"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "allianceAdd", shortHand: "aa", adminOnly: false, usage: ".aa [Player/Clan]", description: "Adds player/clan to alliance if invites are toggled (if clan based owner of clan must toggle).")]
@@ -544,7 +706,7 @@ internal static class LevelingCommands
     {  
         if (!PlayerAlliances)
         {
-            HandleReply(ctx, "Alliances are not enabled.");
+            LocalizationService.HandleReply(ctx, "Alliances are not enabled.");
             return;
         }
 
@@ -555,7 +717,7 @@ internal static class LevelingCommands
         {
             if (CheckClanLeadership(ctx, ownerClanEntity))
             {
-                HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
+                LocalizationService.HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
                 return;
             }
 
@@ -565,139 +727,6 @@ internal static class LevelingCommands
         {
             HandlePlayerAlliance(ctx, ownerId, name);
         }
-        /*
-        if (!PlayerAlliances)
-        {
-            HandleReply(ctx, "Alliances are not enabled.");
-            return;
-        }
-
-        ulong ownerId = ctx.Event.User.PlatformId;
-        Entity ownerClanEntity = ctx.Event.User.ClanEntity._Entity;
-
-        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null))
-        {
-            HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
-            return;
-        }
-        else if (ClanAlliances)
-        {
-            Entity userEntity = ctx.Event.SenderUserEntity;
-            if (userEntity.TryGetComponent(out ClanRole clanRole) && !clanRole.Value.Equals(ClanRoleEnum.Leader))
-            {
-                HandleReply(ctx, "You must be the leader of a clan to form an alliance.");
-                return;
-            }
-        }    
-
-        if (ClanAlliances)
-        {
-            //ClanMemberStatus query for entities with ClanMemberStatus then match name to clan name
-            if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId)) // check if inviter has a group, make one if not
-            {
-                Core.DataStructures.PlayerAlliances[ownerId] = [];
-            }
-
-            HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId];
-            HashSet<string> members = [];
-            Entity clanEntity = GetClanByName(name);
-
-            if (clanEntity.Equals(Entity.Null))
-            {
-                HandleReply(ctx, "Clan/leader not found...");
-                return;
-            }
-
-            var clanBuffer = clanEntity.ReadBuffer<ClanMemberStatus>();
-            int leaderIndex = -1;
-
-            for (int i = 0; i < clanBuffer.Length; i++) // find leader, check invite toggle
-            {
-                if (clanBuffer[i].ClanRole.Equals(ClanRoleEnum.Leader))
-                {
-                    leaderIndex = i;
-                    break;
-                }
-            }
-
-            if (leaderIndex == -1)
-            {
-                HandleReply(ctx, "Couldn't find clan leader to verify consent.");
-                return;
-            }
-
-            var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
-            for (int i = 0; i < userBuffer.Length; i++) // add clan members
-            {
-                var users = userBuffer[i];
-                User user = users.UserEntity.Read<User>();
-                if (i == leaderIndex && Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && !bools["Grouping"]) // check for invites here on leader
-                {
-                    HandleReply(ctx, "Clan leader does not have alliances invites enabled.");
-                    return;
-                }
-                members.Add(user.CharacterName.Value);
-            }
-            
-            if (members.Count > 0 && alliance.Count + members.Count < Plugin.MaxAllianceSize.Value)
-            {
-                string membersAdded = string.Join(", ", members.Select(member => $"<color=green>{member}</color>"));
-                alliance.UnionWith(members);
-                HandleReply(ctx, $"{membersAdded} were added to the alliance.");
-                Core.DataStructures.SavePlayerAlliances();
-            }
-            else if (members.Count == 0)
-            {
-                HandleReply(ctx, "Couldn't find any clan members to add.");
-            }
-            else
-            {
-                HandleReply(ctx, "Alliance would exceed max size by adding found clan members.");
-            }
-        }
-        else
-        {
-            Entity foundUserEntity = GetUserByName(name);
-            if (foundUserEntity.Equals(Entity.Null))
-            {
-                HandleReply(ctx, "Player not found...");
-                return;
-            }
-
-            User foundUser = foundUserEntity.Read<User>();
-            if (foundUser.PlatformId == ownerId)
-            {
-                HandleReply(ctx, "Player not found...");
-                return;
-            }
-
-            string playerName = foundUser.CharacterName.Value;
-            if (Core.DataStructures.PlayerBools.TryGetValue(foundUser.PlatformId, out var bools) && bools["Grouping"] && !Core.DataStructures.PlayerAlliances.ContainsKey(foundUser.PlatformId)) // get consent, make sure they don't have their own group made first
-            {
-                if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId)) // check if inviter has a group, make one if not
-                {
-                    Core.DataStructures.PlayerAlliances[ownerId] = [];
-                }
-
-                HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId]; // check size and if player is already present in group before adding
-
-                if (alliance.Count < Plugin.MaxAllianceSize.Value && !alliance.Contains(playerName))
-                {
-                    alliance.Add(playerName); // would need to add the playerTeam TeamReference entity for every player in the alliance to the TeamAllies buffer of... every other TeamAllies buffer on every TeamReference entity on every other player in the alliance, oof
-                    Core.DataStructures.SavePlayerAlliances();
-                    HandleReply(ctx, $"<color=green>{foundUser.CharacterName.Value}</color> added to alliance.");
-                }
-                else
-                {
-                    HandleReply(ctx, $"Alliance is full or <color=green>{foundUser.CharacterName.Value}</color> is already in the alliance.");
-                }
-            }
-            else
-            {
-                HandleReply(ctx, $"<color=green>{foundUser.CharacterName.Value}</color> does not have alliances enabled or they are the owner of an alliance.");
-            }
-        }
-        */
     }
 
     [Command(name: "allianceRemove", shortHand: "ar", adminOnly: false, usage: ".ar [Player/Clan]", description: "Removes player or clan from alliance.")]
@@ -705,7 +734,7 @@ internal static class LevelingCommands
     {
         if (!PlayerAlliances)
         {
-            HandleReply(ctx, "Alliances are not enabled.");
+            LocalizationService.HandleReply(ctx, "Alliances are not enabled.");
             return;
         }
 
@@ -714,13 +743,13 @@ internal static class LevelingCommands
 
         if (ClanAlliances && CheckClanLeadership(ctx, ownerClanEntity))
         {
-            HandleReply(ctx, "You must be the leader of a clan to remove clans from an alliance.");
+            LocalizationService.HandleReply(ctx, "You must be the leader of a clan to remove clans from an alliance.");
             return;
         }
 
         if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
         {
-            HandleReply(ctx, "You don't have an alliance.");
+            LocalizationService.HandleReply(ctx, "You don't have an alliance.");
             return;
         }
 
@@ -734,51 +763,6 @@ internal static class LevelingCommands
         {
             RemovePlayerFromAlliance(ctx, alliance, name);
         }
-        /*
-        if (ClanAlliances) // find members of alliance with matching clan name and remove
-        {
-            List<string> removed = [];
-            
-            Entity clanEntity = GetClanByName(name);
-            if (clanEntity.Equals(Entity.Null))
-            {
-                HandleReply(ctx, "Clan/leader not found...");
-                return;
-            }
-            foreach (string memberName in alliance)
-            {
-                string playerKey = playerCache.Keys.FirstOrDefault(key => key.Equals(memberName, StringComparison.OrdinalIgnoreCase));
-                if (playerCache.TryGetValue(playerKey, out var player))
-                {
-                    Entity playerClanEntity = player.Read<User>().ClanEntity._Entity;
-                    ClanTeam clanTeam = playerClanEntity.Read<ClanTeam>();
-                    if (clanTeam.Name.Value.Equals(name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        alliance.Remove(memberName);
-                        removed.Add(memberName);
-                    }
-                }
-            }
-            string replyMessage = removed.Count > 0 ? string.Join(", ", removed.Select(member => $"<color=green>{member}</color>")) : "No members matching clan name found to remove.";
-            if (removed.Count > 0) replyMessage += " removed from alliance.";
-            HandleReply(ctx, replyMessage);
-            Core.DataStructures.SavePlayerAlliances();
-            return;
-        }
-        else
-        {
-            if (alliance.FirstOrDefault(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)) != null)
-            {
-                alliance.Remove(name);
-                Core.DataStructures.SavePlayerAlliances();
-                HandleReply(ctx, $"<color=green>{char.ToUpper(name[0]) + name[1..].ToLower()}</color> removed from alliance.");
-            }
-            else
-            {
-                HandleReply(ctx, $"<color=green>{char.ToUpper(name[0]) + name[1..].ToLower()}</color> not found in alliance.");
-            }
-        }
-        */
     }
 
     [Command(name: "listAllianceMembers", shortHand: "lam", adminOnly: false, usage: ".lam [Player]", description: "Lists alliance members of your alliance or the alliance you are in or the members in the alliance of the player entered if found.")]
@@ -786,7 +770,7 @@ internal static class LevelingCommands
     {
         if (!PlayerAlliances)
         {
-            HandleReply(ctx, "Alliances are not enabled.");
+            LocalizationService.HandleReply(ctx, "Alliances are not enabled.");
             return;
         }        
 
@@ -800,41 +784,6 @@ internal static class LevelingCommands
         {
             ListAllianceMembersByName(ctx, name, playerAlliances);
         }
-        /*
-        if (string.IsNullOrEmpty(name)) // get personal alliance members if no name entered
-        {
-            ulong ownerId = ctx.Event.User.PlatformId;
-            string playerName = ctx.Event.User.CharacterName.Value;
-            HashSet<string> members = playerAlliances.ContainsKey(ownerId) ? playerAlliances[ownerId] : playerAlliances.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
-            string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
-            HandleReply(ctx, replyMessage);
-        }
-        else
-        {
-            string playerKey = playerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && playerCache.TryGetValue(playerKey, out var player))
-            {
-                ulong steamId = player.Read<User>().PlatformId;
-                string playerName = player.Read<User>().CharacterName.Value;
-                HashSet<string> members = playerAlliances.ContainsKey(steamId) ? playerAlliances[steamId] : playerAlliances.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
-                string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
-                HandleReply(ctx, replyMessage);
-            }
-            else
-            {                
-                foreach (var groupEntry in playerAlliances)
-                {
-                    playerKey = groupEntry.Value.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-                    if (!string.IsNullOrEmpty(playerKey))
-                    {
-                        string replyMessage = groupEntry.Value.Count > 0 ? string.Join(", ", groupEntry.Value.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
-                        HandleReply(ctx, replyMessage);
-                        return;
-                    }
-                }
-            }
-        }
-        */
     }
 
     [Command(name: "allianceDisband", shortHand: "disband", adminOnly: false, usage: ".disband", description: "Disbands alliance.")]
@@ -842,7 +791,7 @@ internal static class LevelingCommands
     {
         if (!PlayerAlliances)
         {
-            HandleReply(ctx, "Alliances are not enabled.");
+            LocalizationService.HandleReply(ctx, "Alliances are not enabled.");
             return;
         }
 
@@ -851,18 +800,18 @@ internal static class LevelingCommands
 
         if (ClanAlliances && CheckClanLeadership(ctx, ownerClanEntity))
         {
-            HandleReply(ctx, "You must be the leader of your clan to disband the alliance.");
+            LocalizationService.HandleReply(ctx, "You must be the leader of your clan to disband the alliance.");
             return;
         }
 
         if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId)) 
         {
-            HandleReply(ctx, "You don't have an alliance to disband.");
+            LocalizationService.HandleReply(ctx, "You don't have an alliance to disband.");
             return;
         }
        
         Core.DataStructures.PlayerAlliances.Remove(ownerId);
-        HandleReply(ctx, "Alliance disbanded.");
+        LocalizationService.HandleReply(ctx, "Alliance disbanded.");
         Core.DataStructures.SavePlayerAlliances();   
     }
 
@@ -871,7 +820,7 @@ internal static class LevelingCommands
     {
         if (!PlayerAlliances)
         {
-            HandleReply(ctx, "Alliances are not enabled.");
+            LocalizationService.HandleReply(ctx, "Alliances are not enabled.");
             return;
         }
 
@@ -881,13 +830,13 @@ internal static class LevelingCommands
 
         if (ClanAlliances && CheckClanLeadership(ctx, ownerClanEntity))
         {
-            HandleReply(ctx, "You must be the leader of a clan to leave an alliance.");
+            LocalizationService.HandleReply(ctx, "You must be the leader of a clan to leave an alliance.");
             return;
         }
 
         if (Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
         {
-            HandleReply(ctx, "You can't leave your own alliance. Disband it instead.");
+            LocalizationService.HandleReply(ctx, "You can't leave your own alliance. Disband it instead.");
             return;
         }
 
@@ -900,9 +849,8 @@ internal static class LevelingCommands
             }
             else
             {
-                HandleReply(ctx, "Your clan is not in an alliance.");
+                LocalizationService.HandleReply(ctx, "Your clan is not in an alliance.");
             }
-            
         }
         else
         {
@@ -913,62 +861,8 @@ internal static class LevelingCommands
             }
             else
             {
-                HandleReply(ctx, "You're not in an alliance.");
+                LocalizationService.HandleReply(ctx, "You're not in an alliance.");
             }    
         }
-        /*
-        if (ClanAlliances && ownerClanEntity.Equals(Entity.Null) || !Core.EntityManager.Exists(ownerClanEntity))
-        {
-            HandleReply(ctx, "You must be the leader of a clan to remove it from an alliance.");
-            return;
-        }
-        else if (ClanAlliances)
-        {
-            Entity userEntity = ctx.Event.SenderUserEntity;
-            if (userEntity.TryGetComponent(out ClanMemberStatus memberStatus) && !memberStatus.Equals(ClanRoleEnum.Leader))
-            {
-                HandleReply(ctx, "You must be the leader of a clan to remove it from an alliance.");
-                return;
-            }
-        }
-
-
-        if (ClanAlliances)
-        {
-            // find alliance that this clan leader is in, remove matching clan members
-            List<string> removed = [];
-            var alliance = Core.DataStructures.PlayerAlliances.Values.FirstOrDefault(set => set.Contains(playerName)); // this set has the clan members
-            foreach (var member in alliance)
-            {
-                if (playerCache.TryGetValue(member, out var player))
-                {
-                    Entity playerClanEntity = player.Read<User>().ClanEntity._Entity;
-                    if (playerClanEntity.Equals(ownerClanEntity))
-                    {
-                        alliance.Remove(member);
-                        removed.Add(member);
-                    }
-                }
-            }
-            string replyMessage = removed.Count > 0 ? string.Join(", ", removed.Select(member => $"<color=green>{member}</color>")) : "Failed to leave the alliance.";
-            if (removed.Count > 0) replyMessage += " removed from alliance.";
-            HandleReply(ctx, replyMessage);
-            Core.DataStructures.SavePlayerAlliances();
-        }
-        else
-        {
-            var alliance = Core.DataStructures.PlayerAlliances.Values.FirstOrDefault(set => set.Contains(playerName));
-            if (alliance != null)
-            {
-                alliance.Remove(playerName);
-                HandleReply(ctx, "You have left the alliance.");
-                Core.DataStructures.SavePlayerAlliances();
-            }
-            else
-            {
-                HandleReply(ctx, "You are not in an alliance.");
-            }
-        }
-        */
     }
 }

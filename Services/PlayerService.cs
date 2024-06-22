@@ -13,6 +13,7 @@ internal class PlayerService
 		[
 			ComponentType.ReadOnly(Il2CppType.Of<User>()),
 		];
+
 	static readonly ComponentType[] ClanComponent =
         [
             ComponentType.ReadOnly(Il2CppType.Of<ClanMemberStatus>()),
@@ -43,7 +44,11 @@ internal class PlayerService
         {
             yield return new WaitForSeconds(60);
 			playerCache.Clear();
-            playerCache = GetUsers().Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity }).ToDictionary(user => user.CharacterName, user => user.Entity); // get map of online player names to entities for easier handling
+            playerCache = GetUsers()
+				.Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity })
+				.GroupBy(user => user.CharacterName)
+				.Select(group => group.First())
+				.ToDictionary(user => user.CharacterName, user => user.Entity); // playerName : userEntity
         }
     }
 	public static IEnumerable<Entity> GetUsers(bool includeDisabled = false)
@@ -87,7 +92,6 @@ internal class PlayerService
 		Entity userEntity = GetUsers(includeDisabled).FirstOrDefault(entity => entity.Read<User>().CharacterName.Value.ToLower() == playerName.ToLower());
 		return userEntity != Entity.Null ? userEntity : Entity.Null;
 	}
-
 	public static Entity GetClanByName(string clanName)
     {
 		Entity clanEntity = GetClans().FirstOrDefault(entity => entity.Read<ClanTeam>().Name.Value.ToLower() == clanName.ToLower());
