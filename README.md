@@ -1,6 +1,6 @@
 ## Table of Contents
 
-UPDATED (6/16)
+UPDATED (6/22)
 
 
 - [Features](#features)
@@ -101,12 +101,15 @@ UPDATED (6/16)
 - `.listClasses`
   - List classes.
   - Shortcut: *.classes*
-- `.listClassBuffs`
+- `.listClassBuffs [Class]`
   - List class buffs.
-  - Shortcut: *.lcb*
-- `.listClassSpells`
+  - Shortcut: *.lcb [Class]*
+- `.listClassSpells [Class]`
   - List class spells.
-  - Shortcut: *.classes*
+  - Shortcut: *.lcs [Class]*
+ - `.listClassStats [Class]`
+  - List class spells.
+  - Shortcut: *.stats [Class]*
 
 ### Profession Commands
 - `.getProfessionProgress [Profession]`
