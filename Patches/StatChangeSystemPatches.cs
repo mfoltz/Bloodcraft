@@ -30,6 +30,8 @@ internal static class StatChangeSystemPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Plugin.BloodSystem.Value && Plugin.BloodQualityBonus.Value && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
@@ -89,6 +91,8 @@ internal static class StatChangeSystemPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
 
                 if (dealDamageEvent.MainType != MainDamageType.Physical || dealDamageEvent.MainType != MainDamageType.Spell) continue;

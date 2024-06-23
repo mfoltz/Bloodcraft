@@ -42,6 +42,8 @@ public static class EmoteSystemPatch
         {
             foreach (var entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
 
@@ -95,12 +97,23 @@ public static class EmoteSystemPatch
 
             if (!familiar.Has<Disabled>())
             {
+                if (FamiliarPatches.familiarMinions.ContainsKey(data.Familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
                 entityManager.AddComponent<Disabled>(familiar);
                 
                 Follower follower = familiar.Read<Follower>();
                 follower.Followed._Value = Entity.Null;
                 familiar.Write(follower);
-                
+
+                var buffer = character.ReadBuffer<FollowerBuffer>();
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    if (buffer[i].Entity._Entity.Equals(familiar))
+                    {
+                        buffer.RemoveAt(i);
+                        break;
+                    }
+                }
+
                 data = (familiar, data.Item2);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();

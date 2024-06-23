@@ -73,11 +73,11 @@ public static class ECSExtensions
         var ct = new ComponentType(Il2CppType.Of<T>());
         return EntityManager.HasComponent(entity, ct);
     }
-    public static string LookupName(this PrefabGUID PrefabGUID)
+    public static string LookupName(this PrefabGUID prefabGUID)
     {
         PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
-        return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(PrefabGUID)
-            ? prefabCollectionSystem.PrefabGuidToNameDictionary[PrefabGUID] + " " + PrefabGUID : "Guid Not Found").ToString();
+        return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGUID)
+            ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGUID] + " " + prefabGUID : "Guid Not Found").ToString();
     }
     public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
     {

@@ -27,6 +27,8 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;

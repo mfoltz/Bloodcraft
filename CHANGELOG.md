@@ -1,3 +1,10 @@
+`0.9.10`
+- added command to list stats from classes for synergies
+- familiar summon handling improved for more consistent yeeting with death timer
+- dominating presence no longer summons familiar when form entered and only dismiss if familiar is present
+- can view class specific spells/buffs without being the class by entering the class name in command
+- fixed initialization errors on new worlds
+
 `0.9.9`
 - added damage config for damage dealt to players by familiars
 - familiar summons now properly being yeeted after combat

@@ -28,6 +28,8 @@ internal static class CreateGameplayEventOnDestroySystemPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
                 PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
 

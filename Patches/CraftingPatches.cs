@@ -22,6 +22,8 @@ internal static class CraftingPatches
             {
                 if (Plugin.ProfessionSystem.Value)
                 {
+                    if (!Core.hasInitialized) continue;
+
                     if (entity.Has<StartCraftItemEvent>() && entity.Has<FromCharacter>())
                     {
                         FromCharacter fromCharacter = entity.Read<FromCharacter>();
@@ -80,6 +82,8 @@ internal static class CraftingPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Plugin.ProfessionSystem.Value)
                 {
                     if (entity.Has<StopCraftItemEvent>() && entity.Has<FromCharacter>())

@@ -28,6 +28,8 @@ internal static class FamiliarPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
@@ -47,6 +49,7 @@ internal static class FamiliarPatches
                         {
                             Core.FamiliarService.HandleFamiliarMinions(familiar);
                         }
+                        
                     }
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat)) // simulate player target?
                     {
@@ -85,6 +88,8 @@ internal static class FamiliarPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 TeamReference teamReference = entity.Read<TeamReference>();
                 NativeList<Entity> alliedUsers = new NativeList<Entity>(Allocator.Temp);
                 try
@@ -129,6 +134,8 @@ internal static class FamiliarPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (entity.TryGetComponent(out EntityOwner entityOwner))
                 {
                     if (entityOwner.Owner.Has<PlayerCharacter>() && entity.Read<PrefabGUID>().GuidHash.Equals(-986064531) || entity.Read<PrefabGUID>().GuidHash.Equals(985937733)) // player using waygate
@@ -179,6 +186,7 @@ internal static class FamiliarPatches
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                     if (familiar != Entity.Null)
                     {
+                        
                         if (!familiarMinions.ContainsKey(familiar))
                         {
                             familiarMinions.Add(familiar, [entity]);
@@ -188,6 +196,27 @@ internal static class FamiliarPatches
                         {
                             familiarMinions[familiar].Add(entity);
                             //Core.Log.LogInfo("Added minion to existing entry...");
+                        }
+
+                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("vblood")) continue;
+
+                        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                        {
+                            BuffPrefabGUID = new(1273155981),
+                        };
+                        FromCharacter fromCharacter = new()
+                        {
+                            Character = entity,
+                            User = familiar
+                        };
+                        Core.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                        if (Core.ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
+                        {
+                            if (buff.Has<LifeTime>())
+                            {
+                                buff.Write(new LifeTime { Duration = 30, EndAction = LifeTimeEndAction.Destroy });
+                                //Core.Log.LogInfo("Set lifetime to 30 seconds...");
+                            }
                         }
                     }
                 }

@@ -28,7 +28,6 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID highlordSwordBuff = new(-916946628);
     static readonly PrefabGUID dominateAbility = new(-1908054166);
 
-
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)
@@ -38,6 +37,7 @@ internal static class BuffSpawnSystemPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
@@ -243,7 +243,7 @@ internal static class BuffSpawnSystemPatches
                     //Core.Log.LogInfo("Dominate buff found, dismissing familiar if present and not disabled...");
 
                     Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
-                    if (familiar != Entity.Null || !familiar.Has<Disabled>())
+                    if (familiar != Entity.Null && !familiar.Has<Disabled>())
                     {
                         //Core.Log.LogInfo("Familiar found, dismissing...");
                         EmoteSystemPatch.CallDismiss(userEntity, character, steamId);

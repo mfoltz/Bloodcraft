@@ -19,6 +19,8 @@ internal static class UnitSpawnerPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (UnitSpawnerMultiplier < 1f && entity.Has<IsMinion>())
                 {
                     entity.Write(new IsMinion { Value = true });

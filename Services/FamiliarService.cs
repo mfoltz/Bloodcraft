@@ -2,7 +2,6 @@
 using Bloodcraft.Systems.Familiars;
 using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -104,6 +103,7 @@ internal class FamiliarService
             followers.Dispose();
         }      
     }
+    
     public void HandleFamiliarMinions(Entity familiar)
     {
         if (FamiliarPatches.familiarMinions.ContainsKey(familiar))
@@ -116,6 +116,7 @@ internal class FamiliarService
             FamiliarPatches.familiarMinions.Remove(familiar);
         }
     }
+    
     public void CleanUpMinions()
     {
         NativeArray<Entity> minions = minionQuery.ToEntityArray(Allocator.Temp);
@@ -132,4 +133,5 @@ internal class FamiliarService
             minions.Dispose();
         }
     }
+    
 }

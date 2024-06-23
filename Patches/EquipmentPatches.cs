@@ -31,6 +31,8 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
@@ -57,6 +59,8 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Expertise && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
@@ -138,6 +142,8 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Expertise && Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
@@ -177,6 +183,8 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     if (entity.Has<ArmorLevel>()) entity.Write(new ArmorLevel { Level = 0f });
@@ -202,6 +210,8 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
@@ -228,6 +238,8 @@ internal static class EquipmentPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
@@ -254,6 +266,8 @@ internal static class EquipmentPatches
         {
             foreach (var entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Expertise && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
@@ -284,6 +298,8 @@ internal static class EquipmentPatches
         {
             foreach (var entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
@@ -310,6 +326,8 @@ internal static class EquipmentPatches
         {
             foreach (var entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
                 if (Professions && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())

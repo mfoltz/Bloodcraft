@@ -978,6 +978,30 @@ public class LevelingSystem
         }
         return [];
     }
+
+    public static bool TryParseClass(string classType, out PlayerClasses parsedClassType)
+    {
+        // Attempt to parse the classType string to the PlayerClasses enum.
+        if (Enum.TryParse(classType, true, out parsedClassType))
+        {
+            return true; // Successfully parsed
+        }
+
+        // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
+        parsedClassType = Enum.GetValues(typeof(PlayerClasses))
+                              .Cast<PlayerClasses>()
+                              .FirstOrDefault(pc => pc.ToString().Contains(classType, StringComparison.OrdinalIgnoreCase));
+
+        // Check if a valid enum value was found that contains the input string.
+        if (!parsedClassType.Equals(default(PlayerClasses)))
+        {
+            return true; // Found a matching enum value
+        }
+
+        // If no match is found, return false and set the out parameter to default value.
+        parsedClassType = default;
+        return false; // Parsing failed
+    }
     public class AllianceUtilities
     {
         public static bool CheckClanLeadership(ChatCommandContext ctx, Entity ownerClanEntity)

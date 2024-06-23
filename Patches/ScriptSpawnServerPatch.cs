@@ -20,6 +20,8 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
+
                 if (entity.Has<BloodBuff>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     

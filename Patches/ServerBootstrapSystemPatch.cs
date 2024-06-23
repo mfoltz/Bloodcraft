@@ -2,8 +2,6 @@
 using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Shared;
-using Stunlock.Core;
 using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;

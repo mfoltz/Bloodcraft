@@ -10,6 +10,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Patches;
 
@@ -33,6 +34,8 @@ internal static class DeathEventListenerSystemPatch
         {
             foreach (DeathEvent deathEvent in deathEvents)
             {
+                if (!Core.hasInitialized) continue;
+
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
                 
@@ -47,6 +50,7 @@ internal static class DeathEventListenerSystemPatch
                 if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
                 {
                     ulong steamId = deathEvent.Died.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    //if (FamiliarPatches.familiarMinions.ContainsKey(deathEvent.Died)) Core.FamiliarService.HandleFamiliarMinions(deathEvent.Died);
                     if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.Item2.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
                     {
                         actives = new(Entity.Null, 0);

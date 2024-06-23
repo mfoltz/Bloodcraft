@@ -9,6 +9,8 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
 using static Bloodcraft.Systems.Experience.LevelingSystem.AllianceUtilities;
+using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
+using static Bloodcraft.Systems.Legacies.BloodStats.BloodStatManager;
 
 namespace Bloodcraft.Commands;
 internal static class LevelingCommands
@@ -298,8 +300,8 @@ internal static class LevelingCommands
         LocalizationService.HandleReply(ctx, $"Available Classes: <color=white>{classTypes}</color>");
     }
 
-    [Command(name: "listClassBuffs", shortHand: "lcb", adminOnly: false, usage: ".lcb", description: "Shows perks that can be gained from class.")]
-    public static void ClassPerks(ChatCommandContext ctx)
+    [Command(name: "listClassBuffs", shortHand: "lcb", adminOnly: false, usage: ".lcb <ClassType>", description: "Shows perks that can be gained from class.")]
+    public static void ClassPerks(ChatCommandContext ctx, string classType = "")
     {
         if (!SoftSynergies && !HardSynergies)
         {
@@ -314,7 +316,18 @@ internal static class LevelingCommands
                 LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
                 return;
             }
-            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+
+            // Parse classType parameter
+            PlayerClasses playerClass;
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            {
+                playerClass = requestedClass;
+            }
+            else
+            {
+                playerClass = classes.Keys.FirstOrDefault();
+            }
+
             List<int> perks = LevelingSystem.GetClassBuffs(steamId);
 
             if (perks.Count == 0)
@@ -350,8 +363,8 @@ internal static class LevelingCommands
         }
     }
 
-    [Command(name: "listClassSpells", shortHand: "lcs", adminOnly: false, usage: ".lcs", description: "Shows spells that can be gained from class.")]
-    public static void ListClassSpells(ChatCommandContext ctx)
+    [Command(name: "listClassSpells", shortHand: "lcs", adminOnly: false, usage: ".lcs <ClassType>", description: "Shows spells that can be gained from class.")]
+    public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
     {
         if (!SoftSynergies && !HardSynergies)
         {
@@ -366,7 +379,18 @@ internal static class LevelingCommands
                 LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
                 return;
             }
-            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+
+            // Parse classType parameter
+            PlayerClasses playerClass;
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            {
+                playerClass = requestedClass;
+            }
+            else
+            {
+                playerClass = classes.Keys.FirstOrDefault();
+            }
+
             List<int> perks = LevelingSystem.GetClassSpells(steamId);
 
             if (perks.Count == 0)
@@ -396,6 +420,45 @@ internal static class LevelingCommands
         else
         {
             LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
+        }
+    }
+
+    [Command(name: "listClassStats", shortHand: "stats", adminOnly: false, usage: ".stats [Class]", description: "Shows weapon and blood stats for a class.")]
+    public static void ListClassStats(ChatCommandContext ctx, string classType = "")
+    {
+        // Parse classType parameter
+        if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+        {
+            if (ClassWeaponBloodMap.TryGetValue(requestedClass, out var weaponBloodStats))
+            {
+                var weaponStats = weaponBloodStats.Item1.Split(',').Select(v => ((WeaponStatType)int.Parse(v)).ToString()).ToList();
+                var bloodStats = weaponBloodStats.Item2.Split(',').Select(v => ((BloodStatType)int.Parse(v)).ToString()).ToList();
+
+                if (weaponStats.Count == 0 && bloodStats.Count == 0)
+                {
+                    LocalizationService.HandleReply(ctx, "No stats found for the specified class.");
+                    return;
+                }
+
+                var allStats = new List<string>();
+                allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
+                allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
+
+                for (int i = 0; i < allStats.Count; i += 6)
+                {
+                    var batch = allStats.Skip(i).Take(6);
+                    string replyMessage = string.Join(", ", batch);
+                    LocalizationService.HandleReply(ctx, $"{requestedClass} stat synergies[x<color=white>{Plugin.StatSynergyMultiplier.Value}</color>]: {replyMessage}");
+                }
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "Stats for the specified class are not configured.");
+            }
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Invalid or unspecified class type.");
         }
     }
 
