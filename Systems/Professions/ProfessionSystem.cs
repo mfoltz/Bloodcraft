@@ -7,7 +7,7 @@ using User = ProjectM.Network.User;
 using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Professions;
-public class ProfessionSystem
+internal static class ProfessionSystem
 {
     //static readonly Regex regex = new(@"fish.*t0[1-3]$");
     static readonly float ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest

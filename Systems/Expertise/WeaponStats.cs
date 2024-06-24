@@ -3,7 +3,7 @@ using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 
 namespace Bloodcraft.Systems.Expertise;
 
-public class WeaponStats
+public static class WeaponStats
 {
     public class PlayerWeaponUtilities
     {
@@ -77,6 +77,22 @@ public class WeaponStats
             SpellCritChance,
             SpellCritDamage
         }
+
+        public static readonly Dictionary<WeaponStatManager.WeaponStatType, string> StatFormatMap = new Dictionary<WeaponStatManager.WeaponStatType, string>
+        { 
+            { WeaponStatManager.WeaponStatType.MaxHealth, "integer" },
+            { WeaponStatManager.WeaponStatType.MovementSpeed, "decimal" },
+            { WeaponStatManager.WeaponStatType.PrimaryAttackSpeed, "percentage" },
+            { WeaponStatManager.WeaponStatType.PhysicalLifeLeech, "percentage" },
+            { WeaponStatManager.WeaponStatType.SpellLifeLeech, "percentage" },
+            { WeaponStatManager.WeaponStatType.PrimaryLifeLeech, "percentage" },
+            { WeaponStatManager.WeaponStatType.PhysicalPower, "integer" },
+            { WeaponStatManager.WeaponStatType.SpellPower, "integer" },
+            { WeaponStatManager.WeaponStatType.PhysicalCritChance, "percentage" },
+            { WeaponStatManager.WeaponStatType.PhysicalCritDamage, "percentage" },
+            { WeaponStatManager.WeaponStatType.SpellCritChance, "percentage" },
+            { WeaponStatManager.WeaponStatType.SpellCritDamage, "percentage" }
+        };
 
         public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatMap = new()
             {

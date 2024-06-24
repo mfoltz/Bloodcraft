@@ -96,7 +96,6 @@ public class SwordPrestigeHandler : BasePrestigeHandler
     }
 }
 
-
 public class AxePrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAxeExpertise;

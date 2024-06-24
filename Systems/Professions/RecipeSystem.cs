@@ -1,10 +1,10 @@
 ﻿using ProjectM;
-using ProjectM.Gameplay.Systems;
 using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Systems.Professions;
-public class RecipeSystem
+/*
+internal static class RecipeSystem
 {
     static readonly PrefabGUID advancedGrinder = new(-178579946);
     static readonly PrefabGUID advancedLoom = new(1299929048);
@@ -143,9 +143,10 @@ public class RecipeSystem
         //workBuffer = Core.EntityManager.AddBuffer<WorkstationRecipesBuffer>(stationEntity);
         //workBuffer.Add(new WorkstationRecipesBuffer { RecipeGuid = shadowSlashers });
         //refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = shadowSlashers, Disabled = false, Unlocked = true });
-        */
+        
         Core.GameDataSystem.RegisterRecipes();
         Core.GameDataSystem.RegisterItems();
         Core.GameDataSystem.RegisterBlueprints();
     }
 }
+*/

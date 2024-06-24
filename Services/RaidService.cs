@@ -27,7 +27,14 @@ internal class RaidService
     public static void StartRaidMonitor(Entity raider, Entity breached)
     {
         Entity heartEntity = breached.Has<CastleHeartConnection>() ? breached.Read<CastleHeartConnection>().CastleHeartEntity._Entity : Entity.Null;
-        
+
+        PlayerService.playerCache.Clear();
+        PlayerService.playerCache = PlayerService.GetUsers()
+            .Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity })
+            .GroupBy(user => user.CharacterName)
+            .Select(group => group.First())
+            .ToDictionary(user => user.CharacterName, user => user.Entity);
+
         if (!active) // if not active start monitor loop after clearing caches
         {
             Core.Log.LogInfo("Starting raid monitor...");
@@ -56,6 +63,8 @@ internal class RaidService
 
         Entity clanEntity = EntityManager.Exists(playerUser.ClanEntity._Entity) ? playerUser.ClanEntity._Entity : Entity.Null;
 
+        participants.Add(playerUserEntity);
+
         if (!clanEntity.Equals(Entity.Null)) // add owner clan members to raid participants
         {
             var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
@@ -63,10 +72,6 @@ internal class RaidService
             {
                 participants.Add(userBuffer[i].UserEntity); // add clan members without checking if online since they might be in the territory and don't want them to take damage
             }
-        }
-        else // if no clan just add owner to raid participants
-        {
-            participants.Add(playerUserEntity);
         }
 
         if (PlayerAlliances && alliances.Values.Any(set => set.Contains(playerName)))
@@ -86,6 +91,8 @@ internal class RaidService
 
         clanEntity = EntityManager.Exists(playerUser.ClanEntity._Entity) ? playerUser.ClanEntity._Entity : Entity.Null;
 
+        participants.Add(playerUserEntity);
+
         if (!clanEntity.Equals(Entity.Null)) // add raider clan members to raid participants
         {
             var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
@@ -93,10 +100,6 @@ internal class RaidService
             {
                 if (userBuffer[i].UserEntity.Read<User>().IsConnected) participants.Add(userBuffer[i].UserEntity); // for raiders only add clan members that are online
             }
-        }
-        else // if no clan just add raider to raid participants
-        {
-            participants.Add(playerUserEntity);
         }
 
         if (PlayerAlliances && alliances.Values.Any(set => set.Contains(playerName)))

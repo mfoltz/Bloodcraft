@@ -180,6 +180,7 @@ internal static class FamiliarPatches
         {
             foreach (Entity entity in entities)
             {
+                if (!Core.hasInitialized) continue;
                 if (entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
                 {
                     //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());

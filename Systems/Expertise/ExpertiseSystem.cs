@@ -124,7 +124,6 @@ public static class ExpertiseSystem
         if (leveledUp)
         {
             Entity character = user.LocalCharacter._Entity;
-            Equipment equipment = character.Read<Equipment>();
             //if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
             if (newLevel < MaxExpertiseLevel) HandleServerReply(entityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
         }

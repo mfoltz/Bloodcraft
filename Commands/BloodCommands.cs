@@ -46,17 +46,8 @@ internal static class BloodCommands
                 foreach (var stat in stats)
                 {
                     float bonus = ModifyUnitStatBuffUtils.CalculateScaledBloodBonus(bloodHandler, steamID, bloodType, stat);
-                    if (bonus > 1)
-                    {
-                        int intBonus = (int)bonus;
-                        string bonusString = intBonus.ToString();
-                        bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
-                    }
-                    else
-                    {
-                        string bonusString = (bonus * 100).ToString("F0") + "%";
-                        bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
-                    }
+                    string bonusString = (bonus * 100).ToString("F0") + "%";
+                    bonusBloodStats.Add(new KeyValuePair<BloodStatManager.BloodStatType, string>(stat, bonusString));
                 }
                 for (int i = 0; i < bonusBloodStats.Count; i += 6)
                 {

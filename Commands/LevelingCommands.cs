@@ -328,7 +328,7 @@ internal static class LevelingCommands
                 playerClass = classes.Keys.FirstOrDefault();
             }
 
-            List<int> perks = LevelingSystem.GetClassBuffs(steamId);
+            List<int> perks = Core.ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
 
             if (perks.Count == 0)
             {
@@ -391,7 +391,7 @@ internal static class LevelingCommands
                 playerClass = classes.Keys.FirstOrDefault();
             }
 
-            List<int> perks = LevelingSystem.GetClassSpells(steamId);
+            List<int> perks = Core.ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
 
             if (perks.Count == 0)
             {
@@ -604,9 +604,9 @@ internal static class LevelingCommands
             return $"<color=white>{prefab}</color> at prestige <color=yellow>{level}</color>";
         }).ToList();
 
-        for (int i = 0; i < prestigeBuffs.Count; i += 6)
+        for (int i = 0; i < prestigeBuffs.Count; i += 4)
         {
-            var batch = prestigeBuffs.Skip(i).Take(6);
+            var batch = prestigeBuffs.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, replyMessage);
         }

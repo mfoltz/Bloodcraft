@@ -10,7 +10,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ReplaceAbilityOnGroupSlotSystemPatch
 {
-    public static Dictionary<PrefabGUID, int> ClassSpells = [];
+    public static Dictionary<int, int> ClassSpells = [];
 
     static readonly bool UnarmedSlots = Plugin.UnarmedSlots.Value;
 
@@ -150,11 +150,13 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
         {
             foreach (Entity entity in entities)
             {   
+                if (!Core.hasInitialized) continue;
+                if (!Plugin.HardSynergies.Value && !Plugin.SoftSynergies.Value) continue;
                 AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
-                if (postCast.Character.Has<PlayerCharacter>() && ClassSpells.ContainsKey(abilityGroupPrefab))
+                if (postCast.Character.Has<PlayerCharacter>() && ClassSpells.ContainsKey(abilityGroupPrefab.GuidHash))
                 {
-                    float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab] * 15f;
+                    float cooldown = ClassSpells[abilityGroupPrefab.GuidHash].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab.GuidHash] * 15f;
                     Core.ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
                 }
             }

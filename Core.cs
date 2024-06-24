@@ -65,6 +65,7 @@ internal static class Core
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
 
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = LevelingSystem.GetSpellPrefabs();
+
         if (Plugin.FamiliarSystem.Value)
         {
             FamiliarService.HandleFamiliarsOnSpawn();

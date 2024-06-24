@@ -13,7 +13,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Experience;
-public class LevelingSystem
+internal static class LevelingSystem
 {
     static readonly float UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
     static readonly float VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
@@ -951,12 +951,12 @@ public class LevelingSystem
             }
         }
     }
-    public static Dictionary<PrefabGUID, int> GetSpellPrefabs()
+    public static Dictionary<int, int> GetSpellPrefabs()
     {
-        Dictionary<PrefabGUID, int> spellPrefabs = [];
+        Dictionary<int, int> spellPrefabs = [];
         foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
         {
-            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) Core.ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Prefab = new PrefabGUID(x), Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Prefab, x.Index));
+            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) Core.ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
         }
         return spellPrefabs;
     }
@@ -978,7 +978,6 @@ public class LevelingSystem
         }
         return [];
     }
-
     public static bool TryParseClass(string classType, out PlayerClasses parsedClassType)
     {
         // Attempt to parse the classType string to the PlayerClasses enum.

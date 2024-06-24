@@ -1,3 +1,12 @@
+`0.9.12`
+- removed .tbc
+- list prestige buffs command takes shorter text batches and should no longer get cutoff in chat log
+- stat bonuses in .get e correctly formatted based on bonus
+- minor bug fixes/optimizations
+
+`0.9.11`
+- (hotfix) can view class specific spells/buffs without being the class by entering the class name in command
+
 `0.9.10`
 - added command to list stats from classes for synergies
 - familiar summon handling improved for more consistent yeeting with death timer

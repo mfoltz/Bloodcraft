@@ -4,7 +4,7 @@ using static Bloodcraft.Systems.Legacies.BloodStats.BloodStatManager;
 using static Bloodcraft.Systems.Legacy.BloodSystem;
 
 namespace Bloodcraft.Systems.Legacies;
-public class BloodStats
+public static class BloodStats
 {
     public class PlayerBloodUtilities
     {

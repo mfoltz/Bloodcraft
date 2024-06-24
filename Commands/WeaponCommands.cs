@@ -43,23 +43,19 @@ internal static class WeaponCommands
             if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {
                 List<KeyValuePair<WeaponStatManager.WeaponStatType, string>> bonusWeaponStats = [];
-                foreach(var stat in stats)
+                foreach (var stat in stats)
                 {
                     float bonus = ModifyUnitStatBuffUtils.CalculateScaledWeaponBonus(handler, steamID, weaponType, stat);
-                    if (bonus > 1)
+                    string formattedBonus = WeaponStats.WeaponStatManager.StatFormatMap[stat] switch
                     {
-                        int intBonus = (int)bonus;
-                        string bonusString = intBonus.ToString();
-                        bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, string>(stat, bonusString));
-                    }
-                    else
-                    {
-                        string bonusString = (bonus * 100).ToString("F0") + "%";
-                        bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, string>(stat, bonusString));
-                    }
+                        "integer" => ((int)bonus).ToString(),
+                        "decimal" => bonus.ToString("F2"),
+                        "percentage" => (bonus * 100).ToString("F0") + "%",
+                        _ => bonus.ToString(),
+                    };
+                    bonusWeaponStats.Add(new KeyValuePair<WeaponStatManager.WeaponStatType, string>(stat, formattedBonus));
                 }
-                //string bonuses = string.Join(", ", bonusWeaponStats.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                //ctx.Reply($"Current weapon stat bonuses: {bonuses}");
+
                 for (int i = 0; i < bonusWeaponStats.Count; i += 6)
                 {
                     var batch = bonusWeaponStats.Skip(i).Take(6);

@@ -8,7 +8,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Leveling;
-public class PrestigeSystem
+public static class PrestigeSystem
 {
     public enum PrestigeType
     {

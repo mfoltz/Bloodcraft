@@ -7,7 +7,7 @@ using Unity.Entities;
 using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Legacy;
-public class BloodSystem
+public static class BloodSystem
 {
     static readonly float UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
     static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
