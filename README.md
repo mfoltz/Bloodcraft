@@ -61,7 +61,7 @@ UPDATED (6/22)
   - Shortcut: *.prestige [PrestigeType]*
 - `.getPrestige [PrestigeType]`
   - Shows information about player's prestige status and rates for entered type of prestige.
-  - Shortcut: *.gp [PrestigeType]*
+  - Shortcut: *.gpr [PrestigeType]*
 - `.resetPrestige [Name] [PrestigeType]` 🔒
   - Resets prestige type and removes buffs gained from prestiges in leveling if applicable.
   - Shortcut: *.rpr [Name] [PrestigeType]*
