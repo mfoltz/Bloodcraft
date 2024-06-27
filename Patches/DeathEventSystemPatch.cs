@@ -16,12 +16,10 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
-    static readonly PrefabGUID siegeGolem = new(914043867);
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
     static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
     static readonly bool Familiars = Plugin.FamiliarSystem.Value;
     static readonly bool Professions = Plugin.ProfessionSystem.Value;
-    static readonly bool raidWatcher = Plugin.RaidMonitor.Value;
     static readonly bool Legacies = Plugin.BloodSystem.Value;
 
     [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
@@ -37,14 +35,6 @@ internal static class DeathEventListenerSystemPatch
 
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
-                
-                if (raidWatcher && deathEvent.Died.Has<AnnounceCastleBreached>() && deathEvent.StatChangeReason.Equals(StatChangeReason.StatChangeSystem_0))
-                {
-                    if (Core.ServerGameManager.TryGetBuff(deathEvent.Killer, siegeGolem.ToIdentifier(), out Entity buff)) // if this was done by a player with a siege golem buff, start raid service
-                    {
-                        RaidService.StartRaidMonitor(deathEvent.Killer, deathEvent.Died);
-                    }
-                }
 
                 if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
                 {

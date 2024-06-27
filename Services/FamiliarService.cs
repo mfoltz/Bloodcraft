@@ -3,14 +3,18 @@ using Bloodcraft.Systems.Familiars;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Bloodcraft.Services;
 internal class FamiliarService 
 {
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static readonly ComponentType[] MinionComponents =
         [
             ComponentType.ReadOnly(Il2CppType.Of<Minion>())
@@ -20,8 +24,6 @@ internal class FamiliarService
         [
             ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
         ];
-
-    //readonly IgnorePhysicsDebugSystem familiarMonoBehaviour;
 
     EntityQuery minionQuery;
 
@@ -39,46 +41,23 @@ internal class FamiliarService
             All = FamiliarComponents,
             Options = EntityQueryOptions.IncludeDisabledEntities
         });
-        if (Plugin.FamiliarSystem.Value)
-        {
-            List<int> unitBans = Core.ParseConfigString(Plugin.BannedUnits.Value);
-            List<string> typeBans = Plugin.BannedTypes.Value.Split(',').Select(s => s.Trim()).ToList();
-            if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
-            if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
-            //familiarMonoBehaviour = (new GameObject("FamiliarService")).AddComponent<IgnorePhysicsDebugSystem>();
-            //familiarMonoBehaviour.StartCoroutine(UpdateLoop().WrapToIl2Cpp());
-
-        }
+        List<int> unitBans = Core.ParseConfigString(Plugin.BannedUnits.Value);
+        List<string> typeBans = Plugin.BannedTypes.Value.Split(',').Select(s => s.Trim()).ToList();
+        if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
+        if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
+        HandleFamiliarsOnSpawn();
+        Core.StartCoroutine(CleanUpMinions());
     }
-    /*
-    IEnumerator UpdateLoop()
+    
+    IEnumerator CleanUpMinions()
     {
-        WaitForSeconds waitForSeconds = new(30); // Convert minutes to seconds for update loop
-
         while (true)
         {
-            yield return waitForSeconds;
-
-            var actives = Core.DataStructures.FamiliarActives.Keys;
-            foreach (ulong steamId in actives)
-            {
-                
-            }
-        
-            Entity player = familiar.Read<Follower>().Followed._Value;
-            float3 playerPos = player.Read<LocalToWorld>().Position;
-            float distance = UnityEngine.Vector3.Distance(familiar.Read<LocalToWorld>().Position, playerPos);
-            if (distance > 25f)
-            {
-                familiar.Write(new Translation { Value = player.Read<LocalToWorld>().Position });
-                //Core.Log.LogInfo($"Familiar returned to owner.");
-            }
-            
-            
+            yield return new WaitForSeconds(120f); // want to get rid of allied player minions that don't have unholy in the name every so often although it is somewhat rare compared to minions that are caught and handled via the dictionary in FamiliarPatches
+            FindAndHandleFamiliarMinions();
         }
     }
-    */
-    public void HandleFamiliarsOnSpawn()
+    void HandleFamiliarsOnSpawn()
     {
         NativeArray<Entity> followers = familiarQuery.ToEntityArray(Allocator.Temp);
         try
@@ -103,7 +82,6 @@ internal class FamiliarService
             followers.Dispose();
         }      
     }
-    
     public void HandleFamiliarMinions(Entity familiar)
     {
         if (FamiliarPatches.familiarMinions.ContainsKey(familiar))
@@ -116,16 +94,26 @@ internal class FamiliarService
             FamiliarPatches.familiarMinions.Remove(familiar);
         }
     }
-    
-    public void CleanUpMinions()
+    void FindAndHandleFamiliarMinions()
     {
         NativeArray<Entity> minions = minionQuery.ToEntityArray(Allocator.Temp);
+        HashSet<Entity> players = [..PlayerService.playerCache.Values];
+        var unholyPrefix = "char_unholy";
         try
         {
             foreach (Entity minion in minions)
             {
-                //if (minion.Has<PrefabGUID>()) Core.Log.LogInfo($"Cleaning up minion: {minion.Read<PrefabGUID>().LookupName()}");
-                DestroyUtility.CreateDestroyEvent(Core.EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
+                string minionName = minion.Read<PrefabGUID>().LookupName().ToLower();
+                if (minionName.Contains(unholyPrefix)) continue;
+                foreach (Entity player in players)
+                {
+                    if (ServerGameManager.IsAllies(minion, player))
+                    {
+                        Core.Log.LogInfo($"Destroying minion {minionName}...");
+                        DestroyUtility.CreateDestroyEvent(Core.EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
+                        break;
+                    }
+                }
             }
         }
         finally
@@ -133,5 +121,4 @@ internal class FamiliarService
             minions.Dispose();
         }
     }
-    
 }

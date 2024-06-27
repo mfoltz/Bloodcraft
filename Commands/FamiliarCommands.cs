@@ -418,12 +418,26 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.Item2.Equals(0))
+        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.FamKey.Equals(0))
         {
-            var xpData = FamiliarLevelingSystem.GetFamiliarExperience(steamId, data.Item2);
+            var xpData = FamiliarLevelingSystem.GetFamiliarExperience(steamId, data.FamKey);
             int progress = (int)(xpData.Value - FamiliarLevelingSystem.ConvertLevelToXp(xpData.Key));
-            int percent = FamiliarLevelingSystem.GetLevelProgress(steamId, data.Item2);
+            int percent = FamiliarLevelingSystem.GetLevelProgress(steamId, data.FamKey);
+
+            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
+
             LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            if (familiar != Entity.Null)
+            {
+                // read stats and such here
+                Health health = familiar.Read<Health>();
+                UnitStats unitStats = familiar.Read<UnitStats>();
+
+                float physicalPower = unitStats.PhysicalPower._Value;
+                float spellPower = unitStats.SpellPower._Value;
+                float maxHealth = health.MaxHealth._Value;
+                LocalizationService.HandleReply(ctx, $"<color=#00FFFF>MaxHealth</color>: <color=white>{(int)maxHealth}</color>, <color=#00FFFF>PhysicalPower</color>: <color=white>{(int)physicalPower}</color>, <color=#00FFFF>SpellPower</color>: <color=white>{(int)spellPower}</color>");
+            }
         }
         else
         {

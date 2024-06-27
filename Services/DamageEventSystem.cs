@@ -63,7 +63,6 @@ internal partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
         {
             DealDamageEvents = dealDamageEvents
         };
-
         // Execute the job
         JobHandle jobHandle = IJobExtensions.Schedule(job);
         jobHandle.Complete();

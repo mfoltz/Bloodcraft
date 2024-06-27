@@ -220,40 +220,42 @@ public static class PrestigeSystem
         {
             debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             //Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
-            //buff.LogComponentTypes();
-            if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buff))
+            if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
-                if (buff.Has<RemoveBuffOnGameplayEvent>())
+                if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
                 {
-                    buff.Remove<RemoveBuffOnGameplayEvent>();
+                    buffEntity.Remove<RemoveBuffOnGameplayEvent>();
                 }
-                if (buff.Has<RemoveBuffOnGameplayEventEntry>())
+                if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
                 {
-                    buff.Remove<RemoveBuffOnGameplayEventEntry>();
+                    buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
                 }
-                if (buff.Has<CreateGameplayEventsOnSpawn>())
+                if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
                 {
-                    buff.Remove<CreateGameplayEventsOnSpawn>();
+                    buffEntity.Remove<CreateGameplayEventsOnSpawn>();
                 }
-                if (buff.Has<GameplayEventListeners>())
+                if (buffEntity.Has<GameplayEventListeners>())
                 {
-                    buff.Remove<GameplayEventListeners>();
+                    buffEntity.Remove<GameplayEventListeners>();
                 }
-                if (!buff.Has<Buff_Persists_Through_Death>())
+                if (!buffEntity.Has<Buff_Persists_Through_Death>())
                 {
-                    buff.Write(new Buff_Persists_Through_Death());
+                    buffEntity.Add<Buff_Persists_Through_Death>();
                 }
-                if (buff.Has<LifeTime>())
+                if (buffEntity.Has<DestroyOnGameplayEvent>())
                 {
-                    LifeTime lifeTime = buff.Read<LifeTime>();
+                    buffEntity.Remove<DestroyOnGameplayEvent>();
+                }
+                if (buffEntity.Has<LifeTime>())
+                {
+                    LifeTime lifeTime = buffEntity.Read<LifeTime>();
                     lifeTime.Duration = -1;
                     lifeTime.EndAction = LifeTimeEndAction.None;
-                    buff.Write(lifeTime);
+                    buffEntity.Write(lifeTime);
                 }
             }
         }
     }
-
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
@@ -345,7 +347,7 @@ public static class PrestigeSystem
     static void RemoveBuff(ChatCommandContext ctx, int buffId, BuffUtility.BuffSpawner buffSpawner, EntityCommandBuffer entityCommandBuffer)
     {
         var buffPrefab = new PrefabGUID(buffId);
-        if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out var buff))
+        if (Core.ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out Entity buff))
         {
             BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
         }

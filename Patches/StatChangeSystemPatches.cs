@@ -8,17 +8,23 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Systems.Experience.LevelingSystem;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal static class StatChangeSystemPatches
 {
+    static readonly Random Random = new();
+    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
-    static readonly bool PlayerAlliances = Plugin.PlayerAlliances.Value;
+    static readonly bool Parties = Plugin.Parties.Value;
     static readonly bool Familiars = Plugin.FamiliarSystem.Value;
     static readonly bool PreventFriendlyFire = Plugin.PreventFriendlyFire.Value;
+    static readonly bool Classes = Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value;
+    static readonly bool OnHitEffects = Plugin.ClassSpellSchoolOnHitEffects.Value;
+    static readonly float OnHitChance = Plugin.OnHitProcChance.Value;
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
 
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
@@ -86,7 +92,7 @@ internal static class StatChangeSystemPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(DealDamageSystem __instance)
     {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
@@ -95,16 +101,17 @@ internal static class StatChangeSystemPatches
 
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
 
-                if (dealDamageEvent.MainType != MainDamageType.Physical || dealDamageEvent.MainType != MainDamageType.Spell) continue;
+                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue;
 
                 if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
                 {
-                    if (PlayerAlliances && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
+                    if (Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
                     {
-                        Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerAlliances;
+                        Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerParties;
                         string targetName = target.Name.Value;
                         string sourceName = source.Name.Value;
                         ulong steamId = source.UserEntity.Read<User>().PlatformId;
+
                         if (playerAlliances.Values.Any(set => set.Contains(targetName) && set.Contains(sourceName)))
                         {
                             Core.EntityManager.DestroyEntity(entity);
@@ -117,28 +124,64 @@ internal static class StatChangeSystemPatches
                             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null)
                             {
+                                //Core.Log.LogInfo($"Destroying familiar damage event PvE...");
                                 Core.EntityManager.DestroyEntity(entity);
                             }
                         }
-                        else if (GameMode.Equals(GameModeType.PvP) && ServerGameManager.TryGetBuff(dealDamageEvent.Target, pvpProtBuff.ToIdentifier(), out Entity _))
+                        else if (ServerGameManager.TryGetBuff(dealDamageEvent.Target, pvpProtBuff.ToIdentifier(), out Entity _)) // account for KindredArenas <3
                         {
                             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null)
                             {
+                                //Core.Log.LogInfo($"Destroying familiar damage event PvP protected...");
                                 Core.EntityManager.DestroyEntity(entity);
                             }
                         }
-                        else if (GameMode.Equals(GameModeType.PvP) && PlayerAlliances && PreventFriendlyFire) // check for alliance in PvP
+                        else if (Parties && PreventFriendlyFire) // check for parties in PvP 
                         {
-                            Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerAlliances;
+                            Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerParties;
                             string targetName = target.Name.Value;
                             string ownerName = follower.Followed._Value.Read<PlayerCharacter>().Name.Value;
 
                             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null && playerAlliances.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
                             {
+                                //Core.Log.LogInfo($"Destroying familiar damage event Parties & PreventFriendlyFire...");
                                 Core.EntityManager.DestroyEntity(entity);
                             }
+                        }
+                    }
+                }
+                else if (OnHitEffects && Classes && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
+                {
+                    ulong steamId = source.UserEntity.Read<User>().PlatformId;
+                    if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classData) && classData.Keys.Count == 0) continue;
+                    PlayerClasses playerClass = GetPlayerClass(steamId);
+                    //Core.Log.LogInfo($"Player class: {playerClass}");
+                    if (Random.NextDouble() <= OnHitChance)
+                    {
+                        PrefabGUID prefabGUID = ClassOnHitDebuffMap[playerClass];
+                        FromCharacter fromCharacter = new()
+                        {
+                            Character = dealDamageEvent.Target,
+                            User = source.UserEntity
+                        };
+
+                        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                        {
+                            BuffPrefabGUID = prefabGUID,
+                        };
+                        if (ServerGameManager.HasBuff(dealDamageEvent.Target, prefabGUID.ToIdentifier()))
+                        {
+                            applyBuffDebugEvent.BuffPrefabGUID = ClassOnHitEffectMap[playerClass];
+                            fromCharacter.Character = entityOwner.Owner;
+                            //Core.Log.LogInfo($"Tier 2 on hit effect proc'd...");
+                            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                        }
+                        else
+                        {
+                            //Core.Log.LogInfo($"Tier 1 on hit effect proc'd...");
+                            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                         }
                     }
                 }

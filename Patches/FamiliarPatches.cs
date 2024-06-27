@@ -95,6 +95,7 @@ internal static class FamiliarPatches
                 try
                 {
                     PrefabGUID famKey = entity.Read<PrefabGUID>();
+
                     TeamUtility.GetAlliedUsers(Core.EntityManager, teamReference, alliedUsers);
                     foreach (Entity userEntity in alliedUsers)
                     {

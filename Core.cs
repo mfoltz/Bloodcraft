@@ -8,14 +8,17 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
+using Stunlock.Network;
 using System.Collections;
 using System.Text.Json;
 using Unity.Entities;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
@@ -33,9 +36,10 @@ internal static class Core
     public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
     public static GameDataSystem GameDataSystem { get; internal set; }
-    public static FamiliarService FamiliarService { get; } = new();
+    public static FamiliarService FamiliarService { get; internal set; }
     public static LocalizationService Localization { get; } = new();
     public static PlayerService Players { get; } = new();
+
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
@@ -60,21 +64,14 @@ internal static class Core
         ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
         EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
         GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
-        ServerGameSettings = Server.GetExistingSystemManaged<ServerGameSettingsSystem>()._Settings;
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
-
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = LevelingSystem.GetSpellPrefabs();
-
-        if (Plugin.FamiliarSystem.Value)
-        {
-            FamiliarService.HandleFamiliarsOnSpawn();
-            FamiliarService.CleanUpMinions();
-        }
-
-        // update system group after injecting system
+        ServerGameSettings = ServerGameSettingsSystem._Settings;
+        if (Plugin.FamiliarSystem.Value) FamiliarService = new();
+        // update system group after injecting system?
         //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
-
+        //JobsUtility.JobScheduleParameters
         // job system initialization
         //DamageEventSystem = Server.GetOrCreateSystemManaged<DamageEventSystem>();
 
@@ -100,14 +97,6 @@ internal static class Core
             UnityEngine.Object.DontDestroyOnLoad(go);
         }
         monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
-    }
-    public static void StopCoroutine(IEnumerator routine)
-    {
-        if (monoBehaviour == null)
-        {
-            return;
-        }
-        monoBehaviour.StopCoroutine(routine.WrapToIl2Cpp());
     }
     public class DataStructures
     {
@@ -194,7 +183,6 @@ internal static class Core
             get => familiarActives;
             set => familiarActives = value;
         }
-
         public static Dictionary<ulong, string> FamiliarSet
         {
             get => familiarSet;
@@ -430,12 +418,12 @@ internal static class Core
             set => playerBloodStats = value;
         }
 
-        private static Dictionary<ulong, HashSet<string>> playerAlliances = []; // userEntities of players in the same alliance
+        private static Dictionary<ulong, HashSet<string>> playerParties = []; // userEntities of players in the same alliance
 
-        public static Dictionary<ulong, HashSet<string>> PlayerAlliances
+        public static Dictionary<ulong, HashSet<string>> PlayerParties
         {
-            get => playerAlliances;
-            set => playerAlliances = value;
+            get => playerParties;
+            set => playerParties = value;
         }
 
         // cache-only
@@ -456,7 +444,6 @@ internal static class Core
             set => playerMaxWeaponLevels = value;
         }
 
-
         // file paths dictionary
         private static readonly Dictionary<string, string> filePaths = new()
         {
@@ -464,7 +451,7 @@ internal static class Core
             {"Classes", JsonFiles.PlayerClassesJson },
             {"Prestiges", JsonFiles.PlayerPrestigesJson },
             {"PlayerBools", JsonFiles.PlayerBoolsJson},
-            {"PlayerAlliances", JsonFiles.PlayerAlliancesJson},
+            {"PlayerParties", JsonFiles.PlayerPartiesJson},
             {"Woodcutting", JsonFiles.PlayerWoodcuttingJson},
             {"Mining", JsonFiles.PlayerMiningJson},
             {"Fishing", JsonFiles.PlayerFishingJson},
@@ -549,7 +536,7 @@ internal static class Core
 
         public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
 
-        public static void LoadPlayerAlliances() => LoadData(ref playerAlliances, "PlayerAlliances");
+        public static void LoadPlayerParties() => LoadData(ref playerParties, "PlayerParties");
 
         public static void LoadPlayerWoodcutting() => LoadData(ref playerWoodcutting, "Woodcutting");
 
@@ -646,7 +633,7 @@ internal static class Core
 
         public static void SavePlayerBools() => SaveData(PlayerBools, "PlayerBools");
 
-        public static void SavePlayerAlliances() => SaveData(PlayerAlliances, "PlayerAlliances");
+        public static void SavePlayerParties() => SaveData(PlayerParties, "PlayerParties");
 
         public static void SavePlayerWoodcutting() => SaveData(PlayerWoodcutting, "Woodcutting");
 
@@ -768,7 +755,7 @@ internal static class Core
         public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
         public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigFiles, "player_classes.json");
         public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigFiles, "player_bools.json");
-        public static readonly string PlayerAlliancesJson = Path.Combine(Plugin.ConfigFiles, "player_alliances.json");
+        public static readonly string PlayerPartiesJson = Path.Combine(Plugin.ConfigFiles, "player_parties.json");
         public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
         public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
         public static readonly string PlayerFishingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_fishing.json");

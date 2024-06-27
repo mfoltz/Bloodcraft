@@ -434,11 +434,16 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
             {
                 float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, weaponStatType);
                 bool found = false;
+
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     ModifyUnitStatBuff_DOTS statBuff = buffer[i];
                     if (statBuff.StatType.Equals(WeaponStatMap[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
                     {
+                        if (weaponStatType.Equals(WeaponStatType.MovementSpeed))
+                        {
+                            break;
+                        }
                         statBuff.Value += scaledBonus; // Modify the value accordingly
                         buffer[i] = statBuff; // Assign the modified struct back to the buffer
                         found = true;

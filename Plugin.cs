@@ -28,8 +28,6 @@ internal class Plugin : BasePlugin
 
     // config entries
     private static ConfigEntry<string> _languageLocalization;
-    private static ConfigEntry<bool> _raidMonitor;
-    private static ConfigEntry<bool> _damageIntruders;
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<string> _prestigeBuffs;
@@ -54,9 +52,8 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<float> _docileUnitMultiplier;
     private static ConfigEntry<float> _warEventMultiplier;
     private static ConfigEntry<float> _unitSpawnerMultiplier;
-    private static ConfigEntry<bool> _playerAlliances;
-    private static ConfigEntry<int> _maxAllianceSize;
-    private static ConfigEntry<bool> _clanBasedAlliances;
+    private static ConfigEntry<bool> _parties;
+    private static ConfigEntry<int> _maxPartySize;
     private static ConfigEntry<bool> _preventFriendlyFire;
     private static ConfigEntry<float> _expShareDistance;
     private static ConfigEntry<int> _changeClassItem;
@@ -129,6 +126,8 @@ internal class Plugin : BasePlugin
 
     private static ConfigEntry<bool> _softSynergies; // allow synergies (turns on class multipliers but doesn't restrict choices)
     private static ConfigEntry<bool> _hardSynergies; // enforce synergies (turns on class multipliers and restricts choices)
+    private static ConfigEntry<bool> _classSpellSchoolOnHitEffects;
+    private static ConfigEntry<float> _onHitProcChance;
     private static ConfigEntry<float> _statSyngergyMultiplier;
     private static ConfigEntry<string> _bloodKnightWeapon;
     private static ConfigEntry<string> _bloodKnightBlood;
@@ -151,8 +150,6 @@ internal class Plugin : BasePlugin
 
     // public getters, kinda verbose might just get rid of these
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
-    public static ConfigEntry<bool> RaidMonitor => _raidMonitor;
-    public static ConfigEntry<bool> DamageIntruders => _damageIntruders;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
     public static ConfigEntry<string> PrestigeBuffs => _prestigeBuffs;
@@ -174,10 +171,9 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
     public static ConfigEntry<float> GroupLevelingMultiplier => _groupLevelingMultiplier;
     public static ConfigEntry<float> LevelScalingMultiplier => _levelScalingMultiplier;
-    public static ConfigEntry<int> MaxAllianceSize => _maxAllianceSize;
+    public static ConfigEntry<int> MaxPartySize => _maxPartySize;
     public static ConfigEntry<float> ExpShareDistance => _expShareDistance;
-    public static ConfigEntry<bool> PlayerAlliances => _playerAlliances;
-    public static ConfigEntry<bool> ClanBasedAlliances => _clanBasedAlliances;
+    public static ConfigEntry<bool> Parties => _parties;
     public static ConfigEntry<bool> PreventFriendlyFire => _preventFriendlyFire;
     public static ConfigEntry<float> DocileUnitMultiplier => _docileUnitMultiplier;
     public static ConfigEntry<float> WarEventMultiplier => _warEventMultiplier;
@@ -245,6 +241,9 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> PlayerVampireDamageMultiplier => _playerVampireDamageMultiplier;
     public static ConfigEntry<bool> SoftSynergies => _softSynergies;
     public static ConfigEntry<bool> HardSynergies => _hardSynergies;
+
+    public static ConfigEntry<bool> ClassSpellSchoolOnHitEffects => _classSpellSchoolOnHitEffects;
+    public static ConfigEntry<float> OnHitProcChance => _onHitProcChance;
     public static ConfigEntry<float> StatSynergyMultiplier => _statSyngergyMultiplier;
     public static ConfigEntry<string> BloodKnightWeapon => _bloodKnightWeapon;
     public static ConfigEntry<string> BloodKnightBlood => _bloodKnightBlood;
@@ -316,8 +315,6 @@ internal class Plugin : BasePlugin
         }
 
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
-        _raidMonitor = InitConfigEntry("Config", "PreventRaidInterference", false, "Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed in territory for duration of the raid once breach by raiders is detected).");
-        _damageIntruders = InitConfigEntry("Config", "DamageIntruders", false, "Enable or disable damaging raid intruders if RaidMonitor is enabled.");
 
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
@@ -359,10 +356,9 @@ internal class Plugin : BasePlugin
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
 
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
-        _playerAlliances = InitConfigEntry("Config", "PlayerAlliances", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
-        _clanBasedAlliances = InitConfigEntry("Config", "ClanBasedAlliances", false, "If true, clan leaders will decide if the entire clan participates in alliances. If false, it will be up to the individual.");
-        _preventFriendlyFire = InitConfigEntry("Config", "PreventFriendlyFire", false, "True to prevent damage between players in alliances, false to allow. (damage only at the moment)");
-        _maxAllianceSize = InitConfigEntry("Config", "MaxAllianceSize", 5, "The maximum number of players that can share experience in a group.");
+        _parties = InitConfigEntry("Config", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
+        _preventFriendlyFire = InitConfigEntry("Config", "PreventFriendlyFire", false, "True to prevent damage between players in parties, false to allow. (damage only at the moment)");
+        _maxPartySize = InitConfigEntry("Config", "MaxPartySize", 5, "The maximum number of players that can share experience in a group.");
         _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is about 5 floor tile lengths.");
 
         _expertiseSystem = InitConfigEntry("Config", "ExpertiseSystem", false, "Enable or disable the expertise system.");
@@ -432,6 +428,8 @@ internal class Plugin : BasePlugin
 
         _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");
         _hardSynergies = InitConfigEntry("Config", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).");
+        _classSpellSchoolOnHitEffects = InitConfigEntry("Config", "ClassSpellSchoolOnHitEffects", false, "Enable or disable class spell school on hit effects.");
+        _onHitProcChance = InitConfigEntry("Config", "OnHitProcChance", 0.10f, "The chance for a class effect to proc on hit.");
         _statSyngergyMultiplier = InitConfigEntry("Config", "StatSynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap.");
         _bloodKnightWeapon = InitConfigEntry("Config", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies.");
         _bloodKnightBlood = InitConfigEntry("Config", "BloodKnightBlood", "0,2,3,11", "Blood Knight blood synergies.");
@@ -486,9 +484,9 @@ internal class Plugin : BasePlugin
     static void LoadAllData()
     {
         Core.DataStructures.LoadPlayerBools();
-        if (PlayerAlliances.Value)
+        if (Parties.Value)
         {
-            Core.DataStructures.LoadPlayerAlliances();
+            Core.DataStructures.LoadPlayerParties();
         }
         if (LevelingSystem.Value)
         {

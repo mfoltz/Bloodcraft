@@ -10,6 +10,7 @@ namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static GameDifficulty GameDifficulty => Core.ServerGameSettings.GameDifficulty;
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
     static readonly float VBloodDamageMultiplier = Plugin.VBloodDamageMultiplier.Value;
     static readonly float PlayerVampireDamageMultiplier = Plugin.PlayerVampireDamageMultiplier.Value;
@@ -142,7 +143,6 @@ internal static class FamiliarSummonSystem
         float healthScalingFactor = 1.0f + (level / (float)Plugin.MaxFamiliarLevel.Value) * 4.0f; // Calculate scaling factor for max health
 
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[familiar.Read<PrefabGUID>()];
-
         // get stats from original
         UnitStats unitStats = original.Read<UnitStats>();
 
@@ -155,11 +155,17 @@ internal static class FamiliarSummonSystem
         unitLevel.Level._Value = level;
         familiar.Write(unitLevel);
 
-        Health health = familiar.Read<Health>();
+        Health familiarHealth = familiar.Read<Health>();
         int baseHealth = 500;
-        health.MaxHealth._Value = baseHealth * healthScalingFactor;
-        health.Value = health.MaxHealth._Value;
-        familiar.Write(health);
+
+        if (GameDifficulty.Equals(GameDifficulty.Hard))
+        {
+            baseHealth = 750;
+        }
+
+        familiarHealth.MaxHealth._Value = baseHealth * healthScalingFactor;
+        familiarHealth.Value = familiarHealth.MaxHealth._Value;
+        familiar.Write(familiarHealth);
 
         if (VBloodDamageMultiplier != 1f)
         {
@@ -179,7 +185,7 @@ internal static class FamiliarSummonSystem
                 familiar.Write(damageCategoryStats);
             }
         }
-
+        
         if (familiar.Has<MaxMinionsPerPlayerElement>()) // make vbloods summon?
         {
             familiar.Remove<MaxMinionsPerPlayerElement>();
@@ -275,6 +281,10 @@ internal static class FamiliarSummonSystem
     {
         DynamicCollision collision = familiar.Read<DynamicCollision>();
         collision.AgainstPlayers.RadiusOverride = -1f;
+        collision.AgainstPlayers.HardnessThreshold._Value = 0f;
+        collision.AgainstPlayers.PushStrengthMax._Value = 0f;
+        collision.AgainstPlayers.PushStrengthMin._Value = 0f;
+        collision.AgainstPlayers.RadiusVariation = 0f;
         familiar.Write(collision);
     }
     static void ModifyDropTable(Entity familiar)

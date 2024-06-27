@@ -85,7 +85,8 @@ internal static class ProfessionSystem
         PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
         Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
         int level = GetLevel(SteamID, handler);
-        if (handler.GetProfessionName().Contains("Fishing"))
+        string name = handler.GetProfessionName();
+        if (name.Contains("Fishing"))
         {
             List<PrefabGUID> fishDrops = ProfessionUtilities.GetFishingAreaDrops(prefab);
             Random random = new();
@@ -112,8 +113,19 @@ internal static class ProfessionSystem
                         {
                             if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
                             {
-                                int bonus = level / 5;
+                                int bonus = 0;
+
+                                if (dropTableData.ItemGuid.LookupName().ToLower().Contains("plant"))
+                                {
+                                    bonus = level / 5;
+                                }
+                                else
+                                {
+                                    bonus = level / 2;
+                                }
+
                                 if (bonus.Equals(0)) return;
+
                                 if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                 {
                                     //string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.GetPrefabName());

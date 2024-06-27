@@ -1,3 +1,17 @@
+`0.9.14`
+- fixed bug with applying buffs when changing classes
+- corrected harvesting bonus for plants
+- added class spell school effects on hit, can enable with new config option named as such and accompanying % to proc config. 10% chance per hit to apply class spell school debuff by default, if debuff already present and this is proc'd will do the T08 magic source amulet buff instead (leech -> lesser blood rage for BloodKnight, for reference)
+- BloodKnight leech, DemonHunter static, Shadowblade ignite, VampireLord chill, ArcaneSorcerer weaken, DeathMage condemn and the corresponding T08 amulet effects if debuff is already proc'd on target and roll on hit is succesful (except for deathmage, made that an the undead guardian absorb buff since the amulet effect from that one is a spawn instead of a buff and didn't really fit in the code here)
+- note that these will not proc on other players for pvp
+
+`0.9.13`
+- movement speed correctly applies as a flat stat to all weapons now instead of multiplying the stat if it already existed on the weapon
+- RaidMonitor removed and made into standalone mod, alliances are now parties. options/commands have changed accordingly and will need to be configured again. same function of exp share/preventing damage.
+- familiar health scaling modified to be more viable in harder difficulty settings (health boost for brutal, will expand on in future updates)
+- extended familiar get level command to show stats as well (maxhealth, physical power, spell power)
+- buffed resource bonus for wood & minerals from professions
+
 `0.9.12`
 - removed .tbc
 - list prestige buffs command takes shorter text batches and should no longer get cutoff in chat log

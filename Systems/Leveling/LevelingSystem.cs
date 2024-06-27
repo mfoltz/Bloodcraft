@@ -10,7 +10,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.Systems.Experience;
 internal static class LevelingSystem
@@ -26,7 +25,7 @@ internal static class LevelingSystem
     static readonly float DocileUnitMultiplier = Plugin.DocileUnitMultiplier.Value;
     static readonly float WarEventMultiplier = Plugin.WarEventMultiplier.Value;
     static readonly float ExpShareDistance = Plugin.ExpShareDistance.Value;
-    static readonly bool PlayerAlliances = Plugin.PlayerAlliances.Value;
+    static readonly bool PlayerAlliances = Plugin.Parties.Value;
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
@@ -72,14 +71,25 @@ internal static class LevelingSystem
         { PlayerClasses.DeathMage, Plugin.DeathMageSpells.Value }
     };
 
-    public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassApplyBuffOnDamageDealtMap = new()
+    public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassOnHitDebuffMap = new() // tier 2
     {
-        { PlayerClasses.BloodKnight, new(-1246704569) }, // leech
-        { PlayerClasses.DemonHunter, new(-1576512627) }, // static
+        { PlayerClasses.BloodKnight, new(-1246704569) }, //leech
+        { PlayerClasses.DemonHunter, new(-1576512627) }, //static
         { PlayerClasses.VampireLord, new(27300215) }, // chill
         { PlayerClasses.ShadowBlade, new(348724578) }, // ignite
         { PlayerClasses.ArcaneSorcerer, new(1723455773) }, // weaken
-        { PlayerClasses.DeathMage, new(-1246704569) } // condemn
+        { PlayerClasses.DeathMage, new(-325758519) } // condemn
+    };
+
+    public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassOnHitEffectMap = new() // effect, then target (0 for self, 1 for enemy) tier 2
+    {
+        
+        { PlayerClasses.BloodKnight, new(2085766220) }, // leech
+        { PlayerClasses.DemonHunter, new(-737425100) }, // static
+        { PlayerClasses.VampireLord, new(620130895) }, // chill
+        { PlayerClasses.ShadowBlade, new(763939566) }, // ignite
+        { PlayerClasses.ArcaneSorcerer, new(1433921398) }, // weaken
+        { PlayerClasses.DeathMage, new(-2071441247) } // condemn find new one here, guardian block?
     };
 
     public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
@@ -124,7 +134,7 @@ internal static class LevelingSystem
 
         if (PlayerAlliances)
         {
-            foreach (var groupEntry in Core.DataStructures.PlayerAlliances)
+            foreach (var groupEntry in Core.DataStructures.PlayerParties)
             {
                 if (groupEntry.Value.Contains(killerUser.CharacterName.Value))
                 {
@@ -284,7 +294,6 @@ internal static class LevelingSystem
         }
         NotifyPlayer(entityManager, userEntity, SteamID, (int)gainedXP, leveledUp);
     }
-
     static bool CheckForLevelUp(ulong SteamID, int currentLevel)
     {
         int newLevel = ConvertXpToLevel(Core.DataStructures.PlayerExperience[SteamID].Value);
@@ -294,7 +303,6 @@ internal static class LevelingSystem
         }
         return false;
     }
-
     static void NotifyPlayer(EntityManager entityManager, Entity userEntity, ulong SteamID, int gainedXP, bool leveledUp)
     {
         User user = entityManager.GetComponentData<User>(userEntity);
@@ -302,38 +310,33 @@ internal static class LevelingSystem
         {
             int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
             GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
-            if (newLevel < MaxPlayerLevel) HandleServerReply(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+            if (newLevel < MaxPlayerLevel) LocalizationService.HandleServerReply(entityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
         }
         if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
         {
             int levelProgress = GetLevelProgress(SteamID);
-            HandleServerReply(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
+            LocalizationService.HandleServerReply(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)");
         }
     }
-
     public static int ConvertXpToLevel(float xp)
     {
         // Assuming a basic square root scaling for experience to level conversion
         return (int)(EXPConstant * Math.Sqrt(xp));
     }
-
     public static int ConvertLevelToXp(int level)
     {
         // Reversing the formula used in ConvertXpToLevel for consistency
         return (int)Math.Pow(level / EXPConstant, EXPPower);
     }
-
     static float GetXp(ulong SteamID)
     {
         if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
         return 0;
     }
-
     static int GetLevel(ulong SteamID)
     {
         return ConvertXpToLevel(GetXp(SteamID));
     }
-
     public static int GetLevelProgress(ulong SteamID)
     {
         float currentXP = GetXp(SteamID);
@@ -416,12 +419,10 @@ internal static class LevelingSystem
                 {
                     firstBuff.Remove<CreateGameplayEventsOnSpawn>();
                 }
-
                 if (firstBuff.Has<GameplayEventListeners>())
                 {
                     firstBuff.Remove<GameplayEventListeners>();
                 }
-
                 if (!firstBuff.Has<Buff_Persists_Through_Death>())
                 {
                     firstBuff.Add<Buff_Persists_Through_Death>();
@@ -436,7 +437,6 @@ internal static class LevelingSystem
             }
         }
     }
-
     static void HandleBloodBuff(Entity buff, int prestigeLevel = 0)
     {
         // so at every prestige need to take away and reapply buff with new values
@@ -834,13 +834,13 @@ internal static class LevelingSystem
         if (!InventoryUtilities.TryGetInventoryEntity(Core.EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
             Core.ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
         {
-            HandleReply(ctx, $"You do not have the required item to change classes ({item.GetPrefabName()}x{quantity})");
+            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes ({item.GetPrefabName()}x{quantity})");
             return false;
         }
 
         if (!Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
         {
-            HandleReply(ctx, $"Failed to remove the required item ({item.GetPrefabName()}x{quantity})");
+            LocalizationService.HandleReply(ctx, $"Failed to remove the required item ({item.GetPrefabName()}x{quantity})");
             return false;
         }
 
@@ -919,7 +919,7 @@ internal static class LevelingSystem
                         }
                         if (!firstBuff.Has<Buff_Persists_Through_Death>())
                         {
-                            firstBuff.Write(new Buff_Persists_Through_Death());
+                            firstBuff.Add<Buff_Persists_Through_Death>();
                         }
                         if (firstBuff.Has<LifeTime>())
                         {
@@ -969,6 +969,10 @@ internal static class LevelingSystem
         }
         return [];
     }
+    public static PlayerClasses GetPlayerClass(ulong steamId)
+    {
+        return Core.DataStructures.PlayerClasses[steamId].Keys.First();
+    }
     public static List<int> GetClassSpells(ulong steamId)
     {
         if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
@@ -1001,170 +1005,46 @@ internal static class LevelingSystem
         parsedClassType = default;
         return false; // Parsing failed
     }
-    public class AllianceUtilities
+    public class PartyUtilities
     {
-        public static bool CheckClanLeadership(ChatCommandContext ctx, Entity ownerClanEntity)
-        {
-            if (ownerClanEntity.Equals(Entity.Null))
-            {
-                return true;
-            }
-
-            Entity userEntity = ctx.Event.SenderUserEntity;
-            return userEntity.TryGetComponent(out ClanRole clanRole) && !clanRole.Value.Equals(ClanRoleEnum.Leader);
-        }
-
-        public static void HandleClanAlliance(ChatCommandContext ctx, ulong ownerId, string name)
-        {
-            if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
-            {
-                Core.DataStructures.PlayerAlliances[ownerId] = [];
-            }
-
-            HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId];
-            HashSet<string> members = [];
-            Entity clanEntity = PlayerService.GetClanByName(name);
-
-            if (clanEntity.Equals(Entity.Null))
-            {
-                HandleReply(ctx, "Clan/leader not found...");
-                return;
-            }
-
-            if (!TryAddClanMembers(ctx, ownerId, clanEntity, members))
-            {
-                return;
-            }
-
-            AddMembersToAlliance(ctx, alliance, members);
-        }
-        public static bool TryAddClanMembers(ChatCommandContext ctx, ulong ownerId, Entity clanEntity, HashSet<string> members)
-        {
-            var clanBuffer = clanEntity.ReadBuffer<ClanMemberStatus>();
-            int leaderIndex = GetClanLeaderIndex(clanBuffer);
-
-            if (leaderIndex == -1)
-            {
-                HandleReply(ctx, "Couldn't find clan leader to verify consent.");
-                return false;
-            }
-
-            var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
-            for (int i = 0; i < userBuffer.Length; i++)
-            {
-                var users = userBuffer[i];
-                User user = users.UserEntity.Read<User>();
-
-                if (i == leaderIndex && !IsClanLeaderInvitesEnabled(user))
-                {
-                    HandleReply(ctx, "Clan leader does not have alliances invites enabled.");
-                    return false;
-                }
-                members.Add(user.CharacterName.Value);
-            }
-            return true;
-        }
-        public static void RemoveClanFromAlliance(ChatCommandContext ctx, HashSet<string> alliance, string clanName)
-        {
-            List<string> removed = [];
-            Entity clanEntity = PlayerService.GetClanByName(clanName);
-
-            if (clanEntity.Equals(Entity.Null))
-            {
-                HandleReply(ctx, "Clan not found...");
-                return;
-            }
-
-            foreach (string memberName in alliance)
-            {
-                string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(memberName, StringComparison.OrdinalIgnoreCase));
-                if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerCache.TryGetValue(playerKey, out var player))
-                {
-                    Entity playerClanEntity = player.Read<User>().ClanEntity._Entity;
-                    ClanTeam clanTeam = playerClanEntity.Read<ClanTeam>();
-                    if (clanTeam.Name.Value.Equals(clanName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        alliance.Remove(memberName);
-                        removed.Add(memberName);
-                    }
-                }
-            }
-            string replyMessage = removed.Count > 0 ? string.Join(", ", removed.Select(member => $"<color=green>{member}</color>")) : "No members from clan found to remove.";
-            if (removed.Count > 0) replyMessage += " removed from alliance.";
-            HandleReply(ctx, replyMessage);
-            Core.DataStructures.SavePlayerAlliances();
-        }
-        public static int GetClanLeaderIndex(DynamicBuffer<ClanMemberStatus> clanBuffer)
-        {
-            for (int i = 0; i < clanBuffer.Length; i++)
-            {
-                if (clanBuffer[i].ClanRole.Equals(ClanRoleEnum.Leader))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        public static bool IsClanLeaderInvitesEnabled(User user)
-        {
-            return Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["Grouping"];
-        }
-        public static void AddMembersToAlliance(ChatCommandContext ctx, HashSet<string> alliance, HashSet<string> members)
-        {
-            if (members.Count > 0 && alliance.Count + members.Count < Plugin.MaxAllianceSize.Value)
-            {
-                string membersAdded = string.Join(", ", members.Select(member => $"<color=green>{member}</color>"));
-                alliance.UnionWith(members);
-                HandleReply(ctx, $"{membersAdded} were added to the alliance.");
-                Core.DataStructures.SavePlayerAlliances();
-            }
-            else if (members.Count == 0)
-            {
-                HandleReply(ctx, "Couldn't find any clan members to add.");
-            }
-            else
-            {
-                HandleReply(ctx, "Alliance would exceed max size by adding found clan members.");
-            }
-        }
-        public static void HandlePlayerAlliance(ChatCommandContext ctx, ulong ownerId, string name)
+        public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
         {
             string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerCache.TryGetValue(playerKey, out Entity player))
             {
                 if (player.Equals(Entity.Null))
                 {
-                    HandleReply(ctx, "Player not found...");
+                    LocalizationService.HandleReply(ctx, "Player not found...");
                     return;
                 }
 
                 User foundUser = player.Read<User>();
                 if (foundUser.PlatformId == ownerId)
                 {
-                    HandleReply(ctx, "Player not found...");
+                    LocalizationService.HandleReply(ctx, "Can't add yourself to your own party.");
                     return;
                 }
 
                 string playerName = foundUser.CharacterName.Value;
-                if (IsPlayerEligibleForAlliance(foundUser, ownerId, playerName))
+                if (IsPlayerEligibleForParty(foundUser, playerName))
                 {
-                    AddPlayerToAlliance(ctx, ownerId, playerName);
+                    AddPlayerToParty(ctx, ownerId, playerName);
                 }
                 else
                 {
-                    HandleReply(ctx, $"<color=green>{playerName}</color> does not have alliances enabled or is already in an alliance.");
+                    LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> does not have parties enabled or is already in a party.");
                 }
             }
             else
             {
-                HandleReply(ctx, "Player not found...");
+                LocalizationService.HandleReply(ctx, "Player not found...");
             }  
         }
-        public static bool IsPlayerEligibleForAlliance(User foundUser, ulong ownerId, string playerName)
+        public static bool IsPlayerEligibleForParty(User foundUser, string playerName)
         {
             if (Core.DataStructures.PlayerBools.TryGetValue(foundUser.PlatformId, out var bools) && bools["Grouping"])
             {
-                if (!Core.DataStructures.PlayerAlliances.ContainsKey(foundUser.PlatformId) && (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId) || !Core.DataStructures.PlayerAlliances[ownerId].Contains(playerName)))
+                if (!Core.DataStructures.PlayerParties.ContainsKey(foundUser.PlatformId) && !Core.DataStructures.PlayerParties.Values.Any(party => party.Equals(playerName)))
                 {
                     bools["Grouping"] = false;
                     Core.DataStructures.SavePlayerBools();
@@ -1173,79 +1053,54 @@ internal static class LevelingSystem
             }
             return false;
         }
-        public static void AddPlayerToAlliance(ChatCommandContext ctx, ulong ownerId, string playerName)
+        public static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
         {
-            if (!Core.DataStructures.PlayerAlliances.ContainsKey(ownerId))
+            if (!Core.DataStructures.PlayerParties.ContainsKey(ownerId))
             {
-                Core.DataStructures.PlayerAlliances[ownerId] = [];
+                Core.DataStructures.PlayerParties[ownerId] = [];
             }
 
             string ownerName = ctx.Event.User.CharacterName.Value;
-            HashSet<string> alliance = Core.DataStructures.PlayerAlliances[ownerId];
+            HashSet<string> party = Core.DataStructures.PlayerParties[ownerId];
 
-            if (alliance.Count < Plugin.MaxAllianceSize.Value && !alliance.Contains(playerName))
+            if (party.Count < Plugin.MaxPartySize.Value && !party.Contains(playerName))
             {
-                alliance.Add(playerName);
+                party.Add(playerName);
 
-                if (!alliance.Contains(ownerName)) // add owner to alliance for simplified processing elsewhere
+                if (!party.Contains(ownerName)) // add owner to alliance for simplified processing elsewhere
                 {
-                    alliance.Add(ownerName);
+                    party.Add(ownerName);
                 }
 
-                Core.DataStructures.SavePlayerAlliances();
-                HandleReply(ctx, $"<color=green>{playerName}</color> added to alliance.");
+                Core.DataStructures.SavePlayerParties();
+                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party.");
             }
             else
             {
-                HandleReply(ctx, $"Alliance is full or <color=green>{playerName}</color> is already in the alliance.");
+                LocalizationService.HandleReply(ctx, $"Party is full or <color=green>{playerName}</color> is already in the party.");
             }
         }
-        public static void RemovePlayerFromAlliance(ChatCommandContext ctx, HashSet<string> alliance, string playerName)
+        public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
         {
             string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && alliance.FirstOrDefault(n => n.Equals(playerKey)) != null)
+            if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
             {
-                alliance.Remove(playerKey);
-                Core.DataStructures.SavePlayerAlliances();
-                HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from alliance.");
+                party.Remove(playerKey);
+                Core.DataStructures.SavePlayerParties();
+                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from party.");
             }
             else
             {
-                HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in alliance.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party.");
             }
         }
-        public static void ListPersonalAllianceMembers(ChatCommandContext ctx, Dictionary<ulong, HashSet<string>> playerAlliances)
+        public static void ListPartyMembers(ChatCommandContext ctx, Dictionary<ulong, HashSet<string>> playerParties)
         {
             ulong ownerId = ctx.Event.User.PlatformId;
             string playerName = ctx.Event.User.CharacterName.Value;
-            HashSet<string> members = playerAlliances.ContainsKey(ownerId) ? playerAlliances[ownerId] : playerAlliances.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
-            string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
-            HandleReply(ctx, replyMessage);
-        }
-        public static void ListAllianceMembersByName(ChatCommandContext ctx, string name, Dictionary<ulong, HashSet<string>> playerAlliances)
-        {
-            string playerKey = PlayerService.playerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerCache.TryGetValue(playerKey, out var player))
-            {
-                ulong steamId = player.Read<User>().PlatformId;
-                string playerName = player.Read<User>().CharacterName.Value;
-                HashSet<string> members = playerAlliances.ContainsKey(steamId) ? playerAlliances[steamId] : playerAlliances.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
-                string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
-                HandleReply(ctx, replyMessage);
-            }
-            else
-            {
-                foreach (var groupEntry in playerAlliances)
-                {
-                    playerKey = groupEntry.Value.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-                    if (!string.IsNullOrEmpty(playerKey))
-                    {
-                        string replyMessage = groupEntry.Value.Count > 0 ? string.Join(", ", groupEntry.Value.Select(member => $"<color=green>{member}</color>")) : "No members in alliance.";
-                        HandleReply(ctx, replyMessage);
-                        return;
-                    }
-                }
-            }
+            HashSet<string> members = playerParties.ContainsKey(ownerId) ? playerParties[ownerId] : playerParties.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
+            string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in party.";
+            LocalizationService.HandleReply(ctx, replyMessage);
         }
     }
 }
