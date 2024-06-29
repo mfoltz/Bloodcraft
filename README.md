@@ -6,6 +6,11 @@ UPDATED (6/27)
 - [Commands](#commands)
 - [Configuration](#configuration)
 
+## Sponsor this project
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
+[![patreon](https://github.githubassets.com/assets/patreon-96b15b9db4b9.svg)](https://www.patreon.com/user?u=38097960)]
+
 ## Features
 
 - **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and optionally adds extra spell slots to unarmed. Expertise is gained per kill based on equipped weapon. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
