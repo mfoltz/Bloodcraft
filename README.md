@@ -211,10 +211,6 @@ UPDATED (6/27)
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: English)
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
-- **Raid Monitor**: `PreventRaidInterference` (bool, default: false)
-  Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed unpunished in territory for duration of the raid once breach by raiders is detected).
-- **Damage Intruders**: `DamageIntruders` (bool, default: false)
-  Enable or disable damaging raid intruders if RaidMonitor is enabled. They will be unable to heal for the duration of the debuff.
   
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
