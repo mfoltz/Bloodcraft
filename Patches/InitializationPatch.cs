@@ -1,38 +1,27 @@
 using HarmonyLib;
-using ProjectM;
-using ProjectM.Gameplay.WarEvents;
+using Unity.Scenes;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal static class InitializationPatch
 {
-    /*
-    [HarmonyPatch(typeof(SpawnTeamSystem_OnPersistenceLoad), nameof(SpawnTeamSystem_OnPersistenceLoad.OnUpdate))]
+    [HarmonyPatch(typeof(SceneSystem), nameof(SceneSystem.ShutdownStreamingSupport))]
     [HarmonyPostfix]
-    static void OnUpdatePostfix()
+    static void ShutdownStreamingSupportPostfix()
     {
-        Core.Log.LogInfo($"SpawnTeamSystem_OnPersistenceLoad.OnUpdate() Postfix...");
         try
         {
             Core.Initialize();
-            if (Core.hasInitialized) Core.Log.LogInfo($"|{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized|");
+            if (Core.hasInitialized)
+            {
+                Core.Log.LogInfo($"|{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized|");
+                Plugin.Harmony.Unpatch(typeof(SceneSystem).GetMethod("ShutdownStreamingSupport"), typeof(InitializationPatch).GetMethod("OneShot_AfterLoad_InitializationPatch"));
+            }
         }
-        catch (Exception e)
+        catch
         {
-            Core.Log.LogWarning($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] failed to initialize with {e} on try-catch (other mod initializations in SpawnTeamSystem_OnPersistenceLoad.OnUpdate() shouldn't be affected by this)");
-        }
-    }
-    */
-
-    [HarmonyPatch(typeof(WarEventRegistrySystem), nameof(WarEventRegistrySystem.RegisterWarEventEntities))]
-    [HarmonyPostfix]
-    static void Postfix()
-    {
-        if (!Core.hasInitialized) Core.Initialize();
-        if (Core.hasInitialized)
-        {
-            Core.Log.LogInfo($"|{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized|");
+            Core.Log.LogError($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] failed to initialize, exiting on try-catch...");
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Bloodcraft.Commands;
 internal static class BloodCommands
 {
     [Command(name: "getBloodLegacyProgress", shortHand: "gbl", adminOnly: false, usage: ".gbl [BloodType]", description: "Display your current blood legacy progress.")]
-    public static void GetLegacyCommand(ChatCommandContext ctx, string blood)
+    public static void GetLegacyCommand(ChatCommandContext ctx, string blood = "")
     {
         if (!Plugin.BloodSystem.Value)
         {
@@ -21,21 +21,33 @@ internal static class BloodCommands
             return;
         }
 
-        if (!Enum.TryParse<BloodSystem.BloodType>(blood, true, out var bloodType))
+        Entity character = ctx.Event.SenderCharacterEntity;
+        Blood playerBlood = character.Read<Blood>();
+        BloodSystem.BloodType bloodType;
+
+        if (string.IsNullOrEmpty(blood))
+        {
+            bloodType = BloodSystem.GetBloodTypeFromPrefab(playerBlood.BloodType);
+        }
+        else if (!Enum.TryParse<BloodSystem.BloodType>(blood, true, out bloodType))
         {
             LocalizationService.HandleReply(ctx, "Invalid blood type, use .lbl to see options.");
             return;
         }
 
         ulong steamID = ctx.Event.User.PlatformId;
+
         IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+
         if (bloodHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid blood type.");
             return;
         }
+
         var data = bloodHandler.GetLegacyData(steamID);
         int progress = (int)(data.Value - BloodSystem.ConvertLevelToXp(data.Key));
+
         if (data.Key > 0)
         {
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
@@ -58,7 +70,7 @@ internal static class BloodCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "No bonuses from current legacy.");
+                LocalizationService.HandleReply(ctx, "No bonuses from legacy.");
             }
         }
         else
@@ -131,6 +143,7 @@ internal static class BloodCommands
             LocalizationService.HandleReply(ctx, $"You have already chosen {Plugin.LegacyStatChoices.Value} stats for this legacy, the stat has already been chosen for this legacy, or the stat is not allowed for your class.");
         }
     }
+
     [Command(name: "resetBloodStats", shortHand: "rbs", adminOnly: false, usage: ".rbs", description: "Reset stats for current blood.")]
     public static void ResetBloodStats(ChatCommandContext ctx)
     {
@@ -173,6 +186,7 @@ internal static class BloodCommands
         PlayerBloodUtilities.ResetStats(steamID, bloodType);
         LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
     }
+
     [Command(name: "listBloodStats", shortHand: "lbs", adminOnly: false, usage: ".lbs", description: "Lists blood stats available.")]
     public static void ListBloodStatsAvailable(ChatCommandContext ctx)
     {

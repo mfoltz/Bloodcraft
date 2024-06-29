@@ -11,8 +11,9 @@ namespace Bloodcraft;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 internal class Plugin : BasePlugin
 {
-    private Harmony _harmony;
+    Harmony _harmony;
     internal static Plugin Instance { get; private set; }
+    public static Harmony Harmony => Instance._harmony;
     public static ManualLogSource LogInstance => Instance.Log;
 
     public static readonly string ConfigFiles = Path.Combine(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME); // Bloodcraft folder
@@ -488,6 +489,10 @@ internal class Plugin : BasePlugin
         {
             Core.DataStructures.LoadPlayerParties();
         }
+        if (SoftSynergies.Value || HardSynergies.Value)
+        {
+            Core.DataStructures.LoadPlayerClasses();
+        }
         if (LevelingSystem.Value)
         {
             foreach (var loadFunction in loadLeveling)
@@ -534,7 +539,6 @@ internal class Plugin : BasePlugin
     [
         Core.DataStructures.LoadPlayerExperience,
         Core.DataStructures.LoadPlayerPrestiges,
-        Core.DataStructures.LoadPlayerClasses
     ];
 
     static readonly Action[] loadExpertises =

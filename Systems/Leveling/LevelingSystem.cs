@@ -879,7 +879,18 @@ internal static class LevelingSystem
         if (buffs.Count == 0) return;
         int levelStep = MaxPlayerLevel / buffs.Count;
 
-        int playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
+        int playerLevel = 0;
+
+        if (Plugin.LevelingSystem.Value)
+        {
+            playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
+        }
+        else
+        {
+            Equipment equipment = character.Read<Equipment>();
+            playerLevel = (int)equipment.GetFullLevel();
+        }
+
         int numBuffsToApply = playerLevel / levelStep;
 
         if (numBuffsToApply > 0 && numBuffsToApply <= buffs.Count)

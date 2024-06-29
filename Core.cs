@@ -8,17 +8,14 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
-using Stunlock.Network;
 using System.Collections;
 using System.Text.Json;
 using Unity.Entities;
-using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
 
@@ -39,7 +36,6 @@ internal static class Core
     public static FamiliarService FamiliarService { get; internal set; }
     public static LocalizationService Localization { get; } = new();
     public static PlayerService Players { get; } = new();
-
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}

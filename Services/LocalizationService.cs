@@ -83,7 +83,7 @@ internal class LocalizationService
         //{"Thai", "Bloodcraft.Localization.ThaiStrings.json"},
         {"Turkish", "Bloodcraft.Localization.TurkishStrings.json"},
         //{"Vietnamese", "Bloodcraft.Localization.VietnameseStrings.json"},
-        {"Brazilian", "Bloodcraft.Localization.BrazilianStrings.json"}
+        //{"Brazilian", "Bloodcraft.Localization.BrazilianStrings.json"}
     };
     public LocalizationService()
     {

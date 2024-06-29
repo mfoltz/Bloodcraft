@@ -182,6 +182,10 @@ internal static class StatChangeSystemPatches
                         {
                             //Core.Log.LogInfo($"Tier 1 on hit effect proc'd...");
                             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                            if (ServerGameManager.TryGetBuff(dealDamageEvent.Target, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
+                            {
+                                buff.Write(new EntityOwner { Owner = entityOwner.Owner });
+                            }
                         }
                     }
                 }

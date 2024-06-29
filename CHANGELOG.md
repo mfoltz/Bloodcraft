@@ -1,3 +1,9 @@
+`0.9.15`
+- changed initialization patch, single player didn't like it (credit to Odjit for the hook~)
+- class onHit debuff effects should behave more consistently now (chain lightning from static won't hit the player, skeleton spawned from condemn-afflicted kills now allied, etc)
+- classBuffs useable via .scb if gearscore is sufficient and leveling is turned off
+- .gbl can be used without entering a blood type and will default to equipped blood type
+
 `0.9.14`
 - fixed bug with applying buffs when changing classes
 - corrected harvesting bonus for plants
