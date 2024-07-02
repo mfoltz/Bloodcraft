@@ -571,7 +571,7 @@ internal static class LevelingCommands
             PrestigeSystem.ApplyOtherPrestigeEffects(ctx, playerId, parsedPrestigeType, level);
         }
 
-        LocalizationService.HandleReply(ctx, $"Player {playerId} has been set to level {level} in {parsedPrestigeType} prestige.");
+        LocalizationService.HandleReply(ctx, $"Player <color=green>{playerId}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
     }
 
     [Command(name: "listPrestigeBuffs", shortHand: "lpb", adminOnly: false, usage: ".lpb", description: "Lists prestige buff names.")]

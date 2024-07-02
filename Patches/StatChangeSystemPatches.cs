@@ -101,11 +101,11 @@ internal static class StatChangeSystemPatches
 
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
 
-                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue;
+                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell && dealDamageEvent.MainType != MainDamageType.Holy) continue;
 
                 if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
                 {
-                    if (Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
+                    if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
                     {
                         Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerParties;
                         string targetName = target.Name.Value;
@@ -139,12 +139,12 @@ internal static class StatChangeSystemPatches
                         }
                         else if (Parties && PreventFriendlyFire) // check for parties in PvP 
                         {
-                            Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerParties;
+                            Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
                             string targetName = target.Name.Value;
                             string ownerName = follower.Followed._Value.Read<PlayerCharacter>().Name.Value;
 
                             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
-                            if (familiar != Entity.Null && playerAlliances.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
+                            if (familiar != Entity.Null && playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event Parties & PreventFriendlyFire...");
                                 Core.EntityManager.DestroyEntity(entity);
@@ -152,7 +152,7 @@ internal static class StatChangeSystemPatches
                         }
                     }
                 }
-                else if (OnHitEffects && Classes && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
+                else if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && OnHitEffects && Classes && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
                 {
                     ulong steamId = source.UserEntity.Read<User>().PlatformId;
                     if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classData) && classData.Keys.Count == 0) continue;

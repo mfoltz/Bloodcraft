@@ -9,6 +9,8 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using ProjectM.Shared;
+using ProjectM.CastleBuilding;
 
 namespace Bloodcraft.Patches;
 
@@ -221,6 +223,32 @@ internal static class FamiliarPatches
                             }
                         }
                     }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo(ex);
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    [HarmonyPatch(typeof(ImprisonedBuffSystem), nameof(ImprisonedBuffSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(ImprisonedBuffSystem __instance) // get EntityOwner (familiar), apply ModifyTeamBuff
+    {
+        NativeArray<Entity> entities = __instance.__query_1231815368_0.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (!Core.hasInitialized) continue;
+                if (entity.TryGetComponent(out Buff buff) && !buff.Target.Has<CharmSource>()) // if no charm source, destroy
+                {
+                    //Core.Log.LogInfo("Destroying imprisoned familiar...");
+                    DestroyUtility.CreateDestroyEvent(Core.EntityManager, buff.Target, DestroyReason.Default, DestroyDebugReason.None);
                 }
             }
         }

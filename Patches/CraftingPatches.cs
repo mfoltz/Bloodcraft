@@ -1,6 +1,7 @@
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -120,6 +121,120 @@ internal static class CraftingPatches
         finally
         {
             entities.Dispose();
+        }
+    }
+
+    [HarmonyPatch(typeof(ForgeSystem_Events), nameof(ForgeSystem_Events.OnUpdate))]
+    static class ForgeSystem_EventsPatch
+    {
+        public static void Prefix(ForgeSystem_Events __instance)
+        {
+            var repairEntities = __instance._RepairItemEventQuery.ToEntityArray(Allocator.Temp);
+            //var cancelRepairEntities = __instance._CancelRepairEventQuery.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in repairEntities)
+                {
+                    var fromCharacter = entity.Read<FromCharacter>();
+                    ulong steamId = fromCharacter.User.Read<User>().PlatformId;
+                    Entity station = fromCharacter.Character.Read<Interactor>().Target; // station entity
+
+                    if (!station.Has<Forge_Shared>()) continue;
+
+                    Forge_Shared forge_Shared = station.Read<Forge_Shared>();
+                    Entity itemEntity = forge_Shared.ItemEntity._Entity;
+                    PrefabGUID itemPrefab = new(0);
+                    if (itemEntity.Has<ShatteredItem>())
+                    {
+                        itemPrefab = itemEntity.Read<ShatteredItem>().OutputItem;
+                    }
+                    else if (itemEntity.Has<UpgradeableLegendaryItem>())
+                    {
+                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().NextTier;
+                        var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
+                        itemPrefab = buffer[tier].TierPrefab;
+                    }
+
+                    if (itemPrefab.GuidHash == 0) continue;
+
+                    // Ensure the player’s job list exists
+                    if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
+                    {
+                        playerJobs = [];
+                        Core.DataStructures.PlayerCraftingJobs.Add(steamId, playerJobs);
+                    }
+
+                    // Check if the job exists and update or add
+                    var jobExists = false;
+                    for (int i = 0; i < playerJobs.Count; i++)
+                    {
+                        if (playerJobs[i].Item1.Equals(itemPrefab))
+                        {
+                            //Core.Log.LogInfo($"Adding Craft to existing: {itemPrefab.GetPrefabName()}");
+                            playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 + 1);
+                            jobExists = true;
+                            break;
+                        }
+                    }
+                    if (!jobExists)
+                    {
+                        //Core.Log.LogInfo($"Adding Craft: {itemPrefab.GetPrefabName()}");
+                        playerJobs.Add((itemPrefab, 1));
+                    }
+
+                }
+            }
+            finally
+            {
+                repairEntities.Dispose();
+            }
+            repairEntities = __instance._CancelRepairEventQuery.ToEntityArray(Allocator.Temp);
+            try
+            {
+                foreach (Entity entity in repairEntities)
+                {
+                    var fromCharacter = entity.Read<FromCharacter>();
+                    ulong steamId = fromCharacter.User.Read<User>().PlatformId;
+                    Entity station = fromCharacter.Character.Read<Interactor>().Target; // station entity
+
+                    if (!station.Has<Forge_Shared>()) continue;
+
+                    Forge_Shared forge_Shared = station.Read<Forge_Shared>();
+                    Entity itemEntity = forge_Shared.ItemEntity._Entity;
+                    PrefabGUID itemPrefab = new(0);
+                    if (itemEntity.Has<ShatteredItem>())
+                    {
+                        itemPrefab = itemEntity.Read<ShatteredItem>().OutputItem;
+                    }
+                    else if (itemEntity.Has<UpgradeableLegendaryItem>())
+                    {
+                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().NextTier;
+                        var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
+                        itemPrefab = buffer[tier].TierPrefab;
+                    }
+
+                    if (itemPrefab.GuidHash == 0) continue;
+
+                    if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
+                    {
+                        // if crafting job is active, remove
+                        for (int i = 0; i < playerJobs.Count; i++)
+                        {
+                            if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
+                            {
+                                //Core.Log.LogInfo($"Removing Craft: {itemPrefab.GetPrefabName()}");
+                                playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
+                                if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                repairEntities.Dispose();
+            }
         }
     }
 }

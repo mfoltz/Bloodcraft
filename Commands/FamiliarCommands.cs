@@ -9,6 +9,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
 using Unity.Collections;
+using Bloodcraft.Systems.Expertise;
 
 namespace Bloodcraft.Commands;
 internal static class FamiliarCommands
@@ -426,7 +427,19 @@ internal static class FamiliarCommands
 
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
 
-            LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            int prestigeLevel = 0;
+            FamiliarPrestigeData prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
+            if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
+            {
+                prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
+                FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
+            }
+            else
+            {
+                prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key;
+            }
+
+            LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>) ");
             if (familiar != Entity.Null)
             {
                 // read stats and such here
@@ -436,7 +449,22 @@ internal static class FamiliarCommands
                 float physicalPower = unitStats.PhysicalPower._Value;
                 float spellPower = unitStats.SpellPower._Value;
                 float maxHealth = health.MaxHealth._Value;
-                LocalizationService.HandleReply(ctx, $"<color=#00FFFF>MaxHealth</color>: <color=white>{(int)maxHealth}</color>, <color=#00FFFF>PhysicalPower</color>: <color=white>{(int)physicalPower}</color>, <color=#00FFFF>SpellPower</color>: <color=white>{(int)spellPower}</color>");
+                float physCritChance = unitStats.PhysicalCriticalStrikeChance._Value;
+                string physCrit = (physCritChance * 100).ToString("F0") + "%";
+                float spellCritChance = unitStats.SpellCriticalStrikeChance._Value;
+                string spellCrit = (spellCritChance * 100).ToString("F0") + "%";
+                float healingReceived = unitStats.HealingReceived._Value;
+                string healing = (healingReceived * 100).ToString("F0") + "%";
+                float physResist = unitStats.PhysicalResistance._Value;
+                string physRes = (physResist * 100).ToString("F0") + "%";
+                float spellResist = unitStats.SpellResistance._Value;
+                string spellRes = (spellResist * 100).ToString("F0") + "%";
+                float ccReduction = unitStats.CCReduction._Value;
+                string ccRed = (ccReduction * 100).ToString("F0") + "%";
+                float shieldAbsorb = unitStats.ShieldAbsorbModifier._Value;
+                string shieldAbs = (shieldAbsorb * 100).ToString("F0") + "%";
+                LocalizationService.HandleReply(ctx, $"<color=#00FFFF>MaxHealth</color>: <color=white>{(int)maxHealth}</color>, <color=#00FFFF>PhysicalPower</color>: <color=white>{(int)physicalPower}</color>, <color=#00FFFF>SpellPower</color>: <color=white>{(int)spellPower}</color>, <color=#00FFFF>PhysCritChance</color>: <color=white>{physCrit}</color>, <color=#00FFFF>SpellCritChance</color>: <color=white>{spellCrit}</color>");
+                LocalizationService.HandleReply(ctx, $"<color=#00FFFF>HealingReceived</color>: <color=white>{healing}</color>, <color=#00FFFF>PhysResist</color>: <color=white>{physRes}</color>, <color=#00FFFF>SpellResist</color>: <color=white>{spellRes}</color>, <color=#00FFFF>CCReduction</color>: <color=white>{ccRed}</color>, <color=#00FFFF>ShieldAbsorb</color>: <color=white>{shieldAbs}</color>");
             }
         }
         else
@@ -467,7 +495,7 @@ internal static class FamiliarCommands
             Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
             KeyValuePair<int, float> newXP = new(level, FamiliarLevelingSystem.ConvertLevelToXp(level));
             FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
-            xpData.FamiliarExperience[data.Item2] = newXP;
+            xpData.FamiliarExperience[data.FamKey] = newXP;
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
             FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, level);
             LocalizationService.HandleReply(ctx, $"Your familiar has been set to level <color=white>{level}</color>.");
@@ -478,6 +506,100 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "Couldn't find active familiar to set level for.");
         }
     }
+    
+    [Command(name: "prestigeFamiliar", shortHand: "prfam", adminOnly: false, usage: ".prfam [BonusStat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
+    public static void PrestigeFamiliarCommand(ChatCommandContext ctx, string bonusStat = "")
+    {
+        if (!Plugin.FamiliarSystem.Value)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+        
+        if (!Plugin.FamiliarPrestige.Value)
+        {
+            LocalizationService.HandleReply(ctx, "Familiar prestige is not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.FamKey.Equals(0))
+        {
+            FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(ctx.Event.User.PlatformId);
+            if (xpData.FamiliarExperience[data.FamKey].Key >= Plugin.MaxFamiliarLevel.Value)
+            {
+                FamiliarPrestigeData prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
+                if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
+                {
+                    prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
+                    FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
+                }
+
+                prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
+                List<FamiliarSummonSystem.FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
+                
+                if (stats.Count < FamiliarSummonSystem.familiarStatCaps.Count) // if less than max stats, parse entry and add if set doesnt already contain
+                {
+                    if (!FamiliarSummonSystem.TryParseFamiliarStat(bonusStat, out var stat))
+                    {
+                        var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarSummonSystem.FamiliarStatType))
+                        .Cast<FamiliarSummonSystem.FamiliarStatType>()
+                        .Select(stat =>
+                            $"<color=#00FFFF>{stat}</color>: <color=white>{FamiliarSummonSystem.familiarStatCaps[stat]}</color>")
+                        .ToArray();
+
+                        int halfLength = familiarStatsWithCaps.Length / 2;
+
+                        string familiarStatsLine1 = string.Join(", ", familiarStatsWithCaps.Take(halfLength));
+                        string familiarStatsLine2 = string.Join(", ", familiarStatsWithCaps.Skip(halfLength));
+
+                        LocalizationService.HandleReply(ctx, "Invalid stat, please choose from the following:");
+                        LocalizationService.HandleReply(ctx, $"Available familiar stats (1/2): {familiarStatsLine1}");
+                        LocalizationService.HandleReply(ctx, $"Available familiar stats (2/2): {familiarStatsLine2}");
+                        return;
+                    }
+                    else if (!stats.Contains(stat))
+                    {
+                        stats.Add(stat);
+                    }
+                    else
+                    {
+                        LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{stat}</color> as a bonus stat, pick another.");
+                        return;
+                    }
+                }
+                else if (stats.Count >= FamiliarSummonSystem.familiarStatCaps.Count && !string.IsNullOrEmpty(bonusStat))
+                {
+                    LocalizationService.HandleReply(ctx, "Familiar already has max bonus stats, try again without entering a stat.");
+                    return;
+                }
+
+                KeyValuePair<int, float> newXP = new(1, FamiliarLevelingSystem.ConvertLevelToXp(1)); // reset level to 1
+                xpData.FamiliarExperience[data.FamKey] = newXP;
+                FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
+                int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
+                prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
+                FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
+
+                Entity player = ctx.Event.SenderCharacterEntity;
+                Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, newXP.Key);
+                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
+
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"Familiar must be at max level (<color=white>{Plugin.MaxFamiliarLevel.Value}</color>) to prestige.");
+            }
+
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar to check for prestige.");
+        }
+    }
+
 
     [Command(name: "resetFamiliars", shortHand: "resetfams", adminOnly: false, usage: ".resetfams", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
     public static void ResetFamiliars(ChatCommandContext ctx)

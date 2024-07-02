@@ -1,5 +1,6 @@
 ﻿using ProjectM;
 using ProjectM.Network;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Core;
@@ -119,11 +120,19 @@ internal static class FamiliarLevelingSystem
                 Character = familiarEntity,
                 User = userEntity,
             };
+            int famKey = familiarEntity.Read<PrefabGUID>().GuidHash;
             debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             UnitLevel unitLevel = familiarEntity.Read<UnitLevel>();
             unitLevel.Level._Value = newLevel;
             familiarEntity.Write(unitLevel);
-            FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel);
+
+            int prestigeLevel = 0;
+            if (Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamID).FamiliarPrestige.TryGetValue(familiarEntity.Read<PrefabGUID>().GuidHash, out var prestigeData) && prestigeData.Key > 0)
+            {
+                prestigeLevel = prestigeData.Key;
+            }
+
+            FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel, steamID, famKey);
             if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiarEntity, newLevel);
         }
     }   

@@ -4,9 +4,11 @@ using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Systems.Professions;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
@@ -65,6 +67,8 @@ internal static class Core
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = LevelingSystem.GetSpellPrefabs();
         ServerGameSettings = ServerGameSettingsSystem._Settings;
         if (Plugin.FamiliarSystem.Value) FamiliarService = new();
+        if (Plugin.ExtraRecipes.Value) RecipeSystem.HandleRecipes();
+
         // update system group after injecting system?
         //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
         //JobsUtility.JobScheduleParameters
@@ -160,12 +164,19 @@ internal static class Core
         private static Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = [];
         private static Dictionary<ulong, string> familiarSet = [];
         private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
+        private static Dictionary<ulong, FamiliarPrestigeData> familiarPrestiges = [];
 
 
         [Serializable]
         public class FamiliarExperienceData
         {
             public Dictionary<int, KeyValuePair<int, float>> FamiliarExperience { get; set; } = [];
+        }
+
+        [Serializable]
+        public class FamiliarPrestigeData
+        {
+            public Dictionary<int, KeyValuePair<int, List<FamiliarSummonSystem.FamiliarStatType>>> FamiliarPrestige { get; set; } = [];
         }
 
         [Serializable]
@@ -193,6 +204,11 @@ internal static class Core
         {
             get => familiarExperience;
             set => familiarExperience = value;
+        }
+        public static Dictionary<ulong, FamiliarPrestigeData> FamiliarPrestiges
+        {
+            get => familiarPrestiges;
+            set => familiarPrestiges = value;
         }
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerExperience
         {
@@ -721,6 +737,28 @@ internal static class Core
 
             string jsonString = File.ReadAllText(filePath);
             return System.Text.Json.JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
+        }
+    }
+    public static class FamiliarPrestigeManager
+    {
+        private static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_prestige.json");
+
+        public static void SaveFamiliarPrestige(ulong playerId, FamiliarPrestigeData data)
+        {
+            string filePath = GetFilePath(playerId);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, options);
+            File.WriteAllText(filePath, jsonString);
+        }
+
+        public static FamiliarPrestigeData LoadFamiliarPrestige(ulong playerId)
+        {
+            string filePath = GetFilePath(playerId);
+            if (!File.Exists(filePath))
+                return new FamiliarPrestigeData();
+
+            string jsonString = File.ReadAllText(filePath);
+            return System.Text.Json.JsonSerializer.Deserialize<FamiliarPrestigeData>(jsonString);
         }
     }
     public static class FamiliarUnlocksManager

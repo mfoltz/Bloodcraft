@@ -1,10 +1,15 @@
 ## Table of Contents
 
-UPDATED (6/27)
+UPDATED (7/1)
+(haven't figured out how to make a fancy button for patreon yet so putting that one here for now: patreon.com/zfolmt)
 
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
+
+## Sponsor this project
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
 
 ## Features
 
@@ -195,6 +200,9 @@ UPDATED (6/27)
 - `.getFamiliarLevel`
   - Display current familiar leveling progress.
   - Shortcut: *.get fl*
+- `.prestigeFamiliar [StatType]`
+  - Prestiges familiar if at max level and valid stat is chosen.
+  - Shortcut: *.prfam [StatType]*
 - `.setFamiliarLevel [Level]` 🔒
   - Set current familiar level. Rebind to force updating stats if that doesn't happen when this is used.
   - Shortcut: *.sfl [Level]*
@@ -387,6 +395,8 @@ UPDATED (6/27)
   Maximum level in professions.
 - **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)  
   Multiplier for proficiency gained per action.
+- **Extra Recipes**: `ExtraRecipes` (bool, default: false)  
+  Adds copper wires to fabricator, vampiric dust to advanced grinder, and silver ingots to basic furnace.
 
 ### Familiar System
 - **Enable Familiar System**: `FamiliarSystem` (bool, default: false)  
@@ -399,6 +409,12 @@ UPDATED (6/27)
   The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)
 - **Max Familiar Level**: `MaxFamiliarLevel` (int, default: 90)  
   Maximum level familiars can reach.
+- **Familiar Prestiges**: `FamiliarPrestiges` (bool, default: false)  
+  Enables prestiging for familiars.
+- **Max Familiar Prestiges**: `MaxFamiliarPrestiges` (int, default: 10)  
+  Maximum prestiges for familiars.
+- **Familiar Prestige Stat Multiplier**: `FamiliarPrestigeStatMultiplier` (float, default: 0.10)  
+  Factor by which stats are increased in for prestiged familiars.
 - **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 5)  
   Multiplier for experience gained from units.
 - **VBlood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)  

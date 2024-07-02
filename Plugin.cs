@@ -111,10 +111,14 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<bool> _professionSystem;
     private static ConfigEntry<int> _maxProfessionLevel;
     private static ConfigEntry<float> _professionMultiplier;
+    private static ConfigEntry<bool> _extraRecipes;
 
     private static ConfigEntry<bool> _familiarSystem;
     private static ConfigEntry<bool> _familiarCombat;
     private static ConfigEntry<int> _maxFamiliarLevel;
+    private static ConfigEntry<bool> _familiarPrestige;
+    private static ConfigEntry<int> _maxFamiliarPrestiges;
+    private static ConfigEntry<float> _familiarPrestigeStatMultiplier;
     private static ConfigEntry<bool> _allowVBloods;
     private static ConfigEntry<string> _bannedUnits;
     private static ConfigEntry<string> _bannedTypes;
@@ -228,8 +232,13 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<bool> ProfessionSystem => _professionSystem;
     public static ConfigEntry<int> MaxProfessionLevel => _maxProfessionLevel;
     public static ConfigEntry<float> ProfessionMultiplier => _professionMultiplier;
+
+    public static ConfigEntry<bool> ExtraRecipes => _extraRecipes;
     public static ConfigEntry<bool> FamiliarSystem => _familiarSystem;
     public static ConfigEntry<bool> FamiliarCombat => _familiarCombat;
+    public static ConfigEntry<bool> FamiliarPrestige => _familiarPrestige;
+    public static ConfigEntry<int> MaxFamiliarPrestiges => _maxFamiliarPrestiges;
+    public static ConfigEntry<float> FamiliarPrestigeStatMultiplier => _familiarPrestigeStatMultiplier;
     public static ConfigEntry<int> MaxFamiliarLevel => _maxFamiliarLevel;
     public static ConfigEntry<bool> AllowVBloods => _allowVBloods;
     public static ConfigEntry<string> BannedUnits => _bannedUnits;
@@ -242,7 +251,6 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> PlayerVampireDamageMultiplier => _playerVampireDamageMultiplier;
     public static ConfigEntry<bool> SoftSynergies => _softSynergies;
     public static ConfigEntry<bool> HardSynergies => _hardSynergies;
-
     public static ConfigEntry<bool> ClassSpellSchoolOnHitEffects => _classSpellSchoolOnHitEffects;
     public static ConfigEntry<float> OnHitProcChance => _onHitProcChance;
     public static ConfigEntry<float> StatSynergyMultiplier => _statSyngergyMultiplier;
@@ -413,9 +421,13 @@ internal class Plugin : BasePlugin
         _professionSystem = InitConfigEntry("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
         _maxProfessionLevel = InitConfigEntry("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
         _professionMultiplier = InitConfigEntry("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
+        _extraRecipes = InitConfigEntry("Config", "ExtraRecipes", false, "Enable or disable extra recipes.");
 
         _familiarSystem = InitConfigEntry("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
         _familiarCombat = InitConfigEntry("Config", "FamiliarCombat", true, "Enable or disable combat for familiars.");
+        _familiarPrestige = InitConfigEntry("Config", "FamiliarPrestige", false, "Enable or disable the prestige system for familiars.");
+        _maxFamiliarPrestiges = InitConfigEntry("Config", "MaxFamiliarPrestiges", 10, "The maximum number of prestiges a familiar can reach.");
+        _familiarPrestigeStatMultiplier = InitConfigEntry("Config", "FamiliarPrestigeStatMultiplier", 0.10f, "The multiplier for stats gained from familiar prestiges.");
         _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
         _allowVBloods = InitConfigEntry("Config", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).");
         _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.");

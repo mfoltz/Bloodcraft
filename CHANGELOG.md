@@ -1,3 +1,10 @@
+`0.9.16`
+- familiar prestiging added (familiar prestiges, max familiar prestiges, familiar prestige stat multiplier added to config), choose extra stat per prestige (use .prfam and it will show stats if none have been entered and familiar is at max level)
+- familiars that use holy damage no longer hurt players when relevant
+- imprisoning a familiar will destroy the familiar
+- added extra recipe toggle under professions; technically no relation to professions yet and no uses atm unless configured as costs in BloodyMerchants or something similar
+- ancestral forge crafts now receive extra durability from blacksmithing
+
 `0.9.15`
 - changed initialization patch, single player didn't like it (credit to Odjit for the hook~)
 - class onHit debuff effects should behave more consistently now (chain lightning from static won't hit the player, skeleton spawned from condemn-afflicted kills now allied, etc)

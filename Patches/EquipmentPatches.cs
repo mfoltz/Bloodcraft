@@ -332,8 +332,18 @@ internal static class EquipmentPatches
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
                 if (Professions && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<CastleWorkstation>())
                 {
+                    //Core.Log.LogInfo(inventoryChangedEvent.Item.LookupName());
                     Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
                     // get ulong of online clanmates
+                    PrefabGUID itemPrefab = inventoryChangedEvent.Item;
+
+                    if (inventoryChangedEvent.ItemEntity.Has<UpgradeableLegendaryItem>())
+                    {
+                        int tier = inventoryChangedEvent.ItemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                        itemPrefab = inventoryChangedEvent.ItemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
+                        Core.Log.LogInfo(itemPrefab.LookupName());
+                    }
+
                     ulong steamId = userEntity.Read<User>().PlatformId;
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
@@ -341,7 +351,7 @@ internal static class EquipmentPatches
                         bool jobExists = false;
                         for (int i = 0; i < playerJobs.Count; i++)
                         {
-                            if (playerJobs[i].Item1 == inventoryChangedEvent.Item && playerJobs[i].Item2 > 0)
+                            if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
                             {
                                 playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
                                 if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
@@ -351,7 +361,7 @@ internal static class EquipmentPatches
                         }
                         if (!jobExists) continue;
                         float ProfessionValue = 50f;
-                        ProfessionValue *= ProfessionUtilities.GetTierMultiplier(inventoryChangedEvent.Item);
+                        ProfessionValue *= ProfessionUtilities.GetTierMultiplier(itemPrefab);
                         if (handler != null)
                         {
                             ProfessionSystem.SetProfession(userEntity.Read<User>(), steamId, ProfessionValue, handler);
