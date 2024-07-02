@@ -215,10 +215,6 @@ UPDATED (7/1)
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: English)
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
-- **Raid Monitor**: `PreventRaidInterference` (bool, default: false)
-  Enable or disable the prevention of raid interference (only territory clan members and raiding clan members are allowed unpunished in territory for duration of the raid once breach by raiders is detected).
-- **Damage Intruders**: `DamageIntruders` (bool, default: false)
-  Enable or disable damaging raid intruders if RaidMonitor is enabled. They will be unable to heal for the duration of the debuff.
   
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
@@ -281,11 +277,11 @@ UPDATED (7/1)
   Default is about 5 floor tile lengths.
 - **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
-- **Player Alliances**: `PlayerGrouping` (bool, default: false)  
+- **Player Parties**: `PlayerParties` (bool, default: false)  
   Enable or disable player alliances.
 - **Prevent Friendly Fire**: `PreventFriendlyFire` (bool, default: false)  
   True to prevent damage between players in same alliance, false to allow.
-- **Max Alliance Size**: `MaxAllianceSize` (int, default: 5)  
+- **Max Party Size**: `MaxPartySize` (int, default: 5)  
   The maximum number of players that can form an alliance.
 - **Change Class Item**: `ChangeClassItem` (int, default: 576389135)  
   Item PrefabGUID for changing classes.
