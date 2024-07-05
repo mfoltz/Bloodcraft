@@ -1,20 +1,15 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
-using ProjectM;
-using ProjectM.CastleBuilding;
-using ProjectM.Debugging;
 using ProjectM.Network;
-using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using VampireCommandFramework;
 
-namespace Bloodcraft.Commands;
+namespace Bloodcraft.Commands
+{ [CommandGroup(name: "profession", ".prof")] 
 internal static class ProfessionCommands
 {
-    [Command(name: "logProfessionProgress", shortHand: "log p", adminOnly: false, usage: ".log p", description: "Toggles profession progress logging.")]
+    [Command(name: "logprogress", shortHand: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ProfessionSystem.Value)
@@ -33,7 +28,7 @@ internal static class ProfessionCommands
         LocalizationService.HandleReply(ctx, $"Profession logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "getProfessionProgress", shortHand: "gp", adminOnly: false, usage: ".gp [Profession]", description: "Display your current profession progress.")]
+    [Command(name: "getprogress", shortHand: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]
     public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
     {
         if (!Plugin.ProfessionSystem.Value)
@@ -61,7 +56,7 @@ internal static class ProfessionCommands
         }
     }
 
-    [Command(name: "setProfessionLevel", shortHand: "spl", adminOnly: true, usage: ".spl [Name] [Profession] [Level]", description: "Sets player profession level.")]
+    [Command(name: "setlevel", shortHand: "set", adminOnly: true, usage: ".prof set [Name] [Profession] [Level]", description: "Sets player profession level.")]
     public static void SetProfessionCommand(ChatCommandContext ctx, string name, string profession, int level)
     {
         if (!Plugin.ProfessionSystem.Value)
@@ -97,7 +92,7 @@ internal static class ProfessionCommands
         LocalizationService.HandleReply(ctx, $"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
     }
 
-    [Command(name: "listProfessions", shortHand: "lp", adminOnly: false, usage: ".lp", description: "Lists professions available.")]
+    [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".prof l", description: "Lists professions available.")]
     public static void ListProfessionsCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ProfessionSystem.Value)
@@ -108,4 +103,5 @@ internal static class ProfessionCommands
         string professions = ProfessionHandlerFactory.GetAllProfessions();
         LocalizationService.HandleReply(ctx, $"Available professions: {professions}");
     }
+}
 }

@@ -1,6 +1,7 @@
 ## Table of Contents
 
-UPDATED (7/1)
+UPDATED (7/5)
+
 
 - [Features](#features)
 - [Commands](#commands)
@@ -8,208 +9,238 @@ UPDATED (7/1)
 
 ## Sponsor this project
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
-
-[<img src="https://github.githubassets.com/assets/patreon-96b15b9db4b9.svg" width="50" height="50">](https://patreon.com/zfolmt)
+[![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914) | [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
 
 ## Features
 
 - **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and optionally adds extra spell slots to unarmed. Expertise is gained per kill based on equipped weapon. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
+
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch. Mining/woodcutting/harvesting provide bonus yields per resource harvest, fishing provide bonus fish every 20 levels based on the area fished in, alchemy enhances consumable duration and effects, and blacksmithing/enchanting/tailoring increases durability in armors/weapons crafted. Do note you only receive experience for crafting and extra durability is only applied if you own the station/placed it if in a clan, plan on improving that and revamping these a bit in the future.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill (should apply to all kills that can be linked back to the player) and can complete level 20 quest to track vbloods with .quickStart (.start). Still tuning this as needed but the config options should be there to support whatever kind of leveling experience you're looking to provide at this point (within reason :P). Experience sharing in clan or group has a max distance of 25f (4-5 floor lengths). Recently added options to control experience gain from units spawned via vermin nest and other unit spawners along with nerfing rift trash experience if you so desire. Can now tune how much experience higher level players receive from lower level kills as well.
+
+ - **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill (should apply to all kills that can be linked back to the player) and can complete level 20 quest to track vbloods with .quickStart (.start). Still tuning this as needed but the config options should be there to support whatever kind of leveling experience you're looking to provide at this point (within reason :P). Experience sharing in clan or group has a max distance of 25f (4-5 floor lengths). Recently added options to control experience gain from units spawned via vermin nest and other unit spawners along with nerfing rift trash experience if you so desire. Can now tune how much experience higher level players receive from lower level kills as well.
+
 - **Blood Legacies:** Provides further stat customization for legacies (blood types) similar to expertise with a different set of stats. Experience for this is gained per feed kill/execute for equipped blood type. Old blood quality enhancement option still exists for those who would like to use it, although do note if using prestige as well the quality gain will be based on legacy prestige level in that blood. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
+
 - **Prestiging:** Prestige in leveling, expertise, and legacies! Each increment in leveling prestige will reduce experience rate gain for leveling by the leveling rate reducer (separate from the expertise/legacy rate reducer) and increase expertise/legacy rate gains by the rate multiplier. Prestiging in expertise/legacies will increase their max stat bonuses per level by the stat multiplier and will reduce rate gains in that individual prestige category by the rate reducer per increment. Configurable buffs will be permanently applied to the player each prestige level in experience (can skip levels by leaving prefab as 0). Prestiging is also configurably tied to unlocking extra spells for classes to use on shift (you can use any abilityGroup prefabs here but don't use normal player spells unless you like weird weapon cloning bugs when equipping jewels. also, some NPC spells don't really work as expected when used by players so do some testing before swapping these out and make sure they behave. can test spells with '.spell [1/2] [AbilityGroupPrefab]' to manually place them on unarmed)
+
 - **Familiars:** Every kill of a valid unit is a chance to unlock that unit as a familiar, now including VBloods and summoners! VBloods can be toggled on/off and unit types can be configurably allowed (humans, demons, beasts, etc) although do note that some category bans will supercede VBlood checks (if humans are banned, Vincent will be banned as well even if VBloods are enabled); there is also a list for individual unit bans. They will level up, fight for you, and you can collect them all. Only one familiar can be summoned at a time. They can be toggled (called/dismissed) without fully unbinding them to quickly use waygates (attempting to use a waygate with a familiar out will dismiss it automatically now and using it will then summon the familiar again so it is there after teleporting) and perform other actions normally prohibited by having a follower like a charmed human. Each set can hold 10 and more sets will be created once the one being added to is full. You can choose the active set by name (default is FamiliarsList1, FamiliarsList2, etc), remove familiars from sets, move familiars between sets, and the sets can be renamed. To summon a familiar from your current set (which can be chosen with .cfs [Name]), .lf to see the units available and use .bind #; to choose a different one, use .unbind, and if it gets weird or buggy at any point .resetfams can be used to clear your active familiar data and followerBuffer. All units have the same stats as usual, however their phys/spell power starts at 10% at level 1 and will scale to 100% again when they reach max level. Base health is 500 and will scale with up to 2500 at max level. Traders, carriages, horses, crystals (looking at you dracula blood crystal thing) and werewolves are unavailable. Werewolves will be in the pool once I add handling for their transformations but the rest will likely stay banned (if you manually add one of them to your unlocks as an admin that's on you :P). Can't bind in combat or pvp combat.
+
 - **Classes:** Soft synergies allows for the encouragement of stat choices without restricting choices while hard synergies will only allow the stats for that class to be chosen. Both soft or hard will apply the synergy multiplier to the max stat bonuses for that class for weapon expertise/blood legacies. Additionally, each class has a config spot for 4 blood buffs (the correct prefabs for this start with AB_BloodBuff_) that are granted every MaxPlayerLevel/#buffs while leveling up (with 4 buffs and 90 being the max, they'll be applied at 22, 44, 66, and 88) and apply permanently at max strength without regard to the blood quality or type the player possesses (can be skipped with 0 in the spot). They do not stack with buffs from the same blood type (if a player has the scholar free cast proc buff from class and also has 100% scholar blood, those chances will not stack) which maintains a sense of balance while allowing each class to have a persistent theme/identity that can be earned without excessive grinding. Classes also get extra spells to use on shift that are configurable, both the spell and at what level of prestige they are earned at but do keep in mind the considerations mentioned in the prestige section. Will probably be changing at least a few aspects of these new class systems in the future but am overall happy with where they're at in the sense that they allow for a lot of customization and can be made to feel as unique as you'd like. Tried to make decent thematic choices for the default blood buffs and spells per class but no promises :P. Changing classes should properly remove and apply buffs based on level. Also, spell school effects on hit unique to each class if enabled!
   
 ## Commands
 
 ### Blood Commands
-- `.getBloodLegacyProgress [Blood]`
+- `.bloodlegacy getprogress [Blood]`
   - Display progress and bonuses in entered blood legacy.
-  - Shortcut: *.gbl [Blood]*
-- `.logBloodLegacyProgress`
+  - Shortcut: *.blg get [Blood]*
+- `.bloodlegacy logprogress`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.log bl*
-- `.chooseBloodStat [Blood] [Stat]`
+  - Shortcut: *.blg log*
+- `.bloodlegacy choosestat [Blood] [Stat]`
   - Chooses stat bonus to apply to a blood type that scales with that blood legacy level.
-  - Shortcut: *.cbs [Blood] [Stat]*
-- `.setBloodLegacy [Player] [Blood] [Level]` 🔒
+  - Shortcut: *.blg cst [Blood] [Stat]*
+- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
-  - Shorcut: *.sbl [Player] [Blood] [Level]*
-- `.listBloodStats`
+  - Shorcut: *.blg set [Player] [Blood] [Level]*
+- `.bloodlegacy liststats`
   - Lists blood stats available along with bonuses at max legacy.
-  - Shortcut: *.lbs*
-- `.resetBloodStats`
+  - Shortcut: *.blg lst*
+- `.bloodlegacy resetstats`
   - Resets stat choices for currently equipped blood for configurable item cost/quanity.
-  - Shortcut: *.rbs*
-- `.listBloodLegacies`
+  - Shortcut: *.blg rst*
+- `.bloodlegacy list`
   - Lists blood legacies available.
-  - Shortcut: *.lbl*
+  - Shortcut: *.blg l*
 
-### Leveling/Prestige Commands
-- `.getLevelingProgress`
+### Class Commands
+- `.class choose [Class]`
+  - Chooses class (see options with .classes)
+  - Shortcut: *.class c [Class]*
+- `.class choosespell [#]`
+  - Choose class spell (see options with .class lsp)
+  - Shortcut: *.class csp [#]*
+- `.class change [Class]`
+  - Changes to specified class.
+  - Shortcut: *.class change [Class]*
+- `.class list`
+  - List classes.
+  - Shortcut: *.class l*
+- `.class syncbuffs`
+  - Applies class buffs appropriately if not present
+  - Shortcut: *.class sb*
+- `.class listbuffs [Class]`
+  - List class buffs.
+  - Shortcut: *.class lb [Class]*
+- `.class listspells [Class]`
+  - List class spells.
+  - Shortcut: *.class lsp [Class]*
+- `.class liststats [Class]`
+  - List class spells.
+  - Shortcut: *.class lst [Class]*
+ 
+### Leveling Commands
+- `.level get`
   - Display current level progress.
-  - Shortcut: *.get l*
-- `.logLevelingProgress`
+  - Shortcut: *.lvl get*
+- `.level log`
   - Enables or disables leveling experience logging.
-  - Shortcut: *.log l*
-- `.setLevel [Player] [Level]` 🔒
+  - Shortcut: *.lvl log*
+- `.level set [Player] [Level]` 🔒
   - Sets player experience level.
-  - Shorcut: *.sl [Player] [Level]*
+  - Shorcut: *.lvl set [Player] [Level]*
+
+### Prestige Commands
+- `.prestige me [PrestigeType]`
+  - Handles all player prestiging. Must be at max configured level for experience, expertise, or legacies to be eligible.
+  - Shortcut: *.prestige me [PrestigeType]*
+- `.prestige get [PrestigeType]`
+  - Shows information about player's prestige status and rates for entered type of prestige.
+  - Shortcut: *.prestige get [PrestigeType]*
+- `.prestige reset [Name] [PrestigeType]` 🔒
+  - Resets prestige type and removes buffs gained from prestiges in leveling if applicable.
+  - Shortcut: *.prestige r [Name] [PrestigeType]*
+- `.prestige set [Name] [PrestigeType] [Level]` 🔒
+  - Sets player prestige level.
+  - Shorcut: *.spr [Name] [PrestigeType] [Level]*
+- `.prestige list`
+  - Lists prestiges available to the player.
+  - Shortcut: *.prestige l*
+- `.prestige listbuffs`
+  - Lists prestige buffs available.
+  - Shortcut: *.prestige lb*
+- `.prestige syncbuffs`
+  - Applies prestige buffs appropriately if not present.
+  - Shortcut: *.prestige sb*
+
+### Party Commands
+- `.party toggleinvites`
+  - Toggles party invites.
+  - Shortcut: *.party toginv*
+- `.party add [Player]`
+  - Adds player to party.
+  - Shortcut: *.party a [Player]*
+- `.party remove [Player]`
+  - Removes player from party.
+  - Shortcut: *.party r [Player]*
+- `.party disband`
+  - Disbands party.
+  - Shortcut: *.party end*
+- `.party listmembers`
+  - Lists party members.
+  - Shortcut: *.party lm*
+- `.party leave`
+  - Leaves party.
+  - Shortcut: *.party drop*
+
+
+### Profession Commands
+- `.profession getprogress [Profession]`
+  - Display progress in entered profession.
+  - Shortcut: *.prof get [Profession]*
+- `.profession logprogress`
+  - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
+  - Shortcut: *.prof log*
+- `.profession setlevel [Name] [Profession] [Level]` 🔒
+  - Sets player profession level.
+  - Shortcut: *.prof set [Name] [Profession] [Level]*
+- `.profession list`
+  - Lists available professions.
+  - Shortcut: *.prof l*
+    
+### Weapon Commands
+- `.weapon getexpertise`
+  - Display expertise progress for current weapon along with any bonus stats if applicable.
+  - Shortcut: *.wep get*
+- `.weapon logexpertise`
+  - Enables or disables expertise logging.
+  - Shortcut: *.wep log*
+- `.weapon choosestat [Weapon] [Stat]`
+  - Chooses stat bonus to apply to a weapon type that scales based on expertise level.
+  - Shortcut: *.wep cst [Weapon] [Stat]*
+- `.weapon setexpertise [Player] [Weapon] [Level]` 🔒
+  - Sets player weapon expertise level.
+  - Shorcut: *.wep set [Player] [Weapon] [Level]*
+- `.weapon liststats`
+  - Lists weapon stats available along with bonuses at max expertise.
+  - Shortcut: *.wep lst*
+- `.weapon list`
+  - Lists weapon types/expertises available.
+  - Shortcut: *.wep l*
+- `.weapon resetstats`
+  - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
+  - Shortcut: *.wep rst*
+- `.weapon setspells [Slot] [AbilityGroupPrefab]` 🔒
+  - Manually set spells in unarmed slots. Useful for testing but do be mindful, some NPC spells are fairly dangerous- and not in an OP sort of way :P
+  - Shortcut: *.wep spell [Slot] [AbilityGroupPrefab]*
+- `.weapon restorelevels`
+  - Restores weapon levels in player inventory to what they should be if they had been modified via expertise level in earlier versions of the mod. Don't use unless needed.
+  - Shortcut: *.wep restore*
+
+- `.lockSpell`
+  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Shortcut: *.locksp*
+- `.lockshift`
+  - Toggles set class spell on shift. Works for unarmed and weapons.
+  - Shortcut: *.shift*
+ 
+### Familiar Commands
+- `.familiar bind [#]`
+  - Activates specified familiar from current list.
+  - Shortcut: *.fam b [#]*
+- `.familiar unbind`
+  - Destroys active familiar.
+  - Shortcut: *.fam ub*
+- `.familiar list`
+  - Lists unlocked familiars from current box.
+  - Shortcut: *.fam l*
+- `.familiar boxes`
+  - Shows the available familiar boxes.
+  - Shorcut: *.fam box*
+- `.familiar choosebox [Name]`
+  - Choose active box of familiars to bind from.
+  - Shortcut: *.fam cb [Name]*
+- `.familiar renamebox [CurrentName] [NewName]`
+  - Renames a box.
+  - Shortcut: *.fam rb [CurrentName] [NewName]*
+- `.familiar movebox [BoxName]`
+  - Move active familiar to specified box.
+  - Shortcut: *.fam mb [SetName]*
+- `.familiar toggle`
+  - Calls or dismisses familar. Wave also does this if .emotes is toggled on.
+  - Shortcut: *.fam toggle*
+- `.familiar add [CharPrefab]` 🔒
+  - Adds familiar to active list.
+  - Shortcut: *.fam a [CharPrefab]*
+- `.familiar remove [#]`
+  - Removes familiar from unlocks.
+  - Shortcut: *.fam r [#]*
+- `.familiar togglecombat`
+  - Enables or disables combat for familiar.
+  - Shortcut: *.fam c*
+- `.familiar emotes`
+  - Toggles emote commands (only 1 right now) on.
+  - Shortcut: *.fam e*
+- `.familiar listemoteactions`
+  - Lists emote actions and what they do.
+  - Shortcut: *.fam le*
+- `.familiar getlevel`
+  - Display current familiar leveling progress.
+  - Shortcut: *.fam gl*
+- `.familiar prestige [StatType]`
+  - Prestiges familiar if at max level and valid stat is chosen.
+  - Shortcut: *.fam pr [StatType]*
+- `.familiar setlevel [Level]` 🔒
+  - Set current familiar level. Rebind to force updating stats if that doesn't happen when this is used.
+  - Shortcut: *.fam sl [Level]*
+- `.familiar reset`
+  - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
+  - Shortcut: *.fam reset*
+
+### Misc Commands
 - `.prepareForTheHunt`
   - Completes GettingReadyForTheHunt if not already completed. 
   - Shortcut: *.prepare*
-- `.playerPrestige [PrestigeType]`
-  - Handles all player prestiging. Must be at max configured level for experience, expertise, or legacies to be eligible.
-  - Shortcut: *.prestige [PrestigeType]*
-- `.getPrestige [PrestigeType]`
-  - Shows information about player's prestige status and rates for entered type of prestige.
-  - Shortcut: *.gpr [PrestigeType]*
-- `.resetPrestige [Name] [PrestigeType]` 🔒
-  - Resets prestige type and removes buffs gained from prestiges in leveling if applicable.
-  - Shortcut: *.rpr [Name] [PrestigeType]*
-- `.listPlayerPrestiges`
-  - Lists prestiges available to the player.
-  - Shortcut: *.lpp*
-- `.listPrestigeBuffs`
-  - Lists prestige buffs available.
-  - Shortcut: *.lpb*
-- `.togglePartyInvites`
-  - Toggles alliance invites.
-  - Shortcut: *.pinvites*
-- `.partyAdd [Player]`
-  - Adds player to alliance.
-  - Shortcut: *.pa [Player]*
-- `.partyRemove [Player]`
-  - Removes player from alliance.
-  - Shortcut: *.pr [Player]*
-- `.partyDisband`
-  - Disbands alliance.
-  - Shortcut: *.pdisband*
-- `.listPartyMembers`
-  - Lists alliance members.
-  - Shortcut: *.lpm*
-- `.leaveParty`
-  - Leaves alliance.
-  - Shortcut: *.pleave*
-- `.chooseClass [Class]`
-  - Chooses class (see options with .classes)
-  - Shortcut: *.cc [Class]*
-- `.chooseClassSpell [#]`
-  - Choose class spell (see options with .lcs)
-  - Shortcut: *.cs [#]*
-- `.changeClass [Class]`
-  - Changes to specified class.
-  - Shortcut: *.change [Class]*
-- `.listClasses`
-  - List classes.
-  - Shortcut: *.classes*
-- `.listClassBuffs [Class]`
-  - List class buffs.
-  - Shortcut: *.lcb [Class]*
-- `.listClassSpells [Class]`
-  - List class spells.
-  - Shortcut: *.lcs [Class]*
- - `.listClassStats [Class]`
-  - List class spells.
-  - Shortcut: *.stats [Class]*
 
-### Profession Commands
-- `.getProfessionProgress [Profession]`
-  - Display progress in entered profession.
-  - Shortcut: *.gp [Profession]*
-- `.logProfessionProgress`
-  - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
-  - Shortcut: *.log p*
-- `.setProfessionLevel [Name] [Profession] [Level]` 🔒
-  - Sets player profession level.
-  - Shortcut: *.spl [Name] [Profession] [Level]*
-- `.listProfessions`
-  - Lists available professions.
-  - Shortcut: *.lp*
-    
-### Weapon Commands
-- `.getExpertiseProgress`
-  - Display expertise progress for current weapon along with any bonus stats if applicable.
-  - Shortcut: *.get e*
-- `.logExpertiseProgress`
-  - Enables or disables expertise logging.
-  - Shortcut: *.log e*
-- `.chooseWeaponStat [Weapon] [Stat]`
-  - Chooses stat bonus to apply to a weapon type that scales based on expertise level.
-  - Shortcut: *.cws [Weapon] [Stat]*
-- `.setWeaponExpertise [Player] [Weapon] [Level]` 🔒
-  - Sets player weapon expertise level.
-  - Shorcut: *.swe [Player] [Weapon] [Level]*
-- `.listWeaponStats`
-  - Lists weapon stats available along with bonuses at max expertise.
-  - Shortcut: *.lws*
-- `.resetWeaponStats`
-  - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
-  - Shortcut: *.rws*
-- `.lockSpell`
-  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
-  - Shortcut: *.lock*
-- `.shift`
-  - Toggles set class spell on shift. Works for unarmed and weapons.
-  - Shortcut: *.lock*
-- `.setSpells [Slot] [AbilityGroupPrefab]` 🔒
-  - Manually set spells in unarmed slots. Useful for testing but do be mindful, some NPC spells are fairly dangerous- and not in an OP sort of way :P
-  - Shortcut: *.spell [Slot] [AbilityGroupPrefab]*
-- `.restoreWeaponLevels`
-  - Restores weapon levels in player inventory to what they should be if they had been modified via expertise level in earlier versions of the mod. Don't use unless needed.
-  - Shortcut: *.rwl*
- 
-### Familiar Commands
-- `.bindFamiliar [#]`
-  - Activates specified familiar from current list.
-  - Shortcut: *.bind [#]*
-- `.unbindFamiliar`
-  - Destroys active familiar.
-  - Shortcut: *.unbind*
-- `.listFamiliars`
-  - Lists unlocked familiars from current set.
-  - Shortcut: *.lf*
-- `.familiarSets`
-  - Shows the available familiar lists.
-  - Shorcut: *.famsets*
-- `.chooseFamiliarSet [Name]`
-  - Choose active set of familiars to bind from.
-  - Shortcut: *.cfs [Name]*
-- `.setRename [CurrentName] [NewName]`
-  - Renames set.
-  - Shortcut: *.sr [CurrentName] [NewName]*
-- `.transplantFamiliar [SetName]`
-  - Move active familiar to different set.
-  - Shortcut: *.tf [SetName]*
-- `.toggleFamiliar`
-  - Calls or dismisses familar. Wave also does this if .emotes is toggled on.
-  - Shortcut: *.toggle*
-- `.addFamiliar [CharPrefab]` 🔒
-  - Adds familiar to active list.
-  - Shortcut: *.af [CharPrefab]*
-- `.removeFamiliar [#]`
-  - Removes familiar from unlocks.
-  - Shortcut: *.rf [#]*
-- `.toggleEmotes`
-  - Toggles emote commands (only 1 right now) on.
-  - Shortcut: *.emotes*
-- `.listEmoteActions`
-  - Lists emote actions and what they do.
-  - Shortcut: *.le*
-- `.getFamiliarLevel`
-  - Display current familiar leveling progress.
-  - Shortcut: *.get fl*
-- `.prestigeFamiliar [StatType]`
-  - Prestiges familiar if at max level and valid stat is chosen.
-  - Shortcut: *.prfam [StatType]*
-- `.setFamiliarLevel [Level]` 🔒
-  - Set current familiar level. Rebind to force updating stats if that doesn't happen when this is used.
-  - Shortcut: *.sfl [Level]*
-- `.resetFamiliars`
-  - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
-  - Shortcut: *.resetfams*
  
 ## Configuration
 
