@@ -1,7 +1,6 @@
 ## Table of Contents
 
 UPDATED (7/1)
-(haven't figured out how to make a fancy button for patreon yet so putting that one here for now: patreon.com/zfolmt)
 
 - [Features](#features)
 - [Commands](#commands)
