@@ -10,6 +10,7 @@ UPDATED (7/1)
 ## Sponsor this project
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
+[!<img src="https://github.githubassets.com/assets/patreon-96b15b9db4b9.svg" width="50" height="50">](patreon.com/zfolmt)
 
 ## Features
 
