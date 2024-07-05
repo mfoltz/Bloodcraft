@@ -9,10 +9,11 @@ using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.ExpertiseStats;
 using Bloodcraft.Services;
 
-namespace Bloodcraft.Commands;
-internal static class WeaponCommands
+namespace Bloodcraft.Commands
+{ [CommandGroup(name: "weapon", ".wep")] 
+    internal static class WeaponCommands
 {
-    [Command(name: "getExpertiseProgress", shortHand: "get e", adminOnly: false, usage: ".get e", description: "Displays your current expertise.")] 
+    [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 
     public static void GetExpertiseCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -74,7 +75,7 @@ internal static class WeaponCommands
         }
     }
 
-    [Command(name: "logExpertiseProgress", shortHand: "log e", adminOnly: false, usage: ".log e", description: "Toggles expertise logging.")]
+    [Command(name: "logexpertise", shortHand: "log", adminOnly: false, usage: ".wep log", description: "Toggles expertise logging.")]
     public static void LogExpertiseCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -92,7 +93,7 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");          
     }
 
-    [Command(name: "chooseWeaponStat", shortHand: "cws", adminOnly: false, usage: ".cws [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
+    [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
     public static void ChooseWeaponStat(ChatCommandContext ctx, string weaponType, string statType)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -141,7 +142,7 @@ internal static class WeaponCommands
         }
     }
 
-    [Command(name: "resetWeaponStats", shortHand: "rws", adminOnly: false, usage: ".rws", description: "Reset the stats for current weapon.")]
+    [Command(name: "resetstats", shortHand: "rst", adminOnly: false, usage: ".wep rst", description: "Reset the stats for current weapon.")]
     public static void ResetWeaponStats(ChatCommandContext ctx)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -187,7 +188,7 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
     }
 
-    [Command(name: "setWeaponExpertise", shortHand: "swe", adminOnly: true, usage: ".swe [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
+    [Command(name: "setexpertise", shortHand: "set", adminOnly: true, usage: ".wep set [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
     public static void SetExpertiseCommand(ChatCommandContext ctx, string name, string weapon, int level)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -242,7 +243,7 @@ internal static class WeaponCommands
 
     }
 
-    [Command(name: "listWeaponStats", shortHand: "lws", adminOnly: false, usage: ".lws", description: "Lists weapon stats available.")]
+    [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".wep lst", description: "Lists weapon stats available.")]
     public static void ListWeaponStatsCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -266,7 +267,7 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Available weapon stats (2/2): {weaponStatsLine2}");
     }
 
-    [Command(name: "listWeaponExpertises", shortHand: "lwe", adminOnly: false, usage: ".lwe", description: "Lists weapon expertises available.")]
+    [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".wep l", description: "Lists weapon expertises available.")]
     public static void ListWeaponsCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ExpertiseSystem.Value)
@@ -279,66 +280,9 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 
-    [Command(name: "lockSpells", shortHand: "lock", adminOnly: false, usage: ".lock", description: "Locks in the next spells equipped to use in your unarmed slots.")]
-    public static void LockPlayerSpells(ChatCommandContext ctx)
-    {
-        if (!Plugin.UnarmedSlots.Value)
-        {
-            LocalizationService.HandleReply(ctx, "Extra spell slots for unarmed are not enabled.");
-            return;
-        }
 
-        User user = ctx.Event.User;
-        ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data))
-        {
-            bools["SpellLock"] = !bools["SpellLock"];
-            if (bools["SpellLock"])
-            {
-                LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, "Spells set.");
-            }
-            Core.DataStructures.SavePlayerBools();
-        }
-    }
-
-    [Command(name: "shiftLock", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
-    public static void ShiftPlayerSpells(ChatCommandContext ctx)
-    {
-        if (!Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value)
-        {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
-            return;
-        }
-        if (!Plugin.ShiftSlot.Value)
-        {
-            LocalizationService.HandleReply(ctx, "Shift slots are not enabled.");
-            return;
-        }
-
-        User user = ctx.Event.User;
-        ulong SteamID = user.PlatformId;
-
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data))
-        {
-            bools["ShiftLock"] = !bools["ShiftLock"];
-            if (bools["ShiftLock"])
-            {
-                LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
-            }
-            Core.DataStructures.SavePlayerBools();
-        }
-    }
-
-    [Command(name: "setSpells", shortHand: "spell", adminOnly: true, usage: ".spell [Name] [Slot] [PrefabGUID]", description: "Manually sets spells for testing.")]
+    [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGUID]", description: "Manually sets spells for testing.")]
     public static void SetSpellCommand(ChatCommandContext ctx, string name, int slot, int ability)
     { 
         if (!Plugin.UnarmedSlots.Value)
@@ -379,7 +323,7 @@ internal static class WeaponCommands
         }    
     }
 
-    [Command(name: "restoreWeaponLevels", shortHand: "rwl", adminOnly: false, usage: ".rwl", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
+    [Command(name: "restorelevels", shortHand: "restore", adminOnly: false, usage: ".wep restore", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
     public static void ResetWeaponLevels(ChatCommandContext ctx)
     {
         Entity character = ctx.Event.SenderCharacterEntity;
@@ -406,4 +350,5 @@ internal static class WeaponCommands
             LocalizationService.HandleReply(ctx, "Set weapon levels to original values.");
         }
     }
+}
 }
