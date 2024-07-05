@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -8,17 +8,17 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
-using Unity.Collections;
-using Bloodcraft.Systems.Expertise;
 
-namespace Bloodcraft.Commands;
-internal static class FamiliarCommands
+namespace Bloodcraft.Commands
 {
+    [CommandGroup(name: "familiar", "fam")]
+    internal static class FamiliarCommands
+    {
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
 
-    [Command(name: "bindFamiliar", shortHand: "bind", adminOnly: false, usage: ".bind [#]", description: "Activates specified familiar from current list.")]
+    [Command(name: "bind", shortHand: "b", adminOnly: false, usage: ".fam b [#]", description: "Activates specified familiar from current list.")]
     public static void BindFamiliar(ChatCommandContext ctx, int choice)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -48,7 +48,7 @@ internal static class FamiliarCommands
 
         if (string.IsNullOrEmpty(set))
         {
-            LocalizationService.HandleReply(ctx, "You don't have a set selected. Use .famsets to see available sets then choose one with .cfs [SetName]");
+            LocalizationService.HandleReply(ctx, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
             return;
         }
 
@@ -63,9 +63,9 @@ internal static class FamiliarCommands
             data = new(Entity.Null, famKeys[choice - 1]);
             Core.DataStructures.FamiliarActives[steamId] = data;
             Core.DataStructures.SavePlayerFamiliarActives();
-            FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[choice -1]);
+            FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[choice - 1]);
             //character.Add<AlertAllies>();
-            
+
         }
         else
         {
@@ -73,7 +73,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "unbindFamiliar", shortHand: "unbind", adminOnly: false, usage: ".unbind", description: "Destroys active familiar.")]
+    [Command(name: "unbind", shortHand: "ub", adminOnly: false, usage: ".fam ub", description: "Destroys active familiar.")]
     public static void UnbindFamiliar(ChatCommandContext ctx)
     {
         ulong steamId = ctx.User.PlatformId;
@@ -94,7 +94,7 @@ internal static class FamiliarCommands
 
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
-            
+
         }
         else if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
         {
@@ -110,7 +110,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "listFamiliars", shortHand: "lf", adminOnly: false, usage: ".lf", description: "Lists unlocked familiars from current set.")]
+    [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".fam l", description: "Lists unlocked familiars from current box.")]
     public static void ListFamiliars(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -133,11 +133,11 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't locate set.");
+            LocalizationService.HandleReply(ctx, "Couldn't locate box.");
         }
     }
 
-    [Command(name: "familiarSets", shortHand: "famsets", adminOnly: false, usage: ".famsets", description: "Shows the available familiar lists.")]
+    [Command(name: "boxes", shortHand: "box", adminOnly: false, usage: ".fam box", description: "Shows the available familiar boxes.")]
     public static void ListFamiliarSets(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -155,7 +155,7 @@ internal static class FamiliarCommands
                 sets.Add(key);
             }
             string fams = string.Join(", ", sets.Select(set => $"<color=white>{set}</color>"));
-            LocalizationService.HandleReply(ctx, $"Available Familiar Sets: {fams}");
+            LocalizationService.HandleReply(ctx, $"Available Familiar Boxes: {fams}");
         }
         else
         {
@@ -163,7 +163,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "chooseFamiliarSet", shortHand: "cfs", adminOnly: false, usage: ".cfs [Name]", description: "Choose active set of familiars.")]
+    [Command(name: "choosebox", shortHand: "cb", adminOnly: false, usage: ".fam cb [Name]", description: "Choose active box of familiars.")]
     public static void ChooseSet(ChatCommandContext ctx, string name)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -176,16 +176,16 @@ internal static class FamiliarCommands
         if (data.UnlockedFamiliars.TryGetValue(name, out var _))
         {
             Core.DataStructures.FamiliarSet[steamId] = name;
-            LocalizationService.HandleReply(ctx, $"Active Familiar Set: <color=white>{name}</color>");
+            LocalizationService.HandleReply(ctx, $"Active Familiar Box: <color=white>{name}</color>");
             Core.DataStructures.SavePlayerFamiliarSets();
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find set.");
+            LocalizationService.HandleReply(ctx, "Couldn't find box.");
         }
     }
 
-    [Command(name: "setRename", shortHand: "sr", adminOnly: false, usage: ".sr [CurrentName] [NewName]", description: "Renames set.")]
+    [Command(name: "renamebox", shortHand: "rb", adminOnly: false, usage: ".fam rb [CurrentName] [NewName]", description: "Renames a box.")]
     public static void RenameSet(ChatCommandContext ctx, string current, string name)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -214,11 +214,11 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find set to rename.");
+            LocalizationService.HandleReply(ctx, "Couldn't find box to rename.");
         }
     }
 
-    [Command(name: "transplantFamiliar", shortHand: "tf", adminOnly: false, usage: ".tf [SetName]", description: "Moves active familiar to specified set.")]
+    [Command(name: "movebox", shortHand: "mb", adminOnly: false, usage: ".fam mb [BoxName]", description: "Moves active familiar to specified box.")]
     public static void TransplantFamiliar(ChatCommandContext ctx, string name)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -249,11 +249,11 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find set or set is full.");
+            LocalizationService.HandleReply(ctx, "Couldn't find box or box is full.");
         }
     }
 
-    [Command(name: "addFamiliar", shortHand: "af", adminOnly: true, usage: ".af [PrefabGUID]", description: "Unit testing.")]
+    [Command(name: "add", shortHand: "a", adminOnly: true, usage: ".fam a [PrefabGUID]", description: "Unit testing.")]
     public static void AddFamiliar(ChatCommandContext ctx, int unit)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -292,7 +292,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "removeFamiliar", shortHand: "rf", adminOnly: false, usage: ".rf [#]", description: "Removes familiar from current set permanently.")]
+    [Command(name: "remove", shortHand: "r", adminOnly: false, usage: ".fam r [#]", description: "Removes familiar from current set permanently.")]
     public static void RemoveFamiliarFromSet(ChatCommandContext ctx, int choice)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -323,7 +323,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "toggleFamiliar", shortHand: "toggle", usage: ".toggle", description: "Calls or dismisses familar.", adminOnly: false)]
+    [Command(name: "toggle", shortHand: "toggle", usage: ".fam toggle", description: "Calls or dismisses familar.", adminOnly: false)]
     public static void ToggleFamiliar(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -344,7 +344,7 @@ internal static class FamiliarCommands
         EmoteSystemPatch.CallDismiss(userEntity, character, platformId);
     }
 
-    [Command(name: "toggleCombat", shortHand: "combat", usage: ".combat", description: "Enables or disables combat for familiar.", adminOnly: false)]
+    [Command(name: "togglecombat", shortHand: "c", usage: ".fam c", description: "Enables or disables combat for familiar.", adminOnly: false)]
     public static void ToggleCombat(ChatCommandContext ctx)
     {
 
@@ -365,7 +365,7 @@ internal static class FamiliarCommands
         EmoteSystemPatch.CombatMode(userEntity, character, platformId);
     }
 
-    [Command(name: "familiarEmotes", shortHand: "fe", usage: ".fe", description: "Toggle emote commands.", adminOnly: false)]
+    [Command(name: "emotes", shortHand: "e", usage: ".fam e", description: "Toggle emote commands.", adminOnly: false)]
     public static void ToggleEmotes(ChatCommandContext ctx)
     {
         ulong platformId = ctx.User.PlatformId;
@@ -389,7 +389,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "listEmoteActions", shortHand: "le", usage: ".le", description: "List emote actions.", adminOnly: false)]
+    [Command(name: "listemoteactions", shortHand: "le", usage: ".fam le", description: "List emote actions.", adminOnly: false)]
     public static void ListEmotes(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -408,7 +408,7 @@ internal static class FamiliarCommands
         LocalizationService.HandleReply(ctx, emotes);
     }
 
-    [Command(name: "getFamiliarLevel", shortHand: "get fl", adminOnly: false, usage: ".get fl", description: "Display current familiar leveling progress.")]
+    [Command(name: "getlevel", shortHand: "gl", adminOnly: false, usage: ".fam gl", description: "Display current familiar leveling progress.")]
     public static void GetLevelCommand(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -473,7 +473,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "setFamiliarLevel", shortHand: "sfl", adminOnly: true, usage: ".sfl [Level]", description: "Set current familiar level.")]
+    [Command(name: "setlevel", shortHand: "sl", adminOnly: true, usage: ".fam sl [Level]", description: "Set current familiar level.")]
     public static void SetFamiliarLevel(ChatCommandContext ctx, int level)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -506,8 +506,7 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "Couldn't find active familiar to set level for.");
         }
     }
-    
-    [Command(name: "prestigeFamiliar", shortHand: "prfam", adminOnly: false, usage: ".prfam [BonusStat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
+    [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr [BonusStat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
     public static void PrestigeFamiliarCommand(ChatCommandContext ctx, string bonusStat = "")
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -515,7 +514,7 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
-        
+
         if (!Plugin.FamiliarPrestige.Value)
         {
             LocalizationService.HandleReply(ctx, "Familiar prestige is not enabled.");
@@ -538,7 +537,7 @@ internal static class FamiliarCommands
 
                 prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
                 List<FamiliarSummonSystem.FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
-                
+
                 if (stats.Count < FamiliarSummonSystem.familiarStatCaps.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
                     if (!FamiliarSummonSystem.TryParseFamiliarStat(bonusStat, out var stat))
@@ -601,7 +600,7 @@ internal static class FamiliarCommands
     }
 
 
-    [Command(name: "resetFamiliars", shortHand: "resetfams", adminOnly: false, usage: ".resetfams", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
+    [Command(name: "reset", shortHand: "reset", adminOnly: false, usage: ".fam reset", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
     public static void ResetFamiliars(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -628,5 +627,6 @@ internal static class FamiliarCommands
             }
         }
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
+    }
     }
 }
