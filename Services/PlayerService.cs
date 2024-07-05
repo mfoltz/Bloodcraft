@@ -25,7 +25,10 @@ internal class PlayerService
 
 	static EntityQuery ClansQuery;
 
-	public static Dictionary<string, Entity> playerCache = []; //player name, player userEntity
+	public static Dictionary<string, Entity> playerNameCache = []; //player name, player userEntity
+
+	public static Dictionary<ulong, Entity> playerIdCache = []; //player steamID, player charEntity
+
 	public PlayerService()
 	{
 		ActiveUsersQuery = Core.EntityManager.CreateEntityQuery(UserComponent);
@@ -35,7 +38,6 @@ internal class PlayerService
 			Options = EntityQueryOptions.IncludeDisabled
 		});
 		ClansQuery = Core.EntityManager.CreateEntityQuery(ClanComponent);
-
 		Core.StartCoroutine(CacheUpdateLoop());
 	}
 	static IEnumerator CacheUpdateLoop()
@@ -43,12 +45,22 @@ internal class PlayerService
         while (true)
         {
             yield return new WaitForSeconds(60);
-			playerCache.Clear();
-            playerCache = GetUsers()
-				.Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity })
+
+			//Core.Log.LogInfo("Updating player cache...");
+
+			playerNameCache.Clear();
+            playerNameCache = GetUsers()
+                .Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity })
 				.GroupBy(user => user.CharacterName)
 				.Select(group => group.First())
 				.ToDictionary(user => user.CharacterName, user => user.Entity); // playerName : userEntity
+
+			playerIdCache.Clear();
+			playerIdCache = GetUsers()
+                .Select(userEntity => new { SteamID = userEntity.Read<User>().PlatformId, Entity = userEntity.Read<User>().LocalCharacter._Entity })
+				.GroupBy(user => user.SteamID)
+				.Select(group => group.First())
+				.ToDictionary(user => user.SteamID, user => user.Entity); // steamID : charEntity
         }
     }
 	public static IEnumerable<Entity> GetUsers(bool includeDisabled = false)

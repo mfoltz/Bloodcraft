@@ -82,7 +82,7 @@ public static class EmoteSystemPatch
 
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
             
             if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
             {
@@ -155,7 +155,7 @@ public static class EmoteSystemPatch
         ServerGameManager serverGameManager = Core.ServerGameManager;
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
             if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
             {

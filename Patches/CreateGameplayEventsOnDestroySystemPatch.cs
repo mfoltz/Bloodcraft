@@ -38,7 +38,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
                         //Core.Log.LogInfo(PrefabGUID.GetPrefabName());
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entity.Read<Buff>().Target);
+                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(entity.Read<Buff>().Target);
                         if (familiar != Entity.Null && Core.EntityManager.Exists(familiar))
                         {
                             Follower follower = familiar.Read<Follower>();
@@ -69,11 +69,11 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                         continue;
                     }
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "");
-                    int multiplier = ProfessionUtilities.GetFishingModifier(toProcess);
+                    int multiplier = ProfessionMappings.GetFishingModifier(toProcess);
                     if (handler != null)
                     {
-                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
-                        ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
+                        ProfessionUtilities.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
+                        ProfessionUtilities.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }
 
@@ -82,13 +82,13 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;
 
-                    if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(killer, died);
-                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
-                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
+                    if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(killer, died);
+                    if (Plugin.ExpertiseSystem.Value) ExpertiseUtilities.UpdateExpertise(killer, died);
+                    if (Plugin.LevelingSystem.Value) PlayerLevelingUtilities.UpdateLeveling(killer, died);
                     if (Plugin.FamiliarSystem.Value)
                     {
-                        FamiliarLevelingSystem.UpdateFamiliar(killer, died);
-                        FamiliarUnlockSystem.HandleUnitUnlock(killer, died);
+                        FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
+                        FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
                     }
                 }
             }

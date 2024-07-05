@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>0.9.16</Version>
+	<Version>0.9.17</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>
@@ -90,10 +90,10 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" IncludeAssets="compile"/>
+    <PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" IncludeAssets="compile" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
     <PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
-    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile"/>
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
     <PackageReference Include="HarmonyX" Version="2.10.1" />
     <PackageReference Include="VRising.Unhollowed.Client" Version="1.0.2.794360001" />
     <PackageReference Include="VRising.VampireCommandFramework" Version="0.9.0" />

@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
 using Stunlock.Network;
@@ -26,6 +27,7 @@ internal static class ServerBootstrapSystemPatch
             Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
             {
                 { "ExperienceLogging", false },
+                { "QuestLogging", false },
                 { "ProfessionLogging", false },
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
@@ -46,6 +48,7 @@ internal static class ServerBootstrapSystemPatch
             var defaultValues = new Dictionary<string, bool>
             {
                 { "ExperienceLogging", false },
+                { "QuestLogging", false },
                 { "ProfessionLogging", false },
                 { "ExpertiseLogging", false },
                 { "BloodLogging", false },
@@ -277,13 +280,13 @@ internal static class ServerBootstrapSystemPatch
         {
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, LevelingSystem.ConvertLevelToXp(Plugin.StartingLevel.Value)));
+                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, PlayerLevelingUtilities.ConvertLevelToXp(Plugin.StartingLevel.Value)));
                 Core.DataStructures.SavePlayerExperience();
             }
             if (Plugin.PrestigeSystem.Value && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
             {
-                var prestigeDict = new Dictionary<PrestigeSystem.PrestigeType, int>();
-                foreach (var prestigeType in Enum.GetValues<PrestigeSystem.PrestigeType>())
+                var prestigeDict = new Dictionary<PrestigeUtilities.PrestigeType, int>();
+                foreach (var prestigeType in Enum.GetValues<PrestigeUtilities.PrestigeType>())
                 {
                     prestigeDict.Add(prestigeType, 0);
                 }

@@ -6,18 +6,22 @@ using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using EnterShapeshiftEvent = ProjectM.Network.EnterShapeshiftEvent;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal static class BuffSpawnSystemPatches
 {
+    static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static readonly PrefabGUID draculaReturnHide = new(404387047);
     static readonly PrefabGUID draculaFinal = new(1269681960); // final stage buff Dracula, force him to evolve -2005193286 (ability group)
     static readonly PrefabGUID solarusFinal = new(2144624015); // final stage buff Solarus, remove 358972271 (holy bubble)
@@ -27,6 +31,10 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID swordBuff = new(-6635580);
     static readonly PrefabGUID highlordSwordBuff = new(-916946628);
     static readonly PrefabGUID dominateAbility = new(-1908054166);
+    static readonly PrefabGUID pvpProtBuff = new(1111481396);
+    static readonly bool Parties = Plugin.Parties.Value;
+    static readonly bool PreventFriendlyFire = Plugin.PreventFriendlyFire.Value;
+    static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -41,13 +49,14 @@ internal static class BuffSpawnSystemPatches
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
-                //Core.Log.LogInfo(prefabGUID.LookupName());
+                
+                
 
-                if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // 914043867 golem
+                if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) 
                 {
                     Entity player = entity.Read<Buff>().Target.Read<Follower>().Followed._Value;
                     //entity.LogComponentTypes();
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
                     if (Core.EntityManager.Exists(familiar))
                     {
                         //Core.Log.LogInfo(PrefabGUID.LookupName());
@@ -83,19 +92,19 @@ internal static class BuffSpawnSystemPatches
                             }
                         }
                     }
-                }
+                } // cassius, drac, other weird boss phase stuff
 
                 if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("combat"))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
                         Entity player = entity.Read<Buff>().Target;
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
                         if (familiar != Entity.Null && Core.EntityManager.Exists(familiar))
                         {
-                            Follower follower = familiar.Read<Follower>();
-                            follower.ModeModifiable._Value = 1;
-                            familiar.Write(follower);
+                            Follower following = familiar.Read<Follower>();
+                            following.ModeModifiable._Value = 1;
+                            familiar.Write(following);
                             float3 playerPos = player.Read<LocalToWorld>().Position;
                             float distance = UnityEngine.Vector3.Distance(familiar.Read<LocalToWorld>().Position, playerPos);
                             if (distance > 25f)
@@ -105,9 +114,9 @@ internal static class BuffSpawnSystemPatches
                                 //Core.Log.LogInfo($"Familiar returned to owner.");
                             }
                         }
-                        else if (Core.DataStructures.FamiliarActives.TryGetValue(player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId, out var data) && !data.Item1.Equals(Entity.Null))
+                        else if (Core.DataStructures.FamiliarActives.TryGetValue(player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId, out var data) && !data.Familiar.Equals(Entity.Null))
                         {
-                            if (Core.EntityManager.Exists(data.Item1))
+                            if (Core.EntityManager.Exists(data.Familiar))
                             {
                                 float3 playerPos = player.Read<LocalToWorld>().Position;
                                 float distance = UnityEngine.Vector3.Distance(familiar.Read<LocalToWorld>().Position, playerPos);
@@ -120,9 +129,9 @@ internal static class BuffSpawnSystemPatches
                             }
                         }
                     }
-                }
+                } // return familiar when entering combat if far away
 
-                if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>()) 
                 {
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
@@ -143,12 +152,12 @@ internal static class BuffSpawnSystemPatches
                             buffer[i] = statBuff;
                         }
                     }
-                }
+                } // alchemy stuff
 
                 if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar != Entity.Null)
                     {
                         DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
@@ -163,12 +172,12 @@ internal static class BuffSpawnSystemPatches
                         };
                         debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                     }
-                }
+                } // familiar potion sharing
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // teleport familiar to player after waygate
                 {
                     Entity player = entity.Read<Buff>().Target;
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
                     if (Core.EntityManager.Exists(familiar))
                     {
                         float3 playerPos = player.Read<LocalToWorld>().Position;
@@ -180,9 +189,9 @@ internal static class BuffSpawnSystemPatches
                             //Core.Log.LogInfo($"Familiar returned to owner.");
                         }
                     }
-                    else if (Core.DataStructures.FamiliarActives.TryGetValue(player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId, out var data) && !data.Item1.Equals(Entity.Null))
+                    else if (Core.DataStructures.FamiliarActives.TryGetValue(player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId, out var data) && !data.Familiar.Equals(Entity.Null))
                     {
-                        if (Core.EntityManager.Exists(data.Item1))
+                        if (Core.EntityManager.Exists(data.Familiar))
                         {
                             float3 playerPos = player.Read<LocalToWorld>().Position;
                             float distance = UnityEngine.Vector3.Distance(familiar.Read<LocalToWorld>().Position, playerPos);
@@ -201,15 +210,69 @@ internal static class BuffSpawnSystemPatches
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;
-                    if (Plugin.BloodSystem.Value) BloodSystem.UpdateLegacy(killer, died);
-                    if (Plugin.ExpertiseSystem.Value) ExpertiseSystem.UpdateExpertise(killer, died);
-                    if (Plugin.LevelingSystem.Value) LevelingSystem.UpdateLeveling(killer, died);
+                    if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(killer, died);
+                    if (Plugin.ExpertiseSystem.Value) ExpertiseUtilities.UpdateExpertise(killer, died);
+                    if (Plugin.LevelingSystem.Value) PlayerLevelingUtilities.UpdateLeveling(killer, died);
                     if (Plugin.FamiliarSystem.Value)
                     {
-                        FamiliarLevelingSystem.UpdateFamiliar(killer, died);
-                        FamiliarUnlockSystem.HandleUnitUnlock(killer, died);
+                        FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
+                        FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
                     }
                 }
+                /*
+                if (entity.Read<Buff>().Target.Has<PlayerCharacter>() && entity.Read<EntityOwner>().Owner.Has<Follower>() && entity.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
+                {
+                    if (Plugin.FamiliarSystem.Value)
+                    {
+                        Follower follower = entity.Read<EntityOwner>().Owner.Read<Follower>();
+                        if (GameMode.Equals(GameModeType.PvE)) // always stop in PvE
+                        {
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            if (familiar != Entity.Null)
+                            {
+                                //Core.Log.LogInfo($"Destroying familiar damage event PvE...");
+                                Core.EntityManager.DestroyEntity(entity);
+                                continue;
+                            }
+                        }
+                        else if (ServerGameManager.TryGetBuff(entity.Read<Buff>().Target, pvpProtBuff.ToIdentifier(), out Entity _)) // account for KindredArenas <3
+                        {
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            if (familiar != Entity.Null)
+                            {
+                                //Core.Log.LogInfo($"Destroying familiar damage event PvP protected...");
+                                Core.EntityManager.DestroyEntity(entity);
+                                continue;
+                            }
+                        }
+                        else if (Parties && PreventFriendlyFire) // check for parties in PvP 
+                        {
+                            Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
+                            string targetName = entity.Read<Buff>().Target.Read<PlayerCharacter>().Name.Value;
+                            string ownerName = follower.Followed._Value.Read<PlayerCharacter>().Name.Value;
+
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            if (familiar != Entity.Null && playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
+                            {
+                                //Core.Log.LogInfo($"Destroying familiar damage event Parties & PreventFriendlyFire...");
+                                Core.EntityManager.DestroyEntity(entity);
+                                continue;
+                            }
+                        }
+                    }
+                } // stop debuff and other negative effects for parties and such
+                else if (Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                {
+                    Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
+                    string targetName = entity.Read<Buff>().Target.Read<PlayerCharacter>().Name.Value;
+                    string sourceName = entity.Read<EntityOwner>().Owner.Read<PlayerCharacter>().Name.Value;
+                    if (playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(sourceName)))
+                    {
+                        Core.EntityManager.DestroyEntity(entity);
+                        continue;
+                    }
+                }
+                */
             }
         }
         catch (Exception ex)
@@ -233,19 +296,14 @@ internal static class BuffSpawnSystemPatches
             {
                 EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                //Core.Log.LogInfo(enterShapeshiftEvent.Shapeshift.LookupName());
                 if (enterShapeshiftEvent.Shapeshift.Equals(dominateAbility))
                 {
                     Entity character = fromCharacter.Character;
                     Entity userEntity = fromCharacter.User;
                     ulong steamId = userEntity.Read<User>().PlatformId;
-
-                    //Core.Log.LogInfo("Dominate buff found, dismissing familiar if present and not disabled...");
-
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
                     if (familiar != Entity.Null && !familiar.Has<Disabled>())
                     {
-                        //Core.Log.LogInfo("Familiar found, dismissing...");
                         EmoteSystemPatch.CallDismiss(userEntity, character, steamId);
                     }
                 }
@@ -260,4 +318,45 @@ internal static class BuffSpawnSystemPatches
             entities.Dispose();
         }
     }
+    /*
+    [HarmonyPatch(typeof(HitCastColliderSystem_OnUpdate), nameof(HitCastColliderSystem_OnUpdate.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(HitCastColliderSystem_OnUpdate __instance)
+    {
+        NativeArray<Entity> entities = __instance.__query_911162766_0.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {                
+                if (entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Has<PlayerCharacter>())
+                {
+                    var hitTriggers = entity.ReadBuffer<HitTrigger>();
+                    if (Plugin.Parties.Value && Plugin.PreventFriendlyFire.Value) 
+                    {
+                        Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
+                        foreach (HitTrigger hitTrigger in hitTriggers)
+                        {
+                            hitTrigger.Target.LogComponentTypes();
+                            
+                            if (playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(sourceName)))
+                            {
+                                Core.Log.LogInfo("Friendly fire detected, removing hit trigger...");
+                                Core.EntityManager.DestroyEntity(entity);
+                            }
+                            
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo(ex);
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    */
 }

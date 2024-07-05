@@ -24,7 +24,7 @@ internal static class ScriptSpawnServerPatch
 
                 if (entity.Has<BloodBuff>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
-                    if (BloodSystem.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out BloodSystem.BloodType bloodType)) // applies stat choices to blood types when changed
+                    if (LegacyUtilities.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out LegacyUtilities.BloodType bloodType)) // applies stat choices to blood types when changed
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;
                         ModifyUnitStatBuffUtils.ApplyBloodBonuses(character, bloodType, entity);

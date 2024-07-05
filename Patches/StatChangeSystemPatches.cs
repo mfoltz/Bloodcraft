@@ -8,7 +8,10 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Experience.LevelingSystem;
+using Unity.Mathematics;
+using Unity.Transforms;
+using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities;
+using Random = System.Random;
 
 namespace Bloodcraft.Patches;
 
@@ -18,6 +21,8 @@ internal static class StatChangeSystemPatches
     static readonly Random Random = new();
     static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
+    static readonly PrefabGUID sctCombat = new(781573820);
     static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
     static readonly bool Parties = Plugin.Parties.Value;
     static readonly bool Familiars = Plugin.FamiliarSystem.Value;
@@ -43,7 +48,7 @@ internal static class StatChangeSystemPatches
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
                     BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
                     Blood blood = statChangeEvent.Entity.Read<Blood>();
-                    BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
+                    LegacyUtilities.BloodType bloodType = LegacyUtilities.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
                     ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
@@ -56,7 +61,7 @@ internal static class StatChangeSystemPatches
 
                     float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
 
-                    if (Plugin.PrestigeSystem.Value && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
+                    if (Plugin.PrestigeSystem.Value && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(LegacyUtilities.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
                     {
                         legacyKey = (float)bloodPrestige * Plugin.PrestigeBloodQuality.Value;
                         if (legacyKey > 0)
@@ -87,7 +92,7 @@ internal static class StatChangeSystemPatches
             entities.Dispose();
         }
     }
-    
+
     [HarmonyPatch(typeof(DealDamageSystem), nameof(DealDamageSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(DealDamageSystem __instance)
@@ -121,7 +126,7 @@ internal static class StatChangeSystemPatches
                     {
                         if (GameMode.Equals(GameModeType.PvE)) // always stop in PvE
                         {
-                            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null)
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event PvE...");
@@ -130,7 +135,7 @@ internal static class StatChangeSystemPatches
                         }
                         else if (ServerGameManager.TryGetBuff(dealDamageEvent.Target, pvpProtBuff.ToIdentifier(), out Entity _)) // account for KindredArenas <3
                         {
-                            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null)
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event PvP protected...");
@@ -143,7 +148,7 @@ internal static class StatChangeSystemPatches
                             string targetName = target.Name.Value;
                             string ownerName = follower.Followed._Value.Read<PlayerCharacter>().Name.Value;
 
-                            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null && playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event Parties & PreventFriendlyFire...");
@@ -189,6 +194,13 @@ internal static class StatChangeSystemPatches
                         }
                     }
                 }
+                /*
+                else if (Familiars && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner familiarEntityOwner) && familiarEntityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>())
+                {
+                    //ScrollingCombatTextMessage.Create
+                    ServerGameManager.CreateScrollingCombatText(dealDamageEvent.RawDamage, sctCombat, dealDamageEvent.Target.Read<Translation>().Value, follower.Followed._Value, default);
+                }
+                */
             }
             //Core.DamageEventSystem.DealDamageSystemEvents = __instance._Query.ToComponentDataArray<DealDamageEvent>(Allocator.TempJob);
             //Core.DamageEventSystem.OnUpdate();

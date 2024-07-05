@@ -6,7 +6,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Expertise.WeaponStats;
+using static Bloodcraft.Systems.Expertise.ExpertiseStats;
 using Bloodcraft.Services;
 
 namespace Bloodcraft.Commands;
@@ -23,7 +23,7 @@ internal static class WeaponCommands
         Entity character = ctx.Event.SenderCharacterEntity;
 
 
-        ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
+        ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
         
         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (handler == null)
@@ -34,11 +34,11 @@ internal static class WeaponCommands
 
         ulong steamID = ctx.Event.User.PlatformId;
         var ExpertiseData = handler.GetExpertiseData(steamID);
-        int progress = (int)(ExpertiseData.Value - ExpertiseSystem.ConvertLevelToXp(ExpertiseData.Key));
+        int progress = (int)(ExpertiseData.Value - ExpertiseUtilities.ConvertLevelToXp(ExpertiseData.Key));
         // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{ExpertiseSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
+            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{ExpertiseUtilities.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
 
             if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {
@@ -46,7 +46,7 @@ internal static class WeaponCommands
                 foreach (var stat in stats)
                 {
                     float bonus = ModifyUnitStatBuffUtils.CalculateScaledWeaponBonus(handler, steamID, weaponType, stat);
-                    string formattedBonus = WeaponStats.WeaponStatManager.StatFormatMap[stat] switch
+                    string formattedBonus = ExpertiseStats.WeaponStatManager.StatFormatMap[stat] switch
                     {
                         "integer" => ((int)bonus).ToString(),
                         "decimal" => bonus.ToString("F2"),
@@ -107,7 +107,7 @@ internal static class WeaponCommands
             return;
         }
 
-        if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weaponType, true, out var WeaponType))
+        if (!Enum.TryParse<ExpertiseUtilities.WeaponType>(weaponType, true, out var WeaponType))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon choice.");
             return;
@@ -116,7 +116,7 @@ internal static class WeaponCommands
         ulong steamID = ctx.Event.User.PlatformId;
         //ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
         
-        if (WeaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+        if (WeaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
             return;
@@ -152,10 +152,10 @@ internal static class WeaponCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         ulong steamID = ctx.Event.User.PlatformId;
-        ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
+        ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
        
-        if (weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole))
+        if (weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
             return;
@@ -177,7 +177,7 @@ internal static class WeaponCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats ({item.GetPrefabName()}x{quantity})");
+                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
                 return;
             }
             
@@ -218,7 +218,7 @@ internal static class WeaponCommands
             return;
         }
 
-        if (!Enum.TryParse<ExpertiseSystem.WeaponType>(weapon, true, out var weaponType))
+        if (!Enum.TryParse<ExpertiseUtilities.WeaponType>(weapon, true, out var weaponType))
         {
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {Plugin.MaxExpertiseLevel.Value}.");
             return;
@@ -234,7 +234,7 @@ internal static class WeaponCommands
 
         ulong steamId = foundUser.PlatformId;
 
-        var xpData = new KeyValuePair<int, float>(level, ExpertiseSystem.ConvertLevelToXp(level));
+        var xpData = new KeyValuePair<int, float>(level, ExpertiseUtilities.ConvertLevelToXp(level));
         expertiseHandler.UpdateExpertiseData(steamId, xpData);
         expertiseHandler.SaveChanges();
 
@@ -274,7 +274,8 @@ internal static class WeaponCommands
             LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
             return;
         }
-        string weaponTypes = string.Join(", ", Enum.GetNames(typeof(ExpertiseSystem.WeaponType)));
+        string weaponTypes = string.Join(", ", Enum.GetNames(typeof(ExpertiseUtilities.WeaponType)));
+        weaponTypes = weaponTypes.Replace("FishingPole", "");
         LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 

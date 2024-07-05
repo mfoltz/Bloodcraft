@@ -1,3 +1,9 @@
+`0.9.17`
+- familiar prestige limit should be working as intended now
+- added ShareUnlocks config option for familiars when killing with clanmates or party members, uses share exp distance for range, gives all players involved a roll
+- quests! 
+- nerfed plant bonus again
+
 `0.9.16`
 - familiar prestiging added (familiar prestiges, max familiar prestiges, familiar prestige stat multiplier added to config), choose extra stat per prestige (use .prfam and it will show stats if none have been entered and familiar is at max level)
 - familiars that use holy damage no longer hurt players when relevant

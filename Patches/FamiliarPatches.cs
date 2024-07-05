@@ -105,7 +105,7 @@ internal static class FamiliarPatches
                         ulong steamID = user.PlatformId;
                         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["Binding"] && Core.DataStructures.FamiliarActives.TryGetValue(steamID, out var data) && data.Item2.Equals(famKey.GuidHash))
                         {
-                            FamiliarSummonSystem.HandleFamiliar(user.LocalCharacter._Entity, entity);
+                            FamiliarSummonUtilities.HandleFamiliar(user.LocalCharacter._Entity, entity);
                             bools["Binding"] = false;
                             Core.DataStructures.SavePlayerBools();
                             LocalizationService.HandleServerReply(Core.EntityManager, user, $"Familiar bound: <color=green>{famKey.GetPrefabName()}</color>");
@@ -143,7 +143,7 @@ internal static class FamiliarPatches
                 {
                     if (entityOwner.Owner.Has<PlayerCharacter>() && entity.Read<PrefabGUID>().GuidHash.Equals(-986064531) || entity.Read<PrefabGUID>().GuidHash.Equals(985937733)) // player using waygate
                     {
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
+                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 
@@ -187,7 +187,7 @@ internal static class FamiliarPatches
                 if (entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
                 {
                     //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                     if (familiar != Entity.Null)
                     {
                         

@@ -20,6 +20,7 @@ internal class Plugin : BasePlugin
 
     // current paths
     public static readonly string PlayerLevelingPath = Path.Combine(ConfigFiles, "PlayerLeveling");
+    public static readonly string PlayerQuestsPath = Path.Combine(ConfigFiles, "Quests");
     public static readonly string PlayerExpertisePath = Path.Combine(ConfigFiles, "WeaponExpertise");
     public static readonly string PlayerBloodPath = Path.Combine(ConfigFiles, "BloodLegacies");
     public static readonly string PlayerProfessionPath = Path.Combine(ConfigFiles, "Professions");
@@ -29,8 +30,17 @@ internal class Plugin : BasePlugin
 
     // config entries
     private static ConfigEntry<string> _languageLocalization;
+    private static ConfigEntry<bool> _questSystem;
+    private static ConfigEntry<string> _questRewards;
+    private static ConfigEntry<string> _questRewardAmounts;
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _prestigeSystem;
+    private static ConfigEntry<bool> _exoPrestiging;
+    private static ConfigEntry<int> _exoPrestiges;
+    private static ConfigEntry<int> _exoPrestigeReward;
+    private static ConfigEntry<int> _exoPrestigeRewardQuantity;
+    private static ConfigEntry<float> _exoPrestigeDamageTakenMultiplier;
+    private static ConfigEntry<float> _exoPrestigeDamageDealtMultiplier;
     private static ConfigEntry<string> _prestigeBuffs;
     private static ConfigEntry<string> _prestigeLevelsToUnlockClassSpells;
     private static ConfigEntry<string> _bloodKnightBuffs;
@@ -114,6 +124,7 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<bool> _extraRecipes;
 
     private static ConfigEntry<bool> _familiarSystem;
+    private static ConfigEntry<bool> _shareUnlocks;
     private static ConfigEntry<bool> _familiarCombat;
     private static ConfigEntry<int> _maxFamiliarLevel;
     private static ConfigEntry<bool> _familiarPrestige;
@@ -155,8 +166,17 @@ internal class Plugin : BasePlugin
 
     // public getters, kinda verbose might just get rid of these
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
+    public static ConfigEntry<bool> QuestSystem => _questSystem;
+    public static ConfigEntry<string> QuestRewards => _questRewards;
+    public static ConfigEntry<string> QuestRewardAmounts => _questRewardAmounts;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
+    public static ConfigEntry<bool> ExoPrestiging => _exoPrestiging;
+    public static ConfigEntry<int> ExoPrestiges => _exoPrestiges;
+    public static ConfigEntry<int> ExoPrestigeReward => _exoPrestigeReward;
+    public static ConfigEntry<int> ExoPrestigeRewardQuantity => _exoPrestigeRewardQuantity;
+    public static ConfigEntry<float> ExoPrestigeDamageTakenMultiplier => _exoPrestigeDamageTakenMultiplier;
+    public static ConfigEntry<float> ExoPrestigeDamageDealtMultiplier => _exoPrestigeDamageDealtMultiplier;
     public static ConfigEntry<string> PrestigeBuffs => _prestigeBuffs;
     public static ConfigEntry<string> PrestigeLevelsToUnlockClassSpells => _prestigeLevelsToUnlockClassSpells;
     public static ConfigEntry<string> BloodKnightBuffs => _bloodKnightBuffs;
@@ -232,9 +252,9 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<bool> ProfessionSystem => _professionSystem;
     public static ConfigEntry<int> MaxProfessionLevel => _maxProfessionLevel;
     public static ConfigEntry<float> ProfessionMultiplier => _professionMultiplier;
-
     public static ConfigEntry<bool> ExtraRecipes => _extraRecipes;
     public static ConfigEntry<bool> FamiliarSystem => _familiarSystem;
+    public static ConfigEntry<bool> ShareUnlocks => _shareUnlocks;
     public static ConfigEntry<bool> FamiliarCombat => _familiarCombat;
     public static ConfigEntry<bool> FamiliarPrestige => _familiarPrestige;
     public static ConfigEntry<int> MaxFamiliarPrestiges => _maxFamiliarPrestiges;
@@ -271,7 +291,6 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<string> ArcaneSorcererSpells => _arcaneSorcererSpells;
     public static ConfigEntry<string> DeathMageWeapon => _deathMageWeapon;
     public static ConfigEntry<string> DeathMageBlood => _deathMageBlood;
-
     public static ConfigEntry<string> DeathMageSpells => _deathMageSpells;
 
     public override void Load()
@@ -315,7 +334,6 @@ internal class Plugin : BasePlugin
         }
     }
     */
-
     static void InitConfig()
     {
         foreach (string path in directoryPaths) // make sure directories exist
@@ -325,8 +343,17 @@ internal class Plugin : BasePlugin
 
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
 
+        _questSystem = InitConfigEntry("Config", "QuestSystem", false, "Enable or disable quests (requires professions for proper tracking of crafting quests, won't see those without it enabled).");
+        _questRewards = InitConfigEntry("Config", "QuestRewards", "2103989354,576389135,28358550", "The PrefabGUID hashes for quest reward pool.");
+        _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "250,100,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies.");
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
+        _exoPrestiging = InitConfigEntry("Config", "ExoPrestiging", false, "Enable or disable exo prestiges (need to max normal prestiges first).");
+        _exoPrestiges = InitConfigEntry("Config", "ExoPrestiges", 100, "The number of exo prestiges available.");
+        _exoPrestigeReward = InitConfigEntry("Config", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default). Number of this item rewarded will be multiplied by level of exo prestige.");
+        _exoPrestigeRewardQuantity = InitConfigEntry("Config", "ExoPrestigeRewardQuantity", 50, "The quantity of the reward for exo prestiging.");
+        _exoPrestigeDamageTakenMultiplier = InitConfigEntry("Config", "ExoPrestigeDamageMultiplier", 0.05f, "The damage multiplier per exo prestige (applies to damage taken by the player).");
+        _exoPrestigeDamageDealtMultiplier = InitConfigEntry("Config", "ExoPrestigeDamageDealtMultiplier", 0.025f, "The damage multiplier per exo prestige (applies to damage dealt by the player).");
         _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
         _prestigeLevelsToUnlockClassSpells = InitConfigEntry("Config", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.");
 
@@ -374,7 +401,7 @@ internal class Plugin : BasePlugin
         _maxExpertisePrestiges = InitConfigEntry("Config", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise.");
         _unarmedSlots = InitConfigEntry("Config", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots.");
         _shiftSlots = InitConfigEntry("Config", "ShiftSlot", false, "Enable or disable using class spell on shift.");
-        _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 99, "The maximum level a player can reach in weapon expertise.");
+        _maxExpertiseLevel = InitConfigEntry("Config", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise.");
         _unitExpertiseMultiplier = InitConfigEntry("Config", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units.");
         _vBloodExpertiseMultiplier = InitConfigEntry("Config", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods.");
         _expertiseStatChoices = InitConfigEntry("Config", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise.");
@@ -398,7 +425,7 @@ internal class Plugin : BasePlugin
         _maxLegacyPrestiges = InitConfigEntry("Config", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies.");
         _bloodQualityBonus = InitConfigEntry("Config", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using presige, legacy level will be used with _prestigeBloodQuality multiplier below).");
         _prestigeBloodQuality = InitConfigEntry("Config", "PrestigeBloodQuality", 5f, "Blood quality bonus per prestige legacy level.");
-        _maxBloodLevel = InitConfigEntry("Config", "MaxBloodLevel", 99, "The maximum level a player can reach in blood legacies.");
+        _maxBloodLevel = InitConfigEntry("Config", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies.");
         _unitLegacyMultiplier = InitConfigEntry("Config", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units.");
         _vBloodLegacyMultipler = InitConfigEntry("Config", "VBloodLegacyMultipler", 5f, "The multiplier for lineage gained from VBloods.");
         _legacyStatChoices = InitConfigEntry("Config", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy.");
@@ -419,11 +446,12 @@ internal class Plugin : BasePlugin
         _bloodEfficiency = InitConfigEntry("Config", "BloodEfficiency", 0.10f, "The base cap for blood efficiency.");
 
         _professionSystem = InitConfigEntry("Config", "ProfessionSystem", false, "Enable or disable the profession system.");
-        _maxProfessionLevel = InitConfigEntry("Config", "MaxProfessionLevel", 99, "The maximum level a player can reach in professions.");
+        _maxProfessionLevel = InitConfigEntry("Config", "MaxProfessionLevel", 100, "The maximum level a player can reach in professions.");
         _professionMultiplier = InitConfigEntry("Config", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained.");
         _extraRecipes = InitConfigEntry("Config", "ExtraRecipes", false, "Enable or disable extra recipes.");
 
         _familiarSystem = InitConfigEntry("Config", "FamiliarSystem", false, "Enable or disable the familiar system.");
+        _shareUnlocks = InitConfigEntry("Config", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance).");
         _familiarCombat = InitConfigEntry("Config", "FamiliarCombat", true, "Enable or disable combat for familiars.");
         _familiarPrestige = InitConfigEntry("Config", "FamiliarPrestige", false, "Enable or disable the prestige system for familiars.");
         _maxFamiliarPrestiges = InitConfigEntry("Config", "MaxFamiliarPrestiges", 10, "The maximum number of prestiges a familiar can reach.");
@@ -504,6 +532,10 @@ internal class Plugin : BasePlugin
         if (SoftSynergies.Value || HardSynergies.Value)
         {
             Core.DataStructures.LoadPlayerClasses();
+        }
+        if (QuestSystem.Value)
+        {
+            Core.DataStructures.LoadPlayerQuests();
         }
         if (LevelingSystem.Value)
         {
@@ -611,6 +643,7 @@ internal class Plugin : BasePlugin
     static readonly List<string> directoryPaths =
         [
         ConfigFiles,
+        PlayerQuestsPath,
         PlayerLevelingPath,
         PlayerExpertisePath,
         PlayerBloodPath,

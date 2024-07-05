@@ -43,8 +43,8 @@ internal class FamiliarService
         });
         List<int> unitBans = Core.ParseConfigString(Plugin.BannedUnits.Value);
         List<string> typeBans = Plugin.BannedTypes.Value.Split(',').Select(s => s.Trim()).ToList();
-        if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
-        if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
+        if (unitBans.Count > 0) FamiliarUnlockUtilities.ExemptPrefabs = unitBans;
+        if (typeBans.Count > 0) FamiliarUnlockUtilities.ExemptTypes = typeBans;
         HandleFamiliarsOnSpawn();
         Core.StartCoroutine(CleanUpMinions());
     }
@@ -97,7 +97,7 @@ internal class FamiliarService
     void FindAndHandleFamiliarMinions()
     {
         NativeArray<Entity> minions = minionQuery.ToEntityArray(Allocator.Temp);
-        HashSet<Entity> players = [..PlayerService.playerCache.Values];
+        HashSet<Entity> players = [..PlayerService.playerNameCache.Values];
         var unholyPrefix = "char_unholy";
         try
         {
@@ -109,7 +109,7 @@ internal class FamiliarService
                 {
                     if (ServerGameManager.IsAllies(minion, player))
                     {
-                        Core.Log.LogInfo($"Destroying minion {minionName}...");
+                        //Core.Log.LogInfo($"Destroying minion {minionName}...");
                         DestroyUtility.CreateDestroyEvent(Core.EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
                         break;
                     }

@@ -1,15 +1,13 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
-using Unity.Collections;
-using Bloodcraft.Systems.Expertise;
 
 namespace Bloodcraft.Commands;
 internal static class FamiliarCommands
@@ -30,7 +28,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
-        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
 
         if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
         {
@@ -52,7 +50,7 @@ internal static class FamiliarCommands
             return;
         }
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Item1.Equals(Entity.Null) && data.Item2.Equals(0) && Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
+        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
             Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
             if (choice < 1 || choice > famKeys.Count)
@@ -63,7 +61,7 @@ internal static class FamiliarCommands
             data = new(Entity.Null, famKeys[choice - 1]);
             Core.DataStructures.FamiliarActives[steamId] = data;
             Core.DataStructures.SavePlayerFamiliarActives();
-            FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[choice -1]);
+            FamiliarSummonUtilities.SummonFamiliar(character, userEntity, famKeys[choice -1]);
             //character.Add<AlertAllies>();
             
         }
@@ -78,7 +76,7 @@ internal static class FamiliarCommands
     {
         ulong steamId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
 
         if (familiar != Entity.Null)
         {
@@ -88,7 +86,7 @@ internal static class FamiliarCommands
             Core.DataStructures.SavePlayerFamiliarActives();
             LocalizationService.HandleReply(ctx, "Familiar unbound.");
         }
-        else if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Item1.Equals(Entity.Null) && !data.Item2.Equals(0))
+        else if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Familiar.Equals(Entity.Null) && !data.FamKey.Equals(0))
         {
             LocalizationService.HandleReply(ctx, "Couldn't find familiar, assuming dead and unbinding...");
 
@@ -121,7 +119,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
         string set = Core.DataStructures.FamiliarSet[steamId];
-        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && data.UnlockedFamiliars.TryGetValue(set, out var famKeys))
+        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var _) && data.UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
             int count = 1;
             foreach (var famKey in famKeys)
@@ -231,19 +229,19 @@ internal static class FamiliarCommands
         if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count < 10)
         {
             // Remove the old set
-            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Item2.Equals(0))
+            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && !actives.FamKey.Equals(0))
             {
                 var keys = data.UnlockedFamiliars.Keys;
                 foreach (var key in keys)
                 {
-                    if (data.UnlockedFamiliars[key].Contains(actives.Item2))
+                    if (data.UnlockedFamiliars[key].Contains(actives.FamKey))
                     {
-                        data.UnlockedFamiliars[key].Remove(actives.Item2);
-                        familiarSet.Add(actives.Item2);
+                        data.UnlockedFamiliars[key].Remove(actives.FamKey);
+                        familiarSet.Add(actives.FamKey);
                         Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
                     }
                 }
-                PrefabGUID PrefabGUID = new(actives.Item2);
+                PrefabGUID PrefabGUID = new(actives.FamKey);
                 LocalizationService.HandleReply(ctx, $"<color=green>{PrefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
             }
         }
@@ -253,17 +251,26 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "addFamiliar", shortHand: "af", adminOnly: true, usage: ".af [PrefabGUID]", description: "Unit testing.")]
-    public static void AddFamiliar(ChatCommandContext ctx, int unit)
+    [Command(name: "addFamiliar", shortHand: "af", adminOnly: true, usage: ".af [Name] [PrefabGUID]", description: "Unit testing.")]
+    public static void AddFamiliar(ChatCommandContext ctx, string name, int unit)
     {
         if (!Plugin.FamiliarSystem.Value)
         {
             LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
         }
-        ulong steamId = ctx.User.PlatformId;
+
+        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
+        if (foundUserEntity.Equals(Entity.Null))
+        {
+            LocalizationService.HandleReply(ctx, "Player not found.");
+            return;
+        }
+
+        User foundUser = foundUserEntity.Read<User>();
+        ulong steamId = foundUser.PlatformId;
         UnlockedFamiliarData data = Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
-        if (Core.DataStructures.FamiliarSet.TryGetValue(steamId, out var activeSet) && activeSet.Length < 10)
+        if (Core.DataStructures.FamiliarSet.TryGetValue(steamId, out var activeSet))
         {
             // Remove the old set
             if (Core.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(unit), out var Entity))
@@ -288,7 +295,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Set full, choose another.");
+            LocalizationService.HandleReply(ctx, "No active set found to add to for player (unlock at least 1 unit to create one or make sure it is set as their active set)");
         }
     }
 
@@ -421,18 +428,18 @@ internal static class FamiliarCommands
 
         if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.FamKey.Equals(0))
         {
-            var xpData = FamiliarLevelingSystem.GetFamiliarExperience(steamId, data.FamKey);
-            int progress = (int)(xpData.Value - FamiliarLevelingSystem.ConvertLevelToXp(xpData.Key));
-            int percent = FamiliarLevelingSystem.GetLevelProgress(steamId, data.FamKey);
+            var xpData = FamiliarLevelingUtilities.GetFamiliarExperience(steamId, data.FamKey);
+            int progress = (int)(xpData.Value - FamiliarLevelingUtilities.ConvertLevelToXp(xpData.Key));
+            int percent = FamiliarLevelingUtilities.GetLevelProgress(steamId, data.FamKey);
 
-            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
+            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
 
             int prestigeLevel = 0;
-            FamiliarPrestigeData prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
+            FamiliarPrestigeData prestigeData = Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
             if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
             {
                 prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
-                FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
+                Core.FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
             }
             else
             {
@@ -489,15 +496,15 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.Item2.Equals(0))
+        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.FamKey.Equals(0))
         {
             Entity player = ctx.Event.SenderCharacterEntity;
-            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
-            KeyValuePair<int, float> newXP = new(level, FamiliarLevelingSystem.ConvertLevelToXp(level));
-            FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
+            KeyValuePair<int, float> newXP = new(level, FamiliarLevelingUtilities.ConvertLevelToXp(level));
+            FamiliarExperienceData xpData = Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId);
             xpData.FamiliarExperience[data.FamKey] = newXP;
-            FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
-            FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, level);
+            Core.FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
+            FamiliarSummonUtilities.HandleFamiliarModifications(player, familiar, level);
             LocalizationService.HandleReply(ctx, $"Your familiar has been set to level <color=white>{level}</color>.");
 
         }
@@ -526,27 +533,27 @@ internal static class FamiliarCommands
 
         if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && !data.FamKey.Equals(0))
         {
-            FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(ctx.Event.User.PlatformId);
+            FamiliarExperienceData xpData = Core.FamiliarExperienceManager.LoadFamiliarExperience(ctx.Event.User.PlatformId);
             if (xpData.FamiliarExperience[data.FamKey].Key >= Plugin.MaxFamiliarLevel.Value)
             {
-                FamiliarPrestigeData prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
+                FamiliarPrestigeData prestigeData = Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
                 if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
                 {
                     prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
-                    FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
+                    Core.FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
                 }
 
-                prestigeData = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
-                List<FamiliarSummonSystem.FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
+                prestigeData = Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
+                List<FamiliarSummonUtilities.FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
                 
-                if (stats.Count < FamiliarSummonSystem.familiarStatCaps.Count) // if less than max stats, parse entry and add if set doesnt already contain
+                if (stats.Count < FamiliarSummonUtilities.familiarStatCaps.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
-                    if (!FamiliarSummonSystem.TryParseFamiliarStat(bonusStat, out var stat))
+                    if (!FamiliarSummonUtilities.TryParseFamiliarStat(bonusStat, out var stat))
                     {
-                        var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarSummonSystem.FamiliarStatType))
-                        .Cast<FamiliarSummonSystem.FamiliarStatType>()
+                        var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarSummonUtilities.FamiliarStatType))
+                        .Cast<FamiliarSummonUtilities.FamiliarStatType>()
                         .Select(stat =>
-                            $"<color=#00FFFF>{stat}</color>: <color=white>{FamiliarSummonSystem.familiarStatCaps[stat]}</color>")
+                            $"<color=#00FFFF>{stat}</color>: <color=white>{FamiliarSummonUtilities.familiarStatCaps[stat]}</color>")
                         .ToArray();
 
                         int halfLength = familiarStatsWithCaps.Length / 2;
@@ -569,30 +576,35 @@ internal static class FamiliarCommands
                         return;
                     }
                 }
-                else if (stats.Count >= FamiliarSummonSystem.familiarStatCaps.Count && !string.IsNullOrEmpty(bonusStat))
+                else if (stats.Count >= FamiliarSummonUtilities.familiarStatCaps.Count && !string.IsNullOrEmpty(bonusStat))
                 {
                     LocalizationService.HandleReply(ctx, "Familiar already has max bonus stats, try again without entering a stat.");
                     return;
                 }
 
-                KeyValuePair<int, float> newXP = new(1, FamiliarLevelingSystem.ConvertLevelToXp(1)); // reset level to 1
+                KeyValuePair<int, float> newXP = new(1, FamiliarLevelingUtilities.ConvertLevelToXp(1)); // reset level to 1
                 xpData.FamiliarExperience[data.FamKey] = newXP;
-                FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
+                Core.FamiliarExperienceManager.SaveFamiliarExperience(steamId, xpData);
+
+                if (prestigeData.FamiliarPrestige[data.FamKey].Key >= Plugin.MaxFamiliarPrestiges.Value)
+                {
+                    LocalizationService.HandleReply(ctx, "Familiar is already at max prestige!");
+                    return;
+                }
+
                 int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
                 prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
-                FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
+                Core.FamiliarPrestigeManager.SaveFamiliarPrestige(steamId, prestigeData);
 
                 Entity player = ctx.Event.SenderCharacterEntity;
-                Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
-                FamiliarSummonSystem.HandleFamiliarModifications(player, familiar, newXP.Key);
+                Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
+                FamiliarSummonUtilities.HandleFamiliarModifications(player, familiar, newXP.Key);
                 LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
-
             }
             else
             {
                 LocalizationService.HandleReply(ctx, $"Familiar must be at max level (<color=white>{Plugin.MaxFamiliarLevel.Value}</color>) to prestige.");
             }
-
         }
         else
         {
