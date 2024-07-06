@@ -7,7 +7,7 @@ using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
 {
-    [CommandGroup(name: "prestige", ".prestige")]
+    [CommandGroup(name: "prestige")]
     class PrestigeCommands
     {
         static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
@@ -16,7 +16,7 @@ namespace Bloodcraft.Commands
         static readonly bool PlayerParties = Plugin.Parties.Value;
         static readonly bool Prestige = Plugin.PrestigeSystem.Value;
 
-        [Command(name: "me", shortHand: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
+        [Command(name: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
         public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
             if (!Prestige)
@@ -60,7 +60,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "set", shortHand: "set", adminOnly: true, usage: ".prestige set [PlayerID] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
+        [Command(name: "set", adminOnly: true, usage: ".prestige set [PlayerID] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
         public static void SetPlayerPrestigeCommand(ChatCommandContext ctx, string name, string prestigeType, int level)
         {
             if (!Prestige)
@@ -228,7 +228,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "get", shortHand: "get", adminOnly: false, usage: ".prestige get [PrestigeType]", description: "Shows information about player's prestige status.")]
+        [Command(name: "get", adminOnly: false, usage: ".prestige get [PrestigeType]", description: "Shows information about player's prestige status.")]
         public static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
         {
             if (!Prestige)

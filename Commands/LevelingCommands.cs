@@ -7,14 +7,14 @@ using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
 {
-    [CommandGroup(name:"level", ".lvl")]
+    [CommandGroup(name:"level", "lvl")]
 internal static class LevelingCommands
 {
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
     static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
 
  
-    [Command(name: "log", shortHand: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
+    [Command(name: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
         if (!Leveling)
@@ -32,7 +32,7 @@ internal static class LevelingCommands
         LocalizationService.HandleReply(ctx, $"Leveling experience logging {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "get", shortHand: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
+    [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
     public static void GetLevelCommand(ChatCommandContext ctx)
     {
         if (!Leveling)
@@ -54,7 +54,7 @@ internal static class LevelingCommands
         }
     }
 
-    [Command(name: "set", shortHand: "set", adminOnly: true, usage: ".lvl set [Player] [Level]", description: "Sets player level.")]
+    [Command(name: "set", adminOnly: true, usage: ".lvl set [Player] [Level]", description: "Sets player level.")]
     public static void SetLevelCommand(ChatCommandContext ctx, string name, int level)
     {
         if (!Leveling)

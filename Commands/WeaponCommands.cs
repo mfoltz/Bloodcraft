@@ -10,7 +10,7 @@ using static Bloodcraft.Systems.Expertise.WeaponStats;
 using Bloodcraft.Services;
 
 namespace Bloodcraft.Commands
-{ [CommandGroup(name: "weapon", ".wep")] 
+{ [CommandGroup(name: "weapon", "wep")] 
     internal static class WeaponCommands
 {
     [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 

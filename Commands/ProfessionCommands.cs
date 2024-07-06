@@ -6,7 +6,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Bloodcraft.Commands
-{ [CommandGroup(name: "profession", ".prof")] 
+{ [CommandGroup(name: "profession", "prof")] 
 internal static class ProfessionCommands
 {
     [Command(name: "logprogress", shortHand: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
