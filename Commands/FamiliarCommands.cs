@@ -9,8 +9,8 @@ using VampireCommandFramework;
 using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
 
-namespace Bloodcraft.Commands
-{
+namespace Bloodcraft.Commands;
+
     [CommandGroup(name: "familiar", "fam")]
     internal static class FamiliarCommands
     {
@@ -323,7 +323,7 @@ namespace Bloodcraft.Commands
         }
     }
 
-    [Command(name: "toggle", shortHand: "toggle", usage: ".fam toggle", description: "Calls or dismisses familar.", adminOnly: false)]
+    [Command(name: "toggle", usage: ".fam toggle", description: "Calls or dismisses familar.", adminOnly: false)]
     public static void ToggleFamiliar(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -600,7 +600,7 @@ namespace Bloodcraft.Commands
     }
 
 
-    [Command(name: "reset", shortHand: "reset", adminOnly: false, usage: ".fam reset", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
+    [Command(name: "reset", adminOnly: false, usage: ".fam reset", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
     public static void ResetFamiliars(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -629,4 +629,4 @@ namespace Bloodcraft.Commands
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
     }
-}
+

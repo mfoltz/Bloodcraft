@@ -9,9 +9,9 @@ using static Bloodcraft.Systems.Experience.LevelingSystem;
 using static Bloodcraft.Systems.Expertise.WeaponStats.WeaponStatManager;
 using static Bloodcraft.Systems.Legacies.BloodStats.BloodStatManager;
 
-namespace Bloodcraft.Commands
-{
-    [CommandGroup("class", "class")]
+namespace Bloodcraft.Commands;
+
+    [CommandGroup("class")]
     class ClassCommands
     {
         static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
@@ -114,7 +114,7 @@ namespace Bloodcraft.Commands
             }
         }
 
-        [Command(name: "change", shortHand: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
+        [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
         public static void ClassChangeCommand(ChatCommandContext ctx, string className)
         {
             if (!SoftSynergies && !HardSynergies)
@@ -363,4 +363,4 @@ namespace Bloodcraft.Commands
             }
         }
     }
-}
+

@@ -9,9 +9,8 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Legacies.BloodStats;
 
-namespace Bloodcraft.Commands
+namespace Bloodcraft.Commands;
 
-{
     [CommandGroup("bloodlegacy", "blg")]
     public static class BloodCommands
     { 
@@ -214,7 +213,7 @@ namespace Bloodcraft.Commands
         LocalizationService.HandleReply(ctx, $"Available blood stats (2/2): {bloodStatsLine2}");
     }
 
-    [Command(name: "set", shortHand: "set", adminOnly: true, usage: ".blg set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
+    [Command(name: "set", adminOnly: true, usage: ".blg set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
     public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
     {
         if (!Plugin.BloodSystem.Value)
@@ -269,5 +268,4 @@ namespace Bloodcraft.Commands
         string bloodTypesList = string.Join(", ", bloodTypes);
         LocalizationService.HandleReply(ctx, $"Available Blood Legacies: <color=red>{bloodTypesList}</color>");
     }
-}
 }

@@ -4,7 +4,7 @@ using static Bloodcraft.Systems.Experience.LevelingSystem.PartyUtilities;
 
 namespace Bloodcraft.Commands
 {
-    [CommandGroup(name: "party", ".party")]
+    [CommandGroup(name: "party")]
     internal static class PartyCommands
     {
         static readonly bool PlayerParties = Plugin.Parties.Value;
