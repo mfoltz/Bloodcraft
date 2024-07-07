@@ -9,11 +9,11 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Core.DataStructures;
 
-namespace Bloodcraft.Commands
+namespace Bloodcraft.Commands;
+
+[CommandGroup(name: "familiar", "fam")]
+internal static class FamiliarCommands
 {
-    [CommandGroup(name: "familiar", "fam")]
-    internal static class FamiliarCommands
-    {
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -63,7 +63,7 @@ namespace Bloodcraft.Commands
             data = new(Entity.Null, famKeys[choice - 1]);
             Core.DataStructures.FamiliarActives[steamId] = data;
             Core.DataStructures.SavePlayerFamiliarActives();
-            FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[choice -1]);
+            FamiliarSummonUtilities.SummonFamiliar(character, userEntity, famKeys[choice -1]);
             //character.Add<AlertAllies>();
 
         }
@@ -253,8 +253,8 @@ namespace Bloodcraft.Commands
         }
     }
 
-    [Command(name: "add", shortHand: "a", adminOnly: true, usage: ".fam a [PrefabGUID]", description: "Unit testing.")]
-    public static void AddFamiliar(ChatCommandContext ctx, int unit)
+    [Command(name: "add", shortHand: "a", adminOnly: true, usage: ".fam a [Name] [PrefabGUID]", description: "Unit testing.")]
+    public static void AddFamiliar(ChatCommandContext ctx, string name, int unit)
     {
         if (!Plugin.FamiliarSystem.Value)
         {
@@ -546,7 +546,7 @@ namespace Bloodcraft.Commands
 
                 prestigeData = Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamId);
                 List<FamiliarSummonUtilities.FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
-                
+            
                 if (stats.Count < FamiliarSummonUtilities.familiarStatCaps.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
                     if (!FamiliarSummonUtilities.TryParseFamiliarStat(bonusStat, out var stat))
@@ -641,6 +641,5 @@ namespace Bloodcraft.Commands
             }
         }
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
-    }
     }
 }

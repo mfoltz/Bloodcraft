@@ -204,10 +204,15 @@ internal static class PlayerLevelingUtilities
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
         //Core.Log.LogInfo($"Gained XP after applying scaling factor: {gainedXP}");
+        
         if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
+            int exoLevel = prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Exo, out var exo) ? exo : 0;
             float expReductionFactor = 1 - (Plugin.LevelingPrestigeReducer.Value * PrestigeData);
-            gainedXP *= expReductionFactor;
+            if (exoLevel == 0)
+            {
+                gainedXP *= expReductionFactor;
+            }
         }
         //Core.Log.LogInfo($"Gained XP after reducing for prestige: {gainedXP}");
         if (UnitSpawnerMultiplier < 1 && victimEntity.Has<IsMinion>() && victimEntity.Read<IsMinion>().Value)

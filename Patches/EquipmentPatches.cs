@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
@@ -7,14 +6,12 @@ using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
-using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.ExpertiseStats.WeaponStatManager;
 using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
-using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -26,6 +23,7 @@ internal static class EquipmentPatches
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
     static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
     static readonly bool Professions = Plugin.ProfessionSystem.Value;
+    static readonly bool Quests = Plugin.QuestSystem.Value;
 
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -86,7 +84,7 @@ internal static class EquipmentPatches
                     Entity character = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(character);
                 }
-                else if (!Leveling && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                else if (!Leveling && Expertise && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     ulong steamId = entity.Read<EntityOwner>().Owner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
@@ -334,9 +332,11 @@ internal static class EquipmentPatches
                 if (!Core.hasInitialized) continue;
                 InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
+                //inventory.LogComponentTypes();
+                //inventory.Read<InventoryConnection>().InventoryOwner.LogComponentTypes();
                 if (Professions && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
                 {
-                    Core.Log.LogInfo(inventoryChangedEvent.Item.LookupName());
+                    //Core.Log.LogInfo("professions reactinventory" + inventoryChangedEvent.Item.LookupName());
                     Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
                     PrefabGUID itemPrefab = inventoryChangedEvent.Item;
 
@@ -347,9 +347,10 @@ internal static class EquipmentPatches
                     }
 
                     ulong steamId = userEntity.Read<User>().PlatformId;
-                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(inventoryChangedEvent.Item, "");
+                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(userEntity, out var playerJobs) && playerJobs.TryGetValue(itemPrefab, out int credits) && credits > 0)
                     {
+                        //Core.Log.LogInfo($"job processing for {itemPrefab.LookupName()}, credits: {credits}");
                         credits--;
                         if (credits == 0)
                         {
@@ -401,7 +402,18 @@ internal static class EquipmentPatches
                                     break;
                             }
                         }
-                        
+                    }
+                }
+                else if (Quests && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
+                {
+                    //Core.Log.LogInfo("quest reactinventory" + inventoryChangedEvent.Item.LookupName());
+                    if (!inventoryChangedEvent.Item.LookupName().Contains("Item_Ingredient")) continue;
+                    Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity;
+                    User user = userEntity.Read<User>();
+                    ulong steamId = user.PlatformId;
+                    if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData))
+                    {
+                        QuestUtilities.UpdateQuestProgress(questData, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, user);
                     }
                 }
             }

@@ -8,9 +8,10 @@ using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
 
 namespace Bloodcraft.Commands;
 
+[CommandGroup(name: "quest", "quest")]
 internal static class QuestCommands
 {
-    [Command(name: "logQuestProgress", shortHand: "log q", adminOnly: false, usage: ".log q", description: "Toggles quest progress logging.")]
+    [Command(name: "logquest", shortHand: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
     public static void LogQuestCommand(ChatCommandContext ctx)
     {
         if (!Plugin.QuestSystem.Value || !Plugin.ProfessionSystem.Value || !Plugin.LevelingSystem.Value)
@@ -29,7 +30,7 @@ internal static class QuestCommands
         LocalizationService.HandleReply(ctx, $"Quest logging is now {(bools["QuestLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "getDailyQuestProgress", shortHand: "get dq", adminOnly: false, usage: ".get dq", description: "Display your current daily quest progress.")]
+    [Command(name: "getdaily", shortHand: "daily", adminOnly: false, usage: ".quest daily", description: "Display your current daily quest progress.")]
     public static void DailyQuestProgressCommand(ChatCommandContext ctx)
     {
         if (!Plugin.QuestSystem.Value)
@@ -60,7 +61,7 @@ internal static class QuestCommands
         }
     }
 
-    [Command(name: "getWeeklyQuestProgress", shortHand: "get wq", adminOnly: false, usage: ".get wq", description: "Display your current weekly quest progress.")]
+    [Command(name: "getweekly", shortHand: "weekly", adminOnly: false, usage: ".quest weekly", description: "Display your current weekly quest progress.")]
     public static void WeeklyQuestProgressCommand(ChatCommandContext ctx)
     {
         if (!Plugin.QuestSystem.Value)
@@ -91,7 +92,7 @@ internal static class QuestCommands
             LocalizationService.HandleReply(ctx, "You don't have any quests yet.");
         }
     }
-    [Command(name: "ForceRefreshPlayerQuests", shortHand: "refresh", adminOnly: true, usage: ".refresh [Name]", description: "Display your current weekly quest progress.")]
+    [Command(name: "forcerefresh", shortHand: "refresh", adminOnly: true, usage: ".quest refresh [Name]", description: "Display your current weekly quest progress.")]
     public static void ForceRefreshQuests(ChatCommandContext ctx, string name)
     {
         if (!Plugin.QuestSystem.Value)

@@ -259,11 +259,6 @@ public static class PrestigeUtilities
             }
         }
     }
-
-    static void HandleExoPrestige(ChatCommandContext ctx)
-    {
-        
-    }
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);

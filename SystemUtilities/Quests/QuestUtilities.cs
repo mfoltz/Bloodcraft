@@ -149,6 +149,8 @@ internal static class QuestUtilities
             {
                 if (IsWithinLevelRange(tierCheck, playerLevel, EquipmentTierLevelRangeMap))
                 {
+                    string nameCheck = prefabGUID.LookupName();
+                    if (nameCheck.Contains("T01_Bone") || nameCheck.Contains("Item_Cloak")) continue;
                     prefabs.Add(prefabGUID);
                 }
             }
@@ -224,6 +226,15 @@ internal static class QuestUtilities
                 break;
             case QuestGoal.Craft:
                 targets = GetCraftPrefabsForLevel(level);
+                if (targets.Count == 0) // fallback to kill quest if none found for lower level players
+                {
+                    goal = QuestGoal.Kill;
+                    targets = GetKillPrefabsForLevel(level);
+                    target = targets.ElementAt(random.Next(targets.Count));
+                    if (questType.Equals(QuestType.Weekly)) requiredAmount = target.LookupName().ToLower().Contains("vblood") ? random.Next(5, 10) * 2 : random.Next(5, 10) * QuestMultipliers[questType];
+                    else requiredAmount = random.Next(5, 10) * QuestMultipliers[questType];
+                    break;
+                }
                 target = targets.ElementAt(random.Next(targets.Count));
                 requiredAmount = random.Next(10, 15) * QuestMultipliers[questType];
                 break;
@@ -296,7 +307,7 @@ internal static class QuestUtilities
             {
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
-                if (Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["QuestLogging"])
+                if (Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["QuestLogging"] && !quest.Value.Objective.Complete)
                 {
                     string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> <color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> [<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
                     LocalizationService.HandleServerReply(EntityManager, user, message);

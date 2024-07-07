@@ -1,279 +1,364 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 
-namespace Bloodcraft.Commands
+namespace Bloodcraft.Commands;
+
+[CommandGroup(name: "prestige", "prestige")]
+internal static class PrestigeCommands
 {
-    [CommandGroup(name: "prestige", ".prestige")]
-    class PrestigeCommands
+    static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
+    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
+    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
+    static readonly bool ExoPrestige = Plugin.ExoPrestiging.Value;
+
+    [Command(name: "playerpr", shortHand: "pr", adminOnly: false, usage: ".prestige pr [PrestigeType]", description: "Handles player prestiging.")]
+    public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
     {
-        static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
-        static readonly bool HardSynergies = Plugin.HardSynergies.Value;
-        static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
-        static readonly bool PlayerParties = Plugin.Parties.Value;
-        static readonly bool Prestige = Plugin.PrestigeSystem.Value;
-
-        [Command(name: "me", shortHand: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
-        public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
+        if (!Prestige)
         {
-            if (!Prestige)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-                return;
-            }
-
-            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
-                return;
-            }
-
-            if ((SoftSynergies || HardSynergies) &&
-                Core.DataStructures.PlayerClasses.TryGetValue(ctx.Event.User.PlatformId, out var classes) &&
-                classes.Keys.Count == 0 &&
-                parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
-            {
-                LocalizationService.HandleReply(ctx, "You must choose a class before prestiging in experience.");
-                return;
-            }
-
-            var steamId = ctx.Event.User.PlatformId;
-            var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
-
-            if (handler == null)
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige type.");
-                return;
-            }
-
-            var xpData = handler.GetExperienceData(steamId);
-            if (PrestigeSystem.CanPrestige(steamId, parsedPrestigeType, xpData.Key))
-            {
-                PrestigeSystem.PerformPrestige(ctx, steamId, parsedPrestigeType, handler);
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
-            }
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
         }
 
-        [Command(name: "set", shortHand: "set", adminOnly: true, usage: ".prestige set [PlayerID] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
-        public static void SetPlayerPrestigeCommand(ChatCommandContext ctx, string name, string prestigeType, int level)
+        if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            if (!Prestige)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-                return;
-            }
-
-            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige type, use .lpp to see options.");
-                return;
-            }
-
-            Entity userEntity = PlayerService.GetUserByName(name, true);
-            ulong playerId = userEntity.Read<User>().PlatformId;
-
-            if ((SoftSynergies || HardSynergies) &&
-                Core.DataStructures.PlayerClasses.TryGetValue(playerId, out var classes) &&
-                classes.Keys.Count == 0 &&
-                parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
-            {
-                LocalizationService.HandleReply(ctx, "The player must choose a class before prestiging in experience.");
-                return;
-            }
-
-            var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
-
-            if (handler == null)
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige type.");
-                return;
-            }
-
-            if (!Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestigeData))
-            {
-                prestigeData = [];
-                Core.DataStructures.PlayerPrestiges[playerId] = prestigeData;
-            }
-
-            if (!prestigeData.ContainsKey(parsedPrestigeType))
-            {
-                prestigeData[parsedPrestigeType] = 0;
-            }
-
-            if (level > PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType])
-            {
-                LocalizationService.HandleReply(ctx, $"The maximum level for {parsedPrestigeType} prestige is {PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType]}.");
-                return;
-            }
-
-            prestigeData[parsedPrestigeType] = level;
-            handler.SaveChanges();
-
-            // Apply effects based on the prestige type
-            if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
-            {
-                PrestigeSystem.ApplyPrestigeBuffs(ctx, level);
-                PrestigeSystem.ApplyExperiencePrestigeEffects(ctx, playerId, level);
-            }
-            else
-            {
-                PrestigeSystem.ApplyOtherPrestigeEffects(ctx, playerId, parsedPrestigeType, level);
-            }
-
-            LocalizationService.HandleReply(ctx, $"Player <color=green>{playerId}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            return;
         }
-
-        [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".prestige lb", description: "Lists prestige buff names.")]
-        public static void PrestigeBuffsCommand(ChatCommandContext ctx)
+        if (ExoPrestige && parsedPrestigeType.Equals(PrestigeUtilities.PrestigeType.Exo))
         {
-            if (!Prestige)
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(ctx.Event.User.PlatformId, out var prestigeData) && prestigeData.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige == Plugin.MaxLevelingPrestiges.Value)
             {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-                return;
-            }
-
-            List<int> buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
-
-            if (buffs.Count == 0)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging buffs not found.");
-                return;
-            }
-
-            var prestigeBuffs = buffs.Select((buff, index) =>
-            {
-                int level = index + 1;
-                string prefab = new PrefabGUID(buff).LookupName();
-                int prefabIndex = prefab.IndexOf("Prefab");
-                if (prefabIndex != -1)
-                {
-                    prefab = prefab[..prefabIndex].TrimEnd();
-                }
-                return $"<color=white>{prefab}</color> at prestige <color=yellow>{level}</color>";
-            }).ToList();
-
-            for (int i = 0; i < prestigeBuffs.Count; i += 4)
-            {
-                var batch = prestigeBuffs.Skip(i).Take(4);
-                string replyMessage = string.Join(", ", batch);
-                LocalizationService.HandleReply(ctx, replyMessage);
-            }
-        }
-
-        [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
-        public static void ResetPrestige(ChatCommandContext ctx, string name, string prestigeType)
-        {
-            if (!Prestige)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-                return;
-            }
-
-            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
-                return;
-            }
-
-            Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-
-            if (foundUserEntity.Equals(Entity.Null))
-            {
-                LocalizationService.HandleReply(ctx, "Player not found...");
-                return;
-            }
-
-            User foundUser = foundUserEntity.Read<User>();
-            ulong steamId = foundUser.PlatformId;
-
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
-            {
-                if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
-                {
-                    PrestigeSystem.RemovePrestigeBuffs(ctx, prestigeLevel);
-                }
-                prestigeData[parsedPrestigeType] = 0;
+                prestigeData[PrestigeUtilities.PrestigeType.Exo] += 1;
                 Core.DataStructures.SavePlayerPrestiges();
-                LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{foundUser.CharacterName}</color>.");
-            }
-        }
 
-        [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".prestige sb", description: "Applies prestige buffs appropriately if not present.")]
-        public static void SyncPrestigeBuffsCommand(ChatCommandContext ctx)
-        {
-            if (!Prestige)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+                Entity character = ctx.Event.SenderCharacterEntity;
+                ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
+                resistCategoryStats.ResistVsBeasts._Value = -Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                resistCategoryStats.ResistVsHumans._Value = -Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                resistCategoryStats.ResistVsUndeads._Value = -Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                resistCategoryStats.ResistVsDemons._Value = -Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                resistCategoryStats.ResistVsMechanical._Value = -Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                resistCategoryStats.ResistVsVampires._Value = -Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                character.Write(resistCategoryStats);
+                DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
+                damageCategoryStats.DamageVsBeasts._Value = 1 + Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                damageCategoryStats.DamageVsHumans._Value = 1 + Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                damageCategoryStats.DamageVsUndeads._Value = 1 + Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                damageCategoryStats.DamageVsDemons._Value = 1 + Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                damageCategoryStats.DamageVsMechanical._Value = 1 + Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                damageCategoryStats.DamageVsVampires._Value = 1 + Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+                character.Write(damageCategoryStats);
+
+                if (Core.ServerGameManager.TryAddInventoryItem(character, new(Plugin.ExoPrestigeReward.Value), Plugin.ExoPrestigeRewardQuantity.Value))
+                {
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>Exo</color> prestige complete. Damage taken increased by: <color=red>{(Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
+                    LocalizationService.HandleReply(ctx, $"You have also been awarded with <color=#ffd9eb>{new PrefabGUID(Plugin.ExoPrestigeReward.Value).GetPrefabName()}</color>x<color=white>{Plugin.ExoPrestigeRewardQuantity.Value}</color>!");
+                }
+                else
+                {
+                    InventoryUtilitiesServer.CreateDropItem(Core.EntityManager, character, new(Plugin.ExoPrestigeReward.Value), Plugin.ExoPrestigeRewardQuantity.Value, new Entity());
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>Exo</color> prestige complete. Damage taken increased by: <color=red>{(Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
+                    LocalizationService.HandleReply(ctx, $"You have also been awarded with <color=#ffd9eb>{new PrefabGUID(Plugin.ExoPrestigeReward.Value).GetPrefabName()}</color>x<color=white>{Plugin.ExoPrestigeRewardQuantity.Value}</color>! It dropped on the ground becuase your inventory was full though.");
+                }
                 return;
-            }
-
-            var steamId = ctx.Event.User.PlatformId;
-
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-                prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
-            {
-                PrestigeSystem.ApplyPrestigeBuffs(ctx, prestigeLevel);
-                LocalizationService.HandleReply(ctx, "Prestige buffs applied.");
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{PrestigeSystem.PrestigeType.Experience}</color>.");
+                LocalizationService.HandleReply(ctx, "You must reach the maximum level in <color=#90EE90>experience</color> prestige before <color=#90EE90>exo</color> prestiging.");
+                return;
             }
         }
-
-        [Command(name: "get", shortHand: "get", adminOnly: false, usage: ".prestige get [PrestigeType]", description: "Shows information about player's prestige status.")]
-        public static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
+        if ((SoftSynergies || HardSynergies) &&
+            Core.DataStructures.PlayerClasses.TryGetValue(ctx.Event.User.PlatformId, out var classes) &&
+            classes.Keys.Count == 0 &&
+            parsedPrestigeType == PrestigeUtilities.PrestigeType.Experience)
         {
-            if (!Prestige)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-                return;
-            }
-
-            if (!PrestigeSystem.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
-                return;
-            }
-
-            var steamId = ctx.Event.User.PlatformId;
-            var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
-
-            if (handler == null)
-            {
-                LocalizationService.HandleReply(ctx, "Invalid prestige type.");
-                return;
-            }
-
-            var maxPrestigeLevel = PrestigeSystem.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType];
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
-            {
-                PrestigeSystem.DisplayPrestigeInfo(ctx, steamId, parsedPrestigeType, prestigeLevel, maxPrestigeLevel);
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
-            }
+            LocalizationService.HandleReply(ctx, "You must choose a class before prestiging in experience.");
+            return;
         }
 
-        [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".prestige l", description: "Lists prestiges available.")]
-        public static void ListPlayerPrestigeTypes(ChatCommandContext ctx)
+        var steamId = ctx.Event.User.PlatformId;
+        var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+
+        if (handler == null)
         {
-            if (!Prestige)
-            {
-                LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-                return;
-            }
-            string prestigeTypes = string.Join(", ", Enum.GetNames(typeof(PrestigeSystem.PrestigeType)));
-            LocalizationService.HandleReply(ctx, $"Available Prestiges: <color=#90EE90>{prestigeTypes}</color>");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            return;
         }
+
+        var xpData = handler.GetExperienceData(steamId);
+        if (PrestigeUtilities.CanPrestige(steamId, parsedPrestigeType, xpData.Key))
+        {
+            PrestigeUtilities.PerformPrestige(ctx, steamId, parsedPrestigeType, handler);
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
+        }
+    }
+
+    [Command(name: "set", shortHand: "set", adminOnly: true, usage: ".prestige set [PlayerID] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
+    public static void SetPlayerPrestigeCommand(ChatCommandContext ctx, string name, string prestigeType, int level)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige type, use .lpp to see options.");
+            return;
+        }
+
+        if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
+        {
+            LocalizationService.HandleReply(ctx, "Exo prestige cannot be set.");
+            return;
+        }
+
+        Entity userEntity = PlayerService.GetUserByName(name, true);
+        ulong playerId = userEntity.Read<User>().PlatformId;
+
+        if ((SoftSynergies || HardSynergies) &&
+            Core.DataStructures.PlayerClasses.TryGetValue(playerId, out var classes) &&
+            classes.Keys.Count == 0 &&
+            parsedPrestigeType == PrestigeUtilities.PrestigeType.Experience)
+        {
+            LocalizationService.HandleReply(ctx, "The player must choose a class before prestiging in experience.");
+            return;
+        }
+
+        var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+
+        if (handler == null)
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            return;
+        }
+
+        if (!Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestigeData))
+        {
+            prestigeData = [];
+            Core.DataStructures.PlayerPrestiges[playerId] = prestigeData;
+        }
+
+        if (!prestigeData.ContainsKey(parsedPrestigeType))
+        {
+            prestigeData[parsedPrestigeType] = 0;
+        }
+
+        if (level > PrestigeUtilities.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType])
+        {
+            LocalizationService.HandleReply(ctx, $"The maximum level for {parsedPrestigeType} prestige is {PrestigeUtilities.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType]}.");
+            return;
+        }
+
+        prestigeData[parsedPrestigeType] = level;
+        handler.SaveChanges();
+
+        // Apply effects based on the prestige type
+        if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Experience)
+        {
+            PrestigeUtilities.ApplyPrestigeBuffs(ctx, level);
+            PrestigeUtilities.ApplyExperiencePrestigeEffects(ctx, playerId, level);
+        }
+        else
+        {
+            PrestigeUtilities.ApplyOtherPrestigeEffects(ctx, playerId, parsedPrestigeType, level);
+        }
+
+        LocalizationService.HandleReply(ctx, $"Player <color=green>{playerId}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
+    }
+
+    [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".prestige lb", description: "Lists prestige buff names.")]
+    public static void PrestigeBuffsCommand(ChatCommandContext ctx)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        List<int> buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
+
+        if (buffs.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging buffs not found.");
+            return;
+        }
+
+        var prestigeBuffs = buffs.Select((buff, index) =>
+        {
+            int level = index + 1;
+            string prefab = new PrefabGUID(buff).LookupName();
+            int prefabIndex = prefab.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                prefab = prefab[..prefabIndex].TrimEnd();
+            }
+            return $"<color=white>{prefab}</color> at prestige <color=yellow>{level}</color>";
+        }).ToList();
+
+        for (int i = 0; i < prestigeBuffs.Count; i += 4)
+        {
+            var batch = prestigeBuffs.Skip(i).Take(4);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, replyMessage);
+        }
+    }
+
+    [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
+    public static void ResetPrestige(ChatCommandContext ctx, string name, string prestigeType)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            return;
+        }
+        if (!ExoPrestige && parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
+        {
+            LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
+            return;
+        }
+
+        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
+
+        if (foundUserEntity.Equals(Entity.Null))
+        {
+            LocalizationService.HandleReply(ctx, "Player not found...");
+            return;
+        }
+
+        User foundUser = foundUserEntity.Read<User>();
+        ulong steamId = foundUser.PlatformId;
+
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
+        {
+            if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Experience)
+            {
+                PrestigeUtilities.RemovePrestigeBuffs(ctx, prestigeLevel);
+            }
+            if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
+            {
+                Entity character = foundUser.LocalCharacter._Entity;
+                ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
+                resistCategoryStats.ResistVsBeasts._Value = 0f;
+                resistCategoryStats.ResistVsHumans._Value = 0f;
+                resistCategoryStats.ResistVsUndeads._Value = 0f;
+                resistCategoryStats.ResistVsDemons._Value = 0f;
+                resistCategoryStats.ResistVsMechanical._Value = 0f;
+                resistCategoryStats.ResistVsVampires._Value = 0f;
+                character.Write(resistCategoryStats);
+                DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
+                damageCategoryStats.DamageVsBeasts._Value = 1f;
+                damageCategoryStats.DamageVsHumans._Value = 1f;
+                damageCategoryStats.DamageVsUndeads._Value = 1f;
+                damageCategoryStats.DamageVsDemons._Value = 1f;
+                damageCategoryStats.DamageVsMechanical._Value = 1f;
+                damageCategoryStats.DamageVsVampires._Value = 1f;
+                character.Write(damageCategoryStats);
+            }
+            prestigeData[parsedPrestigeType] = 0;
+            Core.DataStructures.SavePlayerPrestiges();
+            LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{foundUser.CharacterName}</color>.");
+        }
+    }
+
+    [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".prestige sb", description: "Applies prestige buffs appropriately if not present.")]
+    public static void SyncPrestigeBuffsCommand(ChatCommandContext ctx)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        var steamId = ctx.Event.User.PlatformId;
+
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            prestigeData.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
+        {
+            PrestigeUtilities.ApplyPrestigeBuffs(ctx, prestigeLevel);
+            LocalizationService.HandleReply(ctx, "Prestige buffs applied.");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{PrestigeUtilities.PrestigeType.Experience}</color>.");
+        }
+    }
+
+    [Command(name: "get", shortHand: "get", adminOnly: false, usage: ".prestige get [PrestigeType]", description: "Shows information about player's prestige status.")]
+    public static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            return;
+        }
+
+        var steamId = ctx.Event.User.PlatformId;
+
+        if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
+        {
+            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeUtilities.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType]}");
+            LocalizationService.HandleReply(ctx, $"Damage taken increased by: <color=red>{(Plugin.ExoPrestigeDamageTakenMultiplier.Value * exoData[PrestigeUtilities.PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(Plugin.ExoPrestigeDamageDealtMultiplier.Value * exoData[PrestigeUtilities.PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
+            return;
+        }
+        else if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
+        {
+            LocalizationService.HandleReply(ctx, "You have not prestiged in <color=#90EE90>Exo</color> yet.");
+            return;
+        }
+        var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+
+        if (handler == null)
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            return;
+        }
+
+        var maxPrestigeLevel = PrestigeUtilities.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType];
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
+        {
+            PrestigeUtilities.DisplayPrestigeInfo(ctx, steamId, parsedPrestigeType, prestigeLevel, maxPrestigeLevel);
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
+        }
+    }
+
+    [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".prestige l", description: "Lists prestiges available.")]
+    public static void ListPlayerPrestigeTypes(ChatCommandContext ctx)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+        string prestigeTypes = string.Join(", ", Enum.GetNames(typeof(PrestigeUtilities.PrestigeType)));
+        LocalizationService.HandleReply(ctx, $"Available Prestiges: <color=#90EE90>{prestigeTypes}</color>");
     }
 }

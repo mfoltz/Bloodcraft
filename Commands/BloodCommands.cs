@@ -9,13 +9,12 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Legacies.LegacyStats;
 
-namespace Bloodcraft.Commands
+namespace Bloodcraft.Commands;
 
-{
-    [CommandGroup("bloodlegacy", "blg")]
-    public static class BloodCommands
-    { 
-    [Command(name: "getprogress", shortHand: "get", adminOnly: false, usage: ".blg get [BloodType]", description: "Display your current blood legacy progress.")]
+[CommandGroup("bloodlegacy", "bl")]
+internal static class BloodCommands
+{ 
+    [Command(name: "getlegacy", shortHand: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display your current blood legacy progress.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = "")
     {
         if (!Plugin.BloodSystem.Value)
@@ -82,7 +81,7 @@ namespace Bloodcraft.Commands
         }
     }
 
-    [Command(name: "logprogress", shortHand: "log", adminOnly: false, usage: ".blg log", description: "Toggles Legacy progress logging.")]
+    [Command(name: "loglegacy", shortHand: "log", adminOnly: false, usage: ".bl log", description: "Toggles Legacy progress logging.")]
     public static void LogLegacyCommand(ChatCommandContext ctx)
     {
         if (!Plugin.BloodSystem.Value)
@@ -147,7 +146,7 @@ namespace Bloodcraft.Commands
         }
     }
 
-    [Command(name: "resetstats", shortHand: "rst", adminOnly: false, usage: ".blg rst", description: "Reset stats for current blood.")]
+    [Command(name: "resetstats", shortHand: "rst", adminOnly: false, usage: ".bl rst", description: "Reset stats for current blood.")]
     public static void ResetBloodStats(ChatCommandContext ctx)
     {
         if (!Plugin.BloodSystem.Value)
@@ -190,7 +189,7 @@ namespace Bloodcraft.Commands
         LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
     }
 
-    [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".blg lst", description: "Lists blood stats available.")]
+    [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".bl lst", description: "Lists blood stats available.")]
     public static void ListBloodStatsAvailable(ChatCommandContext ctx)
     {
         if (!Plugin.BloodSystem.Value)
@@ -214,7 +213,7 @@ namespace Bloodcraft.Commands
         LocalizationService.HandleReply(ctx, $"Available blood stats (2/2): {bloodStatsLine2}");
     }
 
-    [Command(name: "set", shortHand: "set", adminOnly: true, usage: ".blg set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
+    [Command(name: "setlegacy", shortHand: "set", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
     public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
     {
         if (!Plugin.BloodSystem.Value)
@@ -252,7 +251,7 @@ namespace Bloodcraft.Commands
         LocalizationService.HandleReply(ctx, $"<color=red>{BloodHandler.GetBloodType()}</color> legacy set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");
     }
 
-    [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".blg l", description: "Lists blood legacies available.")]
+    [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".bl l", description: "Lists blood legacies available.")]
     public static void ListBloodTypesCommand(ChatCommandContext ctx)
     {
         if (!Plugin.BloodSystem.Value)
@@ -269,5 +268,4 @@ namespace Bloodcraft.Commands
         string bloodTypesList = string.Join(", ", bloodTypes);
         LocalizationService.HandleReply(ctx, $"Available Blood Legacies: <color=red>{bloodTypesList}</color>");
     }
-}
 }

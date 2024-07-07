@@ -5,11 +5,12 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 
-namespace Bloodcraft.Commands
-{ [CommandGroup(name: "profession", ".prof")] 
+namespace Bloodcraft.Commands;
+
+[CommandGroup(name: "profession", "prof")] 
 internal static class ProfessionCommands
 {
-    [Command(name: "logprogress", shortHand: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
+    [Command(name: "logprof", shortHand: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
     {
         if (!Plugin.ProfessionSystem.Value)
@@ -103,5 +104,4 @@ internal static class ProfessionCommands
         string professions = ProfessionHandlerFactory.GetAllProfessions();
         LocalizationService.HandleReply(ctx, $"Available professions: {professions}");
     }
-}
 }
