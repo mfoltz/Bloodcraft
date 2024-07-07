@@ -11,9 +11,9 @@ using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities.PartyUtilitie
 using static Bloodcraft.Systems.Expertise.ExpertiseStats.WeaponStatManager;
 using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
 
-namespace Bloodcraft.Commands;
-
-[CommandGroup(name:"level", "lvl")]
+namespace Bloodcraft.Commands
+{
+    [CommandGroup(name:"level", "lvl")]
 internal static class LevelingCommands
 {
     //static VampireStatModifiers VampireStatModifiers => Core.ServerGameSettingsSystem._Settings.VampireStatModifiers;
@@ -25,8 +25,8 @@ internal static class LevelingCommands
     static readonly bool Prestige = Plugin.PrestigeSystem.Value;
     static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
 
-
-    [Command(name: "loglevel", shortHand: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
+ 
+    [Command(name: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
         if (!Leveling)
@@ -44,7 +44,7 @@ internal static class LevelingCommands
         LocalizationService.HandleReply(ctx, $"Leveling experience logging {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "getlevel", shortHand: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
+    [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
     public static void GetLevelCommand(ChatCommandContext ctx)
     {
         if (!Leveling)
@@ -66,7 +66,7 @@ internal static class LevelingCommands
         }
     }
 
-    [Command(name: "setlevel", shortHand: "set", adminOnly: true, usage: ".lvl set [Player] [Level]", description: "Sets player level.")]
+    [Command(name: "set", adminOnly: true, usage: ".lvl set [Player] [Level]", description: "Sets player level.")]
     public static void SetLevelCommand(ChatCommandContext ctx, string name, int level)
     {
         if (!Leveling)

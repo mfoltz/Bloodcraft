@@ -2,12 +2,12 @@
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities.PartyUtilities;
 
-namespace Bloodcraft.Commands;
-
-[CommandGroup(name: "party", "party")]
-internal static class PartyCommands
+namespace Bloodcraft.Commands
 {
-    static readonly bool PlayerParties = Plugin.Parties.Value;
+    [CommandGroup(name: "party", ".party")]
+    internal static class PartyCommands
+    {
+        static readonly bool PlayerParties = Plugin.Parties.Value;
 
     [Command(name: "toggleinvites", shortHand: "inv", adminOnly: false, usage: ".party inv", description: "Toggles being able to be invited to parties, prevents damage and share exp.")]
     public static void TogglePartyInvitesCommand(ChatCommandContext ctx)

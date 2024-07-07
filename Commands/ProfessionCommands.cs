@@ -5,9 +5,8 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 
-namespace Bloodcraft.Commands;
-
-[CommandGroup(name: "profession", "prof")] 
+namespace Bloodcraft.Commands
+{ [CommandGroup(name: "profession", "prof")] 
 internal static class ProfessionCommands
 {
     [Command(name: "logprof", shortHand: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]

@@ -11,10 +11,10 @@ using static Bloodcraft.Systems.Legacies.LegacyStats;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup("bloodlegacy", "bl")]
-internal static class BloodCommands
-{ 
-    [Command(name: "getlegacy", shortHand: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display your current blood legacy progress.")]
+    [CommandGroup("bloodlegacy", "blg")]
+    public static class BloodCommands
+    { 
+    [Command(name: "getprogress", shortHand: "get", adminOnly: false, usage: ".blg get [BloodType]", description: "Display your current blood legacy progress.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = "")
     {
         if (!Plugin.BloodSystem.Value)
@@ -213,7 +213,7 @@ internal static class BloodCommands
         LocalizationService.HandleReply(ctx, $"Available blood stats (2/2): {bloodStatsLine2}");
     }
 
-    [Command(name: "setlegacy", shortHand: "set", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
+    [Command(name: "set", adminOnly: true, usage: ".blg set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
     public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
     {
         if (!Plugin.BloodSystem.Value)

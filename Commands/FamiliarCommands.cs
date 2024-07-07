@@ -11,9 +11,9 @@ using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup(name: "familiar", "fam")]
-internal static class FamiliarCommands
-{
+    [CommandGroup(name: "familiar", "fam")]
+    internal static class FamiliarCommands
+    {
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -332,7 +332,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "toggle", shortHand: "toggle", usage: ".fam toggle", description: "Calls or dismisses familar.", adminOnly: false)]
+    [Command(name: "toggle", usage: ".fam toggle", description: "Calls or dismisses familar.", adminOnly: false)]
     public static void ToggleFamiliar(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -614,7 +614,7 @@ internal static class FamiliarCommands
     }
 
 
-    [Command(name: "reset", shortHand: "reset", adminOnly: false, usage: ".fam reset", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
+    [Command(name: "reset", adminOnly: false, usage: ".fam reset", description: "Resets (destroys) entities found in followerbuffer and clears familiar actives data.")]
     public static void ResetFamiliars(ChatCommandContext ctx)
     {
         if (!Plugin.FamiliarSystem.Value)
@@ -642,4 +642,5 @@ internal static class FamiliarCommands
         }
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
-}
+    }
+

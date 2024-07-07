@@ -9,10 +9,9 @@ using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.ExpertiseStats;
 using Bloodcraft.Services;
 
-namespace Bloodcraft.Commands;
-
-[CommandGroup(name: "weapon", "wep")] 
-internal static class WeaponCommands
+namespace Bloodcraft.Commands
+{ [CommandGroup(name: "weapon", "wep")] 
+    internal static class WeaponCommands
 {
     [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 
     public static void GetExpertiseCommand(ChatCommandContext ctx)
