@@ -1,6 +1,6 @@
 ## Table of Contents
 
-UPDATED (7/7)
+UPDATED (7/8)
 
 - [Features](#features)
 - [Commands](#commands)
