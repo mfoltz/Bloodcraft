@@ -8,7 +8,7 @@ UPDATED (7/7)
 
 ## Sponsor this project
 
-[![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914) | [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
+[![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914)  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
 
 ## Features
 
