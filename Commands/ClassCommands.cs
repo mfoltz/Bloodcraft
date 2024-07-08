@@ -11,13 +11,13 @@ using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
 
 namespace Bloodcraft.Commands;
 
-    [CommandGroup("class")]
-    class ClassCommands
-    {
-        static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
-        static readonly bool HardSynergies = Plugin.HardSynergies.Value;
-        static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
-        static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
+[CommandGroup("class")]
+internal static class ClassCommands
+{
+    static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
+    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
+    static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
+    static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
     public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
@@ -114,14 +114,14 @@ namespace Bloodcraft.Commands;
         }
     }
 
-        [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
-        public static void ClassChangeCommand(ChatCommandContext ctx, string className)
+    [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
+    public static void ClassChangeCommand(ChatCommandContext ctx, string className)
+    {
+        if (!SoftSynergies && !HardSynergies)
         {
-            if (!SoftSynergies && !HardSynergies)
-            {
-                LocalizationService.HandleReply(ctx, "Classes are not enabled.");
-                return;
-            }
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
 
         if (!TryParseClassName(className, out var parsedClassType))
         {
@@ -150,6 +150,7 @@ namespace Bloodcraft.Commands;
         UpdateClassData(character, parsedClassType, classes, steamId);
         LocalizationService.HandleReply(ctx, $"You have changed to <color=white>{parsedClassType}</color>");
     }
+
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
     public static void SyncClassBuffsCommand(ChatCommandContext ctx)
     {
@@ -345,22 +346,21 @@ namespace Bloodcraft.Commands;
                 allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
                 allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
 
-                    for (int i = 0; i < allStats.Count; i += 6)
-                    {
-                        var batch = allStats.Skip(i).Take(6);
-                        string replyMessage = string.Join(", ", batch);
-                        LocalizationService.HandleReply(ctx, $"{requestedClass} stat synergies[x<color=white>{Plugin.StatSynergyMultiplier.Value}</color>]: {replyMessage}");
-                    }
-                }
-                else
+                for (int i = 0; i < allStats.Count; i += 6)
                 {
-                    LocalizationService.HandleReply(ctx, "Stats for the specified class are not configured.");
+                    var batch = allStats.Skip(i).Take(6);
+                    string replyMessage = string.Join(", ", batch);
+                    LocalizationService.HandleReply(ctx, $"{requestedClass} stat synergies[x<color=white>{Plugin.StatSynergyMultiplier.Value}</color>]: {replyMessage}");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid or unspecified class type.");
+                LocalizationService.HandleReply(ctx, "Stats for the specified class are not configured.");
             }
         }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Invalid or unspecified class type.");
+        }
     }
-
+}

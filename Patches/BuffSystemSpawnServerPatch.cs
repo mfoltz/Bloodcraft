@@ -133,14 +133,18 @@ internal static class BuffSpawnSystemPatches
 
                 if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>()) 
                 {
+                    //Core.Log.LogInfo($"Consumable found: {prefabGUID.LookupName()} for alchemy boosting...");
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int level = handler.GetExperienceData(steamId).Key;
+                    //Core.Log.LogInfo($"Alchemy level: {level}");
                     if (entity.Has<LifeTime>())
                     {
                         LifeTime lifeTime = entity.Read<LifeTime>();
-                        if (lifeTime.Duration != -1) lifeTime.Duration *= (1 + level / Plugin.MaxProfessionLevel.Value);
+                        //Core.Log.LogInfo($"Old duration: {lifeTime.Duration}");
+                        if (lifeTime.Duration != -1) lifeTime.Duration *= (float)(1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
                         entity.Write(lifeTime);
+                        //Core.Log.LogInfo($"New duration: {lifeTime.Duration}");
                     }
                     if (entity.Has<ModifyUnitStatBuff_DOTS>())
                     {
@@ -148,7 +152,7 @@ internal static class BuffSpawnSystemPatches
                         for (int i = 0; i < buffer.Length; i++)
                         {
                             ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                            statBuff.Value *= (1 + level / Plugin.MaxProfessionLevel.Value);
+                            statBuff.Value *= (float)(1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
                             buffer[i] = statBuff;
                         }
                     }
@@ -219,7 +223,7 @@ internal static class BuffSpawnSystemPatches
                         FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
                     }
                 }
-                /*
+                
                 if (entity.Read<Buff>().Target.Has<PlayerCharacter>() && entity.Read<EntityOwner>().Owner.Has<Follower>() && entity.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
                     if (Plugin.FamiliarSystem.Value)
@@ -231,7 +235,8 @@ internal static class BuffSpawnSystemPatches
                             if (familiar != Entity.Null)
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event PvE...");
-                                Core.EntityManager.DestroyEntity(entity);
+                                //Core.EntityManager.DestroyEntity(entity);
+                                DestroyUtility.CreateDestroyEvent(Core.EntityManager, entity, DestroyReason.Default, DestroyDebugReason.TryRemoveBuff);
                                 continue;
                             }
                         }
@@ -241,7 +246,8 @@ internal static class BuffSpawnSystemPatches
                             if (familiar != Entity.Null)
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event PvP protected...");
-                                Core.EntityManager.DestroyEntity(entity);
+                                //Core.EntityManager.DestroyEntity(entity);
+                                DestroyUtility.CreateDestroyEvent(Core.EntityManager, entity, DestroyReason.Default, DestroyDebugReason.TryRemoveBuff);
                                 continue;
                             }
                         }
@@ -255,12 +261,14 @@ internal static class BuffSpawnSystemPatches
                             if (familiar != Entity.Null && playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
                             {
                                 //Core.Log.LogInfo($"Destroying familiar damage event Parties & PreventFriendlyFire...");
-                                Core.EntityManager.DestroyEntity(entity);
+                                //Core.EntityManager.DestroyEntity(entity);
+                                DestroyUtility.CreateDestroyEvent(Core.EntityManager, entity, DestroyReason.Default, DestroyDebugReason.TryRemoveBuff);
                                 continue;
                             }
                         }
                     }
                 } // stop debuff and other negative effects for parties and such
+                /*
                 else if (Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;

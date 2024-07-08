@@ -143,14 +143,14 @@ internal static class QuestUtilities
             {
                 continue;
             }
-
+            
             // Check if the item is within the player's level range based on T01, etc
             if (itemData.ItemType == ItemType.Equippable)
             {
                 if (IsWithinLevelRange(tierCheck, playerLevel, EquipmentTierLevelRangeMap))
                 {
                     string nameCheck = prefabGUID.LookupName();
-                    if (nameCheck.Contains("T01_Bone") || nameCheck.Contains("Item_Cloak")) continue;
+                    if (nameCheck.Contains("T01_Bone") || nameCheck.Contains("Item_Cloak") || nameCheck.Contains("BloodKey_T01")) continue;
                     prefabs.Add(prefabGUID);
                 }
             }
@@ -208,9 +208,11 @@ internal static class QuestUtilities
     }
     static QuestObjective GenerateQuestObjective(Random random, int level, QuestType questType)
     {
-        QuestGoal goal = (QuestGoal)random.Next(Enum.GetValues(typeof(QuestGoal)).Length);
+        //QuestGoal goal = (QuestGoal)random.Next(Enum.GetValues(typeof(QuestGoal)).Length);
 
-        if (!Plugin.ProfessionSystem.Value && goal == QuestGoal.Craft) goal = QuestGoal.Kill;
+        //if (!Plugin.ProfessionSystem.Value && goal == QuestGoal.Craft) goal = QuestGoal.Kill;
+
+        QuestGoal goal = QuestGoal.Kill;
 
         HashSet<PrefabGUID> targets;
         PrefabGUID target;
@@ -221,20 +223,10 @@ internal static class QuestUtilities
             case QuestGoal.Kill:
                 targets = GetKillPrefabsForLevel(level);
                 target = targets.ElementAt(random.Next(targets.Count));
-                if (questType.Equals(QuestType.Weekly)) requiredAmount = target.LookupName().ToLower().Contains("vblood") ? random.Next(5, 10) * 2 : random.Next(5, 10) * QuestMultipliers[questType];
-                else requiredAmount = random.Next(5, 10) * QuestMultipliers[questType];
+                requiredAmount = random.Next(6, 8) * QuestMultipliers[questType];
                 break;
             case QuestGoal.Craft:
                 targets = GetCraftPrefabsForLevel(level);
-                if (targets.Count == 0) // fallback to kill quest if none found for lower level players
-                {
-                    goal = QuestGoal.Kill;
-                    targets = GetKillPrefabsForLevel(level);
-                    target = targets.ElementAt(random.Next(targets.Count));
-                    if (questType.Equals(QuestType.Weekly)) requiredAmount = target.LookupName().ToLower().Contains("vblood") ? random.Next(5, 10) * 2 : random.Next(5, 10) * QuestMultipliers[questType];
-                    else requiredAmount = random.Next(5, 10) * QuestMultipliers[questType];
-                    break;
-                }
                 target = targets.ElementAt(random.Next(targets.Count));
                 requiredAmount = random.Next(10, 15) * QuestMultipliers[questType];
                 break;
@@ -322,6 +314,7 @@ internal static class QuestUtilities
                         PrefabGUID reward = QuestRewards.Keys.ElementAt(randomReward.Next(QuestRewards.Count));
                         int quantity = QuestRewards[reward];
                         if (quest.Key == QuestType.Weekly) quantity *= QuestMultipliers[quest.Key];
+                        if (quest.Value.Objective.Target.LookupName().ToLower().Contains("vblood")) quantity *= 3;
                         if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
                         {
                             string message = $"You've received <color=#ffd9eb>{reward.GetPrefabName()}</color>x<color=white>{quantity}</color> for completing your {colorType}!";
@@ -336,7 +329,7 @@ internal static class QuestUtilities
                         if (Plugin.LevelingSystem.Value)
                         {
                             PlayerLevelingUtilities.ProcessQuestExperienceGain(user.PlatformId, QuestMultipliers[quest.Key]);
-                            string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.10f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
+                            string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.025f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
                             LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
                         }
                     }

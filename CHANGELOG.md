@@ -1,8 +1,14 @@
-`0.9.17`
+`1.0.0`
+- command groups added for organizational purposes (thanks Odjit <3)
 - familiar prestige limit should be working as intended now
+- familiar CC effects and other debuffs seem to be neutered effectively for PvE and other scenarios where they should be
 - added ShareUnlocks config option for familiars when killing with clanmates or party members, uses share exp distance for range, gives all players involved a roll
-- quests! 
-- nerfed plant bonus again
+- quests! kill only for now, daily and weekly, details in readme (BETA) note that it will take a small but non-trivial amount of time to distribute quests to all players when first enabled, service loop runs every 5 minutes and has a 10 sec cooldown between generating quests for players to prevent lag from doing so
+- nerfed plant bonus
+- fixed alchemy bonus
+- reworked craft tracking for professions
+- exo prestiging! need to be maxed in normal experience prestiges first, (no exp reduction for exo prestiging) each level gives configured item reward and increases your damage done slightly and your damage taken moderately based on configured values up to 100 times
+- mod is more or less feature complete now, future updates will focus on refining what's already here
 
 `0.9.16`
 - familiar prestiging added (familiar prestiges, max familiar prestiges, familiar prestige stat multiplier added to config), choose extra stat per prestige (use .prfam and it will show stats if none have been entered and familiar is at max level)

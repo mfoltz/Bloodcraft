@@ -8,10 +8,10 @@ using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup(name: "quest", "quest")]
+[CommandGroup(name: "quest")]
 internal static class QuestCommands
 {
-    [Command(name: "logquest", shortHand: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
+    [Command(name: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
     public static void LogQuestCommand(ChatCommandContext ctx)
     {
         if (!Plugin.QuestSystem.Value || !Plugin.ProfessionSystem.Value || !Plugin.LevelingSystem.Value)
@@ -30,7 +30,7 @@ internal static class QuestCommands
         LocalizationService.HandleReply(ctx, $"Quest logging is now {(bools["QuestLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "getdaily", shortHand: "daily", adminOnly: false, usage: ".quest daily", description: "Display your current daily quest progress.")]
+    [Command(name: "daily", adminOnly: false, usage: ".quest daily", description: "Display your current daily quest progress.")]
     public static void DailyQuestProgressCommand(ChatCommandContext ctx)
     {
         if (!Plugin.QuestSystem.Value)
@@ -57,11 +57,11 @@ internal static class QuestCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You don't have any quests yet.");
+            LocalizationService.HandleReply(ctx, "You don't have any quests yet, check back soon.");
         }
     }
 
-    [Command(name: "getweekly", shortHand: "weekly", adminOnly: false, usage: ".quest weekly", description: "Display your current weekly quest progress.")]
+    [Command(name: "weekly", adminOnly: false, usage: ".quest weekly", description: "Display your current weekly quest progress.")]
     public static void WeeklyQuestProgressCommand(ChatCommandContext ctx)
     {
         if (!Plugin.QuestSystem.Value)
@@ -89,10 +89,10 @@ internal static class QuestCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You don't have any quests yet.");
+            LocalizationService.HandleReply(ctx, "You don't have any quests yet, check back soon.");
         }
     }
-    [Command(name: "forcerefresh", shortHand: "refresh", adminOnly: true, usage: ".quest refresh [Name]", description: "Display your current weekly quest progress.")]
+    [Command(name: "refresh", adminOnly: true, usage: ".quest refresh [Name]", description: "Display your current weekly quest progress.")]
     public static void ForceRefreshQuests(ChatCommandContext ctx, string name)
     {
         if (!Plugin.QuestSystem.Value)

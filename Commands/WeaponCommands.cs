@@ -9,9 +9,10 @@ using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.ExpertiseStats;
 using Bloodcraft.Services;
 
-namespace Bloodcraft.Commands
-{ [CommandGroup(name: "weapon", "wep")] 
-    internal static class WeaponCommands
+namespace Bloodcraft.Commands;
+
+[CommandGroup(name: "weapon", "wep")] 
+internal static class WeaponCommands
 {
     [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 
     public static void GetExpertiseCommand(ChatCommandContext ctx)
@@ -24,7 +25,7 @@ namespace Bloodcraft.Commands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-    
+
         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (handler == null)
         {
@@ -115,7 +116,7 @@ namespace Bloodcraft.Commands
 
         ulong steamID = ctx.Event.User.PlatformId;
         //ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-    
+
         if (WeaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
@@ -154,7 +155,7 @@ namespace Bloodcraft.Commands
         ulong steamID = ctx.Event.User.PlatformId;
         ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
-   
+
         if (weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
@@ -180,7 +181,7 @@ namespace Bloodcraft.Commands
                 LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
                 return;
             }
-        
+    
         }
 
         PlayerWeaponUtilities.ResetStats(steamID, weaponType);
@@ -223,7 +224,7 @@ namespace Bloodcraft.Commands
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {Plugin.MaxExpertiseLevel.Value}.");
             return;
         }
-    
+
         IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
         if (expertiseHandler == null)

@@ -2,7 +2,6 @@ using Bloodcraft.Systems.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
@@ -271,7 +270,7 @@ internal static class CraftingPatches
                     }
                     else if (itemEntity.Has<UpgradeableLegendaryItem>())
                     {
-                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().NextTier;
+                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                         var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
                         itemPrefab = buffer[tier].TierPrefab;
                     }
@@ -280,6 +279,7 @@ internal static class CraftingPatches
 
                     if (forge_Shared.State == ForgeState.Finished)
                     {
+                        //Core.Log.LogInfo($"Forge finished: {itemPrefab.LookupName()}");
                         float ProfessionValue = 50f;
                         ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
@@ -343,23 +343,26 @@ internal static class CraftingPatches
                         //Core.Log.LogInfo($"Progress: {progress}, Total Time: {totalTime} ({progress / totalTime}%) | {RecipeDurationMultiplier}");
                         if (progress / (float)totalTime >= CraftThreshold)
                         {
+                            DateTime now = DateTime.Now;
                             if (CraftCooldowns.TryGetValue(userEntity, out var cooldowns))
                             {
                                 if (cooldowns.TryGetValue(recipePrefab, out var lastCrafted))
                                 {
-                                    if (DateTime.Now < lastCrafted.AddSeconds(5))
+                                    if ((now - lastCrafted).TotalSeconds < 5)
                                     {
+                                        //Core.Log.LogInfo($"Recipe {recipePrefab.LookupName()} on cooldown for {(now - lastCrafted).TotalSeconds} more seconds...");
                                         continue;
                                     }
                                 }
                                 else
                                 {
-                                    cooldowns.Add(recipePrefab, DateTime.Now);
+                                    cooldowns.Add(recipePrefab, now);
                                 }
                             }
                             else
                             {
-                                CraftCooldowns.Add(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, DateTime.Now } });
+                                //Core.Log.LogInfo($"Adding stamp for {recipePrefab.LookupName()} at: {now}");
+                                CraftCooldowns.Add(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, now } });
                             }
 
                             var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();

@@ -11,8 +11,8 @@ using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
 
-    [CommandGroup(name: "familiar", "fam")]
-    internal static class FamiliarCommands
+[CommandGroup(name: "familiar", "fam")]
+internal static class FamiliarCommands
     {
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
@@ -642,5 +642,5 @@ namespace Bloodcraft.Commands;
         }
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
-    }
+}
 

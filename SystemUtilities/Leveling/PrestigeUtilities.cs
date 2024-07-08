@@ -384,4 +384,36 @@ public static class PrestigeUtilities
         parsedPrestigeType = default;
         return false; // Parsing failed
     }
+    public static void AdjustCharacterStats(Entity character, ulong platformId)
+    {
+        var prestigeData = Core.DataStructures.PlayerPrestiges[platformId];
+        float damageTakenMultiplier = Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+        float damageDealtMultiplier = Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+
+        AdjustResistStats(character, -damageTakenMultiplier);
+        AdjustDamageStats(character, damageDealtMultiplier);
+    }
+    static void AdjustResistStats(Entity character, float multiplier)
+    {
+        ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
+        resistCategoryStats.ResistVsBeasts._Value = multiplier;
+        resistCategoryStats.ResistVsHumans._Value = multiplier;
+        resistCategoryStats.ResistVsUndeads._Value = multiplier;
+        resistCategoryStats.ResistVsDemons._Value = multiplier;
+        resistCategoryStats.ResistVsMechanical._Value = multiplier;
+        resistCategoryStats.ResistVsVampires._Value = multiplier;
+        character.Write(resistCategoryStats);
+    }
+
+    static void AdjustDamageStats(Entity character, float multiplier)
+    {
+        DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
+        damageCategoryStats.DamageVsBeasts._Value = 1 + multiplier;
+        damageCategoryStats.DamageVsHumans._Value = 1 + multiplier;
+        damageCategoryStats.DamageVsUndeads._Value = 1 + multiplier;
+        damageCategoryStats.DamageVsDemons._Value = 1 + multiplier;
+        damageCategoryStats.DamageVsMechanical._Value = 1 + multiplier;
+        damageCategoryStats.DamageVsVampires._Value = 1 + multiplier;
+        character.Write(damageCategoryStats);
+    }
 }

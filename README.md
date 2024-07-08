@@ -1,7 +1,6 @@
 ## Table of Contents
 
-UPDATED (7/5)
-
+UPDATED (7/7)
 
 - [Features](#features)
 - [Commands](#commands)
@@ -17,35 +16,35 @@ UPDATED (7/5)
 - **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch. Mining/woodcutting/harvesting provide bonus yields per resource harvest, fishing provide bonus fish every 20 levels based on the area fished in, alchemy enhances consumable duration and effects, and blacksmithing/enchanting/tailoring increases durability in armors/weapons crafted. Do note you only receive experience for crafting and extra durability is only applied if you own the station/placed it if in a clan, plan on improving that and revamping these a bit in the future.
 - **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill (should apply to all kills that can be linked back to the player) and can complete level 20 quest to track vbloods with .quickStart (.start). Still tuning this as needed but the config options should be there to support whatever kind of leveling experience you're looking to provide at this point (within reason :P). Experience sharing in clan or group has a max distance of 25f (4-5 floor lengths). Recently added options to control experience gain from units spawned via vermin nest and other unit spawners along with nerfing rift trash experience if you so desire. Can now tune how much experience higher level players receive from lower level kills as well.
 - **Blood Legacies:** Provides further stat customization for legacies (blood types) similar to expertise with a different set of stats. Experience for this is gained per feed kill/execute for equipped blood type. Old blood quality enhancement option still exists for those who would like to use it, although do note if using prestige as well the quality gain will be based on legacy prestige level in that blood. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
-- **Prestiging:** Prestige in leveling, expertise, and legacies! Each increment in leveling prestige will reduce experience rate gain for leveling by the leveling rate reducer (separate from the expertise/legacy rate reducer) and increase expertise/legacy rate gains by the rate multiplier. Prestiging in expertise/legacies will increase their max stat bonuses per level by the stat multiplier and will reduce rate gains in that individual prestige category by the rate reducer per increment. Configurable buffs will be permanently applied to the player each prestige level in experience (can skip levels by leaving prefab as 0). Prestiging is also configurably tied to unlocking extra spells for classes to use on shift (you can use any abilityGroup prefabs here but don't use normal player spells unless you like weird weapon cloning bugs when equipping jewels. also, some NPC spells don't really work as expected when used by players so do some testing before swapping these out and make sure they behave. can test spells with '.spell [1/2] [AbilityGroupPrefab]' to manually place them on unarmed)
-
+- **Prestiging:** Prestige in leveling, expertise, and legacies! Each increment in leveling prestige will reduce experience rate gain for leveling by the leveling rate reducer (separate from the expertise/legacy rate reducer) and increase expertise/legacy rate gains by the rate multiplier. Prestiging in expertise/legacies will increase their max stat bonuses per level by the stat multiplier and will reduce rate gains in that individual prestige category by the rate reducer per increment. Configurable buffs will be permanently applied to the player each prestige level in experience (can skip levels by leaving prefab as 0). Prestiging is also configurably tied to unlocking extra spells for classes to use on shift (you can use any abilityGroup prefabs here but don't use normal player spells unless you like weird weapon cloning bugs when equipping jewels. also, some NPC spells don't really work as expected when used by players so do some testing before swapping these out and make sure they behave. can test spells with '.spell [1/2] [AbilityGroupPrefab]' to manually place them on unarmed). Exo prestiging is also available for those who have already maxed out normal experience prestige options and want more of a NG+ feel, increases damage taken/done by configured amount per level up to 100 times by default with configured item reward per level, trying to emulate a NG+ feel with this one.
 - **Familiars:** Every kill of a valid unit is a chance to unlock that unit as a familiar, now including VBloods and summoners! VBloods can be toggled on/off and unit types can be configurably allowed (humans, demons, beasts, etc) although do note that some category bans will supercede VBlood checks (if humans are banned, Vincent will be banned as well even if VBloods are enabled); there is also a list for individual unit bans. They will level up, fight for you, and you can collect them all. Only one familiar can be summoned at a time. They can be toggled (called/dismissed) without fully unbinding them to quickly use waygates (attempting to use a waygate with a familiar out will dismiss it automatically now and using it will then summon the familiar again so it is there after teleporting) and perform other actions normally prohibited by having a follower like a charmed human. Each set can hold 10 and more sets will be created once the one being added to is full. You can choose the active set by name (default is FamiliarsList1, FamiliarsList2, etc), remove familiars from sets, move familiars between sets, and the sets can be renamed. To summon a familiar from your current set (which can be chosen with .cfs [Name]), .lf to see the units available and use .bind #; to choose a different one, use .unbind, and if it gets weird or buggy at any point .resetfams can be used to clear your active familiar data and followerBuffer. All units have the same stats as usual, however their phys/spell power starts at 10% at level 1 and will scale to 100% again when they reach max level. Base health is 500 and will scale with up to 2500 at max level. Traders, carriages, horses, crystals (looking at you dracula blood crystal thing) and werewolves are unavailable. Werewolves will be in the pool once I add handling for their transformations but the rest will likely stay banned (if you manually add one of them to your unlocks as an admin that's on you :P). Can't bind in combat or pvp combat.
 - **Classes:** Soft synergies allows for the encouragement of stat choices without restricting choices while hard synergies will only allow the stats for that class to be chosen. Both soft or hard will apply the synergy multiplier to the max stat bonuses for that class for weapon expertise/blood legacies. Additionally, each class has a config spot for 4 blood buffs (the correct prefabs for this start with AB_BloodBuff_) that are granted every MaxPlayerLevel/#buffs while leveling up (with 4 buffs and 90 being the max, they'll be applied at 22, 44, 66, and 88) and apply permanently at max strength without regard to the blood quality or type the player possesses (can be skipped with 0 in the spot). They do not stack with buffs from the same blood type (if a player has the scholar free cast proc buff from class and also has 100% scholar blood, those chances will not stack) which maintains a sense of balance while allowing each class to have a persistent theme/identity that can be earned without excessive grinding. Classes also get extra spells to use on shift that are configurable, both the spell and at what level of prestige they are earned at but do keep in mind the considerations mentioned in the prestige section. Will probably be changing at least a few aspects of these new class systems in the future but am overall happy with where they're at in the sense that they allow for a lot of customization and can be made to feel as unique as you'd like. Tried to make decent thematic choices for the default blood buffs and spells per class but no promises :P. Changing classes should properly remove and apply buffs based on level. Also, spell school effects on hit unique to each class if enabled!
-  
+- **Quests:** Daily and weekly kill quests. Configurable reward pool and amounts. Dailies give 2.5% of your total exp as reward, weeklies give 10%. Can track progress and see details with commands. WIP feature but stable and working.
+
 ## Commands
 
 ### Blood Commands
-- `.bloodlegacy getprogress [Blood]`
+- `.bloodlegacy get [Blood]`
   - Display progress and bonuses in entered blood legacy.
-  - Shortcut: *.blg get [Blood]*
-- `.bloodlegacy logprogress`
+  - Shortcut: *.bl get [Blood]*
+- `.bloodlegacy log`
   - Enables or disables blood legacy logging.
-  - Shortcut: *.blg log*
+  - Shortcut: *.bl log*
 - `.bloodlegacy choosestat [Blood] [Stat]`
   - Chooses stat bonus to apply to a blood type that scales with that blood legacy level.
-  - Shortcut: *.blg cst [Blood] [Stat]*
+  - Shortcut: *.bl cst [Blood] [Stat]*
 - `.bloodlegacy set [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
-  - Shorcut: *.blg set [Player] [Blood] [Level]*
+  - Shorcut: *.bl set [Player] [Blood] [Level]*
 - `.bloodlegacy liststats`
   - Lists blood stats available along with bonuses at max legacy.
-  - Shortcut: *.blg lst*
+  - Shortcut: *.bl lst*
 - `.bloodlegacy resetstats`
   - Resets stat choices for currently equipped blood for configurable item cost/quanity.
-  - Shortcut: *.blg rst*
+  - Shortcut: *.bl rst*
 - `.bloodlegacy list`
   - Lists blood legacies available.
-  - Shortcut: *.blg l*
+  - Shortcut: *.bl l*
 
 ### Class Commands
 - `.class choose [Class]`
@@ -85,9 +84,9 @@ UPDATED (7/5)
   - Shorcut: *.lvl set [Player] [Level]*
 
 ### Prestige Commands
-- `.prestige me [PrestigeType]`
+- `.prestige pr [PrestigeType]`
   - Handles all player prestiging. Must be at max configured level for experience, expertise, or legacies to be eligible.
-  - Shortcut: *.prestige me [PrestigeType]*
+  - Shortcut: *.prestige pr [PrestigeType]*
 - `.prestige get [PrestigeType]`
   - Shows information about player's prestige status and rates for entered type of prestige.
   - Shortcut: *.prestige get [PrestigeType]*
@@ -96,7 +95,7 @@ UPDATED (7/5)
   - Shortcut: *.prestige r [Name] [PrestigeType]*
 - `.prestige set [Name] [PrestigeType] [Level]` 🔒
   - Sets player prestige level.
-  - Shorcut: *.spr [Name] [PrestigeType] [Level]*
+  - Shorcut: *.prestige spr [Name] [PrestigeType] [Level]*
 - `.prestige list`
   - Lists prestiges available to the player.
   - Shortcut: *.prestige l*
@@ -110,7 +109,7 @@ UPDATED (7/5)
 ### Party Commands
 - `.party toggleinvites`
   - Toggles party invites.
-  - Shortcut: *.party toginv*
+  - Shortcut: *.party invites*
 - `.party add [Player]`
   - Adds player to party.
   - Shortcut: *.party a [Player]*
@@ -129,13 +128,13 @@ UPDATED (7/5)
 
 
 ### Profession Commands
-- `.profession getprogress [Profession]`
+- `.profession get [Profession]`
   - Display progress in entered profession.
   - Shortcut: *.prof get [Profession]*
-- `.profession logprogress`
+- `.profession log`
   - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
   - Shortcut: *.prof log*
-- `.profession setlevel [Name] [Profession] [Level]` 🔒
+- `.profession set [Name] [Profession] [Level]` 🔒
   - Sets player profession level.
   - Shortcut: *.prof set [Name] [Profession] [Level]*
 - `.profession list`
@@ -143,10 +142,10 @@ UPDATED (7/5)
   - Shortcut: *.prof l*
     
 ### Weapon Commands
-- `.weapon getexpertise`
+- `.weapon get`
   - Display expertise progress for current weapon along with any bonus stats if applicable.
   - Shortcut: *.wep get*
-- `.weapon logexpertise`
+- `.weapon log`
   - Enables or disables expertise logging.
   - Shortcut: *.wep log*
 - `.weapon choosestat [Weapon] [Stat]`
@@ -170,13 +169,6 @@ UPDATED (7/5)
 - `.weapon restorelevels`
   - Restores weapon levels in player inventory to what they should be if they had been modified via expertise level in earlier versions of the mod. Don't use unless needed.
   - Shortcut: *.wep restore*
-
-- `.lockSpell`
-  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
-  - Shortcut: *.locksp*
-- `.lockshift`
-  - Toggles set class spell on shift. Works for unarmed and weapons.
-  - Shortcut: *.shift*
  
 ### Familiar Commands
 - `.familiar bind [#]`
@@ -232,7 +224,26 @@ UPDATED (7/5)
 - `.prepareForTheHunt`
   - Completes GettingReadyForTheHunt if not already completed. 
   - Shortcut: *.prepare*
+- `.lockSpell`
+  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Shortcut: *.locksp*
+- `.lockshift`
+  - Toggles set class spell on shift. Works for unarmed and weapons.
+  - Shortcut: *.shift*
 
+### Quest Commands
+- `.quest log`
+  - Enable/disable logging quest progress. 
+  - Shortcut: *.quest log*
+- `.quest daily`
+  - Displays daily quest details.
+  - Shortcut: *.quest daily*
+- `.quest weekly`
+  - Displays weekly quest details.
+  - Shortcut: *.quest weekly*
+- `.quest refresh [Name]` 🔒
+  - Refreshes quests for player.
+  - Shortcut: *.quest refresh [Name]*
  
 ## Configuration
 
@@ -312,6 +323,14 @@ UPDATED (7/5)
 - **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 1000)  
   Quantity of item cost required to change class.
   
+### Quest System
+- **Enable Quest System**: `QuestSystem` (bool, default: false)  
+  Enable or disable the quest system.
+- **Quest Rewards**: `QuestRewards` (string, default: "2103989354,576389135,28358550")  
+  Prefab pool for quest rewards.
+- **Quest Reward Amounts**: `QuestRewardAmounts` (string, default: "250,100,50")  
+  Amounts for quest rewards. Must match the number of rewards in the pool.
+ 
 ### Expertise System
 - **Enable Expertise System**: `ExpertiseSystem` (bool, default: false)  
   Enable or disable the expertise system.

@@ -255,7 +255,7 @@ internal static class PlayerLevelingUtilities
     public static void ProcessQuestExperienceGain(ulong SteamID, int multiplier)
     {
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
-        float gainedXP = (float)ConvertLevelToXp(currentLevel) * 0.10f * multiplier;
+        float gainedXP = (float)ConvertLevelToXp(currentLevel) * 0.025f * multiplier;
         Entity character = PlayerService.playerIdCache.ContainsKey(SteamID) ? PlayerService.playerIdCache[SteamID] : Entity.Null;
         if (character == Entity.Null) return;
         UpdatePlayerExperience(SteamID, gainedXP);
