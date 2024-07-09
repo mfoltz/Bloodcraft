@@ -36,35 +36,6 @@ public static class PrestigeUtilities
         CreatureLegacy,
         BruteLegacy
     }
-    static readonly Dictionary<PrestigeUtilities.PrestigeType, Dictionary<ulong, KeyValuePair<int, float>>> prestigeTypeToPlayerDataMap = new()
-    {
-        { PrestigeUtilities.PrestigeType.Experience, Core.DataStructures.PlayerExperience },
-        { PrestigeUtilities.PrestigeType.SwordExpertise, Core.DataStructures.PlayerSwordExpertise },
-        { PrestigeUtilities.PrestigeType.AxeExpertise, Core.DataStructures.PlayerAxeExpertise },
-        { PrestigeUtilities.PrestigeType.MaceExpertise, Core.DataStructures.PlayerMaceExpertise },
-        { PrestigeUtilities.PrestigeType.SpearExpertise, Core.DataStructures.PlayerSpearExpertise },
-        { PrestigeUtilities.PrestigeType.CrossbowExpertise, Core.DataStructures.PlayerCrossbowExpertise },
-        { PrestigeUtilities.PrestigeType.GreatSwordExpertise, Core.DataStructures.PlayerGreatSwordExpertise },
-        { PrestigeUtilities.PrestigeType.SlashersExpertise, Core.DataStructures.PlayerSlashersExpertise },
-        { PrestigeUtilities.PrestigeType.PistolsExpertise, Core.DataStructures.PlayerPistolsExpertise },
-        { PrestigeUtilities.PrestigeType.ReaperExpertise, Core.DataStructures.PlayerReaperExpertise },
-        { PrestigeUtilities.PrestigeType.LongbowExpertise, Core.DataStructures.PlayerLongbowExpertise },
-        { PrestigeUtilities.PrestigeType.WhipExpertise, Core.DataStructures.PlayerWhipExpertise },
-        { PrestigeUtilities.PrestigeType.Sanguimancy, Core.DataStructures.PlayerSanguimancy },
-        { PrestigeUtilities.PrestigeType.WorkerLegacy, Core.DataStructures.PlayerWorkerLegacy },
-        { PrestigeUtilities.PrestigeType.WarriorLegacy, Core.DataStructures.PlayerWarriorLegacy },
-        { PrestigeUtilities.PrestigeType.ScholarLegacy, Core.DataStructures.PlayerScholarLegacy },
-        { PrestigeUtilities.PrestigeType.RogueLegacy, Core.DataStructures.PlayerRogueLegacy },
-        { PrestigeUtilities.PrestigeType.MutantLegacy, Core.DataStructures.PlayerMutantLegacy },
-        { PrestigeUtilities.PrestigeType.DraculinLegacy, Core.DataStructures.PlayerDraculinLegacy },
-        { PrestigeUtilities.PrestigeType.ImmortalLegacy, Core.DataStructures.PlayerImmortalLegacy },
-        { PrestigeUtilities.PrestigeType.CreatureLegacy, Core.DataStructures.PlayerCreatureLegacy },
-        { PrestigeUtilities.PrestigeType.BruteLegacy, Core.DataStructures.PlayerBruteLegacy }
-    };
-    public static Dictionary<PrestigeUtilities.PrestigeType, Dictionary<ulong, KeyValuePair<int, float>>> PrestigeTypeToPlayerDataMap
-    {
-        get => prestigeTypeToPlayerDataMap;
-    }
 
     static readonly Dictionary<PrestigeUtilities.PrestigeType, int> prestigeTypeToMaxLevel = new()
     {

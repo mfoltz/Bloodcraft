@@ -126,7 +126,6 @@ UPDATED (7/8)
   - Leaves party.
   - Shortcut: *.party drop*
 
-
 ### Profession Commands
 - `.profession get [Profession]`
   - Display progress in entered profession.
@@ -193,17 +192,20 @@ UPDATED (7/8)
   - Move active familiar to specified box.
   - Shortcut: *.fam mb [SetName]*
 - `.familiar toggle`
-  - Calls or dismisses familar. Wave also does this if .emotes is toggled on.
+  - Calls or dismisses familar. Wave also does this if .fam e is toggled on.
   - Shortcut: *.fam toggle*
+- `.familiar togglecombat`
+  - Enables/disables combat. Salute also does this if .fam e is toggled on.
+  - Shortcut: *.fam c*
 - `.familiar add [CharPrefab]` 🔒
   - Adds familiar to active list.
   - Shortcut: *.fam a [CharPrefab]*
 - `.familiar remove [#]`
   - Removes familiar from unlocks.
   - Shortcut: *.rf [#]*
-- `.toggleEmotes`
+- `.familiar emotes`
   - Toggles emote commands (only 1 right now) on.
-  - Shortcut: *.emotes*
+  - Shortcut: *.fam e*
 - `.listEmoteActions`
   - Lists emote actions and what they do.
   - Shortcut: *.fam le*
