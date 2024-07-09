@@ -592,6 +592,7 @@ internal class Plugin : BasePlugin
         Core.DataStructures.LoadPlayerReaperExpertise,
         Core.DataStructures.LoadPlayerLongbowExpertise,
         Core.DataStructures.LoadPlayerWhipExpertise,
+        Core.DataStructures.LoadPlayerFishingpoleExpertise,
         Core.DataStructures.LoadPlayerWeaponStats
     ];
 

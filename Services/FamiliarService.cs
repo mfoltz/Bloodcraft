@@ -46,9 +46,9 @@ internal class FamiliarService
         if (unitBans.Count > 0) FamiliarUnlockUtilities.ExemptPrefabs = unitBans;
         if (typeBans.Count > 0) FamiliarUnlockUtilities.ExemptTypes = typeBans;
         HandleFamiliarsOnSpawn();
-        Core.StartCoroutine(CleanUpMinions());
+        FindAndHandleFamiliarMinions();
+        //Core.StartCoroutine(CleanUpMinions());
     }
-    
     IEnumerator CleanUpMinions()
     {
         while (true)

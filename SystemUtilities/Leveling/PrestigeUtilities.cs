@@ -384,6 +384,12 @@ public static class PrestigeUtilities
         parsedPrestigeType = default;
         return false; // Parsing failed
     }
+    public static Dictionary<ulong, int> GetPrestigeForType(PrestigeType prestigeType)
+    {
+        return Core.DataStructures.PlayerPrestiges
+            .Where(p => p.Value.ContainsKey(prestigeType))
+            .ToDictionary(p => p.Key, p => p.Value[prestigeType]);
+    }
     public static void AdjustCharacterStats(Entity character, ulong platformId)
     {
         var prestigeData = Core.DataStructures.PlayerPrestiges[platformId];

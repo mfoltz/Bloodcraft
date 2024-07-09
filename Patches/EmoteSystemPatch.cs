@@ -9,6 +9,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using User = ProjectM.Network.User;
+using static ProjectM.VoiceMapping;
 
 namespace Bloodcraft.Patches;
 
@@ -26,11 +27,14 @@ public static class EmoteSystemPatch
     static readonly PrefabGUID invulnerableBuff = new(-480024072);
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
     static readonly PrefabGUID playerFaction = new(1106458752);
+    static readonly PrefabGUID combatBuff = new(581443919);
+    static readonly PrefabGUID pvpCombatBuff = new(697095869);
 
     public static readonly Dictionary<PrefabGUID, Action<Entity, Entity, ulong>> actions = new()
     {
         { new(1177797340), CallDismiss }, // Wave
-        { new(-370061286), CombatMode } // Salute
+        { new(-370061286), CombatMode }, // Salute
+        { new(-26826346), BindPreset } // clap
     };
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
@@ -76,17 +80,76 @@ public static class EmoteSystemPatch
             entities.Dispose();
         }
     }
+    public static void BindPreset(Entity userEntity, Entity character, ulong steamId)
+    {
+        EntityManager entityManager = Core.EntityManager;
+
+        if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId))
+        {
+            LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "No familiar preset found to bind, use .fam bind # at least once first.");
+            return;
+        }
+
+        int preset = Core.DataStructures.FamiliarChoice[steamId];
+        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+        User user = userEntity.Read<User>();
+
+        if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+        {
+            LocalizationService.HandleServerReply(entityManager, user, "You can't bind a familiar while in combat or dominating presence is active.");
+            return;
+        }
+
+        if (familiar != Entity.Null)
+        {
+            LocalizationService.HandleServerReply(entityManager, user, "You already have an active familiar.");
+            return;
+        }
+
+        string set = Core.DataStructures.FamiliarSet[steamId];
+
+        if (string.IsNullOrEmpty(set))
+        {
+            LocalizationService.HandleServerReply(entityManager, user, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
+            return;
+        }
+
+        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
+        {
+            Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
+            if (preset < 1 || preset > famKeys.Count)
+            {
+                LocalizationService.HandleServerReply(entityManager, user, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>) and make sure to update preset for new active boxes.");
+                return;
+            }
+            if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId)) // cache, set choice once per session then can use emote to bind same choice
+            {
+                Core.DataStructures.FamiliarChoice[steamId] = preset;
+            }
+            data = new(Entity.Null, famKeys[preset - 1]);
+            Core.DataStructures.FamiliarActives[steamId] = data;
+            Core.DataStructures.SavePlayerFamiliarActives();
+            FamiliarSummonUtilities.SummonFamiliar(character, userEntity, famKeys[preset - 1]);
+            //character.Add<AlertAllies>();
+
+        }
+        else
+        {
+            LocalizationService.HandleServerReply(entityManager, user, "Couldn't find familiar or familiar already active.");
+        }
+    }
+
     public static void CallDismiss(Entity userEntity, Entity character, ulong playerId)
     {
         EntityManager entityManager = Core.EntityManager;
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
+        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
             
-            if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
+            if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
             {
-                familiar = data.Item1;
+                familiar = data.Familiar;
             }
 
             if (familiar == Entity.Null)
@@ -114,7 +177,7 @@ public static class EmoteSystemPatch
                     }
                 }
 
-                data = (familiar, data.Item2);
+                data = (familiar, data.FamKey);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
 
@@ -130,7 +193,7 @@ public static class EmoteSystemPatch
                 follower.Followed._Value = character;
                 familiar.Write(follower);
                 
-                data = (Entity.Null, data.Item2);
+                data = (Entity.Null, data.FamKey);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
                 LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
@@ -157,9 +220,9 @@ public static class EmoteSystemPatch
         {
             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
-            if (!data.Item1.Equals(Entity.Null) && Core.EntityManager.Exists(data.Item1))
+            if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
             {
-                familiar = data.Item1;
+                familiar = data.Familiar;
             }
 
             if (familiar == Entity.Null)

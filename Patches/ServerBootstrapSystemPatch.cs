@@ -206,6 +206,12 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.SavePlayerWhipExpertise();
             }
 
+            if (!Core.DataStructures.PlayerFishingpoleExpertise.ContainsKey(steamId))
+            {
+                Core.DataStructures.PlayerFishingpoleExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerFishingpoleExpertise();
+            }
+
             if (!Core.DataStructures.PlayerWeaponStats.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerWeaponStats.Add(steamId, []);

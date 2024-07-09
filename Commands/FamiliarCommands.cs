@@ -13,7 +13,7 @@ namespace Bloodcraft.Commands;
 
 [CommandGroup(name: "familiar", "fam")]
 internal static class FamiliarCommands
-    {
+{
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -51,7 +51,7 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
             return;
         }
-
+        
         if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
             Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
@@ -59,6 +59,10 @@ internal static class FamiliarCommands
             {
                 LocalizationService.HandleReply(ctx, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>)");
                 return;
+            }
+            if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId)) // cache, set choice once per session then can use emote to bind same choice
+            {
+                Core.DataStructures.FamiliarChoice[steamId] = choice;
             }
             data = new(Entity.Null, famKeys[choice - 1]);
             Core.DataStructures.FamiliarActives[steamId] = data;

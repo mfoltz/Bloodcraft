@@ -3,7 +3,6 @@ using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -378,5 +377,48 @@ internal static class PrestigeCommands
         }
         string prestigeTypes = string.Join(", ", Enum.GetNames(typeof(PrestigeUtilities.PrestigeType)));
         LocalizationService.HandleReply(ctx, $"Available Prestiges: <color=#90EE90>{prestigeTypes}</color>");
+    }
+    [Command(name: "leaderboard", shortHand: "lb", adminOnly: false, usage: ".prestige lb [PrestigeType]", description: "Lists prestige leaderboard for type.")]
+    public static void ListPrestigeTypeLeaderboard(ChatCommandContext ctx, string prestigeType)
+    {
+        if (!Prestige)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+        if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            return;
+        }
+        if (!ExoPrestige && parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
+        {
+            LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
+            return;
+        }
+
+        var prestigeData = PrestigeUtilities.GetPrestigeForType(parsedPrestigeType)
+        .OrderByDescending(p => p.Value)
+        .ToList();
+
+        if (prestigeData.All(p => p.Value == 0))
+        {
+            LocalizationService.HandleReply(ctx, "No players to display yet!");
+            return;
+        }
+
+        var leaderboard = PrestigeUtilities.GetPrestigeForType(parsedPrestigeType)
+        .Take(10)
+        .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerService.playerIdCache[p.Key].Read<PlayerCharacter>().Name.Value}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
+        .ToList();
+
+        if (leaderboard.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "No players to display yet!");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, string.Join("\n", leaderboard));
+        }
     }
 }

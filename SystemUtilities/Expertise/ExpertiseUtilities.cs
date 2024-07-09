@@ -83,7 +83,6 @@ public static class ExpertiseUtilities
             ExpertiseValue *= changeFactor;
             //IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponPrestigeMap[weaponType]);
 
-
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
@@ -132,7 +131,6 @@ public static class ExpertiseUtilities
             HandleServerReply(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }
     }
-    
     public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)
     {
         float currentXP = GetXp(steamID, handler);

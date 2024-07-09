@@ -116,13 +116,13 @@ internal static class WeaponCommands
 
         ulong steamID = ctx.Event.User.PlatformId;
         //ExpertiseSystem.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
-
+        /*
         if (WeaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
             return;
         }
-
+        */
         // Ensure that there is a dictionary for the player's stats
         if (!Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponsStats))
         {
@@ -156,11 +156,13 @@ internal static class WeaponCommands
         ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(character);
 
 
-        if (weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
+        /*
+        if (WeaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
             return;
         }
+        */
 
         if (!Plugin.ResetExpertiseItem.Value.Equals(0))
         {
@@ -276,7 +278,6 @@ internal static class WeaponCommands
             return;
         }
         string weaponTypes = string.Join(", ", Enum.GetNames(typeof(ExpertiseUtilities.WeaponType)));
-        weaponTypes = weaponTypes.Replace("FishingPole", "");
         LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 

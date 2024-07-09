@@ -1,5 +1,4 @@
 ﻿namespace Bloodcraft.Systems.Expertise;
-
 public interface IExpertiseHandler
 {
     void AddExpertise(ulong steamID, float experience);
@@ -30,6 +29,7 @@ public static class ExpertiseHandlerFactory
             ExpertiseUtilities.WeaponType.Reaper => new ReaperHandler(),
             ExpertiseUtilities.WeaponType.Longbow => new LongbowHandler(),
             ExpertiseUtilities.WeaponType.Whip => new WhipHandler(),
+            ExpertiseUtilities.WeaponType.FishingPole => new FishingHandler(),
             ExpertiseUtilities.WeaponType.Unarmed => new SanguimancyHandler(),
             _ => null,
         };
@@ -232,6 +232,20 @@ public class WhipHandler : BaseExpertiseHandler
     public override ExpertiseUtilities.WeaponType GetWeaponType()
     {
         return ExpertiseUtilities.WeaponType.Whip;
+    }
+}
+public class FishingHandler : BaseExpertiseHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishingpoleExpertise;
+
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerFishingpoleExpertise();
+    }
+
+    public override ExpertiseUtilities.WeaponType GetWeaponType()
+    {
+        return ExpertiseUtilities.WeaponType.FishingPole;
     }
 }
 

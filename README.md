@@ -8,7 +8,7 @@ UPDATED (7/7)
 
 ## Sponsor this project
 
-[![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914) | [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
+[![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914)  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
 
 ## Features
 
@@ -440,6 +440,8 @@ UPDATED (7/7)
 ### Familiar System
 - **Enable Familiar System**: `FamiliarSystem` (bool, default: false)  
   Enable or disable the familiar system.
+- **Share Unlocks**: `ShareUnlocks` (bool, default: false)  
+  Enable or disable sharing unlocks between players in clans or parties (uses exp share distance).
 - **Allow VBloods**: `AllowVBloods` (bool, default: false)  
   Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).
 - **Banned Units**: `BannedUnits` (string, default: "")  

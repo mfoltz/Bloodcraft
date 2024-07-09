@@ -8,6 +8,8 @@
 - fixed alchemy bonus
 - reworked craft tracking for professions
 - exo prestiging! need to be maxed in normal experience prestiges first, (no exp reduction for exo prestiging) each level gives configured item reward and increases your damage done slightly and your damage taken moderately based on configured values up to 100 times
+- basic prestige leaderboards of top 10, use .prestige lb [PrestigeType] to view
+- can now use clap to summon your most recently summoned familiar instead of having to do .fam bind # again
 - mod is more or less feature complete now, future updates will focus on refining what's already here
 
 `0.9.16`

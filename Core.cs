@@ -142,6 +142,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerFishingpoleExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseUtilities.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed and needs to be renamed to match the rest
@@ -166,6 +167,7 @@ internal static class Core
         private static Dictionary<ulong, UnlockedFamiliarData> unlockedFamiliars = [];
         private static Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = [];
         private static Dictionary<ulong, string> familiarSet = [];
+        private static Dictionary<ulong, int> familiarChoice = [];
         private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
         private static Dictionary<ulong, FamiliarPrestigeData> familiarPrestiges = [];
 
@@ -207,6 +209,11 @@ internal static class Core
             get => familiarSet;
             set => familiarSet = value;
         }
+        public static Dictionary<ulong, int> FamiliarChoice
+        {
+            get => familiarChoice;
+            set => familiarChoice = value;
+        }
         public static Dictionary<ulong, UnlockedFamiliarData> UnlockedFamiliars
         {
             get => unlockedFamiliars;
@@ -237,9 +244,7 @@ internal static class Core
         {
             get => playerPrestiges;
             set => playerPrestiges = value;
-        }
-
-        
+        }  
         public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
         {
             get => playerBools;
@@ -358,6 +363,12 @@ internal static class Core
         {
             get => playerWhipExpertise;
             set => playerWhipExpertise = value;
+        }
+
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerFishingpoleExpertise
+        {
+            get => playerFishingpoleExpertise;
+            set => playerFishingpoleExpertise = value;
         }
 
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSanguimancy
@@ -496,6 +507,7 @@ internal static class Core
             {"ReaperExpertise", JsonFiles.PlayerReaperExpertise},
             {"LongbowExpertise", JsonFiles.PlayerLongbowExpertiseJson},
             {"WhipExpertise", JsonFiles.PlayerWhipExpertiseJson},
+            {"FishingpoleExpertise", JsonFiles.PlayerFishingpoleExpertiseJson},
             {"Sanguimancy", JsonFiles.PlayerSanguimancyJson},
             {"PlayerSpells", JsonFiles.PlayerSpellsJson},
             {"WeaponStats", JsonFiles.PlayerWeaponStatsJson},
@@ -603,6 +615,8 @@ internal static class Core
 
         public static void LoadPlayerWhipExpertise() => LoadData(ref playerWhipExpertise, "WhipExpertise");
 
+        public static void LoadPlayerFishingpoleExpertise() => LoadData(ref playerFishingpoleExpertise, "FishingpoleExpertise");
+
         public static void LoadPlayerSanguimancy() => LoadData(ref playerSanguimancy, "Sanguimancy");
 
         public static void LoadPlayerSpells() => LoadData(ref playerSpells, "PlayerSpells");
@@ -701,6 +715,8 @@ internal static class Core
         public static void SavePlayerLongbowExpertise() => SaveData(PlayerLongbowExpertise, "LongbowExpertise");
 
         public static void SavePlayerWhipExpertise() => SaveData(PlayerWhipExpertise, "WhipExpertise");
+
+        public static void SavePlayerFishingpoleExpertise() => SaveData(PlayerFishingpoleExpertise, "FishingpoleExpertise");
 
         public static void SavePlayerSanguimancy() => SaveData(PlayerSanguimancy, "Sanguimancy");
 
@@ -828,6 +844,7 @@ internal static class Core
         public static readonly string PlayerLongbowExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_longbow.json");
         public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_unarmed.json");
         public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_whip.json");
+        public static readonly string PlayerFishingpoleExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_fishingpole.json");
         public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sanguimancy.json");
         public static readonly string PlayerSpellsJson = Path.Combine(Plugin.PlayerLevelingPath, "player_spells.json");
         public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_weapon_stats.json");

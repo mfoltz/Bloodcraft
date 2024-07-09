@@ -37,6 +37,10 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                     {
                         HandleUnarmed(entity, character, unarmedSpells, steamId);
                     }
+                    else if (UnarmedSlots && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("fishingpole") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var fishingSpells))
+                    {
+                        HandleUnarmed(entity, character, fishingSpells, steamId);
+                    }
                     else if (Prestige && entity.Read<PrefabGUID>().LookupName().ToLower().Contains("weapon") && Core.DataStructures.PlayerSpells.TryGetValue(steamId, out var playerSpells) && !playerSpells.ClassSpell.Equals(0))
                     {
                         HandleWeapon(entity, character, steamId, playerSpells);
