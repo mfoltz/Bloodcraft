@@ -202,7 +202,7 @@ UPDATED (7/8)
   - Shortcut: *.fam a [CharPrefab]*
 - `.familiar remove [#]`
   - Removes familiar from unlocks.
-  - Shortcut: *.rf [#]*
+  - Shortcut: *.fam r [#]*
 - `.familiar emotes`
   - Toggles emote commands (only 1 right now) on.
   - Shortcut: *.fam e*
