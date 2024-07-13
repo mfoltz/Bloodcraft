@@ -37,7 +37,7 @@ jobs:
           additionalArguments: '/updateprojectfiles /overrideconfig "mode=Mainline"'
 
       - name: Build (Release)
-        run: dotnet build . --configuration Release --no-restore -p:Version=$GitVersion_SemVer
+        run: dotnet build ./Bloodcraft --configuration Release --no-restore -p:Version=$GitVersion_SemVer
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
