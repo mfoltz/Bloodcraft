@@ -5,6 +5,7 @@ UPDATED (7/8)
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
+- [Sponsors](#sponsors)
 
 ## Sponsor this project
 
@@ -503,6 +504,6 @@ UPDATED (7/8)
 - **Death Mage Blood:** `DeathMageBlood` (string, default: "2,6,9,10")
   Death Mage blood synergies.
 
-  
+## Sponsors
 
-
+Eduardo Batista Gagno;

@@ -64,18 +64,18 @@ internal static class LegacyStats
     {
         public enum BloodStatType
         {
-            HealingReceived,
-            DamageReduction,
-            PhysicalResistance,
-            SpellResistance,
-            ResourceYield,
-            CCReduction,
-            SpellCooldownRecoveryRate,
-            WeaponCooldownRecoveryRate,
-            UltimateCooldownRecoveryRate,
-            MinionDamage,
-            ShieldAbsorb,
-            BloodEfficiency
+            HealingReceived, // 0
+            DamageReduction, // 1
+            PhysicalResistance, // 2
+            SpellResistance, // 3
+            ResourceYield, // 4
+            CCReduction, // 5
+            SpellCooldownRecoveryRate, // 6
+            WeaponCooldownRecoveryRate, // 7
+            UltimateCooldownRecoveryRate, // 8
+            MinionDamage, // 9
+            ShieldAbsorb, // 10
+            BloodEfficiency // 11
         }
 
         public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatMap = new()

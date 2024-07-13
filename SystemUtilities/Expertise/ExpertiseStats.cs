@@ -60,18 +60,18 @@ internal static class ExpertiseStats
     {
         public enum WeaponStatType
         {
-            MaxHealth,
-            MovementSpeed,
-            PrimaryAttackSpeed,
-            PhysicalLifeLeech,
-            SpellLifeLeech,
-            PrimaryLifeLeech,
-            PhysicalPower,
-            SpellPower,
-            PhysicalCritChance,
-            PhysicalCritDamage,
-            SpellCritChance,
-            SpellCritDamage
+            MaxHealth, // 0
+            MovementSpeed, // 1
+            PrimaryAttackSpeed, // 2
+            PhysicalLifeLeech, // 3
+            SpellLifeLeech, // 4
+            PrimaryLifeLeech, // 5
+            PhysicalPower, // 6
+            SpellPower, // 7
+            PhysicalCritChance, // 8
+            PhysicalCritDamage, // 9
+            SpellCritChance, // 10
+            SpellCritDamage // 11
         }
 
         public static readonly Dictionary<WeaponStatManager.WeaponStatType, string> StatFormatMap = new()
