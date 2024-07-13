@@ -40,11 +40,6 @@ jobs:
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=$GitVersion_SemVer
 
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.0
-        with:
-          path: ./dist
-
       - name: GH Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'push'
