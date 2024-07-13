@@ -262,7 +262,7 @@ internal static class CraftingPatches
                     ulong steamId = user.PlatformId;
 
                     Entity itemEntity = forge_Shared.ItemEntity._Entity;
-                    PrefabGUID itemPrefab = new(0);
+                    PrefabGUID itemPrefab = itemEntity.Read<PrefabGUID>();
 
                     if (itemEntity.Has<ShatteredItem>())
                     {
@@ -275,11 +275,9 @@ internal static class CraftingPatches
                         itemPrefab = buffer[tier].TierPrefab;
                     }
 
-                    if (itemPrefab.GuidHash == 0) continue;
-
                     if (forge_Shared.State == ForgeState.Finished)
                     {
-                        //Core.Log.LogInfo($"Forge finished: {itemPrefab.LookupName()}");
+                        //Core.Log.LogInfo($"Forge finished: {itemPrefab.LookupName()} | {itemEntity.Read<PrefabGUID>().LookupName()}");
                         float ProfessionValue = 50f;
                         ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
@@ -290,7 +288,7 @@ internal static class CraftingPatches
                                 Entity originalItem = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
                                 Durability durability = itemEntity.Read<Durability>();
                                 Durability originalDurability = originalItem.Read<Durability>();
-
+                                //Core.Log.LogInfo($"{originalItem.Read<PrefabGUID>().LookupName()}, {originalDurability.MaxDurability} | {itemPrefab.LookupName()}, {durability.MaxDurability}");
                                 if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
 
                                 int level = handler.GetExperienceData(steamId).Key;

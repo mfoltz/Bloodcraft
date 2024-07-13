@@ -110,7 +110,7 @@ internal static class BloodCommands
 
         if (!Enum.TryParse<LegacyStats.BloodStatManager.BloodStatType>(statType, true, out var StatType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood stat choice, use .lbs to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid blood stat choice, use .bl lst to see options.");
             return;
         }
 

@@ -91,6 +91,7 @@ internal static class ProfessionUtilities
             List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefab);
             Random random = new();
             int bonus = level / 20;
+            if (bonus.Equals(0)) return;
             int index = random.Next(fishDrops.Count);
             PrefabGUID fish = fishDrops[index];
             if (serverGameManager.TryAddInventoryItem(Killer, fish, bonus))
@@ -114,7 +115,6 @@ internal static class ProfessionUtilities
                             if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
                             {
                                 int bonus = 0;
-
                                 if (dropTableData.ItemGuid.LookupName().ToLower().Contains("plant"))
                                 {
                                     bonus = level / 10;
@@ -123,9 +123,7 @@ internal static class ProfessionUtilities
                                 {
                                     bonus = level / 2;
                                 }
-
                                 if (bonus.Equals(0)) return;
-
                                 if (serverGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                 {
                                     //string name = ProfessionUtilities.FormatMaterialName(dropTableData.ItemGuid.GetPrefabName());

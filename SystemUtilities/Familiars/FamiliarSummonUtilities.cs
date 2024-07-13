@@ -1,4 +1,5 @@
 ﻿using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -112,14 +113,18 @@ internal static class FamiliarSummonUtilities
     }
     static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
-        ModifyTeamBuff modifyTeamBuff = new() { Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam };
-        familiar.Add<ModifyTeamBuff>();
-        familiar.Write(modifyTeamBuff);
+        //ModifyTeamBuff modifyTeamBuff = new() { Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam };
+        //familiar.Add<ModifyTeamBuff>();
+        //familiar.Write(modifyTeamBuff);
 
         FactionReference factionReference = familiar.Read<FactionReference>();
         factionReference.FactionGuid._Value = playerFaction;
         //factionReference.FactionGuid._Value = traderFaction;
         familiar.Write(factionReference);
+
+        Team team = familiar.Read<Team>();//
+        team.Value = player.Read<Team>().Value;
+        familiar.Write(team);//
 
         Follower follower = familiar.Read<Follower>();
         follower.Followed._Value = player;

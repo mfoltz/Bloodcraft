@@ -36,7 +36,8 @@ internal static class ServerBootstrapSystemPatch
                 { "SpellLock", false },
                 { "Grouping", false },
                 { "Emotes", false },
-                { "Binding", false }
+                { "Binding", false },
+                { "Kit", false }
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -57,7 +58,8 @@ internal static class ServerBootstrapSystemPatch
                 { "ShiftLock", false },
                 { "Grouping", false },
                 { "Emotes", false },
-                { "Binding", false }
+                { "Binding", false },
+                { "Kit", false }
             };
 
             // Add missing default values to the existing dictionary

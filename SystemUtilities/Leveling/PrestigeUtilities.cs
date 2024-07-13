@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -196,6 +197,7 @@ public static class PrestigeUtilities
             //Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
             if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
+                PlayerLevelingUtilities.HandleBloodBuff(buffEntity);
                 if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
                 {
                     buffEntity.Remove<RemoveBuffOnGameplayEvent>();

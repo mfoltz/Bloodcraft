@@ -143,11 +143,18 @@ internal static class PrestigeCommands
                 LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
                 return;
             }
+
             if (level > PrestigeUtilities.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType] || level < 1)
             {
                 LocalizationService.HandleReply(ctx, $"The maximum level for <color=#90EE90>{parsedPrestigeType}</color> prestige is {PrestigeUtilities.PrestigeTypeToMaxPrestigeLevel[parsedPrestigeType]}.");
                 return;
             }
+
+            if (Core.DataStructures.PlayerPrestiges.ContainsKey(steamId) && !Core.DataStructures.PlayerPrestiges[steamId].ContainsKey(PrestigeUtilities.PrestigeType.Exo))
+            {
+                Core.DataStructures.PlayerPrestiges[steamId].TryAdd(PrestigeUtilities.PrestigeType.Exo, 0);
+            }
+
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var exoData) && exoData.TryGetValue(PrestigeUtilities.PrestigeType.Exo, out var exoPrestige))
             {
                 exoPrestige = level;

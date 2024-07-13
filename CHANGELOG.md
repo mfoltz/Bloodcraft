@@ -1,3 +1,10 @@
+`1.0.1`
+- player prestige dictionary properly updated with 'Exo' when trying to Exo prestige
+- more filtering to prevent non-ideal quest targets, fixed bug on generating quests for new players on fresh servers (new players receieve same starting daily/weekly quests to circumvent this), hopefully fixed any other issues with quest distribution involving timing
+- ancestral forge works for all shattered again and not just blue legendaries
+- familiars ignore players on PvE and PvPProtected players on PvP servers
+- fixed bug where destroying disabled familiars rendered space unuseable for building
+
 `1.0.0`
 - command groups added for organizational purposes (thanks Odjit <3)
 - familiar prestige limit should be working as intended now

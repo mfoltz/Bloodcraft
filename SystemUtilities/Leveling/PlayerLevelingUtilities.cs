@@ -29,6 +29,8 @@ internal static class PlayerLevelingUtilities
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
+    static readonly PrefabGUID playerFaction = new(1106458752);
+
     //static readonly PrefabGUID critterFaction = new(10678632);
     //static readonly PrefabGUID ignoredFaction = new(-1430861195);
     public enum PlayerClasses
@@ -103,7 +105,6 @@ internal static class PlayerLevelingUtilities
     {
         return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
     }
-
     static void HandleExperienceUpdate(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
     {
         PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
@@ -468,7 +469,7 @@ internal static class PlayerLevelingUtilities
             }
         }
     }
-    static void HandleBloodBuff(Entity buff)
+    public static void HandleBloodBuff(Entity buff)
     {
         // so at every prestige need to take away and reapply buff with new values
         //Core.Log.LogInfo($"Handling blood buff... {buff.Read<PrefabGUID>().GetPrefabName()}");
@@ -605,6 +606,7 @@ internal static class PlayerLevelingUtilities
             var biteToMutant = buff.Read<BloodBuff_BiteToMutant_DataShared>();
             // modifications
             biteToMutant.RequiredBloodPercentage = 0;
+            biteToMutant.MutantFaction = new(877850148); // slaves_rioters
             buff.Write(biteToMutant);
             return;
         }
@@ -852,9 +854,10 @@ internal static class PlayerLevelingUtilities
             var bruteAttackSpeedBonus = buff.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
             bruteAttackSpeedBonus.MinValue = bruteAttackSpeedBonus.MaxValue;
             bruteAttackSpeedBonus.RequiredBloodPercentage = 0;
+            bruteAttackSpeedBonus.GearLevel = 0f;
             buff.Write(bruteAttackSpeedBonus);
             return;
-        }
+        }   
     }
 
     public static bool HandleClassChangeItem(ChatCommandContext ctx, ulong steamId)
@@ -1046,6 +1049,65 @@ internal static class PlayerLevelingUtilities
         // If no match is found, return false and set the out parameter to default value.
         parsedClassType = default;
         return false; // Parsing failed
+    }
+    public static void ShowClassBuffs(ChatCommandContext ctx, PlayerClasses playerClass)
+    {
+        List<int> perks = Core.ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
+
+        if (perks.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, $"{playerClass} buffs not found.");
+            return;
+        }
+
+        int step = MaxPlayerLevel / perks.Count;
+
+        var classBuffs = perks.Select((perk, index) =>
+        {
+            int level = (index + 1) * step;
+            string prefab = new PrefabGUID(perk).LookupName();
+            int prefabIndex = prefab.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                prefab = prefab[..prefabIndex].TrimEnd();
+            }
+            return $"<color=white>{prefab}</color> at level <color=yellow>{level}</color>";
+        }).ToList();
+
+        for (int i = 0; i < classBuffs.Count; i += 6)
+        {
+            var batch = classBuffs.Skip(i).Take(6);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
+        }
+    }
+    public static void ShowClassSpells(ChatCommandContext ctx, PlayerClasses playerClass)
+    {
+        List<int> perks = Core.ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
+
+        if (perks.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, $"{playerClass} spells not found.");
+            return;
+        }
+
+        var classSpells = perks.Select(perk =>
+        {
+            string prefab = new PrefabGUID(perk).LookupName();
+            int prefabIndex = prefab.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                prefab = prefab[..prefabIndex].TrimEnd();
+            }
+            return $"<color=white>{prefab}</color>";
+        }).ToList();
+
+        for (int i = 0; i < classSpells.Count; i += 6)
+        {
+            var batch = classSpells.Skip(i).Take(6);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
+        }
     }
     public class PartyUtilities
     {

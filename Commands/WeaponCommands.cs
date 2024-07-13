@@ -104,7 +104,7 @@ internal static class WeaponCommands
 
         if (!Enum.TryParse<WeaponStatManager.WeaponStatType>(statType, true, out var StatType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid stat choice, use .lws to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid stat choice, use .wep lst to see options.");
             return;
         }
 

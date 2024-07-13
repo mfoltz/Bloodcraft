@@ -28,7 +28,7 @@ internal static class FamiliarUnlockUtilities
         string lowerName = diedPrefab.LookupName().ToLower();
         //Core.Log.LogInfo(lowerName);
         if (died.Has<Minion>()) return; // component checks
-        if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("crystal") || lowerName.Contains("werewolf")) return; // prefab name checks
+        if (lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("werewolf")) return; // prefab name checks
         if (IsBannedUnit(diedPrefab)) return; // banned prefab checks, no using currently
         if (IsBannedType(diedCategory)) return; // banned type checks, no using currently
 
@@ -79,7 +79,7 @@ internal static class FamiliarUnlockUtilities
 
         if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
         {
-            lastListName = $"fl{data.UnlockedFamiliars.Count + 1}";
+            lastListName = $"box{data.UnlockedFamiliars.Count + 1}";
             data.UnlockedFamiliars[lastListName] = [];
             if (Core.DataStructures.FamiliarSet[playerId] == "")
             {

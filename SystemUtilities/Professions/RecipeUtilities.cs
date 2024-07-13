@@ -13,6 +13,7 @@ internal static class RecipeUtilities
     static readonly PrefabGUID fabricator = new(-465055967); // copper wires
     //static readonly PrefabGUID artisanTable = new(-1718710437);
 
+    static readonly PrefabGUID ironBody = new(-1270503528);
     static readonly PrefabGUID vampiricDust = new(311920560);
     static readonly PrefabGUID copperWires = new(-2031309726);
     static readonly PrefabGUID silverIngot = new(-1633898285);
@@ -25,7 +26,7 @@ internal static class RecipeUtilities
         Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[vampiricDust];
 
         RecipeData recipeData = recipeEntity.Read<RecipeData>();
-
+        
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;
         recipeData.HudSortingOrder = 0;
@@ -52,10 +53,24 @@ internal static class RecipeUtilities
 
         recipeMap[copperWires] = recipeData;
 
+        recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[ironBody];
+
+        recipeData = recipeEntity.Read<RecipeData>();
+
+        recipeData.AlwaysUnlocked = true;
+        recipeData.HideInStation = false;
+        recipeData.HudSortingOrder = 0;
+
+        recipeEntity.Write(recipeData);
+
+        recipeMap[ironBody] = recipeData;
+
+
         Core.GameDataSystem.RegisterRecipes();
 
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = copperWires, Disabled = false, Unlocked = true });
+        refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = ironBody, Disabled = false, Unlocked = true });
 
         stationEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[smallFurnace];
         recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[silverIngot];

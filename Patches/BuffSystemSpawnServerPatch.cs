@@ -5,6 +5,7 @@ using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -50,8 +51,6 @@ internal static class BuffSpawnSystemPatches
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 
-                
-
                 if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) 
                 {
                     Entity player = entity.Read<Buff>().Target.Read<Follower>().Followed._Value;
@@ -326,33 +325,25 @@ internal static class BuffSpawnSystemPatches
             entities.Dispose();
         }
     }
-    /*
-    [HarmonyPatch(typeof(HitCastColliderSystem_OnUpdate), nameof(HitCastColliderSystem_OnUpdate.OnUpdate))]
+    
+    [HarmonyPatch(typeof(PlayerCombatBuffSystem_OnAggro), nameof(PlayerCombatBuffSystem_OnAggro.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePrefix(HitCastColliderSystem_OnUpdate __instance)
+    static void OnUpdatePrefix(PlayerCombatBuffSystem_OnAggro __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_911162766_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.__query_928948733_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {                
-                if (entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Has<PlayerCharacter>())
+                //entity.LogComponentTypes();
+                if (entity.Has<InverseAggroEvents.Added>())
                 {
-                    var hitTriggers = entity.ReadBuffer<HitTrigger>();
-                    if (Plugin.Parties.Value && Plugin.PreventFriendlyFire.Value) 
+                    InverseAggroEvents.Added added = entity.Read<InverseAggroEvents.Added>();
+                    if ((GameMode.Equals(GameModeType.PvE) || Core.ServerGameManager.HasBuff(added.Producer, pvpProtBuff.ToIdentifier())) && added.Consumer.Has<Follower>() && added.Consumer.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                     {
-                        Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
-                        foreach (HitTrigger hitTrigger in hitTriggers)
-                        {
-                            hitTrigger.Target.LogComponentTypes();
-                            
-                            if (playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(sourceName)))
-                            {
-                                Core.Log.LogInfo("Friendly fire detected, removing hit trigger...");
-                                Core.EntityManager.DestroyEntity(entity);
-                            }
-                            
-                        }
+                        Follower following = added.Consumer.Read<Follower>();
+                        following.ModeModifiable._Value = 0;
+                        added.Consumer.Write(following);
                     }
                 }
             }
@@ -366,5 +357,5 @@ internal static class BuffSpawnSystemPatches
             entities.Dispose();
         }
     }
-    */
+    
 }

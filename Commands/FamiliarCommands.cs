@@ -95,7 +95,6 @@ internal static class FamiliarCommands
         else if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Familiar.Equals(Entity.Null) && !data.FamKey.Equals(0))
         {
             LocalizationService.HandleReply(ctx, "Couldn't find familiar, assuming dead and unbinding...");
-
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
 
@@ -103,6 +102,7 @@ internal static class FamiliarCommands
         else if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
         {
             if (FamiliarPatches.familiarMinions.ContainsKey(data.Familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
+            if (data.Familiar.Has<Disabled>()) data.Familiar.Remove<Disabled>();
             DestroyUtility.CreateDestroyEvent(Core.EntityManager, data.Familiar, DestroyReason.Default, DestroyDebugReason.None);
             Core.DataStructures.FamiliarActives[steamId] = new(Entity.Null, 0);
             Core.DataStructures.SavePlayerFamiliarActives();
@@ -519,6 +519,7 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "Couldn't find active familiar to set level for.");
         }
     }
+
     [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr [BonusStat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
     public static void PrestigeFamiliarCommand(ChatCommandContext ctx, string bonusStat = "")
     {
@@ -641,10 +642,40 @@ internal static class FamiliarCommands
         {
             if (Core.EntityManager.Exists(buffer[i].Entity._Entity))
             {
+                if (buffer[i].Entity._Entity.Has<Disabled>()) buffer[i].Entity._Entity.Remove<Disabled>();
                 DestroyUtility.CreateDestroyEvent(Core.EntityManager, buffer[i].Entity._Entity, DestroyReason.Default, DestroyDebugReason.None);
             }
         }
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
+    /*
+    [Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Set current familiar name.")]
+    public static void SetFamiliarName(ChatCommandContext ctx, string name)
+    {
+        if (!Plugin.FamiliarSystem.Value)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+
+        if (familiar != Entity.Null)
+        {
+            familiar.Add<NameableInteractable>();
+            NameableInteractable nameableInteractable = familiar.Read<NameableInteractable>();
+            nameableInteractable.OnlyAllyRename = true;
+            nameableInteractable.OnlyAllySee = false;
+            nameableInteractable.Name = new Unity.Collections.FixedString64Bytes(name);
+            familiar.Write(nameableInteractable);
+            LocalizationService.HandleReply(ctx, $"Renamed familiar to <color=white>{name}</color>!");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Make sure familiar is active and out before attempting to rename.");
+        }
+    }
+    */
 }
 

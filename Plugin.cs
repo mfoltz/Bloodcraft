@@ -344,8 +344,8 @@ internal class Plugin : BasePlugin
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
 
         _questSystem = InitConfigEntry("Config", "QuestSystem", false, "Enable or disable quests (currently only kill quests).");
-        _questRewards = InitConfigEntry("Config", "QuestRewards", "2103989354,576389135,28358550", "The PrefabGUID hashes for quest reward pool.");
-        _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "250,100,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests have a *3 multiplier.");
+        _questRewards = InitConfigEntry("Config", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool.");
+        _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests have a *3 multiplier.");
         
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
@@ -356,7 +356,7 @@ internal class Plugin : BasePlugin
         _warEventMultiplier = InitConfigEntry("Config", "WarEventMultiplier", 0.2f, "The multiplier for experience gained from war event trash spawns.");
         _unitSpawnerMultiplier = InitConfigEntry("Config", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs).");
         _changeClassItem = InitConfigEntry("Config", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class.");
-        _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 1000, "Quantity of item required for changing class.");
+        _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 750, "Quantity of item required for changing class.");
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
         _parties = InitConfigEntry("Config", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
@@ -365,17 +365,17 @@ internal class Plugin : BasePlugin
         _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is about 5 floor tile lengths.");
 
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
-        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
+        _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
         _prestigeLevelsToUnlockClassSpells = InitConfigEntry("Config", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.");
         _maxLevelingPrestiges = InitConfigEntry("Config", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling.");
-        _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.075f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
+        _levelingPrestigeReducer = InitConfigEntry("Config", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling.");
         _prestigeRatesReducer = InitConfigEntry("Config", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy.");
         _prestigeStatMultiplier = InitConfigEntry("Config", "PrestigeStatMultiplier", 0.10f, "Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.");
         _prestigeRatesMultiplier = InitConfigEntry("Config", "PrestigeRateMultiplier", 0.10f, "Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling.");
         _exoPrestiging = InitConfigEntry("Config", "ExoPrestiging", false, "Enable or disable exo prestiges (need to max normal prestiges first).");
         _exoPrestiges = InitConfigEntry("Config", "ExoPrestiges", 100, "The number of exo prestiges available.");
-        _exoPrestigeReward = InitConfigEntry("Config", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default). Number of this item rewarded will be multiplied by level of exo prestige.");
-        _exoPrestigeRewardQuantity = InitConfigEntry("Config", "ExoPrestigeRewardQuantity", 50, "The quantity of the reward for exo prestiging.");
+        _exoPrestigeReward = InitConfigEntry("Config", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default).");
+        _exoPrestigeRewardQuantity = InitConfigEntry("Config", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging.");
         _exoPrestigeDamageTakenMultiplier = InitConfigEntry("Config", "ExoPrestigeDamageMultiplier", 0.05f, "The damage multiplier per exo prestige (applies to damage taken by the player).");
         _exoPrestigeDamageDealtMultiplier = InitConfigEntry("Config", "ExoPrestigeDamageDealtMultiplier", 0.025f, "The damage multiplier per exo prestige (applies to damage dealt by the player).");
 
@@ -444,7 +444,7 @@ internal class Plugin : BasePlugin
         _bannedTypes = InitConfigEntry("Config", "BannedTypes", "", "The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)");
         _vBloodDamageMultiplier = InitConfigEntry("Config", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods).");
         _playerVampireDamageMultiplier = InitConfigEntry("Config", "PlayerVampireDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to players. probably).");
-        _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 5f, "The multiplier for experience gained from units.");
+        _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 7.5f, "The multiplier for experience gained from units.");
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
         _vBloodUnlockChance = InitConfigEntry("Config", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar.");
@@ -452,31 +452,31 @@ internal class Plugin : BasePlugin
         _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");
         _hardSynergies = InitConfigEntry("Config", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).");
         _classSpellSchoolOnHitEffects = InitConfigEntry("Config", "ClassSpellSchoolOnHitEffects", false, "Enable or disable class spell school on hit effects.");
-        _onHitProcChance = InitConfigEntry("Config", "OnHitProcChance", 0.10f, "The chance for a class effect to proc on hit.");
+        _onHitProcChance = InitConfigEntry("Config", "OnHitProcChance", 0.075f, "The chance for a class effect to proc on hit.");
         _statSyngergyMultiplier = InitConfigEntry("Config", "StatSynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap.");
         _bloodKnightWeapon = InitConfigEntry("Config", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies.");
-        _bloodKnightBlood = InitConfigEntry("Config", "BloodKnightBlood", "0,2,3,11", "Blood Knight blood synergies.");
+        _bloodKnightBlood = InitConfigEntry("Config", "BloodKnightBlood", "1,5,7,10", "Blood Knight blood synergies.");
         _demonHunterWeapon = InitConfigEntry("Config", "DemonHunterWeapon", "1,2,8,9", "Demon Hunter weapon synergies.");
         _demonHunterBlood = InitConfigEntry("Config", "DemonHunterBlood", "2,5,7,9", "Demon Hunter blood synergies.");
-        _vampireLordWeapon = InitConfigEntry("Config", "VampireLordWeapon", "0,5,6,7", "Vampire Lord weapon synergies.");
-        _vampireLordBlood = InitConfigEntry("Config", "VampireLordBlood", "1,4,8,11", "Vampire Lord blood synergies.");
-        _shadowBladeWeapon = InitConfigEntry("Config", "ShadowBladeWeapon", "1,2,3,4", "Shadow Blade weapon synergies.");
-        _shadowBladeBlood = InitConfigEntry("Config", "ShadowBladeBlood", "3,7,8,10", "Shadow Blade blood synergies.");
+        _vampireLordWeapon = InitConfigEntry("Config", "VampireLordWeapon", "0,4,6,7", "Vampire Lord weapon synergies.");
+        _vampireLordBlood = InitConfigEntry("Config", "VampireLordBlood", "1,3,8,11", "Vampire Lord blood synergies.");
+        _shadowBladeWeapon = InitConfigEntry("Config", "ShadowBladeWeapon", "1,2,6,9", "Shadow Blade weapon synergies.");
+        _shadowBladeBlood = InitConfigEntry("Config", "ShadowBladeBlood", "3,5,7,10", "Shadow Blade blood synergies.");
         _arcaneSorcererWeapon = InitConfigEntry("Config", "ArcaneSorcererWeapon", "4,7,10,11", "Arcane Sorcerer weapon synergies.");
         _arcaneSorcererBlood = InitConfigEntry("Config", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies.");
-        _deathMageWeapon = InitConfigEntry("Config", "DeathMageWeapon", "0,3,4,7", "Death Mage weapon synergies.");
-        _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,6,9,10", "Death Mage blood synergies.");
-        _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,-714434113,-534491790,-1055766373", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs), so if max l ");
+        _deathMageWeapon = InitConfigEntry("Config", "DeathMageWeapon", "0,4,7,11", "Death Mage weapon synergies.");
+        _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,3,6,8", "Death Mage blood synergies.");
+        _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,-534491790,-1055766373,-584203677", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs), so if max l ");
         _bloodKnightSpells = InitConfigEntry("Config", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige.");
-        _demonHunterBuffs = InitConfigEntry("Config", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-536284884", "The PrefabGUID hashes for demon hunter leveling blood buffs");
+        _demonHunterBuffs = InitConfigEntry("Config", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-397097531", "The PrefabGUID hashes for demon hunter leveling blood buffs");
         _demonHunterSpells = InitConfigEntry("Config", "DemonHunterSpells", "-433204738,1611191665,-328617085,-1161896955", "Demon Hunter shift spells, granted at levels of prestige");
-        _vampireLordBuffs = InitConfigEntry("Config", "VampireLordBuffs", "-1266262267,-1413561088,1103099361,1558171501", "The PrefabGUID hashes for vampire lord leveling blood buffs");
+        _vampireLordBuffs = InitConfigEntry("Config", "VampireLordBuffs", "1558171501,997154800,-1413561088,1103099361", "The PrefabGUID hashes for vampire lord leveling blood buffs");
         _vampireLordSpells = InitConfigEntry("Config", "VampireLordSpells", "-433204738,716346677,1450902136,-254080557", "Vampire Lord shift spells, granted at levels of prestige");
-        _shadowBladeBuffs = InitConfigEntry("Config", "ShadowBladeBuffs", "894725875,997154800,-1576592687,-285745649", "The PrefabGUID hashes for shadow blade leveling blood buffs");
+        _shadowBladeBuffs = InitConfigEntry("Config", "ShadowBladeBuffs", "894725875,-1596803256,-993492354,210193036", "The PrefabGUID hashes for shadow blade leveling blood buffs");
         _shadowBladeSpells = InitConfigEntry("Config", "ShadowBladeSpells", "-433204738,94933870,642767950,1922493152", "Shadow Blade shift spells, granted at levels of prestige");
-        _arcaneSorcererBuffs = InitConfigEntry("Config", "ArcaneSorcererBuffs", "-901503997,884683323,-993492354,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs");
+        _arcaneSorcererBuffs = InitConfigEntry("Config", "ArcaneSorcererBuffs", "1614027598,884683323,-1576592687,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs");
         _arcaneSorcererSpells = InitConfigEntry("Config", "ArcaneSorcererSpells", "-433204738,495259674,1217615468,-1503327574", "Arcane Sorcerer shift spells, granted at levels of prestige");
-        _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "1643157297,1159173627,1006510207,997154800", "The PrefabGUID hashes for death mage leveling blood buffs");
+        _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs");
         _deathMageSpells = InitConfigEntry("Config", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige");
     }
 

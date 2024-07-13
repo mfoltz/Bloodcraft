@@ -1,5 +1,4 @@
-﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
@@ -25,6 +24,8 @@ internal static class QuestUtilities
     public static HashSet<PrefabGUID> CraftPrefabs = [];
     public static HashSet<Entity> GatherEntities = [];
     public static HashSet<PrefabGUID> GatherPrefabs = [];
+    static readonly PrefabGUID graveyardSkeleton = new(1395549638);
+    static readonly PrefabGUID forestWolf = new(-1418430647);
     public enum QuestGoal
     {
         Kill,
@@ -110,8 +111,8 @@ internal static class QuestUtilities
             //if (prefabEntity == Entity.Null || !EntityManager.Exists(prefabEntity)) continue;
             //Core.Log.LogInfo($"Checking {prefabEntity.Read<PrefabGUID>().GuidHash}...");
             PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
-            if (prefabs.Contains(prefabGUID) || prefabGUID.LookupName().Contains("Trader")) continue;
-            if (!prefabEntity.Has<UnitLevel>() || !prefabEntity.Has<EntityCategory>()) continue;
+            if (prefabs.Contains(prefabGUID) || prefabGUID.LookupName().Contains("Trader") || prefabGUID.LookupName().Contains("Servant") || prefabGUID.LookupName().Contains("Horse") || prefabGUID.LookupName().Contains("Carriage")) continue;
+            if (!prefabEntity.Has<UnitLevel>() || !prefabEntity.Has<EntityCategory>() || prefabEntity.Has<Minion>()) continue;
             UnitLevel level = prefabEntity.Read<UnitLevel>();
             if (Math.Abs(level.Level._Value - playerLevel) <= 10)
             {
@@ -206,23 +207,30 @@ internal static class QuestUtilities
         }
         return false;
     }
-    static QuestObjective GenerateQuestObjective(Random random, int level, QuestType questType)
+    static QuestObjective GenerateQuestObjective(ulong steamId, Random random, int level, QuestType questType)
     {
         //QuestGoal goal = (QuestGoal)random.Next(Enum.GetValues(typeof(QuestGoal)).Length);
-
-        //if (!Plugin.ProfessionSystem.Value && goal == QuestGoal.Craft) goal = QuestGoal.Kill;
 
         QuestGoal goal = QuestGoal.Kill;
 
         HashSet<PrefabGUID> targets;
-        PrefabGUID target;
+        PrefabGUID target = new(0);
         int requiredAmount;
         //Core.Log.LogInfo($"Generating {questType} quest with goal {goal}...");
         switch (goal)
         {
             case QuestGoal.Kill:
                 targets = GetKillPrefabsForLevel(level);
-                target = targets.ElementAt(random.Next(targets.Count));
+
+                if (questType.Equals(QuestType.Weekly) && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData) && questData.TryGetValue(QuestType.Daily, out var dailyData)) // no dupes
+                {
+                    PrefabGUID dailyTarget = dailyData.Objective.Target;
+                    if (targets.Contains(dailyTarget)) targets.Remove(dailyTarget);
+                    //if (targets.Count == 0) targets.Add(rottingGhoul);
+                }
+                if (targets.Count != 0) target = targets.ElementAt(random.Next(targets.Count));
+                else if (questType.Equals(QuestType.Daily)) target = graveyardSkeleton;
+                else if (questType.Equals(QuestType.Weekly)) target = forestWolf;
                 requiredAmount = random.Next(6, 8) * QuestMultipliers[questType];
                 break;
             case QuestGoal.Craft:
@@ -247,8 +255,8 @@ internal static class QuestUtilities
         Random weeklyRandom = RandomWeeklySeed();
         Core.DataStructures.PlayerQuests.Add(steamId, new Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)>
             {
-                { QuestType.Daily, (GenerateQuestObjective(dailyRandom, level, QuestType.Daily), 0, DateTime.Now) },
-                { QuestType.Weekly, (GenerateQuestObjective(weeklyRandom, level, QuestType.Weekly), 0, DateTime.Now) }
+                { QuestType.Daily, (GenerateQuestObjective(steamId, dailyRandom, level, QuestType.Daily), 0, DateTime.Now) },
+                { QuestType.Weekly, (GenerateQuestObjective(steamId, weeklyRandom, level, QuestType.Weekly), 0, DateTime.Now) }
             });
         Core.DataStructures.SavePlayerQuests();
     }
@@ -256,21 +264,21 @@ internal static class QuestUtilities
     {
         var playerQuestData = Core.DataStructures.PlayerQuests[steamId];
 
-        bool refreshDaily = playerQuestData[QuestType.Daily].LastReset > GetNextDailyReset();
-        bool refreshWeekly = playerQuestData[QuestType.Weekly].LastReset > GetNextWeeklyReset();
+        bool refreshDaily = playerQuestData[QuestType.Daily].LastReset < GetNextDailyReset();
+        bool refreshWeekly = playerQuestData[QuestType.Weekly].LastReset < GetNextWeeklyReset();
 
         if (refreshDaily || refreshWeekly)
         {
             if (refreshDaily)
             {
                 Random dailyRandom = RandomDailySeed();
-                playerQuestData[QuestType.Daily] = (GenerateQuestObjective(dailyRandom, level, QuestType.Daily), 0, DateTime.Now);
+                playerQuestData[QuestType.Daily] = (GenerateQuestObjective(steamId, dailyRandom, level, QuestType.Daily), 0, DateTime.UtcNow);
             }
 
             if (refreshWeekly)
             {
                 Random weeklyRandom = RandomWeeklySeed();
-                playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(weeklyRandom, level, QuestType.Weekly), 0, DateTime.Now);
+                playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(steamId, weeklyRandom, level, QuestType.Weekly), 0, DateTime.UtcNow);
             }
 
             Core.DataStructures.PlayerQuests[steamId] = playerQuestData;
@@ -282,10 +290,10 @@ internal static class QuestUtilities
         var playerQuestData = Core.DataStructures.PlayerQuests[steamId];
 
         Random dailyRandom = new(Random.Next(100));
-        playerQuestData[QuestType.Daily] = (GenerateQuestObjective(dailyRandom, level, QuestType.Daily), 0, DateTime.Now);
+        playerQuestData[QuestType.Daily] = (GenerateQuestObjective(steamId, dailyRandom, level, QuestType.Daily), 0, DateTime.UtcNow);
 
         Random weeklyRandom = new(Random.Next(100));
-        playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(weeklyRandom, level, QuestType.Weekly), 0, DateTime.Now);
+        playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(steamId, weeklyRandom, level, QuestType.Weekly), 0, DateTime.UtcNow);
 
         Core.DataStructures.PlayerQuests[steamId] = playerQuestData;
         Core.DataStructures.SavePlayerQuests();

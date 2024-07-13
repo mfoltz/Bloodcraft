@@ -1,16 +1,16 @@
-﻿using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using ProjectM.Shared;
-using ProjectM.CastleBuilding;
+using static ProjectM.InverseAggroEvents;
 
 namespace Bloodcraft.Patches;
 
@@ -18,6 +18,9 @@ namespace Bloodcraft.Patches;
 internal static class FamiliarPatches
 {
     static readonly PrefabGUID dominateBuff = new(-1447419822);
+    static readonly PrefabGUID pvpProtBuff = new(1111481396);
+
+    static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
 
     public static Dictionary<Entity, HashSet<Entity>> familiarMinions = [];
 
@@ -51,9 +54,9 @@ internal static class FamiliarPatches
                         {
                             Core.FamiliarService.HandleFamiliarMinions(familiar);
                         }
-                        
                     }
-                    if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat)) // simulate player target?
+                    /*
+                    if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat))
                     {
                         if (behaviourTreeStateChangedEvent.Entity.Has<AggroBuffer>())
                         {
@@ -65,6 +68,21 @@ internal static class FamiliarPatches
                                 buffer[i] = item;
                                 //Core.Log.LogInfo("Set IsPlayer to true...");
                                 break;
+                            }
+                        }
+                    }
+                    */
+                    if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat))
+                    {
+                        if (behaviourTreeStateChangedEvent.Entity.Has<AggroConsumer>())
+                        {
+                            AggroConsumer aggroConsumer = behaviourTreeStateChangedEvent.Entity.Read<AggroConsumer>();
+                            if ((GameMode.Equals(GameModeType.PvE) || Core.ServerGameManager.HasBuff(aggroConsumer.AggroTarget._Entity, pvpProtBuff.ToIdentifier()) && aggroConsumer.AggroTarget._Entity.Has<PlayerCharacter>()))
+                            {
+                                Follower following = behaviourTreeStateChangedEvent.Entity.Read<Follower>();
+                                following.ModeModifiable._Value = 0;
+                                behaviourTreeStateChangedEvent.Entity.Write(following);
+                                //Core.Log.LogInfo("Set mode modifiable to 0 to prevent player aggression...");
                             }
                         }
                     }
@@ -93,7 +111,7 @@ internal static class FamiliarPatches
                 if (!Core.hasInitialized) continue;
 
                 TeamReference teamReference = entity.Read<TeamReference>();
-                NativeList<Entity> alliedUsers = new NativeList<Entity>(Allocator.Temp);
+                NativeList<Entity> alliedUsers = new(Allocator.Temp);
                 try
                 {
                     PrefabGUID famKey = entity.Read<PrefabGUID>();
@@ -184,6 +202,7 @@ internal static class FamiliarPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+
                 if (entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
                 {
                     //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
@@ -235,9 +254,10 @@ internal static class FamiliarPatches
             entities.Dispose();
         }
     }
+
     [HarmonyPatch(typeof(ImprisonedBuffSystem), nameof(ImprisonedBuffSystem.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePrefix(ImprisonedBuffSystem __instance) // get EntityOwner (familiar), apply ModifyTeamBuff
+    static void OnUpdatePrefix(ImprisonedBuffSystem __instance)
     {
         NativeArray<Entity> entities = __instance.__query_1231815368_0.ToEntityArray(Allocator.Temp);
         try

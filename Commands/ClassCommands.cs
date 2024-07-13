@@ -201,8 +201,8 @@ internal static class ClassCommands
         string classTypes = string.Join(", ", Enum.GetNames(typeof(PlayerLevelingUtilities.PlayerClasses)));
         LocalizationService.HandleReply(ctx, $"Available Classes: <color=white>{classTypes}</color>");
     }
-
-    [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb <ClassType>", description: "Shows perks that can be gained from class.")]
+    /*
+    [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [ClassType]", description: "Shows perks that can be gained from class.")]
     public static void ClassPerks(ChatCommandContext ctx, string classType = "")
     {
         if (!SoftSynergies && !HardSynergies)
@@ -265,7 +265,7 @@ internal static class ClassCommands
         }
     }
 
-    [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp <ClassType>", description: "Shows spells that can be gained from class.")]
+    [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [ClassType]", description: "Shows spells that can be gained from class.")]
     public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
     {
         if (!SoftSynergies && !HardSynergies)
@@ -324,7 +324,93 @@ internal static class ClassCommands
             LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
         }
     }
+    */
+    [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [ClassType]", description: "Shows perks that can be gained from class.")]
+    public static void ClassPerks(ChatCommandContext ctx, string classType = "")
+    {
+        if (!SoftSynergies && !HardSynergies)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+        ulong steamId = ctx.Event.User.PlatformId;
+        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+        {
+            // Parse classType parameter
+            PlayerClasses playerClass;
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            {
+                playerClass = requestedClass;
+            }
+            else
+            {
+                playerClass = classes.Keys.FirstOrDefault();
+            }
 
+            ShowClassBuffs(ctx, playerClass);
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(classType))
+            {
+                foreach (PlayerClasses cls in Enum.GetValues(typeof(PlayerClasses)))
+                {
+                    ShowClassBuffs(ctx, cls);
+                }
+            }
+            else if (TryParseClass(classType, out PlayerClasses requestedClass))
+            {
+                ShowClassBuffs(ctx, requestedClass);
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "Invalid class type.");
+            }
+        }
+    }
+    [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [ClassType]", description: "Shows spells that can be gained from class.")]
+    public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
+    {
+        if (!SoftSynergies && !HardSynergies)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+        ulong steamId = ctx.Event.User.PlatformId;
+        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes))
+        {
+            // Parse classType parameter
+            PlayerClasses playerClass;
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            {
+                playerClass = requestedClass;
+            }
+            else
+            {
+                playerClass = classes.Keys.FirstOrDefault();
+            }
+
+            ShowClassSpells(ctx, playerClass);
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(classType))
+            {
+                foreach (PlayerClasses cls in Enum.GetValues(typeof(PlayerClasses)))
+                {
+                    ShowClassSpells(ctx, cls);
+                }
+            }
+            else if (TryParseClass(classType, out PlayerClasses requestedClass))
+            {
+                ShowClassSpells(ctx, requestedClass);
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "Invalid class type.");
+            }
+        }
+    }
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".class lst [Class]", description: "Shows weapon and blood stat synergies for a class.")]
     public static void ListClassStats(ChatCommandContext ctx, string classType = "")
     {

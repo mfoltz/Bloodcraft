@@ -4,12 +4,41 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using ProjectM.Network;
+using ProjectM.Scripting;
 
 namespace Bloodcraft.Commands;
 
 internal static class MiscCommands
 {
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
+    static readonly Dictionary<PrefabGUID, int> StarterKit = new()
+    {
+        { new(862477668), 500 },
+        { new(-1531666018), 1000 },
+        { new(-1593377811), 1000 },
+        { new(1821405450), 250 }
+    };
+
+    //[Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
+    public static void KitMe(ChatCommandContext ctx)
+    {
+        if (Core.DataStructures.PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && !bools["Kit"])
+        {
+            bools["Kit"] = true;
+            Entity character = ctx.Event.SenderCharacterEntity;
+            Core.DataStructures.SavePlayerBools();
+            foreach (var item in StarterKit)
+            {
+                ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
+            }
+            LocalizationService.HandleReply(ctx, "You've received a starting kit with blood essence, stone, wood, and bone!");
+        }
+        else
+        {
+            ctx.Reply("You've already received your starting kit.");
+        }
+    }
 
     [Command(name: "prepareForTheHunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
     public static void QuickStartCommand(ChatCommandContext ctx)
@@ -27,6 +56,7 @@ internal static class MiscCommands
         Core.ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
         LocalizationService.HandleReply(ctx, "You are now prepared for the hunt.");
     }
+
     [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
     public static void LockPlayerSpells(ChatCommandContext ctx)
     {
