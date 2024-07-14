@@ -6,6 +6,10 @@
 	<AssemblyName>Bloodcraft</AssemblyName>
 	<Version>1.0.1</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	<RestoreSources>
+		  https://api.nuget.org/v3/index.json;
+		  https://nuget.bepinex.dev/v3/index.json;
+	</RestoreSources>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 	<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>
 	<LangVersion>preview</LangVersion>

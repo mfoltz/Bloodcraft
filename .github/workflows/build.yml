@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
@@ -37,12 +38,7 @@ jobs:
           additionalArguments: '/updateprojectfiles /overrideconfig "mode=Mainline"'
 
       - name: Build (Release)
-        run: dotnet build . --configuration Release --no-restore -p:Version=$GitVersion_SemVer
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.0
-        with:
-          path: ./dist
+        run: dotnet build . --configuration Release -p:Version=$GitVersion_SemVer
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
