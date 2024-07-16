@@ -51,18 +51,32 @@ jobs:
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=${{ steps.extract_version.outputs.version }}
 
+      - name: Publish (Release)
+        run: dotnet publish . --configuration Release --output ./output
+
+      - name: Copy build artifacts
+        run: |
+          mkdir -p release_artifacts
+          cp ./output/Bloodcraft.dll release_artifacts/
+          cp manifest.json release_artifacts/
+          cp CHANGELOG.md release_artifacts/
+          cp README.md release_artifacts/
+          cp icon.png release_artifacts/
+          
       - name: GH Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'
         with:
-          body: Manual pre-release of ${{ steps.extract_version.outputs.version }} for ${{ env.GitVersion_ShortSha }}
-          name: v${{ steps.extract_version.outputs.version }}
+          body: Manual pre-release of ${{ env.version }} for ${{ env.GitVersion_ShortSha }}
+          name: v${{ env.version }}
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ steps.extract_version.outputs.version }}
+          tag_name: v${{ env.version }}
           files: |
-            Bloodcraft.dll
-            manifest.json
-            CHANGELOG.md
-            README.md
-            icon.png
+            release_artifacts/Bloodcraft.dll
+            release_artifacts/manifest.json
+            release_artifacts/CHANGELOG.md
+            release_artifacts/README.md
+            release_artifacts/icon.png
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
