@@ -1,6 +1,3 @@
-﻿[config]
-schemaVersion = "0.0.1"
-
 [package.dependencies]
 BepInEx-BepInExPack_V_Rising = "1.691.3"
 deca-VampireCommandFramework = "0.9.0"
