@@ -29,6 +29,12 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Extract Version from .csproj
+        id: extract_version
+        run: |
+          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" Bloodcraft.csproj)
+          echo "##[set-output name=version;]$version"
+
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@v0.9.7
         with:
@@ -41,11 +47,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'
         with:
-          body: Automatic pre-release of ${{ env.GitVersion_SemVer }} for ${{ env.GitVersion_ShortSha }}
-          name: v${{ env.GitVersion_SemVer }}
+          body: Manual pre-release of ${{ steps.extract_version.outputs.version }} for ${{ env.GitVersion_ShortSha }}
+          name: v${{ steps.extract_version.outputs.version }}
           fail_on_unmatched_files: false
           prerelease: true
-          tag_name: v${{ env.GitVersion_SemVer }}
+          tag_name: v${{ steps.extract_version.outputs.version }}
           files: |
             Bloodcraft.dll
             LICENSE.txt
