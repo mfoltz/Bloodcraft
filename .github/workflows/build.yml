@@ -46,7 +46,12 @@ jobs:
         with:
           body: Automatic pre-release of ${{ env.GitVersion_SemVer }} for ${{ env.GitVersion_ShortSha }}
           name: v${{ env.GitVersion_SemVer }}
-          files: ./bin/Release/net7.0/Bloodcraft.dll
           fail_on_unmatched_files: false
           prerelease: true
           tag_name: v${{ env.GitVersion_SemVer }}
+          files: |
+            ./bin/Release/net7.0/Bloodcraft.dll
+            LICENSE.txt
+            CHANGELOG.md
+            README.md
+            icon.png
