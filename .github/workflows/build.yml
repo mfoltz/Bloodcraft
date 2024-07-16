@@ -54,7 +54,7 @@ jobs:
           tag_name: v${{ steps.extract_version.outputs.version }}
           files: |
             Bloodcraft.dll
-            LICENSE.txt
+            manifest.json
             CHANGELOG.md
             README.md
             icon.png
