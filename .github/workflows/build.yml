@@ -11,6 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
@@ -25,7 +26,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - name: Restore dependencies
         run: dotnet restore
 
@@ -36,20 +37,21 @@ jobs:
         id: extract_version
         run: |
           version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" Bloodcraft.csproj)
-          echo "##[set-output name=version;]$version"
+          echo "version=$version" >> $GITHUB_ENV
           
       - name: Update manifest.json
         run: |
-          version=${{ steps.extract_version.outputs.version }}
+          version=${{ env.version }}
           jq --arg version "$version" '.version_number = $version' manifest.json > temp.json && mv temp.json manifest.json
           
       - name: Determine Version
+        id: determine_version
         uses: gittools/actions/gitversion/execute@v0.9.7
         with:
           additionalArguments: '/updateprojectfiles /overrideconfig "mode=Mainline"'
-
+      
       - name: Build (Release)
-        run: dotnet build . --configuration Release -p:Version=${{ steps.extract_version.outputs.version }}
+        run: dotnet build . --configuration Release -p:Version=${{ env.version }}
 
       - name: Publish (Release)
         run: dotnet publish . --configuration Release --output ./output
@@ -67,7 +69,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'
         with:
-          body: Manual pre-release of ${{ env.version }} for ${{ env.GitVersion_ShortSha }}
+          body: Manual pre-release of ${{ env.version }} for ${{ steps.determine_version.outputs.ShortSha }}
           name: v${{ env.version }}
           fail_on_unmatched_files: true
           prerelease: true
