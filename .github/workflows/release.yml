@@ -43,9 +43,6 @@ jobs:
       - name: Install Thunderstore CLI (tcli)
         run: dotnet tool install --global tcli
 
-      - name: Publish build to Thunderstore
-        run: tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version ${{ env.RELEASE_TAG:1 }} --config ./dist/thunderstore.toml
-
       - name: Prepare Thunderstore Package
         run: |
           version=${{ steps.extract_version.outputs.version }}
