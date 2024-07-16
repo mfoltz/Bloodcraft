@@ -44,7 +44,18 @@ internal static class QuestCommands
         {
             if (questData.TryGetValue(QuestType.Daily, out var dailyQuest) && !dailyQuest.Objective.Complete)
             {
+                DateTime lastDaily = dailyQuest.LastReset;
+                DateTime nextDaily = lastDaily.AddDays(1);
+                DateTime now = DateTime.UtcNow;
+                TimeSpan untilReset = nextDaily - now;
+
+                string timeLeft = string.Format("{0:D2}:{1:D2}:{2:D2}",
+                                                untilReset.Hours,
+                                                untilReset.Minutes,
+                                                untilReset.Seconds);
+
                 LocalizationService.HandleReply(ctx, $"<color=#00FFFF>Daily Quest</color>: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
+                LocalizationService.HandleReply(ctx, $"Time until daily reset: <color=yellow>{timeLeft}</color> | Character Prefab: <color=white>{dailyQuest.Objective.Target.LookupName()}</color>");
             }
             else if (dailyQuest.Objective.Complete)
             {
@@ -76,11 +87,35 @@ internal static class QuestCommands
         {
             if (questData.TryGetValue(QuestType.Weekly, out var weeklyQuest) && !weeklyQuest.Objective.Complete)
             {
+                DateTime lastWeekly = weeklyQuest.LastReset;
+                DateTime nextWeekly = lastWeekly.AddDays(7);
+                DateTime now = DateTime.UtcNow;
+                TimeSpan untilReset = nextWeekly - now;
+
+                string timeLeft = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}",
+                                                untilReset.Days,
+                                                untilReset.Hours,
+                                                untilReset.Minutes,
+                                                untilReset.Seconds);
+
                 LocalizationService.HandleReply(ctx, $"<color=#BF40BF>Weekly Quest</color>: <color=green>{weeklyQuest.Objective.Goal}</color> <color=white>{weeklyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{weeklyQuest.Objective.RequiredAmount}</color> [<color=white>{weeklyQuest.Progress}</color>/<color=yellow>{weeklyQuest.Objective.RequiredAmount}</color>]");
+                LocalizationService.HandleReply(ctx, $"Time until weekly reset: <color=yellow>{timeLeft}</color> | Character Prefab: <color=white>{weeklyQuest.Objective.Target.LookupName()}</color>");
             }
             else if (weeklyQuest.Objective.Complete)
             {
-                LocalizationService.HandleReply(ctx, "You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back after midnight Sunday.");
+                DateTime lastWeekly = weeklyQuest.LastReset;
+                DateTime nextWeekly = lastWeekly.AddDays(7);
+                DateTime now = DateTime.UtcNow;
+                TimeSpan untilReset = nextWeekly - now;
+
+                string timeLeft = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}",
+                                                untilReset.Days,
+                                                untilReset.Hours,
+                                                untilReset.Minutes,
+                                                untilReset.Seconds);
+
+                LocalizationService.HandleReply(ctx, "You've already completed your <color=#BF40BF>Weekly Quest</color>.");
+                LocalizationService.HandleReply(ctx, $"Time until weekly reset: <color=yellow>{timeLeft}</color>");
             }
             else
             {
@@ -92,6 +127,7 @@ internal static class QuestCommands
             LocalizationService.HandleReply(ctx, "You don't have any quests yet, check back soon.");
         }
     }
+
     [Command(name: "refresh", adminOnly: true, usage: ".quest refresh [Name]", description: "Display your current weekly quest progress.")]
     public static void ForceRefreshQuests(ChatCommandContext ctx, string name)
     {

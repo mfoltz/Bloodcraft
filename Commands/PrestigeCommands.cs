@@ -28,7 +28,7 @@ internal static class PrestigeCommands
 
         if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
 
@@ -130,7 +130,7 @@ internal static class PrestigeCommands
 
         if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
         Entity userEntity = PlayerService.GetUserByName(name, true);
@@ -265,7 +265,7 @@ internal static class PrestigeCommands
 
         if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
         if (!ExoPrestige && parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
@@ -337,7 +337,7 @@ internal static class PrestigeCommands
 
         if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
 
@@ -385,6 +385,7 @@ internal static class PrestigeCommands
         string prestigeTypes = string.Join(", ", Enum.GetNames(typeof(PrestigeUtilities.PrestigeType)));
         LocalizationService.HandleReply(ctx, $"Available Prestiges: <color=#90EE90>{prestigeTypes}</color>");
     }
+
     [Command(name: "leaderboard", shortHand: "lb", adminOnly: false, usage: ".prestige lb [PrestigeType]", description: "Lists prestige leaderboard for type.")]
     public static void ListPrestigeTypeLeaderboard(ChatCommandContext ctx, string prestigeType)
     {
@@ -395,7 +396,7 @@ internal static class PrestigeCommands
         }
         if (!PrestigeUtilities.TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .lpp to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
         if (!ExoPrestige && parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
@@ -405,27 +406,33 @@ internal static class PrestigeCommands
         }
 
         var prestigeData = PrestigeUtilities.GetPrestigeForType(parsedPrestigeType)
+        .Where(p => p.Value > 0)  // Filter out values of 0
         .OrderByDescending(p => p.Value)
         .ToList();
 
-        if (prestigeData.All(p => p.Value == 0))
+        if (!prestigeData.Any())
         {
-            LocalizationService.HandleReply(ctx, "No players to display yet!");
+            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet...");
             return;
         }
 
-        var leaderboard = PrestigeUtilities.GetPrestigeForType(parsedPrestigeType)
+        var leaderboard = prestigeData
         .Take(10)
         .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerService.playerIdCache[p.Key].Read<PlayerCharacter>().Name.Value}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
         .ToList();
 
         if (leaderboard.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, "No players to display yet!");
+            LocalizationService.HandleReply(ctx, "No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet...");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, string.Join("\n", leaderboard));
+            for (int i = 0; i < leaderboard.Count; i += 4)
+            {
+                var batch = leaderboard.Skip(i).Take(4);
+                string replyMessage = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, replyMessage);
+            }
         }
     }
 }

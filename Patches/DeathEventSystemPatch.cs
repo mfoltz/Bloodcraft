@@ -81,7 +81,7 @@ internal static class DeathEventListenerSystemPatch
                 {
                     Entity followedPlayer = deathEvent.Killer.Read<Follower>().Followed._Value;
                     User user = followedPlayer.Read<PlayerCharacter>().UserEntity.Read<User>();
-                    if (!hasVBloodConsumeSource)
+                    if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
                     {
                         if (Leveling) PlayerLevelingUtilities.UpdateLeveling(followedPlayer, deathEvent.Died);
                         if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(followedPlayer, deathEvent.Died);

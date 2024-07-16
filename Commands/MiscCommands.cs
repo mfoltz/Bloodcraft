@@ -5,6 +5,10 @@ using Unity.Entities;
 using VampireCommandFramework;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Terrain;
+using Il2CppInterop.Runtime;
+using Unity.Collections;
+using Unity.Transforms;
 
 namespace Bloodcraft.Commands;
 
@@ -12,23 +16,23 @@ internal static class MiscCommands
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly Dictionary<PrefabGUID, int> StarterKit = new()
-    {
-        { new(862477668), 500 },
-        { new(-1531666018), 1000 },
-        { new(-1593377811), 1000 },
-        { new(1821405450), 250 }
-    };
+    static readonly bool StarterKit = Plugin.StarterKit.Value;
+    public static Dictionary<PrefabGUID, int> KitPrefabs = [];
 
-    //[Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
+    [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
     public static void KitMe(ChatCommandContext ctx)
     {
+        if (!StarterKit)
+        {
+            LocalizationService.HandleReply(ctx, "Starter kit is not enabled.");
+            return;
+        }
         if (Core.DataStructures.PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && !bools["Kit"])
         {
             bools["Kit"] = true;
             Entity character = ctx.Event.SenderCharacterEntity;
             Core.DataStructures.SavePlayerBools();
-            foreach (var item in StarterKit)
+            foreach (var item in KitPrefabs)
             {
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
             }
@@ -40,7 +44,7 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "prepareForTheHunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
+    [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
     public static void QuickStartCommand(ChatCommandContext ctx)
     {
         if (!Leveling)

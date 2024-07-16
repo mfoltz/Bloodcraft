@@ -1,5 +1,4 @@
 ﻿using ProjectM;
-using ProjectM.Behaviours;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -21,8 +20,7 @@ internal static class FamiliarSummonUtilities
     static readonly PrefabGUID invulnerableBuff = new(-480024072);
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
     static readonly PrefabGUID playerFaction = new(1106458752);
-
-    
+    static readonly PrefabGUID pvpProtBuff = new(1111481396);
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
     {
         EntityCommandBufferSystem entityCommandBufferSystem = Core.EntityCommandBufferSystem;
@@ -130,15 +128,38 @@ internal static class FamiliarSummonUtilities
         follower.Followed._Value = player;
         follower.ModeModifiable._Value = 0;
         familiar.Write(follower);
+
+        /*
         UnitStats unitStats = familiar.Read<UnitStats>();
         unitStats.PvPProtected._Value = true;
         familiar.Write(unitStats);
+        */
 
+        if (Core.ServerGameManager.HasBuff(player, pvpProtBuff.ToIdentifier()))
+        {
+            ApplyBuffDebugEvent applyBuffDebugEvent = new()
+            {
+                BuffPrefabGUID = pvpProtBuff,
+            };
+            FromCharacter fromCharacter = new()
+            {
+                Character = familiar,
+                User = player.Read<PlayerCharacter>().UserEntity,
+            };
+            Core.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+            if (Core.ServerGameManager.TryGetBuff(familiar, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
+            {
+                if (buff.Has<LifeTime>())
+                {
+                    var lifetime = buff.Read<LifeTime>();
+                    lifetime.Duration = -1;
+                    lifetime.EndAction = LifeTimeEndAction.None;
+                    buff.Write(lifetime);
+                }
+            }
+        }
         var followerBuffer = player.ReadBuffer<FollowerBuffer>();
         followerBuffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
-        //AggroFactionMultiplierBufferElement aggro = new AggroFactionMultiplierBufferElement { FactionIndex = player.Read<Team>().FactionIndex, Multiplier = 0f };
-        //var aggroBuffer = Core.EntityManager.AddBuffer<AggroFactionMultiplierBufferElement>(familiar);
-        //aggroBuffer.Add(aggro);
     }
     public static void ModifyBloodSource(Entity familiar, int level)
     {

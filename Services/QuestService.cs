@@ -1,8 +1,7 @@
-﻿using Il2CppInterop.Runtime;
-using ProjectM;
+﻿using ProjectM;
+using ProjectM.Network;
 using Stunlock.Core;
 using System.Collections;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
@@ -11,20 +10,8 @@ namespace Bloodcraft.Services;
 internal class QuestService
 {
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly ComponentType[] prefabComponent =
-        [
-            ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-        ];
-    static EntityQuery PrefabQuery;
     public QuestService() // add coroutine to handle updating quests at midnight and distributing them as needed? make random generator or something in QuestUtilities
     {
-        PrefabQuery = Core.EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = prefabComponent,
-            Options = EntityQueryOptions.IncludeDisabledEntities
-        });
-        QuestResets[QuestType.Daily] = GetNextDailyReset(); // random seed based on the current daily time?
-        QuestResets[QuestType.Weekly] = GetNextWeeklyReset(); // random seed based on the current weekly time?
         List<PrefabGUID> questRewards = Core.ParseConfigString(Plugin.QuestRewards.Value).Select(x => new PrefabGUID(x)).ToList();
         List<int> rewardAmounts = [.. Core.ParseConfigString(Plugin.QuestRewardAmounts.Value)];
         QuestRewards = questRewards.Zip(rewardAmounts, (reward, amount) => new { reward, amount }).ToDictionary(x => x.reward, x => x.amount);
@@ -34,55 +21,56 @@ internal class QuestService
     }
     static void PopulatePrefabs()
     {
-        NativeArray<Entity> prefabs = PrefabQuery.ToEntityArray(Allocator.Temp);
-        try
+        //NativeArray<Entity> prefabs = PrefabQuery.ToEntityArray(Allocator.Temp);
+        var prefabs = Core.PrefabCollectionSystem.NameToPrefabGuidDictionary;
+        foreach(string name in prefabs.Keys)
         {
-            foreach(Entity entity in prefabs)
+            if (name.Contains("CHAR"))
             {
-                if (entity.Has<PrefabGUID>() && entity.Read<PrefabGUID>().LookupName().Contains("CHAR"))
-                {
-                    UnitEntities.Add(entity);
-                    UnitPrefabs.Add(entity.Read<PrefabGUID>());
-                }
-                else if (entity.Has<ItemData>())
-                {
-                    CraftEntities.Add(entity);
-                    CraftPrefabs.Add(entity.Read<PrefabGUID>());
-                }
-                else if (entity.Has<YieldResourcesOnDamageTaken>())
-                {
-                    GatherEntities.Add(entity);
-                    GatherPrefabs.Add(entity.Read<PrefabGUID>());
-                }
+                UnitPrefabs.Add(prefabs[name]);
             }
+            /*
+            else if (Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabs[name]].Has<ItemData>())
+            {
+                CraftPrefabs.Add(prefabs[name]);
+            }
+            
+            else if (entity.Has<YieldResourcesOnDamageTaken>())
+            {
+                GatherEntities.Add(entity);
+                GatherPrefabs.Add(entity.Read<PrefabGUID>());
+            }
+            */
         }
-        finally
-        {
-            prefabs.Dispose();
-        }
+
     }
     static IEnumerator QuestHandler()
     {
+        WaitForSeconds updateDelay = new(300);
+        WaitForSeconds startDelay = new(60);
+        WaitForSeconds playerDelay = new(1);
+
         while (true)
         {
-            yield return new WaitForSeconds(300);
-            DateTime now = DateTime.UtcNow;
-            bool dailyRefresh = QuestResets[QuestType.Daily] <= now;
-            bool weeklyRefresh = QuestResets[QuestType.Weekly] <= now;
-            if (dailyRefresh || weeklyRefresh)
+            yield return startDelay; // Wait 60 seconds before processing players
+
+            if (PlayerService.playerIdCache.Keys.Count == 0)
             {
-                if (dailyRefresh) QuestResets[QuestType.Daily] = GetNextDailyReset();
-                if (weeklyRefresh) QuestResets[QuestType.Weekly] = GetNextWeeklyReset();
+                yield return updateDelay; // Wait 300 seconds if there are no players
+                continue;
             }
-            //Core.Log.LogInfo("Refreshing quests...");
-            if (PlayerService.playerIdCache.Keys.Count == 0) continue;
-            foreach (ulong steamId in PlayerService.playerIdCache.Keys)
+
+            Dictionary<ulong, Entity> players = new(PlayerService.playerIdCache); // Copy the player cache to make sure updates to that don't interfere with this loop
+
+            foreach (ulong steamId in players.Keys)
             {
+                User user = PlayerService.playerIdCache[steamId].Read<PlayerCharacter>().UserEntity.Read<User>();
+
                 if (!Leveling)
                 {
                     if (Core.DataStructures.PlayerQuests.ContainsKey(steamId))
                     {
-                        RefreshQuests(steamId, (int)PlayerService.playerIdCache[steamId].Read<Equipment>().GetFullLevel());
+                        RefreshQuests(user, steamId, (int)PlayerService.playerIdCache[steamId].Read<Equipment>().GetFullLevel());
                     }
                     else
                     {
@@ -93,15 +81,18 @@ internal class QuestService
                 {
                     if (Core.DataStructures.PlayerQuests.ContainsKey(steamId))
                     {
-                        RefreshQuests(steamId, xpData.Key);
+                        RefreshQuests(user, steamId, xpData.Key);
                     }
                     else
                     {
                         InitializePlayerQuests(steamId, xpData.Key);
                     }
                 }
-                yield return new WaitForSeconds(10);
+
+                yield return playerDelay; // Wait 1 second between processing each player
             }
+
+            yield return updateDelay; // Wait 300 seconds before processing players again
         }
     }
 }

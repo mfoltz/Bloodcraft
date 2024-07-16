@@ -44,7 +44,7 @@ public static class ExpertiseUtilities
         { WeaponType.Reaper, PrestigeUtilities.PrestigeType.ReaperExpertise },
         { WeaponType.Longbow, PrestigeUtilities.PrestigeType.LongbowExpertise },
         { WeaponType.Whip, PrestigeUtilities.PrestigeType.WhipExpertise },
-        { WeaponType.Unarmed, PrestigeUtilities.PrestigeType.Sanguimancy }, // Assuming unarmed maps to Sanguimancy
+        { WeaponType.Unarmed, PrestigeUtilities.PrestigeType.UnarmedExpertise }, // Assuming unarmed maps to Sanguimancy
         { WeaponType.FishingPole, PrestigeUtilities.PrestigeType.WorkerLegacy } // Example mapping
     };
     public static void UpdateExpertise(Entity Killer, Entity Victim)

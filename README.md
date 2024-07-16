@@ -1,7 +1,5 @@
 ## Table of Contents
 
-UPDATED (7/8)
-
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
@@ -224,7 +222,10 @@ UPDATED (7/8)
   - Shortcut: *.fam reset*
 
 ### Misc Commands
-- `.prepareForTheHunt`
+- `.starterkit`
+  - Grants kit if configured.
+  - Shortcut: *.kitme*
+- `.prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed. 
   - Shortcut: *.prepare*
 - `.lockSpell`
@@ -253,40 +254,22 @@ UPDATED (7/8)
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: English)
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
-  
+- **Starter Kit**: `StarterKit` (bool, default: false)  
+  Enable or disable the starter kit.
+- **KitPrefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")  
+  PrefabGUIDs for the starter kit.
+- **KitQuantities**: `KitQuantities` (string, default: "500,1000,1000,250")
+  Quantities for the starter kit.
+
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
   Enable or disable the leveling system.
 - **Enable Prestige System**: `PrestigeSystem` (bool, default: false)  
   Enable or disable the prestige system.
-- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,1966156848,505940050,-692773400,-1971511915,-564979747,1796711064,1486229325,1126020850,1126020850")
+- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884")
   The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list.
 - **Prestige Levels to Unlock Class Spells:** `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3")
   The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.
-- **Blood Knight Buffs:** `BloodKnightBuffs` (string, default: "1828387635,-714434113,-534491790,-1055766373")
-  The PrefabGUID hashes for blood knight leveling blood buffs.
-- **Blood Knight Spells:** `BloodKnightSpells` (string, default: "-433204738,-1161896955,1957691133,-7407393")
-  Blood Knight shift spells, granted at levels of prestige.
-- **Demon Hunter Buffs:** `DemonHunterBuffs` (string, default: "-154702686,-285745649,-1510965956,-536284884")
-  The PrefabGUID hashes for demon hunter leveling blood buffs.
-- **Demon Hunter Spells:** `DemonHunterSpells` (string, default: "-433204738,1611191665,-328617085,-1161896955")
-  Demon Hunter shift spells, granted at levels of prestige.
-- **Vampire Lord Buffs:** `VampireLordBuffs` (string, default: "-1266262267,-1413561088,1103099361,1558171501")
-  The PrefabGUID hashes for vampire lord leveling blood buffs.
-- **Vampire Lord Spells:** `VampireLordSpells` (string, default: "-433204738,716346677,1450902136,-254080557")
-  Vampire Lord shift spells, granted at levels of prestige.
-- **Shadow Blade Buffs:** `ShadowBladeBuffs` (string, default: "894725875,997154800,-1576592687,-285745649")
-  The PrefabGUID hashes for shadow blade leveling blood buffs.
-- **Shadow Blade Spells:** `ShadowBladeSpells` (string, default: "-433204738,94933870,642767950,1922493152")
-  Shadow Blade shift spells, granted at levels of prestige.
-- **Arcane Sorcerer Buffs:** `ArcaneSorcererBuffs` (string, default: "-901503997,884683323,-993492354,-1859298707")
-  The PrefabGUID hashes for arcane sorcerer leveling blood buffs.
-- **Arcane Sorcerer Spells:** `ArcaneSorcererSpells` (string, default: "-433204738,495259674,1217615468,-1503327574")
-  Arcane Sorcerer shift spells, granted at levels of prestige.
-- **Death Mage Buffs:** `DeathMageBuffs` (string, default: "1643157297,1159173627,1006510207,997154800")
-  The PrefabGUID hashes for death mage leveling blood buffs.
-- **Death Mage Spells:** `DeathMageSpells` (string, default: "-433204738,234226418,1619461812,1006960825")
-  Demon Hunter shift spells, granted at levels of prestige.
 - **Max Player Level**: `MaxLevel` (int, default: 90)  
   The maximum level a player can reach.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
@@ -321,14 +304,12 @@ UPDATED (7/8)
   True to prevent damage between players in same alliance, false to allow.
 - **Max Party Size**: `MaxPartySize` (int, default: 5)  
   The maximum number of players that can form an alliance.
-- **Change Class Item**: `ChangeClassItem` (int, default: 576389135)  
-  Item PrefabGUID for changing classes.
-- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 1000)  
-  Quantity of item cost required to change class.
   
 ### Quest System
 - **Enable Quest System**: `QuestSystem` (bool, default: false)  
   Enable or disable the quest system.
+- **Infinite Dailies**: `InfiniteDailies` (bool, default: false)  
+  Enable or disable infinite dailies (will grant new daily upon completion of current).
 - **Quest Rewards**: `QuestRewards` (string, default: "2103989354,576389135,28358550")  
   Prefab pool for quest rewards.
 - **Quest Reward Amounts**: `QuestRewardAmounts` (string, default: "250,100,50")  
@@ -503,6 +484,34 @@ UPDATED (7/8)
   Death Mage weapon synergies.
 - **Death Mage Blood:** `DeathMageBlood` (string, default: "2,6,9,10")
   Death Mage blood synergies.
+- **Blood Knight Buffs:** `BloodKnightBuffs` (string, default: "1828387635,-534491790,-1055766373,-584203677")
+  The PrefabGUID hashes for blood knight leveling blood buffs.
+- **Blood Knight Spells:** `BloodKnightSpells` (string, default: "-433204738,-1161896955,1957691133,-7407393")
+  Blood Knight shift spells, granted at levels of prestige.
+- **Demon Hunter Buffs:** `DemonHunterBuffs` (string, default: "-154702686,-285745649,-1510965956,-397097531")
+  The PrefabGUID hashes for demon hunter leveling blood buffs.
+- **Demon Hunter Spells:** `DemonHunterSpells` (string, default: "-433204738,1611191665,-328617085,-1161896955")
+  Demon Hunter shift spells, granted at levels of prestige.
+- **Vampire Lord Buffs:** `VampireLordBuffs` (string, default: "1558171501,997154800,-1413561088,1103099361")
+  The PrefabGUID hashes for vampire lord leveling blood buffs.
+- **Vampire Lord Spells:** `VampireLordSpells` (string, default: "-433204738,716346677,1450902136,-254080557")
+  Vampire Lord shift spells, granted at levels of prestige.
+- **Shadow Blade Buffs:** `ShadowBladeBuffs` (string, default: "894725875,-1596803256,-993492354,210193036")
+  The PrefabGUID hashes for shadow blade leveling blood buffs.
+- **Shadow Blade Spells:** `ShadowBladeSpells` (string, default: "-433204738,94933870,642767950,1922493152")
+  Shadow Blade shift spells, granted at levels of prestige.
+- **Arcane Sorcerer Buffs:** `ArcaneSorcererBuffs` (string, default: "1614027598,884683323,-1576592687,-1859298707")
+  The PrefabGUID hashes for arcane sorcerer leveling blood buffs.
+- **Arcane Sorcerer Spells:** `ArcaneSorcererSpells` (string, default: "-433204738,495259674,1217615468,-1503327574")
+  Arcane Sorcerer shift spells, granted at levels of prestige.
+- **Death Mage Buffs:** `DeathMageBuffs` (string, default: "-901503997,-804597757,1934870645,1201299233")
+  The PrefabGUID hashes for death mage leveling blood buffs.
+- **Death Mage Spells:** `DeathMageSpells` (string, default: "-433204738,234226418,1619461812,1006960825")
+  Demon Hunter shift spells, granted at levels of prestige.
+- **Change Class Item**: `ChangeClassItem` (int, default: 576389135)  
+  Item PrefabGUID for changing classes.
+- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 1000)  
+  Quantity of item cost required to change class.
 
 ## Sponsors
 

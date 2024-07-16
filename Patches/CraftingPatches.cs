@@ -333,12 +333,14 @@ internal static class CraftingPatches
                         PrefabGUID recipePrefab = item.RecipeGuid;
                         Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
                         double totalTime = recipeEntity.Read<RecipeData>().CraftDuration * recipeReduction;
+                        /*
                         if (RecipeDurationMultiplier != 1f)
                         {
                             totalTime *= 1 - (RecipeDurationMultiplier - 1);
                         }
+                        */
                         float progress = item.ProgressTime;
-                        //Core.Log.LogInfo($"Progress: {progress}, Total Time: {totalTime} ({progress / totalTime}%) | {RecipeDurationMultiplier}");
+                        //Core.Log.LogInfo($"Progress: {progress}, Total Time: {totalTime} ({progress / totalTime}%)");
                         if (progress / (float)totalTime >= CraftThreshold)
                         {
                             DateTime now = DateTime.Now;

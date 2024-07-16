@@ -1,9 +1,14 @@
-`1.0.1`
+`1.1.2`
+- further improved quest distribution, should be significantly more consistent and less error-prone (will still take time to rollover from old quests, would recommend deleting quest file to force initial refreshes)
+- added option for infinite dailies
+- added basic starter kit, configurable
+- familiars don't attack other familiars on PvE and PvPProtected familiars (which fams will have if owner has) on PvP servers, mostly working but needs some tuning
 - player prestige dictionary properly updated with 'Exo' when trying to Exo prestige
 - more filtering to prevent non-ideal quest targets, fixed bug on generating quests for new players on fresh servers (new players receieve same starting daily/weekly quests to circumvent this), hopefully fixed any other issues with quest distribution involving timing
 - ancestral forge works for all shattered again and not just blue legendaries
 - familiars ignore players on PvE and PvPProtected players on PvP servers
 - fixed bug where destroying disabled familiars rendered space unuseable for building
+- fixed leaderboard for prestige not displaying correctly
 
 `1.0.0`
 - command groups added for organizational purposes (thanks Odjit <3)

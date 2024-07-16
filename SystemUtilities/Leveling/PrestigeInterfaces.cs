@@ -24,7 +24,7 @@ public static class PrestigeHandlerFactory
             PrestigeUtilities.PrestigeType.ReaperExpertise => new ReaperPrestigeHandler(),
             PrestigeUtilities.PrestigeType.LongbowExpertise => new LongbowPrestigeHandler(),
             PrestigeUtilities.PrestigeType.WhipExpertise => new WhipPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.Sanguimancy => new SanguimancyPrestigeHandler(),
+            PrestigeUtilities.PrestigeType.UnarmedExpertise => new SanguimancyPrestigeHandler(),
             PrestigeUtilities.PrestigeType.WorkerLegacy => new WorkerLegacyPrestigeHandler(),
             PrestigeUtilities.PrestigeType.WarriorLegacy => new WarriorLegacyPrestigeHandler(),
             PrestigeUtilities.PrestigeType.ScholarLegacy => new ScholarLegacyPrestigeHandler(),
@@ -256,7 +256,7 @@ public class SanguimancyPrestigeHandler : BasePrestigeHandler
 
     public override PrestigeUtilities.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.Sanguimancy;
+        return PrestigeUtilities.PrestigeType.UnarmedExpertise;
     }
 }
 

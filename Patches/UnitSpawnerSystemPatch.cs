@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using ProjectM;
+using ProjectM.Shared.Systems;
 using Unity.Collections;
 using Unity.Entities;
 

@@ -1,5 +1,6 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Bloodcraft.Commands;
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
@@ -15,6 +16,7 @@ using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
+using ProjectM.Terrain;
 using Stunlock.Core;
 using System.Collections;
 using System.Text.Json;
@@ -71,7 +73,7 @@ internal static class Core
         if (Plugin.FamiliarSystem.Value) FamiliarService = new();
         if (Plugin.ExtraRecipes.Value) RecipeUtilities.HandleRecipes();
         if (Plugin.QuestSystem.Value) QuestService = new();
-
+        if (Plugin.StarterKit.Value) InitializeKit();
         // update system group after injecting system?
         //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
         //JobsUtility.JobScheduleParameters
@@ -79,6 +81,13 @@ internal static class Core
         //DamageEventSystem = Server.GetOrCreateSystemManaged<DamageEventSystem>();
 
         hasInitialized = true;
+    }
+
+    static void InitializeKit()
+    {
+        List<PrefabGUID> kitPrefabs = Core.ParseConfigString(Plugin.KitPrefabs.Value).Select(x => new PrefabGUID(x)).ToList();
+        List<int> kitAmounts = [.. Core.ParseConfigString(Plugin.KitQuantities.Value)];
+        MiscCommands.KitPrefabs = kitPrefabs.Zip(kitAmounts, (item, amount) => new { item, amount }).ToDictionary(x => x.item, x => x.amount);
     }
     static World GetWorld(string name)
     {
@@ -173,7 +182,6 @@ internal static class Core
 
         // quest data
         private static Dictionary<ulong, Dictionary<QuestUtilities.QuestType, (QuestUtilities.QuestObjective Objective, int Progress, DateTime LastReset)>> playerQuests = [];
-
 
         [Serializable]
         public class FamiliarExperienceData

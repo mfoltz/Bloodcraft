@@ -30,7 +30,12 @@ internal class Plugin : BasePlugin
 
     // config entries
     private static ConfigEntry<string> _languageLocalization;
+    private static ConfigEntry<bool> _eliteShardBearers;
+    private static ConfigEntry<bool> _starterKit;
+    private static ConfigEntry<string> _kitPrefabs;
+    private static ConfigEntry<string> _kitQuantities;
     private static ConfigEntry<bool> _questSystem;
+    private static ConfigEntry<bool> _infiniteDailies;
     private static ConfigEntry<string> _questRewards;
     private static ConfigEntry<string> _questRewardAmounts;
     private static ConfigEntry<bool> _levelingSystem;
@@ -166,7 +171,12 @@ internal class Plugin : BasePlugin
 
     // public getters, kinda verbose might just get rid of these
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
+    public static ConfigEntry<bool> EliteShardBearers => _eliteShardBearers;
+    public static ConfigEntry<bool> StarterKit => _starterKit;
+    public static ConfigEntry<string> KitPrefabs => _kitPrefabs;
+    public static ConfigEntry<string> KitQuantities => _kitQuantities;
     public static ConfigEntry<bool> QuestSystem => _questSystem;
+    public static ConfigEntry<bool> InfiniteDailies => _infiniteDailies;
     public static ConfigEntry<string> QuestRewards => _questRewards;
     public static ConfigEntry<string> QuestRewardAmounts => _questRewardAmounts;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
@@ -343,7 +353,14 @@ internal class Plugin : BasePlugin
 
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
 
+        _eliteShardBearers = InitConfigEntry("Config", "EliteShardBearers", false, "Enable or disable elite shard bearers.");
+
+        _starterKit = InitConfigEntry("Config", "StarterKit", false, "Enable or disable the starter kit.");
+        _kitPrefabs = InitConfigEntry("Config", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit.");
+        _kitQuantities = InitConfigEntry("Config", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit.");
+
         _questSystem = InitConfigEntry("Config", "QuestSystem", false, "Enable or disable quests (currently only kill quests).");
+        _infiniteDailies = InitConfigEntry("Config", "InfiniteDailies", false, "Enable or disable infinite dailies.");
         _questRewards = InitConfigEntry("Config", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool.");
         _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests have a *3 multiplier.");
         

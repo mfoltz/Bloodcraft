@@ -1,7 +1,6 @@
 ﻿using Bloodcraft.Systems.Legacy;
 using ProjectM;
 using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
-using static Bloodcraft.Systems.Legacy.LegacyUtilities;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class LegacyStats

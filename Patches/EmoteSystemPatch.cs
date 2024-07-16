@@ -198,7 +198,6 @@ public static class EmoteSystemPatch
                 Core.DataStructures.SavePlayerFamiliarActives();
                 LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
             }
-
         }
         else
         {
@@ -216,7 +215,7 @@ public static class EmoteSystemPatch
         }
 
         ServerGameManager serverGameManager = Core.ServerGameManager;
-        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.Item2.Equals(0)) // 0 means no active familiar
+        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
@@ -233,7 +232,6 @@ public static class EmoteSystemPatch
 
             if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // remove and enable combat
             {
-                
                 BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(serverGameManager);
                 EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
                 BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, invulnerableBuff, familiar);

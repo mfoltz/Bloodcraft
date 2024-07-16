@@ -55,7 +55,6 @@ public static class LegacyUtilities
         { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
         { new PrefabGUID(1828387635), BloodType.Brute } // primary life leech
     };
-
     public static void UpdateLegacy(Entity Killer, Entity Victim)
     {
         EntityManager entityManager = Core.EntityManager;
@@ -124,7 +123,6 @@ public static class LegacyUtilities
             NotifyPlayer(entityManager, user, bloodType, BloodValue, leveledUp, newLevel, handler);
         }
     }
-
     public static void NotifyPlayer(EntityManager entityManager, User user, LegacyUtilities.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
     {
         ulong steamID = user.PlatformId;

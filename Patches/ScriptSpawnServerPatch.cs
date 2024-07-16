@@ -1,6 +1,7 @@
 using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
@@ -11,6 +12,9 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ScriptSpawnServerPatch
 {
+    static readonly bool BloodSystem = Plugin.BloodSystem.Value;
+    static readonly bool LevelingSystem = Plugin.LevelingSystem.Value;
+
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ScriptSpawnServer __instance)
@@ -24,7 +28,13 @@ internal static class ScriptSpawnServerPatch
 
                 if (entity.Has<BloodBuff>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
-                    if (LegacyUtilities.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out LegacyUtilities.BloodType bloodType)) // applies stat choices to blood types when changed
+                    if (LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
+                    {
+                        BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
+                        bloodBuff_Brute_ArmorLevelBonus_DataShared.GearLevel = 0;
+                        entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
+                    }
+                    if (BloodSystem && LegacyUtilities.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out LegacyUtilities.BloodType bloodType)) // applies stat choices to blood types when changed
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;
                         ModifyUnitStatBuffUtils.ApplyBloodBonuses(character, bloodType, entity);
