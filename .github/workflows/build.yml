@@ -1,10 +1,7 @@
 name: Build
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -42,7 +39,7 @@ jobs:
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
-        if: github.event_name == 'push'
+        if: github.event_name == 'workflow_dispatch'
         with:
           body: Automatic pre-release of ${{ env.GitVersion_SemVer }} for ${{ env.GitVersion_ShortSha }}
           name: v${{ env.GitVersion_SemVer }}
@@ -50,7 +47,7 @@ jobs:
           prerelease: true
           tag_name: v${{ env.GitVersion_SemVer }}
           files: |
-            ./bin/Release/net7.0/Bloodcraft.dll
+            Bloodcraft.dll
             LICENSE.txt
             CHANGELOG.md
             README.md
