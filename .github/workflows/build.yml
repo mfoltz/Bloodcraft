@@ -16,17 +16,12 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 7.0.x
-
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: "5.x"
       
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-
+          fetch-depth: 0        
+        
       - name: Restore dependencies
         run: dotnet restore
 
@@ -37,48 +32,26 @@ jobs:
         id: extract_version
         run: |
           version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" Bloodcraft.csproj)
-          echo "version=$version" >> $GITHUB_ENV
+          echo "version=$version" >> $GITHUB_ENV   
           
-      - name: Update manifest.json
+      - name: Update thunderstore.toml
         run: |
-          version=${{ env.version }}
-          jq --arg version "$version" '.version_number = $version' manifest.json > temp.json && mv temp.json manifest.json
+          sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
           
-      - name: Determine Version
-        id: determine_version
-        uses: gittools/actions/gitversion/execute@v0.9.7
-        with:
-          additionalArguments: '/updateprojectfiles /overrideconfig "mode=Mainline"'
-      
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=${{ env.version }}
-
-      - name: Publish (Release)
-        run: dotnet publish . --configuration Release --output ./output
-
-      - name: Copy build artifacts
-        run: |
-          mkdir -p release_artifacts
-          cp ./output/Bloodcraft.dll release_artifacts/
-          cp manifest.json release_artifacts/
-          cp CHANGELOG.md release_artifacts/
-          cp README.md release_artifacts/
-          cp icon.png release_artifacts/
-          
+     
       - name: GH Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'
         with:
-          body: Manual pre-release of ${{ env.version }} for ${{ steps.determine_version.outputs.ShortSha }}
+          body: Manual pre-release of ${{ env.version }}
           name: v${{ env.version }}
           fail_on_unmatched_files: true
           prerelease: true
           tag_name: v${{ env.version }}
           files: |
-            release_artifacts/Bloodcraft.dll
-            release_artifacts/manifest.json
-            release_artifacts/CHANGELOG.md
-            release_artifacts/README.md
-            release_artifacts/icon.png
+            ./bin/Release/net6.0/Bloodcraft.dll
+            CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
