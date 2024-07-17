@@ -8,3 +8,11 @@ repository = "https://thunderstore.io"
 
 [publish.categories]
 v-rising = ["1-0-update", "mods", "server"]
+
+[package]
+namespace = "zfolmt"
+name = "Bloodcraft"
+versionNumber = "1.1.2"
+description = "Leveling, expertise, legacies, professions, familiars, classes, quests!"
+websiteUrl = "https://github.com/mfoltz/Bloodcraft"
+containsNsfwContent = false
