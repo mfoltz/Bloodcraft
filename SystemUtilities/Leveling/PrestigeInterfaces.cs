@@ -24,7 +24,8 @@ public static class PrestigeHandlerFactory
             PrestigeUtilities.PrestigeType.ReaperExpertise => new ReaperPrestigeHandler(),
             PrestigeUtilities.PrestigeType.LongbowExpertise => new LongbowPrestigeHandler(),
             PrestigeUtilities.PrestigeType.WhipExpertise => new WhipPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.UnarmedExpertise => new SanguimancyPrestigeHandler(),
+            PrestigeUtilities.PrestigeType.UnarmedExpertise => new UnarmedPrestigeHandler(),
+            PrestigeUtilities.PrestigeType.FishingPoleExpertise => new FishingPolePrestigeHandler(),
             PrestigeUtilities.PrestigeType.WorkerLegacy => new WorkerLegacyPrestigeHandler(),
             PrestigeUtilities.PrestigeType.WarriorLegacy => new WarriorLegacyPrestigeHandler(),
             PrestigeUtilities.PrestigeType.ScholarLegacy => new ScholarLegacyPrestigeHandler(),
@@ -245,18 +246,32 @@ public class WhipPrestigeHandler : BasePrestigeHandler
         return PrestigeUtilities.PrestigeType.WhipExpertise;
     }
 }
-public class SanguimancyPrestigeHandler : BasePrestigeHandler
+public class UnarmedPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSanguimancy;
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedExpertise;
 
     public override void SaveChanges()
     {
-        Core.DataStructures.SavePlayerSanguimancy();
+        Core.DataStructures.SavePlayerUnarmedExpertise();
     }
 
     public override PrestigeUtilities.PrestigeType GetPrestigeType()
     {
         return PrestigeUtilities.PrestigeType.UnarmedExpertise;
+    }
+}
+public class FishingPolePrestigeHandler : BasePrestigeHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishingPoleExpertise;
+
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerFishingPoleExpertise();
+    }
+
+    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    {
+        return PrestigeUtilities.PrestigeType.FishingPoleExpertise;
     }
 }
 

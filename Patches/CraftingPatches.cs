@@ -1,5 +1,4 @@
 using Bloodcraft.Systems.Professions;
-using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Shared;
@@ -13,7 +12,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CraftingPatches
 {
-    static readonly float RecipeDurationMultiplier = Core.ServerGameSettingsSystem._Settings.CraftRateModifier;
+    static readonly float CraftRateModifier = Core.ServerGameSettings.CraftRateModifier;
+    static PrefabCollectionSystem PrefabCollectionSystem = Core.PrefabCollectionSystem;
     const float CraftThreshold = 0.995f;
     static Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
     /*
@@ -331,19 +331,19 @@ internal static class CraftingPatches
                         User user = userEntity.Read<User>();
                         ulong steamId = user.PlatformId;
                         PrefabGUID recipePrefab = item.RecipeGuid;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
+                        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
                         double totalTime = recipeEntity.Read<RecipeData>().CraftDuration * recipeReduction;
-                        /*
-                        if (RecipeDurationMultiplier != 1f)
+                        
+                        if (CraftRateModifier != 1f)
                         {
-                            totalTime *= 1 - (RecipeDurationMultiplier - 1);
+                            totalTime /= CraftRateModifier;
                         }
-                        */
+
                         float progress = item.ProgressTime;
                         //Core.Log.LogInfo($"Progress: {progress}, Total Time: {totalTime} ({progress / totalTime}%)");
                         if (progress / (float)totalTime >= CraftThreshold)
                         {
-                            DateTime now = DateTime.Now;
+                            DateTime now = DateTime.UtcNow;
                             if (CraftCooldowns.TryGetValue(userEntity, out var cooldowns))
                             {
                                 if (cooldowns.TryGetValue(recipePrefab, out var lastCrafted))
@@ -368,10 +368,12 @@ internal static class CraftingPatches
                             var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                             PrefabGUID itemPrefab = outputBuffer[0].Guid;
 
+                            /*
                             if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData))
                             {
                                 QuestUtilities.UpdateQuestProgress(questData, itemPrefab, 1, user);
                             }
+                            */
 
                             if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(userEntity, out var playerJobs))
                             {
@@ -406,71 +408,9 @@ internal static class CraftingPatches
     /*
     [HarmonyPatch(typeof(UpdateCharacterCraftingSystem), nameof(UpdateCharacterCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePrefix(UpdateCharacterCraftingSystem __instance)
+    static void OnUpdatePrefix()
     {
-        NativeArray<Entity> entities = __instance.__query_970757718_0.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!Core.hasInitialized) continue;
-                if (!Plugin.ProfessionSystem.Value) continue;
-
-                if (entity.Has<QueuedWorkstationCraftAction>())
-                {
-                    var buffer = entity.ReadBuffer<QueuedWorkstationCraftAction>();
-                    for (int i = 0; i < buffer.Length; i++)
-                    {
-                        var item = buffer[i];
-                        Entity userEntity = item.InitiateUser;
-                        User user = userEntity.Read<User>();
-                        ulong steamId = user.PlatformId;
-                        PrefabGUID recipePrefab = item.RecipeGuid;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
-                        float totalTime = recipeEntity.Read<RecipeData>().CraftDuration; // need to account for craft rate reduction in settings here
-                        float progress = item.ProgressTime;
-                        Core.Log.LogInfo($"Progress: {progress}, Total Time: {totalTime} ({progress / totalTime} | {RecipeDurationMultiplier}%)");
-                        if (progress / (float)totalTime >= CraftThreshold)
-                        {
-                            if (CraftCooldowns.TryGetValue(userEntity, out var cooldowns))
-                            {
-                                if (cooldowns.TryGetValue(recipePrefab, out var lastCrafted))
-                                {
-                                    if (DateTime.Now < lastCrafted.AddSeconds(5))
-                                    {
-                                        continue;
-                                    }
-                                }
-                                else
-                                {
-                                    cooldowns.Add(recipePrefab, DateTime.Now);
-                                }
-                            }
-                            else
-                            {
-                                CraftCooldowns.Add(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, DateTime.Now } });
-                            }
-
-                            var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-                            PrefabGUID itemPrefab = outputBuffer[0].Guid;
-                            Core.Log.LogInfo($"charactercrafting quest {itemPrefab.LookupName()}");
-                            if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData))
-                            {
-                                QuestUtilities.UpdateQuestProgress(questData, itemPrefab, 1, user);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited UpdateCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
+        //AggroService.OnUpdate();
     }
     
     [HarmonyPatch(typeof(YieldResourcesSystem_Dead), nameof(YieldResourcesSystem_Dead.OnUpdate))]

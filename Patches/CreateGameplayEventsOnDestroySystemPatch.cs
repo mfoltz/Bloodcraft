@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacy;
 using Bloodcraft.Systems.Professions;
+using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -66,6 +67,9 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                 {
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<EntityOwner>().Owner;
+                    Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
+                    User user = userEntity.Read<User>();
+                    ulong steamId = user.PlatformId;
 
                     if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(killer, died);
                     if (Plugin.ExpertiseSystem.Value) ExpertiseUtilities.UpdateExpertise(killer, died);
@@ -74,6 +78,10 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     {
                         FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
                         FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
+                    }
+                    if (Plugin.QuestSystem.Value)
+                    {
+                        QuestUtilities.UpdateQuests(killer, userEntity, died.Read<PrefabGUID>());
                     }
                 }
             }

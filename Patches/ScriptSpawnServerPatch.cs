@@ -26,6 +26,8 @@ internal static class ScriptSpawnServerPatch
             {
                 if (!Core.hasInitialized) continue;
 
+                //Core.Log.LogInfo($"ScriptSpawnServer: {entity.Read<PrefabGUID>().LookupName()}");
+
                 if (entity.Has<BloodBuff>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     if (LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())

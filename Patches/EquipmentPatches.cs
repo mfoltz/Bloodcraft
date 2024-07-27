@@ -324,7 +324,7 @@ internal static class EquipmentPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)
@@ -332,21 +332,31 @@ internal static class EquipmentPatches
                 if (!Core.hasInitialized) continue;
                 InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
+                if (!EntityManager.Exists(inventory)) continue;
                 //inventory.LogComponentTypes();
                 //inventory.Read<InventoryConnection>().InventoryOwner.LogComponentTypes();
+                //Core.Log.LogInfo($"pre job processing for {inventoryChangedEvent.Item.LookupName()}");
                 if (Professions && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
                 {
-                    //Core.Log.LogInfo("professions reactinventory" + inventoryChangedEvent.Item.LookupName());
-                    Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>().Owner._Entity;
-                    PrefabGUID itemPrefab = inventoryChangedEvent.Item;
+                    //Core.Log.LogInfo("entered job processing");
+                    UserOwner userOwner = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>();
+                    if (!EntityManager.Exists(userOwner.Owner._Entity))
+                    {
+                        //Core.Log.LogInfo("user does not exist");
+                        continue;
+                    }
 
+                    Entity userEntity = userOwner.Owner._Entity;
+                    PrefabGUID itemPrefab = inventoryChangedEvent.Item;
                     if (inventoryChangedEvent.ItemEntity.Has<UpgradeableLegendaryItem>())
                     {
                         int tier = inventoryChangedEvent.ItemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                         itemPrefab = inventoryChangedEvent.ItemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
                     }
 
-                    ulong steamId = userEntity.Read<User>().PlatformId;
+                    User user = userEntity.Read<User>();
+                    ulong steamId = user.PlatformId;
+                    //Core.Log.LogInfo($"job processing for {itemPrefab.LookupName()}");
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(userEntity, out var playerJobs) && playerJobs.TryGetValue(itemPrefab, out int credits) && credits > 0)
                     {
@@ -364,7 +374,8 @@ internal static class EquipmentPatches
                         ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                         if (handler != null)
                         {
-                            ProfessionUtilities.SetProfession(userEntity.Read<User>(), steamId, ProfessionValue, handler);
+                            ProfessionUtilities.SetProfession(user, steamId, ProfessionValue, handler);
+                            if (handler.GetProfessionName().ToLower().Contains("alchemy")) continue;
                             Entity itemEntity = inventoryChangedEvent.ItemEntity;
                             switch (handler)
                             {
@@ -404,10 +415,14 @@ internal static class EquipmentPatches
                         }
                     }
                 }
+                /*
                 else if (Quests && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<PlayerCharacter>())
                 {
                     //Core.Log.LogInfo("quest reactinventory" + inventoryChangedEvent.Item.LookupName());
+                    PlayerCharacter playerCharacter = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>();
+                    if (!EntityManager.Exists(playerCharacter.UserEntity) || !EntityManager.Exists(inventoryChangedEvent.ItemEntity)) continue;
                     if (!inventoryChangedEvent.Item.LookupName().Contains("Item_Ingredient")) continue;
+
                     Entity userEntity = inventory.Read<InventoryConnection>().InventoryOwner.Read<PlayerCharacter>().UserEntity;
                     User user = userEntity.Read<User>();
                     ulong steamId = user.PlatformId;
@@ -416,6 +431,7 @@ internal static class EquipmentPatches
                         QuestUtilities.UpdateQuestProgress(questData, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, user);
                     }
                 }
+                */
             }
         }
         catch (Exception ex)

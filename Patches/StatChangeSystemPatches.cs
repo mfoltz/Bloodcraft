@@ -2,14 +2,13 @@
 using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities;
 using Random = System.Random;
 
@@ -19,6 +18,8 @@ namespace Bloodcraft.Patches;
 internal static class StatChangeSystemPatches
 {
     static readonly Random Random = new();
+
+    static EntityManager EntityManager => Core.EntityManager;
     static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
@@ -31,6 +32,9 @@ internal static class StatChangeSystemPatches
     static readonly bool OnHitEffects = Plugin.ClassSpellSchoolOnHitEffects.Value;
     static readonly float OnHitChance = Plugin.OnHitProcChance.Value;
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
+    static readonly PrefabGUID stormShield03 = new(1095865904);
+    static readonly PrefabGUID stormShield02 = new(-1192885497);
+    static readonly PrefabGUID stormShield01 = new(1044565673);
 
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -181,7 +185,29 @@ internal static class StatChangeSystemPatches
                             applyBuffDebugEvent.BuffPrefabGUID = ClassOnHitEffectMap[playerClass];
                             fromCharacter.Character = entityOwner.Owner;
                             //Core.Log.LogInfo($"Tier 2 on hit effect proc'd...");
-                            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                            if (playerClass.Equals(PlayerClasses.DemonHunter))
+                            {
+                                if (ServerGameManager.TryGetBuff(entityOwner.Owner, stormShield01.ToIdentifier(), out Entity firstBuff))
+                                {
+                                    firstBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
+                                }
+                                else if (ServerGameManager.TryGetBuff(entityOwner.Owner, stormShield02.ToIdentifier(), out Entity secondBuff))
+                                {
+                                    secondBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
+                                }
+                                else if (ServerGameManager.TryGetBuff(entityOwner.Owner, stormShield03.ToIdentifier(), out Entity thirdBuff))
+                                {
+                                    thirdBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
+                                }
+                                else
+                                {
+                                    DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                                }
+                            }
+                            else
+                            {
+                                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                            }
                         }
                         else
                         {
@@ -193,6 +219,26 @@ internal static class StatChangeSystemPatches
                             }
                         }
                     }
+                    /*
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
+                    if (EntityManager.Exists(familiar))
+                    {
+                        // want to have fam attack thing here if doesn't already have a formerly set target?
+                        //Core.Log.LogInfo($"Main Factor: {dealDamageEvent.MainFactor} | Main Type: {dealDamageEvent.MainType.ToString()} | Modifier: {dealDamageEvent.Modifier} | Raw Damage: {dealDamageEvent.RawDamage} | Raw Percent: {dealDamageEvent.RawDamagePercent} | Resource Modifier: {dealDamageEvent.ResourceModifier}");
+                        DealDamageParameters dealDamageParameters = new()
+                        {
+                            MainFactor = 1f,
+                            MainType = MainDamageType.Physical,
+                            RawDamageValue = 0f,
+                            RawDamagePercent = 0f,
+                            DealDamageFlags = (int)DealDamageFlag.None,
+                            MaterialModifiers = EntityTypeModifiers.Default,
+                            ResourceModifier = 1f
+                        };
+                        ServerGameManager.DealDamage(dealDamageEvent.Target, familiar, dealDamageParameters, 100f);
+                        //Core.Log.LogInfo("Familiar provoked~");
+                    }
+                    */
                 }
                 /*
                 else if (Familiars && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner familiarEntityOwner) && familiarEntityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>())

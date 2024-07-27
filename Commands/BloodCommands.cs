@@ -14,6 +14,8 @@ namespace Bloodcraft.Commands;
 [CommandGroup("bloodlegacy", "bl")]
 internal static class BloodCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     [Command(name: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display your current blood legacy progress.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = "")
     {
@@ -221,29 +223,34 @@ internal static class BloodCommands
             LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
             return;
         }
-        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-        if (foundUserEntity.Equals(Entity.Null))
+
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
         {
-            LocalizationService.HandleReply(ctx, "Player not found.");
+            ctx.Reply($"Couldn't find player.");
             return;
         }
+
         User foundUser = foundUserEntity.Read<User>();
         if (level < 0 || level > Plugin.MaxBloodLevel.Value)
         {
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {Plugin.MaxBloodLevel.Value}.");
             return;
         }
+
         if (!Enum.TryParse<LegacyUtilities.BloodType>(blood, true, out var bloodType))
         {
             LocalizationService.HandleReply(ctx, "Invalid blood legacy.");
             return;
         }
+
         var BloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
         if (BloodHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid blood legacy.");
             return;
         }
+
         ulong steamId = foundUser.PlatformId;
         var xpData = new KeyValuePair<int, float>(level, LegacyUtilities.ConvertLevelToXp(level));
         BloodHandler.UpdateLegacyData(steamId, xpData);

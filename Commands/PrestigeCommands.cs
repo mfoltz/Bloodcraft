@@ -12,12 +12,14 @@ namespace Bloodcraft.Commands;
 [CommandGroup(name: "prestige")]
 internal static class PrestigeCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
     static readonly bool HardSynergies = Plugin.HardSynergies.Value;
     static readonly bool Prestige = Plugin.PrestigeSystem.Value;
     static readonly bool ExoPrestige = Plugin.ExoPrestiging.Value;
 
-    [Command(name: "playerpr", shortHand: "pr", adminOnly: false, usage: ".prestige pr [PrestigeType]", description: "Handles player prestiging.")]
+    [Command(name: "self", shortHand: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
     public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
     {
         if (!Prestige)
@@ -42,6 +44,11 @@ internal static class PrestigeCommands
                 if (!Core.DataStructures.PlayerExperience.TryGetValue(ctx.Event.User.PlatformId, out var expData) && expData.Key == Plugin.MaxPlayerLevel.Value)
                 {
                     LocalizationService.HandleReply(ctx, "You must reach max level before <color=#90EE90>Exo</color> prestiging again.");
+                    return;
+                }
+                else if (prestigeData[PrestigeUtilities.PrestigeType.Exo] >= Plugin.ExoPrestiges.Value)
+                {
+                    LocalizationService.HandleReply(ctx, "You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges.");
                     return;
                 }
                 expData = new KeyValuePair<int, float>(0, 0);
@@ -133,9 +140,18 @@ internal static class PrestigeCommands
             LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
-        Entity userEntity = PlayerService.GetUserByName(name, true);
-        User user = userEntity.Read<User>();
+
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
+        {
+            ctx.Reply($"Couldn't find player.");
+            return;
+        }
+
+        User user = foundUserEntity.Read<User>();
         ulong steamId = user.PlatformId;
+        Entity character = user.LocalCharacter._Entity;
+
         if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
         {
             if (!ExoPrestige)
@@ -160,7 +176,7 @@ internal static class PrestigeCommands
                 exoPrestige = level;
                 exoData[PrestigeUtilities.PrestigeType.Exo] = exoPrestige;
                 Core.DataStructures.SavePlayerPrestiges();
-                Entity character = ctx.Event.SenderCharacterEntity;
+                //Entity character = ctx.Event.SenderCharacterEntity;
                 PrestigeUtilities.AdjustCharacterStats(character, steamId);
                 LocalizationService.HandleReply(ctx, $"Player <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
                 return;
@@ -207,13 +223,14 @@ internal static class PrestigeCommands
         // Apply effects based on the prestige type
         if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Experience)
         {
-            PrestigeUtilities.ApplyPrestigeBuffs(ctx, level);
-            PrestigeUtilities.ApplyExperiencePrestigeEffects(ctx, steamId, level);
+            PrestigeUtilities.ApplyPrestigeBuffs(character, level);
+            PrestigeUtilities.ApplyExperiencePrestigeEffects(user, level);
         }
         else
         {
-            PrestigeUtilities.ApplyOtherPrestigeEffects(ctx, steamId, parsedPrestigeType, level);
+            PrestigeUtilities.ApplyOtherPrestigeEffects(user, steamId, parsedPrestigeType, level);
         }
+        Core.DataStructures.SavePlayerPrestiges();
         LocalizationService.HandleReply(ctx, $"Player <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
     }
 
@@ -274,29 +291,28 @@ internal static class PrestigeCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-
-        if (foundUserEntity.Equals(Entity.Null))
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
         {
-            LocalizationService.HandleReply(ctx, "Player not found...");
+            ctx.Reply($"Couldn't find player.");
             return;
         }
 
         User foundUser = foundUserEntity.Read<User>();
         ulong steamId = foundUser.PlatformId;
+        Entity character = foundUser.LocalCharacter._Entity;
 
         if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
             prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
         {
             if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Experience)
             {
-                PrestigeUtilities.RemovePrestigeBuffs(ctx, prestigeLevel);
+                PrestigeUtilities.RemovePrestigeBuffs(character, prestigeLevel);
             }
             prestigeData[parsedPrestigeType] = 0;
             Core.DataStructures.SavePlayerPrestiges();
             if (parsedPrestigeType == PrestigeUtilities.PrestigeType.Exo)
             {
-                Entity character = foundUser.LocalCharacter._Entity;
                 PrestigeUtilities.AdjustCharacterStats(character, steamId);
             }
             LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{foundUser.CharacterName}</color>.");
@@ -313,11 +329,12 @@ internal static class PrestigeCommands
         }
 
         var steamId = ctx.Event.User.PlatformId;
+        Entity character = ctx.Event.SenderCharacterEntity;
 
         if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
             prestigeData.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
         {
-            PrestigeUtilities.ApplyPrestigeBuffs(ctx, prestigeLevel);
+            PrestigeUtilities.ApplyPrestigeBuffs(character, prestigeLevel);
             LocalizationService.HandleReply(ctx, "Prestige buffs applied.");
         }
         else
@@ -418,7 +435,7 @@ internal static class PrestigeCommands
 
         var leaderboard = prestigeData
         .Take(10)
-        .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerService.playerIdCache[p.Key].Read<PlayerCharacter>().Name.Value}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
+        .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerService.PlayerCache[p.Key].Read<User>().CharacterName.Value}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
         .ToList();
 
         if (leaderboard.Count == 0)

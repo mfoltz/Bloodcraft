@@ -14,6 +14,8 @@ namespace Bloodcraft.Commands;
 [CommandGroup(name: "weapon", "wep")] 
 internal static class WeaponCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 
     public static void GetExpertiseCommand(ChatCommandContext ctx)
     {
@@ -199,12 +201,13 @@ internal static class WeaponCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-        if (foundUserEntity.Equals(Entity.Null))
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
         {
-            LocalizationService.HandleReply(ctx, "Player not found...");
+            ctx.Reply($"Couldn't find player.");
             return;
         }
+
         User foundUser = foundUserEntity.Read<User>();
 
         if (level < 0 || level > Plugin.MaxExpertiseLevel.Value)
@@ -297,10 +300,10 @@ internal static class WeaponCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-        if (foundUserEntity.Equals(Entity.Null))
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
         {
-            LocalizationService.HandleReply(ctx, "Player not found...");
+            ctx.Reply($"Couldn't find player.");
             return;
         }
 

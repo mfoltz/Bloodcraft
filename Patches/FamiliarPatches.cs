@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
@@ -16,6 +17,13 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class FamiliarPatches
 {
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static EntityManager EntityManager => Core.EntityManager;
+    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
+
+    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+
+    static readonly PrefabGUID abilityGroupSlot = new(-633717863);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
     static readonly PrefabGUID manticore = new(-393555055);
@@ -25,12 +33,14 @@ internal static class FamiliarPatches
     static readonly PrefabGUID manticoreVisual = new(1670636401);
     static readonly PrefabGUID draculaVisual = new(-1923843097);
     static readonly PrefabGUID monsterVisual = new(-2067402784);
-    static readonly PrefabGUID solarusVisual = new(-1466712470);
-    static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
+    static readonly PrefabGUID solarusVisual = new(178225731);
+    static readonly PrefabGUID holyBeamHard = new(583436571);
+    static readonly PrefabGUID holySpinners = new(-1852467646);
+    public static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
     static readonly bool EliteShardBearers = Plugin.EliteShardBearers.Value;
     static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
 
-    public static Dictionary<Entity, HashSet<Entity>> familiarMinions = [];
+    public static Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
 
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -46,48 +56,32 @@ internal static class FamiliarPatches
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    //Core.Log.LogInfo(behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().GetPrefabName());
                     //Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.PreviousState.ToString()}|{behaviourTreeStateChangedEvent.NewState.ToString()}");
                     BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
+                        //Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().LookupName()}: {behaviourTreeState.Value}");
                         Entity familiar = behaviourTreeStateChangedEvent.Entity;
-
                         behaviourTreeState.Value = GenericEnemyState.Follow;
                         behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
-                        
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
-                        if (familiarMinions.ContainsKey(familiar))
+                        if (FamiliarMinions.ContainsKey(familiar))
                         {
                             Core.FamiliarService.HandleFamiliarMinions(familiar);
                         }
                     }
-                    if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat))
+                    /*
+                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat))
                     {
-                        if (behaviourTreeStateChangedEvent.Entity.Has<AggroConsumer>())
+                        Entity character = behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed.Value;
+                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+                        if (EntityManager.Exists(familiar))
                         {
-                            AggroConsumer aggroConsumer = behaviourTreeStateChangedEvent.Entity.Read<AggroConsumer>();
-                            if ((GameMode.Equals(GameModeType.PvE) || Core.ServerGameManager.HasBuff(aggroConsumer.AggroTarget._Entity, pvpProtBuff.ToIdentifier())))
-                            {
-                                Follower follower = behaviourTreeStateChangedEvent.Entity.Read<Follower>();
-                                follower.ModeModifiable._Value = 0;
-                                behaviourTreeStateChangedEvent.Entity.Write(follower);
-                            }
-                            /*
-                            else if ((GameMode.Equals(GameModeType.PvE) || Core.ServerGameManager.HasBuff(aggroConsumer.AggroTarget._Entity, pvpProtBuff.ToIdentifier()) && aggroConsumer.AggroTarget._Entity.Has<Follower>()))
-                            {
-                                Follower following = aggroConsumer.AggroTarget._Entity.Read<Follower>();
-                                if (following.Followed._Value != Entity.Null && following.Followed._Value.Has<PlayerCharacter>()) // if player familiar and pvp protected, don't target
-                                {
-                                    Follower follower = behaviourTreeStateChangedEvent.Entity.Read<Follower>();
-                                    follower.ModeModifiable._Value = 0;
-                                    behaviourTreeStateChangedEvent.Entity.Write(following);
-                                }
-                            }
-                            */
+                            FamiliarService.StartFamiliarHandler(familiar);
                         }
                     }
+                    */
                 }
             }
         }
@@ -119,7 +113,7 @@ internal static class FamiliarPatches
                 NativeList<Entity> alliedUsers = new(Allocator.Temp);
                 try
                 {
-                    TeamUtility.GetAlliedUsers(Core.EntityManager, teamReference, alliedUsers);
+                    TeamUtility.GetAlliedUsers(EntityManager, teamReference, alliedUsers);
                     foreach (Entity userEntity in alliedUsers)
                     {
                         User user = userEntity.Read<User>();
@@ -146,19 +140,19 @@ internal static class FamiliarPatches
                 {
                     if (prefabGUID.Equals(manticore))
                     {
-                        ProcessManticore(entity);
+                        HandleManticore(entity);
                     }
                     else if (prefabGUID.Equals(dracula))
                     {
-                        ProcessDracula(entity);
+                        HandleDracula(entity);
                     }
                     else if (prefabGUID.Equals(monster))
                     {
-                        ProcessMonster(entity);
+                        HandleMonster(entity);
                     }
                     else if (prefabGUID.Equals(solarus))
                     {
-                        ProcessSolarus(entity);
+                        HandleSolarus(entity);
                     }
                 }
             }
@@ -192,16 +186,16 @@ internal static class FamiliarPatches
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 
-                        if (Core.ServerGameManager.TryGetBuff(entityOwner.Owner, dominateBuff.ToIdentifier(), out Entity _))
+                        if (ServerGameManager.TryGetBuff(entityOwner.Owner, dominateBuff.ToIdentifier(), out Entity _))
                         {
                             continue;
                         }
 
-                        if (Core.EntityManager.Exists(familiar) && !familiar.Has<Disabled>()) 
+                        if (EntityManager.Exists(familiar) && !familiar.Has<Disabled>()) 
                         {
                             EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, steamID); // auto dismiss familiar 
                         }
-                        else if (Core.EntityManager.Exists(familiar) && familiar.Has<Disabled>())
+                        else if (EntityManager.Exists(familiar) && familiar.Has<Disabled>())
                         {
                             EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, steamID); // auto dismiss familiar 
                         }
@@ -237,14 +231,14 @@ internal static class FamiliarPatches
                     if (familiar != Entity.Null)
                     {
                         
-                        if (!familiarMinions.ContainsKey(familiar))
+                        if (!FamiliarMinions.ContainsKey(familiar))
                         {
-                            familiarMinions.Add(familiar, [entity]);
+                            FamiliarMinions.Add(familiar, [entity]);
                             //Core.Log.LogInfo("Added new minion entry...");
                         }
                         else
                         {
-                            familiarMinions[familiar].Add(entity);
+                            FamiliarMinions[familiar].Add(entity);
                             //Core.Log.LogInfo("Added minion to existing entry...");
                         }
 
@@ -261,13 +255,12 @@ internal static class FamiliarPatches
                             User = familiar
                         };
 
-                        Core.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                        if (Core.ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
+                        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                        if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
                         {
                             if (buff.Has<LifeTime>())
                             {
                                 buff.Write(new LifeTime { Duration = 30, EndAction = LifeTimeEndAction.Destroy });
-                                //Core.Log.LogInfo("Set lifetime to 30 seconds...");
                             }
                         }
                     }
@@ -296,8 +289,7 @@ internal static class FamiliarPatches
                 if (!Core.hasInitialized) continue;
                 if (entity.TryGetComponent(out Buff buff) && !buff.Target.Has<CharmSource>()) // if no charm source, destroy
                 {
-                    //Core.Log.LogInfo("Destroying imprisoned familiar...");
-                    DestroyUtility.CreateDestroyEvent(Core.EntityManager, buff.Target, DestroyReason.Default, DestroyDebugReason.None);
+                    DestroyUtility.CreateDestroyEvent(EntityManager, buff.Target, DestroyReason.Default, DestroyDebugReason.None);
                 }
             }
         }
@@ -310,7 +302,7 @@ internal static class FamiliarPatches
             entities.Dispose();
         }
     }
-    static void ProcessManticore(Entity entity)
+    static void HandleManticore(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
@@ -326,7 +318,7 @@ internal static class FamiliarPatches
         entity.Write(unitStats);
 
         AbilityBar_Shared abilityBarShared = entity.Read<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 1.5f;
+        abilityBarShared.AttackSpeed._Value = 2f;
         abilityBarShared.PrimaryAttackSpeed._Value = 2f;
         entity.Write(abilityBarShared);
 
@@ -336,9 +328,8 @@ internal static class FamiliarPatches
         entity.Write(aiMoveSpeeds);
 
         HandleVisual(entity, manticoreVisual);
-        //Core.Log.LogInfo("Manticore processed...");
     }
-    static void ProcessMonster(Entity entity)
+    static void HandleMonster(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
@@ -354,19 +345,18 @@ internal static class FamiliarPatches
         entity.Write(unitStats);
 
         AbilityBar_Shared abilityBarShared = entity.Read<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 1.25f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 1.5f;
+        abilityBarShared.AttackSpeed._Value = 2f;
+        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
         entity.Write(abilityBarShared);
 
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
         aiMoveSpeeds.Walk._Value = 2.5f;
         aiMoveSpeeds.Run._Value = 5.5f;
         entity.Write(aiMoveSpeeds);
-
+        
         HandleVisual(entity, monsterVisual);
-        //Core.Log.LogInfo("Manticore processed...");
     }
-    static void ProcessSolarus(Entity entity)
+    static void HandleSolarus(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
@@ -382,20 +372,34 @@ internal static class FamiliarPatches
         entity.Write(unitStats);
 
         AbilityBar_Shared abilityBarShared = entity.Read<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 1.25f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 1.5f;
+        abilityBarShared.AttackSpeed._Value = 2f;
+        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
         entity.Write(abilityBarShared);
 
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
-        aiMoveSpeeds.Walk._Value = 3f;
-        aiMoveSpeeds.Run._Value = 4f;
-        aiMoveSpeeds.Circle._Value = 3f;
+        aiMoveSpeeds.Walk._Value = 4f;
+        //aiMoveSpeeds.Run._Value = 2f;
         entity.Write(aiMoveSpeeds);
 
+        /*
+        var buffer = entity.ReadBuffer<AbilityGroupSlotBuffer>();
+
+        for (int i = 0; i < buffer.Length; i++)
+        {
+            var item = buffer[i];
+            Core.Log.LogInfo($"{item.BaseAbilityGroupOnSlot.LookupName()}");
+            if (item.BaseAbilityGroupOnSlot.Equals(holySpinners))
+            {
+                item.BaseAbilityGroupOnSlot = holyBeamHard;
+                buffer[i] = item;
+                Core.Log.LogInfo($"replaced spinners with holy beam?");
+            }
+        }
+        */
+
         HandleVisual(entity, solarusVisual);
-        //Core.Log.LogInfo("Manticore processed...");
     }
-    static void ProcessDracula(Entity entity)
+    static void HandleDracula(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
@@ -404,15 +408,15 @@ internal static class FamiliarPatches
         health.MaxHealth._Value *= 5;
         health.Value = health.MaxHealth._Value;
         entity.Write(health);
-
+        
         UnitStats unitStats = entity.Read<UnitStats>();
         unitStats.PhysicalPower._Value *= 1.5f;
         unitStats.SpellPower._Value *= 1.5f;
         entity.Write(unitStats);
 
         AbilityBar_Shared abilityBarShared = entity.Read<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 1.25f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 1.5f;
+        abilityBarShared.AttackSpeed._Value = 2f;
+        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
         entity.Write(abilityBarShared);
 
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
@@ -422,9 +426,7 @@ internal static class FamiliarPatches
         entity.Write(aiMoveSpeeds);
 
         HandleVisual(entity, draculaVisual);
-        //Core.Log.LogInfo("Manticore processed...");
     }
-
     static void HandleVisual(Entity entity, PrefabGUID visual)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -438,8 +440,8 @@ internal static class FamiliarPatches
             User = entity
         };
 
-        Core.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-        if (Core.ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
+        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+        if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
         {
             if (buff.Has<CreateGameplayEventsOnSpawn>())
             {

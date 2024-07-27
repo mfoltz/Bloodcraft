@@ -1,30 +1,18 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Leveling;
 using ProjectM.Network;
-using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities;
-using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities.PartyUtilities;
-using static Bloodcraft.Systems.Expertise.ExpertiseStats.WeaponStatManager;
-using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
 
 namespace Bloodcraft.Commands;
 
 [CommandGroup(name:"level", "lvl")]
 internal static class LevelingCommands
 {
-    //static VampireStatModifiers VampireStatModifiers => Core.ServerGameSettingsSystem._Settings.VampireStatModifiers;
+    static EntityManager EntityManager => Core.EntityManager;
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
-    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
-    static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
-    static readonly bool PlayerParties = Plugin.Parties.Value;
-    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
     static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
-
 
     [Command(name: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
@@ -75,12 +63,13 @@ internal static class LevelingCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-        if (foundUserEntity.Equals(Entity.Null))
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
         {
-            LocalizationService.HandleReply(ctx, "Player not found...");
+            ctx.Reply($"Couldn't find player.");
             return;
         }
+
         User foundUser = foundUserEntity.Read<User>();
 
         if (level < 0 || level > MaxPlayerLevel)

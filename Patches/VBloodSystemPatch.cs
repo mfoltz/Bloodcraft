@@ -45,7 +45,7 @@ internal static class VBloodSystemPatch
                 if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(player, vBlood);
                 if (Plugin.FamiliarSystem.Value) FamiliarLevelingUtilities.UpdateFamiliar(player, vBlood);
                 if (Plugin.FamiliarSystem.Value) FamiliarUnlockUtilities.HandleUnitUnlock(player, vBlood);
-                if (Plugin.QuestSystem.Value && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.UpdateQuestProgress(questData, vBloodConsumed.Source, 1, user);
+                if (Plugin.QuestSystem.Value && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)

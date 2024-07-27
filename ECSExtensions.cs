@@ -1,15 +1,19 @@
+using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
-using Bloodcraft.Services;
 
 namespace Bloodcraft;
-public static class ECSExtensions
+internal static class ECSExtensions
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -28,7 +32,6 @@ public static class ECSExtensions
             EntityManager.SetComponentDataRaw(entity, ct.TypeIndex, p, size);
         }
     }
-    // Helper function to marshal a struct to a byte array
     public static byte[] StructureToByteArray<T>(T structure) where T : struct
     {
         int size = Marshal.SizeOf(structure);
@@ -75,13 +78,12 @@ public static class ECSExtensions
     }
     public static string LookupName(this PrefabGUID prefabGUID)
     {
-        PrefabCollectionSystem prefabCollectionSystem = Core.PrefabCollectionSystem;
-        return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGUID)
-            ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGUID] + " " + prefabGUID : "Guid Not Found").ToString();
+        return (PrefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGUID)
+            ? PrefabCollectionSystem.PrefabGuidToNameDictionary[prefabGUID] + " " + prefabGUID : "Guid Not Found").ToString();
     }
     public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
     {
-        if (!LocalizationService.prefabNames.TryGetValue(itemPrefabGUID._Value, out var itemLocalizationHash))
+        if (!LocalizationService.PrefabNames.TryGetValue(itemPrefabGUID._Value, out var itemLocalizationHash))
         {
             return itemPrefabGUID.LookupName();
         }
@@ -107,5 +109,25 @@ public static class ECSExtensions
     {
         var ct = new ComponentType(Il2CppType.Of<T>());
         EntityManager.RemoveComponent(entity, ct);
+    }
+    public static Entity GetOwner(this Entity entity)
+    {
+        return ServerGameManager.GetOwner(entity);
+    }
+    public static Entity GetBuffTarget(this Entity entity)
+    {
+        return CreateGameplayEventServerUtility.GetBuffTarget(EntityManager, entity);
+    }
+    public static Entity GetSelf(this Entity entity)
+    {
+        return ServerGameManager.GetOwnerOrSelf(entity);
+    }
+    public static Entity GetSpellTarget(this Entity entity)
+    {
+        return CreateGameplayEventServerUtility.GetSpellTarget(EntityManager, entity);
+    }
+    public static bool Exists(this Entity entity)
+    {
+        return EntityManager.Exists(entity);
     }
 }

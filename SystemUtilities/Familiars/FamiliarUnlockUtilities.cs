@@ -86,7 +86,6 @@ internal static class FamiliarUnlockUtilities
                 Core.DataStructures.FamiliarSet[playerId] = lastListName;
                 Core.DataStructures.SavePlayerFamiliarSets();
             }
-            
         }
 
         bool isAlreadyUnlocked = false;

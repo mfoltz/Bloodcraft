@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Jobs;
 /*
 namespace Bloodcraft.Services;
+
 internal partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
 {
     public NativeArray<DealDamageEvent> DealDamageSystemEvents;
@@ -38,6 +39,7 @@ internal partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
             }
         }
     }
+
     public override void OnCreate()
     {
         // OnCreate
@@ -63,6 +65,7 @@ internal partial class DamageEventSystem(IntPtr pointer) : SystemBase(pointer)
         {
             DealDamageEvents = dealDamageEvents
         };
+
         // Execute the job
         JobHandle jobHandle = IJobExtensions.Schedule(job);
         jobHandle.Complete();

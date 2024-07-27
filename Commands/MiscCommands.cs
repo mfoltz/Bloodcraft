@@ -1,20 +1,19 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
+using ProjectM.Network;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using ProjectM.Network;
-using ProjectM.Scripting;
-using ProjectM.Terrain;
-using Il2CppInterop.Runtime;
-using Unity.Collections;
-using Unity.Transforms;
 
 namespace Bloodcraft.Commands;
-
 internal static class MiscCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
+    static readonly PrefabGUID combatBuff = new(581443919);
+
     static readonly bool Leveling = Plugin.LevelingSystem.Value;
     static readonly bool StarterKit = Plugin.StarterKit.Value;
     public static Dictionary<PrefabGUID, int> KitPrefabs = [];
@@ -73,7 +72,7 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data))
+        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerUnarmedExpertise.TryGetValue(SteamID, out var data))
         {
             bools["SpellLock"] = !bools["SpellLock"];
             if (bools["SpellLock"])
@@ -105,7 +104,7 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerSanguimancy.TryGetValue(SteamID, out var data))
+        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerUnarmedExpertise.TryGetValue(SteamID, out var data))
         {
             bools["ShiftLock"] = !bools["ShiftLock"];
             if (bools["ShiftLock"])
@@ -118,5 +117,25 @@ internal static class MiscCommands
             }
             Core.DataStructures.SavePlayerBools();
         }
+    }
+
+    [Command(name: "silence", adminOnly: false, usage: ".silence", description: "Resets music for player.")]
+    public static void ResetMusicCommand(ChatCommandContext ctx)
+    {
+        Entity character = ctx.Event.SenderCharacterEntity;
+
+        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()))
+        {
+            LocalizationService.HandleReply(ctx, "This command should only be used as required and certainly not while in combat.");
+            return;
+        }
+
+        CombatMusicListener_Shared combatMusicListener_Shared = character.Read<CombatMusicListener_Shared>();
+        combatMusicListener_Shared.UnitPrefabGuid = new PrefabGUID(0);
+        character.Write(combatMusicListener_Shared);
+
+        Core.CombatMusicSystem_Server.OnUpdate();
+
+        ctx.Reply($"Combat music cleared~");
     }
 }

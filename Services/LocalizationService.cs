@@ -1,5 +1,6 @@
 using ProjectM;
 using ProjectM.Network;
+using Stunlock.Localization;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -14,7 +15,6 @@ internal class LocalizationService
 {
     static readonly string regexPattern = @"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)";
     static readonly Regex regex = new(regexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     public static readonly string LanguageLocalization = Plugin.LanguageLocalization.Value;
     struct Code
     {
@@ -39,9 +39,9 @@ internal class LocalizationService
         public Words[] Words { get; set; }
     }
 
-    public static Dictionary<string, string> localization = [];
-    public static Dictionary<int, string> prefabNames = [];
-    public static Dictionary<string, string> localizedWords = [];
+    public static Dictionary<string, string> Localization = [];
+    public static Dictionary<int, string> PrefabNames = [];
+    public static Dictionary<string, string> LocalizedWords = [];
 
     static readonly Dictionary<string, string> LocalizationMapping = new()
     {
@@ -94,15 +94,13 @@ internal class LocalizationService
     {
         var resourceName = LocalizationMapping.ContainsKey(LanguageLocalization) ? LocalizationMapping[LanguageLocalization] : "Bloodcraft.Localization.English.json";
 
-        //Core.Log.LogInfo($"Loading localization file: {resourceName}");
-
         var assembly = Assembly.GetExecutingAssembly();
         var stream = assembly.GetManifestResourceStream(resourceName);
         
         using StreamReader localizationReader = new(stream);
         string jsonContent = localizationReader.ReadToEnd();
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-        localization = localizationFile.Nodes.ToDictionary(x => x.Guid, x => x.Text);
+        Localization = localizationFile.Nodes.ToDictionary(x => x.Guid, x => x.Text);
 
         if (LanguageLocalization == "English")
         {
@@ -118,9 +116,8 @@ internal class LocalizationService
         using StreamReader languageReader = new(stream);
         jsonContent = languageReader.ReadToEnd();
         localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-        localizedWords = localizationFile.Words.OrderByDescending(x => x.Original.Length).ToDictionary(x => x.Original.ToLower(), x => x.Translation);
+        LocalizedWords = localizationFile.Words.OrderByDescending(x => x.Original.Length).ToDictionary(x => x.Original.ToLower(), x => x.Translation);
     }
-
     static void LoadPrefabNames()
     {
         var resourceName = "Bloodcraft.Localization.Prefabs.json";
@@ -129,7 +126,7 @@ internal class LocalizationService
 
         using StreamReader reader = new(stream);
         string jsonContent = reader.ReadToEnd();
-        prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
+        PrefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
     }
     public static void HandleReply(ChatCommandContext ctx, string message)
     {
@@ -153,13 +150,18 @@ internal class LocalizationService
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
         }
     }
+    public static string GetLocalizationFromKey(LocalizationKey key)
+    {
+        var guid = key.Key.ToGuid().ToString();
+        return GetLocalization(guid);
+    }
     public static string GetLocalization(string Guid)
     {
-        if (localization.TryGetValue(Guid, out var Text))
+        if (Localization.TryGetValue(Guid, out var Text))
         {
             return Text;
         }
-        return $"<Localization not found for {Guid}>";
+        return "Couldn't find key for localization...";
     }
     public static string GetLocalizedWords(string message)
     {
@@ -181,7 +183,7 @@ internal class LocalizationService
                 string word = match.Value;
                 string wordLower = word.ToLower();
 
-                if (localizedWords.TryGetValue(wordLower, out string localizedWord))
+                if (LocalizedWords.TryGetValue(wordLower, out string localizedWord))
                 {
                     // Preserve the original case of the word
                     if (char.IsUpper(word[0]))

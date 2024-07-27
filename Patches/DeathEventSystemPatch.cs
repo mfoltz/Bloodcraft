@@ -50,7 +50,7 @@ internal static class DeathEventListenerSystemPatch
                 }
                 if (deathEvent.Killer.Has<PlayerCharacter>())
                 {
-                    User user = deathEvent.Killer.Read<PlayerCharacter>().UserEntity.Read<User>();
+                    Entity userEntity = deathEvent.Killer.Read<PlayerCharacter>().UserEntity;
                     if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
                     {
                         if (!isStatChangeInvalid ) // only process non-feed related deaths here except for gatebosses
@@ -67,7 +67,7 @@ internal static class DeathEventListenerSystemPatch
                             if (Legacies) LegacyUtilities.UpdateLegacy(deathEvent.Killer, deathEvent.Died);
                         }
                         if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                        if (Quests && Core.DataStructures.PlayerQuests.TryGetValue(user.PlatformId, out var questData)) QuestUtilities.UpdateQuestProgress(questData, deathEvent.Died.Read<PrefabGUID>(), 1, user);
+                        if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
                     else
                     {
@@ -80,23 +80,39 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Killer.Has<Follower>() && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // player familiar kills
                 {
                     Entity followedPlayer = deathEvent.Killer.Read<Follower>().Followed._Value;
-                    User user = followedPlayer.Read<PlayerCharacter>().UserEntity.Read<User>();
+                    Entity userEntity = followedPlayer.Read<PlayerCharacter>().UserEntity;
                     if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
                     {
                         if (Leveling) PlayerLevelingUtilities.UpdateLeveling(followedPlayer, deathEvent.Died);
                         if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(followedPlayer, deathEvent.Died);
-                        if (Quests && Core.DataStructures.PlayerQuests.TryGetValue(user.PlatformId, out var questData)) QuestUtilities.UpdateQuestProgress(questData, deathEvent.Died.Read<PrefabGUID>(), 1, user);
+                        if (Quests) QuestUtilities.UpdateQuests(followedPlayer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>()) // player summon kills
                 {
                     Entity killer = deathEvent.Killer.Read<EntityOwner>().Owner;
-                    User user = killer.Read<PlayerCharacter>().UserEntity.Read<User>();
+                    Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
                     if (!hasVBloodConsumeSource)
                     {
                         if (Leveling) PlayerLevelingUtilities.UpdateLeveling(killer, deathEvent.Died);
                         if (Expertise) ExpertiseUtilities.UpdateExpertise(killer, deathEvent.Died);
-                        if (Quests && Core.DataStructures.PlayerQuests.TryGetValue(user.PlatformId, out var questData)) QuestUtilities.UpdateQuestProgress(questData, deathEvent.Died.Read<PrefabGUID>(), 1, user);
+                        if (Quests) QuestUtilities.UpdateQuests(killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                    }
+                }
+                else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
+                {
+                    Follower follower = deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>();
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                    if (familiar != Entity.Null)
+                    {
+                        Entity character = follower.Followed._Value;
+                        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
+                        if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
+                        {
+                            if (Leveling) PlayerLevelingUtilities.UpdateLeveling(follower.Followed._Value, deathEvent.Died);
+                            if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(follower.Followed._Value, deathEvent.Died);
+                            if (Quests) QuestUtilities.UpdateQuests(character, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                        }
                     }
                 }
             }

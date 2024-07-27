@@ -12,11 +12,12 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using ProjectM;
+using ProjectM.Gameplay;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
-using ProjectM.Terrain;
 using Stunlock.Core;
 using System.Collections;
 using System.Text.Json;
@@ -28,7 +29,7 @@ namespace Bloodcraft;
 internal static class Core
 {
     public static World Server { get; } = GetWorld("Server") ?? throw new Exception("There is no Server world (yet)...");
-    public static EntityManager EntityManager { get; } = Server.EntityManager;
+    public static EntityManager EntityManager => Server.EntityManager;
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
     public static ServerGameSettingsSystem ServerGameSettingsSystem { get; internal set; }
     public static ServerScriptMapper ServerScriptMapper { get; internal set; }
@@ -44,8 +45,10 @@ internal static class Core
     public static QuestService QuestService { get; internal set; }
     public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
     public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
+    public static CombatMusicSystem_Server CombatMusicSystem_Server { get; internal set; }
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
     public static ServerGameSettings ServerGameSettings { get; internal set; }
+    public static FactionLookupSingleton FactionLookupSingleton { get; internal set; }
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -68,21 +71,42 @@ internal static class Core
         GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
         NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
         ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
+        CombatMusicSystem_Server = Server.GetExistingSystemManaged<CombatMusicSystem_Server>();
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = PlayerLevelingUtilities.GetSpellPrefabs();
         ServerGameSettings = ServerGameSettingsSystem._Settings;
+        FactionLookupSingleton = ServerScriptMapper.GetSingleton<FactionLookupSingleton>();
         if (Plugin.FamiliarSystem.Value) FamiliarService = new();
         if (Plugin.ExtraRecipes.Value) RecipeUtilities.HandleRecipes();
         if (Plugin.QuestSystem.Value) QuestService = new();
         if (Plugin.StarterKit.Value) InitializeKit();
+
         // update system group after injecting system?
         //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
         //JobsUtility.JobScheduleParameters
         // job system initialization
         //DamageEventSystem = Server.GetOrCreateSystemManaged<DamageEventSystem>();
 
+        /*
+        foreach (var kvp in Server.m_SystemLookup)
+        {
+            var system = kvp.Value;
+            if (system.EntityQueries.Length == 0) continue;
+            Core.Log.LogInfo($"{kvp.key.FullName}[");
+            foreach (EntityQuery query in system.EntityQueries)
+            {
+                List<string> componentNames = [];
+                EntityQueryDesc queryDesc = query.GetEntityQueryDesc();
+                foreach(ComponentType component in queryDesc.All)
+                {
+                    componentNames.Add(component.ToString());
+                }
+                Core.Log.LogInfo($"{query.ToString()} {string.Join(", ", componentNames)}");
+            }
+            Core.Log.LogInfo($"]");
+        }
+        */
         hasInitialized = true;
     }
-
     static void InitializeKit()
     {
         List<PrefabGUID> kitPrefabs = Core.ParseConfigString(Plugin.KitPrefabs.Value).Select(x => new PrefabGUID(x)).ToList();
@@ -110,7 +134,7 @@ internal static class Core
         }
         monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
-    public class DataStructures
+    public static class DataStructures
     {
         // Encapsulated fields with properties
 
@@ -151,10 +175,10 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerReaperExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerFishingpoleExpertise = [];
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerFishingPoleExpertise = [];
         private static Dictionary<ulong, Dictionary<ExpertiseUtilities.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
 
-        private static Dictionary<ulong, KeyValuePair<int, float>> playerSanguimancy = []; // this is unarmed and needs to be renamed to match the rest
+        private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
         private static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> playerSpells = [];
 
         // blood legacies
@@ -247,7 +271,6 @@ internal static class Core
             get => playerClasses;
             set => playerClasses = value;
         }
-
         public static Dictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> PlayerPrestiges
         {
             get => playerPrestiges;
@@ -258,139 +281,116 @@ internal static class Core
             get => playerBools;
             set => playerBools = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWoodcutting
         {
             get => playerWoodcutting;
             set => playerWoodcutting = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMining
         {
             get => playerMining;
             set => playerMining = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerFishing
         {
             get => playerFishing;
             set => playerFishing = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerBlacksmithing
         {
             get => playerBlacksmithing;
             set => playerBlacksmithing = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerTailoring
         {
             get => playerTailoring;
             set => playerTailoring = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerEnchanting
         {
             get => playerEnchanting;
             set => playerEnchanting = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAlchemy
         {
             get => playerAlchemy;
             set => playerAlchemy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerHarvesting
         {
             get => playerHarvesting;
             set => playerHarvesting = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSwordExpertise
         {
             get => playerSwordExpertise;
             set => playerSwordExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerAxeExpertise
         {
             get => playerAxeExpertise;
             set => playerAxeExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMaceExpertise
         {
             get => playerMaceExpertise;
             set => playerMaceExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSpearExpertise
         {
             get => playerSpearExpertise;
             set => playerSpearExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCrossbowExpertise
         {
             get => playerCrossbowExpertise;
             set => playerCrossbowExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerGreatSwordExpertise
         {
             get => playerGreatSwordExpertise;
             set => playerGreatSwordExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSlashersExpertise
         {
             get => playerSlashersExpertise;
             set => playerSlashersExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerPistolsExpertise
         {
             get => playerPistolsExpertise;
             set => playerPistolsExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerReaperExpertise
         {
             get => playerReaperExpertise;
             set => playerReaperExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerLongbowExpertise
         {
             get => playerLongbowExpertise;
             set => playerLongbowExpertise = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWhipExpertise
         {
             get => playerWhipExpertise;
             set => playerWhipExpertise = value;
         }
-
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerFishingpoleExpertise
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerFishingPoleExpertise
         {
-            get => playerFishingpoleExpertise;
-            set => playerFishingpoleExpertise = value;
+            get => playerFishingPoleExpertise;
+            set => playerFishingPoleExpertise = value;
         }
-
-        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerSanguimancy
+        public static Dictionary<ulong, KeyValuePair<int, float>> PlayerUnarmedExpertise
         {
-            get => playerSanguimancy;
-            set => playerSanguimancy = value;
+            get => playerUnarmedExpertise;
+            set => playerUnarmedExpertise = value;
         }
-
         public static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> PlayerSpells
         {
             get => playerSpells;
             set => playerSpells = value;
         }
-
         public static Dictionary<ulong, Dictionary<ExpertiseUtilities.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats
         {
             get => playerWeaponStats;
@@ -401,55 +401,46 @@ internal static class Core
             get => playerWorkerLegacy;
             set => playerWorkerLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerWarriorLegacy
         {
             get => playerWarriorLegacy;
             set => playerWarriorLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerScholarLegacy
         {
             get => playerScholarLegacy;
             set => playerScholarLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerRogueLegacy
         {
             get => playerRogueLegacy;
             set => playerRogueLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerMutantLegacy
         {
             get => playerMutantLegacy;
             set => playerMutantLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerVBloodLegacy
         {
             get => playerVBloodLegacy;
             set => playerVBloodLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerDraculinLegacy
         {
             get => playerDraculinLegacy;
             set => playerDraculinLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerImmortalLegacy
         {
             get => playerImmortalLegacy;
             set => playerImmortalLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerCreatureLegacy
         {
             get => playerCreatureLegacy;
             set => playerCreatureLegacy = value;
         }
-
         public static Dictionary<ulong, KeyValuePair<int, float>> PlayerBruteLegacy
         {
             get => playerBruteLegacy;
@@ -461,8 +452,7 @@ internal static class Core
             set => playerBloodStats = value;
         }
 
-        private static Dictionary<ulong, HashSet<string>> playerParties = []; // userEntities of players in the same alliance
-
+        static Dictionary<ulong, HashSet<string>> playerParties = []; // userEntities of players in the same alliance
         public static Dictionary<ulong, HashSet<string>> PlayerParties
         {
             get => playerParties;
@@ -470,8 +460,7 @@ internal static class Core
         }
 
         // cache-only
-    
-        private static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = [];
+        static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = [];
 
         public static Dictionary<Entity, Dictionary<PrefabGUID, int>> PlayerCraftingJobs
         {
@@ -479,7 +468,7 @@ internal static class Core
             set => playerCraftingJobs = value;
         }
         
-        private static Dictionary<ulong, int> playerMaxWeaponLevels = [];
+        static Dictionary<ulong, int> playerMaxWeaponLevels = [];
 
         public static Dictionary<ulong, int> PlayerMaxWeaponLevels
         {
@@ -515,8 +504,8 @@ internal static class Core
             {"ReaperExpertise", JsonFiles.PlayerReaperExpertise},
             {"LongbowExpertise", JsonFiles.PlayerLongbowExpertiseJson},
             {"WhipExpertise", JsonFiles.PlayerWhipExpertiseJson},
-            {"FishingpoleExpertise", JsonFiles.PlayerFishingpoleExpertiseJson},
-            {"Sanguimancy", JsonFiles.PlayerSanguimancyJson},
+            {"FishingPoleExpertise", JsonFiles.PlayerFishingPoleExpertiseJson},
+            {"UnarmedExpertise", JsonFiles.PlayerUnarmedExpertiseJson},
             {"PlayerSpells", JsonFiles.PlayerSpellsJson},
             {"WeaponStats", JsonFiles.PlayerWeaponStatsJson},
             {"WorkerLegacy", JsonFiles.PlayerWorkerLegacyJson},
@@ -566,7 +555,7 @@ internal static class Core
                 Log.LogError($"Error reading {key} data from file: {ex.Message}");
                 dataStructure = []; // Provide default empty dictionary on error.
             }
-            catch (System.Text.Json.JsonException ex)
+            catch (JsonException ex)
             {
                 Log.LogError($"JSON deserialization error when loading {key} data: {ex.Message}");
                 dataStructure = []; // Provide default empty dictionary on error.
@@ -623,9 +612,9 @@ internal static class Core
 
         public static void LoadPlayerWhipExpertise() => LoadData(ref playerWhipExpertise, "WhipExpertise");
 
-        public static void LoadPlayerFishingpoleExpertise() => LoadData(ref playerFishingpoleExpertise, "FishingpoleExpertise");
+        public static void LoadPlayerFishingPoleExpertise() => LoadData(ref playerFishingPoleExpertise, "FishingPoleExpertise");
 
-        public static void LoadPlayerSanguimancy() => LoadData(ref playerSanguimancy, "Sanguimancy");
+        public static void LoadPlayerUnarmedExpertise() => LoadData(ref playerUnarmedExpertise, "UnarmedExpertise");
 
         public static void LoadPlayerSpells() => LoadData(ref playerSpells, "PlayerSpells");
 
@@ -652,6 +641,7 @@ internal static class Core
         public static void LoadPlayerBruteLegacy() => LoadData(ref playerBruteLegacy, "BruteLegacy");
 
         public static void LoadPlayerBloodStats() => LoadData(ref playerBloodStats, "BloodStats");
+
         public static void LoadPlayerFamiliarActives() => LoadData(ref familiarActives, "FamiliarActives");
 
         public static void LoadPlayerFamiliarSets() => LoadData(ref familiarSet, "FamiliarSets");
@@ -661,7 +651,7 @@ internal static class Core
             string path = filePaths[key];
             try
             {
-                string json = System.Text.Json.JsonSerializer.Serialize(data, prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
             }
@@ -724,9 +714,9 @@ internal static class Core
 
         public static void SavePlayerWhipExpertise() => SaveData(PlayerWhipExpertise, "WhipExpertise");
 
-        public static void SavePlayerFishingpoleExpertise() => SaveData(PlayerFishingpoleExpertise, "FishingpoleExpertise");
+        public static void SavePlayerFishingPoleExpertise() => SaveData(PlayerFishingPoleExpertise, "FishingPoleExpertise");
 
-        public static void SavePlayerSanguimancy() => SaveData(PlayerSanguimancy, "Sanguimancy");
+        public static void SavePlayerUnarmedExpertise() => SaveData(PlayerUnarmedExpertise, "UnarmedExpertise");
 
         public static void SavePlayerSpells() => SaveData(PlayerSpells, "PlayerSpells");
 
@@ -760,13 +750,13 @@ internal static class Core
     }
     public static class FamiliarExperienceManager
     {
-        private static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_experience.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_experience.json");
 
         public static void SaveFamiliarExperience(ulong playerId, FamiliarExperienceData data)
         {
             string filePath = GetFilePath(playerId);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, options);
+            string jsonString = JsonSerializer.Serialize(data, options);
             File.WriteAllText(filePath, jsonString);
         }
 
@@ -777,18 +767,18 @@ internal static class Core
                 return new FamiliarExperienceData();
 
             string jsonString = File.ReadAllText(filePath);
-            return System.Text.Json.JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
+            return JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
         }
     }
     public static class FamiliarPrestigeManager
     {
-        private static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_prestige.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_prestige.json");
 
         public static void SaveFamiliarPrestige(ulong playerId, FamiliarPrestigeData data)
         {
             string filePath = GetFilePath(playerId);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, options);
+            string jsonString = JsonSerializer.Serialize(data, options);
             File.WriteAllText(filePath, jsonString);
         }
 
@@ -799,18 +789,18 @@ internal static class Core
                 return new FamiliarPrestigeData();
 
             string jsonString = File.ReadAllText(filePath);
-            return System.Text.Json.JsonSerializer.Deserialize<FamiliarPrestigeData>(jsonString);
+            return JsonSerializer.Deserialize<FamiliarPrestigeData>(jsonString);
         }
     }
     public static class FamiliarUnlocksManager
     {
-        private static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarUnlocksPath, $"{playerId}_familiar_unlocks.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarUnlocksPath, $"{playerId}_familiar_unlocks.json");
 
         public static void SaveUnlockedFamiliars(ulong playerId, UnlockedFamiliarData data)
         {
             string filePath = GetFilePath(playerId);
             var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, options);
+            string jsonString = JsonSerializer.Serialize(data, options);
             File.WriteAllText(filePath, jsonString);
         }
 
@@ -821,10 +811,10 @@ internal static class Core
                 return new UnlockedFamiliarData();
 
             string jsonString = File.ReadAllText(filePath);
-            return System.Text.Json.JsonSerializer.Deserialize<UnlockedFamiliarData>(jsonString);
+            return JsonSerializer.Deserialize<UnlockedFamiliarData>(jsonString);
         }
     }
-    public class JsonFiles
+    public static class JsonFiles
     {
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerLevelingPath, "player_experience.json");
         public static readonly string PlayerQuestsJson = Path.Combine(Plugin.PlayerQuestsPath, "player_quests.json");
@@ -852,8 +842,7 @@ internal static class Core
         public static readonly string PlayerLongbowExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_longbow.json");
         public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_unarmed.json");
         public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_whip.json");
-        public static readonly string PlayerFishingpoleExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_fishingpole.json");
-        public static readonly string PlayerSanguimancyJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sanguimancy.json");
+        public static readonly string PlayerFishingPoleExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_fishingpole.json");
         public static readonly string PlayerSpellsJson = Path.Combine(Plugin.PlayerLevelingPath, "player_spells.json");
         public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_weapon_stats.json");
         public static readonly string PlayerWorkerLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_worker.json");

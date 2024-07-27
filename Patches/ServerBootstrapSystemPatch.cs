@@ -1,8 +1,9 @@
 ﻿using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
-using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Shared;
 using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -12,6 +13,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ServerBootstrapSystemPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
@@ -37,7 +40,8 @@ internal static class ServerBootstrapSystemPatch
                 { "Grouping", false },
                 { "Emotes", false },
                 { "Binding", false },
-                { "Kit", false }
+                { "Kit", false },
+                { "VBloodEmotes", true }
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -59,7 +63,8 @@ internal static class ServerBootstrapSystemPatch
                 { "Grouping", false },
                 { "Emotes", false },
                 { "Binding", false },
-                { "Kit", false }
+                { "Kit", false },
+                { "VBloodEmotes", true }
             };
 
             // Add missing default values to the existing dictionary
@@ -129,10 +134,10 @@ internal static class ServerBootstrapSystemPatch
         if (Plugin.ExpertiseSystem.Value)
         {
 
-            if (!Core.DataStructures.PlayerSanguimancy.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerUnarmedExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerSanguimancy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSanguimancy();
+                Core.DataStructures.PlayerUnarmedExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerUnarmedExpertise();
             }
 
             if (!Core.DataStructures.PlayerSpells.ContainsKey(steamId))
@@ -208,10 +213,10 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.SavePlayerWhipExpertise();
             }
 
-            if (!Core.DataStructures.PlayerFishingpoleExpertise.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerFishingPoleExpertise.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerFishingpoleExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerFishingpoleExpertise();
+                Core.DataStructures.PlayerFishingPoleExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
+                Core.DataStructures.SavePlayerFishingPoleExpertise();
             }
 
             if (!Core.DataStructures.PlayerWeaponStats.ContainsKey(steamId))
@@ -301,6 +306,18 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.PlayerPrestiges.Add(steamId, prestigeDict);
                 Core.DataStructures.SavePlayerPrestiges();
             }
+            else
+            {
+                // Ensure all keys are present in the existing dictionary
+                var prestigeDict = Core.DataStructures.PlayerPrestiges[steamId];
+                foreach (var prestigeType in Enum.GetValues<PrestigeUtilities.PrestigeType>())
+                {
+                    if (!prestigeDict.ContainsKey(prestigeType))
+                    {
+                        prestigeDict.Add(prestigeType, 0);
+                    }
+                }
+            }
             if (Core.EntityManager.Exists(user.LocalCharacter._Entity)) GearOverride.SetLevel(user.LocalCharacter._Entity);
         }
 
@@ -331,6 +348,28 @@ internal static class ServerBootstrapSystemPatch
             {
                 Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
                 Core.DataStructures.SavePlayerSpells();
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
+    [HarmonyPrefix]
+    static void OnUserDisconnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
+    {
+        int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
+        ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
+        Entity userEntity = serverClient.UserEntity;
+        User user = __instance.EntityManager.GetComponentData<User>(userEntity);
+        Entity character = user.LocalCharacter._Entity;
+        ulong steamId = user.PlatformId;
+
+        if (Plugin.FamiliarSystem.Value && EntityManager.Exists(character) && character.Has<FollowerBuffer>())
+        {
+            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+            if (EntityManager.Exists(familiar))
+            {
+                DestroyUtility.Destroy(EntityManager, familiar);
+                FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
             }
         }
     }

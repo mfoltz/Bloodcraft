@@ -1,14 +1,20 @@
+`1.2.3`
+- added command to search for familiars in boxes (.fam s [Name])
+- added command to find nearest quest target, if none are found will reroll the quest
+- reduced number of kills required for vbloods for dailies and weeklies to be less of a vibe-check
+- can stack t01/t02 potion effects now, if anyone finds this particularly bothersome can add a config option
+- added command to reset commbat music for player (.silence) if it gets stuck (think I handled what was causing that but if not this will fix it and can be used by players)
+
 `1.1.2`
 - further improved quest distribution, should be significantly more consistent and less error-prone (will still take time to rollover from old quests, would recommend deleting quest file to force initial refreshes)
 - added option for infinite dailies
 - added basic starter kit, configurable
-- familiars don't attack other familiars on PvE and PvPProtected familiars (which fams will have if owner has) on PvP servers, mostly working but needs some tuning
 - player prestige dictionary properly updated with 'Exo' when trying to Exo prestige
 - more filtering to prevent non-ideal quest targets, fixed bug on generating quests for new players on fresh servers (new players receieve same starting daily/weekly quests to circumvent this), hopefully fixed any other issues with quest distribution involving timing
 - ancestral forge works for all shattered again and not just blue legendaries
-- familiars ignore players on PvE and PvPProtected players on PvP servers
 - fixed bug where destroying disabled familiars rendered space unuseable for building
 - fixed leaderboard for prestige not displaying correctly
+- eliteShardBearers added as config option (experimental, WIP. significantly increases health, damage, attack speed, cast speed, and movement speed of shardbearers but removes scaling for multiple players fighting them at once and gives them minor visual effects)
 
 `1.0.0`
 - command groups added for organizational purposes (thanks Odjit <3)

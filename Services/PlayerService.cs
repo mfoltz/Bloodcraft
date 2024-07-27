@@ -3,81 +3,62 @@ using ProjectM.Network;
 using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace Bloodcraft.Services;
 internal class PlayerService
 {
+	static EntityManager EntityManager => Core.EntityManager;
+
 	static readonly ComponentType[] UserComponent =
 		[
 			ComponentType.ReadOnly(Il2CppType.Of<User>()),
 		];
 
-	static EntityQuery ActiveUsersQuery;
+	static EntityQuery UsersQuery;
 
-	static EntityQuery AllUsersQuery;
-
-	public static Dictionary<string, Entity> playerNameCache = []; //player name, player userEntity
-
-	public static Dictionary<ulong, Entity> playerIdCache = []; //player steamID, player charEntity
-
+	public static Dictionary<string, Entity> PlayerCache = []; //player name, player userEntity
 	public PlayerService()
 	{
-		ActiveUsersQuery = Core.EntityManager.CreateEntityQuery(UserComponent);
-		AllUsersQuery = Core.EntityManager.CreateEntityQuery(new EntityQueryDesc
-		{
-			All = UserComponent,
-			Options = EntityQueryOptions.IncludeDisabledEntities
-		});
-		Core.StartCoroutine(CacheUpdateLoop());
+		UsersQuery = EntityManager.CreateEntityQuery(UserComponent);
+		Core.StartCoroutine(PlayerUpdateLoop());
 	}
-	static IEnumerator CacheUpdateLoop()
+	static IEnumerator PlayerUpdateLoop()
     {
 		WaitForSeconds wait = new(60);
         while (true)
         {
-			//Core.Log.LogInfo("Updating player cache...");
+            PlayerCache = GetUsersEnumerable()
+                .GroupBy(userEntity => userEntity.Read<User>().CharacterName.Value)
+                .Select(group => group.First())
+                .ToDictionary(user => user.Read<User>().CharacterName.Value, user => user);
 
-			IEnumerable<Entity> users = GetUsers();
-
-			playerNameCache.Clear();
-            playerNameCache = users
-                .Select(userEntity => new { CharacterName = userEntity.Read<User>().CharacterName.Value, Entity = userEntity })
-				.GroupBy(user => user.CharacterName)
-				.Select(group => group.First())
-				.ToDictionary(user => user.CharacterName, user => user.Entity); // playerName : userEntity
-
-			playerIdCache.Clear();
-			playerIdCache = users
-                .Select(userEntity => new { SteamID = userEntity.Read<User>().PlatformId, Entity = userEntity.Read<User>().LocalCharacter._Entity })
-				.GroupBy(user => user.SteamID)
-				.Select(group => group.First())
-				.ToDictionary(user => user.SteamID, user => user.Entity); // steamID : charEntity
-
-			yield return wait;
+            yield return wait;
         }
     }
-	public static IEnumerable<Entity> GetUsers(bool includeDisabled = false)
-	{
-		NativeArray<Entity> userEntities = includeDisabled ? AllUsersQuery.ToEntityArray(Allocator.TempJob) : ActiveUsersQuery.ToEntityArray(Allocator.TempJob);
-		try
-		{
-			foreach (Entity entity in userEntities)
-			{
-				if (Core.EntityManager.Exists(entity))
-				{
-					yield return entity;
-				}
-			}
-		}
-		finally
-		{
-			userEntities.Dispose();
-		}
-	}
-    public static Entity GetUserByName(string playerName, bool includeDisabled = false)
-	{
-		Entity userEntity = GetUsers(includeDisabled).FirstOrDefault(entity => entity.Read<User>().CharacterName.Value.ToLower() == playerName.ToLower());
-		return userEntity != Entity.Null ? userEntity : Entity.Null;
-	}
+    static IEnumerable<Entity> GetUsersEnumerable()
+    {
+        JobHandle handle = GetUsers(out NativeArray<Entity> userEntities, Allocator.TempJob);
+        handle.Complete();
+        try
+        {
+            foreach (Entity entity in userEntities)
+            {
+                if (EntityManager.Exists(entity))
+                {
+                    yield return entity;
+                }
+            }
+        }
+        finally
+        {
+            userEntities.Dispose();
+        }
+    }
+    static JobHandle GetUsers(out NativeArray<Entity> userEntities, Allocator allocator = Allocator.TempJob)
+    {
+        userEntities = UsersQuery.ToEntityArray(allocator);
+        return default;
+    }
 }

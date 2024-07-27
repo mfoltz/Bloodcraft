@@ -9,9 +9,14 @@ using Unity.Transforms;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonUtilities
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static GameDifficulty GameDifficulty => Core.ServerGameSettings.GameDifficulty;
+    static FactionLookupSingleton FactionLookupSingleton => Core.FactionLookupSingleton;
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => Core.EntityCommandBufferSystem;
+
     static readonly float VBloodDamageMultiplier = Plugin.VBloodDamageMultiplier.Value;
     static readonly float PlayerVampireDamageMultiplier = Plugin.PlayerVampireDamageMultiplier.Value;
     static readonly float FamiliarStatMultiplier = Plugin.FamiliarPrestigeStatMultiplier.Value;
@@ -21,16 +26,22 @@ internal static class FamiliarSummonUtilities
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
     static readonly PrefabGUID playerFaction = new(1106458752);
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
+    static readonly PrefabGUID playersMutant = new(2146780972);
+    static readonly PrefabGUID farbaneMerchants = new(30052367);
+    static readonly PrefabGUID unitTeamPrefab = new(-1434736744);
+    static readonly PrefabGUID clanTeamPrefab = new(-501996644);
+
+    public static Dictionary<PrefabGUID, int> FactionIndices = [];
+
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
     {
-        EntityCommandBufferSystem entityCommandBufferSystem = Core.EntityCommandBufferSystem;
-        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
-        EntityCommandBuffer entityCommandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
         User user = userEntity.Read<User>();
         ulong steamId = user.PlatformId;
         int index = user.Index;
         int level = 1;
+
         FromCharacter fromCharacter = new() { Character = character, User = userEntity };
 
         if (Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(famKey, out var xpData) && xpData.Key > 1)
@@ -49,7 +60,7 @@ internal static class FamiliarSummonUtilities
             DyeIndex = 0
         };
 
-        debugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
+        DebugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
     }
     public static void HandleFamiliar(Entity player, Entity familiar)
     {
@@ -64,11 +75,12 @@ internal static class FamiliarSummonUtilities
         if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
         ModifyFollowerAndTeam(player, familiar);
         ModifyDamageStats(familiar, level, steamId, famKey);
-        ModifyAggro(familiar);
+        //ModifyAggro(familiar);
         ModifyConvertable(familiar);
         ModifyCollision(familiar);
         ModifyDropTable(familiar);
         PreventDisableFamiliar(familiar);
+        //ModifyBehaviour(familiar);
         if (!FamiliarCombat) DisableCombat(player, familiar);
     }
     static void DisableCombat(Entity player, Entity familiar)
@@ -87,17 +99,18 @@ internal static class FamiliarSummonUtilities
         aggroable.AggroFactor._Value = 0f;
         familiar.Write(aggroable);
 
-        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
             BuffPrefabGUID = invulnerableBuff,
         };
+
         FromCharacter fromCharacter = new()
         {
             Character = familiar,
             User = player.Read<PlayerCharacter>().UserEntity,
         };
-        debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+
+        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
         if (ServerGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
         {
             if (invlunerableBuff.Has<LifeTime>())
@@ -111,18 +124,9 @@ internal static class FamiliarSummonUtilities
     }
     static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
-        //ModifyTeamBuff modifyTeamBuff = new() { Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam };
-        //familiar.Add<ModifyTeamBuff>();
-        //familiar.Write(modifyTeamBuff);
-
         FactionReference factionReference = familiar.Read<FactionReference>();
         factionReference.FactionGuid._Value = playerFaction;
-        //factionReference.FactionGuid._Value = traderFaction;
         familiar.Write(factionReference);
-
-        Team team = familiar.Read<Team>();//
-        team.Value = player.Read<Team>().Value;
-        familiar.Write(team);//
 
         Follower follower = familiar.Read<Follower>();
         follower.Followed._Value = player;
@@ -130,34 +134,122 @@ internal static class FamiliarSummonUtilities
         familiar.Write(follower);
 
         /*
-        UnitStats unitStats = familiar.Read<UnitStats>();
-        unitStats.PvPProtected._Value = true;
-        familiar.Write(unitStats);
-        */
+        Team playerTeam = player.Read<Team>();
+        TeamReference teamReference = player.Read<TeamReference>();
+        Entity playerTeamEntity = teamReference.Value._Value;
+        TeamData teamData = playerTeamEntity.Read<TeamData>();
 
-        if (Core.ServerGameManager.HasBuff(player, pvpProtBuff.ToIdentifier()))
+        Team familiarTeam = familiar.Read<Team>();
+        TeamReference familiarTeamReference = familiar.Read<TeamReference>();
+        Entity familiarTeamEntity = familiarTeamReference.Value._Value;
+
+        foreach (Entity entity in PlayerService.PlayerCache.Values)
         {
-            ApplyBuffDebugEvent applyBuffDebugEvent = new()
+            if (!EntityManager.Exists(entity)) continue;
+        }
+        
+        //playerTeamEntity.LogComponentTypes();
+        //familiarTeamEntity.LogComponentTypes();  copy of user team basically
+
+        //if (familiarTeamEntity.Has<UserTeam>()) Core.Log.LogInfo($"Name on familiar UserTeam: {familiarTeamEntity.Read<UserTeam>().UserEntity.Read<User>().CharacterName.Value}");
+        Core.Log.LogInfo($"Player: {playerTeam.Value}/{teamData.TeamValue} | Familiar: {familiarTeam.Value}/{familiarTeamData.TeamValue}");
+
+        var teamAllies = playerTeamEntity.ReadBuffer<TeamAllies>();
+
+        TeamAllies playerFamiliarTeam = new()
+        {
+            Value = Entity.Null
+        };
+        
+        Core.Log.LogInfo("Player Allies|");
+        for (int i = 0; i < teamAllies.Length; i++)
+        {
+            Entity allyEntity = teamAllies[i].Value;
+            TeamData allyTeamData = allyEntity.Read<TeamData>();
+            Core.Log.LogInfo($"{allyEntity.Read<PrefabGUID>().LookupName()}: {allyTeamData.TeamValue}");
+            if (allyEntity.Read<PrefabGUID>().Equals(clanTeamPrefab) && playerFamiliarTeam.Value.Equals(Entity.Null))
             {
-                BuffPrefabGUID = pvpProtBuff,
-            };
-            FromCharacter fromCharacter = new()
+                playerFamiliarTeam = teamAllies[i];
+            }
+        }
+
+        teamAllies = familiarTeamEntity.ReadBuffer<TeamAllies>();
+        HashSet<TeamAllies> added = [];
+        foreach (Entity entity in PlayerService.PlayerCache.Values)
+        {
+            if (!EntityManager.Exists(entity)) continue;
+            TeamReference reference = entity.Read<TeamReference>();
+            var alliesBuffer = reference.Value._Value.ReadBuffer<TeamAllies>();
+            foreach (TeamAllies team in alliesBuffer)
             {
-                Character = familiar,
-                User = player.Read<PlayerCharacter>().UserEntity,
-            };
-            Core.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (Core.ServerGameManager.TryGetBuff(familiar, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
-            {
-                if (buff.Has<LifeTime>())
+                if (EntityManager.Exists(team.Value) && team.Value.Read<PrefabGUID>().Equals(clanTeamPrefab) && !added.Contains(team) && !playerFamiliarTeam.Value.Equals(Entity.Null))
                 {
-                    var lifetime = buff.Read<LifeTime>();
-                    lifetime.Duration = -1;
-                    lifetime.EndAction = LifeTimeEndAction.None;
-                    buff.Write(lifetime);
+                    alliesBuffer.Add(playerFamiliarTeam);
+                    teamAllies.Add(team);
+                    added.Add(team);
                 }
             }
         }
+
+        Core.Log.LogInfo("Familiar Allies|");
+        for (int i = 0; i < teamAllies.Length; i++)
+        {
+            Entity allyEntity = teamAllies[i].Value;
+            if (!EntityManager.Exists(allyEntity)) continue;
+            TeamData allyTeamData = allyEntity.Read<TeamData>();
+            Core.Log.LogInfo($"{allyEntity.Read<PrefabGUID>().LookupName()}: {allyTeamData.TeamValue}");
+            //TeamUtility
+        }
+
+        foreach (Entity entity in PlayerService.PlayerCache.Values)
+        {
+            if (!EntityManager.Exists(entity)) continue;
+            Entity teamEntity = entity.Read<TeamReference>().Value._Value;
+            TeamData allyTeamData = teamEntity.Read<TeamData>();
+            Core.Log.LogInfo($"{teamEntity.Read<PrefabGUID>().LookupName()}: {allyTeamData.TeamValue}");
+            var alliesBuffer = teamEntity.ReadBuffer<TeamAllies>();
+            for (int i = 0; i < alliesBuffer.Length; i++)
+            {
+                Entity allyEntity = alliesBuffer[i].Value;
+                if (!EntityManager.Exists(allyEntity)) continue;
+                TeamData allyData = allyEntity.Read<TeamData>();
+                Core.Log.LogInfo($"{allyEntity.Read<PrefabGUID>().LookupName()}: {allyData.TeamValue}");
+            }
+
+            if (ServerGameManager.IsAllies(familiar, entity))
+            {
+                Core.Log.LogInfo($"{entity.Read<User>().CharacterName.Value} is an ally of the familiar");
+            }
+            else
+            {
+                Core.Log.LogInfo($"{entity.Read<User>().CharacterName.Value} is not an ally of the familiar");
+            }
+        }
+        
+
+        AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+        aggroConsumer.Active._Value = false;
+        familiar.Write(aggroConsumer);
+
+        if (familiar.Has<GainAggroByAlert>()) familiar.Remove<GainAggroByAlert>();
+        if (familiar.Has<GainAggroByVicinity>()) familiar.Remove<GainAggroByVicinity>();
+        if (familiar.Has<GainAlertByVicinity>()) familiar.Remove<GainAlertByVicinity>();
+
+        
+        Aggroable aggroable = familiar.Read<Aggroable>();
+        aggroable.Value._Value = false;
+        aggroable.DistanceFactor._Value = 0f;
+        aggroable.AggroFactor._Value = 0f;
+        familiar.Write(aggroable);
+        */
+
+        if (ServerGameManager.HasBuff(player, pvpProtBuff.ToIdentifier()))
+        {
+            UnitStats unitStats = familiar.Read<UnitStats>();
+            unitStats.PvPProtected._Value = true;
+            familiar.Write(unitStats);
+        }
+
         var followerBuffer = player.ReadBuffer<FollowerBuffer>();
         followerBuffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
     }
@@ -168,6 +260,20 @@ internal static class FamiliarSummonUtilities
         bloodConsumeSource.CanBeConsumed = false;
         familiar.Write(bloodConsumeSource);
         familiar.Add<BlockFeedBuff>();
+    }
+    static void ModifyBehaviour(Entity familiar)
+    {
+        //BehaviourTreeNodeInstanceElement behaviourTreeNodeInstanceElement = familiar.Read<BehaviourTreeNodeInstanceElement>();
+        //BehaviourTreeNodeInstance behaviourTreeNodeInstance = behaviourTreeNodeInstanceElement.Value;
+
+        //BehaviourTreeInstance behaviourTreeInstance = familiar.Read<BehaviourTreeInstance>();
+       
+        //BehaviourTreeBinding behaviourTreeBinding = familiar.Read<BehaviourTreeBinding>();
+        //Entity behaviourEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[behaviourTreeBinding.PrefabGUID];
+        //BehaviourTree behaviourTree = behaviourEntity.Read<BehaviourTree>();
+        //BehaviourTreeBlob* treeBlob = (BehaviourTreeBlob*)behaviourTree.Blob;
+        //IntPtr nodePtr = treeBlob->Nodes;
+        //Blackboard
     }
     public enum FamiliarStatType
     {
@@ -181,15 +287,16 @@ internal static class FamiliarSummonUtilities
     }
 
     public static readonly Dictionary<FamiliarStatType, float> familiarStatCaps = new()
-            {
-                {FamiliarStatType.PhysicalCritChance, 0.2f},
-                {FamiliarStatType.SpellCritChance, 0.2f},
-                {FamiliarStatType.HealingReceived, 0.5f},
-                {FamiliarStatType.PhysicalResistance, 0.2f},
-                {FamiliarStatType.SpellResistance, 0.2f},
-                {FamiliarStatType.CCReduction, 0.5f},
-                {FamiliarStatType.ShieldAbsorb, 1f}
-            };
+    {
+        {FamiliarStatType.PhysicalCritChance, 0.2f},
+        {FamiliarStatType.SpellCritChance, 0.2f},
+        {FamiliarStatType.HealingReceived, 0.5f},
+        {FamiliarStatType.PhysicalResistance, 0.2f},
+        {FamiliarStatType.SpellResistance, 0.2f},
+        {FamiliarStatType.CCReduction, 0.5f},
+        {FamiliarStatType.ShieldAbsorb, 1f}
+    };
+
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
         float scalingFactor = 0.1f + (level / (float)Plugin.MaxFamiliarLevel.Value)*0.9f; // Calculate scaling factor
@@ -211,6 +318,7 @@ internal static class FamiliarSummonUtilities
         }
 
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[familiar.Read<PrefabGUID>()];
+
         // get stats from original
         UnitStats unitStats = original.Read<UnitStats>();
 
@@ -259,7 +367,7 @@ internal static class FamiliarSummonUtilities
             baseHealth = 750;
         }
 
-        familiarHealth.MaxHealth._Value = baseHealth * healthScalingFactor * (1 + prestigeLevel*FamiliarStatMultiplier);
+        familiarHealth.MaxHealth._Value = baseHealth * healthScalingFactor;
         familiarHealth.Value = familiarHealth.MaxHealth._Value;
         familiar.Write(familiarHealth);
 
@@ -281,7 +389,6 @@ internal static class FamiliarSummonUtilities
                 familiar.Write(damageCategoryStats);
             }
         }
-        
         if (familiar.Has<MaxMinionsPerPlayerElement>()) // make vbloods summon?
         {
             familiar.Remove<MaxMinionsPerPlayerElement>();
@@ -318,8 +425,9 @@ internal static class FamiliarSummonUtilities
     {
         ModifiableBool modifiableBool = new() { _Value = false };
         CanPreventDisableWhenNoPlayersInRange canPreventDisable = new() { CanDisable = modifiableBool };
-        Core.EntityManager.AddComponentData(familiar, canPreventDisable);
+        EntityManager.AddComponentData(familiar, canPreventDisable);
     }
+
     /*
     static void ModifyUnitTier(Entity familiar, int level)
     {
@@ -356,8 +464,17 @@ internal static class FamiliarSummonUtilities
     {
         AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
         aggroConsumer.MaxDistanceFromPreCombatPosition = 30f;
-        aggroConsumer.ProximityRadius = 25f;
-        familiar.Write(aggroConsumer);   
+        //aggroConsumer.ProximityRadius = 0f;
+        aggroConsumer.RemoveDelay = 10f;
+        aggroConsumer.ProximityWeight = 0f;
+        //aggroConsumer.RecieveAlerts = false;
+        familiar.Write(aggroConsumer);
+
+        if (familiar.Has<GainAggroByAlert>()) familiar.Remove<GainAggroByAlert>();
+        if (familiar.Has<GainAggroByVicinity>()) familiar.Remove<GainAggroByVicinity>();
+        if (familiar.Has<GainAlertByVicinity>()) familiar.Remove<GainAlertByVicinity>();
+        if (familiar.Has<AggroModifiers>()) familiar.Remove<AggroModifiers>();
+        if (familiar.Has<AlertModifiers>()) familiar.Remove<AlertModifiers>();
     }
     static void ModifyConvertable(Entity familiar)
     {
@@ -369,11 +486,9 @@ internal static class FamiliarSummonUtilities
         {
             familiar.Remove<CharmSource>();
         }
-
         // testing
         //NameableInteractable nameableInteractable = new NameableInteractable { Name = "Bob", OnlyAllyRename = true, OnlyAllySee = false };
         //Core.EntityManager.SetComponentData(familiar, nameableInteractable);
-        
     }
     static void ModifyCollision(Entity familiar)
     {
@@ -402,7 +517,7 @@ internal static class FamiliarSummonUtilities
         {
             var followers = characterEntity.ReadBuffer<FollowerBuffer>();
             ulong platformId = characterEntity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-            if (Core.DataStructures.FamiliarActives.TryGetValue(platformId, out var data) && Core.EntityManager.Exists(data.Familiar))
+            if (Core.DataStructures.FamiliarActives.TryGetValue(platformId, out var data) && EntityManager.Exists(data.Familiar))
             {
                 return data.Familiar;
             }
@@ -415,7 +530,16 @@ internal static class FamiliarSummonUtilities
                 }
             }
             return Entity.Null;
-        } 
+        }
+        public static void ClearFamiliarActives(ulong steamId)
+        {
+            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives))
+            {
+                actives = (Entity.Null, 0);
+                Core.DataStructures.FamiliarActives[steamId] = actives;
+                Core.DataStructures.SavePlayerFamiliarActives();
+            }
+        }
     }
     public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
     {

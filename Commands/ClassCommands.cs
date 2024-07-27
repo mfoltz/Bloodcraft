@@ -17,7 +17,6 @@ internal static class ClassCommands
     static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
     static readonly bool HardSynergies = Plugin.HardSynergies.Value;
     static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
-    static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
     public static void ClassChoiceCommand(ChatCommandContext ctx, string className)

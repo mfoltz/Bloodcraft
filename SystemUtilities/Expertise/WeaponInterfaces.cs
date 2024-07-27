@@ -29,8 +29,8 @@ public static class ExpertiseHandlerFactory
             ExpertiseUtilities.WeaponType.Reaper => new ReaperHandler(),
             ExpertiseUtilities.WeaponType.Longbow => new LongbowHandler(),
             ExpertiseUtilities.WeaponType.Whip => new WhipHandler(),
-            ExpertiseUtilities.WeaponType.FishingPole => new FishingHandler(),
-            ExpertiseUtilities.WeaponType.Unarmed => new SanguimancyHandler(),
+            ExpertiseUtilities.WeaponType.FishingPole => new FishingPoleHandler(),
+            ExpertiseUtilities.WeaponType.Unarmed => new UnarmedHandler(),
             _ => null,
         };
     }
@@ -234,13 +234,13 @@ public class WhipHandler : BaseExpertiseHandler
         return ExpertiseUtilities.WeaponType.Whip;
     }
 }
-public class FishingHandler : BaseExpertiseHandler
+public class FishingPoleHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishingpoleExpertise;
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishingPoleExpertise;
 
     public override void SaveChanges()
     {
-        Core.DataStructures.SavePlayerFishingpoleExpertise();
+        Core.DataStructures.SavePlayerFishingPoleExpertise();
     }
 
     public override ExpertiseUtilities.WeaponType GetWeaponType()
@@ -249,13 +249,13 @@ public class FishingHandler : BaseExpertiseHandler
     }
 }
 
-public class SanguimancyHandler : BaseExpertiseHandler
+public class UnarmedHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSanguimancy;
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedExpertise;
 
     public override void SaveChanges()
     {
-        Core.DataStructures.SavePlayerSanguimancy();
+        Core.DataStructures.SavePlayerUnarmedExpertise();
     }
 
     public override ExpertiseUtilities.WeaponType GetWeaponType()

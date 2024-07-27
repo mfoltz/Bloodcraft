@@ -29,10 +29,6 @@ internal static class PlayerLevelingUtilities
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
-    static readonly PrefabGUID playerFaction = new(1106458752);
-
-    //static readonly PrefabGUID critterFaction = new(10678632);
-    //static readonly PrefabGUID ignoredFaction = new(-1430861195);
     public enum PlayerClasses
     {
         BloodKnight,
@@ -116,25 +112,6 @@ internal static class PlayerLevelingUtilities
             ProcessExperienceGain(entityManager, killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
             return;
         }
-
-        /*
-        var aggroBuffer = victimEntity.ReadBuffer<AggroBuffer>();
-
-        NativeArray<AggroBuffer> aggroArray = aggroBuffer.ToNativeArray(Allocator.Temp);
-        Entity highestPlayerAggroEntity = aggroArray
-                .ToArray()
-                .Where(aggro => aggro.IsPlayer)
-                .OrderByDescending(aggro => aggro.DamageValue)
-                .Select(aggro => aggro.Entity)
-                .FirstOrDefault();
-
-        if (highestPlayerAggroEntity != Entity.Null && highestPlayerAggroEntity != killerEntity)
-        {
-            killerEntity = highestPlayerAggroEntity;
-        }
-
-        aggroArray.Dispose();
-        */
         
         HashSet<Entity> participants = GetParticipants(killerEntity, userEntity); // want list of participants to process experience for
         if (participants.Count > 1) groupMultiplier = GroupMultiplier; // if more than 1 participant, apply group multiplier
@@ -159,9 +136,8 @@ internal static class PlayerLevelingUtilities
                 {
                     foreach (string name in groupEntry.Value)
                     {
-                        if (PlayerService.playerNameCache.TryGetValue(name, out var player))
+                        if (PlayerService.PlayerCache.TryGetValue(name, out var player))
                         {
-                            //Core.Log.LogInfo($"Adding {name} to participants if online...");
                             if (!player.Read<User>().IsConnected) continue;
                             var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
                             if (distance > ExpShareDistance) continue;
@@ -196,15 +172,13 @@ internal static class PlayerLevelingUtilities
         bool isVBlood = IsVBlood(entityManager, victimEntity);
         int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
         float gainedXP = CalculateExperienceGained(victimLevel.Level._Value, isVBlood);
-        //Core.Log.LogInfo($"Gained XP before nerfing unit spawner: {gainedXP}");
 
-        //Core.Log.LogInfo($"Gained XP before adding bonus from health of unit: {gainedXP}");
         gainedXP += additionalXP;
-        //Core.Log.LogInfo($"Gained XP after adding bonus from health of unit: {gainedXP}");
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
 
+        if (currentLevel >= MaxPlayerLevel) return; // Check if already at max level
+
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
-        //Core.Log.LogInfo($"Gained XP after applying scaling factor: {gainedXP}");
         
         if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
@@ -215,7 +189,7 @@ internal static class PlayerLevelingUtilities
                 gainedXP *= expReductionFactor;
             }
         }
-        //Core.Log.LogInfo($"Gained XP after reducing for prestige: {gainedXP}");
+
         if (UnitSpawnerMultiplier < 1 && victimEntity.Has<IsMinion>() && victimEntity.Read<IsMinion>().Value)
         {
             gainedXP *= UnitSpawnerMultiplier;
@@ -253,21 +227,19 @@ internal static class PlayerLevelingUtilities
         UpdatePlayerExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel);
     }
-    public static void ProcessQuestExperienceGain(ulong SteamID, int multiplier)
+    public static void ProcessQuestExperienceGain(User user, int multiplier)
     {
+        ulong SteamID = user.PlatformId;
+        Entity character = user.LocalCharacter._Entity;
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
         float gainedXP = (float)ConvertLevelToXp(currentLevel) * 0.025f * multiplier;
-        Entity character = PlayerService.playerIdCache.ContainsKey(SteamID) ? PlayerService.playerIdCache[SteamID] : Entity.Null;
-        if (character == Entity.Null) return;
         UpdatePlayerExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(character, SteamID, gainedXP, currentLevel);
     }
-
     static bool IsVBlood(EntityManager entityManager, Entity victimEntity)
     {
         return entityManager.HasComponent<VBloodConsumeSource>(victimEntity);
     }
-
     static float CalculateExperienceGained(int victimLevel, bool isVBlood)
     {
         int baseXP = victimLevel;
@@ -1113,8 +1085,8 @@ internal static class PlayerLevelingUtilities
     {
         public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
         {
-            string playerKey = PlayerService.playerNameCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && PlayerService.playerNameCache.TryGetValue(playerKey, out Entity player))
+            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(playerKey) && PlayerService.PlayerCache.TryGetValue(playerKey, out Entity player))
             {
                 if (player.Equals(Entity.Null))
                 {
@@ -1186,7 +1158,7 @@ internal static class PlayerLevelingUtilities
         }
         public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
         {
-            string playerKey = PlayerService.playerNameCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
             {
                 party.Remove(playerKey);

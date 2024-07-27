@@ -77,7 +77,6 @@ internal static class ProfessionUtilities
             GiveProfessionBonus(prefab, Killer, user, SteamID, handler);
         }
     }
-
     public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer, User user, ulong SteamID, IProfessionHandler handler)
     {
         EntityManager entityManager = Core.EntityManager;
@@ -86,6 +85,7 @@ internal static class ProfessionUtilities
         Entity prefabEntity = prefabCollectionSystem._PrefabGuidToEntityMap[prefab];
         int level = GetLevel(SteamID, handler);
         string name = handler.GetProfessionName();
+        //Core.Log.LogInfo(prefab.LookupName());
         if (name.Contains("Fishing"))
         {
             List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefab);
@@ -112,10 +112,10 @@ internal static class ProfessionUtilities
                         var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                         foreach (var dropTableData in dropTableDataBuffer)
                         {
-                            if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient"))
+                            if (dropTableData.ItemGuid.LookupName().ToLower().Contains("ingredient") || dropTableData.ItemGuid.LookupName().ToLower().Contains("trippyshroom"))
                             {
                                 int bonus = 0;
-                                if (dropTableData.ItemGuid.LookupName().ToLower().Contains("plant"))
+                                if (dropTableData.ItemGuid.LookupName().ToLower().Contains("plant") || dropTableData.ItemGuid.LookupName().ToLower().Contains("trippyshroom"))
                                 {
                                     bonus = level / 10;
                                 }
@@ -160,10 +160,10 @@ internal static class ProfessionUtilities
     {
         EntityManager entityManager = Core.EntityManager;
 
-        //handler.AddExperience(steamID, value);
-        handler.SaveChanges();
-
         var xpData = handler.GetExperienceData(steamID);
+
+        if (xpData.Key >= MaxProfessionLevel) return;
+
         UpdateProfessionExperience(entityManager, user, steamID, xpData, value, handler);
     }
     static void UpdateProfessionExperience(EntityManager entityManager, User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
@@ -185,7 +185,7 @@ internal static class ProfessionUtilities
         // Update the experience data with the new values
         var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
         handler.UpdateExperienceData(steamID, updatedXPData);
-
+        handler.SaveChanges();
         // Notify player about the changes
         NotifyPlayer(entityManager, user, steamID, gainedXP, leveledUp, handler);
     }
@@ -235,7 +235,7 @@ internal static class ProfessionUtilities
     }
     
 }
-public class ProfessionMappings
+internal static class ProfessionMappings
 {
     static readonly Dictionary<string, int> FishingMultipliers = new()
     {

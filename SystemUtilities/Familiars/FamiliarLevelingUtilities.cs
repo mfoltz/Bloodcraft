@@ -1,6 +1,5 @@
 ﻿using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Core;
@@ -57,8 +56,9 @@ internal static class FamiliarLevelingUtilities
         float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
         KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamID, familiarId);
 
+        if (familiarXP.Key >= MaxFamiliarLevel) return;
+
         int currentLevel = ConvertXpToLevel(familiarXP.Value);
-        if (currentLevel >= MaxFamiliarLevel) return;
 
         UpdateFamiliarExperience(familiarEntity, familiarId, steamID, familiarXP, gainedXP, currentLevel);            
     }
@@ -72,7 +72,6 @@ internal static class FamiliarLevelingUtilities
         if (isVBlood) return baseXP * VBloodMultiplier;
         return baseXP * UnitMultiplier;
     }
-
     static void UpdateFamiliarExperience(Entity familiarEntity, int familiarId, ulong playerId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
     {
         FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
@@ -80,7 +79,6 @@ internal static class FamiliarLevelingUtilities
         FamiliarExperienceManager.SaveFamiliarExperience(playerId, data);
         CheckAndHandleLevelUp(familiarEntity, familiarId, playerId, data.FamiliarExperience[familiarId], currentLevel);
     }
-
     public static KeyValuePair<int, float> GetFamiliarExperience(ulong playerId, int familiarId)
     {
         FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
@@ -92,8 +90,7 @@ internal static class FamiliarLevelingUtilities
         {
             return new(0, 0);
         }
-    }
-    
+    } 
     static void CheckAndHandleLevelUp(Entity familiarEntity, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel)
     {
         Entity userEntity = familiarEntity.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity;
@@ -147,17 +144,14 @@ internal static class FamiliarLevelingUtilities
         // Reversing the formula used in ConvertXpToLevel for consistency
         return (int)Math.Pow(level / EXPConstant, EXPPower);
     }
-
     static float GetXp(ulong steamID, int familiarId)
     {
         return GetFamiliarExperience(steamID, familiarId).Value;
     }
-
     static int GetLevel(ulong SteamID, int familiarId)
     {
         return ConvertXpToLevel(GetXp(SteamID, familiarId));
     }
-
     public static int GetLevelProgress(ulong SteamID, int familiarId)
     {
         float currentXP = GetXp(SteamID, familiarId);

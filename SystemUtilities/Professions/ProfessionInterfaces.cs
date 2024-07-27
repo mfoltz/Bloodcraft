@@ -64,7 +64,7 @@ namespace Bloodcraft.Systems.Professions
                         return new WoodcuttingHandler();
                     if (itemTypeName.Contains("gem") || itemTypeName.Contains("jewel") || itemTypeName.Contains("magicsource"))
                         return new EnchantingHandler();
-                    if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal"))
+                    if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal") || itemTypeName.Contains("techscrap"))
                         return new MiningHandler();
                     if (itemTypeName.Contains("weapon"))
                         return new BlacksmithingHandler();
@@ -72,10 +72,10 @@ namespace Bloodcraft.Systems.Professions
                         return new TailoringHandler();
                     if (itemTypeName.Contains("fish"))
                         return new FishingHandler();
+                    if (itemTypeName.Contains("plant") || itemTypeName.Contains("trippyshroom"))
+                        return new HarvestingHandler();
                     if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable"))
                         return new AlchemyHandler();
-                    if (itemTypeName.Contains("plant"))
-                        return new HarvestingHandler();
                     else
                         return null;
             }

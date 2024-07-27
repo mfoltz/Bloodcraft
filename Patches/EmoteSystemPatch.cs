@@ -1,5 +1,5 @@
-﻿using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -7,22 +7,20 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using User = ProjectM.Network.User;
-using static ProjectM.VoiceMapping;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 public static class EmoteSystemPatch
 {
-    /*
-    public static class Coordinator // this is for coordination on emote usage with KindredAuras (#soon) and ChatGPT insists that static same-named classes can be used for this purpose without making either mod dependent on the other. we'll see about that
-    {
-        public static Dictionary<ulong, bool> FamiliarEmotes { get; set; } = [];
-        public static Dictionary<ulong, bool> AuraEmotes { get; set; } = [];
-    }
-    */
+    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
+    static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => Core.EntityCommandBufferSystem;
+
     static readonly PrefabGUID dominateBuff = new(-1447419822);
     static readonly PrefabGUID invulnerableBuff = new(-480024072);
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
@@ -34,14 +32,15 @@ public static class EmoteSystemPatch
     {
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
-        { new(-26826346), BindPreset } // clap
+        { new(-26826346), BindPreset }, // clap
+        { new(-158502505), ToggleVBloodEmotes } // taunt
     };
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)
@@ -63,10 +62,10 @@ public static class EmoteSystemPatch
                 */
                 if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["Emotes"])
                 {
-                    if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
-                    else if (Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+                    if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
+                    else if (ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
                     {
-                        LocalizationService.HandleServerReply(Core.EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
+                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
                     }
                 }
             }
@@ -80,13 +79,22 @@ public static class EmoteSystemPatch
             entities.Dispose();
         }
     }
+
+    static void ToggleVBloodEmotes(Entity userEntity, Entity character, ulong steamId)
+    {
+        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))
+        {
+            bools["VBloodEmotes"] = !bools["VBloodEmotes"];
+            Core.DataStructures.PlayerBools[steamId] = bools;
+            Core.DataStructures.SavePlayerBools();
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), bools["VBloodEmotes"] ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
+        }
+    }
     public static void BindPreset(Entity userEntity, Entity character, ulong steamId)
     {
-        EntityManager entityManager = Core.EntityManager;
-
         if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId))
         {
-            LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "No familiar preset found to bind, use .fam bind # at least once first.");
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No familiar preset found to bind, use .fam bind # at least once first.");
             return;
         }
 
@@ -94,15 +102,15 @@ public static class EmoteSystemPatch
         Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
         User user = userEntity.Read<User>();
 
-        if (Core.ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || Core.ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+        if (ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
         {
-            LocalizationService.HandleServerReply(entityManager, user, "You can't bind a familiar while in combat or dominating presence is active.");
+            LocalizationService.HandleServerReply(EntityManager, user, "You can't bind a familiar while in combat or dominating presence is active.");
             return;
         }
 
         if (familiar != Entity.Null)
         {
-            LocalizationService.HandleServerReply(entityManager, user, "You already have an active familiar.");
+            LocalizationService.HandleServerReply(EntityManager, user, "You already have an active familiar.");
             return;
         }
 
@@ -110,7 +118,7 @@ public static class EmoteSystemPatch
 
         if (string.IsNullOrEmpty(set))
         {
-            LocalizationService.HandleServerReply(entityManager, user, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
+            LocalizationService.HandleServerReply(EntityManager, user, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
             return;
         }
 
@@ -119,7 +127,7 @@ public static class EmoteSystemPatch
             Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
             if (preset < 1 || preset > famKeys.Count)
             {
-                LocalizationService.HandleServerReply(entityManager, user, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>) and make sure to update preset for new active boxes.");
+                LocalizationService.HandleServerReply(EntityManager, user, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>) and make sure to update preset for new active boxes.");
                 return;
             }
             if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId)) // cache, set choice once per session then can use emote to bind same choice
@@ -135,37 +143,41 @@ public static class EmoteSystemPatch
         }
         else
         {
-            LocalizationService.HandleServerReply(entityManager, user, "Couldn't find familiar or familiar already active.");
+            LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find familiar or familiar already active.");
         }
     }
 
     public static void CallDismiss(Entity userEntity, Entity character, ulong playerId)
     {
-        EntityManager entityManager = Core.EntityManager;
-
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
             
-            if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
+            if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
             {
                 familiar = data.Familiar;
             }
 
             if (familiar == Entity.Null)
             {
-                LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable.");
+                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable or disable.");
                 return;
             }
 
             if (!familiar.Has<Disabled>())
             {
-                if (FamiliarPatches.familiarMinions.ContainsKey(data.Familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
-                entityManager.AddComponent<Disabled>(familiar);
+                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
+                EntityManager.AddComponent<Disabled>(familiar);
                 
                 Follower follower = familiar.Read<Follower>();
                 follower.Followed._Value = Entity.Null;
                 familiar.Write(follower);
+
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                aggroConsumer.Active._Value = false;
+                aggroConsumer.AggroTarget._Entity = Entity.Null;
+                aggroConsumer.AlertTarget._Entity = Entity.Null;
+                familiar.Write(aggroConsumer);
 
                 var buffer = character.ReadBuffer<FollowerBuffer>();
                 for (int i = 0; i < buffer.Length; i++)
@@ -181,59 +193,62 @@ public static class EmoteSystemPatch
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
 
-                LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
+                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
             }
             else if (familiar.Has<Disabled>())
             {
-                familiar.Write(new Translation { Value = character.Read<LocalToWorld>().Position });
+                float3 position = character.Read<Translation>().Value;
                 familiar.Remove<Disabled>();
-
                 
+                familiar.Write(new Translation { Value = position });
+                familiar.Write(new LastTranslation { Value = position });
+
                 Follower follower = familiar.Read<Follower>();
                 follower.Followed._Value = character;
                 familiar.Write(follower);
-                
+
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                aggroConsumer.Active._Value = true;
+                familiar.Write(aggroConsumer);
+
                 data = (Entity.Null, data.FamKey);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
-                LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
+                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
             }
         }
         else
         {
-            LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar to enable or disable.");
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar to enable or disable.");
         }
     }
     public static void CombatMode(Entity userEntity, Entity character, ulong playerId)
     {
-        EntityManager entityManager = Core.EntityManager;
-
         if (!Plugin.FamiliarCombat.Value)
         {
-            LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar combat is not enabled.");
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat is not enabled.");
             return;
         }
 
-        ServerGameManager serverGameManager = Core.ServerGameManager;
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
-            if (!data.Familiar.Equals(Entity.Null) && Core.EntityManager.Exists(data.Familiar))
+            if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
             {
                 familiar = data.Familiar;
             }
 
             if (familiar == Entity.Null)
             {
-                LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
+                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
                 return;
             }
 
-            if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // remove and enable combat
+            if (ServerGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // remove and enable combat
             {
-                BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(serverGameManager);
-                EntityCommandBuffer entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+                BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
+                EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
                 BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, invulnerableBuff, familiar);
 
                 FactionReference factionReference = familiar.Read<FactionReference>();
@@ -250,7 +265,7 @@ public static class EmoteSystemPatch
                 aggroable.AggroFactor._Value = 1f;
                 familiar.Write(aggroable);
                 
-                LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
+                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
             }
             else // if not, disable combat
             {  
@@ -260,6 +275,8 @@ public static class EmoteSystemPatch
 
                 AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
                 aggroConsumer.Active._Value = false;
+                aggroConsumer.AggroTarget._Entity = Entity.Null;
+                aggroConsumer.AlertTarget._Entity = Entity.Null;
                 familiar.Write(aggroConsumer);
 
                 Aggroable aggroable = familiar.Read<Aggroable>();
@@ -268,7 +285,6 @@ public static class EmoteSystemPatch
                 aggroable.AggroFactor._Value = 0f;
                 familiar.Write(aggroable);
 
-                DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
                     BuffPrefabGUID = invulnerableBuff,
@@ -278,8 +294,9 @@ public static class EmoteSystemPatch
                     Character = familiar,
                     User = userEntity,
                 };
-                debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                if (serverGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
+
+                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                if (ServerGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
                 {
                     if (invlunerableBuff.Has<LifeTime>())
                     {
@@ -289,12 +306,12 @@ public static class EmoteSystemPatch
                         invlunerableBuff.Write(lifetime);
                     }              
                 }
-                LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
+                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
             }
         }
         else
         {
-            LocalizationService.HandleServerReply(entityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
         }
     }
 }

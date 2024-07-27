@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>1.1.2</Version>
+	<Version>1.2.3</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	<RestoreSources>
 		  https://api.nuget.org/v3/index.json;
@@ -19,44 +19,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>True</Optimize>
   </PropertyGroup>
-
-	<ItemGroup>
-		<None Remove="Localization\d22bd1wl.1ps~" />
-		<None Remove="Localization\Prefabs.json" />
-		<None Remove="Localization\English.json" />
-		<None Remove="Localization\Brazilian.json" />
-		<None Remove="Localization\French.json" />
-		<None Remove="Localization\German.json" />
-		<None Remove="Localization\Hungarian.json" />
-		<None Remove="Localization\Italian.json" />
-		<None Remove="Localization\Japanese.json" />
-		<None Remove="Localization\Koreana.json" />
-		<None Remove="Localization\Latam.json" />
-		<None Remove="Localization\Polish.json" />
-		<None Remove="Localization\Russian.json" />
-		<None Remove="Localization\SChinese.json" />
-		<None Remove="Localization\TChinese.json" />
-		<None Remove="Localization\Thai.json" />
-		<None Remove="Localization\Turkish.json" />
-		<None Remove="Localization\Spanish.json" />
-		<None Remove="Localization\Vietnamese.json" />
-		<None Remove="Localization\BrazilianStrings.json" />
-		<None Remove="Localization\FrenchStrings.json" />
-		<None Remove="Localization\GermanStrings.json" />
-		<None Remove="Localization\HungarianStrings.json" />
-		<None Remove="Localization\ItalianStrings.json" />
-		<None Remove="Localization\JapaneseStrings.json" />
-		<None Remove="Localization\KoreanaStrings.json" />
-		<None Remove="Localization\LatamStrings.json" />
-		<None Remove="Localization\PolishStrings.json" />
-		<None Remove="Localization\RussianStrings.json" />
-		<None Remove="Localization\SChineseStrings.json" />
-		<None Remove="Localization\TChineseStrings.json" />
-		<None Remove="Localization\ThaiStrings.json" />
-		<None Remove="Localization\TurkishStrings.json" />
-		<None Remove="Localization\SpanishStrings.json" />
-		<None Remove="Localization\VietnameseStrings.json" />
-	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Localization\Prefabs.json" />
 		<EmbeddedResource Include="Localization\English.json" />
@@ -103,10 +65,8 @@
     <PackageReference Include="VRising.Unhollowed.Client" Version="1.0.2.794360001" />
     <PackageReference Include="VRising.VampireCommandFramework" Version="0.9.0" />
   </ItemGroup>
-	<Target Name="CopyDLLsServer" AfterTargets="Build">
-		<Message Text="DLL to V Rising Server" Importance="High" />
+	<Target Name="BuildToServer" AfterTargets="Build">
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\VRising_Server\BepInEx\plugins" />
-		<Message Text="DLL Server Copied OK" Importance="High" />
 	</Target>
 	
 </Project>

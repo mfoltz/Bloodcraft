@@ -514,7 +514,6 @@ internal class Plugin : BasePlugin
                 entry.Value = existingEntry.Value;
             }
         }
-
         return entry;
     }
 
@@ -535,6 +534,20 @@ internal class Plugin : BasePlugin
 
     static void LoadAllData()
     {
+        try
+        {
+            string PlayerSanguimancyJson = Path.Combine(PlayerExpertisePath, "player_sanguimancy.json"); // make sure old format handled and copied to new format
+            string PlayerUnarmedJson = Path.Combine(PlayerExpertisePath, "player_unarmed.json");
+            if (File.Exists(PlayerSanguimancyJson) && !File.Exists(PlayerUnarmedJson))
+            {
+                // Copy the old file to the new file name
+                File.Copy(PlayerSanguimancyJson, Core.JsonFiles.PlayerUnarmedExpertiseJson, overwrite: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogError($"Failed to migrate old player sanguimancy data: {ex}");
+        }
         Core.DataStructures.LoadPlayerBools();
         if (Parties.Value)
         {
@@ -558,11 +571,6 @@ internal class Plugin : BasePlugin
         if (ExpertiseSystem.Value)
         {
             foreach (var loadFunction in loadExpertises)
-            {
-                loadFunction();
-            }
-
-            foreach (var loadFunction in loadSanguimancy)
             {
                 loadFunction();
             }
@@ -609,14 +617,10 @@ internal class Plugin : BasePlugin
         Core.DataStructures.LoadPlayerReaperExpertise,
         Core.DataStructures.LoadPlayerLongbowExpertise,
         Core.DataStructures.LoadPlayerWhipExpertise,
-        Core.DataStructures.LoadPlayerFishingpoleExpertise,
+        Core.DataStructures.LoadPlayerFishingPoleExpertise,
+        Core.DataStructures.LoadPlayerUnarmedExpertise,
+        Core.DataStructures.LoadPlayerSpells,
         Core.DataStructures.LoadPlayerWeaponStats
-    ];
-
-    static readonly Action[] loadSanguimancy =
-    [
-        Core.DataStructures.LoadPlayerSanguimancy,
-        Core.DataStructures.LoadPlayerSpells
     ];
 
     static readonly Action[] loadLegacies =

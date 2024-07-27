@@ -81,6 +81,9 @@ public static class LegacyUtilities
         {
             // Check if the player leveled up
             var xpData = handler.GetLegacyData(steamID);
+
+            if (xpData.Key >= MaxBloodLevel) return;
+
             float changeFactor = 1f;
 
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
@@ -100,7 +103,6 @@ public static class LegacyUtilities
                     
                 }
             }
-
 
             BloodValue *= changeFactor;
 
@@ -138,7 +140,6 @@ public static class LegacyUtilities
         {
             HandleServerReply(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }
-        
     }
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
     {

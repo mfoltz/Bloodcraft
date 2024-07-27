@@ -10,6 +10,8 @@ namespace Bloodcraft.Commands;
 [CommandGroup(name: "profession", "prof")] 
 internal static class ProfessionCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     [Command(name: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
     {
@@ -65,10 +67,10 @@ internal static class ProfessionCommands
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
-        Entity foundUserEntity = PlayerService.GetUserByName(name, true);
-        if (foundUserEntity.Equals(Entity.Null))
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
         {
-            LocalizationService.HandleReply(ctx, "Player not found...");
+            ctx.Reply($"Couldn't find player.");
             return;
         }
         User foundUser = foundUserEntity.Read<User>();

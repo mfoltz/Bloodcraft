@@ -44,8 +44,8 @@ public static class ExpertiseUtilities
         { WeaponType.Reaper, PrestigeUtilities.PrestigeType.ReaperExpertise },
         { WeaponType.Longbow, PrestigeUtilities.PrestigeType.LongbowExpertise },
         { WeaponType.Whip, PrestigeUtilities.PrestigeType.WhipExpertise },
-        { WeaponType.Unarmed, PrestigeUtilities.PrestigeType.UnarmedExpertise }, // Assuming unarmed maps to Sanguimancy
-        { WeaponType.FishingPole, PrestigeUtilities.PrestigeType.WorkerLegacy } // Example mapping
+        { WeaponType.Unarmed, PrestigeUtilities.PrestigeType.UnarmedExpertise }, 
+        { WeaponType.FishingPole, PrestigeUtilities.PrestigeType.FishingPoleExpertise }
     };
     public static void UpdateExpertise(Entity Killer, Entity Victim)
     {
@@ -56,7 +56,6 @@ public static class ExpertiseUtilities
         User user = entityManager.GetComponentData<User>(userEntity);
         ulong steamID = user.PlatformId;
         ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
-
 
         if (entityManager.HasComponent<UnitStats>(Victim))
         {
@@ -88,6 +87,9 @@ public static class ExpertiseUtilities
             {
                 // Check if the player leveled up
                 var xpData = handler.GetExpertiseData(steamID);
+
+                if (xpData.Key >= MaxExpertiseLevel) return;
+
                 float newExperience = xpData.Value + ExpertiseValue;
                 int newLevel = ConvertXpToLevel(newExperience);
                 bool leveledUp = false;
@@ -122,8 +124,6 @@ public static class ExpertiseUtilities
 
         if (leveledUp)
         {
-            Entity character = user.LocalCharacter._Entity;
-            //if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, newLevel, Core.Server.EntityManager);
             if (newLevel <= MaxExpertiseLevel) HandleServerReply(entityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
         }
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])

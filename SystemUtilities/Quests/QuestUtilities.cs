@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
@@ -6,6 +7,8 @@ using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Services.Analytics.Internal;
 using Match = System.Text.RegularExpressions.Match;
 using Regex = System.Text.RegularExpressions.Regex;
 
@@ -14,17 +17,22 @@ internal static class QuestUtilities
 {
     static readonly Regex Regex = new(@"T\d{2}");
     static EntityManager EntityManager => Core.EntityManager;
-    static Random Random => new();
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static readonly Random randomReward = new();
+    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+
+    static readonly System.Random Random = new();
+
     static readonly bool InfiniteDailies = Plugin.InfiniteDailies.Value;
-    public static HashSet<PrefabGUID> UnitPrefabs = [];
+
+    //public static HashSet<PrefabGUID> UnitPrefabs = [];
     public static HashSet<PrefabGUID> CraftPrefabs = [];
     public static HashSet<PrefabGUID> GatherPrefabs = [];
+
     static readonly PrefabGUID graveyardSkeleton = new(1395549638);
     static readonly PrefabGUID forestWolf = new(-1418430647);
     static readonly PrefabGUID reinforcedBoneSword = new(-796306296);
     static readonly PrefabGUID reinforcedBoneMace = new(-1998017941);
+    static readonly PrefabGUID trackingBuff = new(746504391);
     public enum QuestGoal
     {
         Kill,
@@ -71,23 +79,24 @@ internal static class QuestUtilities
     };
     static HashSet<PrefabGUID> GetKillPrefabsForLevel(int playerLevel)
     {
+        Dictionary<PrefabGUID, HashSet<Entity>> TargetPrefabs = new(QuestService.TargetCache);
         HashSet<PrefabGUID> prefabs = [];
-        foreach (PrefabGUID prefab in UnitPrefabs)
+        foreach (PrefabGUID prefab in TargetPrefabs.Keys)
         {
-            Entity prefabEntity;
-            if (Core.PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(prefab))
-            {
-                prefabEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
-            }
-            else continue;
-            //if (prefabEntity == Entity.Null || !EntityManager.Exists(prefabEntity)) continue;
-            //Core.Log.LogInfo($"Checking {prefabEntity.Read<PrefabGUID>().GuidHash}...");
+            if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity prefabEntity)) continue;
+
             PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
-            if (prefabs.Contains(prefabGUID) || prefabGUID.LookupName().Contains("Trader") || prefabGUID.LookupName().Contains("Vermin") || prefabGUID.LookupName().Contains("Servant") || prefabGUID.LookupName().Contains("Horse") || prefabGUID.LookupName().Contains("Carriage")) continue;
-            if (!prefabEntity.Has<UnitLevel>() || !prefabEntity.Has<EntityCategory>() || prefabEntity.Has<Minion>()) continue;
+
+            string check = prefabGUID.LookupName();
+
+            if (check.Contains("Trader") || check.Contains("Vermin") || check.Contains("Servant") || check.Contains("Horse") || check.Contains("Carriage") || check.Contains("Minion") || check.Contains("Unholy") || check.Contains("Surprise")) continue; // need to check if behaviour prefab matches with name for some units for valid spawns?
+            if (!prefabEntity.Has<UnitLevel>() || prefabEntity.Has<Minion>()) continue;     
+
             UnitLevel level = prefabEntity.Read<UnitLevel>();
             if (Math.Abs(level.Level._Value - playerLevel) <= 10)
             {
+                if (check.ToLower().Contains("vblood") && level.Level._Value > playerLevel) continue;
+                if (FamiliarPatches.shardBearers.Contains(prefabGUID)) continue;
                 prefabs.Add(prefabGUID);
             }
         }
@@ -142,7 +151,7 @@ internal static class QuestUtilities
         HashSet<PrefabGUID> prefabs = [];
         foreach (PrefabGUID prefab in GatherPrefabs)
         {
-            Entity prefabEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
+            Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             //if (prefabEntity == Entity.Null || !EntityManager.Exists(prefabEntity)) continue;
             //Core.Log.LogInfo($"Checking {prefabEntity.Read<PrefabGUID>().GuidHash}...");
             if (!prefabEntity.Has<DropTableBuffer>() || !prefabEntity.Has<EntityCategory>()) continue;
@@ -189,12 +198,18 @@ internal static class QuestUtilities
             case QuestGoal.Kill:
                 if (targets.Count != 0)
                 {
+                    if (questType.Equals(QuestType.Daily))
+                    {
+                        //targets = targets.Where(t => !t.LookupName().ToLower().Contains("vblood")).ToHashSet();
+                    }
                     target = targets.ElementAt(Random.Next(targets.Count));
                     targets.Remove(target);
                 }
                 else if (questType.Equals(QuestType.Daily)) target = graveyardSkeleton;
                 else if (questType.Equals(QuestType.Weekly)) target = forestWolf;
                 requiredAmount = Random.Next(6, 8) * QuestMultipliers[questType];
+                if (target.LookupName().ToLower().Contains("vblood") && !questType.Equals(QuestType.Weekly)) requiredAmount = 2;
+                else if (target.LookupName().ToLower().Contains("vblood") && questType.Equals(QuestType.Weekly)) requiredAmount = 10;
                 break;
             case QuestGoal.Craft:
                 if (targets.Count != 0)
@@ -273,7 +288,6 @@ internal static class QuestUtilities
                     playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed~");
                 }
-
                 Core.DataStructures.SavePlayerQuests();
             }
         }
@@ -299,13 +313,54 @@ internal static class QuestUtilities
             InitializePlayerQuests(steamId, level);
         }
     }
-    public static void UpdateQuestProgress(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, PrefabGUID target, int amount, User user)
+    public static void ForceDaily(User user, ulong steamId, int level)
     {
+        QuestGoal goal = QuestGoal.Kill;
+        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+
+        if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        {
+            playerQuestData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
+            Core.DataStructures.SavePlayerQuests();
+            LocalizationService.HandleServerReply(EntityManager, user, "<color=#00FFFF>Daily Quest</color> has been rerolled~");
+        }
+    }
+    public static void ForceWeekly(User user, ulong steamId, int level)
+    {
+        QuestGoal goal = QuestGoal.Kill;
+        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+
+        if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        {
+            playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
+            Core.DataStructures.SavePlayerQuests();
+            LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
+        }
+    }
+    public static void UpdateQuests(Entity source, Entity userEntity, PrefabGUID target)
+    {
+        HashSet<Entity> participants = PlayerLevelingUtilities.GetParticipants(source, userEntity); // want list of participants to process quest credit for, this is doing double right now?
+        List<ulong> processed = [];
+        foreach (Entity participant in participants)
+        {
+            User user = participant.Read<PlayerCharacter>().UserEntity.Read<User>();
+            ulong steamId = user.PlatformId; // participants are character entities
+            if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData) && !processed.Contains(steamId))
+            {
+                ProcessQuestProgress(questData, target, 1, user);
+                processed.Add(steamId);
+            }
+        }
+    }
+    public static void ProcessQuestProgress(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, PrefabGUID target, int amount, User user)
+    {
+        bool updated = false;
         for (int i = 0; i < questData.Count; i++)
         {
             var quest = questData.ElementAt(i);
             if (quest.Value.Objective.Target == target)
             {
+                updated = true;
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
                 if (Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["QuestLogging"] && !quest.Value.Objective.Complete)
@@ -319,7 +374,7 @@ internal static class QuestUtilities
                     LocalizationService.HandleServerReply(EntityManager, user, $"{colorType} complete!");
                     if (QuestRewards.Count > 0)
                     {
-                        PrefabGUID reward = QuestRewards.Keys.ElementAt(randomReward.Next(QuestRewards.Count));
+                        PrefabGUID reward = QuestRewards.Keys.ElementAt(Random.Next(QuestRewards.Count));
                         int quantity = QuestRewards[reward];
                         if (quest.Key == QuestType.Weekly) quantity *= QuestMultipliers[quest.Key];
                         if (quest.Value.Objective.Target.LookupName().ToLower().Contains("vblood")) quantity *= 3;
@@ -330,13 +385,13 @@ internal static class QuestUtilities
                         }
                         else
                         {
-                            InventoryUtilitiesServer.CreateDropItem(Core.EntityManager, user.LocalCharacter._Entity, reward, quantity, new Entity());
+                            InventoryUtilitiesServer.CreateDropItem(EntityManager, user.LocalCharacter._Entity, reward, quantity, new Entity());
                             string message = $"You've received <color=#ffd9eb>{reward.GetPrefabName()}</color>x<color=white>{quantity}</color> for completing your {colorType}! It dropped on the ground because your inventory was full.";
                             LocalizationService.HandleServerReply(EntityManager, user, message);
                         }
                         if (Plugin.LevelingSystem.Value)
                         {
-                            PlayerLevelingUtilities.ProcessQuestExperienceGain(user.PlatformId, QuestMultipliers[quest.Key]);
+                            PlayerLevelingUtilities.ProcessQuestExperienceGain(user, QuestMultipliers[quest.Key]);
                             string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.025f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
                             LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
                         }
@@ -353,12 +408,69 @@ internal static class QuestUtilities
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
                         Core.DataStructures.SavePlayerQuests();
                         var dailyQuest = questData[QuestType.Daily];
-                        LocalizationService.HandleServerReply(Core.EntityManager, user, $"New <color=#00FFFF>Daily Quest</color> available: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
+                        LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>Daily Quest</color> available: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
                     }
                 }
             }
         }
+        if (updated) Core.DataStructures.SavePlayerQuests();
+    }
 
-        Core.DataStructures.SavePlayerQuests();
+    /*
+    public static void TrackTarget(Entity character, Entity entity)
+    {
+        
+        Entity entityProjectile = PrefabCollectionSystem._PrefabGuidToEntityMap[trackingBuff];
+        Entity spawnedProjectile = EntityManager.Instantiate(entityProjectile);
+
+        float3 position = character.Read<Translation>().Value;
+
+        spawnedProjectile.Write(new LastTranslation { Value = position });
+        spawnedProjectile.Write(new Translation { Value = position });
+        spawnedProjectile.Write(new SpellTarget { Target = NetworkedEntity.ServerEntity(entity) });
+
+        float3 playerPosition = character.Read<Translation>().Value;
+        float3 targetPos = entity.Read<Translation>().Value;
+        quaternion playerRotation = character.Read<Rotation>().Value;
+        
+        Script_HomingSpell_DataShared script_HomingSpell_DataShared = spawnedProjectile.Read<Script_HomingSpell_DataShared>();
+        script_HomingSpell_DataShared.SyncServerTime = Core.ServerTime;
+        script_HomingSpell_DataShared.LastSyncedServerTime = script_HomingSpell_DataShared.SyncServerTime;
+        script_HomingSpell_DataShared.DistanceBasedData.StartDistance = playerPosition.x;
+        script_HomingSpell_DataShared.DistanceBasedData.EndDistance = targetPos.x;
+        script_HomingSpell_DataShared.PreHomingRangeData.StartPosition = playerPosition;
+        script_HomingSpell_DataShared.PreHomingRangeData.EndPosition = targetPos;
+        script_HomingSpell_DataShared.PreHomingMode = Script_HomingSpell_DataShared.PreHomingModeType.None;
+        script_HomingSpell_DataShared.SyncTargetPosition = targetPos;
+        script_HomingSpell_DataShared.SyncRotation = playerRotation;
+        script_HomingSpell_DataShared.SyncPosition = playerPosition;
+        script_HomingSpell_DataShared.Type = Script_HomingSpell_DataShared.HomingSpellType.LifeTimeBased;
+        script_HomingSpell_DataShared.ResetHitTriggersOnChangeHomingMode = true;
+        script_HomingSpell_DataShared.HomingData.SnapToTargetWhenFound = true;
+        script_HomingSpell_DataShared.HomingInitiated = true;
+        spawnedProjectile.Write(script_HomingSpell_DataShared);
+    }
+    */
+    public static string GetCardinalDirection(float3 direction)
+    {
+        float angle = math.degrees(math.atan2(direction.z, direction.x));
+        if (angle < 0) angle += 360;
+
+        if (angle >= 337.5 || angle < 22.5)
+            return "East";
+        else if (angle >= 22.5 && angle < 67.5)
+            return "Northeast";
+        else if (angle >= 67.5 && angle < 112.5)
+            return "North";
+        else if (angle >= 112.5 && angle < 157.5)
+            return "Northwest";
+        else if (angle >= 157.5 && angle < 202.5)
+            return "West";
+        else if (angle >= 202.5 && angle < 247.5)
+            return "Southwest";
+        else if (angle >= 247.5 && angle < 292.5)
+            return "South";
+        else
+            return "Southeast";
     }
 }
