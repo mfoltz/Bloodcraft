@@ -1,33 +1,18 @@
-﻿[config]
-schemaVersion = "0.0.1"
-
-[package]
-namespace = "Bloodcraft"
-name = "Bloodcraft"
-versionNumber = "0.1.11"
-description = "Leveling, expertise, legacies, professions, familiars, classes, quests!"
-websiteUrl = "https://github.com/mfoltz/Bloodcraft"
-containsNsfwContent = false
-
 [package.dependencies]
 BepInEx-BepInExPack_V_Rising = "1.691.3"
 deca-VampireCommandFramework = "0.9.0"
 
-[build]
-icon = "./icon.png"
-readme = "./README.md"
-outdir = "./build"
-
-[[build.copy]]
-source = "./dist/Bloodcraft.dll"
-target = "./Bloodcraft.dll"
-
-[[build.copy]]
-source = "./dist/CHANGELOG.md"
-target = "./CHANGELOG.md"
-
 [publish]
 communities = ["v-rising"]
 repository = "https://thunderstore.io"
+
 [publish.categories]
 v-rising = ["1-0-update", "mods", "server"]
+
+[package]
+namespace = "zfolmt"
+name = "Bloodcraft"
+versionNumber = "1.1.2"
+description = "Leveling, expertise, legacies, professions, familiars, classes, quests!"
+websiteUrl = "https://github.com/mfoltz/Bloodcraft"
+containsNsfwContent = false

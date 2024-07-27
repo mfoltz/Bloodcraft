@@ -1,10 +1,7 @@
 name: Build
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,44 +11,47 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 7.0.x
-
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: "5.x"
       
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      
+          fetch-depth: 0        
+        
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0.9.7
-        with:
-          additionalArguments: '/updateprojectfiles /overrideconfig "mode=Mainline"'
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
+      - name: Extract Version from .csproj
+        id: extract_version
+        run: |
+          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" Bloodcraft.csproj)
+          echo "version=$version" >> $GITHUB_ENV   
+          
+      - name: Update thunderstore.toml
+        run: |
+          sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
+          
       - name: Build (Release)
-        run: dotnet build . --configuration Release -p:Version=$GitVersion_SemVer
-
+        run: dotnet build . --configuration Release -p:Version=${{ env.version }}
+     
       - name: GH Release
         uses: softprops/action-gh-release@v1
-        if: github.event_name == 'push'
+        if: github.event_name == 'workflow_dispatch'
         with:
-          body: Automatic pre-release of ${{ env.GitVersion_SemVer }} for ${{ env.GitVersion_ShortSha }}
-          name: v${{ env.GitVersion_SemVer }}
-          fail_on_unmatched_files: false
+          body: Manual pre-release of ${{ env.version }}
+          name: v${{ env.version }}
+          fail_on_unmatched_files: true
           prerelease: true
-          tag_name: v${{ env.GitVersion_SemVer }}
+          tag_name: v${{ env.version }}
           files: |
-            ./bin/Release/net7.0/Bloodcraft.dll
-            LICENSE.txt
+            ./bin/Release/net6.0/Bloodcraft.dll
             CHANGELOG.md
-            README.md
-            icon.png
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
