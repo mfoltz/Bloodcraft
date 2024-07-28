@@ -33,6 +33,7 @@ internal static class QuestUtilities
     static readonly PrefabGUID reinforcedBoneSword = new(-796306296);
     static readonly PrefabGUID reinforcedBoneMace = new(-1998017941);
     static readonly PrefabGUID trackingBuff = new(746504391);
+    static readonly PrefabGUID villageElder = new(-1505705712);
     public enum QuestGoal
     {
         Kill,
@@ -96,7 +97,7 @@ internal static class QuestUtilities
             if (Math.Abs(level.Level._Value - playerLevel) <= 10)
             {
                 if (check.ToLower().Contains("vblood") && level.Level._Value > playerLevel) continue;
-                if (FamiliarPatches.shardBearers.Contains(prefabGUID)) continue;
+                if (FamiliarPatches.shardBearers.Contains(prefabGUID) || prefabGUID.Equals(villageElder)) continue;
                 prefabs.Add(prefabGUID);
             }
         }

@@ -1,16 +1,16 @@
 `1.2.3`
+- note: changed a key in the player prestige file from Sanguimancy to UnarmedExpertise and UnarmedExpertise will no longer be stored in the player_sanguimancy file, tested handling old data to new formats and seems to be fine but please make a backup of these files just incase_
 - added command to search for familiars in boxes (.fam s [Name])
 - added command to find nearest quest target, if none are found will reroll the quest
 - reduced number of kills required for vbloods for dailies and weeklies to be less of a vibe-check
-- can stack t01/t02 potion effects now, if anyone finds this particularly bothersome can add a config option
-- added command to reset commbat music for player (.silence) if it gets stuck (think I handled what was causing that but if not this will fix it and can be used by players)
-
-`1.1.2`
+- can stack t01/t02 potion effects, if anyone finds this particularly bothersome can add a config option
+- added command to reset commbat music for player (.silence) if it gets stuck (think I handled what was causing that but if not this will fix it and can be used by non-admins)
+- added toggle to disable vblood emotes (no commands, only toggleable via taunt emote if familiar emote actions are enabled. will be considering removing any familiar commands that have an emote equivalent to cut down on bloat)
 - further improved quest distribution, should be significantly more consistent and less error-prone (will still take time to rollover from old quests, would recommend deleting quest file to force initial refreshes)
 - added option for infinite dailies
 - added basic starter kit, configurable
-- player prestige dictionary properly updated with 'Exo' when trying to Exo prestige
-- more filtering to prevent non-ideal quest targets, fixed bug on generating quests for new players on fresh servers (new players receieve same starting daily/weekly quests to circumvent this), hopefully fixed any other issues with quest distribution involving timing
+- player prestiges updated when connecting to add any missing prestige types if data already exists (Exo, FishingPoleExpertise)
+- more filtering to prevent non-ideal quest targets, fixed bug on generating quests for new players on fresh servers (new players receieve same starting daily/weekly quests to circumvent this)
 - ancestral forge works for all shattered again and not just blue legendaries
 - fixed bug where destroying disabled familiars rendered space unuseable for building
 - fixed leaderboard for prestige not displaying correctly

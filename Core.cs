@@ -538,6 +538,9 @@ internal static class Core
             try
             {
                 string json = File.ReadAllText(path);
+
+                json = json.Replace("Sanguimancy", "UnarmedExpertise");
+
                 if (string.IsNullOrWhiteSpace(json))
                 {
                     // Handle the empty file case

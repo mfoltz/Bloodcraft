@@ -601,6 +601,7 @@ internal class Plugin : BasePlugin
     static readonly Action[] loadLeveling =
     [
         Core.DataStructures.LoadPlayerExperience,
+
         Core.DataStructures.LoadPlayerPrestiges,
     ];
 
