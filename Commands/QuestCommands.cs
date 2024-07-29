@@ -204,6 +204,10 @@ internal static class QuestCommands
                     int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
                     QuestUtilities.ForceDaily(user, steamID, level);
                 }
+                else if (entities.Count == 0 && QuestService.FoundPrefabs.Contains(dailyQuest.Objective.Target))
+                {
+                    LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
+                }
             }
             else if (type.Equals(QuestType.Weekly) && questData.TryGetValue(QuestType.Weekly, out var weeklyQuest) && !weeklyQuest.Objective.Complete)
             {
@@ -224,7 +228,7 @@ internal static class QuestCommands
                         LocalizationService.HandleReply(ctx, "Use the VBlood menu to track boss units.");
                         return;
                     }
-                    if (math.distance(userPosition, closest.Read<Translation>().Value) > 5000f) // usually means non-ideal CHAR prefab that spawns rarely or strangely for w/e reason
+                    if (math.distance(userPosition, closest.Read<Translation>().Value) > 5000f) // usually means non-ideal CHAR prefab that spawns rarely or strangely for w/e reason, resetting with this should take precedence over prefab being seen probably
                     {
                         int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
                         QuestUtilities.ForceWeekly(user, steamID, level);
@@ -241,6 +245,10 @@ internal static class QuestCommands
                 {
                     int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
                     QuestUtilities.ForceWeekly(user, steamID, level);
+                }
+                else if (entities.Count == 0 && QuestService.FoundPrefabs.Contains(weeklyQuest.Objective.Target))
+                {
+                    LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
                 }
             }
         }
