@@ -2,7 +2,6 @@
 using Bloodcraft.Systems.Legacy;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -35,6 +34,8 @@ internal static class StatChangeSystemPatches
     static readonly PrefabGUID stormShield03 = new(1095865904);
     static readonly PrefabGUID stormShield02 = new(-1192885497);
     static readonly PrefabGUID stormShield01 = new(1044565673);
+    static readonly PrefabGUID garlicDebuff = new(-1701323826);
+    static readonly PrefabGUID silverDebuff = new(853298599);
 
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -112,8 +113,12 @@ internal static class StatChangeSystemPatches
 
                 if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell && dealDamageEvent.MainType != MainDamageType.Holy) continue;
 
+                PrefabGUID sourcePrefab = dealDamageEvent.SpellSource.Read<PrefabGUID>();
+                if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue;
+
                 if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
                 {
+                    //Core.Log.LogInfo($"{target.Name.Value} - MainType: {dealDamageEvent.MainType.ToString()} | SourcePrefab: {dealDamageEvent.SpellSource.Read<PrefabGUID>().LookupName()}");
                     if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
                     {
                         Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerParties;

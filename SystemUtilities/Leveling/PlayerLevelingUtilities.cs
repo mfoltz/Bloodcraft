@@ -897,6 +897,11 @@ internal static class PlayerLevelingUtilities
             playerLevel = (int)equipment.GetFullLevel();
         }
 
+        if (Plugin.PrestigeSystem.Value && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeUtilities.PrestigeType.Experience] > 0)
+        {
+            playerLevel = Plugin.MaxPlayerLevel.Value;
+        }
+
         int numBuffsToApply = playerLevel / levelStep;
 
         if (numBuffsToApply > 0 && numBuffsToApply <= buffs.Count)

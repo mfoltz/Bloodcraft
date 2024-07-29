@@ -114,11 +114,12 @@ internal static class BuffSpawnSystemPatches
             {
                 if (!Core.hasInitialized) continue;
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
+                if (!EntityManager.Exists(entity.Read<Buff>().Target)) continue;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 
                 //Core.Log.LogInfo($"Buff: {prefabGUID.LookupName()}");
-
+                
                 /*
                 if (prefabGUID.Equals(holySpinners))
                 {

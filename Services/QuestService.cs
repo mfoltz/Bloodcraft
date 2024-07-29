@@ -30,6 +30,7 @@ internal class QuestService
     static EntityQuery UnitQuery;
 
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
+    public static HashSet<PrefabGUID> FoundPrefabs = [];
     public static DateTime LastUpdate;
 
     static readonly PrefabGUID enchantedCross = new(-1449314709);
@@ -122,6 +123,12 @@ internal class QuestService
             if (TargetCache.ContainsKey(enchantedCross)) TargetCache.Remove(enchantedCross);
             //Core.Log.LogInfo($"QuestService: Updated TargetCache with {TargetCache.Count} entries");
             LastUpdate = DateTime.UtcNow;
+
+            if (TargetCache.Count > 0)
+            {
+                HashSet<PrefabGUID> prefabGUIDs = new(TargetCache.Keys);
+                FoundPrefabs.UnionWith(prefabGUIDs);
+            }
 
             yield return updateDelay; // Wait 60 seconds before processing players/units again
         }

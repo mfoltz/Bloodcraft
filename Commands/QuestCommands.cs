@@ -199,7 +199,7 @@ internal static class QuestCommands
                     double seconds = (DateTime.UtcNow - QuestService.LastUpdate).TotalSeconds;
                     LocalizationService.HandleReply(ctx, $"Nearest <color=white>{closest.Read<PrefabGUID>().GetPrefabName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the <color=yellow>{cardinalDirection}</color> <color=#F88380>{(int)seconds}</color>s ago.");
                 }
-                else if (entities.Count == 0)
+                else if (entities.Count == 0 && !QuestService.FoundPrefabs.Contains(dailyQuest.Objective.Target)) // check if prefab has been seen to avoid resetting quests because all targets are currently dead
                 {
                     int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
                     QuestUtilities.ForceDaily(user, steamID, level);
@@ -237,7 +237,7 @@ internal static class QuestCommands
                     double seconds = (DateTime.UtcNow - QuestService.LastUpdate).TotalSeconds;
                     LocalizationService.HandleReply(ctx, $"Nearest <color=white>{closest.Read<PrefabGUID>().GetPrefabName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the <color=yellow>{cardinalDirection}</color> <color=#F88380>{(int)seconds}</color>s ago.");
                 }
-                else if (entities.Count == 0)
+                else if (entities.Count == 0 && !QuestService.FoundPrefabs.Contains(weeklyQuest.Objective.Target)) // check if prefab has been seen to avoid resetting quests because all targets are currently dead
                 {
                     int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
                     QuestUtilities.ForceWeekly(user, steamID, level);

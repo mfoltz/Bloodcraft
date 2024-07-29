@@ -96,7 +96,7 @@ internal static class QuestUtilities
             UnitLevel level = prefabEntity.Read<UnitLevel>();
             if (Math.Abs(level.Level._Value - playerLevel) <= 10)
             {
-                if (check.ToLower().Contains("vblood") && level.Level._Value > playerLevel) continue;
+                if (prefabEntity.Has<VBloodUnit>() && level.Level._Value > playerLevel) continue;
                 if (FamiliarPatches.shardBearers.Contains(prefabGUID) || prefabGUID.Equals(villageElder)) continue;
                 prefabs.Add(prefabGUID);
             }
@@ -209,8 +209,14 @@ internal static class QuestUtilities
                 else if (questType.Equals(QuestType.Daily)) target = graveyardSkeleton;
                 else if (questType.Equals(QuestType.Weekly)) target = forestWolf;
                 requiredAmount = Random.Next(6, 8) * QuestMultipliers[questType];
-                if (target.LookupName().ToLower().Contains("vblood") && !questType.Equals(QuestType.Weekly)) requiredAmount = 2;
-                else if (target.LookupName().ToLower().Contains("vblood") && questType.Equals(QuestType.Weekly)) requiredAmount = 10;
+                if ((target.LookupName().ToLower().Contains("vblood") || target.LookupName().ToLower().Contains("vhunter")) && !questType.Equals(QuestType.Weekly))
+                {
+                    requiredAmount = 2;
+                }
+                else if ((target.LookupName().ToLower().Contains("vblood") || target.LookupName().ToLower().Contains("vhunter")) && questType.Equals(QuestType.Weekly))
+                {
+                    requiredAmount = 10;
+                }
                 break;
             case QuestGoal.Craft:
                 if (targets.Count != 0)
