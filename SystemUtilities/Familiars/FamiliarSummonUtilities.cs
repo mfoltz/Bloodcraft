@@ -1,4 +1,5 @@
-﻿using ProjectM;
+﻿using Bloodcraft.Patches;
+using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -82,6 +83,15 @@ internal static class FamiliarSummonUtilities
         PreventDisableFamiliar(familiar);
         //ModifyBehaviour(familiar);
         if (!FamiliarCombat) DisableCombat(player, familiar);
+        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var playerBools) && playerBools["FamiliarVisual"])
+        {
+            Core.DataStructures.FamiliarBuffsData data = Core.FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+            if (data.FamiliarBuffs.TryGetValue(famKey, out var buffs))
+            {
+                PrefabGUID visual = new(buffs[0]);
+                FamiliarPatches.HandleVisual(familiar, visual);
+            }
+        }
     }
     static void DisableCombat(Entity player, Entity familiar)
     {

@@ -33,7 +33,8 @@ public static class EmoteSystemPatch
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
         { new(-26826346), BindPreset }, // clap
-        { new(-158502505), ToggleVBloodEmotes } // taunt
+        { new(-158502505), ToggleVBloodEmotes }, // taunt
+        { new(-1525577000), ToggleFamiliarVisual } // yes
     };
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
@@ -79,7 +80,16 @@ public static class EmoteSystemPatch
             entities.Dispose();
         }
     }
-
+    static void ToggleFamiliarVisual(Entity userEntity, Entity character, ulong steamId)
+    {
+        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))
+        {
+            bools["FamiliarVisual"] = !bools["FamiliarVisual"];
+            Core.DataStructures.PlayerBools[steamId] = bools;
+            Core.DataStructures.SavePlayerBools();
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), bools["FamiliarVisual"] ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
+        }
+    }
     static void ToggleVBloodEmotes(Entity userEntity, Entity character, ulong steamId)
     {
         if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))

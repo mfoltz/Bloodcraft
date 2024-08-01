@@ -2,6 +2,7 @@ using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -52,9 +53,11 @@ internal static class BloodCommands
         var data = bloodHandler.GetLegacyData(steamID);
         int progress = (int)(data.Value - LegacyUtilities.ConvertLevelToXp(data.Key));
 
+        int prestigeLevel = Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) ? prestiges[LegacyUtilities.BloodPrestigeMap[bloodType]] : 0;
+
         if (data.Key > 0)
         {
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{LegacyUtilities.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{LegacyUtilities.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>");
 
             if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamID, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
             {

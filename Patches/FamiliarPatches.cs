@@ -11,6 +11,7 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static ProjectM.SpawnBuffsAuthoring.SpawnBuffElement_Editor;
 
 namespace Bloodcraft.Patches;
 
@@ -36,6 +37,9 @@ internal static class FamiliarPatches
     static readonly PrefabGUID solarusVisual = new(178225731);
     static readonly PrefabGUID holyBeamHard = new(583436571);
     static readonly PrefabGUID holySpinners = new(-1852467646);
+    static readonly PrefabGUID divineAngel = new(-1737346940);
+    static readonly PrefabGUID fallenAngel = new(-76116724);
+
     public static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
     static readonly bool EliteShardBearers = Plugin.EliteShardBearers.Value;
     static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
@@ -154,6 +158,14 @@ internal static class FamiliarPatches
                     {
                         HandleSolarus(entity);
                     }
+                }
+                if (EliteShardBearers && prefabGUID.Equals(divineAngel))
+                {
+                    HandleAngel(entity);
+                }
+                if (EliteShardBearers && prefabGUID.Equals(fallenAngel))
+                {
+                    HandleFallenAngel(entity);
                 }
             }
         }
@@ -378,26 +390,40 @@ internal static class FamiliarPatches
 
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
         aiMoveSpeeds.Walk._Value = 4f;
-        //aiMoveSpeeds.Run._Value = 2f;
         entity.Write(aiMoveSpeeds);
 
-        /*
-        var buffer = entity.ReadBuffer<AbilityGroupSlotBuffer>();
+        HandleVisual(entity, solarusVisual);
+    }
+    static void HandleAngel(Entity entity)
+    {
+        Health health = entity.Read<Health>();
+        health.MaxHealth._Value *= 5;
+        health.Value = health.MaxHealth._Value;
+        entity.Write(health);
 
-        for (int i = 0; i < buffer.Length; i++)
-        {
-            var item = buffer[i];
-            Core.Log.LogInfo($"{item.BaseAbilityGroupOnSlot.LookupName()}");
-            if (item.BaseAbilityGroupOnSlot.Equals(holySpinners))
-            {
-                item.BaseAbilityGroupOnSlot = holyBeamHard;
-                buffer[i] = item;
-                Core.Log.LogInfo($"replaced spinners with holy beam?");
-            }
-        }
-        */
+        UnitStats unitStats = entity.Read<UnitStats>();
+        unitStats.PhysicalPower._Value *= 1.5f;
+        unitStats.SpellPower._Value *= 1.5f;
+        entity.Write(unitStats);
+
+        AbilityBar_Shared abilityBarShared = entity.Read<AbilityBar_Shared>();
+        abilityBarShared.AttackSpeed._Value = 2f;
+        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
+        entity.Write(abilityBarShared);
+
+        AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
+        aiMoveSpeeds.Walk._Value = 5f;
+        aiMoveSpeeds.Run._Value = 7.5f;
+        entity.Write(aiMoveSpeeds);
 
         HandleVisual(entity, solarusVisual);
+    }
+    static void HandleFallenAngel(Entity entity)
+    {
+        Health health = entity.Read<Health>();
+        health.MaxHealth._Value *= 2;
+        health.Value = health.MaxHealth._Value;
+        entity.Write(health);
     }
     static void HandleDracula(Entity entity)
     {
@@ -427,7 +453,7 @@ internal static class FamiliarPatches
 
         HandleVisual(entity, draculaVisual);
     }
-    static void HandleVisual(Entity entity, PrefabGUID visual)
+    public static void HandleVisual(Entity entity, PrefabGUID visual)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
@@ -443,6 +469,12 @@ internal static class FamiliarPatches
         DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
         if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
         {
+            if (buff.Has<Buff>())
+            {
+                BuffCategory component = buff.Read<BuffCategory>();
+                component.Groups = BuffCategoryFlag.None;
+                buff.Write(component);
+            }
             if (buff.Has<CreateGameplayEventsOnSpawn>())
             {
                 buff.Remove<CreateGameplayEventsOnSpawn>();
@@ -489,6 +521,18 @@ internal static class FamiliarPatches
             if (buff.Has<DestroyOnGameplayEvent>())
             {
                 buff.Remove<DestroyOnGameplayEvent>();
+            }
+            if (buff.Has<WeakenBuff>())
+            {
+                buff.Remove<WeakenBuff>();
+            }
+            if (buff.Has<ReplaceAbilityOnSlotBuff>())
+            {
+                buff.Remove<ReplaceAbilityOnSlotBuff>();
+            }
+            if (buff.Has<AmplifyBuff>())
+            {
+                buff.Remove<AmplifyBuff>();
             }
         }
     }

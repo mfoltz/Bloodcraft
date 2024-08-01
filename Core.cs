@@ -12,7 +12,6 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using ProjectM;
-using ProjectM.Gameplay;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Physics;
@@ -203,6 +202,7 @@ internal static class Core
         private static Dictionary<ulong, int> familiarChoice = [];
         private static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
         private static Dictionary<ulong, FamiliarPrestigeData> familiarPrestiges = [];
+        private static Dictionary<ulong, FamiliarBuffsData> familiarBuffs = [];
 
         // quest data
         private static Dictionary<ulong, Dictionary<QuestUtilities.QuestType, (QuestUtilities.QuestObjective Objective, int Progress, DateTime LastReset)>> playerQuests = [];
@@ -225,6 +225,12 @@ internal static class Core
             public Dictionary<string, List<int>> UnlockedFamiliars { get; set; } = [];
         }
 
+        [Serializable]
+        public class FamiliarBuffsData
+        {
+            public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = [];
+        }
+
         public static Dictionary<ulong, Dictionary<QuestUtilities.QuestType, (QuestUtilities.QuestObjective Objective, int Progress, DateTime LastReset)>> PlayerQuests
         {
             get => playerQuests;
@@ -245,6 +251,11 @@ internal static class Core
         {
             get => familiarChoice;
             set => familiarChoice = value;
+        }
+        public static Dictionary<ulong, FamiliarBuffsData> FamiliarBuffs
+        {
+            get => familiarBuffs;
+            set => familiarBuffs = value;
         }
         public static Dictionary<ulong, UnlockedFamiliarData> UnlockedFamiliars
         {
@@ -793,6 +804,28 @@ internal static class Core
 
             string jsonString = File.ReadAllText(filePath);
             return JsonSerializer.Deserialize<FamiliarPrestigeData>(jsonString);
+        }
+    }
+    public static class FamiliarBuffsManager
+    {
+        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarUnlocksPath, $"{playerId}_familiar_buffs.json");
+
+        public static void SaveFamiliarBuffs(ulong playerId, FamiliarBuffsData data)
+        {
+            string filePath = GetFilePath(playerId);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonString = JsonSerializer.Serialize(data, options);
+            File.WriteAllText(filePath, jsonString);
+        }
+
+        public static FamiliarBuffsData LoadFamiliarBuffs(ulong playerId)
+        {
+            string filePath = GetFilePath(playerId);
+            if (!File.Exists(filePath))
+                return new FamiliarBuffsData();
+
+            string jsonString = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<FamiliarBuffsData>(jsonString);
         }
     }
     public static class FamiliarUnlocksManager

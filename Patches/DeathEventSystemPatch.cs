@@ -58,6 +58,8 @@ internal static class DeathEventListenerSystemPatch
                             if (Leveling) PlayerLevelingUtilities.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
                             if (Expertise) ExpertiseUtilities.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                             if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
+                            if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                            if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                         }
                         else if (deathEvent.Died.Has<VBloodUnit>())
                         {
@@ -65,9 +67,11 @@ internal static class DeathEventListenerSystemPatch
                             if (Expertise) ExpertiseUtilities.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
                             if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
                             if (Legacies) LegacyUtilities.UpdateLegacy(deathEvent.Killer, deathEvent.Died);
+                            if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                            if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                         }
-                        if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                        if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                        //if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                        //if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
                     else
                     {

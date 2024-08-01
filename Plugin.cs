@@ -144,6 +144,7 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<float> _vBloodFamiliarMultiplier;
     private static ConfigEntry<float> _unitUnlockChance;
     private static ConfigEntry<float> _vBloodUnlockChance;
+    private static ConfigEntry<float> _shinyChance;
 
     private static ConfigEntry<bool> _softSynergies; // allow synergies (turns on class multipliers but doesn't restrict choices)
     private static ConfigEntry<bool> _hardSynergies; // enforce synergies (turns on class multipliers and restricts choices)
@@ -277,6 +278,7 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier;
     public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
     public static ConfigEntry<float> VBloodUnlockChance => _vBloodUnlockChance;
+    public static ConfigEntry<float> ShinyChance => _shinyChance;
     public static ConfigEntry<float> VBloodDamageMultiplier => _vBloodDamageMultiplier;
     public static ConfigEntry<float> PlayerVampireDamageMultiplier => _playerVampireDamageMultiplier;
     public static ConfigEntry<bool> SoftSynergies => _softSynergies;
@@ -465,6 +467,7 @@ internal class Plugin : BasePlugin
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
         _vBloodUnlockChance = InitConfigEntry("Config", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar.");
+        _shinyChance = InitConfigEntry("Config", "ShinyChance", 0.2f, "The chance for a visual when unlocking a familiar.");
 
         _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");
         _hardSynergies = InitConfigEntry("Config", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).");

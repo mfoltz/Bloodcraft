@@ -693,6 +693,81 @@ internal static class FamiliarCommands
         }
     }
 
+    [Command(name: "visual", shortHand: "v", adminOnly: false, usage: ".fam v [SpellSchool]", description: "Chooses visul for current active familiar, one freebie then cost configured amount.")]
+    public static void SetFamiliarVisual(ChatCommandContext ctx, string spellSchool = "")
+    {
+        if (!Plugin.FamiliarSystem.Value)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.User.PlatformId;
+
+        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["ShinyChoice"])
+        {
+            LocalizationService.HandleReply(ctx, "You've already used your free familiar visual.");
+            return;
+        }
+
+        PrefabGUID visual = FamiliarUnlockUtilities.RandomVisuals
+                .SingleOrDefault(prefab => prefab.LookupName().ToLower().Contains(spellSchool.ToLower()));
+
+        if (!FamiliarUnlockUtilities.RandomVisuals.Contains(visual))
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find matching visual from entered spell school. (options: blood, storm, unholy, chaos, frost, illusion)");
+            return;
+        }
+
+        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+
+        if (familiar != Entity.Null)
+        {
+            if (FamiliarUnlockUtilities.HandleShiny(familiar.Read<PrefabGUID>().GuidHash, steamId, 1f, visual.GuidHash))
+            {
+                bools["ShinyChoice"] = true;
+                Core.DataStructures.SavePlayerBools();
+                LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Emote 'yes' with familiar emote actions enabled to enable/disable unlocked visuals displaying for familiars.");
+            }
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Make sure familiar is active and present before choosing your visual for it.");
+        }
+    }
+
+    [Command(name: "resetvisualchoice", shortHand: "rv", adminOnly: true, usage: ".fam rv [Name]", description: "Allows player to choose another free visual, however, does not erase any visuals they have chosen previously.")]
+    public static void ResetFamiliarVisualChoice(ChatCommandContext ctx, string name)
+    {
+        if (!Plugin.FamiliarSystem.Value)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!EntityManager.Exists(foundUserEntity))
+        {
+            ctx.Reply($"Couldn't find player.");
+            return;
+        }
+
+        ulong steamId = foundUserEntity.Read<User>().PlatformId;
+        string playerName = foundUserEntity.Read<User>().CharacterName.Value;
+
+        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["ShinyChoice"])
+        {
+            bools["ShinyChoice"] = false;
+            Core.DataStructures.SavePlayerBools();
+            LocalizationService.HandleReply(ctx, $"Visual choice reset for <color=white>{playerName}</color>. (does not remove previously chosen visuals from player data)");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Player is already able to choose a free familiar visual.");
+        }
+    }
+
     //[Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Set current familiar name.")]
     public static void SetFamiliarName(ChatCommandContext ctx, string name)
     {

@@ -38,6 +38,8 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID pvpVampire = new(697095869);
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID combatStance = new(-952067173);
+    static readonly PrefabGUID holyBeamPowerBuff = new(-1584595113);
+    static readonly PrefabGUID solarus = new(-740796338);
 
 
     static readonly bool Parties = Plugin.Parties.Value;
@@ -120,16 +122,34 @@ internal static class BuffSpawnSystemPatches
 
                 //Core.Log.LogInfo($"Buff: {prefabGUID.LookupName()}");
                 
-                /*
-                if (prefabGUID.Equals(holySpinners))
+                
+                if (prefabGUID.LookupName().ToLower().Contains("holybubble"))
                 {
                     Entity character = entity.Read<Buff>().Target;
-                    DestroyUtility.Destroy(EntityManager, entity);
-                    ServerGameManager.ForceCastAbilityGroup(character, holyBeamHard);
-                    Core.Log.LogInfo($"{character.Read<PrefabGUID>().LookupName()} force cast attempt...");
-                    continue;
+                    if (character.Read<PrefabGUID>().Equals(solarus) && !ServerGameManager.HasBuff(character, holyBeamPowerBuff))
+                    {
+                        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                        {
+                            BuffPrefabGUID = holyBeamPowerBuff,
+                        };
+                        FromCharacter fromCharacter = new()
+                        {
+                            Character = character,
+                            User = character
+                        };
+                        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                        if (ServerGameManager.TryGetBuff(character, holyBeamPowerBuff.ToIdentifier(), out Entity buff))
+                        {
+                            if (buff.Has<LifeTime>())
+                            {
+                                var lifetime = buff.Read<LifeTime>();
+                                lifetime.Duration = -1;
+                                lifetime.EndAction = LifeTimeEndAction.None;
+                                buff.Write(lifetime);
+                            }
+                        }
+                    }
                 }
-                */
 
                 if (prefabGUID.LookupName().ToLower().Contains("emote_onaggro") && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {

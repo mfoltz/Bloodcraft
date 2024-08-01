@@ -41,7 +41,10 @@ internal static class ServerBootstrapSystemPatch
                 { "Emotes", false },
                 { "Binding", false },
                 { "Kit", false },
-                { "VBloodEmotes", true }
+                { "VBloodEmotes", true },
+                { "FamiliarVisual", true},
+                { "ShinyChoice", false }
+
             });
             Core.DataStructures.SavePlayerBools();
         }
@@ -64,7 +67,9 @@ internal static class ServerBootstrapSystemPatch
                 { "Emotes", false },
                 { "Binding", false },
                 { "Kit", false },
-                { "VBloodEmotes", true }
+                { "VBloodEmotes", true },
+                { "FamiliarVisual", true},
+                { "ShinyChoice", false }
             };
 
             // Add missing default values to the existing dictionary

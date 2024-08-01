@@ -8,7 +8,6 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Services.Analytics.Internal;
 using Match = System.Text.RegularExpressions.Match;
 using Regex = System.Text.RegularExpressions.Regex;
 

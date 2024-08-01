@@ -374,8 +374,12 @@ internal static class EquipmentPatches
                         ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                         if (handler != null)
                         {
+                            if (handler.GetProfessionName().ToLower().Contains("alchemy"))
+                            {
+                                ProfessionUtilities.SetProfession(user, steamId, ProfessionValue * 3, handler);
+                                continue;
+                            }
                             ProfessionUtilities.SetProfession(user, steamId, ProfessionValue, handler);
-                            if (handler.GetProfessionName().ToLower().Contains("alchemy")) continue;
                             Entity itemEntity = inventoryChangedEvent.ItemEntity;
                             switch (handler)
                             {

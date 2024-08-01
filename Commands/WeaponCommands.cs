@@ -8,6 +8,8 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.ExpertiseStats;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Legacy;
+using static Bloodcraft.Systems.Legacy.LegacyUtilities;
 
 namespace Bloodcraft.Commands;
 
@@ -39,9 +41,12 @@ internal static class WeaponCommands
         var ExpertiseData = handler.GetExpertiseData(steamID);
         int progress = (int)(ExpertiseData.Value - ExpertiseUtilities.ConvertLevelToXp(ExpertiseData.Key));
         // ExpertiseData.Key represents the level, and ExpertiseData.Value represents the experience.
+
+        int prestigeLevel = Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) ? prestiges[ExpertiseUtilities.WeaponPrestigeMap[weaponType]] : 0;
+
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{ExpertiseUtilities.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
+            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{ExpertiseUtilities.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
 
             if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {

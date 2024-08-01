@@ -30,7 +30,6 @@ internal class QuestService
     static EntityQuery UnitQuery;
 
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
-    public static HashSet<PrefabGUID> FoundPrefabs = [];
     public static DateTime LastUpdate;
 
     static readonly PrefabGUID enchantedCross = new(-1449314709);
@@ -46,31 +45,6 @@ internal class QuestService
         QuestRewards = questRewards.Zip(rewardAmounts, (reward, amount) => new { reward, amount }).ToDictionary(x => x.reward, x => x.amount);
         Core.StartCoroutine(QuestUpdateLoop());
     }
-    /*
-    static void PopulatePrefabs()
-    {
-        var prefabs = PrefabCollectionSystem.NameToPrefabGuidDictionary;
-        foreach(string name in prefabs.Keys)
-        {
-            if (name.Contains("CHAR"))
-            {
-                //UnitPrefabs.Add(prefabs[name]);
-            }
-            
-            else if (Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefabs[name]].Has<ItemData>())
-            {
-                CraftPrefabs.Add(prefabs[name]);
-            }
-            
-            else if (entity.Has<YieldResourcesOnDamageTaken>())
-            {
-                GatherEntities.Add(entity);
-                GatherPrefabs.Add(entity.Read<PrefabGUID>());
-            }
-            
-        }
-    }
-    */
     static IEnumerator QuestUpdateLoop()
     {
         WaitForSeconds updateDelay = new(60);
@@ -117,18 +91,35 @@ internal class QuestService
                 yield return playerDelay; // Wait 1 second between processing each player
             }
 
+            /*
             TargetCache = GetTargetsEnumerable()
                 .GroupBy(entity => entity.Read<PrefabGUID>())
                 .ToDictionary(group => group.Key, group => new HashSet<Entity>(group));
-            if (TargetCache.ContainsKey(enchantedCross)) TargetCache.Remove(enchantedCross);
-            //Core.Log.LogInfo($"QuestService: Updated TargetCache with {TargetCache.Count} entries");
-            LastUpdate = DateTime.UtcNow;
+            */
 
-            if (TargetCache.Count > 0)
-            {
-                HashSet<PrefabGUID> prefabGUIDs = new(TargetCache.Keys);
-                FoundPrefabs.UnionWith(prefabGUIDs);
-            }
+            TargetCache = GetTargetsEnumerable()
+                .GroupBy(entity => entity.Read<PrefabGUID>())
+                .ToDictionary(
+                    group => group.Key,
+                    group =>
+                    {
+                        if (TargetCache.TryGetValue(group.Key, out var existingSet))
+                        {
+                            // Update the existing set
+                            existingSet.Clear();
+                            existingSet.UnionWith(group);
+                            return existingSet;
+                        }
+                        else
+                        {
+                            // Create a new set
+                            return new HashSet<Entity>(group);
+                        }
+                    }
+                );
+
+            if (TargetCache.ContainsKey(enchantedCross)) TargetCache.Remove(enchantedCross);
+            LastUpdate = DateTime.UtcNow;
 
             yield return updateDelay; // Wait 60 seconds before processing players/units again
         }
