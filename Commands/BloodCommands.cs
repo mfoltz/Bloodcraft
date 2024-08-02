@@ -2,7 +2,6 @@ using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Legacy;
-using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;

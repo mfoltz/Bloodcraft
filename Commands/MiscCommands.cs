@@ -72,7 +72,7 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerUnarmedExpertise.TryGetValue(SteamID, out var data))
+        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["SpellLock"] = !bools["SpellLock"];
             if (bools["SpellLock"])
@@ -104,7 +104,7 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && Core.DataStructures.PlayerUnarmedExpertise.TryGetValue(SteamID, out var data))
+        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["ShiftLock"] = !bools["ShiftLock"];
             if (bools["ShiftLock"])

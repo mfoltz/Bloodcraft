@@ -1,17 +1,13 @@
-﻿using BepInEx;
-using Bloodcraft.Patches;
+﻿using Bloodcraft.Patches;
 using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Behaviours;
-using ProjectM.Pathfinding;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using ProjectM.Tiles;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
 
 namespace Bloodcraft.Services;

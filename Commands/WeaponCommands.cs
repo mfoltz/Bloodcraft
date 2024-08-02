@@ -1,4 +1,5 @@
 using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
@@ -7,9 +8,6 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.ExpertiseStats;
-using Bloodcraft.Services;
-using Bloodcraft.Systems.Legacy;
-using static Bloodcraft.Systems.Legacy.LegacyUtilities;
 
 namespace Bloodcraft.Commands;
 

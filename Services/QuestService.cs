@@ -61,7 +61,7 @@ internal class QuestService
                 continue;
             }
 
-            Dictionary<string, Entity> players = new(PlayerService.PlayerCache); // Copy the player cache to make sure updates to that don't interfere with this loop
+            Dictionary<string, Entity> players = new(PlayerService.PlayerCache); // Copy the player cache to make sure updates to that don't interfere with loop
 
             foreach (string player in players.Keys)
             {
@@ -90,14 +90,8 @@ internal class QuestService
                         InitializePlayerQuests(steamId, xpData.Key);
                     }
                 }
-                yield return playerDelay; // Wait 1 second between processing each player
+                yield return playerDelay; // Wait 0.5 seconds after processing each player
             }
-
-            /*
-            TargetCache = GetTargetsEnumerable()
-                .GroupBy(entity => entity.Read<PrefabGUID>())
-                .ToDictionary(group => group.Key, group => new HashSet<Entity>(group));
-            */
 
             TargetCache = GetTargetsEnumerable()
                 .GroupBy(entity => entity.Read<PrefabGUID>())
