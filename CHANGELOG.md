@@ -6,6 +6,7 @@
 - added shinies back for familiars (see README for details)
 - amped divine angel and added holy mortar buff from brutal Simon to Solarus after his holy bubble activates for eliteShardBearers
 - removed divine and fallen angels from quest target pool
+- fixed bug granting double quest credit on feed executes
 
 `1.2.3`
 - note: changed a key in the player prestige file from Sanguimancy to UnarmedExpertise and UnarmedExpertise will no longer be stored in the player_sanguimancy file, tested handling old data to new formats and seems to be fine but please make a backup of these files just incase_
