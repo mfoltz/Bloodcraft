@@ -33,6 +33,8 @@ internal class QuestService
     public static DateTime LastUpdate;
 
     static readonly PrefabGUID enchantedCross = new(-1449314709);
+    static readonly PrefabGUID divineAngel = new(-1737346940);
+    static readonly PrefabGUID fallenAngel = new(-76116724);
     public QuestService()
     {
         UnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
@@ -119,6 +121,9 @@ internal class QuestService
                 );
 
             if (TargetCache.ContainsKey(enchantedCross)) TargetCache.Remove(enchantedCross);
+            if (TargetCache.ContainsKey(divineAngel)) TargetCache.Remove(divineAngel);
+            if (TargetCache.ContainsKey(fallenAngel)) TargetCache.Remove(fallenAngel);
+
             LastUpdate = DateTime.UtcNow;
 
             yield return updateDelay; // Wait 60 seconds before processing players/units again

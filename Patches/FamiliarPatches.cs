@@ -11,7 +11,6 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static ProjectM.SpawnBuffsAuthoring.SpawnBuffElement_Editor;
 
 namespace Bloodcraft.Patches;
 
