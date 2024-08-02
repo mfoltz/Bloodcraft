@@ -40,6 +40,8 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID combatStance = new(-952067173);
     static readonly PrefabGUID holyBeamPowerBuff = new(-1584595113);
     static readonly PrefabGUID solarus = new(-740796338);
+    static readonly PrefabGUID generalStunDebuff = new(796254181);
+    static readonly PrefabGUID meredithVBlood = new(850622034);
 
 
     static readonly bool Parties = Plugin.Parties.Value;
@@ -413,6 +415,17 @@ internal static class BuffSpawnSystemPatches
                     if (Plugin.FamiliarSystem.Value)
                     {
                         Follower follower = entity.Read<EntityOwner>().Owner.Read<Follower>();
+
+                        if (prefabGUID.Equals(generalStunDebuff))
+                        {
+                            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                            if (familiar != Entity.Null && familiar.Read<PrefabGUID>().Equals(meredithVBlood))
+                            {
+                                DestroyUtility.CreateDestroyEvent(EntityManager, entity, DestroyReason.Default, DestroyDebugReason.TryRemoveBuff);
+                                continue;
+                            }
+                        }
+                        
                         if (GameMode.Equals(GameModeType.PvE)) // always stop in PvE
                         {
                             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
@@ -450,6 +463,7 @@ internal static class BuffSpawnSystemPatches
                                 continue;
                             }
                         }
+
                     }
                 } // stop debuff and other negative effects for parties and such
                 /*

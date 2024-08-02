@@ -3,8 +3,9 @@
 - fixed bug where parties would prevent players from taking silver burn damage and garlic stacks being applied
 - added check to prevent quests from being rerolled if target was previously found in the world but all are dead and waiting on respawns
 - fixed bug where exo prestiging was possible before reaching max player level
-- added shinies back for familiars (see README for details, will be updated before pushing build to Thunderstore)
+- added shinies back for familiars (see README for details)
 - amped divine angel and added holy mortar buff from brutal Simon to Solarus after his holy bubble activates for eliteShardBearers
+- removed divine and fallen angels from quest target pool
 
 `1.2.3`
 - note: changed a key in the player prestige file from Sanguimancy to UnarmedExpertise and UnarmedExpertise will no longer be stored in the player_sanguimancy file, tested handling old data to new formats and seems to be fine but please make a backup of these files just incase_
