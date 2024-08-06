@@ -40,14 +40,21 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID combatStance = new(-952067173);
     static readonly PrefabGUID holyBeamPowerBuff = new(-1584595113);
     static readonly PrefabGUID solarus = new(-740796338);
-    static readonly PrefabGUID generalStunDebuff = new(796254181);
+    static readonly PrefabGUID generalStunDebuffFX = new(796254181);
+    static readonly PrefabGUID generalStunDebuff = new(355774169);
     static readonly PrefabGUID meredithVBlood = new(850622034);
-
+    static readonly PrefabGUID feedExecute = new(366323518);
 
     static readonly bool Parties = Plugin.Parties.Value;
     static readonly bool PreventFriendlyFire = Plugin.PreventFriendlyFire.Value;
     static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
+    static readonly bool PotionStacking = Plugin.PotionStacking.Value;
+    static readonly bool Legacies = Plugin.BloodSystem.Value;
+    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
+    static readonly bool Professions = Plugin.ProfessionSystem.Value;
+    static readonly bool Quests = Plugin.QuestSystem.Value;
+    static readonly GameModeType GameMode = Core.ServerGameSettings.GameModeType;
     /*
     [HarmonyPatch(typeof(DebugEventsSystem.Debug_SpawnBuffs), nameof(DebugEventsSystem.Debug_SpawnBuffs.OnUpdate))]
     [HarmonyPrefix]
@@ -164,6 +171,7 @@ internal static class BuffSpawnSystemPatches
                         continue;
                     }
                 }
+
                 if (entity.Read<Buff>().Target.Has<Follower>() && entity.Read<Buff>().Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target.Read<Follower>().Followed._Value;
@@ -202,7 +210,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 } // cassius, drac, other weird boss phase stuff
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(pvpVampire))
+                if (Familiars && prefabGUID.Equals(pvpVampire))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
@@ -218,7 +226,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 } // remove pvp protection from familiar when owner in pvp
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(pvpProtBuff))
+                if (Familiars && prefabGUID.Equals(pvpProtBuff))
                 {
                     if (entity.Read<Buff>().Target.Has<PlayerCharacter>())
                     {
@@ -230,7 +238,6 @@ internal static class BuffSpawnSystemPatches
                             UnitStats unitStats = familiar.Read<UnitStats>();
                             unitStats.PvPProtected._Value = true;
                             familiar.Write(unitStats);
-
                             /*
                             ApplyBuffDebugEvent applyBuffDebugEvent = new()
                             {
@@ -257,7 +264,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 } // add pvp protection to familiar when applied to owner
 
-                if (Plugin.FamiliarSystem.Value && (prefabGUID.Equals(combatStance) || prefabGUID.Equals(combatBuff)))
+                if (Familiars && (prefabGUID.Equals(combatStance) || prefabGUID.Equals(combatBuff)))
                 {
                     Buff buff = entity.Read<Buff>();
                     if (buff.Target.Has<PlayerCharacter>())
@@ -311,15 +318,15 @@ internal static class BuffSpawnSystemPatches
                     */
                 } // return familiar when entering combat if far away or prevent familiar targetting other familiar when pvpprotected
 
-                if (Plugin.ProfessionSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Professions && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     //Core.Log.LogInfo($"Consumable found: {prefabGUID.LookupName()} for alchemy boosting...");
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int level = handler.GetExperienceData(steamId).Key;
 
-                    if (entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
-                    if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
+                    if (PotionStacking && entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
+                    if (PotionStacking && entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
                     //if (entity.Has<GameplayEventListeners>()) entity.Remove<GameplayEventListeners>();
 
                     if (entity.Has<LifeTime>())
@@ -340,7 +347,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 } // alchemy stuff
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (Familiars && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -359,7 +366,7 @@ internal static class BuffSpawnSystemPatches
                     }
                 } // familiar potion sharing
 
-                if (Plugin.FamiliarSystem.Value && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // teleport familiar to player after waygate
+                if (Familiars && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // teleport familiar to player after waygate
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -389,22 +396,20 @@ internal static class BuffSpawnSystemPatches
                     }
                 }
 
-                if (prefabGUID.GuidHash.Equals(366323518) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
+                if (prefabGUID.Equals(feedExecute) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // feed execute kills
                 {
-                    //ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
-                    //Entity killer = entity.Read<EntityOwner>().Owner;
                     Entity killer = entity.Read<Buff>().Target;
                     Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
-                    if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(killer, died);
-                    if (Plugin.ExpertiseSystem.Value) ExpertiseUtilities.UpdateExpertise(killer, died);
-                    if (Plugin.LevelingSystem.Value) PlayerLevelingUtilities.UpdateLeveling(killer, died);
-                    if (Plugin.FamiliarSystem.Value)
+                    if (Legacies) LegacyUtilities.UpdateLegacy(killer, died);
+                    if (Expertise) ExpertiseUtilities.UpdateExpertise(killer, died);
+                    if (Leveling) PlayerLevelingUtilities.UpdateLeveling(killer, died);
+                    if (Familiars)
                     {
                         FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
                         FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
                     }
-                    if (Plugin.QuestSystem.Value)
+                    if (Quests)
                     {
                         QuestUtilities.UpdateQuests(killer, userEntity, died.Read<PrefabGUID>());
                     }
@@ -412,11 +417,10 @@ internal static class BuffSpawnSystemPatches
 
                 if (entity.Read<Buff>().Target.Has<PlayerCharacter>() && entity.Read<EntityOwner>().Owner.Has<Follower>() && entity.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    if (Plugin.FamiliarSystem.Value)
+                    if (Familiars)
                     {
                         Follower follower = entity.Read<EntityOwner>().Owner.Read<Follower>();
-
-                        if (prefabGUID.Equals(generalStunDebuff))
+                        if (prefabGUID.Equals(generalStunDebuffFX) || prefabGUID.Equals(generalStunDebuff))
                         {
                             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null && familiar.Read<PrefabGUID>().Equals(meredithVBlood))
@@ -437,7 +441,7 @@ internal static class BuffSpawnSystemPatches
                                 continue;
                             }
                         }
-                        else if (ServerGameManager.TryGetBuff(entity.Read<Buff>().Target, pvpProtBuff.ToIdentifier(), out Entity _)) // account for KindredArenas <3
+                        else if (ServerGameManager.HasBuff(entity.Read<Buff>().Target, pvpProtBuff.ToIdentifier())) // account for KindredArenas <3
                         {
                             Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                             if (familiar != Entity.Null)

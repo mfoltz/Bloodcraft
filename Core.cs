@@ -146,6 +146,7 @@ internal static class Core
         // structures to write to json for permanence
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
+        private static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
         private static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> playerClasses = [];
         private static Dictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> playerPrestiges = [];
@@ -276,6 +277,11 @@ internal static class Core
         {
             get => playerExperience;
             set => playerExperience = value;
+        }
+        public static Dictionary<ulong, KeyValuePair<DateTime, float>> PlayerRestedXP
+        {
+            get => playerRestedXP;
+            set => playerRestedXP = value;
         }
         public static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> PlayerClasses
         {
@@ -491,6 +497,7 @@ internal static class Core
         private static readonly Dictionary<string, string> filePaths = new()
         {
             {"Experience", JsonFiles.PlayerExperienceJson},
+            {"RestedXP", JsonFiles.PlayerRestedXPJson },
             {"Quests", JsonFiles.PlayerQuestsJson },
             {"Classes", JsonFiles.PlayerClassesJson },
             {"Prestiges", JsonFiles.PlayerPrestigesJson },
@@ -577,6 +584,8 @@ internal static class Core
         }
 
         public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
+
+        public static void LoadPlayerRestedXP() => LoadData(ref playerRestedXP, "RestedXP");
 
         public static void LoadPlayerQuests() => LoadData(ref playerQuests, "Quests");
 
@@ -679,6 +688,8 @@ internal static class Core
             }
         }
         public static void SavePlayerExperience() => SaveData(PlayerExperience, "Experience");
+
+        public static void SavePlayerRestedXP() => SaveData(PlayerRestedXP, "RestedXP");
 
         public static void SavePlayerQuests() => SaveData(PlayerQuests, "Quests");
 
@@ -853,6 +864,7 @@ internal static class Core
     public static class JsonFiles
     {
         public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerLevelingPath, "player_experience.json");
+        public static readonly string PlayerRestedXPJson = Path.Combine(Plugin.PlayerLevelingPath, "player_rested_xp.json");
         public static readonly string PlayerQuestsJson = Path.Combine(Plugin.PlayerQuestsPath, "player_quests.json");
         public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
         public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigFiles, "player_classes.json");

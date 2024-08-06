@@ -3,11 +3,13 @@ using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using VampireCommandFramework;
+//using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
@@ -16,6 +18,8 @@ namespace Bloodcraft.Commands;
 internal static class FamiliarCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -704,12 +708,6 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.User.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["ShinyChoice"])
-        {
-            LocalizationService.HandleReply(ctx, "You've already used your free familiar visual.");
-            return;
-        }
-
         PrefabGUID visual = FamiliarUnlockUtilities.RandomVisuals
                 .SingleOrDefault(prefab => prefab.LookupName().ToLower().Contains(spellSchool.ToLower()));
 
@@ -721,14 +719,47 @@ internal static class FamiliarCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+        int famKey = familiar.Read<PrefabGUID>().GuidHash;
 
         if (familiar != Entity.Null)
         {
-            if (FamiliarUnlockUtilities.HandleShiny(familiar.Read<PrefabGUID>().GuidHash, steamId, 1f, visual.GuidHash))
+            Core.DataStructures.FamiliarBuffsData buffsData = Core.FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+            if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // if no shiny unlocked already use the freebie
             {
-                bools["ShinyChoice"] = true;
-                Core.DataStructures.SavePlayerBools();
-                LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Emote 'yes' with familiar emote actions enabled to enable/disable unlocked visuals displaying for familiars.");
+                if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && !bools["ShinyChoice"] && FamiliarUnlockUtilities.HandleShiny(famKey, steamId, 1f, visual.GuidHash))
+                {
+                    bools["ShinyChoice"] = true;
+                    Core.DataStructures.SavePlayerBools();
+                    LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Emote 'yes' with familiar emote actions enabled to enable/disable unlocked visuals displaying for familiars.");
+                }
+                else if (bools["ShinyChoice"])
+                {
+                    LocalizationService.HandleReply(ctx, "You've already used your free familiar visual.");
+                }
+            }
+            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // if shiny already unlocked use prefab cost and quantity, override shiny visual with choice
+            {
+                if (!Plugin.ShinyCostItemPrefab.Value.Equals(0))
+                {
+                    PrefabGUID item = new(Plugin.ShinyCostItemPrefab.Value);
+                    int quantity = Plugin.ShinyCostItemQuantity.Value;
+                    if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+                    {
+                        if (Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity) && FamiliarUnlockUtilities.HandleShiny(famKey, steamId, 1f, visual.GuidHash))
+                        {
+                            LocalizationService.HandleReply(ctx, "Visual assigned for cost succesfully! Rebind familiar for it to take effect. Emote 'yes' with familiar emote actions enabled to enable/disable unlocked visuals displaying for familiars.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        LocalizationService.HandleReply(ctx, $"You do not have the required item quantity to change your familiar visual (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                    }
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, "No item set for visual cost.");
+                }
             }
         }
         else

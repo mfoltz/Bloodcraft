@@ -50,8 +50,10 @@ internal static class StatChangeSystemPatches
 
                 if (Plugin.BloodSystem.Value && Plugin.BloodQualityBonus.Value && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
+                    if (!EntityManager.Exists(entity)) continue;
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
                     BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
+                    if (!statChangeEvent.Entity.Has<Blood>()) continue;
                     Blood blood = statChangeEvent.Entity.Read<Blood>();
                     LegacyUtilities.BloodType bloodType = LegacyUtilities.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
                     ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;

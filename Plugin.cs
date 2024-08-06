@@ -31,6 +31,7 @@ internal class Plugin : BasePlugin
     // config entries
     private static ConfigEntry<string> _languageLocalization;
     private static ConfigEntry<bool> _eliteShardBearers;
+    private static ConfigEntry<bool> _potionStacking;
     private static ConfigEntry<bool> _starterKit;
     private static ConfigEntry<string> _kitPrefabs;
     private static ConfigEntry<string> _kitQuantities;
@@ -39,6 +40,9 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<string> _questRewards;
     private static ConfigEntry<string> _questRewardAmounts;
     private static ConfigEntry<bool> _levelingSystem;
+    //private static ConfigEntry<bool> _restedXP;
+    //private static ConfigEntry<int> _restedXPPerMinuteOffline;
+    //private static ConfigEntry<float> _maxRestedXP;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<bool> _exoPrestiging;
     private static ConfigEntry<int> _exoPrestiges;
@@ -145,6 +149,8 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<float> _unitUnlockChance;
     private static ConfigEntry<float> _vBloodUnlockChance;
     private static ConfigEntry<float> _shinyChance;
+    private static ConfigEntry<int> _shinyCostItemPrefab;
+    private static ConfigEntry<int> _shinyCostItemQuantity; 
 
     private static ConfigEntry<bool> _softSynergies; // allow synergies (turns on class multipliers but doesn't restrict choices)
     private static ConfigEntry<bool> _hardSynergies; // enforce synergies (turns on class multipliers and restricts choices)
@@ -173,6 +179,7 @@ internal class Plugin : BasePlugin
     // public getters, kinda verbose might just get rid of these
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
     public static ConfigEntry<bool> EliteShardBearers => _eliteShardBearers;
+    public static ConfigEntry<bool> PotionStacking => _potionStacking;
     public static ConfigEntry<bool> StarterKit => _starterKit;
     public static ConfigEntry<string> KitPrefabs => _kitPrefabs;
     public static ConfigEntry<string> KitQuantities => _kitQuantities;
@@ -181,6 +188,9 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<string> QuestRewards => _questRewards;
     public static ConfigEntry<string> QuestRewardAmounts => _questRewardAmounts;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
+    //public static ConfigEntry<bool> RestedXP => _restedXP;
+    //public static ConfigEntry<int> RestedXPPerMinuteOffline => _restedXPPerMinuteOffline;
+    //public static ConfigEntry<float> MaxRestedXP => _maxRestedXP;
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
     public static ConfigEntry<bool> ExoPrestiging => _exoPrestiging;
     public static ConfigEntry<int> ExoPrestiges => _exoPrestiges;
@@ -279,6 +289,8 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<float> UnitUnlockChance => _unitUnlockChance;
     public static ConfigEntry<float> VBloodUnlockChance => _vBloodUnlockChance;
     public static ConfigEntry<float> ShinyChance => _shinyChance;
+    public static ConfigEntry<int> ShinyCostItemPrefab => _shinyCostItemPrefab;
+    public static ConfigEntry<int> ShinyCostItemQuantity => _shinyCostItemQuantity;
     public static ConfigEntry<float> VBloodDamageMultiplier => _vBloodDamageMultiplier;
     public static ConfigEntry<float> PlayerVampireDamageMultiplier => _playerVampireDamageMultiplier;
     public static ConfigEntry<bool> SoftSynergies => _softSynergies;
@@ -357,6 +369,8 @@ internal class Plugin : BasePlugin
 
         _eliteShardBearers = InitConfigEntry("Config", "EliteShardBearers", false, "Enable or disable elite shard bearers.");
 
+        _potionStacking = InitConfigEntry("Config", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).");
+
         _starterKit = InitConfigEntry("Config", "StarterKit", false, "Enable or disable the starter kit.");
         _kitPrefabs = InitConfigEntry("Config", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit.");
         _kitQuantities = InitConfigEntry("Config", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit.");
@@ -367,6 +381,9 @@ internal class Plugin : BasePlugin
         _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests have a *3 multiplier.");
         
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
+        //_restedXP = InitConfigEntry("Config", "RestedXP", false, "Enable or disable rested experience (provides double experience up to X for Y time offline).");
+        //_restedXPPerMinuteOffline = InitConfigEntry("Config", "RestedXPPerMinuteOffline", 1, "The amount of rested experience gained per minute offline.");
+        //_maxRestedXP = InitConfigEntry("Config", "MaxRestedXP", 10f, "The maximum amount of rested experience that can be gained as a percentage of current total XP.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
         _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 7.5f, "The multiplier for experience gained from units.");
@@ -468,6 +485,8 @@ internal class Plugin : BasePlugin
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
         _vBloodUnlockChance = InitConfigEntry("Config", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar.");
         _shinyChance = InitConfigEntry("Config", "ShinyChance", 0.2f, "The chance for a visual when unlocking a familiar.");
+        _shinyCostItemPrefab = InitConfigEntry("Config", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual.");
+        _shinyCostItemQuantity = InitConfigEntry("Config", "ShinyCostItemQuantity", 1, "Quantity of item required for changing shiny visual.");
 
         _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");
         _hardSynergies = InitConfigEntry("Config", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).");

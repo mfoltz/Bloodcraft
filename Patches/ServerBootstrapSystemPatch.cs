@@ -296,6 +296,22 @@ internal static class ServerBootstrapSystemPatch
 
         if (Plugin.LevelingSystem.Value)
         {
+            /*
+            if (Plugin.RestedXP.Value)
+            {
+                if (!Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
+                {
+                    Core.DataStructures.PlayerRestedXP.Add(steamId, new KeyValuePair<DateTime, float>(DateTime.MinValue, 0f));
+                    Core.DataStructures.SavePlayerRestedXP();
+                }
+                else
+                {
+                    DateTime lastLogin = Core.DataStructures.PlayerRestedXP[steamId].Key;
+                    TimeSpan timeOffline = DateTime.UtcNow - lastLogin;
+                    float earnedRestedXP = (float)timeOffline.TotalMinutes * Plugin.RestedXPRate.Value; 
+                }
+            }
+            */
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, PlayerLevelingUtilities.ConvertLevelToXp(Plugin.StartingLevel.Value)));
@@ -376,6 +392,17 @@ internal static class ServerBootstrapSystemPatch
                 DestroyUtility.Destroy(EntityManager, familiar);
                 FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
             }
+        }
+        if (Plugin.LevelingSystem.Value)
+        {
+            /*
+            if (Plugin.RestedXP.Value && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
+            {
+                restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
+                Core.DataStructures.PlayerRestedXP[steamId] = restedData;
+                Core.DataStructures.SavePlayerRestedXP();
+            }
+            */
         }
     }
 }
