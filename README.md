@@ -535,4 +535,4 @@
 
 ## Sponsors
 
-Eduardo Batista Gagno; Jairon Orellana; Odjit; Jera;
+Jairon Orellana; Odjit; Jera;
