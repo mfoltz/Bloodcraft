@@ -1,27 +1,26 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Leveling;
+using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.SystemUtilities.Leveling;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities;
-using static Bloodcraft.Systems.Expertise.ExpertiseStats.WeaponStatManager;
-using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
+using static Bloodcraft.SystemUtilities.Experience.PlayerLevelingUtilities;
+using static Bloodcraft.SystemUtilities.Expertise.ExpertiseStats.WeaponStatManager;
+using static Bloodcraft.SystemUtilities.Legacies.LegacyStats.BloodStatManager;
 
 namespace Bloodcraft.Commands;
 
 [CommandGroup("class")]
 internal static class ClassCommands
 {
-    static readonly bool SoftSynergies = Plugin.SoftSynergies.Value;
-    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
+    static readonly bool ClassesInactive = !Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value;
     static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
     public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -50,7 +49,7 @@ internal static class ClassCommands
     [Command(name: "choosespell", shortHand: "csp", adminOnly: false, usage: ".class csp [#]", description: "Sets shift spell for class if prestige level is high enough.")]
     public static void ChooseClassSpell(ChatCommandContext ctx, int choice)
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -116,7 +115,7 @@ internal static class ClassCommands
     [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
     public static void ClassChangeCommand(ChatCommandContext ctx, string className)
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -153,7 +152,7 @@ internal static class ClassCommands
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
     public static void SyncClassBuffsCommand(ChatCommandContext ctx)
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -183,7 +182,7 @@ internal static class ClassCommands
                 User = ctx.Event.SenderUserEntity
             };
 
-            ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, Core.DebugEventsSystem, fromCharacter);
+            ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, fromCharacter);
             LocalizationService.HandleReply(ctx, $"Class buffs applied for <color=white>{playerClass}</color>");
         }
     }
@@ -191,7 +190,7 @@ internal static class ClassCommands
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".class l", description: "Lists classes.")]
     public static void ListClasses(ChatCommandContext ctx)
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -327,7 +326,7 @@ internal static class ClassCommands
     [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [ClassType]", description: "Shows perks that can be gained from class.")]
     public static void ClassPerks(ChatCommandContext ctx, string classType = "")
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -370,7 +369,7 @@ internal static class ClassCommands
     [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [ClassType]", description: "Shows spells that can be gained from class.")]
     public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
     {
-        if (!SoftSynergies && !HardSynergies)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;

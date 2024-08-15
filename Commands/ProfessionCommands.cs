@@ -1,5 +1,5 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Professions;
+using Bloodcraft.SystemUtilities.Professions;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;

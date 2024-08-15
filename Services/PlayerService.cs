@@ -11,6 +11,8 @@ internal class PlayerService
 {
 	static EntityManager EntityManager => Core.EntityManager;
 
+    static readonly WaitForSeconds Delay = new(60);
+
 	static readonly ComponentType[] UserComponent =
 		[
 			ComponentType.ReadOnly(Il2CppType.Of<User>()),
@@ -18,7 +20,8 @@ internal class PlayerService
 
 	static EntityQuery UsersQuery;
 
-	public static Dictionary<string, Entity> PlayerCache = []; //player name, player userEntity
+	public static Dictionary<string, Entity> UserCache = []; //player name, player userEntity
+    public static Dictionary<ulong, Entity> CharacterCache = []; // playername, player characterEntity
 	public PlayerService()
 	{
 		UsersQuery = EntityManager.CreateEntityQuery(UserComponent);
@@ -26,15 +29,32 @@ internal class PlayerService
 	}
 	static IEnumerator PlayerUpdateLoop()
     {
-		WaitForSeconds wait = new(60);
         while (true)
         {
-            PlayerCache = GetUsersEnumerable()
-                .GroupBy(userEntity => userEntity.Read<User>().CharacterName.Value)
-                .Select(group => group.First())
-                .ToDictionary(user => user.Read<User>().CharacterName.Value, user => user);
+            var userData = GetUsersEnumerable()
+                .GroupBy(userEntity => new
+                {
+                    CharacterName = userEntity.Read<User>().CharacterName.Value,
+                    userEntity.Read<User>().PlatformId
+                })
+                .Select(group => new
+                {
+                    group.Key.CharacterName,
+                    group.Key.PlatformId,
+                    UserEntity = group.First(),
+                    LocalCharacterEntity = group.First().Read<User>().LocalCharacter._Entity
+                })
+                .ToList();
 
-            yield return wait;
+            UserCache = userData
+                .GroupBy(data => data.CharacterName)
+                .ToDictionary(group => group.Key, group => group.First().UserEntity);
+
+            CharacterCache = userData
+                .GroupBy(data => data.PlatformId)
+                .ToDictionary(group => group.Key, group => group.First().LocalCharacterEntity);
+
+            yield return Delay;
         }
     }
     static IEnumerable<Entity> GetUsersEnumerable()

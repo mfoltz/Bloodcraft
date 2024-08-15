@@ -1,19 +1,23 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Leveling;
+using Bloodcraft.SystemUtilities.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Services.LocalizationService;
 
-namespace Bloodcraft.Systems.Expertise;
+namespace Bloodcraft.SystemUtilities.Expertise;
 public static class ExpertiseUtilities
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     static readonly float UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
     static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
     static readonly float VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
-    static readonly float ExpertiseConstant = 0.1f; // constant for calculating level from xp
-    static readonly int ExpertisePower = 2; // power for calculating level from xp
+    const float ExpertiseConstant = 0.1f; // constant for calculating level from xp
+    const int ExpertisePower = 2; // power for calculating level from xp
+    static readonly float PrestigeRatesMultiplier = Plugin.PrestigeRatesMultiplier.Value; // Prestige multiplier
+    static readonly float PrestigeRatesReducer = Plugin.PrestigeRatesReducer.Value; // Prestige reducer
     public enum WeaponType
     {
         Sword,
@@ -49,33 +53,29 @@ public static class ExpertiseUtilities
     };
     public static void UpdateExpertise(Entity Killer, Entity Victim)
     {
-        EntityManager entityManager = Core.EntityManager;
-        if (Killer == Victim || entityManager.HasComponent<Minion>(Victim)) return;
+        if (Killer == Victim || Victim.Has<Minion>()) return;
 
-        Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
-        User user = entityManager.GetComponentData<User>(userEntity);
+        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
         ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
 
-        if (entityManager.HasComponent<UnitStats>(Victim))
+        if (Victim.Has<UnitStats>())
         {
-            var VictimStats = entityManager.GetComponentData<UnitStats>(Victim);
-            float ExpertiseValue = CalculateExpertiseValue(VictimStats, entityManager.HasComponent<VBloodConsumeSource>(Victim));
+            var VictimStats = Victim.Read<UnitStats>();
+            float ExpertiseValue = CalculateExpertiseValue(VictimStats, Victim.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
 
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
             {
-                // Apply rate reduction with diminishing returns
                 if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige) && expertisePrestige > 0)
                 {
-                    changeFactor -= (Plugin.PrestigeRatesReducer.Value * expertisePrestige);
+                    changeFactor -= (PrestigeRatesReducer * expertisePrestige);
                 }
 
-                // Apply rate gain with linear increase
                 if (prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
-                    changeFactor += (Plugin.PrestigeRatesMultiplier.Value * xpPrestige);
-
+                    changeFactor += (PrestigeRatesMultiplier * xpPrestige);
                 }
             }
 
@@ -103,10 +103,11 @@ public static class ExpertiseUtilities
                         newExperience = ConvertLevelToXp(MaxExpertiseLevel);
                     }
                 }
+
                 var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
                 handler.UpdateExpertiseData(steamID, updatedXPData);
                 handler.SaveChanges();
-                NotifyPlayer(entityManager, user, weaponType, ExpertiseValue, leveledUp, newLevel, handler);
+                NotifyPlayer(user, weaponType, ExpertiseValue, leveledUp, newLevel, handler);
             }
         }
     }
@@ -116,19 +117,20 @@ public static class ExpertiseUtilities
         if (isVBlood) return ExpertiseValue * VBloodMultiplier;
         return ExpertiseValue * UnitMultiplier;
     }
-    public static void NotifyPlayer(EntityManager entityManager, User user, ExpertiseUtilities.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
+    public static void NotifyPlayer(User user, ExpertiseUtilities.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
     {
         ulong steamID = user.PlatformId;
-        gainedXP = (int)gainedXP; // Convert to integer if necessary
-        int levelProgress = GetLevelProgress(steamID, handler); // Calculate the current progress to the next level
+        gainedXP = (int)gainedXP;
+        int levelProgress = GetLevelProgress(steamID, handler);
 
         if (leveledUp)
         {
-            if (newLevel <= MaxExpertiseLevel) HandleServerReply(entityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
+            if (newLevel <= MaxExpertiseLevel) HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
         }
+
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
         {
-            HandleServerReply(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
+            HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }
     }
     public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)
@@ -160,24 +162,17 @@ public static class ExpertiseUtilities
     {
         return ConvertXpToLevel(GetXp(steamID, handler));
     }
-    public static WeaponType GetWeaponTypeFromPrefab(PrefabGUID weapon)
+    public static WeaponType GetWeaponTypeFromSlotEntity(Entity weaponEntity)
     {
-        string weaponCheck = weapon.LookupName().ToString().ToLower();
-        foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
-        {
-            if (weaponCheck.Contains(type.ToString().ToLower()) && !weaponCheck.Contains("great"))
-            {
-                return type;
-            }
-            else if (weaponCheck.Contains("great"))
-            {
-                return WeaponType.GreatSword;
-            }
-            else if (weaponCheck.Contains("fishingpole"))
-            {
-                return WeaponType.FishingPole;
-            }
-        }
-        throw new InvalidOperationException("Unrecognized weapon type");
+        if (weaponEntity == Entity.Null) return WeaponType.Unarmed;
+
+        string weaponCheck = weaponEntity.Read<PrefabGUID>().LookupName();
+
+        return Enum.GetValues(typeof(WeaponType))
+                   .Cast<WeaponType>()
+                   .FirstOrDefault(type =>
+                    weaponCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                    !(type == WeaponType.Sword && weaponCheck.Contains("GreatSword", StringComparison.OrdinalIgnoreCase))
+                   );
     }
 }

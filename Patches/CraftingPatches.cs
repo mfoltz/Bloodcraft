@@ -1,4 +1,4 @@
-using Bloodcraft.Systems.Professions;
+using Bloodcraft.SystemUtilities.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Shared;
@@ -13,9 +13,13 @@ namespace Bloodcraft.Patches;
 internal static class CraftingPatches
 {
     static readonly float CraftRateModifier = Core.ServerGameSettings.CraftRateModifier;
-    static PrefabCollectionSystem PrefabCollectionSystem = Core.PrefabCollectionSystem;
+    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+
     const float CraftThreshold = 0.995f;
     static Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
+
+    static readonly bool Professions = Plugin.ProfessionSystem.Value;
+    static readonly float MaxProfessionLevel = Plugin.MaxProfessionLevel.Value;
     /*
     [HarmonyPatch(typeof(StartCharacterCraftingSystem), nameof(StartCharacterCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -243,7 +247,7 @@ internal static class CraftingPatches
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
     static class ForgeSystem_UpdatesPatch
     {
-        public static void Prefix(ForgeSystem_Update __instance)
+        static void Prefix(ForgeSystem_Update __instance)
         {
             var repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
             try
@@ -251,7 +255,7 @@ internal static class CraftingPatches
                 foreach (Entity entity in repairEntities)
                 {
                     if (!Core.hasInitialized) continue;
-                    if (!Plugin.ProfessionSystem.Value) continue;
+                    if (!Professions) continue;
 
                     Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
                     if (forge_Shared.State == ForgeState.Empty) continue;
@@ -285,14 +289,14 @@ internal static class CraftingPatches
                         {
                             if (itemEntity.Has<Durability>())
                             {
-                                Entity originalItem = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
+                                Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
                                 Durability durability = itemEntity.Read<Durability>();
                                 Durability originalDurability = originalItem.Read<Durability>();
                                 //Core.Log.LogInfo($"{originalItem.Read<PrefabGUID>().LookupName()}, {originalDurability.MaxDurability} | {itemPrefab.LookupName()}, {durability.MaxDurability}");
                                 if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
 
                                 int level = handler.GetExperienceData(steamId).Key;
-                                durability.MaxDurability *= (1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
+                                durability.MaxDurability *= (1 + (float)level / (float)MaxProfessionLevel);
                                 durability.Value = durability.MaxDurability;
                                 itemEntity.Write(durability);
                                 ProfessionUtilities.SetProfession(user, steamId, ProfessionValue, handler);
@@ -318,7 +322,7 @@ internal static class CraftingPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
-                if (!Plugin.ProfessionSystem.Value) continue;
+                if (!Professions) continue;
 
                 if (entity.Has<CastleWorkstation>() && entity.Has<QueuedWorkstationCraftAction>())
                 {

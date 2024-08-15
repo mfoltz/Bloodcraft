@@ -1,10 +1,12 @@
-﻿using Bloodcraft.Systems.Legacy;
+﻿using Bloodcraft.SystemUtilities.Legacy;
 using ProjectM;
-using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
+using static Bloodcraft.SystemUtilities.Legacies.LegacyStats.BloodStatManager;
 
-namespace Bloodcraft.Systems.Legacies;
+namespace Bloodcraft.SystemUtilities.Legacies;
 internal static class LegacyStats
 {
+    static readonly int LegacyStatChoices = Plugin.LegacyStatChoices.Value;
+    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
     public class PlayerBloodUtilities
     {
         public static bool ChooseStat(ulong steamId, LegacyUtilities.BloodType BloodType, BloodStatManager.BloodStatType statType)
@@ -15,7 +17,7 @@ internal static class LegacyStats
                 Core.DataStructures.PlayerBloodStats[steamId][BloodType] = Stats;
             }
 
-            if (Plugin.HardSynergies.Value)
+            if (HardSynergies)
             {
                 if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) || classes.Count == 0)
                 {
@@ -30,7 +32,7 @@ internal static class LegacyStats
                 {
                     return false;
                 }
-                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
+                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen per blood, only allow one stat type per blood
                 }
@@ -39,7 +41,7 @@ internal static class LegacyStats
                 return true;
             }
 
-            if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= Plugin.LegacyStatChoices.Value || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
+            if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
             {
                 return false; // Only allow configured amount of stats to be chosen per weapon
             }

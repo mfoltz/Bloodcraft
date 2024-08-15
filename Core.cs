@@ -3,14 +3,15 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Commands;
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Systems.Legacy;
-using Bloodcraft.Systems.Leveling;
-using Bloodcraft.Systems.Professions;
+using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.SystemUtilities.Expertise;
+using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.SystemUtilities.Legacies;
+using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Leveling;
+using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
@@ -27,6 +28,10 @@ using static Bloodcraft.Core.DataStructures;
 namespace Bloodcraft;
 internal static class Core
 {
+    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
+    static readonly bool ExtraRecipes = Plugin.ExtraRecipes.Value;
+    static readonly bool Quests = Plugin.QuestSystem.Value;
+    static readonly bool StarterKit = Plugin.StarterKit.Value;
     public static World Server { get; } = GetWorld("Server") ?? throw new Exception("There is no Server world (yet)...");
     public static EntityManager EntityManager => Server.EntityManager;
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
@@ -38,7 +43,6 @@ internal static class Core
     public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
     public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
     public static GameDataSystem GameDataSystem { get; internal set; }
-    public static FamiliarService FamiliarService { get; internal set; }
     public static LocalizationService Localization { get; } = new();
     public static PlayerService PlayerService { get; } = new();
     public static QuestService QuestService { get; internal set; }
@@ -48,6 +52,9 @@ internal static class Core
     public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
     public static ServerGameSettings ServerGameSettings { get; internal set; }
     public static FactionLookupSingleton FactionLookupSingleton { get; internal set; }
+    public static MapZoneCollectionSystem MapZoneCollectionSystem { get; internal set; }
+
+    public static MapZoneCollection MapZoneCollection;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -58,7 +65,6 @@ internal static class Core
     {
         if (hasInitialized) return;
 
-        // Initialize utility services
         PrefabCollectionSystem = Server.GetExistingSystemManaged<PrefabCollectionSystem>();
         ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
         DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
@@ -73,44 +79,16 @@ internal static class Core
         CombatMusicSystem_Server = Server.GetExistingSystemManaged<CombatMusicSystem_Server>();
         ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = PlayerLevelingUtilities.GetSpellPrefabs();
         ServerGameSettings = ServerGameSettingsSystem._Settings;
-        FactionLookupSingleton = ServerScriptMapper.GetSingleton<FactionLookupSingleton>();
-        if (Plugin.FamiliarSystem.Value) FamiliarService = new();
-        if (Plugin.ExtraRecipes.Value) RecipeUtilities.HandleRecipes();
-        if (Plugin.QuestSystem.Value) QuestService = new();
-        if (Plugin.StarterKit.Value) InitializeKit();
-
-        // update system group after injecting system?
-        //ClassInjector.RegisterTypeInIl2Cpp<DamageEventSystem>();
-        //JobsUtility.JobScheduleParameters
-        // job system initialization
-        //DamageEventSystem = Server.GetOrCreateSystemManaged<DamageEventSystem>();
-
-        /*
-        foreach (var kvp in Server.m_SystemLookup)
-        {
-            var system = kvp.Value;
-            if (system.EntityQueries.Length == 0) continue;
-            Core.Log.LogInfo($"{kvp.key.FullName}[");
-            foreach (EntityQuery query in system.EntityQueries)
-            {
-                List<string> componentNames = [];
-                EntityQueryDesc queryDesc = query.GetEntityQueryDesc();
-                foreach(ComponentType component in queryDesc.All)
-                {
-                    componentNames.Add(component.ToString());
-                }
-                Core.Log.LogInfo($"{query.ToString()} {string.Join(", ", componentNames)}");
-            }
-            Core.Log.LogInfo($"]");
-        }
-        */
+        FactionLookupSingleton = ServerScriptMapper.GetSingleton<FactionLookupSingleton>();    
+        MapZoneCollectionSystem = Server.GetExistingSystemManaged<MapZoneCollectionSystem>();
+        MapZoneCollection = MapZoneCollectionSystem._MapZoneCollection;
+        
+        if (Familiars) Utilities.FamiliarBans();
+        if (ExtraRecipes) RecipeUtilities.ExtraRecipes();
+        if (Quests) QuestService = new();
+        if (StarterKit) Utilities.StarterKit();
+       
         hasInitialized = true;
-    }
-    static void InitializeKit()
-    {
-        List<PrefabGUID> kitPrefabs = Core.ParseConfigString(Plugin.KitPrefabs.Value).Select(x => new PrefabGUID(x)).ToList();
-        List<int> kitAmounts = [.. Core.ParseConfigString(Plugin.KitQuantities.Value)];
-        MiscCommands.KitPrefabs = kitPrefabs.Zip(kitAmounts, (item, amount) => new { item, amount }).ToDictionary(x => x.item, x => x.amount);
     }
     static World GetWorld(string name)
     {
@@ -127,17 +105,32 @@ internal static class Core
     {
         if (monoBehaviour == null)
         {
-            var go = new GameObject("Bloodcraft");
-            monoBehaviour = go.AddComponent<IgnorePhysicsDebugSystem>();
-            UnityEngine.Object.DontDestroyOnLoad(go);
+            GameObject gameObject = new("Bloodcraft");
+            monoBehaviour = gameObject.AddComponent<IgnorePhysicsDebugSystem>();
+            UnityEngine.Object.DontDestroyOnLoad(gameObject);
         }
         monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    }
+    public static bool PlayerBool(ulong steamId, string boolKey)
+    {
+        if (PlayerBools.ContainsKey(steamId)) return PlayerBools[steamId][boolKey];
+        return false;
+    }
+    public static bool DismissedFamiliar(ulong steamId, out Entity familiar)
+    {
+        familiar = Entity.Null;
+        if (FamiliarActives.ContainsKey(steamId) && FamiliarActives[steamId].Familiar.Exists())
+        {
+            familiar = FamiliarActives[steamId].Familiar;
+            return true;
+        }
+        return false;
     }
     public static class DataStructures
     {
         // Encapsulated fields with properties
 
-        private static readonly JsonSerializerOptions prettyJsonOptions = new()
+        static readonly JsonSerializerOptions prettyJsonOptions = new()
         {
             WriteIndented = true,
             IncludeFields = true
@@ -916,7 +909,155 @@ internal static class Core
         return configString.Split(',').Select(int.Parse).ToList();
     }  
 }
+/*
+[AttributeUsage(AttributeTargets.Class)]
+public class UpdateInGroups(params Type[] groupTypes) : Attribute
+{
+    public Type[] GroupTypes { get; } = groupTypes;
+}
+public struct TeamJob // apply teams based on results of jobs
+{
+    public NativeList<Entity> Targets;
+    public NativeHashMap<Entity, Entity> TeamStorage;
+    public NativeArray<bool> IsInTerritory;
+    public void Execute()
+    {
+        for (int i = 0; i < Targets.Length; i++)
+        {
+            Entity entity = Targets.ElementAt(i);
+            if (IsInTerritory[i]) // restore team from TeamStorage or TeamAllies buffer
+            {
+                if (TeamStorage.TryGetValue(entity, out Entity team))
+                {
+                    TeamReference teamReference = entity.Read<TeamReference>();
+                    teamReference.Value._Value = team;
+                    entity.Write(teamReference);
+                }
+                else // if not in TeamStorage use TeamAllies buffer, bit more complex
+                {
+                    Entity teamReferenceEntity = entity.Read<TeamReference>().Value._Value;
+                    var teamAllies = teamReferenceEntity.ReadBuffer<TeamAllies>();
+                    for (int j = 0; j < teamAllies.Length; j++)
+                    {
+                        Entity allyEntity = teamAllies[j].Value;
+                        if (allyEntity.Has<ClanTeam>())
+                        {
+                            var syncBuffer = allyEntity.ReadBuffer<SyncToUserBuffer>();
+                            for (int k = 0; k < syncBuffer.Length; k++)
+                            {
+                                if (syncBuffer[k].UserEntity.Read<User>().CharacterName.Value == entity.Read<PlayerCharacter>().Name.Value)
+                                {
+                                    teamReferenceEntity.Write(allyEntity);
+                                    entity.Write(teamReferenceEntity);
+                                    break;
+                                }
+                            }
+                        }
+                        else if (allyEntity.Has<CastleTeam>())
+                        {
+                            var alliesBuffer = allyEntity.ReadBuffer<TeamAllies>();
+                            for (int k = 0; k < alliesBuffer.Length; k++)
+                            {
+                                if (alliesBuffer[k].Value.Has<UserTeam>() && alliesBuffer[k].Value.Read<UserTeam>().UserEntity.Read<User>().CharacterName.Value == entity.Read<PlayerCharacter>().Name.Value)
+                                {
+                                    teamReferenceEntity.Write(allyEntity);
+                                    entity.Write(teamReferenceEntity);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else // apply universal team
+            {
+                Entity teamReferenceEntity = entity.Read<TeamReference>().Value._Value;
+                TeamData teamData = teamReferenceEntity.Read<TeamData>();
+                teamData.TeamValue = 0;
+                teamReferenceEntity.Write(teamData);
+                entity.Write(teamReferenceEntity);
+            }
+        }
+    }
+}
+public struct TerritoryJob // determine which entities are in territories; if so, there original UserTeam will be applied back to them, if not then the universal UserTeam
+{
+    public NativeList<Entity> Targets;
+    public NativeArray<bool> IsInTerritory;
+    //public MapZoneCollection MapZoneCollection;
+    //public EntityManager EntityManager;
+    public void Execute()
+    {
+        for (int i = 0; i < Targets.Length; i++)
+        {
+            Entity entity = Targets[i];
+            //if (CastleTerritoryExtensions.TryGetCastleTerritory(ref MapZoneCollection, ref EntityManager, entity.Read<TilePosition>().Tile, out CastleTerritory _)) IsInTerritory[i] = true;
+            //else IsInTerritory[i] = false;
+        }
+    }
+}
+public struct ExcludeJob // validate if entity should be modified based on territory or not; checking for UserTeams should be sufficient for this, add to TeamStorage for later
+{
+    public NativeList<Entity> Targets;
+    public NativeArray<Entity> Entities;
+    public NativeHashMap<Entity, Entity> TeamStorage;
+    public void Execute()
+    {
+        try
+        {
+            for (int i = 0; i < Entities.Length; i++)
+            {
+                Entity entity = Entities[i];
+                Entity teamReferenceEntity = entity.Read<TeamReference>().Value._Value;
+                if (teamReferenceEntity.Has<UserTeam>() && !Targets.Contains(entity))
+                {
+                    Targets.Add(ref entity);
+                    TeamStorage.TryAdd(entity, teamReferenceEntity);
+                }
+            }
+        }
+        finally
+        {
+            Entities.Dispose();
+        }
+    }
+}
 
 
 
 
+
+if (!Core.hasInitialized) return;
+
+NativeArray<Entity> TeamQuery = Core.TeamQuery.ToEntityArray(Allocator.TempJob);
+NativeHashMap<Entity, Entity> TeamStorage = new(100, Allocator.TempJob);
+NativeList<Entity> Targets = new(200, Allocator.TempJob);
+NativeArray<bool> IsInTerritory = new(200, Allocator.TempJob);
+
+ExcludeJob excludeJob = new()
+{
+    Targets = Targets,
+    TeamStorage = TeamStorage,
+    Entities = TeamQuery
+};
+
+TerritoryJob territoryJob = new()
+{
+    Targets = Targets,
+    IsInTerritory = IsInTerritory
+    //MapZoneCollection = Core.MapZoneCollection,
+    //EntityManager = EntityManager
+};
+
+TeamJob teamJob = new()
+{
+    Targets = Targets,
+    TeamStorage = TeamStorage,
+    IsInTerritory = IsInTerritory
+};
+
+JobHandle excludeHandle = IJobExtensions.Schedule(excludeJob);
+JobHandle territoryHandle = IJobExtensions.Schedule(territoryJob, excludeHandle);
+JobHandle teamHandle = IJobExtensions.Schedule(teamJob, territoryHandle);
+Dependency = teamHandle;
+*/

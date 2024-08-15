@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
+using Bloodcraft.SystemUtilities.Experience;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -9,10 +9,29 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.LocalizationService;
 
-namespace Bloodcraft.Systems.Leveling;
+namespace Bloodcraft.SystemUtilities.Leveling;
 public static class PrestigeUtilities
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => Core.EntityCommandBufferSystem;
+
+    static readonly bool RestedXP = Plugin.RestedXP.Value;
+
+    static readonly float LevelingPrestigeReducer = Plugin.LevelingPrestigeReducer.Value;
+    static readonly float PrestigeRatesMultiplier = Plugin.PrestigeRatesMultiplier.Value;
+    static readonly float PrestigeRatesReducer = Plugin.PrestigeRatesReducer.Value;
+    static readonly float PrestigeStatMultiplier = Plugin.PrestigeStatMultiplier.Value;
+    static readonly float ExoPrestigeDamageTakenMultiplier = Plugin.ExoPrestigeDamageTakenMultiplier.Value;
+    static readonly float ExoPrestigeDamageDealtMultiplier = Plugin.ExoPrestigeDamageDealtMultiplier.Value;
+    static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
+    static readonly int MaxLevelingPrestiges = Plugin.MaxLevelingPrestiges.Value;
+    static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value;
+    static readonly int MaxExpertisePrestiges = Plugin.MaxExpertisePrestiges.Value;
+    static readonly int MaxBloodLevel = Plugin.MaxBloodLevel.Value;
+    static readonly int MaxLegacyPrestiges = Plugin.MaxLegacyPrestiges.Value;
+    static readonly int ExoPrestiges = Plugin.ExoPrestiges.Value;
     public enum PrestigeType
     {
         Experience,
@@ -43,30 +62,30 @@ public static class PrestigeUtilities
 
     static readonly Dictionary<PrestigeUtilities.PrestigeType, int> prestigeTypeToMaxLevel = new()
     {
-        { PrestigeUtilities.PrestigeType.Experience, Plugin.MaxPlayerLevel.Value },
-        { PrestigeUtilities.PrestigeType.Exo, Plugin.MaxLevelingPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.SwordExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.AxeExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.MaceExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.SpearExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.CrossbowExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.GreatSwordExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.SlashersExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.PistolsExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.ReaperExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.LongbowExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.WhipExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.UnarmedExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.FishingPoleExpertise, Plugin.MaxExpertiseLevel.Value },
-        { PrestigeUtilities.PrestigeType.WorkerLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.WarriorLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.ScholarLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.RogueLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.MutantLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.DraculinLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.ImmortalLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.CreatureLegacy, Plugin.MaxBloodLevel.Value },
-        { PrestigeUtilities.PrestigeType.BruteLegacy, Plugin.MaxBloodLevel.Value }
+        { PrestigeUtilities.PrestigeType.Experience, MaxPlayerLevel },
+        { PrestigeUtilities.PrestigeType.Exo, MaxLevelingPrestiges },
+        { PrestigeUtilities.PrestigeType.SwordExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.AxeExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.MaceExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.SpearExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.CrossbowExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.GreatSwordExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.SlashersExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.PistolsExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.ReaperExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.LongbowExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.WhipExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.UnarmedExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.FishingPoleExpertise, MaxExpertiseLevel },
+        { PrestigeUtilities.PrestigeType.WorkerLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.WarriorLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.ScholarLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.RogueLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.MutantLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.DraculinLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.ImmortalLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.CreatureLegacy, MaxBloodLevel },
+        { PrestigeUtilities.PrestigeType.BruteLegacy, MaxBloodLevel }
     };
     public static Dictionary<PrestigeUtilities.PrestigeType, int> PrestigeTypeToMaxLevel
     {
@@ -74,30 +93,30 @@ public static class PrestigeUtilities
     }
     static readonly Dictionary<PrestigeUtilities.PrestigeType, int> prestigeTypeToMaxPrestigeLevel = new()
     {
-        { PrestigeUtilities.PrestigeType.Experience, Plugin.MaxLevelingPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.Exo, Plugin.ExoPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.SwordExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.AxeExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.MaceExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.SpearExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.CrossbowExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.GreatSwordExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.SlashersExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.PistolsExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.ReaperExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.LongbowExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.WhipExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.UnarmedExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.FishingPoleExpertise, Plugin.MaxExpertisePrestiges.Value },
-        { PrestigeUtilities.PrestigeType.WorkerLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.WarriorLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.ScholarLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.RogueLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.MutantLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.DraculinLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.ImmortalLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.CreatureLegacy, Plugin.MaxLegacyPrestiges.Value },
-        { PrestigeUtilities.PrestigeType.BruteLegacy, Plugin.MaxLegacyPrestiges.Value }
+        { PrestigeUtilities.PrestigeType.Experience, MaxLevelingPrestiges },
+        { PrestigeUtilities.PrestigeType.Exo, ExoPrestiges },
+        { PrestigeUtilities.PrestigeType.SwordExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.AxeExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.MaceExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.SpearExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.CrossbowExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.GreatSwordExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.SlashersExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.PistolsExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.ReaperExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.LongbowExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.WhipExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.UnarmedExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.FishingPoleExpertise, MaxExpertisePrestiges },
+        { PrestigeUtilities.PrestigeType.WorkerLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.WarriorLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.ScholarLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.RogueLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.MutantLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.DraculinLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.ImmortalLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.CreatureLegacy, MaxLegacyPrestiges },
+        { PrestigeUtilities.PrestigeType.BruteLegacy, MaxLegacyPrestiges }
     };
     public static Dictionary<PrestigeUtilities.PrestigeType, int> PrestigeTypeToMaxPrestigeLevel
     {
@@ -114,10 +133,10 @@ public static class PrestigeUtilities
                 prestigeData.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
-                reductionFactor = Plugin.LevelingPrestigeReducer.Value * expPrestigeLevel;
+                reductionFactor = LevelingPrestigeReducer * expPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
-                gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel;
+                gainMultiplier = PrestigeRatesMultiplier * expPrestigeLevel;
             }
 
             string reductionPercentage = (reductionFactor * 100).ToString("F2") + "%";
@@ -134,17 +153,17 @@ public static class PrestigeUtilities
                 prestigeData.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
-                reductionFactor = Plugin.LevelingPrestigeReducer.Value * expPrestigeLevel;
+                reductionFactor = LevelingPrestigeReducer * expPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
-                gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * expPrestigeLevel;
+                gainMultiplier = PrestigeRatesMultiplier * expPrestigeLevel;
             }
 
             float combinedFactor = gainMultiplier - reductionFactor;
             string percentageReductionString = (reductionFactor * 100).ToString("F2") + "%";
 
             // Fixed additive stat gain increase based on base value
-            float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * prestigeLevel;
+            float statGainIncrease = PrestigeStatMultiplier * prestigeLevel;
             string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
             string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
@@ -180,8 +199,6 @@ public static class PrestigeUtilities
     }
     public static void HandlePrestigeBuff(Entity player, PrefabGUID buffPrefab)
     {
-        ServerGameManager serverGameManager = Core.ServerGameManager;
-        DebugEventsSystem debugEventsSystem = Core.DebugEventsSystem;
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
             BuffPrefabGUID = buffPrefab,
@@ -191,13 +208,11 @@ public static class PrestigeUtilities
             Character = player,
             User = player.Read<PlayerCharacter>().UserEntity,
         };
-        // apply level up buff here
         
-        if (!serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity _))
+        if (!ServerGameManager.HasBuff(player, buffPrefab.ToIdentifier()))
         {
-            debugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            //Core.Log.LogInfo(buff.Read<PrefabGUID>().GetPrefabName());
-            if (serverGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
+            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+            if (ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
                 PlayerLevelingUtilities.HandleBloodBuff(buffEntity);
                 if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
@@ -237,16 +252,19 @@ public static class PrestigeUtilities
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
+        ulong steamId = ctx.Event.User.PlatformId;
 
         List<int> buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
         PrefabGUID buffPrefab = new(buffs[prestigeLevel-1]);
         if (!buffPrefab.GuidHash.Equals(0)) HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
-        
-        float levelingReducer = Plugin.LevelingPrestigeReducer.Value * prestigeLevel;
+
+        if (RestedXP) PlayerLevelingUtilities.ResetRestedXP(steamId);
+
+        float levelingReducer = LevelingPrestigeReducer * prestigeLevel;
 
         string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
 
-        float gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * prestigeLevel;
+        float gainMultiplier = PrestigeRatesMultiplier * prestigeLevel;
 
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
         HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
@@ -255,15 +273,15 @@ public static class PrestigeUtilities
     {
         int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
-        float ratesReduction = prestigeLevel * Plugin.PrestigeRatesReducer.Value; // Example: 0.1 (10%)
-        float ratesMultiplier = expPrestige * Plugin.PrestigeRatesMultiplier.Value;
+        float ratesReduction = prestigeLevel * PrestigeRatesReducer; // Example: 0.1 (10%)
+        float ratesMultiplier = expPrestige * PrestigeRatesMultiplier;
 
         float combinedFactor = ratesMultiplier - ratesReduction;
 
         string percentageReductionString = (ratesReduction * 100).ToString("F0") + "%";
 
         // Fixed additive stat gain increase based on base value
-        float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * prestigeLevel;
+        float statGainIncrease = PrestigeStatMultiplier * prestigeLevel;
         string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
@@ -273,8 +291,8 @@ public static class PrestigeUtilities
     public static void RemovePrestigeBuffs(Entity character, int prestigeLevel)
     {
         var buffs = Core.ParseConfigString(Plugin.PrestigeBuffs.Value);
-        var buffSpawner = BuffUtility.BuffSpawner.Create(Core.ServerGameManager);
-        var entityCommandBuffer = Core.EntityCommandBufferSystem.CreateCommandBuffer();
+        var buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
+        var entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
         for (int i = 0; i < prestigeLevel; i++)
         {
@@ -294,11 +312,11 @@ public static class PrestigeUtilities
     }
     public static void ApplyExperiencePrestigeEffects(User user, int level)
     {
-        float levelingReducer = Plugin.LevelingPrestigeReducer.Value * level;
+        float levelingReducer = LevelingPrestigeReducer * level;
 
         string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
 
-        float gainMultiplier = Plugin.PrestigeRatesMultiplier.Value * level;
+        float gainMultiplier = PrestigeRatesMultiplier * level;
 
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
         //HandleReply(ctx, $"Player <color=green>{ctx.Name}</color> has prestiged in <color=#90EE90>Experience</color>[<color=white>{level}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
@@ -308,15 +326,15 @@ public static class PrestigeUtilities
     {
         int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestiges) && prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
-        float ratesReduction = level * Plugin.PrestigeRatesReducer.Value; // Example: 0.1 (10%)
-        float ratesMultiplier = expPrestige * Plugin.PrestigeRatesMultiplier.Value;
+        float ratesReduction = level * PrestigeRatesReducer; // Example: 0.1 (10%)
+        float ratesMultiplier = expPrestige * PrestigeRatesMultiplier;
 
         float combinedFactor = ratesMultiplier - ratesReduction;
 
         string percentageReductionString = (ratesReduction * 100).ToString("F0") + "%";
 
         // Fixed additive stat gain increase based on base value
-        float statGainIncrease = Plugin.PrestigeStatMultiplier.Value * level;
+        float statGainIncrease = PrestigeStatMultiplier * level;
         string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
@@ -327,7 +345,7 @@ public static class PrestigeUtilities
     static void RemoveBuff(Entity character, int buffId, BuffUtility.BuffSpawner buffSpawner, EntityCommandBuffer entityCommandBuffer)
     {
         var buffPrefab = new PrefabGUID(buffId);
-        if (Core.ServerGameManager.HasBuff(character, buffPrefab.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, buffPrefab.ToIdentifier()))
         {
             BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), character);
         }
@@ -364,25 +382,25 @@ public static class PrestigeUtilities
     public static Dictionary<string, int> GetPrestigeForType(PrestigeType prestigeType)
     {
         return Core.DataStructures.PlayerPrestiges
-        .Where(p => p.Value.ContainsKey(prestigeType))
-        .Select(p => new
-        {
-            SteamId = p.Key,
-            Prestige = p.Value[prestigeType]
-        })
-        .Select(p => new
-        {
-            PlayerName = PlayerService.PlayerCache.FirstOrDefault(pc => pc.Value.Read<User>().PlatformId == p.SteamId).Key,
-            p.Prestige
-        })
-        .Where(p => !string.IsNullOrEmpty(p.PlayerName))
-        .ToDictionary(p => p.PlayerName, p => p.Prestige);
+            .Where(p => p.Value.ContainsKey(prestigeType))
+            .Select(p => new
+            {
+                SteamId = p.Key,
+                Prestige = p.Value[prestigeType]
+            })
+            .Select(p => new
+            {
+                PlayerName = PlayerService.PlayerCache.FirstOrDefault(pc => pc.Value.Read<User>().PlatformId == p.SteamId).Key,
+                p.Prestige
+            })
+            .Where(p => !string.IsNullOrEmpty(p.PlayerName))
+            .ToDictionary(p => p.PlayerName, p => p.Prestige);
     }
     public static void AdjustCharacterStats(Entity character, ulong platformId)
     {
         var prestigeData = Core.DataStructures.PlayerPrestiges[platformId];
-        float damageTakenMultiplier = Plugin.ExoPrestigeDamageTakenMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
-        float damageDealtMultiplier = Plugin.ExoPrestigeDamageDealtMultiplier.Value * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+        float damageTakenMultiplier = ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeUtilities.PrestigeType.Exo];
+        float damageDealtMultiplier = ExoPrestigeDamageDealtMultiplier * prestigeData[PrestigeUtilities.PrestigeType.Exo];
 
         AdjustResistStats(character, -damageTakenMultiplier);
         AdjustDamageStats(character, damageDealtMultiplier);

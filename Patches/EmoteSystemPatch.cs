@@ -1,5 +1,5 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
+using Bloodcraft.SystemUtilities.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -14,7 +14,7 @@ using User = ProjectM.Network.User;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-public static class EmoteSystemPatch
+internal static class EmoteSystemPatch
 {
     static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static EntityManager EntityManager => Core.EntityManager;
@@ -32,9 +32,9 @@ public static class EmoteSystemPatch
     {
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
-        { new(-26826346), BindPreset }, // clap
-        { new(-158502505), ToggleVBloodEmotes }, // taunt
-        { new(-1525577000), ToggleFamiliarVisual } // yes
+        { new(-26826346), BindPreset } // clap
+        //{ new(-158502505), ToggleVBloodEmotes }, // taunt
+        //{ new(-1525577000), ToggleFamiliarVisual } // yes
     };
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
@@ -78,26 +78,6 @@ public static class EmoteSystemPatch
         finally
         {
             entities.Dispose();
-        }
-    }
-    static void ToggleFamiliarVisual(Entity userEntity, Entity character, ulong steamId)
-    {
-        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))
-        {
-            bools["FamiliarVisual"] = !bools["FamiliarVisual"];
-            Core.DataStructures.PlayerBools[steamId] = bools;
-            Core.DataStructures.SavePlayerBools();
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), bools["FamiliarVisual"] ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
-        }
-    }
-    static void ToggleVBloodEmotes(Entity userEntity, Entity character, ulong steamId)
-    {
-        if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))
-        {
-            bools["VBloodEmotes"] = !bools["VBloodEmotes"];
-            Core.DataStructures.PlayerBools[steamId] = bools;
-            Core.DataStructures.SavePlayerBools();
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), bools["VBloodEmotes"] ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
         }
     }
     public static void BindPreset(Entity userEntity, Entity character, ulong steamId)
@@ -176,7 +156,7 @@ public static class EmoteSystemPatch
 
             if (!familiar.Has<Disabled>())
             {
-                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) Core.FamiliarService.HandleFamiliarMinions(familiar);
+                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) FamiliarSummonUtilities.FamiliarUtilities.HandleFamiliarMinions(familiar);
                 EntityManager.AddComponent<Disabled>(familiar);
                 
                 Follower follower = familiar.Read<Follower>();

@@ -2,7 +2,7 @@
 using Stunlock.Core;
 using Unity.Entities;
 
-namespace Bloodcraft.Systems.Professions;
+namespace Bloodcraft.SystemUtilities.Professions;
 internal static class RecipeUtilities
 {
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
@@ -20,7 +20,7 @@ internal static class RecipeUtilities
     static readonly PrefabGUID copperWires = new(-2031309726);
     static readonly PrefabGUID silverIngot = new(-1633898285);
 
-    public static void HandleRecipes()
+    public static void ExtraRecipes()
     {
         var recipeMap = GameDataSystem.RecipeHashLookupMap;
 
@@ -88,7 +88,6 @@ internal static class RecipeUtilities
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = copperWires, Disabled = false, Unlocked = true });
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = ironBody, Disabled = false, Unlocked = true });
-        //refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = silverIngot, Disabled = false, Unlocked = true });
 
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[advancedFurnace];
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();

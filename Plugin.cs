@@ -30,6 +30,7 @@ internal class Plugin : BasePlugin
 
     // config entries
     private static ConfigEntry<string> _languageLocalization;
+    private static ConfigEntry<bool> _clientCompanion;
     private static ConfigEntry<bool> _eliteShardBearers;
     private static ConfigEntry<bool> _potionStacking;
     private static ConfigEntry<bool> _starterKit;
@@ -40,9 +41,10 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<string> _questRewards;
     private static ConfigEntry<string> _questRewardAmounts;
     private static ConfigEntry<bool> _levelingSystem;
-    //private static ConfigEntry<bool> _restedXP;
-    //private static ConfigEntry<int> _restedXPPerMinuteOffline;
-    //private static ConfigEntry<float> _maxRestedXP;
+    private static ConfigEntry<bool> _restedXP;
+    private static ConfigEntry<float> _restedXPRate;
+    private static ConfigEntry<float> _restedXPMaxMultiplier;
+    private static ConfigEntry<float> _restedXPTickRate;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<bool> _exoPrestiging;
     private static ConfigEntry<int> _exoPrestiges;
@@ -176,8 +178,9 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<string> _deathMageBlood;
     private static ConfigEntry<string> _deathMageSpells;
 
-    // public getters, kinda verbose might just get rid of these
+    // public getters
     public static ConfigEntry<string> LanguageLocalization => _languageLocalization;
+    public static ConfigEntry<bool> ClientCompanion => _clientCompanion;
     public static ConfigEntry<bool> EliteShardBearers => _eliteShardBearers;
     public static ConfigEntry<bool> PotionStacking => _potionStacking;
     public static ConfigEntry<bool> StarterKit => _starterKit;
@@ -188,9 +191,10 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<string> QuestRewards => _questRewards;
     public static ConfigEntry<string> QuestRewardAmounts => _questRewardAmounts;
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
-    //public static ConfigEntry<bool> RestedXP => _restedXP;
-    //public static ConfigEntry<int> RestedXPPerMinuteOffline => _restedXPPerMinuteOffline;
-    //public static ConfigEntry<float> MaxRestedXP => _maxRestedXP;
+    public static ConfigEntry<bool> RestedXP => _restedXP;
+    public static ConfigEntry<float> RestedXPRate => _restedXPRate;
+    public static ConfigEntry<float> RestedXPMaxMultiplier => _restedXPMaxMultiplier;
+    public static ConfigEntry<float> RestedXPTickRate => _restedXPTickRate;
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
     public static ConfigEntry<bool> ExoPrestiging => _exoPrestiging;
     public static ConfigEntry<int> ExoPrestiges => _exoPrestiges;
@@ -316,7 +320,6 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<string> DeathMageWeapon => _deathMageWeapon;
     public static ConfigEntry<string> DeathMageBlood => _deathMageBlood;
     public static ConfigEntry<string> DeathMageSpells => _deathMageSpells;
-
     public override void Load()
     {
         Instance = this;
@@ -366,10 +369,9 @@ internal class Plugin : BasePlugin
         }
 
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
-
+        _clientCompanion = InitConfigEntry("Config", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config.");
         _eliteShardBearers = InitConfigEntry("Config", "EliteShardBearers", false, "Enable or disable elite shard bearers.");
-
-        _potionStacking = InitConfigEntry("Config", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).");
+        _potionStacking = InitConfigEntry("Config", "PotionStacking", true, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).");
 
         _starterKit = InitConfigEntry("Config", "StarterKit", false, "Enable or disable the starter kit.");
         _kitPrefabs = InitConfigEntry("Config", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit.");
@@ -378,12 +380,13 @@ internal class Plugin : BasePlugin
         _questSystem = InitConfigEntry("Config", "QuestSystem", false, "Enable or disable quests (currently only kill quests).");
         _infiniteDailies = InitConfigEntry("Config", "InfiniteDailies", false, "Enable or disable infinite dailies.");
         _questRewards = InitConfigEntry("Config", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool.");
-        _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests have a *3 multiplier.");
+        _questRewardAmounts = InitConfigEntry("Config", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3).");
         
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
-        //_restedXP = InitConfigEntry("Config", "RestedXP", false, "Enable or disable rested experience (provides double experience up to X for Y time offline).");
-        //_restedXPPerMinuteOffline = InitConfigEntry("Config", "RestedXPPerMinuteOffline", 1, "The amount of rested experience gained per minute offline.");
-        //_maxRestedXP = InitConfigEntry("Config", "MaxRestedXP", 10f, "The maximum amount of rested experience that can be gained as a percentage of current total XP.");
+        _restedXP = InitConfigEntry("Config", "RestedXPSystem", true, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp.");
+        _restedXPRate = InitConfigEntry("RestedXP", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffine will provide maximum current rested XP).");
+        _restedXPMaxMultiplier = InitConfigEntry("RestedXP", "RestedXPMaxMultiplier", 5f, "Maximum Rested XP based on total XP (5 means a player can earn up to 5 times current total xp as rested xp which would be enough for 5 levels, roughly).");
+        _restedXPTickRate = InitConfigEntry("RestedXP", "RestedXPTickRate", 120f, "Minutes required to accumulate one tick of Rested XP.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
         _unitLevelingMultiplier = InitConfigEntry("Config", "UnitLevelingMultiplier", 7.5f, "The multiplier for experience gained from units.");
@@ -396,9 +399,9 @@ internal class Plugin : BasePlugin
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
         _parties = InitConfigEntry("Config", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
-        _preventFriendlyFire = InitConfigEntry("Config", "PreventFriendlyFire", false, "True to prevent damage between players in parties, false to allow. (damage only at the moment)");
+        _preventFriendlyFire = InitConfigEntry("Config", "PreventFriendlyFire", false, "True to prevent damage between players in parties, false to allow.");
         _maxPartySize = InitConfigEntry("Config", "MaxPartySize", 5, "The maximum number of players that can share experience in a group.");
-        _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is about 5 floor tile lengths.");
+        _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths.");
 
         _prestigeSystem = InitConfigEntry("Config", "PrestigeSystem", false, "Enable or disable the prestige system.");
         _prestigeBuffs = InitConfigEntry("Config", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.");
@@ -477,9 +480,9 @@ internal class Plugin : BasePlugin
         _maxFamiliarLevel = InitConfigEntry("Config", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach.");
         _allowVBloods = InitConfigEntry("Config", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).");
         _bannedUnits = InitConfigEntry("Config", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.");
-        _bannedTypes = InitConfigEntry("Config", "BannedTypes", "", "The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)");
+        _bannedTypes = InitConfigEntry("Config", "BannedTypes", "", "The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast).");
         _vBloodDamageMultiplier = InitConfigEntry("Config", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods).");
-        _playerVampireDamageMultiplier = InitConfigEntry("Config", "PlayerVampireDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to players. probably).");
+        _playerVampireDamageMultiplier = InitConfigEntry("Config", "PlayerVampireDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to player vampires).");
         _unitFamiliarMultiplier = InitConfigEntry("Config", "UnitFamiliarMultiplier", 7.5f, "The multiplier for experience gained from units.");
         _vBloodFamiliarMultiplier = InitConfigEntry("Config", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods.");
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
@@ -504,7 +507,7 @@ internal class Plugin : BasePlugin
         _arcaneSorcererWeapon = InitConfigEntry("Config", "ArcaneSorcererWeapon", "4,7,10,11", "Arcane Sorcerer weapon synergies.");
         _arcaneSorcererBlood = InitConfigEntry("Config", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies.");
         _deathMageWeapon = InitConfigEntry("Config", "DeathMageWeapon", "0,4,7,11", "Death Mage weapon synergies.");
-        _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,3,6,8", "Death Mage blood synergies.");
+        _deathMageBlood = InitConfigEntry("Config", "DeathMageBlood", "2,3,6,9", "Death Mage blood synergies.");
         _bloodKnightBuffs = InitConfigEntry("Config", "BloodKnightBuffs", "1828387635,-534491790,-1055766373,-584203677", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs), so if max l ");
         _bloodKnightSpells = InitConfigEntry("Config", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige.");
         _demonHunterBuffs = InitConfigEntry("Config", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-397097531", "The PrefabGUID hashes for demon hunter leveling blood buffs");
@@ -538,7 +541,6 @@ internal class Plugin : BasePlugin
         }
         return entry;
     }
-
     static void CreateDirectories(string path)
     {
         if (!Directory.Exists(path))
@@ -546,14 +548,12 @@ internal class Plugin : BasePlugin
             Directory.CreateDirectory(path);
         }
     }
-
     public override bool Unload()
     {
         Config.Clear();
         _harmony.UnpatchSelf();
         return true;
     }
-
     static void LoadAllData()
     {
         try
@@ -570,7 +570,9 @@ internal class Plugin : BasePlugin
         {
             Core.Log.LogError($"Failed to migrate old player sanguimancy data: {ex}");
         }
+
         Core.DataStructures.LoadPlayerBools();
+
         if (Parties.Value)
         {
             Core.DataStructures.LoadPlayerParties();
@@ -588,6 +590,10 @@ internal class Plugin : BasePlugin
             foreach (var loadFunction in loadLeveling)
             {
                 loadFunction();
+            }
+            if (RestedXP.Value)
+            {
+                Core.DataStructures.LoadPlayerRestedXP();
             }
         }
         if (ExpertiseSystem.Value)

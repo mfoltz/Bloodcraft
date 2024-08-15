@@ -206,10 +206,12 @@ internal class LocalizationService
             }
             lastIndex = match.Index + match.Length;
         }
+
         if (lastIndex < message.Length)
         {
             result.Append(message, lastIndex, message.Length - lastIndex);
         }
+
         string translatedMessage = result.ToString();
         return translatedMessage;
     }

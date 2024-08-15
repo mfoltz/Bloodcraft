@@ -1,19 +1,23 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Leveling;
+using Bloodcraft.SystemUtilities.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Services.LocalizationService;
 
-namespace Bloodcraft.Systems.Legacy;
+namespace Bloodcraft.SystemUtilities.Legacy;
 public static class LegacyUtilities
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     static readonly float UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
     static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
     static readonly float VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
-    static readonly float BloodConstant = 0.1f; // constant for calculating level from xp
-    static readonly int BloodPower = 2; // power for calculating level from xp
+    static readonly float PrestigeRatesMultiplier = Plugin.PrestigeRatesMultiplier.Value; // Prestige rates multiplier
+    static readonly float PrestigeRatesReducer = Plugin.PrestigeRatesReducer.Value; // Prestige rates reducer
+    const float BloodConstant = 0.1f; // constant for calculating level from xp
+    const int BloodPower = 2; // power for calculating level from xp
     public enum BloodType
     {
         Worker,
@@ -57,13 +61,13 @@ public static class LegacyUtilities
     };
     public static void UpdateLegacy(Entity Killer, Entity Victim)
     {
-        EntityManager entityManager = Core.EntityManager;
-        if (Killer == Victim || entityManager.HasComponent<Minion>(Victim) || !Victim.Has<BloodConsumeSource>() || !Victim.Has<UnitLevel>()) return;
+        if (Killer == Victim || Victim.Has<Minion>() || !Victim.Has<BloodConsumeSource>() || !Victim.Has<UnitLevel>()) return;
         BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
-        Entity userEntity = entityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
+
+        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         int unitLevel = Victim.Read<UnitLevel>().Level;
         float BloodValue = 0;
-        if (entityManager.HasComponent<VBloodConsumeSource>(Victim))
+        if (Victim.Has<VBloodConsumeSource>())
         {
             BloodValue = 10 * unitLevel * VBloodLegacyMultiplier;
         }
@@ -71,7 +75,8 @@ public static class LegacyUtilities
         {
             BloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * UnitLegacyMultiplier;
         }
-        User user = entityManager.GetComponentData<User>(userEntity);
+
+        User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
         LegacyUtilities.BloodType bloodType = ModifyUnitStatBuffUtils.GetCurrentBloodType(Killer);
         if (bloodType.Equals(BloodType.None)) return;
@@ -88,19 +93,17 @@ public static class LegacyUtilities
 
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
             {
-                
                 // Apply rate reduction with diminishing returns
                 if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige) && legacyPrestige > 0)
                 {
-                    changeFactor -= (Plugin.PrestigeRatesReducer.Value * legacyPrestige);
+                    changeFactor -= (PrestigeRatesReducer * legacyPrestige);
                     changeFactor = MathF.Max(changeFactor, 0);
                 }
 
                 // Apply rate gain with linear increase
                 if (prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
-                    changeFactor += 1 + (Plugin.PrestigeRatesMultiplier.Value * xpPrestige);
-                    
+                    changeFactor += 1 + (PrestigeRatesMultiplier * xpPrestige);
                 }
             }
 
@@ -122,10 +125,10 @@ public static class LegacyUtilities
             var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
             handler.UpdateLegacyData(steamID, updatedXPData);
             handler.SaveChanges();
-            NotifyPlayer(entityManager, user, bloodType, BloodValue, leveledUp, newLevel, handler);
+            NotifyPlayer(user, bloodType, BloodValue, leveledUp, newLevel, handler);
         }
     }
-    public static void NotifyPlayer(EntityManager entityManager, User user, LegacyUtilities.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
+    public static void NotifyPlayer(User user, LegacyUtilities.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
     {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP; // Convert to integer if necessary
@@ -133,12 +136,12 @@ public static class LegacyUtilities
 
         if (leveledUp)
         {
-            if (newLevel <= MaxBloodLevel) HandleServerReply(entityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+            if (newLevel <= MaxBloodLevel) HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
         }
         
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
         {
-            HandleServerReply(entityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
+            HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }
     }
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
@@ -171,16 +174,12 @@ public static class LegacyUtilities
     {
         return ConvertXpToLevel(GetXp(steamID, handler));
     }
-    public static BloodType GetBloodTypeFromPrefab(PrefabGUID blood)
+    public static BloodType GetBloodTypeFromPrefab(PrefabGUID bloodPrefab)
     {
-        string bloodCheck = blood.LookupName().ToString().ToLower();
-        foreach (BloodType type in Enum.GetValues(typeof(BloodType)))
-        {
-            if (bloodCheck.Contains(type.ToString().ToLower()))
-            {
-                return type;
-            }
-        }
-        throw new InvalidOperationException("Unrecognized blood type");
+        string bloodCheck = bloodPrefab.LookupName();
+        return Enum.GetValues(typeof(BloodType))
+                   .Cast<BloodType>()
+                   .FirstOrDefault(type =>
+                    bloodCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase));
     }
 }

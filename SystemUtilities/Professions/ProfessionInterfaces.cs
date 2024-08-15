@@ -1,241 +1,238 @@
 ﻿using Stunlock.Core;
 
-namespace Bloodcraft.Systems.Professions
+namespace Bloodcraft.SystemUtilities.Professions;
+public interface IProfessionHandler 
 {
-    public interface IProfessionHandler 
+    void AddExperience(ulong steamID, float experience);
+
+    void SaveChanges();
+
+    KeyValuePair<int, float> GetExperienceData(ulong steamID);
+
+    void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData);
+
+    string GetProfessionName();
+}
+public static class ProfessionHandlerFactory
+{
+    private static readonly List<BaseProfessionHandler> professionHandlers =
+    [
+        new WoodcuttingHandler(),
+        new MiningHandler(),
+        new BlacksmithingHandler(),
+        new TailoringHandler(),
+        new FishingHandler(),
+        new AlchemyHandler(),
+        new HarvestingHandler(),
+        new EnchantingHandler()
+    ];
+    public static IProfessionHandler GetProfessionHandler(PrefabGUID PrefabGUID, string context = "")
     {
-        void AddExperience(ulong steamID, float experience);
+        string itemTypeName = PrefabGUID.LookupName().ToLower();
 
-        void SaveChanges();
-
-        KeyValuePair<int, float> GetExperienceData(ulong steamID);
-
-        void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData);
-
-        string GetProfessionName();
-    }
-
-    public static class ProfessionHandlerFactory
-    {
-        private static readonly List<BaseProfessionHandler> professionHandlers =
-        [
-            new WoodcuttingHandler(),
-            new MiningHandler(),
-            new BlacksmithingHandler(),
-            new TailoringHandler(),
-            new FishingHandler(),
-            new AlchemyHandler(),
-            new HarvestingHandler(),
-            new EnchantingHandler()
-        ];
-        public static IProfessionHandler GetProfessionHandler(PrefabGUID PrefabGUID, string context = "")
+        // Check conText to decide on a handler
+        switch (context)
         {
-            string itemTypeName = PrefabGUID.LookupName().ToLower();
+            case "woodcutting":
+                return new WoodcuttingHandler();
 
-            // Check conText to decide on a handler
-            switch (context)
-            {
-                case "woodcutting":
+            case "mining":
+                return new MiningHandler();
+
+            case "blacksmithing":
+                return new BlacksmithingHandler();
+
+            case "tailoring":
+                return new TailoringHandler();
+
+            case "fishing":
+                return new FishingHandler();
+
+            case "alchemy":
+                return new AlchemyHandler();
+
+            case "harvesting":
+                return new HarvestingHandler();
+
+            case "enchanting":
+                return new EnchantingHandler();
+
+            default:
+                if (itemTypeName.Contains("wood"))
                     return new WoodcuttingHandler();
-
-                case "mining":
-                    return new MiningHandler();
-
-                case "blacksmithing":
-                    return new BlacksmithingHandler();
-
-                case "tailoring":
-                    return new TailoringHandler();
-
-                case "fishing":
-                    return new FishingHandler();
-
-                case "alchemy":
-                    return new AlchemyHandler();
-
-                case "harvesting":
-                    return new HarvestingHandler();
-
-                case "enchanting":
+                if (itemTypeName.Contains("gem") || itemTypeName.Contains("jewel") || itemTypeName.Contains("magicsource"))
                     return new EnchantingHandler();
-
-                default:
-                    if (itemTypeName.Contains("wood"))
-                        return new WoodcuttingHandler();
-                    if (itemTypeName.Contains("gem") || itemTypeName.Contains("jewel") || itemTypeName.Contains("magicsource"))
-                        return new EnchantingHandler();
-                    if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal") || itemTypeName.Contains("techscrap"))
-                        return new MiningHandler();
-                    if (itemTypeName.Contains("weapon"))
-                        return new BlacksmithingHandler();
-                    if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag") || itemTypeName.Contains("cloth") || itemTypeName.Contains("chest") || itemTypeName.Contains("boots") || itemTypeName.Contains("gloves") || itemTypeName.Contains("legs"))
-                        return new TailoringHandler();
-                    if (itemTypeName.Contains("fish"))
-                        return new FishingHandler();
-                    if (itemTypeName.Contains("plant") || itemTypeName.Contains("trippyshroom"))
-                        return new HarvestingHandler();
-                    if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable"))
-                        return new AlchemyHandler();
-                    else
-                        return null;
-            }
+                if (itemTypeName.Contains("mineral") || itemTypeName.Contains("stone") || itemTypeName.Contains("bloodcrystal") || itemTypeName.Contains("techscrap"))
+                    return new MiningHandler();
+                if (itemTypeName.Contains("weapon"))
+                    return new BlacksmithingHandler();
+                if (itemTypeName.Contains("armor") || itemTypeName.Contains("cloak") || itemTypeName.Contains("bag") || itemTypeName.Contains("cloth") || itemTypeName.Contains("chest") || itemTypeName.Contains("boots") || itemTypeName.Contains("gloves") || itemTypeName.Contains("legs"))
+                    return new TailoringHandler();
+                if (itemTypeName.Contains("fish"))
+                    return new FishingHandler();
+                if (itemTypeName.Contains("plant") || itemTypeName.Contains("trippyshroom"))
+                    return new HarvestingHandler();
+                if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable"))
+                    return new AlchemyHandler();
+                else
+                    return null;
         }
-        public static string GetAllProfessions()
+    }
+    public static string GetAllProfessions()
+    {
+        return string.Join(", ", professionHandlers.Select(ph => ph.GetProfessionName()));
+    }
+}
+
+public abstract class BaseProfessionHandler : IProfessionHandler
+{
+    // Abstract property to get the specific data structure for each profession.
+    protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
+
+    public virtual void AddExperience(ulong steamID, float experience)
+    {
+        if (DataStructure.TryGetValue(steamID, out var currentData))
         {
-            return string.Join(", ", professionHandlers.Select(ph => ph.GetProfessionName()));
+            DataStructure[steamID] = new KeyValuePair<int, float>(currentData.Key, currentData.Value + experience);
+        }
+        else
+        {
+            DataStructure.Add(steamID, new KeyValuePair<int, float>(0, experience));
         }
     }
 
-    public abstract class BaseProfessionHandler : IProfessionHandler
+    public KeyValuePair<int, float> GetExperienceData(ulong steamID)
     {
-        // Abstract property to get the specific data structure for each profession.
-        protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
-
-        public virtual void AddExperience(ulong steamID, float experience)
-        {
-            if (DataStructure.TryGetValue(steamID, out var currentData))
-            {
-                DataStructure[steamID] = new KeyValuePair<int, float>(currentData.Key, currentData.Value + experience);
-            }
-            else
-            {
-                DataStructure.Add(steamID, new KeyValuePair<int, float>(0, experience));
-            }
-        }
-
-        public KeyValuePair<int, float> GetExperienceData(ulong steamID)
-        {
-            return DataStructure[steamID];
-        }
-
-        public void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData)
-        {
-            DataStructure[steamID] = xpData;
-        }
-
-        // Abstract methods to be implemented by derived classes.
-        public abstract void SaveChanges();
-
-        public abstract string GetProfessionName();
+        return DataStructure[steamID];
     }
 
-    public class EnchantingHandler : BaseProfessionHandler
+    public void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData)
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerEnchanting;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerEnchanting();
-        }
-
-        public override string GetProfessionName()
-        {
-            return "<color=#7E22CE>Enchanting</color>";
-        }
+        DataStructure[steamID] = xpData;
     }
 
-    public class AlchemyHandler : BaseProfessionHandler
+    // Abstract methods to be implemented by derived classes.
+    public abstract void SaveChanges();
+
+    public abstract string GetProfessionName();
+}
+
+public class EnchantingHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerEnchanting;
+
+    public override void SaveChanges()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAlchemy;
-
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerAlchemy();
-        }
-
-        public override string GetProfessionName()
-        {
-            return "<color=#12D4A2>Alchemy</color>";
-        }
+        Core.DataStructures.SavePlayerEnchanting();
     }
 
-    public class HarvestingHandler : BaseProfessionHandler
+    public override string GetProfessionName()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerHarvesting;
+        return "<color=#7E22CE>Enchanting</color>";
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerHarvesting();
-        }
+public class AlchemyHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAlchemy;
 
-        public override string GetProfessionName()
-        {
-            return "<color=#008000>Harvesting</color>";
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerAlchemy();
     }
 
-    public class BlacksmithingHandler : BaseProfessionHandler
+    public override string GetProfessionName()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerBlacksmithing;
+        return "<color=#12D4A2>Alchemy</color>";
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerBlacksmithing();
-        }
+public class HarvestingHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerHarvesting;
 
-        public override string GetProfessionName()
-        {
-            return "<color=#353641>Blacksmithing</color>";
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerHarvesting();
     }
 
-    public class TailoringHandler : BaseProfessionHandler
+    public override string GetProfessionName()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerTailoring;
+        return "<color=#008000>Harvesting</color>";
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerTailoring();
-        }
+public class BlacksmithingHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerBlacksmithing;
 
-        public override string GetProfessionName()
-        {
-            return "<color=#F9DEBD>Tailoring</color>";
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerBlacksmithing();
     }
 
-    public class WoodcuttingHandler : BaseProfessionHandler
+    public override string GetProfessionName()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWoodcutting;
+        return "<color=#353641>Blacksmithing</color>";
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerWoodcutting();
-        }
+public class TailoringHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerTailoring;
 
-        public override string GetProfessionName()
-        {
-            return "<color=#A52A2A>Woodcutting</color>";
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerTailoring();
     }
 
-    public class MiningHandler : BaseProfessionHandler
+    public override string GetProfessionName()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMining;
+        return "<color=#F9DEBD>Tailoring</color>";
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerMining();
-        }
+public class WoodcuttingHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWoodcutting;
 
-        public override string GetProfessionName()
-        {
-            return "<color=#808080>Mining</color>";
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerWoodcutting();
     }
 
-    public class FishingHandler : BaseProfessionHandler
+    public override string GetProfessionName()
     {
-        protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishing;
+        return "<color=#A52A2A>Woodcutting</color>";
+    }
+}
 
-        public override void SaveChanges()
-        {
-            Core.DataStructures.SavePlayerFishing();
-        }
+public class MiningHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMining;
 
-        public override string GetProfessionName()
-        {
-            return "<color=#00FFFF>Fishing</color>";
-        }
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerMining();
+    }
+
+    public override string GetProfessionName()
+    {
+        return "<color=#808080>Mining</color>";
+    }
+}
+
+public class FishingHandler : BaseProfessionHandler
+{
+    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishing;
+
+    public override void SaveChanges()
+    {
+        Core.DataStructures.SavePlayerFishing();
+    }
+
+    public override string GetProfessionName()
+    {
+        return "<color=#00FFFF>Fishing</color>";
     }
 }

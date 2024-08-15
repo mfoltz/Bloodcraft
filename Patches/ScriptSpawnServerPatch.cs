@@ -1,4 +1,4 @@
-using Bloodcraft.Systems.Legacy;
+using Bloodcraft.SystemUtilities.Legacy;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;

@@ -1,7 +1,7 @@
-﻿using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Systems.Legacy;
-using Bloodcraft.Systems.Professions;
+﻿using Bloodcraft.SystemUtilities.Expertise;
+using Bloodcraft.SystemUtilities.Legacies;
+using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -9,8 +9,8 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Expertise.ExpertiseStats.WeaponStatManager;
-using static Bloodcraft.Systems.Legacies.LegacyStats.BloodStatManager;
+using static Bloodcraft.SystemUtilities.Expertise.ExpertiseStats.WeaponStatManager;
+using static Bloodcraft.SystemUtilities.Legacies.LegacyStats.BloodStatManager;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -42,10 +42,6 @@ internal static class EquipmentPatches
                 }
             }
         }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
-        }
         finally
         {
             entities.Dispose();
@@ -69,9 +65,8 @@ internal static class EquipmentPatches
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     PrefabGUID prefab = entity.Read<PrefabGUID>();
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
-                    if (weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole)) continue;
-                    if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed))
+                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
+                    if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed) || weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
                     {
                         ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
                         Core.ModifyUnitStatBuffSystem_Spawn.OnUpdate();
@@ -117,17 +112,13 @@ internal static class EquipmentPatches
                     }
 
                     PrefabGUID prefab = entity.Read<PrefabGUID>();
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
                     if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed))
                     {
                         entity.Write(new WeaponLevel { Level = unarmedLevel });
                     }
                 } 
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited WeaponLevelSystem_Spawn system early: (ignore this at first character spawn) {e}");
         }
         finally
         {
@@ -153,8 +144,7 @@ internal static class EquipmentPatches
 
                     PrefabGUID prefab = entity.Read<PrefabGUID>();
 
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
-                    //if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed) && !weaponType.Equals(ExpertiseSystem.WeaponType.FishingPole)) GearOverride.SetWeaponItemLevel(character.Read<Equipment>(), ExpertiseHandlerFactory.GetExpertiseHandler(weaponType).GetExpertiseData(steamId).Key, Core.EntityManager);
+                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
                     
                     Entity player = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(player);
@@ -165,10 +155,6 @@ internal static class EquipmentPatches
                     GearOverride.SetLevel(character);
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -192,10 +178,6 @@ internal static class EquipmentPatches
                     if (entity.Has<ArmorLevel>()) entity.Write(new ArmorLevel { Level = 0f });
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
         }
         finally
         {
@@ -221,10 +203,6 @@ internal static class EquipmentPatches
                 }
             }
         }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
-        }
         finally
         {
             entities.Dispose();
@@ -249,10 +227,6 @@ internal static class EquipmentPatches
                 }
             }
         }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited LevelPrefix early: {e}");
-        }
         finally
         {
             entities.Dispose();
@@ -274,16 +248,12 @@ internal static class EquipmentPatches
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromPrefab(entity.Read<PrefabGUID>());
+                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
 
                     if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed) || weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole)) continue;
                     ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -309,10 +279,6 @@ internal static class EquipmentPatches
                 }
             }
         }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
-        }
         finally
         {
             entities.Dispose();
@@ -329,12 +295,11 @@ internal static class EquipmentPatches
             foreach (var entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+
                 InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
+
                 if (!EntityManager.Exists(inventory)) continue;
-                //inventory.LogComponentTypes();
-                //inventory.Read<InventoryConnection>().InventoryOwner.LogComponentTypes();
-                //Core.Log.LogInfo($"pre job processing for {inventoryChangedEvent.Item.LookupName()}");
                 if (Professions && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
                 {
                     //Core.Log.LogInfo("entered job processing");
@@ -355,11 +320,9 @@ internal static class EquipmentPatches
 
                     User user = userEntity.Read<User>();
                     ulong steamId = user.PlatformId;
-                    //Core.Log.LogInfo($"job processing for {itemPrefab.LookupName()}");
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
                     if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(userEntity, out var playerJobs) && playerJobs.TryGetValue(itemPrefab, out int credits) && credits > 0)
                     {
-                        //Core.Log.LogInfo($"job processing for {itemPrefab.LookupName()}, credits: {credits}");
                         credits--;
                         if (credits == 0)
                         {
@@ -436,10 +399,6 @@ internal static class EquipmentPatches
                 }
                 */
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -579,6 +538,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 }
                 
             }
+
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(ExpertiseUtilities.WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
             {
                 float gainFactor = 1 + (PrestigeMultiplier * PrestigeData);
@@ -606,6 +566,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                     maxBonus *= SynergyMultiplier;
                 }
             }
+
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(LegacyUtilities.BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
             {
                 float gainFactor = 1 + (PrestigeMultiplier * PrestigeData);
@@ -620,13 +581,12 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
     public static ExpertiseUtilities.WeaponType GetCurrentWeaponType(Entity character)
     {
         Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-        if (weapon.Equals(Entity.Null)) return ExpertiseUtilities.WeaponType.Unarmed;
-        return ExpertiseUtilities.GetWeaponTypeFromPrefab(weapon.Read<PrefabGUID>());
+        //if (weapon.Equals(Entity.Null)) return ExpertiseUtilities.WeaponType.Unarmed;
+        return ExpertiseUtilities.GetWeaponTypeFromSlotEntity(weapon);
     }
     public static LegacyUtilities.BloodType GetCurrentBloodType(Entity character)
     {
         Blood blood = character.Read<Blood>();
-
         return LegacyUtilities.GetBloodTypeFromPrefab(blood.BloodType);
     }
 }

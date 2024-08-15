@@ -1,4 +1,4 @@
-﻿using Bloodcraft.Systems.Experience;
+﻿using Bloodcraft.SystemUtilities.Experience;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -6,9 +6,11 @@ using Unity.Entities;
 using static Bloodcraft.Core;
 using static Bloodcraft.Services.LocalizationService;
 
-namespace Bloodcraft.Systems.Familiars;
+namespace Bloodcraft.SystemUtilities.Familiars;
 internal static class FamiliarUnlockUtilities
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     static readonly float UnitChance = Plugin.UnitUnlockChance.Value;
     static readonly float VBloodChance = Plugin.VBloodUnlockChance.Value;
     static readonly float ShinyChance = Plugin.ShinyChance.Value;
@@ -19,15 +21,16 @@ internal static class FamiliarUnlockUtilities
     // List of banned PrefabGUIDs
     public static List<int> ExemptPrefabs = [];
     public static List<string> ExemptTypes = [];
-    public static readonly PrefabGUID[] RandomVisuals =
-    [
-        new PrefabGUID(348724578),   // ignite
-        new PrefabGUID(-1576512627),    // static
-        new PrefabGUID(-1246704569),     // leech
-        new PrefabGUID(1723455773),   // weaken
-        new PrefabGUID(27300215),    // chill
-        new PrefabGUID(-325758519)     // condemn
-    ];
+
+    public static readonly Dictionary<PrefabGUID, string> RandomVisuals = new()
+    {
+        { new PrefabGUID(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
+        { new PrefabGUID(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
+        { new PrefabGUID(-1246704569), "#FF0000" },  // leech red (Hex: FF0000)
+        { new PrefabGUID(1723455773), "#008080" },   // weaken teal (Hex: 008080)
+        { new PrefabGUID(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
+        { new PrefabGUID(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
+    };
     public static void HandleUnitUnlock(Entity killer, Entity died)
     {
         if (!died.Has<PrefabGUID>() || !died.Has<EntityCategory>()) return;
@@ -116,13 +119,13 @@ internal static class FamiliarUnlockUtilities
             currentList.Add(familiarKey);
             FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
             isShiny = HandleShiny(familiarKey, playerId, ShinyChance);
-            if (!isShiny) HandleServerReply(Core.EntityManager, user, $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
-            else if (isShiny) HandleServerReply(Core.EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            if (!isShiny) HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            else if (isShiny) HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
             return;
         }
         if (isShiny)
         {
-            HandleServerReply(Core.EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
         }
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)
@@ -133,7 +136,7 @@ internal static class FamiliarUnlockUtilities
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
-                famBuffs.Add(RandomVisuals.ElementAt(Random.Next(RandomVisuals.Length - 1)).GuidHash);
+                famBuffs.Add(RandomVisuals.ElementAt(Random.Next(RandomVisuals.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // only one per fam for now, keep first visual unlocked
@@ -148,7 +151,7 @@ internal static class FamiliarUnlockUtilities
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
-                famBuffs.Add(RandomVisuals.ElementAt(Random.Next(RandomVisuals.Length - 1)).GuidHash);
+                famBuffs.Add(RandomVisuals.ElementAt(Random.Next(RandomVisuals.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // only one per fam for now, keep first visual unlocked

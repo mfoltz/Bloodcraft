@@ -1,8 +1,10 @@
-`1.3.5`
+`1.3.0`
 - added config option for potion stacking
-- added configurable item cost for choosing familiar visual if it already has one unlocked via '.fam v [SpellSchool]', will override current visual (freebie still works as before, cost will take precedence if familiar already has a visual unlocked, can set to 0 if you don't want players to be able to do this)
-- Meredith no longer stuns owner when being used as a familiar
-- started working in rested experience (think logging out in an inn ala WoW except coffin in V Rising) but still working out the details on rates and caps (completely original idea, definitely didn't get it from the popular author of several mods that start with the name 'Kindred')
+- added configurable item cost for choosing familiar visual if already shiny via '.fam v [SpellSchool]', will override current visual (freebie still works as before, cost will take precedence if familiar already has a visual unlocked)
+- rested XP (working, needs minor refinements. idea from Odjit)
+- familiar options command (where general familiar toggles now live that don't warrant use of an emote action)
+- familiar aggro/team stuff (TeamService, WIP)
+- added general functionality needed to support client companion (WIP)
 
 `1.2.4`
 - special thanks to Odjit for tracking down the party bug and discovering the reroll issue <3

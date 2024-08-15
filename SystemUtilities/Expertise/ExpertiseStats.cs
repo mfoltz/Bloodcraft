@@ -1,10 +1,11 @@
 ﻿using ProjectM;
-using static Bloodcraft.Systems.Expertise.ExpertiseStats.WeaponStatManager;
+using static Bloodcraft.SystemUtilities.Expertise.ExpertiseStats.WeaponStatManager;
 
-namespace Bloodcraft.Systems.Expertise;
-
+namespace Bloodcraft.SystemUtilities.Expertise;
 internal static class ExpertiseStats
 {
+    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
+    static readonly int ExpertiseStatChoices = Plugin.ExpertiseStatChoices.Value;
     public class PlayerWeaponUtilities
     {
         public static bool ChooseStat(ulong steamId, ExpertiseUtilities.WeaponType weaponType, WeaponStatManager.WeaponStatType statType)
@@ -15,7 +16,7 @@ internal static class ExpertiseStats
                 Core.DataStructures.PlayerWeaponStats[steamId][weaponType] = Stats;
             }
 
-            if (Plugin.HardSynergies.Value)
+            if (HardSynergies)
             {
                 if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) || classes.Keys.Count == 0)
                 {
@@ -29,7 +30,7 @@ internal static class ExpertiseStats
                 {
                     return false;
                 }
-                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType))
+                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= ExpertiseStatChoices || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon, one stat type per weapon
                 }
@@ -38,7 +39,7 @@ internal static class ExpertiseStats
                 return true;
             }
 
-            if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= Plugin.ExpertiseStatChoices.Value || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType)) 
+            if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= ExpertiseStatChoices || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType)) 
             {
                 return false; // Only allow configured amount of stats to be chosen per weapon
             }
@@ -121,7 +122,6 @@ internal static class ExpertiseStats
             {WeaponStatType.SpellCritChance, Plugin.SpellCritChance.Value},
             {WeaponStatType.SpellCritDamage, Plugin.SpellCritDamage.Value}
         };
-
         public static Dictionary<WeaponStatType, float> BaseCaps
         {
             get => baseCaps;

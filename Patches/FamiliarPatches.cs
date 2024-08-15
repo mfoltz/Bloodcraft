@@ -1,8 +1,9 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
+using Bloodcraft.SystemUtilities.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
+using ProjectM.Gameplay.Clan;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -11,6 +12,7 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
 
@@ -20,7 +22,6 @@ internal static class FamiliarPatches
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static EntityManager EntityManager => Core.EntityManager;
     static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
-
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
 
     static readonly PrefabGUID abilityGroupSlot = new(-633717863);
@@ -38,10 +39,15 @@ internal static class FamiliarPatches
     static readonly PrefabGUID holySpinners = new(-1852467646);
     static readonly PrefabGUID divineAngel = new(-1737346940);
     static readonly PrefabGUID fallenAngel = new(-76116724);
+    static readonly PrefabGUID playerFaction = new(1106458752);
+    static readonly PrefabGUID playerCharPrefab = new(38526109);
 
     public static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
+
     static readonly bool EliteShardBearers = Plugin.EliteShardBearers.Value;
-    static GameModeType GameMode => Core.ServerGameSettings.GameModeType;
+    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
+
+    static readonly GameModeType GameMode = Core.ServerGameSettings.GameModeType;
 
     public static Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
 
@@ -71,7 +77,7 @@ internal static class FamiliarPatches
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
                         if (FamiliarMinions.ContainsKey(familiar))
                         {
-                            Core.FamiliarService.HandleFamiliarMinions(familiar);
+                            FamiliarSummonUtilities.FamiliarUtilities.HandleFamiliarMinions(familiar);
                         }
                     }
                     /*
@@ -108,33 +114,62 @@ internal static class FamiliarPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!entity.Has<UnitLevel>()) continue;
 
-                //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
-                TeamReference teamReference = entity.Read<TeamReference>();
+                int level = entity.Read<UnitLevel>().Level._Value;
+                int famKey = prefabGUID.GuidHash;
                 bool summon = false;
-                NativeList<Entity> alliedUsers = new(Allocator.Temp);
-                try
+
+                if (level == 1)
                 {
-                    TeamUtility.GetAlliedUsers(EntityManager, teamReference, alliedUsers);
-                    foreach (Entity userEntity in alliedUsers)
+                    Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(Core.DataStructures.FamiliarActives);
+                    ulong steamId = FamiliarActives
+                        .Where(f => f.Value.FamKey == famKey)
+                        .Select(f => f.Key)
+                        .FirstOrDefault(id => Core.DataStructures.PlayerBools.TryGetValue(id, out var bools) && bools["Binding"]);
+
+                    if (steamId != 0)
                     {
-                        User user = userEntity.Read<User>();
-                        ulong steamID = user.PlatformId;
-                        if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["Binding"] && Core.DataStructures.FamiliarActives.TryGetValue(steamID, out var data) && data.FamKey.Equals(prefabGUID.GuidHash))
+                        Dictionary<string, Entity> PlayerCache = new(PlayerService.PlayerCache);
+                        Entity userEntity = PlayerCache
+                                              .Where(kvp => kvp.Value.Read<User>().PlatformId == steamId)
+                                              .Select(kvp => kvp.Value)
+                                              .FirstOrDefault();
+
+                        if (userEntity != Entity.Null)
                         {
-                            FamiliarSummonUtilities.HandleFamiliar(user.LocalCharacter._Entity, entity);
-                            bools["Binding"] = false;
-                            Core.DataStructures.SavePlayerBools();
-                            LocalizationService.HandleServerReply(Core.EntityManager, user, $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>");
-                            summon = true;
-                            break;
+                            User user = userEntity.Read<User>();
+                            Entity character = user.LocalCharacter._Entity;
+
+                            if (FamiliarSummonUtilities.HandleFamiliar(character, entity))
+                            {
+                                Core.DataStructures.PlayerBools[steamId]["Binding"] = false;
+                                Core.DataStructures.SavePlayerBools();
+                                string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+                                Core.DataStructures.FamiliarBuffsData buffsData = Core.FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+
+                                // Check if the familiar has buffs and update the color based on RandomVisuals
+                                if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+                                {
+                                    // Look up the color from the RandomVisuals dictionary if it exists
+                                    if (FamiliarUnlockUtilities.RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
+                                    {
+                                        colorCode = $"<color={hexColor}>";
+                                    }
+                                }
+
+                                string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>{colorCode}*</color>" : $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>";
+                                LocalizationService.HandleServerReply(EntityManager, user, message);
+                                summon = true;
+                            }
+                            else // if this fails for any reason destroy the entity and inform player
+                            {
+                                DestroyUtility.Destroy(EntityManager, entity);
+                                LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
+                            }
                         }
                     }
-                }
-                finally
-                {
-                    alliedUsers.Dispose();
                 }
 
                 if (summon) continue;
@@ -158,19 +193,17 @@ internal static class FamiliarPatches
                         HandleSolarus(entity);
                     }
                 }
+
                 if (EliteShardBearers && prefabGUID.Equals(divineAngel))
                 {
                     HandleAngel(entity);
                 }
+
                 if (EliteShardBearers && prefabGUID.Equals(fallenAngel))
                 {
                     HandleFallenAngel(entity);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -235,29 +268,29 @@ internal static class FamiliarPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
+                if (Familiars && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
                 {
-                    //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                     if (familiar != Entity.Null)
                     {
-                        
+                        //FactionReference factionReference = entity.Read<FactionReference>();
+                        //factionReference.FactionGuid._Value = playerFaction; // need friendly to players hostile to everything else? also why does playerFaction target castles?
+                        //familiar.Write(factionReference);
+
                         if (!FamiliarMinions.ContainsKey(familiar))
                         {
                             FamiliarMinions.Add(familiar, [entity]);
-                            //Core.Log.LogInfo("Added new minion entry...");
                         }
                         else
                         {
                             FamiliarMinions[familiar].Add(entity);
-                            //Core.Log.LogInfo("Added minion to existing entry...");
                         }
 
-                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("vblood")) continue;
+                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("vblood")) continue; // this only applies for Voltatia as both the main one and the minion one pass through this system for some reason
 
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
                         {
-                            BuffPrefabGUID = new(1273155981),
+                            BuffPrefabGUID = new(1273155981) // borrowing ink crawler death timer buff
                         };
 
                         FromCharacter fromCharacter = new()
@@ -274,6 +307,19 @@ internal static class FamiliarPatches
                                 buff.Write(new LifeTime { Duration = 30, EndAction = LifeTimeEndAction.Destroy });
                             }
                         }
+                    }
+                }
+                else if (Familiars && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner playerOwner) && playerOwner.Owner.Has<PlayerCharacter>()) // modify player minions here
+                {
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(playerOwner.Owner);
+
+                    if (familiar != Entity.Null)
+                    {
+                        //MiscAiGameplayData miscAiGameplayData = entity.Read<MiscAiGameplayData>();
+                        //miscAiGameplayData.AlertAlliesOnDeath = false;
+                        //entity.Write(miscAiGameplayData);
+
+                        //FamiliarSummonUtilities.FamiliarUtilities.ForceAllies(familiar, entity);
                     }
                 }
             }
@@ -303,10 +349,6 @@ internal static class FamiliarPatches
                     DestroyUtility.CreateDestroyEvent(EntityManager, buff.Target, DestroyReason.Default, DestroyDebugReason.None);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -420,7 +462,7 @@ internal static class FamiliarPatches
     static void HandleFallenAngel(Entity entity)
     {
         Health health = entity.Read<Health>();
-        health.MaxHealth._Value *= 2;
+        health.MaxHealth._Value *= 2.5f;
         health.Value = health.MaxHealth._Value;
         entity.Write(health);
     }

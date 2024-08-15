@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
+using Bloodcraft.SystemUtilities.Experience;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -22,6 +22,7 @@ internal static class QuestUtilities
     static readonly System.Random Random = new();
 
     static readonly bool InfiniteDailies = Plugin.InfiniteDailies.Value;
+    static readonly bool Leveling = Plugin.LevelingSystem.Value;
 
     //public static HashSet<PrefabGUID> UnitPrefabs = [];
     public static HashSet<PrefabGUID> CraftPrefabs = [];
@@ -408,7 +409,7 @@ internal static class QuestUtilities
                     }
                     if (quest.Key == QuestType.Daily && InfiniteDailies)
                     {
-                        int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[user.PlatformId].Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+                        int level = Leveling ? Core.DataStructures.PlayerExperience[user.PlatformId].Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                         QuestGoal goal = QuestGoal.Kill;
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);

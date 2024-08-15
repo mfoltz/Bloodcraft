@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Services;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Experience.PlayerLevelingUtilities.PartyUtilities;
+using static Bloodcraft.SystemUtilities.Experience.PlayerLevelingUtilities.PartyUtilities;
 
 namespace Bloodcraft.Commands;
 

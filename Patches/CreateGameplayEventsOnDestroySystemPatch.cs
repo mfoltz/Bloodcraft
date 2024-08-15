@@ -1,8 +1,8 @@
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacy;
-using Bloodcraft.Systems.Professions;
+using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.SystemUtilities.Expertise;
+using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;

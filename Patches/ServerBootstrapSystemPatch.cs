@@ -1,9 +1,12 @@
-﻿using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Leveling;
+﻿using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.SystemUtilities.Leveling;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Scripting;
 using ProjectM.Shared;
+using Stunlock.Core;
 using Stunlock.Network;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -14,6 +17,44 @@ namespace Bloodcraft.Patches;
 internal static class ServerBootstrapSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
+    static readonly PrefabGUID woodenCoffin = new(381160212);
+    static readonly PrefabGUID stoneCoffin = new(569692162);
+
+    static readonly Dictionary<string, bool> DefaultBools = new()
+    {
+        { "ExperienceLogging", false },
+        { "QuestLogging", false },
+        { "ProfessionLogging", false },
+        { "ExpertiseLogging", false },
+        { "BloodLogging", false },
+        { "FamiliarLogging", false },
+        { "SpellLock", false },
+        { "ShiftLock", false },
+        { "Grouping", false },
+        { "Emotes", false },
+        { "Binding", false },
+        { "Kit", false },
+        { "VBloodEmotes", true },
+        { "FamiliarVisual", true},
+        { "ShinyChoice", false }
+    };
+
+    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
+    static readonly bool Classes = Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value;
+    static readonly bool Legacies = Plugin.BloodSystem.Value;
+    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
+    static readonly bool RestedXP = Plugin.RestedXP.Value;
+    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
+    static readonly bool Professions = Plugin.ProfessionSystem.Value;
+
+    static readonly float RestedXPRate = Plugin.RestedXPRate.Value;
+    static readonly float RestedXPMaxMultiplier = Plugin.RestedXPMaxMultiplier.Value;
+    static readonly float RestedXPTickRate = Plugin.RestedXPTickRate.Value;
+
+    static readonly int StartingLevel = Plugin.StartingLevel.Value;
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
@@ -25,67 +66,30 @@ internal static class ServerBootstrapSystemPatch
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
 
+        Entity character = EntityManager.Exists(user.LocalCharacter._Entity) ? user.LocalCharacter._Entity : Entity.Null;
+
         if (!Core.DataStructures.PlayerBools.ContainsKey(steamId))
         {
-            Core.DataStructures.PlayerBools.Add(steamId, new Dictionary<string, bool>
-            {
-                { "ExperienceLogging", false },
-                { "QuestLogging", false },
-                { "ProfessionLogging", false },
-                { "ExpertiseLogging", false },
-                { "BloodLogging", false },
-                { "FamiliarLogging", false },
-                { "ShiftLock", false },
-                { "SpellLock", false },
-                { "Grouping", false },
-                { "Emotes", false },
-                { "Binding", false },
-                { "Kit", false },
-                { "VBloodEmotes", true },
-                { "FamiliarVisual", true},
-                { "ShinyChoice", false }
-
-            });
+            Core.DataStructures.PlayerBools.Add(steamId, DefaultBools);
             Core.DataStructures.SavePlayerBools();
         }
         else
         {
-            var existingDict = Core.DataStructures.PlayerBools[steamId];
+            Dictionary<string, bool> existingBools = Core.DataStructures.PlayerBools[steamId];
 
-            // Define the default values
-            var defaultValues = new Dictionary<string, bool>
+            foreach (string key in DefaultBools.Keys)
             {
-                { "ExperienceLogging", false },
-                { "QuestLogging", false },
-                { "ProfessionLogging", false },
-                { "ExpertiseLogging", false },
-                { "BloodLogging", false },
-                { "FamiliarLogging", false },
-                { "SpellLock", false },
-                { "ShiftLock", false },
-                { "Grouping", false },
-                { "Emotes", false },
-                { "Binding", false },
-                { "Kit", false },
-                { "VBloodEmotes", true },
-                { "FamiliarVisual", true},
-                { "ShinyChoice", false }
-            };
-
-            // Add missing default values to the existing dictionary
-            foreach (var key in defaultValues.Keys)
-            {
-                if (!existingDict.ContainsKey(key))
+                if (!existingBools.ContainsKey(key))
                 {
-                    existingDict[key] = defaultValues[key];
+                    existingBools[key] = DefaultBools[key];
                 }
             }
 
-            Core.DataStructures.PlayerBools[steamId] = existingDict;
+            Core.DataStructures.PlayerBools[steamId] = existingBools;
             Core.DataStructures.SavePlayerBools();
         }
 
-        if (Plugin.ProfessionSystem.Value)
+        if (Professions)
         {
             if (!Core.DataStructures.PlayerWoodcutting.ContainsKey(steamId))
             {
@@ -136,9 +140,8 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Plugin.ExpertiseSystem.Value)
+        if (Expertise)
         {
-
             if (!Core.DataStructures.PlayerUnarmedExpertise.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerUnarmedExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
@@ -150,7 +153,6 @@ internal static class ServerBootstrapSystemPatch
                 Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
                 Core.DataStructures.SavePlayerSpells();
             }
-
 
             if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
             {
@@ -231,7 +233,7 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Plugin.BloodSystem.Value)
+        if (Legacies)
         {
             if (!Core.DataStructures.PlayerWorkerLegacy.ContainsKey(steamId))
             {
@@ -294,30 +296,15 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Plugin.LevelingSystem.Value)
-        {
-            /*
-            if (Plugin.RestedXP.Value)
-            {
-                if (!Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
-                {
-                    Core.DataStructures.PlayerRestedXP.Add(steamId, new KeyValuePair<DateTime, float>(DateTime.MinValue, 0f));
-                    Core.DataStructures.SavePlayerRestedXP();
-                }
-                else
-                {
-                    DateTime lastLogin = Core.DataStructures.PlayerRestedXP[steamId].Key;
-                    TimeSpan timeOffline = DateTime.UtcNow - lastLogin;
-                    float earnedRestedXP = (float)timeOffline.TotalMinutes * Plugin.RestedXPRate.Value; 
-                }
-            }
-            */
+        if (Leveling)
+        { 
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(Plugin.StartingLevel.Value, PlayerLevelingUtilities.ConvertLevelToXp(Plugin.StartingLevel.Value)));
+                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(StartingLevel, PlayerLevelingUtilities.ConvertLevelToXp(StartingLevel)));
                 Core.DataStructures.SavePlayerExperience();
             }
-            if (Plugin.PrestigeSystem.Value && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
+
+            if (Prestige && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
             {
                 var prestigeDict = new Dictionary<PrestigeUtilities.PrestigeType, int>();
                 foreach (var prestigeType in Enum.GetValues<PrestigeUtilities.PrestigeType>())
@@ -339,32 +326,89 @@ internal static class ServerBootstrapSystemPatch
                     }
                 }
             }
-            if (Core.EntityManager.Exists(user.LocalCharacter._Entity)) GearOverride.SetLevel(user.LocalCharacter._Entity);
+
+            if (character != Entity.Null)
+            {
+                GearOverride.SetLevel(character);
+            }
+
+            if (RestedXP)
+            {
+                if (!Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
+                {
+                    Core.DataStructures.PlayerRestedXP.Add(steamId, new KeyValuePair<DateTime, float>(DateTime.MinValue, 0f));
+                    Core.DataStructures.SavePlayerRestedXP();
+                }
+                else if (character != Entity.Null && Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
+                {
+                    float restedMultiplier = 0;
+
+                    if (ServerGameManager.HasBuff(character, woodenCoffin)) restedMultiplier = 0.5f;
+                    else if (ServerGameManager.HasBuff(character, stoneCoffin)) restedMultiplier = 1f;
+
+                    var restedData = Core.DataStructures.PlayerRestedXP[steamId];
+                    DateTime lastLogout = restedData.Key;
+
+                    TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
+                    if (timeOffline.TotalMinutes >= RestedXPTickRate && restedMultiplier != 0)
+                    {
+                        float currentRestedXP = restedData.Value;
+                        float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * RestedXPMaxMultiplier;
+                        float earnedPerTick = RestedXPRate * restedCap;
+
+                        float earnedRestedXP = (float)timeOffline.TotalMinutes / RestedXPTickRate * earnedPerTick * restedMultiplier;
+                        currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
+                        int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
+
+                        Core.DataStructures.PlayerRestedXP[steamId] = new KeyValuePair<DateTime, float>(DateTime.UtcNow, currentRestedXP);
+                        Core.DataStructures.SavePlayerRestedXP();
+
+                        string message = $"+<color=#FFD700>{roundedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> earned from being logged out in your coffin!";
+                        LocalizationService.HandleServerReply(EntityManager, user, message);
+                    }
+                }
+            }
         }
 
-        if (Plugin.FamiliarSystem.Value)
+        if (Familiars)
         {
             if (!Core.DataStructures.FamiliarActives.ContainsKey(steamId))
             {
                 Core.DataStructures.FamiliarActives.Add(steamId, (Entity.Null, 0));
                 Core.DataStructures.SavePlayerFamiliarActives();
             }
+
             if (!Core.DataStructures.FamiliarSet.ContainsKey(steamId))
             {
                 Core.DataStructures.FamiliarSet.Add(steamId, "");
                 Core.DataStructures.SavePlayerFamiliarSets();
             }
+
             Core.FamiliarExperienceManager.SaveFamiliarExperience(steamId, Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId));
             Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
+
+            if (character != Entity.Null && character.Has<FollowerBuffer>())
+            {
+                var buffer = character.ReadBuffer<FollowerBuffer>();
+                foreach (var follower in buffer)
+                {
+                    if (EntityManager.Exists(follower.Entity._Entity))
+                    {
+                        DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
+                    }
+                }
+                FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
+            }
         }
 
-        if (Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value)
+        if (Classes)
         {
             if (!Core.DataStructures.PlayerClasses.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerClasses.Add(steamId, []);
                 Core.DataStructures.SavePlayerClasses();
             }
+
             if (!Core.DataStructures.PlayerSpells.ContainsKey(steamId))
             {
                 Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
@@ -384,25 +428,32 @@ internal static class ServerBootstrapSystemPatch
         Entity character = user.LocalCharacter._Entity;
         ulong steamId = user.PlatformId;
 
-        if (Plugin.FamiliarSystem.Value && EntityManager.Exists(character) && character.Has<FollowerBuffer>())
+        if (Familiars && EntityManager.Exists(character) && character.Has<FollowerBuffer>())
         {
-            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
-            if (EntityManager.Exists(familiar))
+            var buffer = character.ReadBuffer<FollowerBuffer>();
+            foreach (var follower in buffer)
             {
-                DestroyUtility.Destroy(EntityManager, familiar);
-                FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
+                if (EntityManager.Exists(follower.Entity._Entity))
+                {
+                    DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
+                }
             }
+            FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
         }
-        if (Plugin.LevelingSystem.Value)
+
+        if (Leveling)
         {
-            /*
-            if (Plugin.RestedXP.Value && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
+            if (RestedXP && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                 Core.DataStructures.PlayerRestedXP[steamId] = restedData;
                 Core.DataStructures.SavePlayerRestedXP();
             }
-            */
+
+            if (character.Exists() && character.Has<ServantInteractPointLocalTransform>())
+            {
+                character.Remove<ServantInteractPointLocalTransform>();
+            }
         }
     }
 }

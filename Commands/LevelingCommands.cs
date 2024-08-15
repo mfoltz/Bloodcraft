@@ -1,6 +1,6 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
+using Bloodcraft.SystemUtilities.Experience;
 using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -11,8 +11,10 @@ namespace Bloodcraft.Commands;
 internal static class LevelingCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+
     static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value;
+    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+    static readonly bool RestedXP = Plugin.RestedXP.Value;
 
     [Command(name: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
@@ -40,13 +42,21 @@ internal static class LevelingCommands
             LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
+
         ulong steamId = ctx.Event.User.PlatformId;
+
         if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var levelKvp))
         {
+            int prestigeLevel = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) ? prestiges[SystemUtilities.Leveling.PrestigeUtilities.PrestigeType.Experience] : 0;
             int level = levelKvp.Key;
             int progress = (int)(levelKvp.Value - PlayerLevelingUtilities.ConvertLevelToXp(level));
             int percent = PlayerLevelingUtilities.GetLevelProgress(steamId);
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            if (RestedXP && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
+            {
+                int roundedXP = (int)(Math.Round(restedData.Value / 100.0) * 100);
+                LocalizationService.HandleReply(ctx, $"<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~");
+            }
         }
         else
         {

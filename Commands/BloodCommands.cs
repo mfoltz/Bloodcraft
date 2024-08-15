@@ -1,13 +1,13 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Systems.Legacy;
+using Bloodcraft.SystemUtilities.Legacies;
+using Bloodcraft.SystemUtilities.Legacy;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Legacies.LegacyStats;
+using static Bloodcraft.SystemUtilities.Legacies.LegacyStats;
 
 namespace Bloodcraft.Commands;
 

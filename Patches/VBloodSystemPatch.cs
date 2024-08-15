@@ -1,7 +1,7 @@
-﻿using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacy;
+﻿using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.SystemUtilities.Expertise;
+using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.SystemUtilities.Legacy;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
@@ -16,14 +16,20 @@ internal static class VBloodSystemPatch
 {
     static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
 
-    static Dictionary<ulong, DateTime> lastUpdateCache = [];
+    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
+    static readonly bool Legacies = Plugin.BloodSystem.Value;
+    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
+    static readonly bool Quests = Plugin.QuestSystem.Value;
+
+    static Dictionary<ulong, DateTime> LastUpdateCache = [];
 
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(VBloodSystem __instance)
     {
         NativeList<VBloodConsumed> events = __instance.EventList;
-        DateTime now = DateTime.Now;
+        DateTime now = DateTime.UtcNow;
         try
         {
             foreach (VBloodConsumed vBloodConsumed in events)
@@ -34,18 +40,21 @@ internal static class VBloodSystemPatch
                 User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
                 ulong steamId = user.PlatformId;
 
-                if (lastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
+                if (LastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
                 
-                lastUpdateCache[steamId] = now;
+                LastUpdateCache[steamId] = now;
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (Plugin.LevelingSystem.Value) PlayerLevelingUtilities.UpdateLeveling(player, vBlood);
-                if (Plugin.ExpertiseSystem.Value) ExpertiseUtilities.UpdateExpertise(player, vBlood);
-                if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(player, vBlood);
-                if (Plugin.FamiliarSystem.Value) FamiliarLevelingUtilities.UpdateFamiliar(player, vBlood);
-                if (Plugin.FamiliarSystem.Value) FamiliarUnlockUtilities.HandleUnitUnlock(player, vBlood);
-                if (Plugin.QuestSystem.Value && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
+                if (Leveling) PlayerLevelingUtilities.UpdateLeveling(player, vBlood);
+                if (Expertise) ExpertiseUtilities.UpdateExpertise(player, vBlood);
+                if (Legacies) LegacyUtilities.UpdateLegacy(player, vBlood);
+                if (Familiars)
+                {
+                    FamiliarLevelingUtilities.UpdateFamiliar(player, vBlood);
+                    FamiliarUnlockUtilities.HandleUnitUnlock(player, vBlood);
+                }
+                if (Quests && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)
