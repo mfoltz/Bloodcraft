@@ -1,7 +1,8 @@
-﻿using Bloodcraft.SystemUtilities.Experience;
+﻿using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Experience;
 using Bloodcraft.SystemUtilities.Expertise;
 using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Legacies;
 using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
@@ -22,8 +23,12 @@ namespace Bloodcraft.Patches;
 internal static class BuffSpawnSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     static readonly PrefabGUID draculaReturnHide = new(404387047);
     static readonly PrefabGUID draculaFinal = new(1269681960); // final stage buff Dracula, force him to evolve -2005193286 (ability group)
@@ -46,17 +51,6 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID feedExecute = new(366323518);
     static readonly PrefabGUID insideBuff = new(-1930363607);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
-
-    static readonly bool Parties = Plugin.Parties.Value;
-    static readonly bool PreventFriendlyFire = Plugin.PreventFriendlyFire.Value;
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static readonly bool PotionStacking = Plugin.PotionStacking.Value;
-    static readonly bool Legacies = Plugin.BloodSystem.Value;
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-    static readonly bool Professions = Plugin.ProfessionSystem.Value;
-    static readonly bool Quests = Plugin.QuestSystem.Value;
-    static readonly GameModeType GameMode = Core.ServerGameSettings.GameModeType;
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -164,7 +158,7 @@ internal static class BuffSpawnSystemPatches
                 if (entity.Read<Buff>().Target.Has<EntityOwner>() && entity.Read<Buff>().Target.Read<EntityOwner>().Owner.Has<Follower>())
                 {
                     Follower follower = entity.Read<Buff>().Target.Read<EntityOwner>().Owner.Read<Follower>();
-                    if (Familiars && follower.Followed._Value.Has<PlayerCharacter>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                    if (ConfigService.FamiliarSystem && follower.Followed._Value.Has<PlayerCharacter>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
                         continue;
@@ -178,7 +172,7 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 } // prevent player minions from being affected by player debuffs
 
-                if (Familiars && (prefabGUID.Equals(combatStance) || prefabGUID.Equals(combatBuff)))
+                if (ConfigService.FamiliarSystem && (prefabGUID.Equals(combatStance) || prefabGUID.Equals(combatBuff)))
                 {
                     Buff buff = entity.Read<Buff>();
                     if (buff.Target.Has<PlayerCharacter>())
@@ -202,21 +196,23 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 } // return familiar when entering combat if far away or prevent familiar targetting other familiar when pvpprotected
 
-                if (Professions && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (ConfigService.ProfessionSystem && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     //Core.Log.LogInfo($"Consumable found: {prefabGUID.LookupName()} for alchemy boosting...");
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                     ulong steamId = entity.Read<Buff>().Target.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int level = handler.GetExperienceData(steamId).Key;
 
-                    if (PotionStacking && entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
-                    if (PotionStacking && entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
-                    //if (entity.Has<GameplayEventListeners>()) entity.Remove<GameplayEventListeners>();
+                    if (ConfigService.PotionStacking)
+                    {
+                        if (entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
+                        if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
+                    }
 
                     if (entity.Has<LifeTime>())
                     {
                         LifeTime lifeTime = entity.Read<LifeTime>();
-                        if (lifeTime.Duration != -1) lifeTime.Duration *= (float)(1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
+                        if (lifeTime.Duration != -1) lifeTime.Duration *= (float)(1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                         entity.Write(lifeTime);
                     }
                     if (entity.Has<ModifyUnitStatBuff_DOTS>())
@@ -225,13 +221,13 @@ internal static class BuffSpawnSystemPatches
                         for (int i = 0; i < buffer.Length; i++)
                         {
                             ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                            statBuff.Value *= (float)(1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
+                            statBuff.Value *= (float)(1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                             buffer[i] = statBuff;
                         }
                     }
                 } // alchemy stuff
 
-                if (Familiars && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
+                if (ConfigService.FamiliarSystem && prefabGUID.LookupName().ToLower().Contains("consumable") && entity.Read<Buff>().Target.Has<PlayerCharacter>())
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -251,7 +247,7 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 } // familiar potion sharing
 
-                if (Familiars && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // teleport familiar to player after waygate
+                if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.Read<Buff>().Target.Has<PlayerCharacter>()) // teleport familiar to player after waygate
                 {
                     Entity player = entity.Read<Buff>().Target;
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
@@ -287,15 +283,15 @@ internal static class BuffSpawnSystemPatches
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity killer = entity.Read<Buff>().Target;
                     Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
-                    if (Legacies) LegacyUtilities.UpdateLegacy(killer, died);
-                    if (Expertise) ExpertiseUtilities.UpdateExpertise(killer, died);
-                    if (Leveling) PlayerLevelingUtilities.UpdateLeveling(killer, died);
-                    if (Familiars)
+                    if (ConfigService.BloodSystem) LegacyUtilities.UpdateLegacy(killer, died);
+                    if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(killer, died);
+                    if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(killer, died);
+                    if (ConfigService.FamiliarSystem)
                     {
                         FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
                         FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
                     }
-                    if (Quests)
+                    if (ConfigService.QuestSystem)
                     {
                         QuestUtilities.UpdateQuests(killer, userEntity, died.Read<PrefabGUID>());
                     }
@@ -304,7 +300,7 @@ internal static class BuffSpawnSystemPatches
 
                 if (entity.Read<Buff>().Target.Has<PlayerCharacter>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<Follower>() && entity.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // 
                 {
-                    if (Familiars)
+                    if (ConfigService.FamiliarSystem)
                     {
                         Follower follower = entity.Read<EntityOwner>().Owner.Read<Follower>();
                         
@@ -326,7 +322,7 @@ internal static class BuffSpawnSystemPatches
                                 continue;
                             }
                         }
-                        else if (Parties && PreventFriendlyFire) // check for parties in PvP 
+                        else if (ConfigService.Parties && ConfigService.PreventFriendlyFire) // check for parties in PvP 
                         {
                             Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
                             string targetName = entity.Read<Buff>().Target.Read<PlayerCharacter>().Name.Value;
@@ -396,7 +392,7 @@ internal static class BuffSpawnSystemPatches
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 
-                if (Familiars && prefabGUID.Equals(combatBuff))
+                if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
                 {
                     Entity character = entity.Read<Buff>().Target;
                     if (character.Has<PlayerCharacter>())

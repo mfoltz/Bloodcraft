@@ -18,6 +18,8 @@ internal static class ServerBootstrapSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
 
     static readonly PrefabGUID woodenCoffin = new(381160212);
     static readonly PrefabGUID stoneCoffin = new(569692162);
@@ -40,21 +42,6 @@ internal static class ServerBootstrapSystemPatch
         { "FamiliarVisual", true},
         { "ShinyChoice", false }
     };
-
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static readonly bool Classes = Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value;
-    static readonly bool Legacies = Plugin.BloodSystem.Value;
-    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-    static readonly bool RestedXP = Plugin.RestedXP.Value;
-    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
-    static readonly bool Professions = Plugin.ProfessionSystem.Value;
-
-    static readonly float RestedXPRate = Plugin.RestedXPRate.Value;
-    static readonly float RestedXPMaxMultiplier = Plugin.RestedXPMaxMultiplier.Value;
-    static readonly float RestedXPTickRate = Plugin.RestedXPTickRate.Value;
-
-    static readonly int StartingLevel = Plugin.StartingLevel.Value;
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
@@ -89,7 +76,7 @@ internal static class ServerBootstrapSystemPatch
             Core.DataStructures.SavePlayerBools();
         }
 
-        if (Professions)
+        if (ConfigService.ProfessionSystem)
         {
             if (!Core.DataStructures.PlayerWoodcutting.ContainsKey(steamId))
             {
@@ -140,7 +127,7 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Expertise)
+        if (ConfigService.ExpertiseSystem)
         {
             if (!Core.DataStructures.PlayerUnarmedExpertise.ContainsKey(steamId))
             {
@@ -233,7 +220,7 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Legacies)
+        if (ConfigService.BloodSystem)
         {
             if (!Core.DataStructures.PlayerWorkerLegacy.ContainsKey(steamId))
             {
@@ -296,25 +283,26 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Leveling)
+        if (ConfigService.LevelingSystem)
         { 
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(StartingLevel, PlayerLevelingUtilities.ConvertLevelToXp(StartingLevel)));
+                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(ConfigService.StartingLevel, PlayerLevelingUtilities.ConvertLevelToXp(ConfigService.StartingLevel)));
                 Core.DataStructures.SavePlayerExperience();
             }
 
-            if (Prestige && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
+            if (ConfigService.PrestigeSystem && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
             {
                 var prestigeDict = new Dictionary<PrestigeUtilities.PrestigeType, int>();
                 foreach (var prestigeType in Enum.GetValues<PrestigeUtilities.PrestigeType>())
                 {
                     prestigeDict.Add(prestigeType, 0);
                 }
+
                 Core.DataStructures.PlayerPrestiges.Add(steamId, prestigeDict);
                 Core.DataStructures.SavePlayerPrestiges();
             }
-            else
+            else if (ConfigService.PrestigeSystem)
             {
                 // Ensure all keys are present in the existing dictionary
                 var prestigeDict = Core.DataStructures.PlayerPrestiges[steamId];
@@ -332,7 +320,7 @@ internal static class ServerBootstrapSystemPatch
                 GearOverride.SetLevel(character);
             }
 
-            if (RestedXP)
+            if (ConfigService.RestedXP)
             {
                 if (!Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
                 {
@@ -350,13 +338,13 @@ internal static class ServerBootstrapSystemPatch
                     DateTime lastLogout = restedData.Key;
 
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
-                    if (timeOffline.TotalMinutes >= RestedXPTickRate && restedMultiplier != 0)
+                    if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0)
                     {
                         float currentRestedXP = restedData.Value;
-                        float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * RestedXPMaxMultiplier;
-                        float earnedPerTick = RestedXPRate * restedCap;
+                        float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * ConfigService.RestedXPMaxMultiplier;
+                        float earnedPerTick = ConfigService.RestedXPRate * restedCap;
 
-                        float earnedRestedXP = (float)timeOffline.TotalMinutes / RestedXPTickRate * earnedPerTick * restedMultiplier;
+                        float earnedRestedXP = (float)timeOffline.TotalMinutes / ConfigService.RestedXPTickRate * earnedPerTick * restedMultiplier;
                         currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
                         int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
 
@@ -370,7 +358,7 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Familiars)
+        if (ConfigService.FamiliarSystem)
         {
             if (!Core.DataStructures.FamiliarActives.ContainsKey(steamId))
             {
@@ -401,11 +389,11 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (Classes)
+        if (ConfigService.Classes)
         {
-            if (!Core.DataStructures.PlayerClasses.ContainsKey(steamId))
+            if (!Core.DataStructures.PlayerClass.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerClasses.Add(steamId, []);
+                Core.DataStructures.PlayerClass.Add(steamId, []);
                 Core.DataStructures.SavePlayerClasses();
             }
 
@@ -428,7 +416,7 @@ internal static class ServerBootstrapSystemPatch
         Entity character = user.LocalCharacter._Entity;
         ulong steamId = user.PlatformId;
 
-        if (Familiars && EntityManager.Exists(character) && character.Has<FollowerBuffer>())
+        if (ConfigService.FamiliarSystem && EntityManager.Exists(character) && character.Has<FollowerBuffer>())
         {
             var buffer = character.ReadBuffer<FollowerBuffer>();
             foreach (var follower in buffer)
@@ -441,18 +429,13 @@ internal static class ServerBootstrapSystemPatch
             FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
         }
 
-        if (Leveling)
+        if (ConfigService.LevelingSystem)
         {
-            if (RestedXP && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
+            if (ConfigService.RestedXP && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                 Core.DataStructures.PlayerRestedXP[steamId] = restedData;
                 Core.DataStructures.SavePlayerRestedXP();
-            }
-
-            if (character.Exists() && character.Has<ServantInteractPointLocalTransform>())
-            {
-                character.Remove<ServantInteractPointLocalTransform>();
             }
         }
     }

@@ -1,37 +1,36 @@
-﻿using ProjectM;
+﻿using Bloodcraft.Services;
+using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using User = ProjectM.Network.User;
-using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.SystemUtilities.Professions;
 internal static class ProfessionUtilities
 {
-    //static readonly Regex regex = new(@"fish.*t0[1-3]$");
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly float ProfessionMultiplier = Plugin.ProfessionMultiplier.Value; // multiplier for profession experience per harvest
     const float ProfessionConstant = 0.1f; // constant for calculating level from xp
     const int ProfessionPower = 2; // power for calculating level from xp
-    static readonly int MaxProfessionLevel = Plugin.MaxProfessionLevel.Value; // maximum level
     public static void UpdateProfessions(Entity Killer, Entity Victim)
     {
         if (Killer == Victim) return;
 
-        Entity userEntity = EntityManager.GetComponentData<PlayerCharacter>(Killer).UserEntity;
-        User user = EntityManager.GetComponentData<User>(userEntity);
+        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
         ulong SteamID = user.PlatformId;
+
         if (!Victim.Has<UnitLevel>() || Victim.Has<Movement>()) return;
-        //var VictimLevel = entityManager.GetComponentData<UnitLevel>(Victim);
 
         PrefabGUID PrefabGUID = new(0);
-        if (EntityManager.HasComponent<YieldResourcesOnDamageTaken>(Victim) && EntityManager.HasComponent<EntityCategory>(Victim))
+        if (Victim.Has<YieldResourcesOnDamageTaken>() && Victim.Has<EntityCategory>())
         {
-            //Victim.LogComponentTypes();
             var yield = Victim.ReadBuffer<YieldResourcesOnDamageTaken>();
             if (yield.IsCreated && !yield.IsEmpty)
             {
@@ -46,7 +45,6 @@ internal static class ProfessionUtilities
         float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel._Value;
 
         PrefabGUID prefab = Victim.Read<PrefabGUID>();
-
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
 
         if (original.Has<EntityCategory>() && original.Read<EntityCategory>().ResourceLevel._Value > ProfessionValue)
@@ -64,7 +62,7 @@ internal static class ProfessionUtilities
             ProfessionValue = 10;
         }
 
-        ProfessionValue = (int)(ProfessionValue * ProfessionMultiplier);
+        ProfessionValue = (int)(ProfessionValue * ConfigService.ProfessionMultiplier);
 
         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID);
 
@@ -84,7 +82,6 @@ internal static class ProfessionUtilities
         Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
         int level = GetLevel(SteamID, handler);
         string name = handler.GetProfessionName();
-        //Core.Log.LogInfo(prefab.LookupName());
         if (name.Contains("Fishing"))
         {
             List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefab);
@@ -95,12 +92,12 @@ internal static class ProfessionUtilities
             PrefabGUID fish = fishDrops[index];
             if (ServerGameManager.TryAddInventoryItem(Killer, fish, bonus))
             {
-                if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
             }
             else
             {
                 InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, fish, bonus, new Entity());
-                if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
             }
         }
         else if (prefabEntity.Has<DropTableBuffer>())
@@ -129,13 +126,13 @@ internal static class ProfessionUtilities
                                 if (bonus.Equals(0)) return;
                                 if (ServerGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                 {
-                                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
                                     break;
                                 }
                                 else 
                                 {
                                     InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, dropTableData.ItemGuid, bonus, new Entity());
-                                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                                    if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var Bools) && Bools["ProfessionLogging"]) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
                                     break;
                                 }
                             }
@@ -168,7 +165,7 @@ internal static class ProfessionUtilities
     {
         var xpData = handler.GetExperienceData(steamID);
 
-        if (xpData.Key >= MaxProfessionLevel) return;
+        if (xpData.Key >= ConfigService.MaxProfessionLevel) return;
 
         UpdateProfessionExperience(user, steamID, xpData, value, handler);
     }
@@ -181,10 +178,10 @@ internal static class ProfessionUtilities
         if (newLevel > xpData.Key)
         {
             leveledUp = true;
-            if (newLevel > MaxProfessionLevel)
+            if (newLevel > ConfigService.MaxProfessionLevel)
             {
-                newLevel = MaxProfessionLevel;
-                newExperience = ConvertLevelToXp(MaxProfessionLevel);
+                newLevel = ConfigService.MaxProfessionLevel;
+                newExperience = ConvertLevelToXp(ConfigService.MaxProfessionLevel);
             }
         }
 
@@ -200,12 +197,12 @@ internal static class ProfessionUtilities
         if (leveledUp)
         {
             int newLevel = ConvertXpToLevel(handler.GetExperienceData(steamID).Value);
-            if (newLevel < MaxProfessionLevel) HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
+            if (newLevel < ConfigService.MaxProfessionLevel) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
         }
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ProfessionLogging"])
         {
             int levelProgress = GetLevelProgress(steamID, handler);
-            HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
+            LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
         }
     }
     static int ConvertXpToLevel(float xp)

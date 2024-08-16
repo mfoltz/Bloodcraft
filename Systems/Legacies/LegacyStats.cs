@@ -1,12 +1,11 @@
-﻿using Bloodcraft.SystemUtilities.Legacy;
+﻿using Bloodcraft.Services;
 using ProjectM;
 using static Bloodcraft.SystemUtilities.Legacies.LegacyStats.BloodStatManager;
 
 namespace Bloodcraft.SystemUtilities.Legacies;
 internal static class LegacyStats
 {
-    static readonly int LegacyStatChoices = Plugin.LegacyStatChoices.Value;
-    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
+    static ConfigService ConfigService => Core.ConfigService;
     public class PlayerBloodUtilities
     {
         public static bool ChooseStat(ulong steamId, LegacyUtilities.BloodType BloodType, BloodStatManager.BloodStatType statType)
@@ -17,9 +16,9 @@ internal static class LegacyStats
                 Core.DataStructures.PlayerBloodStats[steamId][BloodType] = Stats;
             }
 
-            if (HardSynergies)
+            if (ConfigService.HardSynergies)
             {
-                if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) || classes.Count == 0)
+                if (!Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) || classes.Count == 0)
                 {
                     return false;
                 }
@@ -32,16 +31,18 @@ internal static class LegacyStats
                 {
                     return false;
                 }
-                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
+
+                if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= ConfigService.LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen per blood, only allow one stat type per blood
                 }
+
                 Core.DataStructures.PlayerBloodStats[steamId][BloodType].Add(statType);
                 Core.DataStructures.SavePlayerWeaponStats();
                 return true;
             }
 
-            if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
+            if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= ConfigService.LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
             {
                 return false; // Only allow configured amount of stats to be chosen per weapon
             }
@@ -50,7 +51,6 @@ internal static class LegacyStats
             Core.DataStructures.SavePlayerBloodStats();
             return true;
         }
-
         public static void ResetStats(ulong steamId, LegacyUtilities.BloodType BloodType)
         {
             if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamId, out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
@@ -60,7 +60,6 @@ internal static class LegacyStats
             }
         }
     }
-
     public class BloodStatManager
     {
         public enum BloodStatType
@@ -79,7 +78,7 @@ internal static class LegacyStats
             BloodEfficiency // 11
         }
 
-        public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatMap = new()
+        public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatTypes = new()
         {
             { BloodStatType.HealingReceived, UnitStatType.HealingReceived },
             { BloodStatType.DamageReduction, UnitStatType.DamageReduction },
@@ -95,24 +94,20 @@ internal static class LegacyStats
             { BloodStatType.BloodEfficiency, UnitStatType.BloodEfficiency }
         };
 
-        static readonly Dictionary<BloodStatType, float> baseCaps = new()
+        public static readonly Dictionary<BloodStatType, float> BloodStatValues = new()
         {
-            {BloodStatType.HealingReceived, Plugin.HealingReceived.Value},
-            {BloodStatType.DamageReduction, Plugin.DamageReduction.Value},
-            {BloodStatType.PhysicalResistance, Plugin.PhysicalResistance.Value},
-            {BloodStatType.SpellResistance, Plugin.SpellResistance.Value},
-            {BloodStatType.ResourceYield, Plugin.ResourceYield.Value},
-            {BloodStatType.CCReduction, Plugin.CCReduction.Value},
-            {BloodStatType.SpellCooldownRecoveryRate, Plugin.SpellCooldownRecoveryRate.Value},
-            {BloodStatType.WeaponCooldownRecoveryRate, Plugin.WeaponCooldownRecoveryRate.Value},
-            {BloodStatType.UltimateCooldownRecoveryRate, Plugin.UltimateCooldownRecoveryRate.Value},
-            {BloodStatType.MinionDamage, Plugin.MinionDamage.Value},
-            {BloodStatType.ShieldAbsorb, Plugin.ShieldAbsorb.Value},
-            {BloodStatType.BloodEfficiency, Plugin.BloodEfficiency.Value}
+            {BloodStatType.HealingReceived, ConfigService.HealingReceived},
+            {BloodStatType.DamageReduction, ConfigService.DamageReduction},
+            {BloodStatType.PhysicalResistance, ConfigService.PhysicalResistance},
+            {BloodStatType.SpellResistance, ConfigService.SpellResistance},
+            {BloodStatType.ResourceYield, ConfigService.ResourceYield},
+            {BloodStatType.CCReduction, ConfigService.CCReduction},
+            {BloodStatType.SpellCooldownRecoveryRate, ConfigService.SpellCooldownRecoveryRate},
+            {BloodStatType.WeaponCooldownRecoveryRate, ConfigService.WeaponCooldownRecoveryRate},
+            {BloodStatType.UltimateCooldownRecoveryRate, ConfigService.UltimateCooldownRecoveryRate},
+            {BloodStatType.MinionDamage, ConfigService.MinionDamage},
+            {BloodStatType.ShieldAbsorb, ConfigService.ShieldAbsorb},
+            {BloodStatType.BloodEfficiency, ConfigService.BloodEfficiency}
         };
-        public static Dictionary<BloodStatType, float> BaseCaps
-        {
-            get => baseCaps;
-        }
     }
 }

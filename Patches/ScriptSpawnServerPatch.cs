@@ -1,4 +1,5 @@
-using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Legacies;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -12,8 +13,9 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ScriptSpawnServerPatch
 {
-    static readonly bool BloodSystem = Plugin.BloodSystem.Value;
-    static readonly bool LevelingSystem = Plugin.LevelingSystem.Value;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -26,28 +28,23 @@ internal static class ScriptSpawnServerPatch
             {
                 if (!Core.hasInitialized) continue;
 
-                //Core.Log.LogInfo($"ScriptSpawnServer: {entity.Read<PrefabGUID>().LookupName()}");
-
                 if (entity.Has<BloodBuff>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
-                    if (LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
+                    if (ConfigService.LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
                     {
                         BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
                         bloodBuff_Brute_ArmorLevelBonus_DataShared.GearLevel = 0;
                         entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
                     }
-                    if (BloodSystem && LegacyUtilities.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out LegacyUtilities.BloodType bloodType)) // applies stat choices to blood types when changed
+
+                    if (ConfigService.BloodSystem && LegacyUtilities.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out LegacyUtilities.BloodType bloodType)) // applies stat choices to blood types when changed
                     {
                         Entity character = entity.Read<EntityOwner>().Owner;
                         ModifyUnitStatBuffUtils.ApplyBloodBonuses(character, bloodType, entity);
-                        Core.ModifyUnitStatBuffSystem_Spawn.OnUpdate();
+                        ModifyUnitStatBuffSystem_Spawn.OnUpdate();
                     }
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited ScriptSpawnServer hook early: {e}");
         }
         finally
         {

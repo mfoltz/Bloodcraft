@@ -10,6 +10,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Match = System.Text.RegularExpressions.Match;
 using Regex = System.Text.RegularExpressions.Regex;
+using static Bloodcraft.Core.DataStructures;
+using Random = System.Random;
 
 namespace Bloodcraft.SystemUtilities.Quests;
 internal static class QuestUtilities
@@ -17,12 +19,12 @@ internal static class QuestUtilities
     static readonly Regex Regex = new(@"T\d{2}");
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly System.Random Random = new();
-
-    static readonly bool InfiniteDailies = Plugin.InfiniteDailies.Value;
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
+    static readonly Random Random = new();
 
     //public static HashSet<PrefabGUID> UnitPrefabs = [];
     public static HashSet<PrefabGUID> CraftPrefabs = [];
@@ -108,7 +110,7 @@ internal static class QuestUtilities
         HashSet<PrefabGUID> prefabs = [];
         foreach (PrefabGUID prefab in CraftPrefabs)
         {
-            Entity prefabEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
+            Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
             //Core.Log.LogInfo($"Checking {prefabEntity.Read<PrefabGUID>().GuidHash}...");
             PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
             if (prefabs.Contains(prefabGUID)) continue;
@@ -164,7 +166,7 @@ internal static class QuestUtilities
                 {
                     if (drop.DropTrigger == DropTriggerType.YieldResourceOnDamageTaken)
                     {
-                        Entity dropTable = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
+                        Entity dropTable = PrefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
                         if (!dropTable.Has<DropTableDataBuffer>()) continue;
                         var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                         foreach (var dropTableData in dropTableDataBuffer)
@@ -199,10 +201,6 @@ internal static class QuestUtilities
             case QuestGoal.Kill:
                 if (targets.Count != 0)
                 {
-                    if (questType.Equals(QuestType.Daily))
-                    {
-                        //targets = targets.Where(t => !t.LookupName().ToLower().Contains("vblood")).ToHashSet();
-                    }
                     target = targets.ElementAt(Random.Next(targets.Count));
                     targets.Remove(target);
                 }
@@ -256,17 +254,17 @@ internal static class QuestUtilities
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        Core.DataStructures.PlayerQuests.TryAdd(steamId, new Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)>
+        PlayerQuests.TryAdd(steamId, new Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)>
             {
                 { QuestType.Daily, (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow) },
                 { QuestType.Weekly, (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow) }
             });
 
-        Core.DataStructures.SavePlayerQuests();
+        SavePlayerQuests();
     }
     public static void RefreshQuests(User user, ulong steamId, int level)
     {
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
         {
             DateTime lastDaily = playerQuestData[QuestType.Daily].LastReset;
             DateTime lastWeekly = playerQuestData[QuestType.Weekly].LastReset;
@@ -295,7 +293,7 @@ internal static class QuestUtilities
                     playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed~");
                 }
-                Core.DataStructures.SavePlayerQuests();
+                SavePlayerQuests();
             }
         }
         else
@@ -308,12 +306,12 @@ internal static class QuestUtilities
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
         {
             playerQuestData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
             playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
 
-            Core.DataStructures.SavePlayerQuests();
+            SavePlayerQuests();
         }
         else
         {
@@ -325,10 +323,10 @@ internal static class QuestUtilities
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
         {
             playerQuestData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
-            Core.DataStructures.SavePlayerQuests();
+            SavePlayerQuests();
             LocalizationService.HandleServerReply(EntityManager, user, "<color=#00FFFF>Daily Quest</color> has been rerolled~");
         }
     }
@@ -337,10 +335,10 @@ internal static class QuestUtilities
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
         {
             playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
-            Core.DataStructures.SavePlayerQuests();
+            SavePlayerQuests();
             LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
         }
     }
@@ -352,7 +350,7 @@ internal static class QuestUtilities
         {
             User user = participant.Read<PlayerCharacter>().UserEntity.Read<User>();
             ulong steamId = user.PlatformId; // participants are character entities
-            if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData) && !processed.Contains(steamId))
+            if (PlayerQuests.TryGetValue(steamId, out var questData) && !processed.Contains(steamId))
             {
                 ProcessQuestProgress(questData, target, 1, user);
                 processed.Add(steamId);
@@ -370,11 +368,13 @@ internal static class QuestUtilities
                 updated = true;
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
-                if (Core.DataStructures.PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["QuestLogging"] && !quest.Value.Objective.Complete)
+
+                if (PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["QuestLogging"] && !quest.Value.Objective.Complete)
                 {
                     string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> <color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> [<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
                     LocalizationService.HandleServerReply(EntityManager, user, message);
                 }
+
                 if (quest.Value.Objective.RequiredAmount <= questData[quest.Key].Progress && !quest.Value.Objective.Complete)
                 {
                     quest.Value.Objective.Complete = true;
@@ -383,8 +383,11 @@ internal static class QuestUtilities
                     {
                         PrefabGUID reward = QuestRewards.Keys.ElementAt(Random.Next(QuestRewards.Count));
                         int quantity = QuestRewards[reward];
+
                         if (quest.Key == QuestType.Weekly) quantity *= QuestMultipliers[quest.Key];
+
                         if (quest.Value.Objective.Target.LookupName().ToLower().Contains("vblood")) quantity *= 3;
+
                         if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
                         {
                             string message = $"You've received <color=#ffd9eb>{reward.GetPrefabName()}</color>x<color=white>{quantity}</color> for completing your {colorType}!";
@@ -396,7 +399,8 @@ internal static class QuestUtilities
                             string message = $"You've received <color=#ffd9eb>{reward.GetPrefabName()}</color>x<color=white>{quantity}</color> for completing your {colorType}! It dropped on the ground because your inventory was full.";
                             LocalizationService.HandleServerReply(EntityManager, user, message);
                         }
-                        if (Plugin.LevelingSystem.Value)
+
+                        if (ConfigService.LevelingSystem)
                         {
                             PlayerLevelingUtilities.ProcessQuestExperienceGain(user, QuestMultipliers[quest.Key]);
                             string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.025f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
@@ -407,57 +411,22 @@ internal static class QuestUtilities
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, $"Couldn't find any valid reward prefabs...");
                     }
-                    if (quest.Key == QuestType.Daily && InfiniteDailies)
+
+                    if (quest.Key == QuestType.Daily && ConfigService.InfiniteDailies)
                     {
-                        int level = Leveling ? Core.DataStructures.PlayerExperience[user.PlatformId].Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+                        int level = ConfigService.LevelingSystem ? PlayerExperience[user.PlatformId].Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                         QuestGoal goal = QuestGoal.Kill;
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
-                        Core.DataStructures.SavePlayerQuests();
                         var dailyQuest = questData[QuestType.Daily];
+                        SavePlayerQuests();
                         LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>Daily Quest</color> available: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
                     }
                 }
             }
         }
-        if (updated) Core.DataStructures.SavePlayerQuests();
+        if (updated) SavePlayerQuests();
     }
-
-    /*
-    public static void TrackTarget(Entity character, Entity entity)
-    {
-        
-        Entity entityProjectile = PrefabCollectionSystem._PrefabGuidToEntityMap[trackingBuff];
-        Entity spawnedProjectile = EntityManager.Instantiate(entityProjectile);
-
-        float3 position = character.Read<Translation>().Value;
-
-        spawnedProjectile.Write(new LastTranslation { Value = position });
-        spawnedProjectile.Write(new Translation { Value = position });
-        spawnedProjectile.Write(new SpellTarget { Target = NetworkedEntity.ServerEntity(entity) });
-
-        float3 playerPosition = character.Read<Translation>().Value;
-        float3 targetPos = entity.Read<Translation>().Value;
-        quaternion playerRotation = character.Read<Rotation>().Value;
-        
-        Script_HomingSpell_DataShared script_HomingSpell_DataShared = spawnedProjectile.Read<Script_HomingSpell_DataShared>();
-        script_HomingSpell_DataShared.SyncServerTime = Core.ServerTime;
-        script_HomingSpell_DataShared.LastSyncedServerTime = script_HomingSpell_DataShared.SyncServerTime;
-        script_HomingSpell_DataShared.DistanceBasedData.StartDistance = playerPosition.x;
-        script_HomingSpell_DataShared.DistanceBasedData.EndDistance = targetPos.x;
-        script_HomingSpell_DataShared.PreHomingRangeData.StartPosition = playerPosition;
-        script_HomingSpell_DataShared.PreHomingRangeData.EndPosition = targetPos;
-        script_HomingSpell_DataShared.PreHomingMode = Script_HomingSpell_DataShared.PreHomingModeType.None;
-        script_HomingSpell_DataShared.SyncTargetPosition = targetPos;
-        script_HomingSpell_DataShared.SyncRotation = playerRotation;
-        script_HomingSpell_DataShared.SyncPosition = playerPosition;
-        script_HomingSpell_DataShared.Type = Script_HomingSpell_DataShared.HomingSpellType.LifeTimeBased;
-        script_HomingSpell_DataShared.ResetHitTriggersOnChangeHomingMode = true;
-        script_HomingSpell_DataShared.HomingData.SnapToTargetWhenFound = true;
-        script_HomingSpell_DataShared.HomingInitiated = true;
-        spawnedProjectile.Write(script_HomingSpell_DataShared);
-    }
-    */
     public static string GetCardinalDirection(float3 direction)
     {
         float angle = math.degrees(math.atan2(direction.z, direction.x));

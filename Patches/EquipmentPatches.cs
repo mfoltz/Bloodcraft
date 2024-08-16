@@ -1,6 +1,6 @@
-﻿using Bloodcraft.SystemUtilities.Expertise;
+﻿using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Expertise;
 using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Legacy;
 using Bloodcraft.SystemUtilities.Professions;
 using HarmonyLib;
 using ProjectM;
@@ -19,10 +19,9 @@ namespace Bloodcraft.Patches;
 internal static class EquipmentPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-    static readonly bool Professions = Plugin.ProfessionSystem.Value;
-    static readonly bool Quests = Plugin.QuestSystem.Value;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -35,7 +34,7 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
                     GearOverride.SetLevel(entityOwner.Owner);
@@ -59,26 +58,24 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Expertise && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.ExpertiseSystem && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
-                    ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
-                    PrefabGUID prefab = entity.Read<PrefabGUID>();
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
-                    if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed) || weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole))
+                    ExpertiseHandler.WeaponType weaponType = ExpertiseHandler.GetWeaponTypeFromSlotEntity(entity);
+                    if (weaponType.Equals(ExpertiseHandler.WeaponType.Unarmed) || weaponType.Equals(ExpertiseHandler.WeaponType.FishingPole))
                     {
                         ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
-                        Core.ModifyUnitStatBuffSystem_Spawn.OnUpdate();
+                        ModifyUnitStatBuffSystem_Spawn.OnUpdate();
                     }
                 }
 
-                if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(character);
                 }
-                else if (!Leveling && Expertise && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                else if (!ConfigService.LevelingSystem && ConfigService.ExpertiseSystem && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     ulong steamId = entity.Read<EntityOwner>().Owner.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
@@ -111,9 +108,8 @@ internal static class EquipmentPatches
                         unarmedLevel = weaponLevel;
                     }
 
-                    PrefabGUID prefab = entity.Read<PrefabGUID>();
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
-                    if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed))
+                    ExpertiseHandler.WeaponType weaponType = ExpertiseHandler.GetWeaponTypeFromSlotEntity(entity);
+                    if (weaponType.Equals(ExpertiseHandler.WeaponType.Unarmed))
                     {
                         entity.Write(new WeaponLevel { Level = unarmedLevel });
                     }
@@ -137,22 +133,10 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Expertise && Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
-                    Entity character = entity.Read<EntityOwner>().Owner;
-                    ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-                    PrefabGUID prefab = entity.Read<PrefabGUID>();
-
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
-                    
                     Entity player = entity.Read<EntityOwner>().Owner;
                     GearOverride.SetLevel(player);
-                }
-                else if (Leveling && !Expertise && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
-                {
-                    Entity character = entity.Read<EntityOwner>().Owner;
-                    GearOverride.SetLevel(character);
                 }
             }
         }
@@ -173,7 +157,7 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     if (entity.Has<ArmorLevel>()) entity.Write(new ArmorLevel { Level = 0f });
                 }
@@ -196,7 +180,7 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
                     GearOverride.SetLevel(entityOwner.Owner);
@@ -220,7 +204,7 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
                     GearOverride.SetLevel(entityOwner.Owner);
@@ -233,7 +217,7 @@ internal static class EquipmentPatches
         }
     }
 
-    [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
+    [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ProjectM.ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
@@ -244,13 +228,12 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Expertise && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.ExpertiseSystem && entity.Has<WeaponLevel>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
-                    ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    ExpertiseUtilities.WeaponType weaponType = ExpertiseUtilities.GetWeaponTypeFromSlotEntity(entity);
+                    ExpertiseHandler.WeaponType weaponType = ExpertiseHandler.GetWeaponTypeFromSlotEntity(entity);
 
-                    if (weaponType.Equals(ExpertiseUtilities.WeaponType.Unarmed) || weaponType.Equals(ExpertiseUtilities.WeaponType.FishingPole)) continue;
+                    if (weaponType.Equals(ExpertiseHandler.WeaponType.Unarmed) || weaponType.Equals(ExpertiseHandler.WeaponType.FishingPole)) continue;
                     ModifyUnitStatBuffUtils.ApplyWeaponBonuses(character, weaponType, entity);
                 }
             }
@@ -261,7 +244,7 @@ internal static class EquipmentPatches
         }
     }
     
-    [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
+    [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ProjectM.ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
@@ -272,7 +255,7 @@ internal static class EquipmentPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Leveling && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (ConfigService.LevelingSystem && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
                 {
                     EntityOwner entityOwner = entity.Read<EntityOwner>();
                     GearOverride.SetLevel(entityOwner.Owner);
@@ -300,7 +283,7 @@ internal static class EquipmentPatches
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
 
                 if (!EntityManager.Exists(inventory)) continue;
-                if (Professions && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
+                if (ConfigService.ProfessionSystem && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
                 {
                     //Core.Log.LogInfo("entered job processing");
                     UserOwner userOwner = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>();
@@ -350,7 +333,7 @@ internal static class EquipmentPatches
                                     {
                                         Durability durability = itemEntity.Read<Durability>();
                                         int level = handler.GetExperienceData(steamId).Key;
-                                        durability.MaxDurability *= (1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
+                                        durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                                         durability.Value = durability.MaxDurability;
                                         itemEntity.Write(durability);
                                     }
@@ -362,7 +345,7 @@ internal static class EquipmentPatches
                                     {
                                         Durability durability = itemEntity.Read<Durability>();
                                         int level = handler.GetExperienceData(steamId).Key;
-                                        durability.MaxDurability *= (1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
+                                        durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                                         durability.Value = durability.MaxDurability;
                                         itemEntity.Write(durability);
                                     }
@@ -372,7 +355,7 @@ internal static class EquipmentPatches
                                     {
                                         Durability durability = itemEntity.Read<Durability>();
                                         int level = handler.GetExperienceData(steamId).Key;
-                                        durability.MaxDurability *= (1 + (float)level / (float)Plugin.MaxProfessionLevel.Value);
+                                        durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                                         durability.Value = durability.MaxDurability;
                                         itemEntity.Write(durability);
                                     }
@@ -408,25 +391,18 @@ internal static class EquipmentPatches
 }
 internal static class ModifyUnitStatBuffUtils // need to move this out of equipment patches
 {
-    static readonly float SynergyMultiplier = Plugin.StatSynergyMultiplier.Value;
-
-    static readonly float PrestigeMultiplier = Plugin.PrestigeStatMultiplier.Value;
-
-    static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value;
-
-    static readonly int MaxBloodLevel = Plugin.MaxBloodLevel.Value;
-    public static void ApplyWeaponBonuses(Entity character, ExpertiseUtilities.WeaponType weaponType, Entity weaponEntity)
+    static EntityManager EntityManager => Core.EntityManager;
+    static ConfigService ConfigService => Core.ConfigService;
+    public static void ApplyWeaponBonuses(Entity character, ExpertiseHandler.WeaponType weaponType, Entity weaponEntity)
     {
         ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
-
-        //if (!weaponType.Equals(ExpertiseSystem.WeaponType.Unarmed)) GearOverride.SetWeaponItemLevel(equipment, handler.GetExpertiseData(steamId).Key, Core.EntityManager);
         
         if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
         {
             if (!weaponEntity.Has<ModifyUnitStatBuff_DOTS>())
             {
-                Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weaponEntity);
+                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weaponEntity);
             }
             var buffer = weaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
             foreach (var weaponStatType in bonuses)
@@ -437,7 +413,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                    if (statBuff.StatType.Equals(WeaponStatMap[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
+                    if (statBuff.StatType.Equals(WeaponStatTypes[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
                     {
                         if (weaponStatType.Equals(WeaponStatType.MovementSpeed))
                         {
@@ -454,7 +430,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 {
                     
                     // If not found, create a new stat modifier
-                    UnitStatType statType = WeaponStatMap[weaponStatType];
+                    UnitStatType statType = WeaponStatTypes[weaponStatType];
                     ModifyUnitStatBuff_DOTS newStatBuff = new()
                     {
                         StatType = statType,
@@ -480,7 +456,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
         {
             if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>())
             {
-                Core.EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
+                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
             }
 
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
@@ -492,7 +468,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                    if (statBuff.StatType.Equals(BloodStatMap[bloodStatType])) 
+                    if (statBuff.StatType.Equals(BloodStatTypes[bloodStatType])) 
                     {
                         statBuff.Value += scaledBonus; // Modify the value accordingly
                         buffer[i] = statBuff; // Assign the modified struct back to the buffer
@@ -504,7 +480,7 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
                 if (!found)
                 {
                     // If not found, create a new stat modifier
-                    UnitStatType statType = BloodStatMap[bloodStatType];
+                    UnitStatType statType = BloodStatTypes[bloodStatType];
                     ModifyUnitStatBuff_DOTS newStatBuff = new()
                     {
                         StatType = statType,
@@ -521,31 +497,31 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
             }    
         }
     }
-    public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, ExpertiseUtilities.WeaponType weaponType, ExpertiseStats.WeaponStatManager.WeaponStatType statType)
+    public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, ExpertiseHandler.WeaponType weaponType, ExpertiseStats.WeaponStatManager.WeaponStatType statType)
     {
         if (handler != null)
         {
             var xpData = handler.GetExpertiseData(steamId);
-            float maxBonus = ExpertiseStats.WeaponStatManager.BaseCaps[statType];
+            float maxBonus = ExpertiseStats.WeaponStatManager.WeaponStatValues[statType];
 
-            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Count > 0)
+            if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Count > 0)
             {
                 List<int> playerClassStats = classes.First().Value.Item1;
                 List<ExpertiseStats.WeaponStatManager.WeaponStatType> weaponStatTypes = playerClassStats.Select(value => (ExpertiseStats.WeaponStatManager.WeaponStatType)value).ToList();
                 if (weaponStatTypes.Contains(statType))
                 {
-                    maxBonus *= SynergyMultiplier;
+                    maxBonus *= ConfigService.StatSynergyMultiplier;
                 }
                 
             }
 
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(ExpertiseUtilities.WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
+            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(ExpertiseHandler.WeaponPrestigeMap[weaponType], out var PrestigeData) && PrestigeData > 0)
             {
-                float gainFactor = 1 + (PrestigeMultiplier * PrestigeData);
+                float gainFactor = 1 + (ConfigService.PrestigeStatMultiplier * PrestigeData);
                 maxBonus *= gainFactor;
             }
             
-            float scaledBonus = maxBonus * ((float)xpData.Key / MaxExpertiseLevel); // Scale bonus up to 99%
+            float scaledBonus = maxBonus * ((float)xpData.Key / ConfigService.MaxExpertiseLevel); // Scale bonus up to 99%
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
@@ -555,34 +531,34 @@ internal static class ModifyUnitStatBuffUtils // need to move this out of equipm
         if (handler != null)
         {
             var xpData = handler.GetLegacyData(steamId);
-            float maxBonus = LegacyStats.BloodStatManager.BaseCaps[statType];
+            float maxBonus = LegacyStats.BloodStatManager.BloodStatValues[statType];
 
-            if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Count > 0)
+            if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Count > 0)
             {
                 List<int> playerClassStats = classes.First().Value.Item2;
                 List<LegacyStats.BloodStatManager.BloodStatType> bloodStatTypes = playerClassStats.Select(value => (LegacyStats.BloodStatManager.BloodStatType)value).ToList();
                 if (bloodStatTypes.Contains(statType))
                 {
-                    maxBonus *= SynergyMultiplier;
+                    maxBonus *= ConfigService.StatSynergyMultiplier;
                 }
             }
 
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(LegacyUtilities.BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
             {
-                float gainFactor = 1 + (PrestigeMultiplier * PrestigeData);
+                float gainFactor = 1 + (ConfigService.PrestigeStatMultiplier * PrestigeData);
                 maxBonus *= gainFactor;
             }
             
-            float scaledBonus = maxBonus * ((float)xpData.Key / MaxBloodLevel); // Scale bonus up to maxLevel then full effect
+            float scaledBonus = maxBonus * ((float)xpData.Key / ConfigService.MaxBloodLevel); // Scale bonus up to maxLevel then full effect
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
     }
-    public static ExpertiseUtilities.WeaponType GetCurrentWeaponType(Entity character)
+    public static ExpertiseHandler.WeaponType GetCurrentWeaponType(Entity character)
     {
         Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
         //if (weapon.Equals(Entity.Null)) return ExpertiseUtilities.WeaponType.Unarmed;
-        return ExpertiseUtilities.GetWeaponTypeFromSlotEntity(weapon);
+        return ExpertiseHandler.GetWeaponTypeFromSlotEntity(weapon);
     }
     public static LegacyUtilities.BloodType GetCurrentBloodType(Entity character)
     {

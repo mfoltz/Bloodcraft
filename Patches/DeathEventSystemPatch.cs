@@ -1,7 +1,8 @@
+using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Experience;
 using Bloodcraft.SystemUtilities.Expertise;
 using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Legacies;
 using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
@@ -16,12 +17,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static readonly bool Professions = Plugin.ProfessionSystem.Value;
-    static readonly bool Legacies = Plugin.BloodSystem.Value;
-    static readonly bool Quests = Plugin.QuestSystem.Value;
+    static ConfigService ConfigService => Core.ConfigService;
 
     [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
     [HarmonyPostfix]
@@ -37,7 +33,7 @@ internal static class DeathEventListenerSystemPatch
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
 
-                if (Familiars && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
+                if (ConfigService.FamiliarSystem && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
                 {
                     ulong steamId = deathEvent.Died.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     //if (FamiliarPatches.familiarMinions.ContainsKey(deathEvent.Died)) Core.FamiliarService.HandleFamiliarMinions(deathEvent.Died);
@@ -55,27 +51,31 @@ internal static class DeathEventListenerSystemPatch
                     {
                         if (!isStatChangeInvalid ) // only process non-feed related deaths here except for gatebosses
                         {
-                            if (Leveling) PlayerLevelingUtilities.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
-                            if (Expertise) ExpertiseUtilities.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
-                            if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
-                            if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                            if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                            if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
+                            if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
+                            if (ConfigService.FamiliarSystem)
+                            {
+                                FamiliarLevelingUtilities.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
+                                FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                            }
+                            if (ConfigService.QuestSystem) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                         }
                         else if (deathEvent.Died.Has<VBloodUnit>())
                         {
-                            if (Leveling) PlayerLevelingUtilities.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
-                            if (Expertise) ExpertiseUtilities.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
-                            if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
-                            if (Legacies) LegacyUtilities.UpdateLegacy(deathEvent.Killer, deathEvent.Died);
-                            if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                            if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                            if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
+                            if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
+                            if (ConfigService.FamiliarSystem)
+                            {
+                                FamiliarLevelingUtilities.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
+                                FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
+                            }
+                            if (ConfigService.BloodSystem) LegacyUtilities.UpdateLegacy(deathEvent.Killer, deathEvent.Died);
+                            if (ConfigService.QuestSystem) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                         }
-                        //if (Familiars) FamiliarUnlockUtilities.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                        //if (Quests) QuestUtilities.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
                     else
                     {
-                        if (Professions && !hasVBloodConsumeSource) // if no movement, handle resource harvest
+                        if (ConfigService.ProfessionSystem && !hasVBloodConsumeSource) // if no movement, handle resource harvest
                         {
                             ProfessionUtilities.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
                         }
@@ -87,9 +87,9 @@ internal static class DeathEventListenerSystemPatch
                     Entity userEntity = followedPlayer.Read<PlayerCharacter>().UserEntity;
                     if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
                     {
-                        if (Leveling) PlayerLevelingUtilities.UpdateLeveling(followedPlayer, deathEvent.Died);
-                        if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(followedPlayer, deathEvent.Died);
-                        if (Quests) QuestUtilities.UpdateQuests(followedPlayer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                        if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(followedPlayer, deathEvent.Died);
+                        if (ConfigService.FamiliarSystem) FamiliarLevelingUtilities.UpdateFamiliar(followedPlayer, deathEvent.Died);
+                        if (ConfigService.QuestSystem) QuestUtilities.UpdateQuests(followedPlayer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>()) // player summon kills
@@ -98,9 +98,9 @@ internal static class DeathEventListenerSystemPatch
                     Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
                     if (!hasVBloodConsumeSource)
                     {
-                        if (Leveling) PlayerLevelingUtilities.UpdateLeveling(killer, deathEvent.Died);
-                        if (Expertise) ExpertiseUtilities.UpdateExpertise(killer, deathEvent.Died);
-                        if (Quests) QuestUtilities.UpdateQuests(killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                        if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(killer, deathEvent.Died);
+                        if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(killer, deathEvent.Died);
+                        if (ConfigService.QuestSystem) QuestUtilities.UpdateQuests(killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
@@ -113,17 +113,13 @@ internal static class DeathEventListenerSystemPatch
                         Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
                         if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
                         {
-                            if (Leveling) PlayerLevelingUtilities.UpdateLeveling(follower.Followed._Value, deathEvent.Died);
-                            if (Familiars) FamiliarLevelingUtilities.UpdateFamiliar(follower.Followed._Value, deathEvent.Died);
-                            if (Quests) QuestUtilities.UpdateQuests(character, userEntity, deathEvent.Died.Read<PrefabGUID>());
+                            if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(follower.Followed._Value, deathEvent.Died);
+                            if (ConfigService.FamiliarSystem) FamiliarLevelingUtilities.UpdateFamiliar(follower.Followed._Value, deathEvent.Died);
+                            if (ConfigService.QuestSystem) QuestUtilities.UpdateQuests(character, userEntity, deathEvent.Died.Read<PrefabGUID>());
                         }
                     }
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited DeathEventListenerSystem hook early: {e}");
         }
         finally
         {

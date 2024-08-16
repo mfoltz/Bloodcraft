@@ -1,5 +1,6 @@
 using ProjectM;
 using ProjectM.Network;
+using Stunlock.Core;
 using Stunlock.Localization;
 using System.Reflection;
 using System.Text;
@@ -13,9 +14,11 @@ using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 namespace Bloodcraft.Services;
 internal class LocalizationService
 {
+    static ConfigService ConfigService => Core.ConfigService;
+
     static readonly string regexPattern = @"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)";
     static readonly Regex regex = new(regexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    public static readonly string LanguageLocalization = Plugin.LanguageLocalization.Value;
+    static readonly string LanguageLocalization = ConfigService.LanguageLocalization;
     struct Code
     {
         public string Key { get; set; }
@@ -39,9 +42,9 @@ internal class LocalizationService
         public Words[] Words { get; set; }
     }
 
-    public static Dictionary<string, string> Localization = [];
-    public static Dictionary<int, string> PrefabNames = [];
-    public static Dictionary<string, string> LocalizedWords = [];
+    static Dictionary<string, string> Localization = [];
+    static Dictionary<int, string> PrefabNames = [];
+    static Dictionary<string, string> LocalizedWords = [];
 
     static readonly Dictionary<string, string> LocalizationMapping = new()
     {
@@ -128,7 +131,7 @@ internal class LocalizationService
         string jsonContent = reader.ReadToEnd();
         PrefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
     }
-    public static void HandleReply(ChatCommandContext ctx, string message)
+    public void HandleReply(ChatCommandContext ctx, string message)
     {
         if (LanguageLocalization == "English")
         {
@@ -139,7 +142,7 @@ internal class LocalizationService
             ctx.Reply(GetLocalizedWords(message));
         }
     }
-    public static void HandleServerReply(EntityManager entityManager, User user, string message)
+    public void HandleServerReply(EntityManager entityManager, User user, string message)
     {
         if (LanguageLocalization == "English")
         {
@@ -150,12 +153,20 @@ internal class LocalizationService
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
         }
     }
-    public static string GetLocalizationFromKey(LocalizationKey key)
+    public string GetLocalizationFromKey(LocalizationKey key)
     {
         var guid = key.Key.ToGuid().ToString();
         return GetLocalization(guid);
     }
-    public static string GetLocalization(string Guid)
+    public string GetPrefabName(PrefabGUID prefabGUID)
+    {
+        if (PrefabNames.TryGetValue(prefabGUID.GuidHash, out var itemLocalizationHash))
+        {
+            return GetLocalization(itemLocalizationHash);
+        }
+        return prefabGUID.LookupName();
+    }
+    public string GetLocalization(string Guid)
     {
         if (Localization.TryGetValue(Guid, out var Text))
         {
@@ -163,7 +174,7 @@ internal class LocalizationService
         }
         return "Couldn't find key for localization...";
     }
-    public static string GetLocalizedWords(string message)
+    public string GetLocalizedWords(string message)
     {
         StringBuilder result = new();
         int lastIndex = 0;

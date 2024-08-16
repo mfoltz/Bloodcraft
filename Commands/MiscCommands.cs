@@ -6,39 +6,35 @@ using ProjectM.Gameplay.Systems;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
 internal static class MiscCommands
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static CombatMusicSystem_Server CombatMusicSystem_Server => Core.CombatMusicSystem_Server;
-    static ClaimAchievementSystem ClaimAchievementSystem => Core.ClaimAchievementSystem;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => Core.EntityCommandBufferSystem;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static CombatMusicSystem_Server CombatMusicSystem_Server => SystemService.CombatMusicSystem_Server;
+    static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static readonly PrefabGUID combatBuff = new(581443919);
-
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool StarterKit = Plugin.StarterKit.Value;
     public static Dictionary<PrefabGUID, int> KitPrefabs = [];
-
-    static readonly bool UnarmedSlots = Plugin.UnarmedSlots.Value;
-    static readonly bool ShiftSlot = Plugin.ShiftSlot.Value;
-    static readonly bool ClassesInactive = !Plugin.SoftSynergies.Value && !Plugin.HardSynergies.Value;
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
     public static void KitMe(ChatCommandContext ctx)
     {
-        if (!StarterKit)
+        if (!ConfigService.StarterKit)
         {
             LocalizationService.HandleReply(ctx, "Starter kit is not enabled.");
             return;
         }
-        if (Core.DataStructures.PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && !bools["Kit"])
+        if (PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && !bools["Kit"])
         {
             bools["Kit"] = true;
             Entity character = ctx.Event.SenderCharacterEntity;
-            Core.DataStructures.SavePlayerBools();
+            SavePlayerBools();
             foreach (var item in KitPrefabs)
             {
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
@@ -54,7 +50,7 @@ internal static class MiscCommands
     [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
     public static void QuickStartCommand(ChatCommandContext ctx)
     {
-        if (!Leveling)
+        if (!ConfigService.LevelingSystem)
         {
             LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
@@ -71,7 +67,7 @@ internal static class MiscCommands
     [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
     public static void LockPlayerSpells(ChatCommandContext ctx)
     {
-        if (!UnarmedSlots)
+        if (!ConfigService.UnarmedSlots)
         {
             LocalizationService.HandleReply(ctx, "Extra spell slots for unarmed are not enabled.");
             return;
@@ -80,7 +76,7 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+        if (PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["SpellLock"] = !bools["SpellLock"];
             if (bools["SpellLock"])
@@ -91,19 +87,19 @@ internal static class MiscCommands
             {
                 LocalizationService.HandleReply(ctx, "Spells set.");
             }
-            Core.DataStructures.SavePlayerBools();
+            SavePlayerBools();
         }
     }
 
     [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
     public static void ShiftPlayerSpells(ChatCommandContext ctx)
     {
-        if (ClassesInactive)
+        if (ConfigService.ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
             return;
         }
-        if (!ShiftSlot)
+        if (!ConfigService.ShiftSlot)
         {
             LocalizationService.HandleReply(ctx, "Shift slots are not enabled.");
             return;
@@ -112,7 +108,7 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+        if (PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["ShiftLock"] = !bools["ShiftLock"];
             if (bools["ShiftLock"])
@@ -123,7 +119,7 @@ internal static class MiscCommands
             {
                 LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
             }
-            Core.DataStructures.SavePlayerBools();
+            SavePlayerBools();
         }
     }
 
@@ -166,7 +162,7 @@ internal static class MiscCommands
     }
 
     [Command(name: "testcommand", adminOnly: true, usage: ".test", description: "Tired of remaking commands to test one thing at a time, just gonna leave this here and comment out in future releases :p")]
-    public static void ZoneInfoCommand(ChatCommandContext ctx)
+    public static void SyncedComponentsInfo(ChatCommandContext ctx)
     {
         SyncedCollection syncedCollection = new();
         if (syncedCollection != null)

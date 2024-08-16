@@ -4,20 +4,19 @@ using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
+using static Bloodcraft.Utilities;
+using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Services;
 internal class QuestService
 {
     static EntityManager EntityManager => Core.EntityManager;
-
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool EliteShardBearers = Plugin.EliteShardBearers.Value;
+    static ConfigService ConfigService => Core.ConfigService;
+    static PlayerService PlayerService => Core.PlayerService;
 
     static readonly WaitForSeconds updateDelay = new(60);
     static readonly WaitForSeconds startDelay = new(30);
@@ -39,7 +38,7 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<UnitRespawnTime>())
     ];
 
-    static EntityQuery UnitQuery;
+    public static EntityQuery UnitQuery;
     static EntityQuery VBloodQuery; // using other one worked better, need to check this at some point but just using other query for now
 
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
@@ -66,18 +65,15 @@ internal class QuestService
             All = VBloodComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
-        List<PrefabGUID> questRewards = Core.ParseConfigString(Plugin.QuestRewards.Value).Select(x => new PrefabGUID(x)).ToList();
-        List<int> rewardAmounts = [.. Core.ParseConfigString(Plugin.QuestRewardAmounts.Value)];
-        QuestRewards = questRewards.Zip(rewardAmounts, (reward, amount) => new { reward, amount }).ToDictionary(x => x.reward, x => x.amount);
         Core.StartCoroutine(QuestUpdateLoop());
     }
-    static IEnumerator QuestUpdateLoop()
+    IEnumerator QuestUpdateLoop()
     {
         while (true)
         {
-            if (EliteShardBearers && !ShardBearersReset)
+            if (ConfigService.EliteShardBearers && !ShardBearersReset)
             {
-                IEnumerable<Entity> vBloods = GetVBloodsEnumerable();
+                IEnumerable<Entity> vBloods = GetEntitiesEnumerable(UnitQuery);
                 foreach (Entity entity in vBloods)
                 {
                     PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
@@ -97,15 +93,14 @@ internal class QuestService
             }
 
             Dictionary<string, Entity> players = new(PlayerService.UserCache); // Copy the player cache to make sure updates to that don't interfere with loop
-
             foreach (string player in players.Keys)
             {
                 User user = players[player].Read<User>();
                 ulong steamId = user.PlatformId;
-                if (!Leveling)
+                if (!ConfigService.LevelingSystem)
                 {
                     Entity character = user.LocalCharacter._Entity;
-                    if (Core.DataStructures.PlayerQuests.ContainsKey(steamId))
+                    if (PlayerQuests.ContainsKey(steamId))
                     {
                         RefreshQuests(user, steamId, (int)character.Read<Equipment>().GetFullLevel());
                     }
@@ -114,9 +109,9 @@ internal class QuestService
                         InitializePlayerQuests(steamId, (int)character.Read<Equipment>().GetFullLevel());
                     }
                 }
-                else if (Leveling && Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
+                else if (ConfigService.LevelingSystem && PlayerExperience.TryGetValue(steamId, out var xpData))
                 {
-                    if (Core.DataStructures.PlayerQuests.ContainsKey(steamId))
+                    if (PlayerQuests.ContainsKey(steamId))
                     {
                         RefreshQuests(user, steamId, xpData.Key);
                     }
@@ -127,7 +122,7 @@ internal class QuestService
                 }
             }
 
-            TargetCache = GetTargetsEnumerable()
+            TargetCache = GetEntitiesEnumerable(UnitQuery, true)
                 .GroupBy(entity => entity.Read<PrefabGUID>())
                 .ToDictionary(
                     group => group.Key,
@@ -156,93 +151,5 @@ internal class QuestService
             yield return updateDelay; // Wait 60 seconds before processing players/units again
         }
     }
-    static IEnumerable<Entity> GetTargetsEnumerable()
-    {
-        JobHandle handle = GetTargets(out NativeArray<Entity> unitEntities, Allocator.TempJob);
-        handle.Complete();
-        try
-        {
-            foreach (Entity entity in unitEntities)
-            {
-                if (EntityManager.Exists(entity) && !entity.ReadBuffer<BuffBuffer>().IsEmpty)
-                {
-                    yield return entity;
-                }
-            }
-        }
-        finally
-        {
-            unitEntities.Dispose();
-        }
-    }
-    static JobHandle GetTargets(out NativeArray<Entity> unitEntities, Allocator allocator = Allocator.TempJob)
-    {
-        unitEntities = UnitQuery.ToEntityArray(allocator);
-        return default;
-    }
-    static IEnumerable<Entity> GetVBloodsEnumerable()
-    {
-        JobHandle handle = GetTargets(out NativeArray<Entity> unitEntities, Allocator.TempJob);
-        handle.Complete();
-        try
-        {
-            foreach (Entity entity in unitEntities)
-            {
-                if (EntityManager.Exists(entity))
-                {
-                    yield return entity;
-                }
-            }
-        }
-        finally
-        {
-            unitEntities.Dispose();
-        }
-    }
-    /*
-    static JobHandle GetVBloods(out NativeArray<Entity> unitEntities, Allocator allocator = Allocator.TempJob)
-    {
-        unitEntities = VBloodQuery.ToEntityArray(allocator);
-        return default;
-    }
-    
-    static void AddPrefabsToBloodHuntBuffer()
-    {
-        ProjectM.UI.GetVBloodsPositionResponseSystem getVBloodsPositionResponseSystem = Core.GetVBloodsPositionResponseSystem;
-        var positions = getVBloodsPositionResponseSystem._Positions;
-        Entity bloodHuntData = PrefabCollectionSystem._PrefabGuidToEntityMap[BloodHunts];
-        DynamicBuffer<BloodHuntBuffer> bloodHuntBuffer = bloodHuntData.ReadBuffer<BloodHuntBuffer>();
-
-        List<PrefabGUID> prefabGUIDs = [.. TargetCache.Keys];
-
-        NativeArray<BloodHuntBuffer> bloodHunts = new(prefabGUIDs.Count, Allocator.Temp);
-
-        for (int i = 0; i < prefabGUIDs.Count; i++)
-        {
-            
-            bloodHunts[i] = new BloodHuntBuffer
-            {
-                BloodHuntTarget = prefabGUIDs[i],
-                IsUnlockedByStation = true
-            };
-        }
-
-        // Resize the buffer if necessary
-        int newCount = bloodHuntBuffer.Length + bloodHunts.Length;
-        if (bloodHuntBuffer.Capacity < newCount)
-        {
-            bloodHuntBuffer.Capacity = newCount;
-        }
-
-        // Add the new BloodHuntBuffer elements to the buffer
-        foreach (BloodHuntBuffer bloodHunt in bloodHunts)
-        {
-            bloodHuntBuffer.Add(bloodHunt);
-        }
-
-        // Dispose of the temporary NativeArray
-        bloodHunts.Dispose();
-    }
-    */
 }
 

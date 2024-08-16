@@ -1,7 +1,7 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Legacies;
 using Bloodcraft.SystemUtilities.Leveling;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -11,51 +11,26 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using VampireCommandFramework;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.SystemUtilities.Experience;
 internal static class PlayerLevelingUtilities
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => Core.EntityCommandBufferSystem;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static PlayerService PlayerService => Core.PlayerService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly float UnitMultiplier = Plugin.UnitLevelingMultiplier.Value; // multipler for normal units
-    static readonly float VBloodMultiplier = Plugin.VBloodLevelingMultiplier.Value; // multiplier for VBlood units
-    static readonly float EXPConstant = 0.1f; // constant for calculating level from xp
-    static readonly float EXPPower = 2f; // power for calculating level from xp
-    static readonly int MaxPlayerLevel = Plugin.MaxPlayerLevel.Value; // maximum level
-    static readonly float GroupMultiplier = Plugin.GroupLevelingMultiplier.Value; // multiplier for group kills
-    static readonly float LevelScalingMultiplier = Plugin.LevelScalingMultiplier.Value;
-    static readonly float UnitSpawnerMultiplier = Plugin.UnitSpawnerMultiplier.Value;
-    static readonly float DocileUnitMultiplier = Plugin.DocileUnitMultiplier.Value;
-    static readonly float WarEventMultiplier = Plugin.WarEventMultiplier.Value;
-    static readonly float ExpShareDistance = Plugin.ExpShareDistance.Value;
-    static readonly float LevelingPrestigeReducer = Plugin.LevelingPrestigeReducer.Value;
-
-    static readonly bool RestedXP = Plugin.RestedXP.Value;
-    static readonly bool PlayerParties = Plugin.Parties.Value;
-    static readonly int MaxPartySize = Plugin.MaxPartySize.Value;
-    static readonly bool Classes = Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value;
-    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool Legacies = Plugin.BloodSystem.Value;
-    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-    static readonly bool Quests = Plugin.QuestSystem.Value;
-    static readonly bool ClientCompanion = Plugin.ClientCompanion.Value;
+    const float EXPConstant = 0.1f; // constant for calculating level from xp
+    const float EXPPower = 2f; // power for calculating level from xp
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
-
-    static float4x4 playerDataMatrix = new
-    (
-        new float4(0f, 0f, 0f, 0f),
-        new float4(0f, 0f, 0f, 0f),
-        new float4(0f, 0f, 0f, 0f),
-        new float4(0f, 0f, 0f, 1f)
-    );
     public enum PlayerClasses
     {
         BloodKnight,
@@ -68,32 +43,32 @@ internal static class PlayerLevelingUtilities
 
     public static readonly Dictionary<PlayerClasses, (string, string)> ClassWeaponBloodMap = new()
     {
-        { PlayerClasses.BloodKnight, (Plugin.BloodKnightWeapon.Value, Plugin.BloodKnightBlood.Value) },
-        { PlayerClasses.DemonHunter, (Plugin.DemonHunterWeapon.Value, Plugin.DemonHunterBlood.Value) },
-        { PlayerClasses.VampireLord, (Plugin.VampireLordWeapon.Value, Plugin.VampireLordBlood.Value) },
-        { PlayerClasses.ShadowBlade, (Plugin.ShadowBladeWeapon.Value, Plugin.ShadowBladeBlood.Value) },
-        { PlayerClasses.ArcaneSorcerer, (Plugin.ArcaneSorcererWeapon.Value, Plugin.ArcaneSorcererBlood.Value) },
-        { PlayerClasses.DeathMage, (Plugin.DeathMageWeapon.Value, Plugin.DeathMageBlood.Value) }
+        { PlayerClasses.BloodKnight, (ConfigService.BloodKnightWeapon, ConfigService.BloodKnightBlood) },
+        { PlayerClasses.DemonHunter, (ConfigService.DemonHunterWeapon, ConfigService.DemonHunterBlood) },
+        { PlayerClasses.VampireLord, (ConfigService.VampireLordWeapon, ConfigService.VampireLordBlood) },
+        { PlayerClasses.ShadowBlade, (ConfigService.ShadowBladeWeapon, ConfigService.ShadowBladeBlood) },
+        { PlayerClasses.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeapon, ConfigService.ArcaneSorcererBlood) },
+        { PlayerClasses.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
     };
 
     public static readonly Dictionary<PlayerClasses, string> ClassPrestigeBuffsMap = new()
     {
-        { PlayerClasses.BloodKnight, Plugin.BloodKnightBuffs.Value },
-        { PlayerClasses.DemonHunter, Plugin.DemonHunterBuffs.Value },
-        { PlayerClasses.VampireLord, Plugin.VampireLordBuffs.Value },
-        { PlayerClasses.ShadowBlade, Plugin.ShadowBladeBuffs.Value },
-        { PlayerClasses.ArcaneSorcerer, Plugin.ArcaneSorcererBuffs.Value },
-        { PlayerClasses.DeathMage, Plugin.DeathMageBuffs.Value }
+        { PlayerClasses.BloodKnight, ConfigService.BloodKnightBuffs },
+        { PlayerClasses.DemonHunter, ConfigService.DemonHunterBuffs },
+        { PlayerClasses.VampireLord, ConfigService.VampireLordBuffs },
+        { PlayerClasses.ShadowBlade, ConfigService.ShadowBladeBuffs },
+        { PlayerClasses.ArcaneSorcerer, ConfigService.ArcaneSorcererBuffs },
+        { PlayerClasses.DeathMage, ConfigService.DeathMageBuffs }
     };
 
     public static readonly Dictionary<PlayerClasses, string> ClassSpellsMap = new()
     {
-        { PlayerClasses.BloodKnight, Plugin.BloodKnightSpells.Value },
-        { PlayerClasses.DemonHunter, Plugin.DemonHunterSpells.Value },
-        { PlayerClasses.VampireLord, Plugin.VampireLordSpells.Value },
-        { PlayerClasses.ShadowBlade, Plugin.ShadowBladeSpells.Value },
-        { PlayerClasses.ArcaneSorcerer, Plugin.ArcaneSorcererSpells.Value },
-        { PlayerClasses.DeathMage, Plugin.DeathMageSpells.Value }
+        { PlayerClasses.BloodKnight, ConfigService.BloodKnightSpells },
+        { PlayerClasses.DemonHunter, ConfigService.DemonHunterSpells },
+        { PlayerClasses.VampireLord, ConfigService.VampireLordSpells },
+        { PlayerClasses.ShadowBlade, ConfigService.ShadowBladeSpells },
+        { PlayerClasses.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
+        { PlayerClasses.DeathMage, ConfigService.DeathMageSpells }
     };
 
     public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassOnHitDebuffMap = new() // tier 1
@@ -118,33 +93,32 @@ internal static class PlayerLevelingUtilities
     };
     public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
     {
-        if (!IsValidVictim(EntityManager, victimEntity)) return;
-        HandleExperienceUpdate(EntityManager, killerEntity, victimEntity);
+        if (!IsValidVictim(victimEntity)) return;
+        HandleExperienceUpdate(killerEntity, victimEntity);
     }
-
-    static bool IsValidVictim(EntityManager entityManager, Entity victimEntity)
+    static bool IsValidVictim(Entity victimEntity)
     {
-        return !entityManager.HasComponent<Minion>(victimEntity) && entityManager.HasComponent<UnitLevel>(victimEntity);
+        return !victimEntity.Has<Minion>() && victimEntity.Has<UnitLevel>();
     }
-    static void HandleExperienceUpdate(EntityManager entityManager, Entity killerEntity, Entity victimEntity)
+    static void HandleExperienceUpdate(Entity killerEntity, Entity victimEntity)
     {
-        PlayerCharacter player = entityManager.GetComponentData<PlayerCharacter>(killerEntity);
+        PlayerCharacter player = killerEntity.Read<PlayerCharacter>();
         Entity userEntity = player.UserEntity;
         float groupMultiplier = 1;
 
-        if (IsVBlood(entityManager, victimEntity))
+        if (IsVBlood(victimEntity))
         {
-            ProcessExperienceGain(entityManager, killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
+            ProcessExperienceGain(killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
             return;
         }
         
         HashSet<Entity> participants = GetParticipants(killerEntity, userEntity); // want list of participants to process experience for
-        if (participants.Count > 1) groupMultiplier = GroupMultiplier; // if more than 1 participant, apply group multiplier
+        if (participants.Count > 1) groupMultiplier = ConfigService.GroupLevelingMultiplier; // if more than 1 participant, apply group multiplier
         foreach (Entity participant in participants)
         {
             ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId; // participants are character entities
-            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= MaxPlayerLevel) continue; // Check if already at max level
-            ProcessExperienceGain(entityManager, participant, victimEntity, steamId, groupMultiplier);
+            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= ConfigService.MaxPlayerLevel) continue; // Check if already at max level
+            ProcessExperienceGain(participant, victimEntity, steamId, groupMultiplier);
         }
     }
     public static HashSet<Entity> GetParticipants(Entity killer, Entity userEntity)
@@ -153,7 +127,7 @@ internal static class PlayerLevelingUtilities
         User killerUser = userEntity.Read<User>();
         HashSet<Entity> players = [killer];
 
-        if (PlayerParties)
+        if (ConfigService.Parties)
         {
             foreach (var groupEntry in Core.DataStructures.PlayerParties)
             {
@@ -161,11 +135,11 @@ internal static class PlayerLevelingUtilities
                 {
                     foreach (string name in groupEntry.Value)
                     {
-                        if (PlayerService.PlayerCache.TryGetValue(name, out var player))
+                        if (PlayerService.UserCache.TryGetValue(name, out var player))
                         {
                             if (!player.Read<User>().IsConnected) continue;
                             var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
-                            if (distance > ExpShareDistance) continue;
+                            if (distance > ConfigService.ExpShareDistance) continue;
                             players.Add(player.Read<User>().LocalCharacter._Entity);
                         }
                     }
@@ -185,58 +159,58 @@ internal static class PlayerLevelingUtilities
             if (!user.IsConnected) continue;
             Entity player = user.LocalCharacter._Entity;
             var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
-            if (distance > ExpShareDistance) continue;
+            if (distance > ConfigService.ExpShareDistance) continue;
             players.Add(player);
         }
 
         return players;
     }
-    static void ProcessExperienceGain(EntityManager entityManager, Entity killerEntity, Entity victimEntity, ulong SteamID, float groupMultiplier)
+    static void ProcessExperienceGain(Entity killerEntity, Entity victimEntity, ulong SteamID, float groupMultiplier)
     {
-        UnitLevel victimLevel = entityManager.GetComponentData<UnitLevel>(victimEntity);
-        Health health = entityManager.GetComponentData<Health>(victimEntity);
+        UnitLevel victimLevel = victimEntity.Read<UnitLevel>();
+        Health health = victimEntity.Read<Health>();
 
-        bool isVBlood = IsVBlood(entityManager, victimEntity);
+        bool isVBlood = IsVBlood(victimEntity);
         int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
         float gainedXP = CalculateExperienceGained(victimLevel.Level._Value, isVBlood);
 
         gainedXP += additionalXP;
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
 
-        if (currentLevel >= MaxPlayerLevel) return; // Check if already at max level
+        if (currentLevel >= ConfigService.MaxPlayerLevel) return; // Check if already at max level
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
         
         if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
             int exoLevel = prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Exo, out var exo) ? exo : 0;
-            float expReductionFactor = 1 - (LevelingPrestigeReducer * PrestigeData);
+            float expReductionFactor = 1 - (ConfigService.LevelingPrestigeReducer * PrestigeData);
             if (exoLevel == 0)
             {
                 gainedXP *= expReductionFactor;
             }
         }
 
-        if (UnitSpawnerMultiplier < 1 && victimEntity.Has<IsMinion>() && victimEntity.Read<IsMinion>().Value)
+        if (ConfigService.UnitSpawnerMultiplier < 1 && victimEntity.Has<IsMinion>() && victimEntity.Read<IsMinion>().Value)
         {
-            gainedXP *= UnitSpawnerMultiplier;
+            gainedXP *= ConfigService.UnitSpawnerMultiplier;
             if (gainedXP == 0) return;
         }
 
-        if (WarEventMultiplier < 1 && victimEntity.Has<SpawnBuffElement>())
+        if (ConfigService.WarEventMultiplier < 1 && victimEntity.Has<SpawnBuffElement>())
         {
             var spawnBuffElement = victimEntity.ReadBuffer<SpawnBuffElement>();
             for (int i = 0; i < spawnBuffElement.Length; i++)
             {
                 if (spawnBuffElement[i].Buff.Equals(warEventTrash))
                 {
-                    gainedXP *= WarEventMultiplier;
+                    gainedXP *= ConfigService.WarEventMultiplier;
                     break;
                 }
             }
         }
 
-        if (DocileUnitMultiplier < 1 && victimEntity.Has<AggroConsumer>() && !isVBlood)
+        if (ConfigService.DocileUnitMultiplier < 1 && victimEntity.Has<AggroConsumer>() && !isVBlood)
         {
             if (victimEntity.Read<AggroConsumer>().AlertDecayPerSecond == 99)
             {
@@ -246,7 +220,7 @@ internal static class PlayerLevelingUtilities
 
         gainedXP *= groupMultiplier;
         int rested = 0;
-        if (RestedXP) gainedXP = HandleRestedXP(SteamID, gainedXP, ref rested);
+        if (ConfigService.RestedXP) gainedXP = HandleRestedXP(SteamID, gainedXP, ref rested);
 
         UpdatePlayerExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel, rested);
@@ -278,15 +252,15 @@ internal static class PlayerLevelingUtilities
         UpdatePlayerExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(character, SteamID, gainedXP, currentLevel);
     }
-    static bool IsVBlood(EntityManager entityManager, Entity victimEntity)
+    static bool IsVBlood(Entity victimEntity)
     {
-        return entityManager.HasComponent<VBloodConsumeSource>(victimEntity);
+        return victimEntity.Has<VBloodConsumeSource>();
     }
     static float CalculateExperienceGained(int victimLevel, bool isVBlood)
     {
         int baseXP = victimLevel;
-        if (isVBlood) return baseXP * VBloodMultiplier;
-        return baseXP * UnitMultiplier;
+        if (isVBlood) return baseXP * ConfigService.VBloodLevelingMultiplier;
+        return baseXP * ConfigService.UnitLevelingMultiplier;
     }
     static void UpdatePlayerExperience(ulong SteamID, float gainedXP)
     {
@@ -297,10 +271,11 @@ internal static class PlayerLevelingUtilities
 
         float newExperience = xpData.Value + gainedXP;
         int newLevel = ConvertXpToLevel(newExperience);
-        if (newLevel > MaxPlayerLevel)
+
+        if (newLevel > ConfigService.MaxPlayerLevel)
         {
-            newLevel = MaxPlayerLevel; // Cap the level at the maximum
-            newExperience = ConvertLevelToXp(MaxPlayerLevel); // Adjust the XP to the max level's XP
+            newLevel = ConfigService.MaxPlayerLevel; // Cap the level at the maximum
+            newExperience = ConvertLevelToXp(ConfigService.MaxPlayerLevel); // Adjust the XP to the max level's XP
         }
 
         Core.DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, newExperience);
@@ -324,7 +299,7 @@ internal static class PlayerLevelingUtilities
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (Classes) ApplyClassBuffsAtThresholds(characterEntity, SteamID, fromCharacter);
+            if (ConfigService.Classes) ApplyClassBuffsAtThresholds(characterEntity, SteamID, fromCharacter);
         }
         NotifyPlayer(userEntity, SteamID, (int)gainedXP, leveledUp, restedXP);
     }
@@ -349,7 +324,7 @@ internal static class PlayerLevelingUtilities
         {
             int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
             GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
-            if (newLevel <= MaxPlayerLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+            if (newLevel <= ConfigService.MaxPlayerLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
         }
 
         if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
@@ -359,16 +334,16 @@ internal static class PlayerLevelingUtilities
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
-        if (ClientCompanion)
+        if (ConfigService.ClientCompanion)
         {
-            int packed = PackValues(character, SteamID, Prestige, Legacies, Expertise);
+            int packed = PackValues(character, SteamID, ConfigService.PrestigeSystem, ConfigService.BloodSystem, ConfigService.ExpertiseSystem);
             Team team = syncedPlayer.Read<Team>();
             team.FactionIndex = packed; // max faction int is 32 so make 33 the new 0 (33-133). if ends up being weird can speed up loop and set back to normal after processing maybe
             syncedPlayer.Write(team);
             Core.Log.LogInfo($"Loaded packed progress on FactionIndex: {user.CharacterName.Value} | {team.FactionIndex}");
         }
     }
-    // for quests, would need to determine best way to get target and then pack in progress for daily/weekly but not too difficult maybe...
+    // for quests, would need to determine best way to get target and then pack in progress for daily/weekly? too difficult maybe...
     static int PackValues(Entity character, ulong steamId, bool Prestige, bool Legacies, bool Expertise)
     {
         int trueCount = (Prestige ? 1 : 0) + (Legacies ? 1 : 0) + (Expertise ? 1 : 0);
@@ -400,8 +375,8 @@ internal static class PlayerLevelingUtilities
 
         if (Expertise)
         {
-            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(ExpertiseUtilities.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity));
-            packed |= ExpertiseUtilities.GetLevelProgress(steamId, expertiseHandler);
+            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(ExpertiseHandler.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity));
+            packed |= ExpertiseHandler.GetLevelProgress(steamId, expertiseHandler);
         }
 
         // Add offset to prevent accidentally using real faction int
@@ -410,15 +385,12 @@ internal static class PlayerLevelingUtilities
         // Pack values into a single integer
         return packed;
     }
-
     public static int ConvertXpToLevel(float xp)
     {
-        // Assuming a basic square root scaling for experience to level conversion
         return (int)(EXPConstant * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
-        // Reversing the formula used in ConvertXpToLevel for consistency
         return (int)Math.Pow(level / EXPConstant, EXPPower);
     }
     static float GetXp(ulong SteamID)
@@ -443,7 +415,7 @@ internal static class PlayerLevelingUtilities
     }
     static float ApplyScalingFactor(float gainedXP, int currentLevel, int victimLevel)
     {
-        float k = LevelScalingMultiplier;
+        float k = ConfigService.LevelScalingMultiplier;
         int levelDifference = currentLevel - victimLevel;
         if (k <= 0) return gainedXP;
         float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
@@ -478,7 +450,7 @@ internal static class PlayerLevelingUtilities
         var buffs = GetClassBuffs(SteamID);
         //int levelStep = 20;
         if (buffs.Count == 0) return;
-        int levelStep = MaxPlayerLevel / buffs.Count;
+        int levelStep = ConfigService.MaxPlayerLevel / buffs.Count;
 
         int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
         if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count)
@@ -489,6 +461,7 @@ internal static class PlayerLevelingUtilities
             {
                 BuffPrefabGUID = new(buffs[buffIndex])
             };
+
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             if (ServerGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff)) // if present, modify based on prestige level
             {
@@ -939,12 +912,12 @@ internal static class PlayerLevelingUtilities
     {
         var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
         var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
-        var classWeaponStats = Core.ParseConfigString(weaponConfigEntry);
-        var classBloodStats = Core.ParseConfigString(bloodConfigEntry);
+        var classWeaponStats = ParseConfigString(weaponConfigEntry);
+        var classBloodStats = ParseConfigString(bloodConfigEntry);
 
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
 
-        Core.DataStructures.PlayerClasses[steamId] = classes;
+        Core.DataStructures.PlayerClass[steamId] = classes;
         Core.DataStructures.SavePlayerClasses();
 
         FromCharacter fromCharacter = new()
@@ -960,11 +933,11 @@ internal static class PlayerLevelingUtilities
         var buffs = GetClassBuffs(steamId);
 
         if (buffs.Count == 0) return;
-        int levelStep = MaxPlayerLevel / buffs.Count;
+        int levelStep = ConfigService.MaxPlayerLevel / buffs.Count;
 
         int playerLevel = 0;
 
-        if (Leveling)
+        if (ConfigService.LevelingSystem)
         {
             playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
         }
@@ -974,9 +947,9 @@ internal static class PlayerLevelingUtilities
             playerLevel = (int)equipment.GetFullLevel();
         }
 
-        if (Prestige && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeUtilities.PrestigeType.Experience] > 0)
+        if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeUtilities.PrestigeType.Experience] > 0)
         {
-            playerLevel = MaxPlayerLevel;
+            playerLevel = ConfigService.MaxPlayerLevel;
         }
 
         int numBuffsToApply = playerLevel / levelStep;
@@ -1055,29 +1028,29 @@ internal static class PlayerLevelingUtilities
         Dictionary<int, int> spellPrefabs = [];
         foreach (PlayerLevelingUtilities.PlayerClasses playerClass in Enum.GetValues(typeof(PlayerLevelingUtilities.PlayerClasses)))
         {
-            if (!string.IsNullOrEmpty(PlayerLevelingUtilities.ClassSpellsMap[playerClass])) Core.ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
+            if (!string.IsNullOrEmpty(PlayerLevelingUtilities.ClassSpellsMap[playerClass])) ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
         }
         return spellPrefabs;
     }
     public static List<int> GetClassBuffs(ulong steamId)
     {
-        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
+        if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return Core.ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
+            return ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
         }
         return [];
     }
     public static PlayerClasses GetPlayerClass(ulong steamId)
     {
-        return Core.DataStructures.PlayerClasses[steamId].Keys.First();
+        return Core.DataStructures.PlayerClass[steamId].Keys.First();
     }
     public static List<int> GetClassSpells(ulong steamId)
     {
-        if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
+        if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return Core.ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
+            return ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
         }
         return [];
     }
@@ -1106,7 +1079,7 @@ internal static class PlayerLevelingUtilities
     }
     public static void ShowClassBuffs(ChatCommandContext ctx, PlayerClasses playerClass)
     {
-        List<int> perks = Core.ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
+        List<int> perks = ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -1114,7 +1087,7 @@ internal static class PlayerLevelingUtilities
             return;
         }
 
-        int step = MaxPlayerLevel / perks.Count;
+        int step = ConfigService.MaxPlayerLevel / perks.Count;
 
         var classBuffs = perks.Select((perk, index) =>
         {
@@ -1137,7 +1110,7 @@ internal static class PlayerLevelingUtilities
     }
     public static void ShowClassSpells(ChatCommandContext ctx, PlayerClasses playerClass)
     {
-        List<int> perks = Core.ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
+        List<int> perks = ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -1176,8 +1149,8 @@ internal static class PlayerLevelingUtilities
     {
         public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
         {
-            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && PlayerService.PlayerCache.TryGetValue(playerKey, out Entity player))
+            string playerKey = PlayerService.UserCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(playerKey) && PlayerService.UserCache.TryGetValue(playerKey, out Entity player))
             {
                 if (player.Equals(Entity.Null))
                 {
@@ -1230,7 +1203,7 @@ internal static class PlayerLevelingUtilities
             string ownerName = ctx.Event.User.CharacterName.Value;
             HashSet<string> party = Core.DataStructures.PlayerParties[ownerId];
 
-            if (party.Count < MaxPartySize && !party.Contains(playerName))
+            if (party.Count < ConfigService.MaxPartySize && !party.Contains(playerName))
             {
                 party.Add(playerName);
 
@@ -1249,7 +1222,7 @@ internal static class PlayerLevelingUtilities
         }
         public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
         {
-            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+            string playerKey = PlayerService.UserCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
             {
                 party.Remove(playerKey);

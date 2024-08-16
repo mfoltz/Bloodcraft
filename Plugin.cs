@@ -329,38 +329,6 @@ internal class Plugin : BasePlugin
         LoadAllData();
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }
-
-    /*
-    static void MigrateData()
-    {
-        try
-        {
-            if (File.Exists(OldConfigFile) && !File.Exists(NewConfigFile)) // migrate old config data
-            {
-                File.Copy(OldConfigFile, NewConfigFile);
-                Core.Log.LogInfo($"Migrated {OldConfigFile} => {NewConfigFile}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo($"Failed to migrate old config: {ex}");
-        }
-
-        try
-        {
-            if (Directory.Exists(OldPlayerExperiencePath) && Directory.Exists(PlayerLevelingPath)) // migrate old exp data if path exists
-            {
-                // Move contents from the old path to the new path
-                Directory.Move(OldPlayerExperiencePath, PlayerLevelingPath);
-                Core.Log.LogInfo($"Migrated {OldPlayerExperiencePath} => {PlayerLevelingPath}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo($"Failed to migrate old player experience data: {ex}");
-        }
-    }
-    */
     static void InitConfig()
     {
         foreach (string path in directoryPaths) // make sure directories exist
@@ -521,7 +489,6 @@ internal class Plugin : BasePlugin
         _deathMageBuffs = InitConfigEntry("Config", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs");
         _deathMageSpells = InitConfigEntry("Config", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige");
     }
-
     static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
     {
         // Bind the configuration entry and get its value
@@ -560,6 +527,7 @@ internal class Plugin : BasePlugin
         {
             string PlayerSanguimancyJson = Path.Combine(PlayerExpertisePath, "player_sanguimancy.json"); // make sure old format handled and copied to new format
             string PlayerUnarmedJson = Path.Combine(PlayerExpertisePath, "player_unarmed.json");
+
             if (File.Exists(PlayerSanguimancyJson) && !File.Exists(PlayerUnarmedJson))
             {
                 // Copy the old file to the new file name
@@ -577,14 +545,17 @@ internal class Plugin : BasePlugin
         {
             Core.DataStructures.LoadPlayerParties();
         }
+
         if (SoftSynergies.Value || HardSynergies.Value)
         {
             Core.DataStructures.LoadPlayerClasses();
         }
+
         if (QuestSystem.Value)
         {
             Core.DataStructures.LoadPlayerQuests();
         }
+
         if (LevelingSystem.Value)
         {
             foreach (var loadFunction in loadLeveling)
@@ -596,6 +567,7 @@ internal class Plugin : BasePlugin
                 Core.DataStructures.LoadPlayerRestedXP();
             }
         }
+
         if (ExpertiseSystem.Value)
         {
             foreach (var loadFunction in loadExpertises)
@@ -603,6 +575,7 @@ internal class Plugin : BasePlugin
                 loadFunction();
             }
         }
+
         if (BloodSystem.Value)
         {
             foreach (var loadFunction in loadLegacies)
@@ -610,6 +583,7 @@ internal class Plugin : BasePlugin
                 loadFunction();
             }
         }
+
         if (ProfessionSystem.Value)
         {
             foreach (var loadFunction in loadProfessions)
@@ -617,6 +591,7 @@ internal class Plugin : BasePlugin
                 loadFunction();
             }
         }
+
         if (FamiliarSystem.Value)
         {
             foreach (var loadFunction in loadFamiliars)
@@ -629,8 +604,7 @@ internal class Plugin : BasePlugin
     static readonly Action[] loadLeveling =
     [
         Core.DataStructures.LoadPlayerExperience,
-
-        Core.DataStructures.LoadPlayerPrestiges,
+        Core.DataStructures.LoadPlayerPrestiges
     ];
 
     static readonly Action[] loadExpertises =
@@ -686,7 +660,7 @@ internal class Plugin : BasePlugin
     ];
 
     static readonly List<string> directoryPaths =
-        [
+    [
         ConfigFiles,
         PlayerQuestsPath,
         PlayerLevelingPath,
@@ -696,5 +670,5 @@ internal class Plugin : BasePlugin
         PlayerFamiliarsPath,
         FamiliarExperiencePath,
         FamiliarUnlocksPath
-        ];
+    ];
 }

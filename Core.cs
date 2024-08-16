@@ -1,23 +1,16 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
-using Bloodcraft.Commands;
-using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Experience;
 using Bloodcraft.SystemUtilities.Expertise;
 using Bloodcraft.SystemUtilities.Familiars;
 using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Legacy;
 using Bloodcraft.SystemUtilities.Leveling;
 using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
-using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using System.Collections;
 using System.Text.Json;
@@ -28,78 +21,35 @@ using static Bloodcraft.Core.DataStructures;
 namespace Bloodcraft;
 internal static class Core
 {
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static readonly bool ExtraRecipes = Plugin.ExtraRecipes.Value;
-    static readonly bool Quests = Plugin.QuestSystem.Value;
-    static readonly bool StarterKit = Plugin.StarterKit.Value;
-    public static World Server { get; } = GetWorld("Server") ?? throw new Exception("There is no Server world (yet)...");
+    static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world (yet)...");
     public static EntityManager EntityManager => Server.EntityManager;
-    public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
-    public static ServerGameSettingsSystem ServerGameSettingsSystem { get; internal set; }
-    public static ServerScriptMapper ServerScriptMapper { get; internal set; }
-    public static DebugEventsSystem DebugEventsSystem { get; internal set; }
-    public static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn { get; internal set; }
-    public static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem { get; internal set; }
-    public static EntityCommandBufferSystem EntityCommandBufferSystem { get; internal set; }
-    public static ClaimAchievementSystem ClaimAchievementSystem { get; internal set; }
-    public static GameDataSystem GameDataSystem { get; internal set; }
-    public static LocalizationService Localization { get; } = new();
+    public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
+    public static SystemService SystemService { get; } = new(Server);
+    public static ConfigService ConfigService { get; } = new();
     public static PlayerService PlayerService { get; } = new();
-    public static QuestService QuestService { get; internal set; }
-    public static ServerGameManager ServerGameManager => ServerScriptMapper.GetServerGameManager();
-    public static NetworkIdSystem.Singleton NetworkIdSystem { get; internal set; }
-    public static CombatMusicSystem_Server CombatMusicSystem_Server { get; internal set; }
-    public static ScriptSpawnServer ScriptSpawnServer { get; internal set;}
-    public static ServerGameSettings ServerGameSettings { get; internal set; }
-    public static FactionLookupSingleton FactionLookupSingleton { get; internal set; }
-    public static MapZoneCollectionSystem MapZoneCollectionSystem { get; internal set; }
-
-    public static MapZoneCollection MapZoneCollection;
+    public static LocalizationService LocalizationService { get; } = new();
+    public static QuestService QuestService { get; } = ConfigService.QuestSystem ? new() : null;
+    public static TeamService TeamService { get; } = ConfigService.FamiliarSystem ? new() : null; // AppendRemovedComponentRecordError?
+    public static MapZoneCollection MapZoneCollection => SystemService.MapZoneCollectionSystem._MapZoneCollection;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour monoBehaviour;
-
     public static bool hasInitialized;
     public static void Initialize()
     {
         if (hasInitialized) return;
-
-        PrefabCollectionSystem = Server.GetExistingSystemManaged<PrefabCollectionSystem>();
-        ServerGameSettingsSystem = Server.GetExistingSystemManaged<ServerGameSettingsSystem>();
-        DebugEventsSystem = Server.GetExistingSystemManaged<DebugEventsSystem>();
-        ServerScriptMapper = Server.GetExistingSystemManaged<ServerScriptMapper>();
-        ModifyUnitStatBuffSystem_Spawn = Server.GetExistingSystemManaged<ModifyUnitStatBuffSystem_Spawn>();
-        ReplaceAbilityOnSlotSystem = Server.GetExistingSystemManaged<ReplaceAbilityOnSlotSystem>();
-        ClaimAchievementSystem = Server.GetExistingSystemManaged<ClaimAchievementSystem>();
-        EntityCommandBufferSystem = Server.GetExistingSystemManaged<EntityCommandBufferSystem>();
-        GameDataSystem = Server.GetExistingSystemManaged<GameDataSystem>();
-        NetworkIdSystem = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
-        ScriptSpawnServer = Server.GetExistingSystemManaged<ScriptSpawnServer>();
-        CombatMusicSystem_Server = Server.GetExistingSystemManaged<CombatMusicSystem_Server>();
-        ReplaceAbilityOnGroupSlotSystemPatch.ClassSpells = PlayerLevelingUtilities.GetSpellPrefabs();
-        ServerGameSettings = ServerGameSettingsSystem._Settings;
-        FactionLookupSingleton = ServerScriptMapper.GetSingleton<FactionLookupSingleton>();    
-        MapZoneCollectionSystem = Server.GetExistingSystemManaged<MapZoneCollectionSystem>();
-        MapZoneCollection = MapZoneCollectionSystem._MapZoneCollection;
         
-        if (Familiars) Utilities.FamiliarBans();
-        if (ExtraRecipes) RecipeUtilities.ExtraRecipes();
-        if (Quests) QuestService = new();
-        if (StarterKit) Utilities.StarterKit();
+        if (ConfigService.FamiliarSystem) Utilities.FamiliarBans();
+        if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
+        if (ConfigService.QuestSystem) Utilities.QuestRewards();
+        if (ConfigService.StarterKit) Utilities.StarterKit();
        
         hasInitialized = true;
     }
-    static World GetWorld(string name)
+    static World GetServerWorld()
     {
-        foreach (var world in World.s_AllWorlds)
-        {
-            if (world.Name == name)
-            {
-                return world;
-            }
-        }
-        return null;
+        return World.s_AllWorlds.ToArray().FirstOrDefault(world => world.Name == "Server");
     }
     public static void StartCoroutine(IEnumerator routine)
     {
@@ -110,21 +60,6 @@ internal static class Core
             UnityEngine.Object.DontDestroyOnLoad(gameObject);
         }
         monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
-    }
-    public static bool PlayerBool(ulong steamId, string boolKey)
-    {
-        if (PlayerBools.ContainsKey(steamId)) return PlayerBools[steamId][boolKey];
-        return false;
-    }
-    public static bool DismissedFamiliar(ulong steamId, out Entity familiar)
-    {
-        familiar = Entity.Null;
-        if (FamiliarActives.ContainsKey(steamId) && FamiliarActives[steamId].Familiar.Exists())
-        {
-            familiar = FamiliarActives[steamId].Familiar;
-            return true;
-        }
-        return false;
     }
     public static class DataStructures
     {
@@ -141,7 +76,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
         private static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
-        private static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> playerClasses = [];
+        private static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> playerClass = [];
         private static Dictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> playerPrestiges = [];
 
         // professions
@@ -169,7 +104,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerFishingPoleExpertise = [];
-        private static Dictionary<ulong, Dictionary<ExpertiseUtilities.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
+        private static Dictionary<ulong, Dictionary<ExpertiseHandler.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
         private static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> playerSpells = [];
@@ -276,16 +211,16 @@ internal static class Core
             get => playerRestedXP;
             set => playerRestedXP = value;
         }
-        public static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> PlayerClasses
+        public static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> PlayerClass
         {
-            get => playerClasses;
-            set => playerClasses = value;
+            get => playerClass;
+            set => playerClass = value;
         }
         public static Dictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> PlayerPrestiges
         {
             get => playerPrestiges;
             set => playerPrestiges = value;
-        }  
+        }
         public static Dictionary<ulong, Dictionary<string, bool>> PlayerBools
         {
             get => playerBools;
@@ -401,7 +336,7 @@ internal static class Core
             get => playerSpells;
             set => playerSpells = value;
         }
-        public static Dictionary<ulong, Dictionary<ExpertiseUtilities.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats
+        public static Dictionary<ulong, Dictionary<ExpertiseHandler.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats
         {
             get => playerWeaponStats;
             set => playerWeaponStats = value;
@@ -477,7 +412,7 @@ internal static class Core
             get => playerCraftingJobs;
             set => playerCraftingJobs = value;
         }
-        
+
         static Dictionary<ulong, int> playerMaxWeaponLevels = [];
 
         public static Dictionary<ulong, int> PlayerMaxWeaponLevels
@@ -582,7 +517,7 @@ internal static class Core
 
         public static void LoadPlayerQuests() => LoadData(ref playerQuests, "Quests");
 
-        public static void LoadPlayerClasses() => LoadData(ref playerClasses, "Classes");
+        public static void LoadPlayerClasses() => LoadData(ref playerClass, "Classes");
 
         public static void LoadPlayerPrestiges() => LoadData(ref playerPrestiges, "Prestiges");
 
@@ -686,7 +621,7 @@ internal static class Core
 
         public static void SavePlayerQuests() => SaveData(PlayerQuests, "Quests");
 
-        public static void SavePlayerClasses() => SaveData(PlayerClasses, "Classes");
+        public static void SavePlayerClasses() => SaveData(PlayerClass, "Classes");
 
         public static void SavePlayerPrestiges() => SaveData(PlayerPrestiges, "Prestiges");
 
@@ -900,14 +835,6 @@ internal static class Core
         public static readonly string PlayerFamiliarActivesJson = Path.Combine(Plugin.PlayerFamiliarsPath, "player_familiar_actives.json");
         public static readonly string PlayerFamiliarSetsJson = Path.Combine(Plugin.FamiliarUnlocksPath, "player_familiar_sets.json");
     }
-    public static List<int> ParseConfigString(string configString)
-    {
-        if (string.IsNullOrEmpty(configString))
-        {
-            return [];
-        }
-        return configString.Split(',').Select(int.Parse).ToList();
-    }  
 }
 /*
 [AttributeUsage(AttributeTargets.Class)]

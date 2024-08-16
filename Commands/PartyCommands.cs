@@ -1,18 +1,20 @@
 ﻿using Bloodcraft.Services;
 using VampireCommandFramework;
 using static Bloodcraft.SystemUtilities.Experience.PlayerLevelingUtilities.PartyUtilities;
+using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
 
 [CommandGroup(name: "party")]
 internal static class PartyCommands
 {
-    static readonly bool PlayerParties = Plugin.Parties.Value;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
 
     [Command(name: "toggleinvites", shortHand: "inv", adminOnly: false, usage: ".party inv", description: "Toggles being able to be invited to parties, prevents damage and share exp.")]
     public static void TogglePartyInvitesCommand(ChatCommandContext ctx)
     {
-        if (!PlayerParties)
+        if (!ConfigService.Parties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -21,24 +23,24 @@ internal static class PartyCommands
         ulong SteamID = ctx.Event.User.PlatformId;
         string name = ctx.Event.User.CharacterName.Value;
 
-        if (Core.DataStructures.PlayerParties.Any(kvp => kvp.Value.Contains(name)))
+        if (PlayerParties.Any(kvp => kvp.Value.Contains(name)))
         {
             LocalizationService.HandleReply(ctx, "You are already in a party. Leave or disband if owned before enabling invites.");
             return;
         }
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+        if (PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["Grouping"] = !bools["Grouping"];
         }
-        Core.DataStructures.SavePlayerBools();
+        SavePlayerBools();
         LocalizationService.HandleReply(ctx, $"Party invites {(bools["Grouping"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]
     public static void PartyAddCommand(ChatCommandContext ctx, string name)
     {
-        if (!PlayerParties)
+        if (!ConfigService.Parties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -51,7 +53,7 @@ internal static class PartyCommands
     [Command(name: "remove", shortHand: "r", adminOnly: false, usage: ".party r [Player]", description: "Removes player from party.")]
     public static void PartyRemoveCommand(ChatCommandContext ctx, string name)
     {
-        if (!PlayerParties)
+        if (!ConfigService.Parties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -59,35 +61,33 @@ internal static class PartyCommands
 
         ulong ownerId = ctx.Event.User.PlatformId;
 
-        if (!Core.DataStructures.PlayerParties.ContainsKey(ownerId))
+        if (!PlayerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You don't have a party.");
             return;
         }
 
-        HashSet<string> party = Core.DataStructures.PlayerParties[ownerId]; // check size and if player is already present in group before adding
+        HashSet<string> party = PlayerParties[ownerId]; // check size and if player is already present in group before adding
         RemovePlayerFromParty(ctx, party, name);
     }
 
     [Command(name: "listmembers", shortHand: "lm", adminOnly: false, usage: ".party lm", description: "Lists party members of your active party.")]
     public static void PartyMembersCommand(ChatCommandContext ctx)
     {
-        if (!PlayerParties)
+        if (!ConfigService.Parties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
         }
 
-        Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
-
+        Dictionary<ulong, HashSet<string>> playerParties = PlayerParties;
         ListPartyMembers(ctx, playerParties);
-
     }
 
     [Command(name: "disband", shortHand: "end", adminOnly: false, usage: ".party end", description: "Disbands party.")]
     public static void DisbandPartyCommand(ChatCommandContext ctx)
     {
-        if (!PlayerParties)
+        if (!ConfigService.Parties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -95,21 +95,21 @@ internal static class PartyCommands
 
         ulong ownerId = ctx.Event.User.PlatformId;
 
-        if (!Core.DataStructures.PlayerParties.ContainsKey(ownerId))
+        if (!PlayerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You don't have a party to disband.");
             return;
         }
 
-        Core.DataStructures.PlayerParties.Remove(ownerId);
+        PlayerParties.Remove(ownerId);
         LocalizationService.HandleReply(ctx, "Party disbanded.");
-        Core.DataStructures.SavePlayerParties();
+        SavePlayerParties();
     }
 
     [Command(name: "leave", shortHand: "drop", adminOnly: false, usage: ".party drop", description: "Leaves party if in one.")]
     public static void LeavePartyCommand(ChatCommandContext ctx)
     {
-        if (!PlayerParties)
+        if (!ConfigService.Parties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -118,13 +118,13 @@ internal static class PartyCommands
         ulong ownerId = ctx.Event.User.PlatformId;
         string playerName = ctx.Event.User.CharacterName.Value;
 
-        if (Core.DataStructures.PlayerParties.ContainsKey(ownerId))
+        if (PlayerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You can't leave your own party. Disband it instead.");
             return;
         }
 
-        var party = Core.DataStructures.PlayerParties.Values.FirstOrDefault(set => set.Contains(playerName));
+        var party = PlayerParties.Values.FirstOrDefault(set => set.Contains(playerName));
         if (party != null)
         {
             RemovePlayerFromParty(ctx, party, playerName);

@@ -1,7 +1,8 @@
+using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Experience;
 using Bloodcraft.SystemUtilities.Expertise;
 using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Legacies;
 using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
@@ -18,6 +19,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CreateGameplayEventOnDestroySystemPatch
 {
+    static ConfigService ConfigService => Core.ConfigService;
     const int BaseFishingXP = 100;
 
     [HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
@@ -34,7 +36,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                 if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
                 PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
 
-                if (Plugin.ProfessionSystem.Value && PrefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
+                if (ConfigService.ProfessionSystem && PrefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entity.Read<EntityOwner>().Owner;
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
@@ -71,24 +73,20 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     User user = userEntity.Read<User>();
                     ulong steamId = user.PlatformId;
 
-                    if (Plugin.BloodSystem.Value) LegacyUtilities.UpdateLegacy(killer, died);
-                    if (Plugin.ExpertiseSystem.Value) ExpertiseUtilities.UpdateExpertise(killer, died);
-                    if (Plugin.LevelingSystem.Value) PlayerLevelingUtilities.UpdateLeveling(killer, died);
-                    if (Plugin.FamiliarSystem.Value)
+                    if (ConfigService.BloodSystem) LegacyUtilities.UpdateLegacy(killer, died);
+                    if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(killer, died);
+                    if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(killer, died);
+                    if (ConfigService.FamiliarSystem)
                     {
                         FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
                         FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
                     }
-                    if (Plugin.QuestSystem.Value)
+                    if (ConfigService.QuestSystem)
                     {
                         QuestUtilities.UpdateQuests(killer, userEntity, died.Read<PrefabGUID>());
                     }
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited GameplayEventsSystem hook early: {e}");
         }
         finally
         {

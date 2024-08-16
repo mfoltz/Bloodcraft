@@ -1,5 +1,6 @@
-﻿using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacy;
+﻿using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.SystemUtilities.Legacies;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -16,24 +17,15 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class StatChangeSystemPatches
 {
-    static readonly Random Random = new();
     static EntityManager EntityManager => Core.EntityManager;
-    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
-    static readonly GameModeType GameMode = Core.ServerGameSettings.GameModeType;
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
-    static readonly bool Parties = Plugin.Parties.Value;
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static readonly bool Legacies = Plugin.BloodSystem.Value;
-    static readonly bool BloodQuality = Plugin.BloodQualityBonus.Value;
-    static readonly float PrestigeBloodQuality = Plugin.PrestigeBloodQuality.Value;
-    static readonly bool PreventFriendlyFire = Plugin.PreventFriendlyFire.Value;
-    static readonly bool Classes = Plugin.SoftSynergies.Value || Plugin.HardSynergies.Value;
-    static readonly bool OnHitEffects = Plugin.ClassSpellSchoolOnHitEffects.Value;
-    static readonly bool Prestige = Plugin.PrestigeSystem.Value;
-
-    static readonly float OnHitChance = Plugin.OnHitProcChance.Value;
+    static readonly Random Random = new();
 
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
     static readonly PrefabGUID stormShield03 = new(1095865904);
@@ -53,7 +45,7 @@ internal static class StatChangeSystemPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Legacies && BloodQuality && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
+                if (ConfigService.BloodSystem && ConfigService.BloodQualityBonus && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
                     if (!EntityManager.Exists(entity)) continue;
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
@@ -73,9 +65,9 @@ internal static class StatChangeSystemPatches
 
                     float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
 
-                    if (Prestige && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(LegacyUtilities.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
+                    if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(LegacyUtilities.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
                     {
-                        legacyKey = (float)bloodPrestige * PrestigeBloodQuality;
+                        legacyKey = (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
                         if (legacyKey > 0)
                         {
                             bloodQualityChange.Quality += legacyKey;
@@ -83,7 +75,7 @@ internal static class StatChangeSystemPatches
                             entity.Write(bloodQualityChange);
                         }
                     }
-                    else if (!Prestige)
+                    else if (!ConfigService.PrestigeSystem)
                     {
                         if (legacyKey > 0)
                         {
@@ -127,9 +119,9 @@ internal static class StatChangeSystemPatches
 
                 if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
                 {
-                    if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && Parties && PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
+                    if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && ConfigService.Parties && ConfigService.PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
                     {
-                        Dictionary<ulong, HashSet<string>> playerAlliances = Core.DataStructures.PlayerParties;
+                        Dictionary<ulong, HashSet<string>> playerAlliances = new(Core.DataStructures.PlayerParties);
                         string targetName = target.Name.Value;
                         string sourceName = source.Name.Value;
                         ulong steamId = source.UserEntity.Read<User>().PlatformId;
@@ -139,7 +131,7 @@ internal static class StatChangeSystemPatches
                             EntityManager.DestroyEntity(entity);
                         }
                     }
-                    else if (Familiars && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner familiarEntityOwner) && familiarEntityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>())
+                    else if (ConfigService.FamiliarSystem && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner familiarEntityOwner) && familiarEntityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>())
                     {
                         if (dealDamageEvent.Target.Has<Follower>() && dealDamageEvent.Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                         {
@@ -162,9 +154,9 @@ internal static class StatChangeSystemPatches
                                 EntityManager.DestroyEntity(entity);
                             }
                         }
-                        else if (Parties && PreventFriendlyFire) // check for parties in PvP 
+                        else if (ConfigService.Parties && ConfigService.PreventFriendlyFire) // check for parties in PvP 
                         {
-                            Dictionary<ulong, HashSet<string>> playerParties = Core.DataStructures.PlayerParties;
+                            Dictionary<ulong, HashSet<string>> playerParties = new(Core.DataStructures.PlayerParties);
                             string targetName = target.Name.Value;
                             string ownerName = follower.Followed._Value.Read<PlayerCharacter>().Name.Value;
 
@@ -178,7 +170,7 @@ internal static class StatChangeSystemPatches
                 else if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
                 {
                     Entity userEntity = source.UserEntity;
-                    if (Familiars)
+                    if (ConfigService.FamiliarSystem)
                     {
                         if (dealDamageEvent.Target.Has<Follower>() && dealDamageEvent.Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // protect familiars from player damage
                         {
@@ -201,13 +193,13 @@ internal static class StatChangeSystemPatches
                         }
                     }
 
-                    if (!OnHitEffects || !Classes) continue;
+                    if (!ConfigService.ClassSpellSchoolOnHitEffects || !ConfigService.Classes) continue;
                     
                     ulong steamId = userEntity.Read<User>().PlatformId;
-                    if (Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classData) && classData.Keys.Count == 0) continue;
+                    if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classData) && classData.Keys.Count == 0) continue;
 
                     PlayerClasses playerClass = GetPlayerClass(steamId);
-                    if (Random.NextDouble() <= OnHitChance)
+                    if (Random.NextDouble() <= ConfigService.OnHitProcChance)
                     {
                         PrefabGUID prefabGUID = ClassOnHitDebuffMap[playerClass];
                         FromCharacter fromCharacter = new()

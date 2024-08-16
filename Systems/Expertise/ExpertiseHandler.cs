@@ -1,23 +1,20 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.SystemUtilities.Expertise;
-public static class ExpertiseUtilities
+public static class ExpertiseHandler
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
 
-    static readonly float UnitMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
-    static readonly int MaxExpertiseLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-    static readonly float VBloodMultiplier = Plugin.VBloodExpertiseMultiplier.Value; // Expertise points multiplier from VBlood units
     const float ExpertiseConstant = 0.1f; // constant for calculating level from xp
     const int ExpertisePower = 2; // power for calculating level from xp
-    static readonly float PrestigeRatesMultiplier = Plugin.PrestigeRatesMultiplier.Value; // Prestige multiplier
-    static readonly float PrestigeRatesReducer = Plugin.PrestigeRatesReducer.Value; // Prestige reducer
     public enum WeaponType
     {
         Sword,
@@ -58,7 +55,7 @@ public static class ExpertiseUtilities
         Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
-        ExpertiseUtilities.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
+        ExpertiseHandler.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
 
         if (Victim.Has<UnitStats>())
         {
@@ -70,25 +67,23 @@ public static class ExpertiseUtilities
             {
                 if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige) && expertisePrestige > 0)
                 {
-                    changeFactor -= (PrestigeRatesReducer * expertisePrestige);
+                    changeFactor -= (ConfigService.PrestigeRatesReducer * expertisePrestige);
                 }
 
                 if (prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
-                    changeFactor += (PrestigeRatesMultiplier * xpPrestige);
+                    changeFactor += (ConfigService.PrestigeRatesMultiplier * xpPrestige);
                 }
             }
 
             ExpertiseValue *= changeFactor;
-            //IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponPrestigeMap[weaponType]);
-
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
                 // Check if the player leveled up
                 var xpData = handler.GetExpertiseData(steamID);
 
-                if (xpData.Key >= MaxExpertiseLevel) return;
+                if (xpData.Key >= ConfigService.MaxExpertiseLevel) return;
 
                 float newExperience = xpData.Value + ExpertiseValue;
                 int newLevel = ConvertXpToLevel(newExperience);
@@ -97,10 +92,10 @@ public static class ExpertiseUtilities
                 if (newLevel > xpData.Key)
                 {
                     leveledUp = true;
-                    if (newLevel > MaxExpertiseLevel)
+                    if (newLevel > ConfigService.MaxExpertiseLevel)
                     {
-                        newLevel = MaxExpertiseLevel;
-                        newExperience = ConvertLevelToXp(MaxExpertiseLevel);
+                        newLevel = ConfigService.MaxExpertiseLevel;
+                        newExperience = ConvertLevelToXp(ConfigService.MaxExpertiseLevel);
                     }
                 }
 
@@ -114,10 +109,10 @@ public static class ExpertiseUtilities
     static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
     {
         float ExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
-        if (isVBlood) return ExpertiseValue * VBloodMultiplier;
-        return ExpertiseValue * UnitMultiplier;
+        if (isVBlood) return ExpertiseValue * ConfigService.VBloodExpertiseMultiplier;
+        return ExpertiseValue * ConfigService.UnitExpertiseMultiplier;
     }
-    public static void NotifyPlayer(User user, ExpertiseUtilities.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
+    public static void NotifyPlayer(User user, ExpertiseHandler.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
     {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP;
@@ -125,12 +120,12 @@ public static class ExpertiseUtilities
 
         if (leveledUp)
         {
-            if (newLevel <= MaxExpertiseLevel) HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
+            if (newLevel <= ConfigService.MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
         }
 
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
         {
-            HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
+            LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }
     }
     public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)

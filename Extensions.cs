@@ -9,11 +9,13 @@ using Unity.Collections;
 using Unity.Entities;
 
 namespace Bloodcraft;
-internal static class ECSExtensions
+internal static class Extensions
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -83,11 +85,7 @@ internal static class ECSExtensions
     }
     public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
     {
-        if (!LocalizationService.PrefabNames.TryGetValue(itemPrefabGUID._Value, out var itemLocalizationHash))
-        {
-            return itemPrefabGUID.LookupName();
-        }
-        return LocalizationService.GetLocalization(itemLocalizationHash);
+        return LocalizationService.GetPrefabName(itemPrefabGUID);
     }
     public static void LogComponentTypes(this Entity entity)
     {

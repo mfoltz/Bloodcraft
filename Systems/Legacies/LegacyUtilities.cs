@@ -1,21 +1,18 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Services.LocalizationService;
 
-namespace Bloodcraft.SystemUtilities.Legacy;
+namespace Bloodcraft.SystemUtilities.Legacies;
 public static class LegacyUtilities
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
 
-    static readonly float UnitLegacyMultiplier = Plugin.UnitExpertiseMultiplier.Value; // Expertise points multiplier from normal units
-    static readonly int MaxBloodLevel = Plugin.MaxExpertiseLevel.Value; // maximum level
-    static readonly float VBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value; // Expertise points multiplier from VBlood units
-    static readonly float PrestigeRatesMultiplier = Plugin.PrestigeRatesMultiplier.Value; // Prestige rates multiplier
-    static readonly float PrestigeRatesReducer = Plugin.PrestigeRatesReducer.Value; // Prestige rates reducer
     const float BloodConstant = 0.1f; // constant for calculating level from xp
     const int BloodPower = 2; // power for calculating level from xp
     public enum BloodType
@@ -33,6 +30,7 @@ public static class LegacyUtilities
         Creature,
         Brute
     }
+
     public static readonly Dictionary<BloodType, PrestigeUtilities.PrestigeType> BloodPrestigeMap = new()
     {
         { BloodType.Worker, PrestigeUtilities.PrestigeType.WorkerLegacy },
@@ -69,11 +67,11 @@ public static class LegacyUtilities
         float BloodValue = 0;
         if (Victim.Has<VBloodConsumeSource>())
         {
-            BloodValue = 10 * unitLevel * VBloodLegacyMultiplier;
+            BloodValue = 10 * unitLevel * ConfigService.VBloodLegacyMultiplier;
         }
         else
         {
-            BloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * UnitLegacyMultiplier;
+            BloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * ConfigService.UnitLegacyMultiplier;
         }
 
         User user = userEntity.Read<User>();
@@ -87,7 +85,7 @@ public static class LegacyUtilities
             // Check if the player leveled up
             var xpData = handler.GetLegacyData(steamID);
 
-            if (xpData.Key >= MaxBloodLevel) return;
+            if (xpData.Key >= ConfigService.MaxBloodLevel) return;
 
             float changeFactor = 1f;
 
@@ -96,14 +94,14 @@ public static class LegacyUtilities
                 // Apply rate reduction with diminishing returns
                 if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige) && legacyPrestige > 0)
                 {
-                    changeFactor -= (PrestigeRatesReducer * legacyPrestige);
+                    changeFactor -= (ConfigService.PrestigeRatesReducer * legacyPrestige);
                     changeFactor = MathF.Max(changeFactor, 0);
                 }
 
                 // Apply rate gain with linear increase
                 if (prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
-                    changeFactor += 1 + (PrestigeRatesMultiplier * xpPrestige);
+                    changeFactor += 1 + (ConfigService.PrestigeRatesMultiplier * xpPrestige);
                 }
             }
 
@@ -116,10 +114,10 @@ public static class LegacyUtilities
             if (newLevel > xpData.Key)
             {
                 leveledUp = true;
-                if (newLevel > MaxBloodLevel)
+                if (newLevel > ConfigService.MaxBloodLevel)
                 {
-                    newLevel = MaxBloodLevel;
-                    newExperience = ConvertLevelToXp(MaxBloodLevel);
+                    newLevel = ConfigService.MaxBloodLevel;
+                    newExperience = ConvertLevelToXp(ConfigService.MaxBloodLevel);
                 }
             }
             var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
@@ -136,12 +134,12 @@ public static class LegacyUtilities
 
         if (leveledUp)
         {
-            if (newLevel <= MaxBloodLevel) HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+            if (newLevel <= ConfigService.MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
         }
         
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
         {
-            HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
+            LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }
     }
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)

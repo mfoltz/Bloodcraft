@@ -3,19 +3,16 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using Bloodcraft.Services;
 using static Bloodcraft.Core;
-using static Bloodcraft.Services.LocalizationService;
 
 namespace Bloodcraft.SystemUtilities.Familiars;
 internal static class FamiliarUnlockUtilities
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
 
-    static readonly float UnitChance = Plugin.UnitUnlockChance.Value;
-    static readonly float VBloodChance = Plugin.VBloodUnlockChance.Value;
-    static readonly float ShinyChance = Plugin.ShinyChance.Value;
-    static readonly bool allowVBloods = Plugin.AllowVBloods.Value;
-    static readonly bool shareUnlocks = Plugin.ShareUnlocks.Value;
     static readonly Random Random = new();
 
     // List of banned PrefabGUIDs
@@ -46,15 +43,15 @@ internal static class FamiliarUnlockUtilities
 
         if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5) // units
         {
-            HandleRoll(UnitChance, died, killer);
+            HandleRoll(ConfigService.UnitUnlockChance, died, killer);
         }
         else if (died.Has<VBloodConsumeSource>()) // VBloods
         {
-            if (allowVBloods) HandleRoll(VBloodChance, died, killer);
+            if (ConfigService.AllowVBloods) HandleRoll(ConfigService.VBloodUnlockChance, died, killer);
         }
         else if (died.Has<VBloodUnit>()) // Shadow VBloods
         {
-            if (allowVBloods) HandleRoll(VBloodChance, died, killer);
+            if (ConfigService.AllowVBloods) HandleRoll(ConfigService.VBloodUnlockChance, died, killer);
         }
     }
     static bool IsBannedUnit(PrefabGUID prefab)
@@ -67,7 +64,7 @@ internal static class FamiliarUnlockUtilities
     }
     static void HandleRoll(float dropChance, Entity died, Entity killer)
     {
-        if (shareUnlocks && !died.Has<VBloodConsumeSource>()) // pretty sure everyone in the vblood feed already gets their own roll, no double-dipping
+        if (ConfigService.ShareUnlocks && !died.Has<VBloodConsumeSource>()) // pretty sure everyone in the vblood feed already gets their own roll, no double-dipping
         {
             HashSet<Entity> players = PlayerLevelingUtilities.GetParticipants(killer, killer.Read<PlayerCharacter>().UserEntity);
             foreach (Entity player in players)
@@ -118,14 +115,14 @@ internal static class FamiliarUnlockUtilities
             List<int> currentList = data.UnlockedFamiliars[lastListName];
             currentList.Add(familiarKey);
             FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
-            isShiny = HandleShiny(familiarKey, playerId, ShinyChance);
-            if (!isShiny) HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
-            else if (isShiny) HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            isShiny = HandleShiny(familiarKey, playerId, ConfigService.ShinyChance);
+            if (!isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
             return;
         }
         if (isShiny)
         {
-            HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
         }
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)
@@ -143,6 +140,7 @@ internal static class FamiliarUnlockUtilities
             {
                 return false;
             }
+
             FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
             return true;
         }
@@ -158,6 +156,7 @@ internal static class FamiliarUnlockUtilities
             {
                 return false;
             }
+
             FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
             return true;
         }
@@ -173,6 +172,7 @@ internal static class FamiliarUnlockUtilities
             {
                 buffsData.FamiliarBuffs[famKey][0] = choice;
             }
+
             FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
             return true;
         }

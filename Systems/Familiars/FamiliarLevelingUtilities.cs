@@ -2,34 +2,31 @@
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using Bloodcraft.Services;
 using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.SystemUtilities.Familiars;
 internal static class FamiliarLevelingUtilities
 {
-    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
-    static readonly float UnitMultiplier = Plugin.UnitFamiliarMultiplier.Value; // multipler for normal units
-    static readonly float VBloodMultiplier = Plugin.VBloodFamiliarMultiplier.Value; // multiplier for VBlood units
     const float EXPConstant = 0.1f; // constant for calculating level from xp
     const int EXPPower = 2; // power for calculating level from xp
-    static readonly int MaxFamiliarLevel = Plugin.MaxFamiliarLevel.Value; // maximum level
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
-
     public static void UpdateFamiliar(Entity player, Entity victimEntity)
     {
         if (!IsValidVictim(victimEntity)) return;
         HandleExperienceUpdate(player, victimEntity);
     }
-
     static bool IsValidVictim(Entity victimEntity)
     {
         return !victimEntity.Has<Minion>() && victimEntity.Has<UnitLevel>();
     }
-
     static void HandleExperienceUpdate(Entity player, Entity victimEntity)
     {
         if (!player.Has<PlayerCharacter>()) return;
@@ -38,7 +35,7 @@ internal static class FamiliarLevelingUtilities
 
         ulong steamId = userEntity.Read<User>().PlatformId;
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Familiar.Equals(Entity.Null)) return; // don't process if familiar not out
+        if (FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Familiar.Equals(Entity.Null)) return; // don't process if familiar not out
 
         Entity familiarEntity = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
         if (familiarEntity == Entity.Null || !EntityManager.Exists(familiarEntity)) return;
@@ -49,7 +46,6 @@ internal static class FamiliarLevelingUtilities
         int familiarId = familiarUnit.GuidHash;
         ProcessExperienceGain(familiarEntity, victimEntity, steamId, familiarId);
     }
-
     static void ProcessExperienceGain(Entity familiarEntity, Entity victimEntity, ulong steamID, int familiarId)
     {
         UnitLevel victimLevel = victimEntity.Read<UnitLevel>();
@@ -58,7 +54,7 @@ internal static class FamiliarLevelingUtilities
         float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
         KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamID, familiarId);
 
-        if (familiarXP.Key >= MaxFamiliarLevel) return;
+        if (familiarXP.Key >= ConfigService.MaxFamiliarLevel) return;
 
         int currentLevel = ConvertXpToLevel(familiarXP.Value);
 
@@ -71,8 +67,8 @@ internal static class FamiliarLevelingUtilities
     static float CalculateExperienceGained(int victimLevel, bool isVBlood)
     {
         int baseXP = victimLevel;
-        if (isVBlood) return baseXP * VBloodMultiplier;
-        return baseXP * UnitMultiplier;
+        if (isVBlood) return baseXP * ConfigService.VBloodFamiliarMultiplier;
+        return baseXP * ConfigService.UnitFamiliarMultiplier;
     }
     static void UpdateFamiliarExperience(Entity familiarEntity, int familiarId, ulong playerId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
     {
@@ -118,6 +114,7 @@ internal static class FamiliarLevelingUtilities
                 Character = familiarEntity,
                 User = userEntity,
             };
+
             int famKey = familiarEntity.Read<PrefabGUID>().GuidHash;
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             UnitLevel unitLevel = familiarEntity.Read<UnitLevel>();
@@ -125,7 +122,7 @@ internal static class FamiliarLevelingUtilities
             familiarEntity.Write(unitLevel);
 
             int prestigeLevel = 0;
-            if (Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamID).FamiliarPrestige.TryGetValue(familiarEntity.Read<PrefabGUID>().GuidHash, out var prestigeData) && prestigeData.Key > 0)
+            if (FamiliarPrestigeManager.LoadFamiliarPrestige(steamID).FamiliarPrestige.TryGetValue(familiarEntity.Read<PrefabGUID>().GuidHash, out var prestigeData) && prestigeData.Key > 0)
             {
                 prestigeLevel = prestigeData.Key;
             }

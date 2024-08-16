@@ -19,10 +19,14 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class FamiliarPatches
 {
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static EntityManager EntityManager => Core.EntityManager;
-    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static PlayerService PlayerService => Core.PlayerService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly PrefabGUID abilityGroupSlot = new(-633717863);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -44,10 +48,7 @@ internal static class FamiliarPatches
 
     public static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
 
-    static readonly bool EliteShardBearers = Plugin.EliteShardBearers.Value;
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-
-    static readonly GameModeType GameMode = Core.ServerGameSettings.GameModeType;
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
     public static Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
 
@@ -61,15 +62,14 @@ internal static class FamiliarPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!ConfigService.FamiliarSystem) continue;
 
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {
-                    //Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.PreviousState.ToString()}|{behaviourTreeStateChangedEvent.NewState.ToString()}");
                     BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
-                        //Core.Log.LogInfo($"{behaviourTreeStateChangedEvent.Entity.Read<PrefabGUID>().LookupName()}: {behaviourTreeState.Value}");
                         Entity familiar = behaviourTreeStateChangedEvent.Entity;
                         behaviourTreeState.Value = GenericEnemyState.Follow;
                         behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
@@ -80,23 +80,8 @@ internal static class FamiliarPatches
                             FamiliarSummonUtilities.FamiliarUtilities.HandleFamiliarMinions(familiar);
                         }
                     }
-                    /*
-                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Combat))
-                    {
-                        Entity character = behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed.Value;
-                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
-                        if (EntityManager.Exists(familiar))
-                        {
-                            FamiliarService.StartFamiliarHandler(familiar);
-                        }
-                    }
-                    */
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -131,7 +116,7 @@ internal static class FamiliarPatches
 
                     if (steamId != 0)
                     {
-                        Dictionary<string, Entity> PlayerCache = new(PlayerService.PlayerCache);
+                        Dictionary<string, Entity> PlayerCache = new(PlayerService.UserCache);
                         Entity userEntity = PlayerCache
                                               .Where(kvp => kvp.Value.Read<User>().PlatformId == steamId)
                                               .Select(kvp => kvp.Value)
@@ -174,7 +159,7 @@ internal static class FamiliarPatches
 
                 if (summon) continue;
 
-                if (EliteShardBearers && shardBearers.Contains(prefabGUID))
+                if (ConfigService.EliteShardBearers && shardBearers.Contains(prefabGUID))
                 {
                     if (prefabGUID.Equals(manticore))
                     {
@@ -194,12 +179,12 @@ internal static class FamiliarPatches
                     }
                 }
 
-                if (EliteShardBearers && prefabGUID.Equals(divineAngel))
+                if (ConfigService.EliteShardBearers && prefabGUID.Equals(divineAngel))
                 {
                     HandleAngel(entity);
                 }
 
-                if (EliteShardBearers && prefabGUID.Equals(fallenAngel))
+                if (ConfigService.EliteShardBearers && prefabGUID.Equals(fallenAngel))
                 {
                     HandleFallenAngel(entity);
                 }
@@ -230,7 +215,7 @@ internal static class FamiliarPatches
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 
-                        if (ServerGameManager.TryGetBuff(entityOwner.Owner, dominateBuff.ToIdentifier(), out Entity _))
+                        if (ServerGameManager.HasBuff(entityOwner.Owner, dominateBuff.ToIdentifier()))
                         {
                             continue;
                         }
@@ -246,10 +231,6 @@ internal static class FamiliarPatches
                     }
                 }         
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {
@@ -268,7 +249,7 @@ internal static class FamiliarPatches
             {
                 if (!Core.hasInitialized) continue;
 
-                if (Familiars && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
+                if (ConfigService.FamiliarSystem && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
                 {
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                     if (familiar != Entity.Null)
@@ -309,7 +290,7 @@ internal static class FamiliarPatches
                         }
                     }
                 }
-                else if (Familiars && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner playerOwner) && playerOwner.Owner.Has<PlayerCharacter>()) // modify player minions here
+                else if (ConfigService.FamiliarSystem && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner playerOwner) && playerOwner.Owner.Has<PlayerCharacter>()) // modify player minions here
                 {
                     Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(playerOwner.Owner);
 
@@ -344,6 +325,8 @@ internal static class FamiliarPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!ConfigService.FamiliarSystem) continue;
+
                 if (entity.TryGetComponent(out Buff buff) && !buff.Target.Has<CharmSource>()) // if no charm source, destroy
                 {
                     DestroyUtility.CreateDestroyEvent(EntityManager, buff.Target, DestroyReason.Default, DestroyDebugReason.None);

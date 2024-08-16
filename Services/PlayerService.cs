@@ -1,10 +1,9 @@
 using Il2CppInterop.Runtime;
 using ProjectM.Network;
 using System.Collections;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using UnityEngine;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Services;
 internal class PlayerService
@@ -18,67 +17,24 @@ internal class PlayerService
 			ComponentType.ReadOnly(Il2CppType.Of<User>()),
 		];
 
-	static EntityQuery UsersQuery;
+	public static EntityQuery UserQuery;
 
-	public static Dictionary<string, Entity> UserCache = []; //player name, player userEntity
-    public static Dictionary<ulong, Entity> CharacterCache = []; // playername, player characterEntity
+	public Dictionary<string, Entity> UserCache = []; //player name, player userEntity
 	public PlayerService()
 	{
-		UsersQuery = EntityManager.CreateEntityQuery(UserComponent);
+		UserQuery = EntityManager.CreateEntityQuery(UserComponent);
 		Core.StartCoroutine(PlayerUpdateLoop());
 	}
-	static IEnumerator PlayerUpdateLoop()
+	IEnumerator PlayerUpdateLoop()
     {
         while (true)
         {
-            var userData = GetUsersEnumerable()
-                .GroupBy(userEntity => new
-                {
-                    CharacterName = userEntity.Read<User>().CharacterName.Value,
-                    userEntity.Read<User>().PlatformId
-                })
-                .Select(group => new
-                {
-                    group.Key.CharacterName,
-                    group.Key.PlatformId,
-                    UserEntity = group.First(),
-                    LocalCharacterEntity = group.First().Read<User>().LocalCharacter._Entity
-                })
-                .ToList();
-
-            UserCache = userData
-                .GroupBy(data => data.CharacterName)
-                .ToDictionary(group => group.Key, group => group.First().UserEntity);
-
-            CharacterCache = userData
-                .GroupBy(data => data.PlatformId)
-                .ToDictionary(group => group.Key, group => group.First().LocalCharacterEntity);
+            UserCache = GetEntitiesEnumerable(UserQuery)
+                .GroupBy(userEntity => userEntity.Read<User>().CharacterName.Value)
+                .Select(group => group.First())
+                .ToDictionary(user => user.Read<User>().CharacterName.Value, user => user);
 
             yield return Delay;
         }
-    }
-    static IEnumerable<Entity> GetUsersEnumerable()
-    {
-        JobHandle handle = GetUsers(out NativeArray<Entity> userEntities, Allocator.TempJob);
-        handle.Complete();
-        try
-        {
-            foreach (Entity entity in userEntities)
-            {
-                if (EntityManager.Exists(entity))
-                {
-                    yield return entity;
-                }
-            }
-        }
-        finally
-        {
-            userEntities.Dispose();
-        }
-    }
-    static JobHandle GetUsers(out NativeArray<Entity> userEntities, Allocator allocator = Allocator.TempJob)
-    {
-        userEntities = UsersQuery.ToEntityArray(allocator);
-        return default;
     }
 }

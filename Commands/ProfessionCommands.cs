@@ -11,11 +11,14 @@ namespace Bloodcraft.Commands;
 internal static class ProfessionCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static PlayerService PlayerService => Core.PlayerService;
 
     [Command(name: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
     {
-        if (!Plugin.ProfessionSystem.Value)
+        if (!ConfigService.ProfessionSystem)
         {
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
@@ -34,7 +37,7 @@ internal static class ProfessionCommands
     [Command(name: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]
     public static void GetProfessionCommand(ChatCommandContext ctx, string profession)
     {
-        if (!Plugin.ProfessionSystem.Value)
+        if (!ConfigService.ProfessionSystem)
         {
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
@@ -62,21 +65,21 @@ internal static class ProfessionCommands
     [Command(name: "set", adminOnly: true, usage: ".prof set [Name] [Profession] [Level]", description: "Sets player profession level.")]
     public static void SetProfessionCommand(ChatCommandContext ctx, string name, string profession, int level)
     {
-        if (!Plugin.ProfessionSystem.Value)
+        if (!ConfigService.ProfessionSystem)
         {
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
-        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        Entity foundUserEntity = PlayerService.UserCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
         if (!EntityManager.Exists(foundUserEntity))
         {
             ctx.Reply($"Couldn't find player.");
             return;
         }
         User foundUser = foundUserEntity.Read<User>();
-        if (level < 0 || level > Plugin.MaxProfessionLevel.Value)
+        if (level < 0 || level > ConfigService.MaxProfessionLevel)
         {
-            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {Plugin.MaxProfessionLevel.Value}.");
+            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxProfessionLevel}.");
             return;
         }
         PrefabGUID empty = new(0);
@@ -98,7 +101,7 @@ internal static class ProfessionCommands
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".prof l", description: "Lists professions available.")]
     public static void ListProfessionsCommand(ChatCommandContext ctx)
     {
-        if (!Plugin.ProfessionSystem.Value)
+        if (!ConfigService.ProfessionSystem)
         {
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;

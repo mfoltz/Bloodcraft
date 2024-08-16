@@ -1,7 +1,8 @@
-﻿using Bloodcraft.SystemUtilities.Experience;
+﻿using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Experience;
 using Bloodcraft.SystemUtilities.Expertise;
 using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacy;
+using Bloodcraft.SystemUtilities.Legacies;
 using Bloodcraft.SystemUtilities.Quests;
 using HarmonyLib;
 using ProjectM;
@@ -14,13 +15,9 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class VBloodSystemPatch
 {
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
-
-    static readonly bool Leveling = Plugin.LevelingSystem.Value;
-    static readonly bool Expertise = Plugin.ExpertiseSystem.Value;
-    static readonly bool Legacies = Plugin.BloodSystem.Value;
-    static readonly bool Familiars = Plugin.FamiliarSystem.Value;
-    static readonly bool Quests = Plugin.QuestSystem.Value;
+    static SystemService SystemService => Core.SystemService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem; 
+    static ConfigService ConfigService => Core.ConfigService;
 
     static Dictionary<ulong, DateTime> LastUpdateCache = [];
 
@@ -46,15 +43,15 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (Leveling) PlayerLevelingUtilities.UpdateLeveling(player, vBlood);
-                if (Expertise) ExpertiseUtilities.UpdateExpertise(player, vBlood);
-                if (Legacies) LegacyUtilities.UpdateLegacy(player, vBlood);
-                if (Familiars)
+                if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(player, vBlood);
+                if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(player, vBlood);
+                if (ConfigService.BloodSystem) LegacyUtilities.UpdateLegacy(player, vBlood);
+                if (ConfigService.FamiliarSystem)
                 {
                     FamiliarLevelingUtilities.UpdateFamiliar(player, vBlood);
                     FamiliarUnlockUtilities.HandleUnitUnlock(player, vBlood);
                 }
-                if (Quests && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
+                if (ConfigService.QuestSystem && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)

@@ -1,12 +1,14 @@
-﻿using ProjectM;
+﻿using Bloodcraft.Services;
+using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.SystemUtilities.Professions;
 internal static class RecipeUtilities
 {
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
-    static GameDataSystem GameDataSystem => Core.GameDataSystem;
+    static SystemService SystemService => Core.SystemService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+    static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
     static readonly PrefabGUID advancedGrinder = new(-178579946); // vampiric dust
     //static readonly PrefabGUID advancedLoom = new(1299929048);

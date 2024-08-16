@@ -1,14 +1,14 @@
-﻿using ProjectM;
+﻿using Bloodcraft.Services;
+using ProjectM;
 using static Bloodcraft.SystemUtilities.Expertise.ExpertiseStats.WeaponStatManager;
 
 namespace Bloodcraft.SystemUtilities.Expertise;
 internal static class ExpertiseStats
 {
-    static readonly bool HardSynergies = Plugin.HardSynergies.Value;
-    static readonly int ExpertiseStatChoices = Plugin.ExpertiseStatChoices.Value;
+    static ConfigService ConfigService => Core.ConfigService;
     public class PlayerWeaponUtilities
     {
-        public static bool ChooseStat(ulong steamId, ExpertiseUtilities.WeaponType weaponType, WeaponStatManager.WeaponStatType statType)
+        public static bool ChooseStat(ulong steamId, ExpertiseHandler.WeaponType weaponType, WeaponStatType statType)
         {
             if (!Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStats) || !weaponStats.TryGetValue(weaponType, out var Stats))
             {
@@ -16,30 +16,32 @@ internal static class ExpertiseStats
                 Core.DataStructures.PlayerWeaponStats[steamId][weaponType] = Stats;
             }
 
-            if (HardSynergies)
+            if (ConfigService.HardSynergies)
             {
-                if (!Core.DataStructures.PlayerClasses.TryGetValue(steamId, out var classes) || classes.Keys.Count == 0)
+                if (!Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) || classes.Keys.Count == 0)
                 {
                     return false;
                 }
-                List<int> playerClassStats = classes.First().Value.Item1;
 
+                List<int> playerClassStats = classes.First().Value.Item1;
                 List<WeaponStatType> weaponStatTypes = playerClassStats.Select(value => (WeaponStatType)value).ToList();
 
                 if (!weaponStatTypes.Contains(statType))
                 {
                     return false;
                 }
-                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= ExpertiseStatChoices || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType))
+
+                if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= ConfigService.ExpertiseStatChoices || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen per weapon, one stat type per weapon
                 }
+
                 Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Add(statType);
                 Core.DataStructures.SavePlayerWeaponStats();
                 return true;
             }
 
-            if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= ExpertiseStatChoices || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType)) 
+            if (Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Count >= ConfigService.ExpertiseStatChoices || Core.DataStructures.PlayerWeaponStats[steamId][weaponType].Contains(statType)) 
             {
                 return false; // Only allow configured amount of stats to be chosen per weapon
             }
@@ -48,7 +50,7 @@ internal static class ExpertiseStats
             Core.DataStructures.SavePlayerWeaponStats();
             return true;
         }
-        public static void ResetStats(ulong steamId, ExpertiseUtilities.WeaponType weaponType)
+        public static void ResetStats(ulong steamId, ExpertiseHandler.WeaponType weaponType)
         {
             if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamId, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
             {
@@ -75,23 +77,23 @@ internal static class ExpertiseStats
             SpellCritDamage // 11
         }
 
-        public static readonly Dictionary<WeaponStatManager.WeaponStatType, string> StatFormatMap = new()
+        public static readonly Dictionary<WeaponStatType, string> WeaponStatFormats = new()
         { 
-            { WeaponStatManager.WeaponStatType.MaxHealth, "integer" },
-            { WeaponStatManager.WeaponStatType.MovementSpeed, "decimal" },
-            { WeaponStatManager.WeaponStatType.PrimaryAttackSpeed, "percentage" },
-            { WeaponStatManager.WeaponStatType.PhysicalLifeLeech, "percentage" },
-            { WeaponStatManager.WeaponStatType.SpellLifeLeech, "percentage" },
-            { WeaponStatManager.WeaponStatType.PrimaryLifeLeech, "percentage" },
-            { WeaponStatManager.WeaponStatType.PhysicalPower, "integer" },
-            { WeaponStatManager.WeaponStatType.SpellPower, "integer" },
-            { WeaponStatManager.WeaponStatType.PhysicalCritChance, "percentage" },
-            { WeaponStatManager.WeaponStatType.PhysicalCritDamage, "percentage" },
-            { WeaponStatManager.WeaponStatType.SpellCritChance, "percentage" },
-            { WeaponStatManager.WeaponStatType.SpellCritDamage, "percentage" }
+            { WeaponStatType.MaxHealth, "integer" },
+            { WeaponStatType.MovementSpeed, "decimal" },
+            { WeaponStatType.PrimaryAttackSpeed, "percentage" },
+            { WeaponStatType.PhysicalLifeLeech, "percentage" },
+            { WeaponStatType.SpellLifeLeech, "percentage" },
+            { WeaponStatType.PrimaryLifeLeech, "percentage" },
+            { WeaponStatType.PhysicalPower, "integer" },
+            { WeaponStatType.SpellPower, "integer" },
+            { WeaponStatType.PhysicalCritChance, "percentage" },
+            { WeaponStatType.PhysicalCritDamage, "percentage" },
+            { WeaponStatType.SpellCritChance, "percentage" },
+            { WeaponStatType.SpellCritDamage, "percentage" }
         };
 
-        public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatMap = new()
+        public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatTypes = new()
         {
             { WeaponStatType.MaxHealth, UnitStatType.MaxHealth },
             { WeaponStatType.MovementSpeed, UnitStatType.MovementSpeed },
@@ -107,24 +109,20 @@ internal static class ExpertiseStats
             { WeaponStatType.SpellCritDamage, UnitStatType.SpellCriticalStrikeDamage },
         };
 
-        static readonly Dictionary<WeaponStatType, float> baseCaps = new()
+        public static readonly Dictionary<WeaponStatType, float> WeaponStatValues = new()
         {
-            {WeaponStatType.MaxHealth, Plugin.MaxHealth.Value},
-            {WeaponStatType.MovementSpeed, Plugin.MovementSpeed.Value},
-            {WeaponStatType.PrimaryAttackSpeed, Plugin.PrimaryAttackSpeed.Value},
-            {WeaponStatType.PhysicalLifeLeech, Plugin.PhysicalLifeLeech.Value},
-            {WeaponStatType.SpellLifeLeech, Plugin.SpellLifeLeech.Value},
-            {WeaponStatType.PrimaryLifeLeech, Plugin.PrimaryLifeLeech.Value},
-            {WeaponStatType.PhysicalPower, Plugin.PhysicalPower.Value},
-            {WeaponStatType.SpellPower, Plugin.SpellPower.Value},
-            {WeaponStatType.PhysicalCritChance, Plugin.PhysicalCritChance.Value},
-            {WeaponStatType.PhysicalCritDamage, Plugin.PhysicalCritDamage.Value},
-            {WeaponStatType.SpellCritChance, Plugin.SpellCritChance.Value},
-            {WeaponStatType.SpellCritDamage, Plugin.SpellCritDamage.Value}
+            {WeaponStatType.MaxHealth, ConfigService.MaxHealth},
+            {WeaponStatType.MovementSpeed, ConfigService.MovementSpeed},
+            {WeaponStatType.PrimaryAttackSpeed, ConfigService.PrimaryAttackSpeed},
+            {WeaponStatType.PhysicalLifeLeech, ConfigService.PhysicalLifeLeech},
+            {WeaponStatType.SpellLifeLeech, ConfigService.SpellLifeLeech},
+            {WeaponStatType.PrimaryLifeLeech, ConfigService.PrimaryLifeLeech},
+            {WeaponStatType.PhysicalPower, ConfigService.PhysicalPower},
+            {WeaponStatType.SpellPower, ConfigService.SpellPower},
+            {WeaponStatType.PhysicalCritChance, ConfigService.PhysicalCritChance},
+            {WeaponStatType.PhysicalCritDamage, ConfigService.PhysicalCritDamage},
+            {WeaponStatType.SpellCritChance, ConfigService.SpellCritChance},
+            {WeaponStatType.SpellCritDamage, ConfigService.SpellCritDamage}
         };
-        public static Dictionary<WeaponStatType, float> BaseCaps
-        {
-            get => baseCaps;
-        }
     }
 }

@@ -1,3 +1,4 @@
+using Bloodcraft.Services;
 using Bloodcraft.SystemUtilities.Professions;
 using HarmonyLib;
 using ProjectM;
@@ -12,237 +13,14 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CraftingPatches
 {
-    static readonly float CraftRateModifier = Core.ServerGameSettings.CraftRateModifier;
-    static PrefabCollectionSystem PrefabCollectionSystem => Core.PrefabCollectionSystem;
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     const float CraftThreshold = 0.995f;
     static Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
 
-    static readonly bool Professions = Plugin.ProfessionSystem.Value;
-    static readonly float MaxProfessionLevel = Plugin.MaxProfessionLevel.Value;
-    /*
-    [HarmonyPatch(typeof(StartCharacterCraftingSystem), nameof(StartCharacterCraftingSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(StartCharacterCraftingSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._StartCharacterCraftItemEventQuery.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (Plugin.ProfessionSystem.Value)
-                {
-                    if (!Core.hasInitialized) continue;
-
-                    if (entity.Has<StartCharacterCraftItemEvent>() && entity.Has<FromCharacter>())
-                    {
-                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                        ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                        StartCharacterCraftItemEvent startCraftItemEvent = entity.Read<StartCharacterCraftItemEvent>();
-                        PrefabGUID PrefabGUID = startCraftItemEvent.RecipeId;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID];
-                        var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-                        PrefabGUID itemPrefab = buffer[0].Guid;
-                        // Ensure the player’s job list exists
-                        if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
-                        {
-                            playerJobs = [];
-                            Core.DataStructures.PlayerCraftingJobs.Add(steamId, playerJobs);
-                        }
-
-                        // Check if the job exists and update or add
-                        var jobExists = false;
-                        for (int i = 0; i < playerJobs.Count; i++)
-                        {
-                            if (playerJobs[i].Item1.Equals(itemPrefab))
-                            {
-                                //Core.Log.LogInfo($"Adding Craft to existing: {itemPrefab.GetPrefabName()}");
-                                playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 + 1);
-                                jobExists = true;
-                                break;
-                            }
-                        }
-                        if (!jobExists)
-                        {
-                            //Core.Log.LogInfo($"Adding Craft: {itemPrefab.GetPrefabName()}");
-                            playerJobs.Add((itemPrefab, 1));
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited StartCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-
-    [HarmonyPatch(typeof(StopCharacterCraftingSystem), nameof(StopCharacterCraftingSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(StopCharacterCraftingSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._StopCharacterCraftItemEventQuery.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (Plugin.ProfessionSystem.Value)
-                {
-                    if (!Core.hasInitialized) continue;
-
-                    if (entity.Has<StopCharacterCraftItemEvent>() && entity.Has<FromCharacter>())
-                    {                        
-                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                        ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                        StopCharacterCraftItemEvent startCraftItemEvent = entity.Read<StopCharacterCraftItemEvent>();
-                        PrefabGUID PrefabGUID = startCraftItemEvent.RecipeGuid;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID];
-                        var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-                        PrefabGUID itemPrefab = buffer[0].Guid;
-                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
-                        {
-                            // if crafting job is active, remove
-                            for (int i = 0; i < playerJobs.Count; i++)
-                            {
-                                if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
-                                {
-                                    //Core.Log.LogInfo($"Removing Craft: {itemPrefab.GetPrefabName()}");
-                                    playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
-                                    if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited StartCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-
-    [HarmonyPatch(typeof(StartCraftingSystem), nameof(StartCraftingSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(StartCraftingSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (Plugin.ProfessionSystem.Value)
-                {
-                    if (!Core.hasInitialized) continue;
-
-                    if (entity.Has<StartCraftItemEvent>() && entity.Has<FromCharacter>())
-                    {
-                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                        ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                        StartCraftItemEvent startCraftItemEvent = entity.Read<StartCraftItemEvent>();
-                        PrefabGUID PrefabGUID = startCraftItemEvent.RecipeId;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID];
-                        var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-                        PrefabGUID itemPrefab = buffer[0].Guid;
-                                                // Ensure the player’s job list exists
-                        if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
-                        {
-                            playerJobs = [];
-                            Core.DataStructures.PlayerCraftingJobs.Add(steamId, playerJobs);
-                        }
-
-                        // Check if the job exists and update or add
-                        var jobExists = false;
-                        for (int i = 0; i < playerJobs.Count; i++)
-                        {
-                            if (playerJobs[i].Item1.Equals(itemPrefab))
-                            {
-                                //Core.Log.LogInfo($"Adding Craft to existing: {itemPrefab.GetPrefabName()}");
-                                playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 + 1);
-                                jobExists = true;
-                                break;
-                            }
-                        }
-                        if (!jobExists)
-                        {
-                            //Core.Log.LogInfo($"Adding Craft: {itemPrefab.GetPrefabName()}");
-                            playerJobs.Add((itemPrefab, 1));
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited StartCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-
-    [HarmonyPatch(typeof(StopCraftingSystem), nameof(StopCraftingSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void Prefix(StopCraftingSystem __instance)
-    {
-        //Core.Log.LogInfo("StopCraftingSystemPrefix called...");
-
-        NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);// double check this
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!Core.hasInitialized) continue;
-
-                if (Plugin.ProfessionSystem.Value)
-                {
-                    if (entity.Has<StopCraftItemEvent>() && entity.Has<FromCharacter>())
-                    {
-                        FromCharacter fromCharacter = entity.Read<FromCharacter>();
-                        ulong steamId = fromCharacter.User.Read<User>().PlatformId;
-                        StopCraftItemEvent stopCraftItemEvent = entity.Read<StopCraftItemEvent>();
-                        PrefabGUID PrefabGUID = stopCraftItemEvent.RecipeGuid;
-                        Entity recipeEntity = Core.PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID];
-                        var buffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-                        PrefabGUID itemPrefab = buffer[0].Guid;
-                        if (Core.DataStructures.PlayerCraftingJobs.TryGetValue(steamId, out var playerJobs))
-                        {
-                            // if crafting job is active, remove
-                            for (int i = 0; i < playerJobs.Count; i++)
-                            {
-                                if (playerJobs[i].Item1 == itemPrefab && playerJobs[i].Item2 > 0)
-                                {
-                                    //Core.Log.LogInfo($"Removing Craft: {itemPrefab.GetPrefabName()}");
-                                    playerJobs[i] = (playerJobs[i].Item1, playerJobs[i].Item2 - 1);
-                                    if (playerJobs[i].Item2 == 0) playerJobs.RemoveAt(i);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited StopCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-    */
+    static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem.Settings.CraftRateModifier;
 
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
     static class ForgeSystem_UpdatesPatch
@@ -255,7 +33,7 @@ internal static class CraftingPatches
                 foreach (Entity entity in repairEntities)
                 {
                     if (!Core.hasInitialized) continue;
-                    if (!Professions) continue;
+                    if (!ConfigService.ProfessionSystem) continue;
 
                     Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
                     if (forge_Shared.State == ForgeState.Empty) continue;
@@ -296,7 +74,7 @@ internal static class CraftingPatches
                                 if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
 
                                 int level = handler.GetExperienceData(steamId).Key;
-                                durability.MaxDurability *= (1 + (float)level / (float)MaxProfessionLevel);
+                                durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                                 durability.Value = durability.MaxDurability;
                                 itemEntity.Write(durability);
                                 ProfessionUtilities.SetProfession(user, steamId, ProfessionValue, handler);
@@ -322,7 +100,7 @@ internal static class CraftingPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
-                if (!Professions) continue;
+                if (!ConfigService.ProfessionSystem) continue;
 
                 if (entity.Has<CastleWorkstation>() && entity.Has<QueuedWorkstationCraftAction>())
                 {
@@ -372,13 +150,6 @@ internal static class CraftingPatches
                             var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                             PrefabGUID itemPrefab = outputBuffer[0].Guid;
 
-                            /*
-                            if (Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData))
-                            {
-                                QuestUtilities.UpdateQuestProgress(questData, itemPrefab, 1, user);
-                            }
-                            */
-
                             if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(userEntity, out var playerJobs))
                             {
                                 playerJobs = [];
@@ -400,52 +171,9 @@ internal static class CraftingPatches
                 }
             }
         }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited UpdateCraftingSystem hook early: {e}");
-        }
         finally
         {
             entities.Dispose();
         }
     }
-    /*
-    [HarmonyPatch(typeof(UpdateCharacterCraftingSystem), nameof(UpdateCharacterCraftingSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix()
-    {
-        //AggroService.OnUpdate();
-    }
-    
-    [HarmonyPatch(typeof(YieldResourcesSystem_Dead), nameof(YieldResourcesSystem_Dead.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(YieldResourcesSystem_Dead __instance)
-    {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!Core.hasInitialized) continue;
-                if (!Plugin.ProfessionSystem.Value) continue;
-
-                //entity.LogComponentTypes();
-                var buffer = entity.ReadBuffer<YieldResourcesOnDamageTaken>();
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    var item = buffer[i];
-                    Core.Log.LogInfo($"Prefab: {item.ItemType.LookupName()} | Amount: {item.Amount} | AmountTaken: {item.AmountTaken}");
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogInfo($"Exited UpdateCraftingSystem hook early: {e}");
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-    */
 }

@@ -1,14 +1,13 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Quests;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
+using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
 
@@ -17,14 +16,15 @@ internal static class QuestCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static DebugEventsSystem DebugEventsSystem => Core.DebugEventsSystem;
-
-    static readonly PrefabGUID bloodAltar = new(-1458480041);
+    static SystemService SystemService => Core.SystemService;
+    static ConfigService ConfigService => Core.ConfigService;
+    static LocalizationService LocalizationService => Core.LocalizationService;
+    static PlayerService PlayerService => Core.PlayerService;
 
     [Command(name: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
     public static void LogQuestCommand(ChatCommandContext ctx)
     {
-        if (!Plugin.QuestSystem.Value || !Plugin.ProfessionSystem.Value || !Plugin.LevelingSystem.Value)
+        if (!ConfigService.QuestSystem)
         {
             LocalizationService.HandleReply(ctx, "Quests are not enabled.");
             return;
@@ -32,26 +32,26 @@ internal static class QuestCommands
 
         var SteamID = ctx.Event.User.PlatformId;
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
+        if (PlayerBools.TryGetValue(SteamID, out var bools))
         {
             bools["QuestLogging"] = !bools["QuestLogging"];
         }
 
-        Core.DataStructures.SavePlayerBools();
+        SavePlayerBools();
         LocalizationService.HandleReply(ctx, $"Quest logging is now {(bools["QuestLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "daily", shortHand: "d", adminOnly: false, usage: ".quest d", description: "Display your current daily quest progress.")]
     public static void DailyQuestProgressCommand(ChatCommandContext ctx)
     {
-        if (!Plugin.QuestSystem.Value)
+        if (!ConfigService.QuestSystem)
         {
             LocalizationService.HandleReply(ctx, "Quests are not enabled.");
             return;
         }
 
         ulong steamID = ctx.Event.User.PlatformId;
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamID, out var questData))
+        if (PlayerQuests.TryGetValue(steamID, out var questData))
         {
             if (questData.TryGetValue(QuestType.Daily, out var dailyQuest) && !dailyQuest.Objective.Complete)
             {
@@ -86,7 +86,7 @@ internal static class QuestCommands
     [Command(name: "weekly", shortHand: "w", adminOnly: false, usage: ".quest w", description: "Display your current weekly quest progress.")]
     public static void WeeklyQuestProgressCommand(ChatCommandContext ctx)
     {
-        if (!Plugin.QuestSystem.Value)
+        if (!ConfigService.QuestSystem)
         {
             LocalizationService.HandleReply(ctx, "Quests are not enabled.");
             return;
@@ -94,7 +94,7 @@ internal static class QuestCommands
 
         ulong steamID = ctx.Event.User.PlatformId;
 
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamID, out var questData))
+        if (PlayerQuests.TryGetValue(steamID, out var questData))
         {
             if (questData.TryGetValue(QuestType.Weekly, out var weeklyQuest) && !weeklyQuest.Objective.Complete)
             {
@@ -142,7 +142,7 @@ internal static class QuestCommands
     [Command(name: "track", shortHand: "t", adminOnly: false, usage: ".quest t [QuestType]", description: "Locate and track quest target, rerolls quest if none found.")]
     public static void LocateTargetCommand(ChatCommandContext ctx, string questType)
     {
-        if (!Plugin.QuestSystem.Value)
+        if (!ConfigService.QuestSystem)
         {
             LocalizationService.HandleReply(ctx, "Quests are not enabled.");
             return;
@@ -165,14 +165,14 @@ internal static class QuestCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
 
-        if (Core.DataStructures.PlayerQuests.TryGetValue(steamID, out var questData))
+        if (PlayerQuests.TryGetValue(steamID, out var questData))
         {
             if (type.Equals(QuestType.Daily) && questData.TryGetValue(QuestType.Daily, out var dailyQuest) && !dailyQuest.Objective.Complete)
             {
                 if (!QuestService.TargetCache.TryGetValue(dailyQuest.Objective.Target, out HashSet<Entity> entities)) // if no valid targest refresh quest
                 {
-                    int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
-                    QuestUtilities.ForceDaily(user, steamID, level);
+                    int level = ConfigService.LevelingSystem ? PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
+                    ForceDaily(user, steamID, level);
                 }
                 else if (entities.Count > 0)
                 {
@@ -194,13 +194,13 @@ internal static class QuestCommands
                     }
                     if (math.distance(userPosition, targetPosition) > 5000f) // usually means non-ideal CHAR prefab that spawns rarely or strangely for w/e reason
                     {
-                        int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
-                        QuestUtilities.ForceDaily(user, steamID, level);
+                        int level = ConfigService.LevelingSystem ? PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
+                        ForceDaily(user, steamID, level);
                         return;
                     }
                     float distance = math.distance(userPosition, targetPosition);
                     float3 direction = math.normalize(targetPosition - userPosition);
-                    string cardinalDirection = $"<color=white>{QuestUtilities.GetCardinalDirection(direction)}</color>";
+                    string cardinalDirection = $"<color=white>{GetCardinalDirection(direction)}</color>";
                     double seconds = (DateTime.UtcNow - QuestService.LastUpdate).TotalSeconds;
                     LocalizationService.HandleReply(ctx, $"Nearest <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the <color=yellow>{cardinalDirection}</color> <color=#F88380>{(int)seconds}</color>s ago.");
                 }
@@ -213,8 +213,8 @@ internal static class QuestCommands
             {
                 if (!QuestService.TargetCache.TryGetValue(weeklyQuest.Objective.Target, out HashSet<Entity> entities)) // if no valid targets refresh quest
                 {
-                    int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
-                    QuestUtilities.ForceWeekly(user, steamID, level);
+                    int level = ConfigService.LevelingSystem ? PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
+                    ForceWeekly(user, steamID, level);
                 }
                 else if (entities.Count > 0)
                 {
@@ -236,13 +236,13 @@ internal static class QuestCommands
                     }
                     if (math.distance(userPosition, targetPosition) > 5000f) // usually means non-ideal CHAR prefab that spawns rarely or strangely for w/e reason, resetting with this should take precedence over prefab being seen probably
                     {
-                        int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
-                        QuestUtilities.ForceWeekly(user, steamID, level);
+                        int level = ConfigService.LevelingSystem ? PlayerExperience[steamID].Key : (int)character.Read<Equipment>().GetFullLevel();
+                        ForceWeekly(user, steamID, level);
                         return;
                     }
                     float distance = math.distance(userPosition, targetPosition);
                     float3 direction = math.normalize(targetPosition - userPosition);
-                    string cardinalDirection = $"<color=white>{QuestUtilities.GetCardinalDirection(direction)}</color>";
+                    string cardinalDirection = $"<color=white>{GetCardinalDirection(direction)}</color>";
                     double seconds = (DateTime.UtcNow - QuestService.LastUpdate).TotalSeconds;
                     LocalizationService.HandleReply(ctx, $"Nearest <color=white>{weeklyQuest.Objective.Target.GetPrefabName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the <color=yellow>{cardinalDirection}</color> <color=#F88380>{(int)seconds}</color>s ago.");
                 }
@@ -261,13 +261,13 @@ internal static class QuestCommands
     [Command(name: "refresh", shortHand: "r", adminOnly: true, usage: ".quest r [Name]", description: "Refreshes daily and weekly quests for player.")]
     public static void ForceRefreshQuests(ChatCommandContext ctx, string name)
     {
-        if (!Plugin.QuestSystem.Value)
+        if (!ConfigService.QuestSystem)
         {
             LocalizationService.HandleReply(ctx, "Quests are not enabled.");
             return;
         }
 
-        Entity foundUserEntity = PlayerService.PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        Entity foundUserEntity = PlayerService.UserCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
         if (!EntityManager.Exists(foundUserEntity))
         {
             ctx.Reply($"Couldn't find player.");
@@ -276,8 +276,8 @@ internal static class QuestCommands
 
         User foundUser = foundUserEntity.Read<User>();
 
-        int level = Plugin.LevelingSystem.Value ? Core.DataStructures.PlayerExperience[foundUser.PlatformId].Key : (int)foundUser.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-        QuestUtilities.ForceRefresh(foundUser.PlatformId, level);
+        int level = ConfigService.LevelingSystem ? PlayerExperience[foundUser.PlatformId].Key : (int)foundUser.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+        ForceRefresh(foundUser.PlatformId, level);
 
         LocalizationService.HandleReply(ctx, $"Quests for <color=green>{foundUser.CharacterName.Value}</color> have been refreshed.");
     }
