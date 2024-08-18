@@ -4,4 +4,5 @@ V RISING NOTES
 
 Teams:
 The UnitTeam entity is global for the units that use it unlike PlayerTeam entities of which each player has a unique one. Changing TeamData on the UnitTeam entity will apply to ALL of those units.
-Oddly enough, they will be allied with the player to some degree as well (at least that was the case using a value of 1337, changing it back to 2 resulted in normal behaviour again).
+Oddly enough, they will be allied with the player to some degree as well (at least that was the case using a value of 1337, changing it back to 2 resulted in normal behaviour again). You can
+purposefully create mismatches between the value for Team on players/units and the value on their team entity TeamData which has odd results; the former seems to handle general aggression/aggroability and the latter seems to handle being able to revive/ability collision/etc.
