@@ -20,7 +20,10 @@ namespace Bloodcraft.Patches;
 internal static class CreateGameplayEventOnDestroySystemPatch
 {
     static ConfigService ConfigService => Core.ConfigService;
+
     const int BaseFishingXP = 100;
+    static readonly PrefabGUID fishingTravelToTarget = new(-1130746976);
+    static readonly PrefabGUID feedComplete = new(-1106009274);
 
     [HarmonyPatch(typeof(CreateGameplayEventOnDestroySystem), nameof(CreateGameplayEventOnDestroySystem.OnUpdate))]
     [HarmonyPrefix]
@@ -32,17 +35,18 @@ internal static class CreateGameplayEventOnDestroySystemPatch
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
-
                 if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
+
                 PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
 
-                if (ConfigService.ProfessionSystem && PrefabGUID.GuidHash.Equals(-1130746976)) // fishing travel to target, this indicates a succesful fishing event
+                if (ConfigService.ProfessionSystem && PrefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
                 {
-                    Entity character = entity.Read<EntityOwner>().Owner;
+                    Entity character = entity.GetOwner();
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
                     ulong steamId = user.PlatformId;
+
                     PrefabGUID toProcess = new(0);
-                    Entity target = entity.Read<Buff>().Target;
+                    Entity target = entity.GetBuffTarget();
 
                     if (target.Has<DropTableBuffer>())
                     {
@@ -52,38 +56,39 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                             toProcess = dropTableBuffer[0].DropTableGuid;
                         }
                     }
+
                     if (toProcess.GuidHash == 0)
                     {
                         continue;
                     }
+
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "");
                     int multiplier = ProfessionMappings.GetFishingModifier(toProcess);
+
                     if (handler != null)
                     {
-                        ProfessionUtilities.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
-                        ProfessionUtilities.GiveProfessionBonus(toProcess, character, user, steamId, handler);
+                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
+                        ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }
 
-                if (PrefabGUID.GuidHash.Equals(-1106009274) && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // feed complete non-vblood kills
+                if (PrefabGUID.Equals(feedComplete) && entity.GetOwner().HasPlayer(out Entity player)) // feed complete non-vblood kills
                 {
-                    Entity died = entity.Read<SpellTarget>().Target._Entity;
-                    Entity killer = entity.Read<EntityOwner>().Owner;
-                    Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
+                    Entity died = entity.GetSpellTarget();
+                    Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     User user = userEntity.Read<User>();
-                    ulong steamId = user.PlatformId;
 
-                    if (ConfigService.BloodSystem) LegacyUtilities.UpdateLegacy(killer, died);
-                    if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(killer, died);
-                    if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(killer, died);
+                    if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, died);
+                    if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, died);
+                    if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(player, died);
                     if (ConfigService.FamiliarSystem)
                     {
-                        FamiliarLevelingUtilities.UpdateFamiliar(killer, died);
-                        FamiliarUnlockUtilities.HandleUnitUnlock(killer, died);
+                        FamiliarLevelingSystem.UpdateFamiliar(player, died);
+                        FamiliarUnlockSystem.HandleUnitUnlock(player, died);
                     }
                     if (ConfigService.QuestSystem)
                     {
-                        QuestUtilities.UpdateQuests(killer, userEntity, died.Read<PrefabGUID>());
+                        QuestSystem.UpdateQuests(player, userEntity, died.Read<PrefabGUID>());
                     }
                 }
             }

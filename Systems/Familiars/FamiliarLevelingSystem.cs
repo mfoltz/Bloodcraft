@@ -7,7 +7,7 @@ using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.SystemUtilities.Familiars;
-internal static class FamiliarLevelingUtilities
+internal static class FamiliarLevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
@@ -37,7 +37,7 @@ internal static class FamiliarLevelingUtilities
 
         if (FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Familiar.Equals(Entity.Null)) return; // don't process if familiar not out
 
-        Entity familiarEntity = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(player);
+        Entity familiarEntity = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
         if (familiarEntity == Entity.Null || !EntityManager.Exists(familiarEntity)) return;
 
         if (familiarEntity.Has<Aggroable>() && !familiarEntity.Read<Aggroable>().Value._Value) return; // don't process if familiar combat disabled
@@ -103,12 +103,14 @@ internal static class FamiliarLevelingUtilities
             data.FamiliarExperience[familiarId] = new(newLevel, familiarXP.Value);
             FamiliarExperienceManager.SaveFamiliarExperience(steamID, data);
         }
+
         if (leveledUp)
         {
             ApplyBuffDebugEvent applyBuffDebugEvent = new()
             {
                 BuffPrefabGUID = levelUpBuff,
             };
+
             FromCharacter fromCharacter = new()
             {
                 Character = familiarEntity,
@@ -127,8 +129,8 @@ internal static class FamiliarLevelingUtilities
                 prestigeLevel = prestigeData.Key;
             }
 
-            FamiliarSummonUtilities.ModifyDamageStats(familiarEntity, newLevel, steamID, famKey);
-            if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonUtilities.ModifyBloodSource(familiarEntity, newLevel);
+            FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel, steamID, famKey);
+            if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiarEntity, newLevel);
         }
     }   
     public static int ConvertXpToLevel(float xp)

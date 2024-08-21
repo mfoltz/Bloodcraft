@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Familiars;
 using Bloodcraft.SystemUtilities.Legacies;
 using HarmonyLib;
 using ProjectM;
@@ -9,7 +8,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.SystemUtilities.Experience.PlayerLevelingUtilities;
+using static Bloodcraft.SystemUtilities.Experience.LevelingSystem;
 using Random = System.Random;
 
 namespace Bloodcraft.Patches;
@@ -44,28 +43,24 @@ internal static class StatChangeSystemPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!entity.Exists()) continue;
 
                 if (ConfigService.BloodSystem && ConfigService.BloodQualityBonus && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
-                    if (!EntityManager.Exists(entity)) continue;
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
                     BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
+
                     if (!statChangeEvent.Entity.Has<Blood>()) continue;
-                    Blood blood = statChangeEvent.Entity.Read<Blood>();
-                    LegacyUtilities.BloodType bloodType = LegacyUtilities.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
+
+                    BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
                     ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
-                    var bloodQualityBuff = statChangeEvent.Entity.ReadBuffer<BloodQualityBuff>();
-
-                    if (bloodHandler == null)
-                    {
-                        continue;
-                    }
-
+                    if (bloodHandler == null) continue;
+                    
                     float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
 
-                    if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(LegacyUtilities.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
+                    if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
                     {
                         legacyKey = (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
                         if (legacyKey > 0)
@@ -103,131 +98,59 @@ internal static class StatChangeSystemPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!ConfigService.ClassSpellSchoolOnHitEffects || !ConfigService.Classes) continue;
                 if (!entity.Exists() || !entity.Has<DealDamageEvent>()) continue;
 
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
 
-                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell && dealDamageEvent.MainType != MainDamageType.Holy) continue;
+                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue;
 
-                if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // this caused plants to disappear after harvesting...? or something broke hard after that error
+                if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue;
 
-                //if (!dealDamageEvent.SpellSource.Has<PrefabGUID>()) continue; // hopefully this is safer, even though that makes zero sense
                 PrefabGUID sourcePrefab = dealDamageEvent.SpellSource.Read<PrefabGUID>();
+
+                //Core.Log.LogInfo($"Source Prefab: {sourcePrefab.LookupName()}");
+
                 if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue;
 
-                //Core.Log.LogInfo($"DealDamageEvent: {dealDamageEvent.MainType} | Source: {dealDamageEvent.SpellSource.Read<PrefabGUID>().LookupName()} | Target: {dealDamageEvent.Target.Read<PrefabGUID>().LookupName()}");
-
-                if (dealDamageEvent.Target.TryGetComponent(out PlayerCharacter target))
-                {
-                    if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && ConfigService.Parties && ConfigService.PreventFriendlyFire && !GameMode.Equals(GameModeType.PvE) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
-                    {
-                        Dictionary<ulong, HashSet<string>> playerAlliances = new(Core.DataStructures.PlayerParties);
-                        string targetName = target.Name.Value;
-                        string sourceName = source.Name.Value;
-                        ulong steamId = source.UserEntity.Read<User>().PlatformId;
-
-                        if (playerAlliances.Values.Any(set => set.Contains(targetName) && set.Contains(sourceName)))
-                        {
-                            EntityManager.DestroyEntity(entity);
-                        }
-                    }
-                    else if (ConfigService.FamiliarSystem && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner familiarEntityOwner) && familiarEntityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>())
-                    {
-                        if (dealDamageEvent.Target.Has<Follower>() && dealDamageEvent.Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
-                        {
-                            EntityManager.DestroyEntity(entity);
-                            continue;
-                        }
-
-                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
-                        if (GameMode.Equals(GameModeType.PvE)) // always stop in PvE
-                        {
-                            if (familiar != Entity.Null)
-                            {
-                                EntityManager.DestroyEntity(entity);
-                            }
-                        }
-                        else if (ServerGameManager.HasBuff(dealDamageEvent.Target, pvpProtBuff.ToIdentifier())) // account for KindredArenas~
-                        {
-                            if (familiar != Entity.Null)
-                            {
-                                EntityManager.DestroyEntity(entity);
-                            }
-                        }
-                        else if (ConfigService.Parties && ConfigService.PreventFriendlyFire) // check for parties in PvP 
-                        {
-                            Dictionary<ulong, HashSet<string>> playerParties = new(Core.DataStructures.PlayerParties);
-                            string targetName = target.Name.Value;
-                            string ownerName = follower.Followed._Value.Read<PlayerCharacter>().Name.Value;
-
-                            if (familiar != Entity.Null && playerParties.Values.Any(set => set.Contains(targetName) && set.Contains(ownerName)))
-                            {
-                                EntityManager.DestroyEntity(entity);
-                            }
-                        }
-                    }
-                }
-                else if (!dealDamageEvent.MainType.Equals(MainDamageType.Holy) && dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetComponent(out PlayerCharacter source))
-                {
-                    Entity userEntity = source.UserEntity;
-                    if (ConfigService.FamiliarSystem)
-                    {
-                        if (dealDamageEvent.Target.Has<Follower>() && dealDamageEvent.Target.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // protect familiars from player damage
-                        {
-                            EntityManager.DestroyEntity(entity);
-                            continue;
-                        }
-                        else if (dealDamageEvent.Target.Has<EntityOwner>() && dealDamageEvent.Target.Read<EntityOwner>().Owner.Has<Follower>()) // protect familiar summons from player damage
-                        {
-                            Follower follower = dealDamageEvent.Target.Read<EntityOwner>().Owner.Read<Follower>();
-                            if (follower.Followed._Value.Has<PlayerCharacter>())
-                            {
-                                EntityManager.DestroyEntity(entity);
-                                continue;
-                            }
-                        }
-                        else if (dealDamageEvent.Target.Has<Minion>() && dealDamageEvent.Target.Has<EntityOwner>() && dealDamageEvent.Target.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // protect minion player summons from player damage
-                        {
-                            EntityManager.DestroyEntity(entity);
-                            continue;
-                        }
-                    }
-
-                    if (!ConfigService.ClassSpellSchoolOnHitEffects || !ConfigService.Classes) continue;
-                    
+                if (dealDamageEvent.SpellSource.GetOwner().HasPlayer(out Entity player) && !dealDamageEvent.Target.IsVampire())
+                {                    
+                    Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;
-                    if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classData) && classData.Keys.Count == 0) continue;
+                    if (!HasClass(steamId)) continue;
 
                     PlayerClasses playerClass = GetPlayerClass(steamId);
                     if (Random.NextDouble() <= ConfigService.OnHitProcChance)
                     {
                         PrefabGUID prefabGUID = ClassOnHitDebuffMap[playerClass];
+
                         FromCharacter fromCharacter = new()
                         {
                             Character = dealDamageEvent.Target,
-                            User = source.UserEntity
+                            User = userEntity
                         };
 
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
                         {
                             BuffPrefabGUID = prefabGUID,
                         };
-
+                        
                         if (ServerGameManager.HasBuff(dealDamageEvent.Target, prefabGUID.ToIdentifier()))
                         {
                             applyBuffDebugEvent.BuffPrefabGUID = ClassOnHitEffectMap[playerClass];
-                            fromCharacter.Character = entityOwner.Owner;
+                            fromCharacter.Character = player;
+
                             if (playerClass.Equals(PlayerClasses.DemonHunter))
                             {
-                                if (ServerGameManager.TryGetBuff(entityOwner.Owner, stormShield01.ToIdentifier(), out Entity firstBuff))
+                                if (ServerGameManager.TryGetBuff(player, stormShield01.ToIdentifier(), out Entity firstBuff))
                                 {
                                     firstBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
                                 }
-                                else if (ServerGameManager.TryGetBuff(entityOwner.Owner, stormShield02.ToIdentifier(), out Entity secondBuff))
+                                else if (ServerGameManager.TryGetBuff(player, stormShield02.ToIdentifier(), out Entity secondBuff))
                                 {
                                     secondBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
                                 }
-                                else if (ServerGameManager.TryGetBuff(entityOwner.Owner, stormShield03.ToIdentifier(), out Entity thirdBuff))
+                                else if (ServerGameManager.TryGetBuff(player, stormShield03.ToIdentifier(), out Entity thirdBuff))
                                 {
                                     thirdBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
                                 }
@@ -246,7 +169,7 @@ internal static class StatChangeSystemPatches
                             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
                             if (ServerGameManager.TryGetBuff(dealDamageEvent.Target, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
                             {
-                                buff.Write(new EntityOwner { Owner = entityOwner.Owner });
+                                buff.Write(new EntityOwner { Owner = player });
                             }
                         }
                     }

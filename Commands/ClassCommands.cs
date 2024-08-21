@@ -5,9 +5,9 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Core.DataStructures;
-using static Bloodcraft.SystemUtilities.Experience.PlayerLevelingUtilities;
-using static Bloodcraft.SystemUtilities.Expertise.ExpertiseStats.WeaponStatManager;
-using static Bloodcraft.SystemUtilities.Legacies.LegacyStats.BloodStatManager;
+using static Bloodcraft.SystemUtilities.Experience.LevelingSystem;
+using static Bloodcraft.SystemUtilities.Expertise.WeaponHandler.WeaponStats;
+using static Bloodcraft.SystemUtilities.Legacies.BloodHandler.BloodStats;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
@@ -71,7 +71,7 @@ internal static class ClassCommands
                 return;
             }
             PlayerClasses playerClass = classes.Keys.FirstOrDefault();
-            if (PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var prestigeLevel))
+            if (PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel))
             {
                 if (prestigeLevel < ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
                 {

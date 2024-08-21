@@ -8,7 +8,6 @@ using Bloodcraft.SystemUtilities.Legacies;
 using Bloodcraft.SystemUtilities.Leveling;
 using Bloodcraft.SystemUtilities.Professions;
 using Bloodcraft.SystemUtilities.Quests;
-using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -29,8 +28,6 @@ internal static class Core
     public static PlayerService PlayerService { get; } = new();
     public static LocalizationService LocalizationService { get; } = new();
     public static QuestService QuestService { get; } = ConfigService.QuestSystem ? new() : null;
-    public static TeamService TeamService { get; } = ConfigService.FamiliarSystem ? new() : null; // AppendRemovedComponentRecordError?
-    public static MapZoneCollection MapZoneCollection => SystemService.MapZoneCollectionSystem._MapZoneCollection;
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -44,7 +41,7 @@ internal static class Core
         if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
         if (ConfigService.QuestSystem) Utilities.QuestRewards();
         if (ConfigService.StarterKit) Utilities.StarterKit();
-       
+        
         hasInitialized = true;
     }
     static World GetServerWorld()
@@ -76,8 +73,8 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
         private static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
-        private static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> playerClass = [];
-        private static Dictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> playerPrestiges = [];
+        private static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)>> playerClass = [];
+        private static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> playerPrestiges = [];
 
         // professions
 
@@ -104,7 +101,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerFishingPoleExpertise = [];
-        private static Dictionary<ulong, Dictionary<ExpertiseHandler.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> playerWeaponStats = [];
+        private static Dictionary<ulong, Dictionary<WeaponSystem.WeaponType, List<WeaponHandler.WeaponStats.WeaponStatType>>> playerWeaponStats = [];
 
         private static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
         private static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> playerSpells = [];
@@ -121,7 +118,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<int, float>> playerImmortalLegacy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerCreatureLegacy = [];
         private static Dictionary<ulong, KeyValuePair<int, float>> playerBruteLegacy = [];
-        private static Dictionary<ulong, Dictionary<LegacyUtilities.BloodType, List<LegacyStats.BloodStatManager.BloodStatType>>> playerBloodStats = [];
+        private static Dictionary<ulong, Dictionary<BloodSystem.BloodType, List<BloodHandler.BloodStats.BloodStatType>>> playerBloodStats = [];
 
         // familiar data
 
@@ -134,7 +131,7 @@ internal static class Core
         private static Dictionary<ulong, FamiliarBuffsData> familiarBuffs = [];
 
         // quest data
-        private static Dictionary<ulong, Dictionary<QuestUtilities.QuestType, (QuestUtilities.QuestObjective Objective, int Progress, DateTime LastReset)>> playerQuests = [];
+        private static Dictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> playerQuests = [];
 
         [Serializable]
         public class FamiliarExperienceData
@@ -145,7 +142,7 @@ internal static class Core
         [Serializable]
         public class FamiliarPrestigeData
         {
-            public Dictionary<int, KeyValuePair<int, List<FamiliarSummonUtilities.FamiliarStatType>>> FamiliarPrestige { get; set; } = [];
+            public Dictionary<int, KeyValuePair<int, List<FamiliarSummonSystem.FamiliarStatType>>> FamiliarPrestige { get; set; } = [];
         }
 
         [Serializable]
@@ -160,7 +157,7 @@ internal static class Core
             public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = [];
         }
 
-        public static Dictionary<ulong, Dictionary<QuestUtilities.QuestType, (QuestUtilities.QuestObjective Objective, int Progress, DateTime LastReset)>> PlayerQuests
+        public static Dictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> PlayerQuests
         {
             get => playerQuests;
             set => playerQuests = value;
@@ -211,12 +208,12 @@ internal static class Core
             get => playerRestedXP;
             set => playerRestedXP = value;
         }
-        public static Dictionary<ulong, Dictionary<PlayerLevelingUtilities.PlayerClasses, (List<int>, List<int>)>> PlayerClass
+        public static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)>> PlayerClass
         {
             get => playerClass;
             set => playerClass = value;
         }
-        public static Dictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> PlayerPrestiges
+        public static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> PlayerPrestiges
         {
             get => playerPrestiges;
             set => playerPrestiges = value;
@@ -336,7 +333,7 @@ internal static class Core
             get => playerSpells;
             set => playerSpells = value;
         }
-        public static Dictionary<ulong, Dictionary<ExpertiseHandler.WeaponType, List<ExpertiseStats.WeaponStatManager.WeaponStatType>>> PlayerWeaponStats
+        public static Dictionary<ulong, Dictionary<WeaponSystem.WeaponType, List<WeaponHandler.WeaponStats.WeaponStatType>>> PlayerWeaponStats
         {
             get => playerWeaponStats;
             set => playerWeaponStats = value;
@@ -391,7 +388,7 @@ internal static class Core
             get => playerBruteLegacy;
             set => playerBruteLegacy = value;
         }
-        public static Dictionary<ulong, Dictionary<LegacyUtilities.BloodType, List<LegacyStats.BloodStatManager.BloodStatType>>> PlayerBloodStats
+        public static Dictionary<ulong, Dictionary<BloodSystem.BloodType, List<BloodHandler.BloodStats.BloodStatType>>> PlayerBloodStats
         {
             get => playerBloodStats;
             set => playerBloodStats = value;

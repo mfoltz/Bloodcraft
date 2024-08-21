@@ -7,15 +7,18 @@ using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
+using static Bloodcraft.SystemUtilities.Expertise.WeaponSystem;
 using static Bloodcraft.Utilities;
+using User = ProjectM.Network.User;
 
 namespace Bloodcraft.SystemUtilities.Experience;
-internal static class PlayerLevelingUtilities
+internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -177,13 +180,15 @@ internal static class PlayerLevelingUtilities
         gainedXP += additionalXP;
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
 
-        if (currentLevel >= ConfigService.MaxPlayerLevel) return; // Check if already at max level
+        if (ConfigService.ClientCompanion) HandleClientUI(killerEntity, SteamID); // move this to death hook?
+
+        if (currentLevel >= ConfigService.MaxPlayerLevel) return;
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
         
-        if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
-            int exoLevel = prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Exo, out var exo) ? exo : 0;
+            int exoLevel = prestiges.TryGetValue(PrestigeSystem.PrestigeType.Exo, out var exo) ? exo : 0;
             float expReductionFactor = 1 - (ConfigService.LevelingPrestigeReducer * PrestigeData);
             if (exoLevel == 0)
             {
@@ -317,73 +322,63 @@ internal static class PlayerLevelingUtilities
         User user = userEntity.Read<User>();
         Entity character = user.LocalCharacter._Entity;
 
-        NetworkedEntity player = NetworkedEntity.ServerEntity(character);
-        Entity syncedPlayer = player.GetSyncedEntityOrNull();
-
         if (leveledUp)
         {
             int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
-            GearOverride.SetLevel(userEntity.Read<User>().LocalCharacter._Entity);
+            SetLevel(character);
+
             if (newLevel <= ConfigService.MaxPlayerLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+            if (GetPlayerBool(SteamID, "Reminders") && ConfigService.Classes && !HasClass(SteamID))
+            {
+                LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use '.class l' to view choices and see what they have to offer with '.class lb [Class]' (buffs), '.class lsp [Class]' (spells), and '.class lst [Class]' (stat synergies).");
+            }
         }
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools) && bools["ExperienceLogging"])
+        if (GetPlayerBool(SteamID, "ExperienceLogging"))
         {
             int levelProgress = GetLevelProgress(SteamID);
             string message = restedXP > 0 ? $"+<color=yellow>{gainedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)" : $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
-
-        if (ConfigService.ClientCompanion)
-        {
-            int packed = PackValues(character, SteamID, ConfigService.PrestigeSystem, ConfigService.BloodSystem, ConfigService.ExpertiseSystem);
-            Team team = syncedPlayer.Read<Team>();
-            team.FactionIndex = packed; // max faction int is 32 so make 33 the new 0 (33-133). if ends up being weird can speed up loop and set back to normal after processing maybe
-            syncedPlayer.Write(team);
-            Core.Log.LogInfo($"Loaded packed progress on FactionIndex: {user.CharacterName.Value} | {team.FactionIndex}");
-        }
     }
-    // for quests, would need to determine best way to get target and then pack in progress for daily/weekly? too difficult maybe...
-    static int PackValues(Entity character, ulong steamId, bool Prestige, bool Legacies, bool Expertise)
+    static void HandleClientUI(Entity character, ulong SteamID)
     {
-        int trueCount = (Prestige ? 1 : 0) + (Legacies ? 1 : 0) + (Expertise ? 1 : 0);
-        int packer = 7 * trueCount;
-        int packed = GetLevelProgress(steamId) << packer; // always start with and include leveling progress
-        packer -= 7;
+        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
 
-        if (Prestige)
-        {
-            IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(PrestigeUtilities.PrestigeType.Experience);
-            packed |= prestigeHandler.GetPrestigeLevel(steamId) << packer;
-            packer -= 7;
-        }
+        int experience = 0;
+        int legacy = 0;
+        int expertise = 0;
+        int legacyEnum = 0;
+        int expertiseEnum = 0;
 
-        if (Legacies)
+        experience = GetLevelProgress(SteamID);
+
+        if (ConfigService.BloodSystem)
         {
-            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(LegacyUtilities.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType));
+            BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
+            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
             if (bloodHandler != null)
             {
-                packed |= LegacyUtilities.GetLevelProgress(steamId, bloodHandler) << packer;
-                packer -= 7;
-            }
-            else
-            {
-                packed |= 0 << packer;
-                packer -= 7;
+                legacy = BloodSystem.GetLevelProgress(SteamID, bloodHandler);
+                legacyEnum = (int)bloodType;
             }
         }
 
-        if (Expertise)
+        if (ConfigService.ExpertiseSystem)
         {
-            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(ExpertiseHandler.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity));
-            packed |= ExpertiseHandler.GetLevelProgress(steamId, expertiseHandler);
+            WeaponSystem.WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
+            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            if (expertiseHandler != null)
+            {
+                expertise = WeaponSystem.GetLevelProgress(SteamID, expertiseHandler);
+                expertiseEnum = (int)weaponType;
+            }
         }
 
-        // Add offset to prevent accidentally using real faction int
-        packed += 33;
-
-        // Pack values into a single integer
-        return packed;
+        string message = $"+{experience:D2},{legacy:D2},{legacyEnum:D2},{expertise:D2},{expertiseEnum:D2}";
+        Core.Log.LogInfo($"Sending progress: {user.CharacterName.Value} | {message} {message.Length}");
+        LocalizationService.HandleServerReply(EntityManager, user, message);
     }
     public static int ConvertXpToLevel(float xp)
     {
@@ -444,7 +439,20 @@ internal static class PlayerLevelingUtilities
         parsedClassType = default;
         return false; // Parsing failed
     }
+    public static void SetLevel(Entity player)
+    {
+        ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+        if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
+        {
+            int playerLevel = xpData.Key;
+            Equipment equipment = player.Read<Equipment>();
 
+            equipment.ArmorLevel._Value = 0f;
+            equipment.SpellLevel._Value = 0f;
+            equipment.WeaponLevel._Value = playerLevel;
+            player.Write(equipment);
+        }
+    }
     static void ApplyClassBuffsAtThresholds(Entity characterEntity, ulong SteamID, FromCharacter fromCharacter)
     {
         var buffs = GetClassBuffs(SteamID);
@@ -947,7 +955,7 @@ internal static class PlayerLevelingUtilities
             playerLevel = (int)equipment.GetFullLevel();
         }
 
-        if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeUtilities.PrestigeType.Experience] > 0)
+        if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeSystem.PrestigeType.Experience] > 0)
         {
             playerLevel = ConfigService.MaxPlayerLevel;
         }
@@ -1026,9 +1034,9 @@ internal static class PlayerLevelingUtilities
     public static Dictionary<int, int> GetSpellPrefabs()
     {
         Dictionary<int, int> spellPrefabs = [];
-        foreach (PlayerLevelingUtilities.PlayerClasses playerClass in Enum.GetValues(typeof(PlayerLevelingUtilities.PlayerClasses)))
+        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
         {
-            if (!string.IsNullOrEmpty(PlayerLevelingUtilities.ClassSpellsMap[playerClass])) ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
+            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
         }
         return spellPrefabs;
     }
@@ -1037,7 +1045,7 @@ internal static class PlayerLevelingUtilities
         if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
+            return ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
         }
         return [];
     }
@@ -1045,12 +1053,16 @@ internal static class PlayerLevelingUtilities
     {
         return Core.DataStructures.PlayerClass[steamId].Keys.First();
     }
+    public static bool HasClass(ulong steamId)
+    {
+        return Core.DataStructures.PlayerClass.ContainsKey(steamId) && Core.DataStructures.PlayerClass[steamId].Keys.Count > 0;
+    }
     public static List<int> GetClassSpells(ulong steamId)
     {
         if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
+            return ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
         }
         return [];
     }
@@ -1079,7 +1091,7 @@ internal static class PlayerLevelingUtilities
     }
     public static void ShowClassBuffs(ChatCommandContext ctx, PlayerClasses playerClass)
     {
-        List<int> perks = ParseConfigString(PlayerLevelingUtilities.ClassPrestigeBuffsMap[playerClass]);
+        List<int> perks = ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -1110,7 +1122,7 @@ internal static class PlayerLevelingUtilities
     }
     public static void ShowClassSpells(ChatCommandContext ctx, PlayerClasses playerClass)
     {
-        List<int> perks = ParseConfigString(PlayerLevelingUtilities.ClassSpellsMap[playerClass]);
+        List<int> perks = ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
 
         if (perks.Count == 0)
         {

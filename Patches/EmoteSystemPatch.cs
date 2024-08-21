@@ -48,6 +48,7 @@ internal static class EmoteSystemPatch
             foreach (var entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!ConfigService.FamiliarSystem) continue;
 
                 UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
@@ -80,7 +81,7 @@ internal static class EmoteSystemPatch
         }
 
         int preset = Core.DataStructures.FamiliarChoice[steamId];
-        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
         User user = userEntity.Read<User>();
 
         if (ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
@@ -120,7 +121,8 @@ internal static class EmoteSystemPatch
             data = new(Entity.Null, famKeys[preset - 1]);
             Core.DataStructures.FamiliarActives[steamId] = data;
             Core.DataStructures.SavePlayerFamiliarActives();
-            FamiliarSummonUtilities.SummonFamiliar(character, userEntity, famKeys[preset - 1]);
+
+            FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[preset - 1]);
         }
         else
         {
@@ -131,7 +133,7 @@ internal static class EmoteSystemPatch
     {
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
             
             if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
             {
@@ -146,7 +148,7 @@ internal static class EmoteSystemPatch
 
             if (!familiar.Has<Disabled>())
             {
-                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) FamiliarSummonUtilities.FamiliarUtilities.HandleFamiliarMinions(familiar);
+                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) FamiliarSummonSystem.FamiliarUtilities.HandleFamiliarMinions(familiar);
                 EntityManager.AddComponent<Disabled>(familiar);
                 
                 Follower follower = familiar.Read<Follower>();
@@ -172,6 +174,7 @@ internal static class EmoteSystemPatch
                 data = (familiar, data.FamKey);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
+
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
             }
             else if (familiar.Has<Disabled>())
@@ -186,10 +189,14 @@ internal static class EmoteSystemPatch
                 follower.Followed._Value = character;
                 familiar.Write(follower);
 
-                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-                aggroConsumer.Active._Value = true;
-                familiar.Write(aggroConsumer);
 
+                if (ConfigService.FamiliarCombat)
+                {
+                    AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                    aggroConsumer.Active._Value = true;
+                    familiar.Write(aggroConsumer);
+                }
+                
                 data = (Entity.Null, data.FamKey);
                 Core.DataStructures.FamiliarActives[playerId] = data;
                 Core.DataStructures.SavePlayerFamiliarActives();
@@ -211,7 +218,7 @@ internal static class EmoteSystemPatch
 
         if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
             if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
             {
@@ -268,6 +275,7 @@ internal static class EmoteSystemPatch
                 {
                     BuffPrefabGUID = invulnerableBuff,
                 };
+
                 FromCharacter fromCharacter = new()
                 {
                     Character = familiar,

@@ -3,6 +3,8 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
+using ProjectM;
+using ProjectM.Network;
 using System.Reflection;
 using VampireCommandFramework;
 
@@ -43,7 +45,7 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<bool> _levelingSystem;
     private static ConfigEntry<bool> _restedXP;
     private static ConfigEntry<float> _restedXPRate;
-    private static ConfigEntry<float> _restedXPMaxMultiplier;
+    private static ConfigEntry<int> _restedXPMax;
     private static ConfigEntry<float> _restedXPTickRate;
     private static ConfigEntry<bool> _prestigeSystem;
     private static ConfigEntry<bool> _exoPrestiging;
@@ -76,7 +78,6 @@ internal class Plugin : BasePlugin
     private static ConfigEntry<float> _unitSpawnerMultiplier;
     private static ConfigEntry<bool> _parties;
     private static ConfigEntry<int> _maxPartySize;
-    private static ConfigEntry<bool> _preventFriendlyFire;
     private static ConfigEntry<float> _expShareDistance;
     private static ConfigEntry<int> _changeClassItem;
     private static ConfigEntry<int> _changeClassItemQuantity;
@@ -193,7 +194,7 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<bool> LevelingSystem => _levelingSystem;
     public static ConfigEntry<bool> RestedXP => _restedXP;
     public static ConfigEntry<float> RestedXPRate => _restedXPRate;
-    public static ConfigEntry<float> RestedXPMaxMultiplier => _restedXPMaxMultiplier;
+    public static ConfigEntry<int> RestedXPMax => _restedXPMax;
     public static ConfigEntry<float> RestedXPTickRate => _restedXPTickRate;
     public static ConfigEntry<bool> PrestigeSystem => _prestigeSystem;
     public static ConfigEntry<bool> ExoPrestiging => _exoPrestiging;
@@ -224,7 +225,6 @@ internal class Plugin : BasePlugin
     public static ConfigEntry<int> MaxPartySize => _maxPartySize;
     public static ConfigEntry<float> ExpShareDistance => _expShareDistance;
     public static ConfigEntry<bool> Parties => _parties;
-    public static ConfigEntry<bool> PreventFriendlyFire => _preventFriendlyFire;
     public static ConfigEntry<float> DocileUnitMultiplier => _docileUnitMultiplier;
     public static ConfigEntry<float> WarEventMultiplier => _warEventMultiplier;
     public static ConfigEntry<float> UnitSpawnerMultiplier => _unitSpawnerMultiplier;
@@ -335,12 +335,12 @@ internal class Plugin : BasePlugin
         {
             CreateDirectories(path);
         }
-
+        
         _languageLocalization = InitConfigEntry("Config", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese");
         _clientCompanion = InitConfigEntry("Config", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config.");
         _eliteShardBearers = InitConfigEntry("Config", "EliteShardBearers", false, "Enable or disable elite shard bearers.");
         _potionStacking = InitConfigEntry("Config", "PotionStacking", true, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).");
-
+        
         _starterKit = InitConfigEntry("Config", "StarterKit", false, "Enable or disable the starter kit.");
         _kitPrefabs = InitConfigEntry("Config", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit.");
         _kitQuantities = InitConfigEntry("Config", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit.");
@@ -353,7 +353,7 @@ internal class Plugin : BasePlugin
         _levelingSystem = InitConfigEntry("Config", "LevelingSystem", false, "Enable or disable the leveling system.");
         _restedXP = InitConfigEntry("Config", "RestedXPSystem", true, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp.");
         _restedXPRate = InitConfigEntry("RestedXP", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffine will provide maximum current rested XP).");
-        _restedXPMaxMultiplier = InitConfigEntry("RestedXP", "RestedXPMaxMultiplier", 5f, "Maximum Rested XP based on total XP (5 means a player can earn up to 5 times current total xp as rested xp which would be enough for 5 levels, roughly).");
+        _restedXPMax = InitConfigEntry("RestedXP", "RestedXPMax", 5, "Maximum extra levels worth of rested XP a player can accumulate.");
         _restedXPTickRate = InitConfigEntry("RestedXP", "RestedXPTickRate", 120f, "Minutes required to accumulate one tick of Rested XP.");
         _maxPlayerLevel = InitConfigEntry("Config", "MaxLevel", 90, "The maximum level a player can reach.");
         _startingLevel = InitConfigEntry("Config", "StartingLevel", 0, "Starting level for players if no data is found.");
@@ -366,8 +366,7 @@ internal class Plugin : BasePlugin
         _changeClassItemQuantity = InitConfigEntry("Config", "ChangeClassQuantity", 750, "Quantity of item required for changing class.");
         _groupLevelingMultiplier = InitConfigEntry("Config", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills.");
         _levelScalingMultiplier = InitConfigEntry("Config", "LevelScalingMultiplier", 0.05f, "reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.");
-        _parties = InitConfigEntry("Config", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience sharing.");
-        _preventFriendlyFire = InitConfigEntry("Config", "PreventFriendlyFire", false, "True to prevent damage between players in parties, false to allow.");
+        _parties = InitConfigEntry("Config", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience/familiar unlock sharing.");
         _maxPartySize = InitConfigEntry("Config", "MaxPartySize", 5, "The maximum number of players that can share experience in a group.");
         _expShareDistance = InitConfigEntry("Config", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths.");
 
@@ -456,7 +455,7 @@ internal class Plugin : BasePlugin
         _unitUnlockChance = InitConfigEntry("Config", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar.");
         _vBloodUnlockChance = InitConfigEntry("Config", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar.");
         _shinyChance = InitConfigEntry("Config", "ShinyChance", 0.2f, "The chance for a visual when unlocking a familiar.");
-        _shinyCostItemPrefab = InitConfigEntry("Config", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual.");
+        _shinyCostItemPrefab = InitConfigEntry("Config", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual (currently demon fragment by default, fyi).");
         _shinyCostItemQuantity = InitConfigEntry("Config", "ShinyCostItemQuantity", 1, "Quantity of item required for changing shiny visual.");
 
         _softSynergies = InitConfigEntry("Config", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).");

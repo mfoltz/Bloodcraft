@@ -68,16 +68,19 @@ internal static class CraftingPatches
                             if (itemEntity.Has<Durability>())
                             {
                                 Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
+
                                 Durability durability = itemEntity.Read<Durability>();
                                 Durability originalDurability = originalItem.Read<Durability>();
-                                //Core.Log.LogInfo($"{originalItem.Read<PrefabGUID>().LookupName()}, {originalDurability.MaxDurability} | {itemPrefab.LookupName()}, {durability.MaxDurability}");
+
                                 if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
 
                                 int level = handler.GetExperienceData(steamId).Key;
+
                                 durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                                 durability.Value = durability.MaxDurability;
                                 itemEntity.Write(durability);
-                                ProfessionUtilities.SetProfession(user, steamId, ProfessionValue, handler);
+
+                                ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
                             }
                         }
                     }
@@ -109,9 +112,10 @@ internal static class CraftingPatches
                     for (int i = 0; i < buffer.Length; i++)
                     {
                         var item = buffer[i];
+
                         Entity userEntity = item.InitiateUser;
                         User user = userEntity.Read<User>();
-                        ulong steamId = user.PlatformId;
+
                         PrefabGUID recipePrefab = item.RecipeGuid;
                         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
                         double totalTime = recipeEntity.Read<RecipeData>().CraftDuration * recipeReduction;
@@ -122,7 +126,6 @@ internal static class CraftingPatches
                         }
 
                         float progress = item.ProgressTime;
-                        //Core.Log.LogInfo($"Progress: {progress}, Total Time: {totalTime} ({progress / totalTime}%)");
                         if (progress / (float)totalTime >= CraftThreshold)
                         {
                             DateTime now = DateTime.UtcNow;

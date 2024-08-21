@@ -5,9 +5,10 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.SystemUtilities.Legacies;
-public static class LegacyUtilities
+public static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ConfigService ConfigService => Core.ConfigService;
@@ -31,17 +32,17 @@ public static class LegacyUtilities
         Brute
     }
 
-    public static readonly Dictionary<BloodType, PrestigeUtilities.PrestigeType> BloodPrestigeMap = new()
+    public static readonly Dictionary<BloodType, PrestigeSystem.PrestigeType> BloodPrestigeMap = new()
     {
-        { BloodType.Worker, PrestigeUtilities.PrestigeType.WorkerLegacy },
-        { BloodType.Warrior, PrestigeUtilities.PrestigeType.WarriorLegacy },
-        { BloodType.Scholar, PrestigeUtilities.PrestigeType.ScholarLegacy },
-        { BloodType.Rogue, PrestigeUtilities.PrestigeType.RogueLegacy },
-        { BloodType.Mutant, PrestigeUtilities.PrestigeType.MutantLegacy },
-        { BloodType.Draculin, PrestigeUtilities.PrestigeType.DraculinLegacy },
-        { BloodType.Immortal, PrestigeUtilities.PrestigeType.ImmortalLegacy },
-        { BloodType.Creature, PrestigeUtilities.PrestigeType.CreatureLegacy },
-        { BloodType.Brute, PrestigeUtilities.PrestigeType.BruteLegacy }
+        { BloodType.Worker, PrestigeSystem.PrestigeType.WorkerLegacy },
+        { BloodType.Warrior, PrestigeSystem.PrestigeType.WarriorLegacy },
+        { BloodType.Scholar, PrestigeSystem.PrestigeType.ScholarLegacy },
+        { BloodType.Rogue, PrestigeSystem.PrestigeType.RogueLegacy },
+        { BloodType.Mutant, PrestigeSystem.PrestigeType.MutantLegacy },
+        { BloodType.Draculin, PrestigeSystem.PrestigeType.DraculinLegacy },
+        { BloodType.Immortal, PrestigeSystem.PrestigeType.ImmortalLegacy },
+        { BloodType.Creature, PrestigeSystem.PrestigeType.CreatureLegacy },
+        { BloodType.Brute, PrestigeSystem.PrestigeType.BruteLegacy }
     };
 
     public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new()
@@ -76,7 +77,7 @@ public static class LegacyUtilities
 
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
-        LegacyUtilities.BloodType bloodType = ModifyUnitStatBuffUtils.GetCurrentBloodType(Killer);
+        BloodSystem.BloodType bloodType = BloodHandler.GetCurrentBloodType(Killer);
         if (bloodType.Equals(BloodType.None)) return;
 
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
@@ -99,7 +100,7 @@ public static class LegacyUtilities
                 }
 
                 // Apply rate gain with linear increase
-                if (prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
+                if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
                     changeFactor += 1 + (ConfigService.PrestigeRatesMultiplier * xpPrestige);
                 }
@@ -126,7 +127,7 @@ public static class LegacyUtilities
             NotifyPlayer(user, bloodType, BloodValue, leveledUp, newLevel, handler);
         }
     }
-    public static void NotifyPlayer(User user, LegacyUtilities.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
+    public static void NotifyPlayer(User user, BloodSystem.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
     {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP; // Convert to integer if necessary
@@ -135,6 +136,16 @@ public static class LegacyUtilities
         if (leveledUp)
         {
             if (newLevel <= ConfigService.MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+            if (GetPlayerBool(steamID, "Reminders"))
+            {
+                if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamID, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
+                {
+                    if (Stats.Count < ConfigService.LegacyStatChoices)
+                    {
+                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.LegacyStatChoices - Stats.Count} stat bonuses available for <color=red>{bloodType.ToString().ToLower()}</color>; use '.bl cst {bloodType} [Stat]' to make your choice and '.bl lst' to view legacy stat options.");
+                    }
+                }
+            }
         }
         
         if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
@@ -176,8 +187,8 @@ public static class LegacyUtilities
     {
         string bloodCheck = bloodPrefab.LookupName();
         return Enum.GetValues(typeof(BloodType))
-                   .Cast<BloodType>()
-                   .FirstOrDefault(type =>
-                    bloodCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase));
+            .Cast<BloodType>()
+            .FirstOrDefault(type =>
+            bloodCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase));
     }
 }

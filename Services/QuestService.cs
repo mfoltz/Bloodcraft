@@ -7,7 +7,7 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
-using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
+using static Bloodcraft.SystemUtilities.Quests.QuestSystem;
 using static Bloodcraft.Utilities;
 using static Bloodcraft.Core.DataStructures;
 
@@ -38,7 +38,7 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<UnitRespawnTime>())
     ];
 
-    public static EntityQuery UnitQuery;
+    static EntityQuery UnitQuery;
     static EntityQuery VBloodQuery; // using other one worked better, need to check this at some point but just using other query for now
 
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
@@ -60,18 +60,13 @@ internal class QuestService
             All = UnitComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
-        VBloodQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = VBloodComponents,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
         Core.StartCoroutine(QuestUpdateLoop());
     }
-    IEnumerator QuestUpdateLoop()
+    static IEnumerator QuestUpdateLoop()
     {
         while (true)
         {
-            if (ConfigService.EliteShardBearers && !ShardBearersReset)
+            if (ConfigService.EliteShardBearers && !ShardBearersReset) // would fit better elsewhere probably but can reuse the query so here it stays for now
             {
                 IEnumerable<Entity> vBloods = GetEntitiesEnumerable(UnitQuery);
                 foreach (Entity entity in vBloods)
@@ -130,14 +125,12 @@ internal class QuestService
                     {
                         if (TargetCache.TryGetValue(group.Key, out var existingSet))
                         {
-                            // Update the existing set
                             existingSet.Clear();
                             existingSet.UnionWith(group);
                             return existingSet;
                         }
                         else
                         {
-                            // Create a new set
                             return new HashSet<Entity>(group);
                         }
                     }

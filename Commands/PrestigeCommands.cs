@@ -10,7 +10,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Utilities;
 using static Bloodcraft.Core.DataStructures;
-using static Bloodcraft.SystemUtilities.Leveling.PrestigeUtilities;
+using static Bloodcraft.SystemUtilities.Leveling.PrestigeSystem;
 
 namespace Bloodcraft.Commands;
 
@@ -59,9 +59,9 @@ internal static class PrestigeCommands
                 PlayerExperience[steamId] = expData;
                 SavePlayerExperience();
 
-                if (ConfigService.RestedXP) PlayerLevelingUtilities.ResetRestedXP(steamId);
+                if (ConfigService.RestedXP) LevelingSystem.ResetRestedXP(steamId);
 
-                GearOverride.SetLevel(ctx.Event.SenderCharacterEntity);
+                LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
 
                 prestigeData[PrestigeType.Exo] += 1;
                 SavePlayerPrestiges();

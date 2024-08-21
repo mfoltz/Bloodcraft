@@ -51,10 +51,10 @@ internal static class ProfessionCommands
             return;
         }
         var data = professionHandler.GetExperienceData(steamID);
-        int progress = (int)(data.Value - ProfessionUtilities.ConvertLevelToXp(data.Key));
+        int progress = (int)(data.Value - ProfessionSystem.ConvertLevelToXp(data.Key));
         if (data.Key > 0)
         {
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionUtilities.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
         }
         else
         {
@@ -91,7 +91,7 @@ internal static class ProfessionCommands
         }
 
         ulong steamId = foundUser.PlatformId;
-        float xp = ProfessionUtilities.ConvertLevelToXp(level);
+        float xp = ProfessionSystem.ConvertLevelToXp(level);
         professionHandler.UpdateExperienceData(steamId, new KeyValuePair<int, float>(level, xp));
         professionHandler.SaveChanges();
 

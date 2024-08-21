@@ -5,9 +5,10 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.SystemUtilities.Expertise;
-public static class ExpertiseHandler
+public static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ConfigService ConfigService => Core.ConfigService;
@@ -32,21 +33,21 @@ public static class ExpertiseHandler
         FishingPole
     }
 
-    public static readonly Dictionary<WeaponType, PrestigeUtilities.PrestigeType> WeaponPrestigeMap = new()
+    public static readonly Dictionary<WeaponType, PrestigeSystem.PrestigeType> WeaponPrestigeMap = new()
     {
-        { WeaponType.Sword, PrestigeUtilities.PrestigeType.SwordExpertise },
-        { WeaponType.Axe, PrestigeUtilities.PrestigeType.AxeExpertise },
-        { WeaponType.Mace, PrestigeUtilities.PrestigeType.MaceExpertise },
-        { WeaponType.Spear, PrestigeUtilities.PrestigeType.SpearExpertise },
-        { WeaponType.Crossbow, PrestigeUtilities.PrestigeType.CrossbowExpertise },
-        { WeaponType.GreatSword, PrestigeUtilities.PrestigeType.GreatSwordExpertise },
-        { WeaponType.Slashers, PrestigeUtilities.PrestigeType.SlashersExpertise },
-        { WeaponType.Pistols, PrestigeUtilities.PrestigeType.PistolsExpertise },
-        { WeaponType.Reaper, PrestigeUtilities.PrestigeType.ReaperExpertise },
-        { WeaponType.Longbow, PrestigeUtilities.PrestigeType.LongbowExpertise },
-        { WeaponType.Whip, PrestigeUtilities.PrestigeType.WhipExpertise },
-        { WeaponType.Unarmed, PrestigeUtilities.PrestigeType.UnarmedExpertise }, 
-        { WeaponType.FishingPole, PrestigeUtilities.PrestigeType.FishingPoleExpertise }
+        { WeaponType.Sword, PrestigeSystem.PrestigeType.SwordExpertise },
+        { WeaponType.Axe, PrestigeSystem.PrestigeType.AxeExpertise },
+        { WeaponType.Mace, PrestigeSystem.PrestigeType.MaceExpertise },
+        { WeaponType.Spear, PrestigeSystem.PrestigeType.SpearExpertise },
+        { WeaponType.Crossbow, PrestigeSystem.PrestigeType.CrossbowExpertise },
+        { WeaponType.GreatSword, PrestigeSystem.PrestigeType.GreatSwordExpertise },
+        { WeaponType.Slashers, PrestigeSystem.PrestigeType.SlashersExpertise },
+        { WeaponType.Pistols, PrestigeSystem.PrestigeType.PistolsExpertise },
+        { WeaponType.Reaper, PrestigeSystem.PrestigeType.ReaperExpertise },
+        { WeaponType.Longbow, PrestigeSystem.PrestigeType.LongbowExpertise },
+        { WeaponType.Whip, PrestigeSystem.PrestigeType.WhipExpertise },
+        { WeaponType.Unarmed, PrestigeSystem.PrestigeType.UnarmedExpertise }, 
+        { WeaponType.FishingPole, PrestigeSystem.PrestigeType.FishingPoleExpertise }
     };
     public static void UpdateExpertise(Entity Killer, Entity Victim)
     {
@@ -55,7 +56,7 @@ public static class ExpertiseHandler
         Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
-        ExpertiseHandler.WeaponType weaponType = ModifyUnitStatBuffUtils.GetCurrentWeaponType(Killer);
+        WeaponType weaponType = WeaponHandler.GetCurrentWeaponType(Killer);
 
         if (Victim.Has<UnitStats>())
         {
@@ -70,7 +71,7 @@ public static class ExpertiseHandler
                     changeFactor -= (ConfigService.PrestigeRatesReducer * expertisePrestige);
                 }
 
-                if (prestiges.TryGetValue(PrestigeUtilities.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
+                if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
                     changeFactor += (ConfigService.PrestigeRatesMultiplier * xpPrestige);
                 }
@@ -97,6 +98,8 @@ public static class ExpertiseHandler
                         newLevel = ConfigService.MaxExpertiseLevel;
                         newExperience = ConvertLevelToXp(ConfigService.MaxExpertiseLevel);
                     }
+                    // update stats here?
+
                 }
 
                 var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
@@ -112,7 +115,7 @@ public static class ExpertiseHandler
         if (isVBlood) return ExpertiseValue * ConfigService.VBloodExpertiseMultiplier;
         return ExpertiseValue * ConfigService.UnitExpertiseMultiplier;
     }
-    public static void NotifyPlayer(User user, ExpertiseHandler.WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
+    static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
     {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP;
@@ -121,9 +124,19 @@ public static class ExpertiseHandler
         if (leveledUp)
         {
             if (newLevel <= ConfigService.MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
+            if (GetPlayerBool(steamID, "Reminders"))
+            {
+                if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
+                {
+                    if (Stats.Count < ConfigService.ExpertiseStatChoices)
+                    {
+                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.ExpertiseStatChoices - Stats.Count} stat bonuses available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '.wep cst {weaponType} [Stat]' to make your choice and '.wep lst' to view expertise stat options.");
+                    }
+                }
+            }
         }
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["ExpertiseLogging"])
+        if (GetPlayerBool(steamID, "ExpertiseLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }
@@ -138,14 +151,12 @@ public static class ExpertiseHandler
         double earnedXP = nextLevelXP - currentXP;
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
     }
-    public static int ConvertXpToLevel(float xp)
+    static int ConvertXpToLevel(float xp)
     {
-        // Assuming a basic square root scaling for experience to level conversion
         return (int)(ExpertiseConstant * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
-        // Reversing the formula used in ConvertXpToLevel for consistency
         return (int)Math.Pow(level / ExpertiseConstant, ExpertisePower);
     }
     static float GetXp(ulong steamID, IExpertiseHandler handler)
@@ -160,14 +171,13 @@ public static class ExpertiseHandler
     public static WeaponType GetWeaponTypeFromSlotEntity(Entity weaponEntity)
     {
         if (weaponEntity == Entity.Null) return WeaponType.Unarmed;
-
         string weaponCheck = weaponEntity.Read<PrefabGUID>().LookupName();
 
         return Enum.GetValues(typeof(WeaponType))
-                   .Cast<WeaponType>()
-                   .FirstOrDefault(type =>
-                    weaponCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase) &&
-                    !(type == WeaponType.Sword && weaponCheck.Contains("GreatSword", StringComparison.OrdinalIgnoreCase))
-                   );
+            .Cast<WeaponType>()
+            .FirstOrDefault(type =>
+            weaponCheck.Contains(type.ToString(), StringComparison.OrdinalIgnoreCase) &&
+            !(type == WeaponType.Sword && weaponCheck.Contains("GreatSword", StringComparison.OrdinalIgnoreCase))
+            );
     }
 }

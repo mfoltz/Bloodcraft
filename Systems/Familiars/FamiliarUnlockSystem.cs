@@ -7,7 +7,7 @@ using Bloodcraft.Services;
 using static Bloodcraft.Core;
 
 namespace Bloodcraft.SystemUtilities.Familiars;
-internal static class FamiliarUnlockUtilities
+internal static class FamiliarUnlockSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ConfigService ConfigService => Core.ConfigService;
@@ -66,7 +66,7 @@ internal static class FamiliarUnlockUtilities
     {
         if (ConfigService.ShareUnlocks && !died.Has<VBloodConsumeSource>()) // pretty sure everyone in the vblood feed already gets their own roll, no double-dipping
         {
-            HashSet<Entity> players = PlayerLevelingUtilities.GetParticipants(killer, killer.Read<PlayerCharacter>().UserEntity);
+            HashSet<Entity> players = LevelingSystem.GetParticipants(killer, killer.Read<PlayerCharacter>().UserEntity);
             foreach (Entity player in players)
             {
                 if (RollForChance(dropChance)) HandleUnlock(died, player);
@@ -120,6 +120,7 @@ internal static class FamiliarUnlockUtilities
             else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
             return;
         }
+
         if (isShiny)
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");

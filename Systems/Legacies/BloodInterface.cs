@@ -9,24 +9,24 @@ public interface IBloodHandler
 
     void UpdateLegacyData(ulong steamID, KeyValuePair<int, float> xpData);
 
-    LegacyUtilities.BloodType GetBloodType();
+    BloodSystem.BloodType GetBloodType();
 }
 public static class BloodHandlerFactory
 {
-    public static IBloodHandler GetBloodHandler(LegacyUtilities.BloodType bloodType)
+    public static IBloodHandler GetBloodHandler(BloodSystem.BloodType bloodType)
     {
         return bloodType switch
         {
-            LegacyUtilities.BloodType.Worker => new WorkerHandler(),
-            LegacyUtilities.BloodType.Warrior => new WarriorHandler(),
-            LegacyUtilities.BloodType.Scholar => new ScholarHandler(),
-            LegacyUtilities.BloodType.Rogue => new RogueHandler(),
-            LegacyUtilities.BloodType.Mutant => new MutantHandler(),
-            LegacyUtilities.BloodType.VBlood => new VBloodHandler(),
-            LegacyUtilities.BloodType.Draculin => new DraculinHandler(),
-            LegacyUtilities.BloodType.Immortal => new ImmortalHandler(),
-            LegacyUtilities.BloodType.Creature => new CreatureHandler(),
-            LegacyUtilities.BloodType.Brute => new BruteHandler(),
+            BloodSystem.BloodType.Worker => new WorkerHandler(),
+            BloodSystem.BloodType.Warrior => new WarriorHandler(),
+            BloodSystem.BloodType.Scholar => new ScholarHandler(),
+            BloodSystem.BloodType.Rogue => new RogueHandler(),
+            BloodSystem.BloodType.Mutant => new MutantHandler(),
+            BloodSystem.BloodType.VBlood => new VBloodHandler(),
+            BloodSystem.BloodType.Draculin => new DraculinHandler(),
+            BloodSystem.BloodType.Immortal => new ImmortalHandler(),
+            BloodSystem.BloodType.Creature => new CreatureHandler(),
+            BloodSystem.BloodType.Brute => new BruteHandler(),
             _ => null,
         };
     }
@@ -34,7 +34,6 @@ public static class BloodHandlerFactory
 public abstract class BaseBloodHandler : IBloodHandler
 {
     protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
-
     public void AddLegacy(ulong steamID, float experience)
     {
         if (DataStructure.TryGetValue(steamID, out var currentData))
@@ -57,7 +56,7 @@ public abstract class BaseBloodHandler : IBloodHandler
         DataStructure[steamID] = xpData;
     }
     public abstract void SaveChanges();
-    public abstract LegacyUtilities.BloodType GetBloodType();
+    public abstract BloodSystem.BloodType GetBloodType();
 }
 public class WorkerHandler : BaseBloodHandler
 {
@@ -66,9 +65,9 @@ public class WorkerHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerWorkerLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Worker;
+        return BloodSystem.BloodType.Worker;
     }
 }
 public class WarriorHandler : BaseBloodHandler
@@ -78,9 +77,9 @@ public class WarriorHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerWarriorLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Warrior;
+        return BloodSystem.BloodType.Warrior;
     }
 }
 public class ScholarHandler : BaseBloodHandler
@@ -90,9 +89,9 @@ public class ScholarHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerScholarLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Scholar;
+        return BloodSystem.BloodType.Scholar;
     }
 }
 public class RogueHandler : BaseBloodHandler
@@ -102,9 +101,9 @@ public class RogueHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerRogueLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Rogue;
+        return BloodSystem.BloodType.Rogue;
     }
 }
 public class MutantHandler : BaseBloodHandler
@@ -114,9 +113,9 @@ public class MutantHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerMutantLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Mutant;
+        return BloodSystem.BloodType.Mutant;
     }
 }
 public class VBloodHandler : BaseBloodHandler
@@ -126,9 +125,9 @@ public class VBloodHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerVBloodLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.VBlood;
+        return BloodSystem.BloodType.VBlood;
     }
 }
 public class DraculinHandler : BaseBloodHandler
@@ -138,9 +137,9 @@ public class DraculinHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerDraculinLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Draculin;
+        return BloodSystem.BloodType.Draculin;
     }
 }
 public class ImmortalHandler : BaseBloodHandler
@@ -150,9 +149,9 @@ public class ImmortalHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerImmortalLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Immortal;
+        return BloodSystem.BloodType.Immortal;
     }
 }
 public class CreatureHandler : BaseBloodHandler
@@ -162,9 +161,9 @@ public class CreatureHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerCreatureLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Creature;
+        return BloodSystem.BloodType.Creature;
     }
 }
 public class BruteHandler : BaseBloodHandler
@@ -174,8 +173,8 @@ public class BruteHandler : BaseBloodHandler
     {
         Core.DataStructures.SavePlayerBruteLegacy();
     }
-    public override LegacyUtilities.BloodType GetBloodType()
+    public override BloodSystem.BloodType GetBloodType()
     {
-        return LegacyUtilities.BloodType.Brute;
+        return BloodSystem.BloodType.Brute;
     }
 }

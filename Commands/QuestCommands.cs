@@ -6,7 +6,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodcraft.SystemUtilities.Quests.QuestUtilities;
+using static Bloodcraft.SystemUtilities.Quests.QuestSystem;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;

@@ -5,37 +5,37 @@ public interface IPrestigeHandler
     KeyValuePair<int, float> GetExperienceData(ulong steamID);
     int GetPrestigeLevel(ulong steamID);
     void SaveChanges();
-    PrestigeUtilities.PrestigeType GetPrestigeType();
+    PrestigeSystem.PrestigeType GetPrestigeType();
 }
 public static class PrestigeHandlerFactory
 {
-    public static IPrestigeHandler GetPrestigeHandler(PrestigeUtilities.PrestigeType prestigeType)
+    public static IPrestigeHandler GetPrestigeHandler(PrestigeSystem.PrestigeType prestigeType)
     {
         return prestigeType switch
         {
-            PrestigeUtilities.PrestigeType.Experience => new LevelingPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.SwordExpertise => new SwordPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.AxeExpertise => new AxePrestigeHandler(),
-            PrestigeUtilities.PrestigeType.MaceExpertise => new MacePrestigeHandler(),
-            PrestigeUtilities.PrestigeType.SpearExpertise => new SpearPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.CrossbowExpertise => new CrossbowPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.GreatSwordExpertise => new GreatSwordPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.SlashersExpertise => new SlashersPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.PistolsExpertise => new PistolsPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.ReaperExpertise => new ReaperPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.LongbowExpertise => new LongbowPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.WhipExpertise => new WhipPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.UnarmedExpertise => new UnarmedPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.FishingPoleExpertise => new FishingPolePrestigeHandler(),
-            PrestigeUtilities.PrestigeType.WorkerLegacy => new WorkerLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.WarriorLegacy => new WarriorLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.ScholarLegacy => new ScholarLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.RogueLegacy => new RogueLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.MutantLegacy => new MutantLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.DraculinLegacy => new DraculinLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.ImmortalLegacy => new ImmortalLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.CreatureLegacy => new CreatureLegacyPrestigeHandler(),
-            PrestigeUtilities.PrestigeType.BruteLegacy => new BrutePrestigeHandler(),
+            PrestigeSystem.PrestigeType.Experience => new LevelingPrestigeHandler(),
+            PrestigeSystem.PrestigeType.SwordExpertise => new SwordPrestigeHandler(),
+            PrestigeSystem.PrestigeType.AxeExpertise => new AxePrestigeHandler(),
+            PrestigeSystem.PrestigeType.MaceExpertise => new MacePrestigeHandler(),
+            PrestigeSystem.PrestigeType.SpearExpertise => new SpearPrestigeHandler(),
+            PrestigeSystem.PrestigeType.CrossbowExpertise => new CrossbowPrestigeHandler(),
+            PrestigeSystem.PrestigeType.GreatSwordExpertise => new GreatSwordPrestigeHandler(),
+            PrestigeSystem.PrestigeType.SlashersExpertise => new SlashersPrestigeHandler(),
+            PrestigeSystem.PrestigeType.PistolsExpertise => new PistolsPrestigeHandler(),
+            PrestigeSystem.PrestigeType.ReaperExpertise => new ReaperPrestigeHandler(),
+            PrestigeSystem.PrestigeType.LongbowExpertise => new LongbowPrestigeHandler(),
+            PrestigeSystem.PrestigeType.WhipExpertise => new WhipPrestigeHandler(),
+            PrestigeSystem.PrestigeType.UnarmedExpertise => new UnarmedPrestigeHandler(),
+            PrestigeSystem.PrestigeType.FishingPoleExpertise => new FishingPolePrestigeHandler(),
+            PrestigeSystem.PrestigeType.WorkerLegacy => new WorkerLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.WarriorLegacy => new WarriorLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.ScholarLegacy => new ScholarLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.RogueLegacy => new RogueLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.MutantLegacy => new MutantLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.DraculinLegacy => new DraculinLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.ImmortalLegacy => new ImmortalLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.CreatureLegacy => new CreatureLegacyPrestigeHandler(),
+            PrestigeSystem.PrestigeType.BruteLegacy => new BrutePrestigeHandler(),
             _ => throw new ArgumentOutOfRangeException(nameof(prestigeType), prestigeType, null)
         };
     }
@@ -43,7 +43,7 @@ public static class PrestigeHandlerFactory
 public abstract class BasePrestigeHandler : IPrestigeHandler
 {
     protected abstract IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure { get; }
-    protected abstract IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure { get; }
+    protected abstract IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure { get; }
     public void Prestige(ulong steamID)
     {
         if (PrimaryStructure.ContainsKey(steamID))
@@ -70,253 +70,253 @@ public abstract class BasePrestigeHandler : IPrestigeHandler
         return 0;
     }
     public abstract void SaveChanges();
-    public abstract PrestigeUtilities.PrestigeType GetPrestigeType();
+    public abstract PrestigeSystem.PrestigeType GetPrestigeType();
 }
 public class LevelingPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerExperience;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerExperience();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.Experience;
+        return PrestigeSystem.PrestigeType.Experience;
     }
 }
 public class SwordPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerSwordExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerSwordExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.SwordExpertise;
+        return PrestigeSystem.PrestigeType.SwordExpertise;
     }
 }
 public class AxePrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerAxeExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerAxeExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.AxeExpertise;
+        return PrestigeSystem.PrestigeType.AxeExpertise;
     }
 }
 public class MacePrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerMaceExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerMaceExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.MaceExpertise;
+        return PrestigeSystem.PrestigeType.MaceExpertise;
     }
 }
 public class SpearPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerSpearExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerSpearExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.SpearExpertise;
+        return PrestigeSystem.PrestigeType.SpearExpertise;
     }
 }
 public class CrossbowPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerCrossbowExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerCrossbowExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.CrossbowExpertise;
+        return PrestigeSystem.PrestigeType.CrossbowExpertise;
     }
 }
 public class GreatSwordPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerGreatSwordExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerGreatSwordExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.GreatSwordExpertise;
+        return PrestigeSystem.PrestigeType.GreatSwordExpertise;
     }
 }
 public class SlashersPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerSlashersExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerSlashersExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.SlashersExpertise;
+        return PrestigeSystem.PrestigeType.SlashersExpertise;
     }
 }
 public class PistolsPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerPistolsExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerPistolsExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.PistolsExpertise;
+        return PrestigeSystem.PrestigeType.PistolsExpertise;
     }
 }
 public class ReaperPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerReaperExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerReaperExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.ReaperExpertise;
+        return PrestigeSystem.PrestigeType.ReaperExpertise;
     }
 }
 public class LongbowPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerLongbowExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerLongbowExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.LongbowExpertise;
+        return PrestigeSystem.PrestigeType.LongbowExpertise;
     }
 }
 public class WhipPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerWhipExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerWhipExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.WhipExpertise;
+        return PrestigeSystem.PrestigeType.WhipExpertise;
     }
 }
 public class UnarmedPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerUnarmedExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerUnarmedExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.UnarmedExpertise;
+        return PrestigeSystem.PrestigeType.UnarmedExpertise;
     }
 }
 public class FishingPolePrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerFishingPoleExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerFishingPoleExpertise();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.FishingPoleExpertise;
+        return PrestigeSystem.PrestigeType.FishingPoleExpertise;
     }
 }
 public class WorkerLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerWorkerLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerWorkerLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.WorkerLegacy;
+        return PrestigeSystem.PrestigeType.WorkerLegacy;
     }
 }
 public class WarriorLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerWarriorLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerWarriorLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.WarriorLegacy;
+        return PrestigeSystem.PrestigeType.WarriorLegacy;
     }
 }
 public class ScholarLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerScholarLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerScholarLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.ScholarLegacy;
+        return PrestigeSystem.PrestigeType.ScholarLegacy;
     }
 }
 public class RogueLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerRogueLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerRogueLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.RogueLegacy;
+        return PrestigeSystem.PrestigeType.RogueLegacy;
     }
 }
 public class MutantLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerMutantLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerMutantLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.MutantLegacy;
+        return PrestigeSystem.PrestigeType.MutantLegacy;
     }
 }
 /*
@@ -338,52 +338,52 @@ public class VBloodLegacyPrestigeHandler : BasePrestigeHandler
 public class DraculinLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerDraculinLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerDraculinLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.DraculinLegacy;
+        return PrestigeSystem.PrestigeType.DraculinLegacy;
     }
 }
 public class ImmortalLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerImmortalLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerImmortalLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.ImmortalLegacy;
+        return PrestigeSystem.PrestigeType.ImmortalLegacy;
     }
 }
 public class CreatureLegacyPrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerCreatureLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerCreatureLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.CreatureLegacy;
+        return PrestigeSystem.PrestigeType.CreatureLegacy;
     }
 }
 public class BrutePrestigeHandler : BasePrestigeHandler
 {
     protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerBruteLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeUtilities.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
+    protected override IDictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
     public override void SaveChanges()
     {
         Core.DataStructures.SavePlayerBruteLegacy();
     }
-    public override PrestigeUtilities.PrestigeType GetPrestigeType()
+    public override PrestigeSystem.PrestigeType GetPrestigeType()
     {
-        return PrestigeUtilities.PrestigeType.BruteLegacy;
+        return PrestigeSystem.PrestigeType.BruteLegacy;
     }
 }

@@ -1,16 +1,25 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
+using Bloodcraft.SystemUtilities.Familiars;
+using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Gameplay.Systems;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
+using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Core.DataStructures;
+using static VCF.Core.Basics.RoleCommands;
+using User = ProjectM.Network.User;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 internal static class MiscCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static ConfigService ConfigService => Core.ConfigService;
@@ -19,8 +28,27 @@ internal static class MiscCommands
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
+    static readonly ComponentType[] DisabledFamiliarComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Disabled>()),
+        ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
+    ];
+
     static readonly PrefabGUID combatBuff = new(581443919);
     public static Dictionary<PrefabGUID, int> KitPrefabs = [];
+
+
+    [Command(name: "reminders", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
+    public static void LogExperienceCommand(ChatCommandContext ctx)
+    {
+        var SteamID = ctx.Event.User.PlatformId;
+
+        TogglePlayerBool(SteamID, "Reminders");
+        LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+    }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
     public static void KitMe(ChatCommandContext ctx)
@@ -161,26 +189,57 @@ internal static class MiscCommands
         ctx.Reply($"Combat music cleared~");
     }
 
-    [Command(name: "testcommand", adminOnly: true, usage: ".test", description: "Tired of remaking commands to test one thing at a time, just gonna leave this here and comment out in future releases :p")]
-    public static void SyncedComponentsInfo(ChatCommandContext ctx)
-    {
-        SyncedCollection syncedCollection = new();
-        if (syncedCollection != null)
+    //[Command(name: "servantfam", adminOnly: true, usage: ".servantfam", description: "Tired of remaking commands to test one thing at a time, just gonna leave this here and comment out in future releases :p")]
+    public static void ServantFamTesting(ChatCommandContext ctx)
+    {        
+        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+        if (!familiar.Exists()) return;
+        
+        FamiliarPatches.PlayerEntities.Enqueue(character);
+
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+        SpawnDebugEvent spawnDebugEvent = new()
         {
-            Core.Log.LogInfo("Synced Collection _included");
-            foreach (SyncedComponent synced in syncedCollection._included)
+            Control = false,
+            Position = familiar.Read<Translation>().Value,
+            Level = 1,
+            Team = SpawnDebugEvent.TeamEnum.Ally,
+            PrefabGuid = new(1649578802)
+        };
+
+        FromCharacter fromCharacter = new()
+        {
+            Character = character,
+            User = ctx.Event.SenderUserEntity
+        };
+
+        Core.SystemService.DebugEventsSystem.SpawnDebugEvent(ctx.Event.User.Index, ref spawnDebugEvent, entityCommandBuffer, ref fromCharacter);        
+    }
+
+    [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
+    public static void CleanUpFams(ChatCommandContext ctx)
+    {
+        // BlockFeedBuff, Disabled, TeamReference with UserTeam on entity, and see if name of prefab starts with CHAR?
+        EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = DisabledFamiliarComponents,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = new(FamiliarActives);
+        List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
+
+        IEnumerable<Entity> disabledFamiliars = GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
+        foreach (Entity entity in disabledFamiliars)
+        {
+            if (dismissedFamiliars.Contains(entity)) continue;
+            else
             {
-                Core.Log.LogInfo(synced.NetworkedComponent.FullName);
-            }
-            Core.Log.LogInfo("Synced Collection _excluded");
-            foreach (SyncedComponent synced in syncedCollection._excluded)
-            {
-                Core.Log.LogInfo(synced.NetworkedComponent.FullName);
-            }
-            Core.Log.LogInfo("Synced Collection _simulated");
-            foreach (SyncedComponent synced in syncedCollection._simulated)
-            {
-                Core.Log.LogInfo(synced.NetworkedComponent.FullName);
+                if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
+                {
+                    DestroyUtility.Destroy(EntityManager, entity);
+                }
             }
         }
     }

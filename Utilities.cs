@@ -7,6 +7,8 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Mathematics;
+using Unity.Transforms;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft;
@@ -40,12 +42,12 @@ internal static class Utilities
         entities = entityQuery.ToEntityArray(allocator);
         return default;
     }
-    public static bool GetBool(ulong steamId, string boolKey)
+    public static bool GetPlayerBool(ulong steamId, string boolKey)
     {
         if (PlayerBools.ContainsKey(steamId)) return PlayerBools[steamId][boolKey];
         return false;
     }
-    public static void ToggleBool(ulong steamId, string boolKey)
+    public static void TogglePlayerBool(ulong steamId, string boolKey)
     {
         if (PlayerBools.ContainsKey(steamId))
         {
@@ -53,7 +55,7 @@ internal static class Utilities
             SavePlayerBools();
         }
     }
-    public static void SetBool(ulong steamId, string boolKey, bool value)
+    public static void SetPlayerBool(ulong steamId, string boolKey, bool value)
     {
         if (PlayerBools.ContainsKey(steamId))
         {
@@ -61,7 +63,7 @@ internal static class Utilities
             SavePlayerBools();
         }
     }
-    public static bool DismissedFamiliar(ulong steamId, out Entity familiar)
+    public static bool HasDismissed(ulong steamId, out Entity familiar)
     {
         familiar = Entity.Null;
         if (FamiliarActives.ContainsKey(steamId) && FamiliarActives[steamId].Familiar.Exists())
@@ -71,11 +73,26 @@ internal static class Utilities
         }
         return false;
     }
+    public static void ReturnFamiliar(Entity player, Entity familiar)
+    {
+        Follower following = familiar.Read<Follower>();
+        following.ModeModifiable._Value = 1;
+        familiar.Write(following);
+
+        float3 playerPos = player.Read<Translation>().Value;
+        float distance = UnityEngine.Vector3.Distance(familiar.Read<Translation>().Value, playerPos);
+
+        if (distance > 25f)
+        {
+            familiar.Write(new LastTranslation { Value = playerPos });
+            familiar.Write(new Translation { Value = playerPos });
+        }
+    }
     public static void QuestRewards()
     {
         List<PrefabGUID> questRewards = ParseConfigString(ConfigService.QuestRewards).Select(x => new PrefabGUID(x)).ToList();
         List<int> rewardAmounts = [.. ParseConfigString(ConfigService.QuestRewardAmounts)];
-        QuestUtilities.QuestRewards = questRewards.Zip(rewardAmounts, (reward, amount) => new { reward, amount }).ToDictionary(x => x.reward, x => x.amount);
+        QuestSystem.QuestRewards = questRewards.Zip(rewardAmounts, (reward, amount) => new { reward, amount }).ToDictionary(x => x.reward, x => x.amount);
     }
     public static void StarterKit()
     {
@@ -87,8 +104,8 @@ internal static class Utilities
     {
         List<int> unitBans = ParseConfigString(ConfigService.BannedUnits);
         List<string> typeBans = ConfigService.BannedTypes.Split(',').Select(s => s.Trim()).ToList();
-        if (unitBans.Count > 0) FamiliarUnlockUtilities.ExemptPrefabs = unitBans;
-        if (typeBans.Count > 0) FamiliarUnlockUtilities.ExemptTypes = typeBans;
+        if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
+        if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
     }
     public static List<int> ParseConfigString(string configString)
     {

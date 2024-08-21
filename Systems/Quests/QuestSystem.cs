@@ -14,7 +14,7 @@ using static Bloodcraft.Core.DataStructures;
 using Random = System.Random;
 
 namespace Bloodcraft.SystemUtilities.Quests;
-internal static class QuestUtilities
+internal static class QuestSystem
 {
     static readonly Regex Regex = new(@"T\d{2}");
     static EntityManager EntityManager => Core.EntityManager;
@@ -139,6 +139,7 @@ internal static class QuestUtilities
                     prefabs.Add(prefabGUID);
                 }
             }
+            /*
             else if (itemData.ItemType == ItemType.Consumable)
             {
                 if (IsWithinLevelRange(tierCheck, playerLevel, ConsumableTierLevelRangeMap))
@@ -146,6 +147,7 @@ internal static class QuestUtilities
                     prefabs.Add(prefabGUID);
                 }
             }
+            */
         }
         return prefabs;
     }
@@ -344,7 +346,7 @@ internal static class QuestUtilities
     }
     public static void UpdateQuests(Entity source, Entity userEntity, PrefabGUID target)
     {
-        HashSet<Entity> participants = PlayerLevelingUtilities.GetParticipants(source, userEntity); // want list of participants to process quest credit for, this is doing double right now?
+        HashSet<Entity> participants = LevelingSystem.GetParticipants(source, userEntity); // want list of participants to process quest credit for, this is doing double right now?
         List<ulong> processed = [];
         foreach (Entity participant in participants)
         {
@@ -402,7 +404,7 @@ internal static class QuestUtilities
 
                         if (ConfigService.LevelingSystem)
                         {
-                            PlayerLevelingUtilities.ProcessQuestExperienceGain(user, QuestMultipliers[quest.Key]);
+                            LevelingSystem.ProcessQuestExperienceGain(user, QuestMultipliers[quest.Key]);
                             string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.025f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
                             LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
                         }

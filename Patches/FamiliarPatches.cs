@@ -3,7 +3,6 @@ using Bloodcraft.SystemUtilities.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
-using ProjectM.Gameplay.Clan;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -45,12 +44,16 @@ internal static class FamiliarPatches
     static readonly PrefabGUID fallenAngel = new(-76116724);
     static readonly PrefabGUID playerFaction = new(1106458752);
     static readonly PrefabGUID playerCharPrefab = new(38526109);
+    static readonly PrefabGUID paladinServantPrefab = new(1649578802);
+    static readonly PrefabGUID invisibleImmaterial = new(-1144825660);
 
     public static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
     public static Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
+
+    public static Queue<Entity> PlayerEntities = [];
 
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -77,7 +80,7 @@ internal static class FamiliarPatches
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
                         if (FamiliarMinions.ContainsKey(familiar))
                         {
-                            FamiliarSummonUtilities.FamiliarUtilities.HandleFamiliarMinions(familiar);
+                            FamiliarSummonSystem.FamiliarUtilities.HandleFamiliarMinions(familiar);
                         }
                     }
                 }
@@ -105,6 +108,82 @@ internal static class FamiliarPatches
                 int level = entity.Read<UnitLevel>().Level._Value;
                 int famKey = prefabGUID.GuidHash;
                 bool summon = false;
+                
+                /*
+                if (level == 1 && prefabGUID.Equals(paladinServantPrefab))
+                {
+                    Entity character = PlayerEntities.Dequeue();
+                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
+
+                    if (!character.Exists() || !familiar.Exists())
+                    {
+                        continue;
+                    }
+
+                    ServantCoffinstation servantCoffinstation = new()
+                    {
+                        BloodQuality = 0,
+                        ConnectedServant = NetworkedEntity.ServerEntity(entity),
+                        State = ServantCoffinState.ServantAlive,
+                        ServantName = new FixedString64Bytes($"{character.Read<PlayerCharacter>().Name.Value}'s Familiar")
+                    };
+
+                    familiar.Add<ServantCoffinstation>();
+                    familiar.Write(servantCoffinstation);
+
+                    ServantConnectedCoffin servantConnectedCoffin = new()
+                    {
+                        CoffinEntity = NetworkedEntity.ServerEntity(familiar),
+                    };
+
+                    ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                    {
+                        BuffPrefabGUID = invisibleImmaterial
+                    };
+
+                    FromCharacter fromCharacter = new()
+                    {
+                        Character = entity,
+                        User = entity
+                    };
+
+                    Core.SystemService.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                    if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID, out Entity buff))
+                    {
+                        if (buff.Has<LifeTime>())
+                        {
+                            buff.Write(new LifeTime { Duration = -1, EndAction = LifeTimeEndAction.None });
+                        }
+                        if (buff.Has<HideTargetHUD>())
+                        {
+                            buff.Remove<HideTargetHUD>();
+                        }
+                        if (!buff.Has<ServerControlsPositionBuff>())
+                        {
+                            buff.Add<ServerControlsPositionBuff>();
+                        }
+                        if (!buff.Has<AttachToCharacterTransformBuff>())
+                        {
+                            AttachToCharacterTransformBuff attachToCharacterTransformBuff = new()
+                            {
+                                ClientPositionOffset = new float3(0, 0, 0),
+                                ClientRotationOffset = new float3(0, 0, 0),
+                                CopyPosition = true,
+                                CopyRotation = true,
+                                HybridBone = 1,
+                                ServerPositionOffset = new float3(0, 0, 0)
+                            };
+                            buff.Add<AttachToCharacterTransformBuff>();
+                            buff.Write(attachToCharacterTransformBuff);
+                        }
+                        Core.Log.LogInfo($"finished modifying invisible buff for servant");
+                    }
+                    else
+                    {
+                        Core.Log.LogError($"failed to get invisible buff for servant");
+                    }
+                }
+                */
 
                 if (level == 1)
                 {
@@ -127,7 +206,7 @@ internal static class FamiliarPatches
                             User user = userEntity.Read<User>();
                             Entity character = user.LocalCharacter._Entity;
 
-                            if (FamiliarSummonUtilities.HandleFamiliar(character, entity))
+                            if (FamiliarSummonSystem.HandleFamiliar(character, entity))
                             {
                                 Core.DataStructures.PlayerBools[steamId]["Binding"] = false;
                                 Core.DataStructures.SavePlayerBools();
@@ -138,7 +217,7 @@ internal static class FamiliarPatches
                                 if (buffsData.FamiliarBuffs.ContainsKey(famKey))
                                 {
                                     // Look up the color from the RandomVisuals dictionary if it exists
-                                    if (FamiliarUnlockUtilities.RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
+                                    if (FamiliarUnlockSystem.RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
                                     {
                                         colorCode = $"<color={hexColor}>";
                                     }
@@ -200,18 +279,26 @@ internal static class FamiliarPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(InteractValidateAndStopSystemServer __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.Temp); // check _1 query if needed, maybe give players short buff here to prevent sudden team changes while knocking for 5s or so?
         try
         {
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
 
+                if (!entity.Has<PrefabGUID>()) continue;
+                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+
+                //Core.Log.LogInfo($"InteractValidateAndStopSystemServer: {prefabGUID.LookupName()}");
+
                 if (entity.TryGetComponent(out EntityOwner entityOwner))
                 {
-                    if (entityOwner.Owner.Has<PlayerCharacter>() && entity.Read<PrefabGUID>().GuidHash.Equals(-986064531) || entity.Read<PrefabGUID>().GuidHash.Equals(985937733)) // player using waygate
+                    Entity buffOwner = entity.GetOwner();
+                    if (!buffOwner.Has<PlayerCharacter>()) continue;
+
+                    if (prefabGUID.GuidHash.Equals(-986064531) || prefabGUID.GuidHash.Equals(985937733)) // player using waygate
                     {
-                        Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
+                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 
@@ -229,6 +316,56 @@ internal static class FamiliarPatches
                             EmoteSystemPatch.CallDismiss(userEntity, entityOwner.Owner, steamID); // auto dismiss familiar 
                         }
                     }
+                    
+                    /*
+                    if (prefabGUID.GuidHash.Equals(1095531563)) // doorknock_trigger, need the spelltarget to check team with player
+                    {
+                        Entity character = entityOwner.Owner;
+                        PlayerCharacter playerCharacter = character.Read<PlayerCharacter>();
+                        if (!entity.Has<SpellTarget>()) continue;
+
+                        SpellTarget spellTarget = entity.Read<SpellTarget>();
+                        Entity door = spellTarget.Target.GetEntityOnServer();
+                        if (door.Has<CastleHeartConnection>())
+                        {
+                            Entity castleHeart = door.Read<CastleHeartConnection>().CastleHeartEntity.GetEntityOnServer();
+                            Entity userEntity = castleHeart.Read<UserOwner>().Owner.GetEntityOnServer(); // check if player is owner of castle or if SmartClanName matches
+
+                            User user = userEntity.Read<User>();
+                            if (user.CharacterName.Value == playerCharacter.Name.Value) // if direct owner, get team and set to player
+                            {
+                                TeamService.UpdateTeam(character, castleHeart.Read<Team>().Value);
+                                LifeTime lifetime = entity.Read<LifeTime>();
+                                lifetime.Duration = 5;
+                                entity.Write(lifetime);
+                            }
+                            else if (!playerCharacter.SmartClanName.IsEmpty && user.ClanEntity.TryGetSyncedEntity(out Entity clanEntity))
+                            {
+                                if (!clanEntity.Exists()) continue;
+
+                                ClanTeam clanTeam = clanEntity.Read<ClanTeam>();
+                                if (playerCharacter.SmartClanName.Value == clanTeam.Name.Value) // if in clan, set team to clanTeam value
+                                {
+                                    TeamService.UpdateTeam(character, clanTeam.TeamValue);
+                                    LifeTime lifetime = entity.Read<LifeTime>();
+                                    lifetime.Duration = 5;
+                                    entity.Write(lifetime);
+                                }
+                            }
+                        }
+                    } // knocking on allied (owned or clan members) door will restore team and prevent modification for 5s
+
+                    if (prefabGUID.GuidHash.Equals(1405487786)) // prevent non-clan members from opening death containers
+                    {
+                        Entity spellTarget = entity.GetSpellTarget();
+                        if (spellTarget.Has<PlayerDeathContainer>())
+                        {
+                            PlayerDeathContainer playerDeathContainer = spellTarget.Read<PlayerDeathContainer>();
+                            Entity teamEntity = playerDeathContainer.DeadUserEntity.GetTeamEntity();
+                            if (!ContainerPermission(buffOwner.GetTeamEntity(), teamEntity)) DestroyUtility.Destroy(EntityManager, entity);
+                        }
+                    }
+                    */
                 }         
             }
         }
@@ -237,27 +374,49 @@ internal static class FamiliarPatches
             entities.Dispose();
         }
     }
-    
+    static bool ContainerPermission(Entity characterTeamEntity, Entity containerTeamEntity)
+    {
+        int interactorTeam = -1;
+        foreach (TeamAllies ally in characterTeamEntity.ReadBuffer<TeamAllies>())
+        {
+            if (ally.Value.Has<ClanTeam>())
+            {
+                interactorTeam = ally.Value.Read<TeamData>().TeamValue;
+                break;
+            }
+        }
+        if (interactorTeam == -1) return false;
+        foreach (TeamAllies ally in containerTeamEntity.ReadBuffer<TeamAllies>())
+        {
+            if (ally.Value.Has<ClanTeam>())
+            {
+                int clanTeam = ally.Value.Read<TeamData>().TeamValue;
+                if (clanTeam == interactorTeam) return true;
+            }
+        }
+        return false;
+    }
+
     [HarmonyPatch(typeof(LinkMinionToOwnerOnSpawnSystem), nameof(LinkMinionToOwnerOnSpawnSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance) // get EntityOwner (familiar), apply ModifyTeamBuff
     {
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); //    All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
         try
         {
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!ConfigService.FamiliarSystem) continue;
 
-                if (ConfigService.FamiliarSystem && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner entityOwner) && (entityOwner.Owner.TryGetComponent(out Follower follower) && follower.Followed._Value.Has<PlayerCharacter>()))
+                //Core.Log.LogInfo($"LinkMinionToOwnerOnSpawnSystem: {entity.Read<PrefabGUID>().LookupName()}");
+
+                Entity Owner = entity.GetOwner();
+                if (Owner.FollowingPlayer(out Entity player))
                 {
-                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar != Entity.Null)
                     {
-                        //FactionReference factionReference = entity.Read<FactionReference>();
-                        //factionReference.FactionGuid._Value = playerFaction; // need friendly to players hostile to everything else? also why does playerFaction target castles?
-                        //familiar.Write(factionReference);
-
                         if (!FamiliarMinions.ContainsKey(familiar))
                         {
                             FamiliarMinions.Add(familiar, [entity]);
@@ -290,24 +449,7 @@ internal static class FamiliarPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && entity.Has<Minion>() && entity.TryGetComponent(out EntityOwner playerOwner) && playerOwner.Owner.Has<PlayerCharacter>()) // modify player minions here
-                {
-                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(playerOwner.Owner);
-
-                    if (familiar != Entity.Null)
-                    {
-                        //MiscAiGameplayData miscAiGameplayData = entity.Read<MiscAiGameplayData>();
-                        //miscAiGameplayData.AlertAlliesOnDeath = false;
-                        //entity.Write(miscAiGameplayData);
-
-                        //FamiliarSummonUtilities.FamiliarUtilities.ForceAllies(familiar, entity);
-                    }
-                }
             }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogInfo(ex);
         }
         finally
         {

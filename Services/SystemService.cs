@@ -1,8 +1,10 @@
 ﻿using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
+using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Services;
@@ -47,6 +49,15 @@ public class SystemService(World world)
 
     MapZoneCollectionSystem _mapZoneCollectionSystem;
     public MapZoneCollectionSystem MapZoneCollectionSystem => _mapZoneCollectionSystem ??= GetSystem<MapZoneCollectionSystem>();
+
+    SerializeAndSendServerEventsSystem _serializeAndSendServerEventsSystem;
+    public SerializeAndSendServerEventsSystem SerializeAndSendServerEventsSystem => _serializeAndSendServerEventsSystem ??= GetSystem<SerializeAndSendServerEventsSystem>();
+
+    NameableInteractableSystem _nameableInteractableSystem;
+    public NameableInteractableSystem NameableInteractableSystem => _nameableInteractableSystem ??= GetSystem<NameableInteractableSystem>();
+
+    BuffSystem_Spawn_Server _buffSystem_Spawn_Server;
+    public BuffSystem_Spawn_Server BuffSystem_Spawn_Server => _buffSystem_Spawn_Server ??= GetSystem<BuffSystem_Spawn_Server>();
 
     // Generic method to get or create a system
     T GetSystem<T>() where T : ComponentSystemBase

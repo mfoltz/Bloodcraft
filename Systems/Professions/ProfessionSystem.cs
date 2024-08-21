@@ -7,7 +7,7 @@ using Unity.Entities;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.SystemUtilities.Professions;
-internal static class ProfessionUtilities
+internal static class ProfessionSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;

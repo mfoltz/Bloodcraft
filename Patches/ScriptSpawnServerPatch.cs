@@ -27,8 +27,9 @@ internal static class ScriptSpawnServerPatch
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
+                if (!entity.Has<BloodBuff>() || !entity.Has<EntityOwner>()) continue;
 
-                if (entity.Has<BloodBuff>() && entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>())
+                if (entity.GetOwner().HasPlayer(out Entity player))
                 {
                     if (ConfigService.LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
                     {
@@ -37,10 +38,10 @@ internal static class ScriptSpawnServerPatch
                         entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
                     }
 
-                    if (ConfigService.BloodSystem && LegacyUtilities.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out LegacyUtilities.BloodType bloodType)) // applies stat choices to blood types when changed
+                    if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out BloodSystem.BloodType bloodType)) // applies stat choices to blood types when changed
                     {
-                        Entity character = entity.Read<EntityOwner>().Owner;
-                        ModifyUnitStatBuffUtils.ApplyBloodBonuses(character, bloodType, entity);
+                        ulong steamId = player.GetSteamId();
+                        BloodHandler.ApplyBloodBonuses(steamId, bloodType, entity);
                         ModifyUnitStatBuffSystem_Spawn.OnUpdate();
                     }
                 }

@@ -124,7 +124,6 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
             var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
             foreach (var buff in buffer)
             {
-                //Core.Log.LogInfo($"{buff.Slot} | {buff.ReplaceGroupId.GetPrefabName()} | {buff.NewGroupId.GetPrefabName()}");
                 if (buff.Slot == 5)
                 {
                     spellTuple = (buff.NewGroupId.GuidHash, spellTuple.SecondUnarmed, spellTuple.ClassSpell);

@@ -46,10 +46,10 @@ internal static class LevelingCommands
 
         if (PlayerExperience.TryGetValue(steamId, out var levelKvp))
         {
-            int prestigeLevel = PlayerPrestiges.TryGetValue(steamId, out var prestiges) ? prestiges[SystemUtilities.Leveling.PrestigeUtilities.PrestigeType.Experience] : 0;
+            int prestigeLevel = PlayerPrestiges.TryGetValue(steamId, out var prestiges) ? prestiges[SystemUtilities.Leveling.PrestigeSystem.PrestigeType.Experience] : 0;
             int level = levelKvp.Key;
-            int progress = (int)(levelKvp.Value - PlayerLevelingUtilities.ConvertLevelToXp(level));
-            int percent = PlayerLevelingUtilities.GetLevelProgress(steamId);
+            int progress = (int)(levelKvp.Value - LevelingSystem.ConvertLevelToXp(level));
+            int percent = LevelingSystem.GetLevelProgress(steamId);
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
             if (ConfigService.RestedXP && PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
             {
@@ -89,10 +89,10 @@ internal static class LevelingCommands
         ulong steamId = foundUser.PlatformId;
         if (PlayerExperience.TryGetValue(steamId, out var _))
         {
-            var xpData = new KeyValuePair<int, float>(level, PlayerLevelingUtilities.ConvertLevelToXp(level));
+            var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
             PlayerExperience[steamId] = xpData;
             SavePlayerExperience();
-            GearOverride.SetLevel(foundUser.LocalCharacter._Entity);
+            LevelingSystem.SetLevel(foundUser.LocalCharacter._Entity);
             LocalizationService.HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");
         }
         else

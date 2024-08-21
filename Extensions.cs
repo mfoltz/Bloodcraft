@@ -2,6 +2,7 @@ using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Runtime.InteropServices;
@@ -16,7 +17,16 @@ internal static class Extensions
     static SystemService SystemService => Core.SystemService;
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
-    public static unsafe void Write<T>(this Entity entity, T componentData) where T : struct
+    
+    public delegate void ActionRef<T>(ref T item);
+    public static void With<T>(this Entity entity, ActionRef<T> action) where T : struct
+    {
+        T item = entity.ReadRW<T>();
+        action(ref item);
+        EntityManager.SetComponentData(entity, item);
+    }
+    
+    public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
         var ct = new ComponentType(Il2CppType.Of<T>());
@@ -46,17 +56,18 @@ internal static class Extensions
 
         return byteArray;
     }
-    public static unsafe T Read<T>(this Entity entity) where T : struct
+    public unsafe static T ReadRW<T>(this Entity entity) where T : struct
     {
-        // Get the ComponentType for T
         var ct = new ComponentType(Il2CppType.Of<T>());
-
-        // Get a pointer to the raw component data
+        void* componentDataRawRW = EntityManager.GetComponentDataRawRW(entity, ct.TypeIndex);
+        T componentData = Marshal.PtrToStructure<T>(new IntPtr(componentDataRawRW));
+        return componentData;
+    }
+    public unsafe static T Read<T>(this Entity entity) where T : struct
+    {
+        var ct = new ComponentType(Il2CppType.Of<T>());
         void* rawPointer = EntityManager.GetComponentDataRawRO(entity, ct.TypeIndex);
-
-        // Marshal the raw data to a T struct
         T componentData = Marshal.PtrToStructure<T>(new IntPtr(rawPointer));
-
         return componentData;
     }
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
@@ -112,20 +123,69 @@ internal static class Extensions
     {
         return ServerGameManager.GetOwner(entity);
     }
+    public static bool FollowingPlayer(this Entity entity, out Entity player)
+    {
+        player = Entity.Null;
+        if (entity.Has<Follower>())
+        {
+            Follower follower = entity.Read<Follower>();
+            Entity followed = follower.Followed._Value;
+            if (followed.Has<PlayerCharacter>())
+            {
+                player = followed;
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bool HasPlayer(this Entity entity, out Entity player)
+    {
+        player = Entity.Null;
+        if (entity.Has<PlayerCharacter>())
+        {
+            player = entity;
+            return true;
+        }
+        return false;
+    }
+    public static bool IsVampire(this Entity entity)
+    {
+        if (entity.Has<VampireTag>())
+        {
+            return true;
+        }
+        return false;
+    }
     public static Entity GetBuffTarget(this Entity entity)
     {
         return CreateGameplayEventServerUtility.GetBuffTarget(EntityManager, entity);
     }
-    public static Entity GetSelf(this Entity entity)
+    public static Entity GetPrefabEntity(this Entity entity)
     {
-        return ServerGameManager.GetOwnerOrSelf(entity);
+        return ServerGameManager.GetPrefabEntity(entity.Read<PrefabGUID>());
     }
     public static Entity GetSpellTarget(this Entity entity)
     {
         return CreateGameplayEventServerUtility.GetSpellTarget(EntityManager, entity);
     }
+    public static Entity GetTeamEntity(this Entity entity)
+    {
+        if (entity.Has<TeamReference>())
+        {
+            return entity.Read<TeamReference>().Value._Value;
+        }
+        return Entity.Null;
+    }
     public static bool Exists(this Entity entity)
     {
         return EntityManager.Exists(entity);
+    }
+    public static bool Disabled(this Entity entity)
+    {
+        return entity.Has<Disabled>();
+    }
+    public static ulong GetSteamId(this Entity entity)
+    {
+        return entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
     }
 }

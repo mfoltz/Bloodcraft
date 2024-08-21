@@ -43,15 +43,15 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (ConfigService.LevelingSystem) PlayerLevelingUtilities.UpdateLeveling(player, vBlood);
-                if (ConfigService.ExpertiseSystem) ExpertiseHandler.UpdateExpertise(player, vBlood);
-                if (ConfigService.BloodSystem) LegacyUtilities.UpdateLegacy(player, vBlood);
+                if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(player, vBlood);
+                if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, vBlood);
+                if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, vBlood);
                 if (ConfigService.FamiliarSystem)
                 {
-                    FamiliarLevelingUtilities.UpdateFamiliar(player, vBlood);
-                    FamiliarUnlockUtilities.HandleUnitUnlock(player, vBlood);
+                    FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
+                    FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
                 }
-                if (ConfigService.QuestSystem && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestUtilities.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
+                if (ConfigService.QuestSystem && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)

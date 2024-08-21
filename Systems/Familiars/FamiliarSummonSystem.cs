@@ -10,7 +10,7 @@ using Unity.Transforms;
 using VampireCommandFramework;
 
 namespace Bloodcraft.SystemUtilities.Familiars;
-internal static class FamiliarSummonUtilities
+internal static class FamiliarSummonSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -40,7 +40,7 @@ internal static class FamiliarSummonUtilities
             PrefabGuid = new(famKey),
             Control = false,
             Roam = false,
-            Team = SpawnDebugEvent.TeamEnum.Neutral, // try neutral, then write player team to fam?
+            Team = SpawnDebugEvent.TeamEnum.Ally, // try neutral, then write player team to fam?
             Level = 1,
             Position = character.Read<LocalToWorld>().Position,
             DyeIndex = 0
@@ -85,11 +85,44 @@ internal static class FamiliarSummonUtilities
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
+            //ModifyAggro(familiar);
             if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
-            if (Utilities.GetBool(steamId, "FamiliarVisual"))
+            if (Utilities.GetPlayerBool(steamId, "FamiliarVisual"))
             {
                 Core.DataStructures.FamiliarBuffsData data = Core.FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
-                if (data.FamiliarBuffs.ContainsKey(famKey)) FamiliarPatches.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
+                if (data.FamiliarBuffs.ContainsKey(famKey)) 
+                {
+                    FamiliarPatches.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
+                    PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
+                    /*
+                    if (ServerGameManager.TryGetBuff(familiar, visualBuff.ToIdentifier(), out Entity visualBuffEntity))
+                    {
+                        NameableInteractable nameableInteractable = new()
+                        {
+                            Name = new Unity.Collections.FixedString64Bytes($"{player.Read<PlayerCharacter>().Name.Value}'s Familiar"),
+                            OnlyAllyRename = true,
+                            OnlyAllySee = false
+                        };
+                        familiar.Add<NameableInteractable>();
+                        familiar.Write(nameableInteractable);
+                        SystemService.NameableInteractableSystem.OnUpdate();
+
+                        ModifyTargetHUDBuff modifyTargetHUDBuff = new()
+                        {
+                            Priority = 0,
+                            Height = 1,
+                            PrefabType = CharacterHUDEntryType.BaseUnitNamed,
+                            BloodPrefabType = CharacterHUDEntryType.None
+                        };
+                        visualBuffEntity.Add<ModifyTargetHUDBuff>();
+                        visualBuffEntity.Write(modifyTargetHUDBuff);
+                        SystemService.BuffSystem_Spawn_Server.OnUpdate();
+
+                        EntityManager.SetComponentData(visualBuffEntity, modifyTargetHUDBuff);
+                        SystemService.BuffSystem_Spawn_Server.OnUpdate();
+                    }
+                    */
+                }
             }
             return true;
         }
@@ -138,7 +171,7 @@ internal static class FamiliarSummonUtilities
             }
         }
     }
-    static void ModifyFollowerAndTeam(Entity player, Entity familiar)
+    static void ModifyFollowerAndTeam(Entity player, Entity familiar)// see if can just adjust the boss spawns to normal team and hijack unit team for familiars since it didn't seem to affect anything else
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
         factionReference.FactionGuid._Value = playerFaction; // need friendly to players hostile to everything else? also why does playerFaction target castles? also try to mess with these again like with wolves to double check
@@ -149,11 +182,20 @@ internal static class FamiliarSummonUtilities
         follower.ModeModifiable._Value = 0;
         familiar.Write(follower);
 
-        Team playerTeam = player.Read<Team>();
-        Team familiarTeam = familiar.Read<Team>();
+        if (familiar.Has<IsMinion>())
+        {
+            familiar.Write(new IsMinion { Value = true });
+        }
 
-        familiarTeam.Value = playerTeam.Value;
-        familiar.Write(familiarTeam);
+        if (!familiar.Has<Minion>())
+        {
+            familiar.Add<Minion>();
+        }
+
+        if (familiar.Has<EntityOwner>())
+        {
+            familiar.Write(new EntityOwner { Owner = player });
+        }
 
         var followerBuffer = player.ReadBuffer<FollowerBuffer>();
         followerBuffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
@@ -242,8 +284,8 @@ internal static class FamiliarSummonUtilities
                     break;
             }
         }
-        familiar.Write(familiarStats);
 
+        familiar.Write(familiarStats);
         UnitLevel unitLevel = familiar.Read<UnitLevel>();
         unitLevel.Level._Value = level;
         familiar.Write(unitLevel);
@@ -369,18 +411,8 @@ internal static class FamiliarSummonUtilities
                     if (!familiar.Has<CharmSource>() && familiar.Exists()) return familiar;
                 }
             }
-            else if (Utilities.DismissedFamiliar(steamId, out Entity familiar)) return familiar;
+            else if (Utilities.HasDismissed(steamId, out Entity familiar)) return familiar;
             return Entity.Null;
-            /*
-            else
-            {
-                foreach (var follower in followers)
-                {
-                    PrefabGUID PrefabGUID = follower.Entity._Entity.Read<PrefabGUID>();
-                    if (PrefabGUID.GuidHash.Equals(data.FamKey)) return follower.Entity._Entity;
-                }
-            }
-            */
         }
         public static void ClearFamiliarActives(ulong steamId)
         {
@@ -428,6 +460,7 @@ internal static class FamiliarSummonUtilities
                 bools["FamiliarVisual"] = !bools["FamiliarVisual"];
                 Core.DataStructures.PlayerBools[steamId] = bools;
                 Core.DataStructures.SavePlayerBools();
+
                 LocalizationService.HandleReply(ctx, bools["FamiliarVisual"] ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
             }
         }
@@ -438,128 +471,9 @@ internal static class FamiliarSummonUtilities
                 bools["VBloodEmotes"] = !bools["VBloodEmotes"];
                 Core.DataStructures.PlayerBools[steamId] = bools;
                 Core.DataStructures.SavePlayerBools();
+
                 LocalizationService.HandleReply(ctx, bools["VBloodEmotes"] ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
             }
         }
     }
 }
-/*   
-//TeamReference familiarReference = familiar.Read<TeamReference>();
-
-//if (UnitTeam == Entity.Null) UnitTeam = familiarReference.Value._Value;
-        
-// adding unitTeam entity to player team entity allies buffer doesnt seem to have an effect, will now add to user team allies buffer as well then check again
-// seems to be some significance to LocalTeam, wonder if that refers to the user team or the player team? seems to control familiar bar being blue or beige which seems like a good indicator of being full-allied or not
-// seems like adding the familiarTeamEntity to the player team allies buffer and user team allies buffer prevents skeleton minions from attacking the familiar without modifying the skeletons?
-// but for some reason it triggers combat for the familiar and therefore the player when they die that doesn't go away until next encounter? weird
-// would expect if this prevents minions from attacking would also work for servants but guess not   
-// question is, why does making the familiar TeamReference entity the same as the player user team entity make the bar blue?
-// maybe try stripping allies buffer at some point and see if it makes things attack each other
-
-//TeamReference playerReference = player.Read<TeamReference>();
-//TeamReference userReference = userEntity.Read<TeamReference>();
-        
-static readonly FactionEnum Hostile =
-    FactionEnum.Bandits |
-    FactionEnum.Undead |
-    FactionEnum.Militia |
-    FactionEnum.ChurchOfLum |
-    FactionEnum.Harpy |
-    FactionEnum.Werewolves |
-    FactionEnum.NatureSpirit |
-    FactionEnum.Plants |
-    FactionEnum.Spiders |
-    FactionEnum.VampireHunters |
-    FactionEnum.Cursed |
-    FactionEnum.Gloomrot |
-    FactionEnum.Elementals |
-    FactionEnum.Mutants |
-    FactionEnum.Legion |
-    FactionEnum.ChurchOfLum_Slaves |
-    FactionEnum.ChurchOfLum_Slaves_Rioters |
-    FactionEnum.WerewolvesHuman |
-    FactionEnum.Spot_ShapeshiftHuman;
-
-static readonly FactionEnum Friendly =
-    FactionEnum.Players |
-    FactionEnum.PlayerMutant |
-    FactionEnum.PlayerCastlePrisoner |
-    FactionEnum.Ignored |
-    FactionEnum.Players_ShapeshiftHuman |
-    FactionEnum.Spiders_Shapeshift;
-public unsafe static void ModifyFaction(PrefabGUID factionPrefab)
-{
-    NativeArray<Entity> entities = FactionLookupSingleton.FactionPrefabEntityLookup;
-    try
-    {
-        foreach (Entity entity in entities)
-        {
-
-            if (entity.Read<PrefabGUID>().Equals(factionPrefab))
-            {
-                // Get BlobAssetReference from Faction
-                Faction faction = entity.Read<Faction>();
-                BlobAssetReference<FactionBlobAsset> blobAssetReferenceFaction = faction.Data;
-                FactionBlobAsset* factionBlobAsset = (FactionBlobAsset*)blobAssetReferenceFaction.GetUnsafePtr();
-
-                // Allocate memory for the new FactionBlobAsset
-                long size = UnsafeUtility.SizeOf<FactionBlobAsset>();
-                byte* allocatedMemory = (byte*)UnsafeUtility.Malloc(size, 16, Allocator.Persistent);
-
-                // Copy existing data
-                UnsafeUtility.MemCpy(allocatedMemory, factionBlobAsset, size);
-
-                // Cast the allocated memory to FactionBlobAsset
-                FactionBlobAsset* newFactionBlobAsset = (FactionBlobAsset*)allocatedMemory;
-
-                // Update faction values as desired
-                newFactionBlobAsset->Hostile = Hostile;
-                newFactionBlobAsset->Friendly = Friendly;
-
-                // Create the new BlobAssetReference from the allocated memory
-                BlobAssetReference<FactionBlobAsset> newBlobAssetReference = BlobAssetReference<FactionBlobAsset>.Create(newFactionBlobAsset, (int)size);
-
-                // Assign the new BlobAssetReference back to the Faction component
-                faction.Data = newBlobAssetReference;
-                entity.Write(faction);
-
-                // Free the temporary allocated memory and break
-                UnsafeUtility.Free(allocatedMemory, Allocator.Persistent);
-            }
-
-            Faction faction = entity.Read<Faction>();
-            BlobAssetReference<FactionBlobAsset> blobAssetReference = faction.Data;
-            FactionBlobAsset* factionBlobAsset = (FactionBlobAsset*)blobAssetReference.GetUnsafePtr();
-
-            PrefabGUID factionPrefab = entity.Read<PrefabGUID>();
-            int factionIndex = factionBlobAsset->Index;
-            FamiliarSummonUtilities.FactionIndices.TryAdd(factionPrefab, factionIndex);
-
-
-            Array factions = Enum.GetValues(typeof(FactionEnum));
-            Core.Log.LogInfo($"Faction: {entity.Read<PrefabGUID>().LookupName()} | Index: {factionBlobAsset->Index}");
-            Core.Log.LogInfo($"Members: {string.Join(", ", CollectEnumValues(factionBlobAsset->Membership, factions))}");
-            Core.Log.LogInfo($"Friendly: {string.Join(", ", CollectEnumValues(factionBlobAsset->Friendly, factions))}");
-            Core.Log.LogInfo($"Hostile: {string.Join(", ", CollectEnumValues(factionBlobAsset->Hostile, factions))}");
-            Core.Log.LogInfo($"Neutral: {string.Join(", ", CollectEnumValues(factionBlobAsset->Neutral, factions))}");
-
-        }
-    }
-    catch (Exception e)
-    {
-        Core.Log.LogError($"Error: {e}");
-    }
-}
-static List<string> CollectEnumValues(FactionEnum factionEnum, Array factions)
-{
-    List<string> values = [];
-    foreach (FactionEnum faction in factions)
-    {
-        if (factionEnum.HasFlag(faction) && faction != FactionEnum.None)
-        {
-            values.Add(faction.ToString());
-        }
-    }
-    return values;
-}
-*/

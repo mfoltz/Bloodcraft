@@ -40,7 +40,8 @@ internal static class ServerBootstrapSystemPatch
         { "Kit", false },
         { "VBloodEmotes", true },
         { "FamiliarVisual", true},
-        { "ShinyChoice", false }
+        { "ShinyChoice", false },
+        { "Reminders", true }
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
@@ -287,14 +288,14 @@ internal static class ServerBootstrapSystemPatch
         { 
             if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
             {
-                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(ConfigService.StartingLevel, PlayerLevelingUtilities.ConvertLevelToXp(ConfigService.StartingLevel)));
+                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(ConfigService.StartingLevel, LevelingSystem.ConvertLevelToXp(ConfigService.StartingLevel)));
                 Core.DataStructures.SavePlayerExperience();
             }
 
             if (ConfigService.PrestigeSystem && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
             {
-                var prestigeDict = new Dictionary<PrestigeUtilities.PrestigeType, int>();
-                foreach (var prestigeType in Enum.GetValues<PrestigeUtilities.PrestigeType>())
+                var prestigeDict = new Dictionary<PrestigeSystem.PrestigeType, int>();
+                foreach (var prestigeType in Enum.GetValues<PrestigeSystem.PrestigeType>())
                 {
                     prestigeDict.Add(prestigeType, 0);
                 }
@@ -306,7 +307,7 @@ internal static class ServerBootstrapSystemPatch
             {
                 // Ensure all keys are present in the existing dictionary
                 var prestigeDict = Core.DataStructures.PlayerPrestiges[steamId];
-                foreach (var prestigeType in Enum.GetValues<PrestigeUtilities.PrestigeType>())
+                foreach (var prestigeType in Enum.GetValues<PrestigeSystem.PrestigeType>())
                 {
                     if (!prestigeDict.ContainsKey(prestigeType))
                     {
@@ -317,7 +318,7 @@ internal static class ServerBootstrapSystemPatch
 
             if (character != Entity.Null)
             {
-                GearOverride.SetLevel(character);
+                LevelingSystem.SetLevel(character);
             }
 
             if (ConfigService.RestedXP)
@@ -341,7 +342,13 @@ internal static class ServerBootstrapSystemPatch
                     if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0)
                     {
                         float currentRestedXP = restedData.Value;
-                        float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * ConfigService.RestedXPMaxMultiplier;
+                        //float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * ConfigService.RestedXPMax; // need to redo the math here
+
+                        int currentLevel = Core.DataStructures.PlayerExperience[steamId].Key;
+                        int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxPlayerLevel);
+
+                        float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
+
                         float earnedPerTick = ConfigService.RestedXPRate * restedCap;
 
                         float earnedRestedXP = (float)timeOffline.TotalMinutes / ConfigService.RestedXPTickRate * earnedPerTick * restedMultiplier;
@@ -385,7 +392,7 @@ internal static class ServerBootstrapSystemPatch
                         DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
                     }
                 }
-                FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
+                FamiliarSummonSystem.FamiliarUtilities.ClearFamiliarActives(steamId);
             }
         }
 
@@ -426,7 +433,7 @@ internal static class ServerBootstrapSystemPatch
                     DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
                 }
             }
-            FamiliarSummonUtilities.FamiliarUtilities.ClearFamiliarActives(steamId);
+            FamiliarSummonSystem.FamiliarUtilities.ClearFamiliarActives(steamId);
         }
 
         if (ConfigService.LevelingSystem)
@@ -439,4 +446,28 @@ internal static class ServerBootstrapSystemPatch
             }
         }
     }
+
+    /*
+    [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(ChatMessageSystem __instance)
+    {
+        NativeArray<Entity> entities = __instance.__query_661171423_0.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (!Core.hasInitialized) continue;
+
+                ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
+                Core.Log.LogInfo($"ChatMessageEvent: {chatMessageEvent.MessageText.Value}");
+                entity.LogComponentTypes();
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    */
 }

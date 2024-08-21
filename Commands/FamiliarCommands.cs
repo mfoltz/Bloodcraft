@@ -14,10 +14,10 @@ using static Bloodcraft.Core.FamiliarBuffsManager;
 using static Bloodcraft.Core.FamiliarPrestigeManager;
 using static Bloodcraft.Core.FamiliarUnlocksManager;
 using static Bloodcraft.Core.FamiliarExperienceManager;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarSummonUtilities;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarSummonUtilities.FamiliarUtilities;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarLevelingUtilities;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarUnlockUtilities;
+using static Bloodcraft.SystemUtilities.Familiars.FamiliarSummonSystem;
+using static Bloodcraft.SystemUtilities.Familiars.FamiliarSummonSystem.FamiliarUtilities;
+using static Bloodcraft.SystemUtilities.Familiars.FamiliarLevelingSystem;
+using static Bloodcraft.SystemUtilities.Familiars.FamiliarUnlockSystem;
 
 namespace Bloodcraft.Commands;
 

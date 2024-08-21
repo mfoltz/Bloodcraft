@@ -44,8 +44,8 @@ public class ConfigService
     readonly float _restedXPRate = Plugin.RestedXPRate.Value;
     public float RestedXPRate => _restedXPRate;
 
-    readonly float _restedXPMaxMultiplier = Plugin.RestedXPMaxMultiplier.Value;
-    public float RestedXPMaxMultiplier => _restedXPMaxMultiplier;
+    readonly int _restedXPMax = Plugin.RestedXPMax.Value;
+    public int RestedXPMax => _restedXPMax;
 
     readonly float _restedXPTickRate = Plugin.RestedXPTickRate.Value;
     public float RestedXPTickRate => _restedXPTickRate;
@@ -136,9 +136,6 @@ public class ConfigService
 
     readonly bool _parties = Plugin.Parties.Value;
     public bool Parties => _parties;
-
-    readonly bool _preventFriendlyFire = Plugin.PreventFriendlyFire.Value;
-    public bool PreventFriendlyFire => _preventFriendlyFire;
 
     readonly float _docileUnitMultiplier = Plugin.DocileUnitMultiplier.Value;
     public float DocileUnitMultiplier => _docileUnitMultiplier;
