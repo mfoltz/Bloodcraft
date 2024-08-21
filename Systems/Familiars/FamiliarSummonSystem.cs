@@ -40,7 +40,7 @@ internal static class FamiliarSummonSystem
             PrefabGuid = new(famKey),
             Control = false,
             Roam = false,
-            Team = SpawnDebugEvent.TeamEnum.Ally, // try neutral, then write player team to fam?
+            Team = SpawnDebugEvent.TeamEnum.Ally,
             Level = 1,
             Position = character.Read<LocalToWorld>().Position,
             DyeIndex = 0
@@ -94,34 +94,6 @@ internal static class FamiliarSummonSystem
                 {
                     FamiliarPatches.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
                     PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
-                    /*
-                    if (ServerGameManager.TryGetBuff(familiar, visualBuff.ToIdentifier(), out Entity visualBuffEntity))
-                    {
-                        NameableInteractable nameableInteractable = new()
-                        {
-                            Name = new Unity.Collections.FixedString64Bytes($"{player.Read<PlayerCharacter>().Name.Value}'s Familiar"),
-                            OnlyAllyRename = true,
-                            OnlyAllySee = false
-                        };
-                        familiar.Add<NameableInteractable>();
-                        familiar.Write(nameableInteractable);
-                        SystemService.NameableInteractableSystem.OnUpdate();
-
-                        ModifyTargetHUDBuff modifyTargetHUDBuff = new()
-                        {
-                            Priority = 0,
-                            Height = 1,
-                            PrefabType = CharacterHUDEntryType.BaseUnitNamed,
-                            BloodPrefabType = CharacterHUDEntryType.None
-                        };
-                        visualBuffEntity.Add<ModifyTargetHUDBuff>();
-                        visualBuffEntity.Write(modifyTargetHUDBuff);
-                        SystemService.BuffSystem_Spawn_Server.OnUpdate();
-
-                        EntityManager.SetComponentData(visualBuffEntity, modifyTargetHUDBuff);
-                        SystemService.BuffSystem_Spawn_Server.OnUpdate();
-                    }
-                    */
                 }
             }
             return true;
@@ -171,10 +143,10 @@ internal static class FamiliarSummonSystem
             }
         }
     }
-    static void ModifyFollowerAndTeam(Entity player, Entity familiar)// see if can just adjust the boss spawns to normal team and hijack unit team for familiars since it didn't seem to affect anything else
+    static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
-        factionReference.FactionGuid._Value = playerFaction; // need friendly to players hostile to everything else? also why does playerFaction target castles? also try to mess with these again like with wolves to double check
+        factionReference.FactionGuid._Value = playerFaction; 
         familiar.Write(factionReference);
 
         Follower follower = familiar.Read<Follower>();
