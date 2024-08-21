@@ -180,8 +180,6 @@ internal static class LevelingSystem
         gainedXP += additionalXP;
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
 
-        if (ConfigService.ClientCompanion) HandleClientUI(killerEntity, SteamID); // move this to death hook?
-
         if (currentLevel >= ConfigService.MaxPlayerLevel) return;
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
@@ -340,45 +338,6 @@ internal static class LevelingSystem
             string message = restedXP > 0 ? $"+<color=yellow>{gainedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)" : $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
-    }
-    static void HandleClientUI(Entity character, ulong SteamID)
-    {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-
-        int experience = 0;
-        int legacy = 0;
-        int expertise = 0;
-        int legacyEnum = 0;
-        int expertiseEnum = 0;
-
-        experience = GetLevelProgress(SteamID);
-
-        if (ConfigService.BloodSystem)
-        {
-            BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
-            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
-            if (bloodHandler != null)
-            {
-                legacy = BloodSystem.GetLevelProgress(SteamID, bloodHandler);
-                legacyEnum = (int)bloodType;
-            }
-        }
-
-        if (ConfigService.ExpertiseSystem)
-        {
-            WeaponSystem.WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
-            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
-            if (expertiseHandler != null)
-            {
-                expertise = WeaponSystem.GetLevelProgress(SteamID, expertiseHandler);
-                expertiseEnum = (int)weaponType;
-            }
-        }
-
-        string message = $"+{experience:D2},{legacy:D2},{legacyEnum:D2},{expertise:D2},{expertiseEnum:D2}";
-        Core.Log.LogInfo($"Sending progress: {user.CharacterName.Value} | {message} {message.Length}");
-        LocalizationService.HandleServerReply(EntityManager, user, message);
     }
     public static int ConvertXpToLevel(float xp)
     {

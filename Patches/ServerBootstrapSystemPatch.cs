@@ -4,10 +4,13 @@ using Bloodcraft.SystemUtilities.Familiars;
 using Bloodcraft.SystemUtilities.Leveling;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Stunlock.Network;
+using System.Text.RegularExpressions;
+using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
@@ -446,28 +449,7 @@ internal static class ServerBootstrapSystemPatch
             }
         }
     }
+    
 
-    /*
-    [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(ChatMessageSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance.__query_661171423_0.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!Core.hasInitialized) continue;
 
-                ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
-                Core.Log.LogInfo($"ChatMessageEvent: {chatMessageEvent.MessageText.Value}");
-                entity.LogComponentTypes();
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-    */
 }

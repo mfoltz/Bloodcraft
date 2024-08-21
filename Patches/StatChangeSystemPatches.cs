@@ -105,7 +105,7 @@ internal static class StatChangeSystemPatches
 
                 if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue;
 
-                if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue;
+                if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // null entities are NOT to make it in here, don't know why or how but last time it happened messed up the save pretty badly
 
                 PrefabGUID sourcePrefab = dealDamageEvent.SpellSource.Read<PrefabGUID>();
 
