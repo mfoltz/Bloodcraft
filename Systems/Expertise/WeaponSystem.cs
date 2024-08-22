@@ -143,8 +143,8 @@ public static class WeaponSystem
     public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)
     {
         float currentXP = GetXp(steamID, handler);
-        int currentLevelXP = ConvertLevelToXp(GetLevel(steamID, handler));
-        int nextLevelXP = ConvertLevelToXp(GetLevel(steamID, handler) + 1);
+        int currentLevelXP = ConvertLevelToXp(GetLevelFromXp(steamID, handler));
+        int nextLevelXP = ConvertLevelToXp(GetLevelFromXp(steamID, handler) + 1);
 
         double neededXP = nextLevelXP - currentLevelXP;
         double earnedXP = nextLevelXP - currentXP;
@@ -163,7 +163,12 @@ public static class WeaponSystem
         var xpData = handler.GetExpertiseData(steamID);
         return xpData.Value;
     }
-    static int GetLevel(ulong steamID, IExpertiseHandler handler)
+    public static int GetLevel(ulong steamID, IExpertiseHandler handler)
+    {
+        var xpData = handler.GetExpertiseData(steamID);
+        return xpData.Key;
+    }
+    static int GetLevelFromXp(ulong steamID, IExpertiseHandler handler)
     {
         return ConvertXpToLevel(GetXp(steamID, handler));
     }

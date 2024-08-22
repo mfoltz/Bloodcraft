@@ -17,7 +17,6 @@ internal static class QuestCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
 

@@ -155,8 +155,8 @@ public static class BloodSystem
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
     {
         float currentXP = GetXp(SteamID, handler);
-        int currentLevelXP = ConvertLevelToXp(GetLevel(SteamID, handler));
-        int nextLevelXP = ConvertLevelToXp(GetLevel(SteamID, handler) + 1);
+        int currentLevelXP = ConvertLevelToXp(GetLevelFromXp(SteamID, handler));
+        int nextLevelXP = ConvertLevelToXp(GetLevelFromXp(SteamID, handler) + 1);
 
         double neededXP = nextLevelXP - currentLevelXP;
         double earnedXP = nextLevelXP - currentXP;
@@ -178,7 +178,12 @@ public static class BloodSystem
         var xpData = handler.GetLegacyData(steamID);
         return xpData.Value;
     }
-    static int GetLevel(ulong steamID, IBloodHandler handler)
+    public static int GetLevel(ulong steamID, IBloodHandler handler)
+    {
+        var xpData = handler.GetLegacyData(steamID);
+        return xpData.Key;
+    }
+    static int GetLevelFromXp(ulong steamID, IBloodHandler handler)
     {
         return ConvertXpToLevel(GetXp(steamID, handler));
     }

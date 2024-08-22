@@ -18,8 +18,6 @@ internal static class EquipmentPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
-
-    
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]

@@ -15,8 +15,6 @@ namespace Bloodcraft;
 internal static class Utilities
 {
     static EntityManager EntityManager => Core.EntityManager;
-    
-
     public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, bool checkBuffBuffer = false) // not sure if need to actually check for empty buff buffer for quest targets but don't really want to find out
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);

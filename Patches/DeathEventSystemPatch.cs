@@ -8,7 +8,6 @@ using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -18,8 +17,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
-    
-
     [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(DeathEventListenerSystem __instance)
@@ -85,7 +82,7 @@ internal static class DeathEventListenerSystemPatch
                         }
                     }
 
-                    if (EclipseService.RegisteredUsers.Contains(steamId))
+                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
                         EclipseService.SendClientProgress(deathEvent.Killer, steamId);
                     }
@@ -103,7 +100,7 @@ internal static class DeathEventListenerSystemPatch
                         if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(followedPlayer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
 
-                    if (EclipseService.RegisteredUsers.Contains(steamId))
+                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
                         EclipseService.SendClientProgress(deathEvent.Killer, steamId);
                     }
@@ -121,7 +118,7 @@ internal static class DeathEventListenerSystemPatch
                         if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
 
-                    if (EclipseService.RegisteredUsers.Contains(steamId))
+                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
                         EclipseService.SendClientProgress(deathEvent.Killer, steamId);
                     }
@@ -144,7 +141,7 @@ internal static class DeathEventListenerSystemPatch
                         }
                     }
 
-                    if (EclipseService.RegisteredUsers.Contains(steamId))
+                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
                         EclipseService.SendClientProgress(deathEvent.Killer, steamId);
                     }

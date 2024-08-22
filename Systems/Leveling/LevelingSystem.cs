@@ -348,15 +348,20 @@ internal static class LevelingSystem
         if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
         return 0;
     }
-    static int GetLevel(ulong SteamID)
+    public static int GetLevel(ulong SteamID)
+    {
+        if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Key;
+        return 0;
+    }
+    static int GetLevelFromXp(ulong SteamID)
     {
         return ConvertXpToLevel(GetXp(SteamID));
     }
     public static int GetLevelProgress(ulong SteamID)
     {
         float currentXP = GetXp(SteamID);
-        int currentLevelXP = ConvertLevelToXp(GetLevel(SteamID));
-        int nextLevelXP = ConvertLevelToXp(GetLevel(SteamID) + 1);
+        int currentLevelXP = ConvertLevelToXp(GetLevelFromXp(SteamID));
+        int nextLevelXP = ConvertLevelToXp(GetLevelFromXp(SteamID) + 1);
 
         double neededXP = nextLevelXP - currentLevelXP;
         double earnedXP = nextLevelXP - currentXP;
