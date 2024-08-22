@@ -7,7 +7,7 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
-using static Bloodcraft.SystemUtilities.Quests.QuestSystem;
+using static Bloodcraft.Systems.Quests.QuestSystem;
 using static Bloodcraft.Utilities;
 using static Bloodcraft.Core.DataStructures;
 
@@ -15,7 +15,7 @@ namespace Bloodcraft.Services;
 internal class QuestService
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static PlayerService PlayerService => Core.PlayerService;
 
     static readonly WaitForSeconds updateDelay = new(60);

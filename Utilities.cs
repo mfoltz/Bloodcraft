@@ -1,7 +1,7 @@
 ﻿using Bloodcraft.Commands;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Quests;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Quests;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Collections;
@@ -15,7 +15,7 @@ namespace Bloodcraft;
 internal static class Utilities
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
 
     public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, bool checkBuffBuffer = false) // not sure if need to actually check for empty buff buffer for quest targets but don't really want to find out
     {

@@ -13,7 +13,8 @@ namespace Bloodcraft.Patches;
 internal static class ReplaceAbilityOnGroupSlotSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
+    static bool ClassesInactive => !ConfigService.SoftSynergies && !ConfigService.HardSynergies;
 
     public static Dictionary<int, int> ClassSpells = [];
 
@@ -149,7 +150,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
             foreach (Entity entity in entities)
             {   
                 if (!Core.hasInitialized) continue;
-                if (ConfigService.ClassesInactive) continue;
+                if (ClassesInactive) continue;
 
                 AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();

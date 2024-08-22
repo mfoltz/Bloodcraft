@@ -1,5 +1,5 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Legacies;
+using Bloodcraft.Systems.Legacies;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -8,7 +8,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.SystemUtilities.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Experience.LevelingSystem;
 using Random = System.Random;
 
 namespace Bloodcraft.Patches;
@@ -19,12 +19,13 @@ internal static class StatChangeSystemPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
     static readonly Random Random = new();
+    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
     static readonly PrefabGUID stormShield03 = new(1095865904);
@@ -98,7 +99,7 @@ internal static class StatChangeSystemPatches
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) continue;
-                if (!ConfigService.ClassSpellSchoolOnHitEffects || !ConfigService.Classes) continue;
+                if (!ConfigService.ClassSpellSchoolOnHitEffects || !Classes) continue;
                 if (!entity.Exists() || !entity.Has<DealDamageEvent>()) continue;
 
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();

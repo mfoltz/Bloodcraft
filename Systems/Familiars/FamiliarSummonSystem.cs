@@ -9,13 +9,13 @@ using Unity.Entities;
 using Unity.Transforms;
 using VampireCommandFramework;
 
-namespace Bloodcraft.SystemUtilities.Familiars;
+namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
@@ -280,16 +280,6 @@ internal static class FamiliarSummonSystem
             if (damageCategoryStats.DamageVsVBloods._Value != ConfigService.VBloodDamageMultiplier)
             {
                 damageCategoryStats.DamageVsVBloods._Value *= ConfigService.VBloodDamageMultiplier;
-                familiar.Write(damageCategoryStats);
-            }
-        }
-
-        if (ConfigService.PlayerVampireDamageMultiplier != 1f)
-        {
-            DamageCategoryStats damageCategoryStats = familiar.Read<DamageCategoryStats>();
-            if (damageCategoryStats.DamageVsVampires._Value != ConfigService.PlayerVampireDamageMultiplier)
-            {
-                damageCategoryStats.DamageVsVampires._Value *= ConfigService.PlayerVampireDamageMultiplier;
                 familiar.Write(damageCategoryStats);
             }
         }

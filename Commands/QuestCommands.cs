@@ -6,7 +6,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodcraft.SystemUtilities.Quests.QuestSystem;
+using static Bloodcraft.Systems.Quests.QuestSystem;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
@@ -17,7 +17,7 @@ internal static class QuestCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
 

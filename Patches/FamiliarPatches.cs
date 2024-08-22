@@ -1,5 +1,5 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
@@ -21,7 +21,6 @@ internal static class FamiliarPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
     static PlayerService PlayerService => Core.PlayerService;
     static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;

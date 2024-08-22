@@ -1,13 +1,13 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
 using Unity.Entities;
-using static Bloodcraft.SystemUtilities.Legacies.BloodHandler.BloodStats;
+using static Bloodcraft.Systems.Legacies.BloodHandler.BloodStats;
 
-namespace Bloodcraft.SystemUtilities.Legacies;
+namespace Bloodcraft.Systems.Legacies;
 internal static class BloodHandler
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     public static bool ChooseStat(ulong steamId, BloodSystem.BloodType BloodType, BloodStats.BloodStatType statType)
     {
         if (!Core.DataStructures.PlayerBloodStats.TryGetValue(steamId, out var bloodStats) || !bloodStats.TryGetValue(BloodType, out var Stats))

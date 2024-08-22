@@ -1,428 +1,606 @@
-﻿namespace Bloodcraft.Services;
+﻿using BepInEx.Configuration;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
-public class ConfigService
+namespace Bloodcraft.Services;
+
+public static class ConfigService
 {
-    readonly string _languageLocalization = Plugin.LanguageLocalization.Value;
-    public string LanguageLocalization => _languageLocalization;
-
-    readonly bool _clientCompanion = Plugin.ClientCompanion.Value;
-    public bool ClientCompanion => _clientCompanion;
-
-    readonly bool _eliteShardBearers = Plugin.EliteShardBearers.Value;
-    public bool EliteShardBearers => _eliteShardBearers;
-
-    readonly bool _potionStacking = Plugin.PotionStacking.Value;
-    public bool PotionStacking => _potionStacking;
-
-    readonly bool _starterKit = Plugin.StarterKit.Value;
-    public bool StarterKit => _starterKit;
-
-    readonly string _kitPrefabs = Plugin.KitPrefabs.Value;
-    public string KitPrefabs => _kitPrefabs;
-
-    readonly string _kitQuantities = Plugin.KitQuantities.Value;
-    public string KitQuantities => _kitQuantities;
-
-    readonly bool _questSystem = Plugin.QuestSystem.Value;
-    public bool QuestSystem => _questSystem;
-
-    readonly bool _infiniteDailies = Plugin.InfiniteDailies.Value;
-    public bool InfiniteDailies => _infiniteDailies;
-
-    readonly string _questRewards = Plugin.QuestRewards.Value;
-    public string QuestRewards => _questRewards;
-
-    readonly string _questRewardAmounts = Plugin.QuestRewardAmounts.Value;
-    public string QuestRewardAmounts => _questRewardAmounts;
-
-    readonly bool _levelingSystem = Plugin.LevelingSystem.Value;
-    public bool LevelingSystem => _levelingSystem;
-
-    readonly bool _restedXP = Plugin.RestedXP.Value;
-    public bool RestedXP => _restedXP;
-
-    readonly float _restedXPRate = Plugin.RestedXPRate.Value;
-    public float RestedXPRate => _restedXPRate;
-
-    readonly int _restedXPMax = Plugin.RestedXPMax.Value;
-    public int RestedXPMax => _restedXPMax;
-
-    readonly float _restedXPTickRate = Plugin.RestedXPTickRate.Value;
-    public float RestedXPTickRate => _restedXPTickRate;
-
-    readonly bool _prestigeSystem = Plugin.PrestigeSystem.Value;
-    public bool PrestigeSystem => _prestigeSystem;
-
-    readonly bool _exoPrestiging = Plugin.ExoPrestiging.Value;
-    public bool ExoPrestiging => _exoPrestiging;
-
-    readonly int _exoPrestiges = Plugin.ExoPrestiges.Value;
-    public int ExoPrestiges => _exoPrestiges;
-
-    readonly int _exoPrestigeReward = Plugin.ExoPrestigeReward.Value;
-    public int ExoPrestigeReward => _exoPrestigeReward;
-
-    readonly int _exoPrestigeRewardQuantity = Plugin.ExoPrestigeRewardQuantity.Value;
-    public int ExoPrestigeRewardQuantity => _exoPrestigeRewardQuantity;
-
-    readonly float _exoPrestigeDamageTakenMultiplier = Plugin.ExoPrestigeDamageTakenMultiplier.Value;
-    public float ExoPrestigeDamageTakenMultiplier => _exoPrestigeDamageTakenMultiplier;
-
-    readonly float _exoPrestigeDamageDealtMultiplier = Plugin.ExoPrestigeDamageDealtMultiplier.Value;
-    public float ExoPrestigeDamageDealtMultiplier => _exoPrestigeDamageDealtMultiplier;
-
-    readonly string _prestigeBuffs = Plugin.PrestigeBuffs.Value;
-    public string PrestigeBuffs => _prestigeBuffs;
-
-    readonly string _prestigeLevelsToUnlockClassSpells = Plugin.PrestigeLevelsToUnlockClassSpells.Value;
-    public string PrestigeLevelsToUnlockClassSpells => _prestigeLevelsToUnlockClassSpells;
-
-    readonly string _bloodKnightBuffs = Plugin.BloodKnightBuffs.Value;
-    public string BloodKnightBuffs => _bloodKnightBuffs;
-
-    readonly string _demonHunterBuffs = Plugin.DemonHunterBuffs.Value;
-    public string DemonHunterBuffs => _demonHunterBuffs;
-
-    readonly string _vampireLordBuffs = Plugin.VampireLordBuffs.Value;
-    public string VampireLordBuffs => _vampireLordBuffs;
-
-    readonly string _shadowBladeBuffs = Plugin.ShadowBladeBuffs.Value;
-    public string ShadowBladeBuffs => _shadowBladeBuffs;
-
-    readonly string _arcaneSorcererBuffs = Plugin.ArcaneSorcererBuffs.Value;
-    public string ArcaneSorcererBuffs => _arcaneSorcererBuffs;
-
-    readonly string _deathMageBuffs = Plugin.DeathMageBuffs.Value;
-    public string DeathMageBuffs => _deathMageBuffs;
-
-    readonly int _maxLevelingPrestiges = Plugin.MaxLevelingPrestiges.Value;
-    public int MaxLevelingPrestiges => _maxLevelingPrestiges;
-
-    readonly float _levelingPrestigeReducer = Plugin.LevelingPrestigeReducer.Value;
-    public float LevelingPrestigeReducer => _levelingPrestigeReducer;
-
-    readonly float _prestigeRatesReducer = Plugin.PrestigeRatesReducer.Value;
-    public float PrestigeRatesReducer => _prestigeRatesReducer;
-
-    readonly float _prestigeStatMultiplier = Plugin.PrestigeStatMultiplier.Value;
-    public float PrestigeStatMultiplier => _prestigeStatMultiplier;
-
-    readonly float _prestigeRatesMultiplier = Plugin.PrestigeRatesMultiplier.Value;
-    public float PrestigeRatesMultiplier => _prestigeRatesMultiplier;
-
-    readonly int _maxPlayerLevel = Plugin.MaxPlayerLevel.Value;
-    public int MaxPlayerLevel => _maxPlayerLevel;
-
-    readonly int _startingLevel = Plugin.StartingLevel.Value;
-    public int StartingLevel => _startingLevel;
-
-    readonly float _unitLevelingMultiplier = Plugin.UnitLevelingMultiplier.Value;
-    public float UnitLevelingMultiplier => _unitLevelingMultiplier;
-
-    readonly float _vBloodLevelingMultiplier = Plugin.VBloodLevelingMultiplier.Value;
-    public float VBloodLevelingMultiplier => _vBloodLevelingMultiplier;
-
-    readonly float _groupLevelingMultiplier = Plugin.GroupLevelingMultiplier.Value;
-    public float GroupLevelingMultiplier => _groupLevelingMultiplier;
-
-    readonly float _levelScalingMultiplier = Plugin.LevelScalingMultiplier.Value;
-    public float LevelScalingMultiplier => _levelScalingMultiplier;
-
-    readonly int _maxPartySize = Plugin.MaxPartySize.Value;
-    public int MaxPartySize => _maxPartySize;
-
-    readonly float _expShareDistance = Plugin.ExpShareDistance.Value;
-    public float ExpShareDistance => _expShareDistance;
-
-    readonly bool _parties = Plugin.Parties.Value;
-    public bool Parties => _parties;
-
-    readonly float _docileUnitMultiplier = Plugin.DocileUnitMultiplier.Value;
-    public float DocileUnitMultiplier => _docileUnitMultiplier;
-
-    readonly float _warEventMultiplier = Plugin.WarEventMultiplier.Value;
-    public float WarEventMultiplier => _warEventMultiplier;
-
-    readonly float _unitSpawnerMultiplier = Plugin.UnitSpawnerMultiplier.Value;
-    public float UnitSpawnerMultiplier => _unitSpawnerMultiplier;
-
-    readonly int _changeClassItem = Plugin.ChangeClassItem.Value;
-    public int ChangeClassItem => _changeClassItem;
-
-    readonly int _changeClassItemQuantity = Plugin.ChangeClassItemQuantity.Value;
-    public int ChangeClassItemQuantity => _changeClassItemQuantity;
-
-    readonly bool _expertiseSystem = Plugin.ExpertiseSystem.Value;
-    public bool ExpertiseSystem => _expertiseSystem;
-
-    readonly int _maxExpertisePrestiges = Plugin.MaxExpertisePrestiges.Value;
-    public int MaxExpertisePrestiges => _maxExpertisePrestiges;
-
-    readonly bool _unarmedSlots = Plugin.UnarmedSlots.Value;
-    public bool UnarmedSlots => _unarmedSlots;
-
-    readonly bool _shiftSlot = Plugin.ShiftSlot.Value;
-    public bool ShiftSlot => _shiftSlot;
-
-    readonly int _maxExpertiseLevel = Plugin.MaxExpertiseLevel.Value;
-    public int MaxExpertiseLevel => _maxExpertiseLevel;
-
-    readonly float _unitExpertiseMultiplier = Plugin.UnitExpertiseMultiplier.Value;
-    public float UnitExpertiseMultiplier => _unitExpertiseMultiplier;
-
-    readonly float _vBloodExpertiseMultiplier = Plugin.VBloodExpertiseMultiplier.Value;
-    public float VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier;
-
-    readonly int _expertiseStatChoices = Plugin.ExpertiseStatChoices.Value;
-    public int ExpertiseStatChoices => _expertiseStatChoices;
-
-    readonly int _resetExpertiseItem = Plugin.ResetExpertiseItem.Value;
-    public int ResetExpertiseItem => _resetExpertiseItem;
-
-    readonly int _resetExpertiseItemQuantity = Plugin.ResetExpertiseItemQuantity.Value;
-    public int ResetExpertiseItemQuantity => _resetExpertiseItemQuantity;
-
-    readonly float _maxHealth = Plugin.MaxHealth.Value;
-    public float MaxHealth => _maxHealth;
-
-    readonly float _movementSpeed = Plugin.MovementSpeed.Value;
-    public float MovementSpeed => _movementSpeed;
-
-    readonly float _primaryAttackSpeed = Plugin.PrimaryAttackSpeed.Value;
-    public float PrimaryAttackSpeed => _primaryAttackSpeed;
-
-    readonly float _physicalLifeLeech = Plugin.PhysicalLifeLeech.Value;
-    public float PhysicalLifeLeech => _physicalLifeLeech;
-
-    readonly float _spellLifeLeech = Plugin.SpellLifeLeech.Value;
-    public float SpellLifeLeech => _spellLifeLeech;
-
-    readonly float _primaryLifeLeech = Plugin.PrimaryLifeLeech.Value;
-    public float PrimaryLifeLeech => _primaryLifeLeech;
-
-    readonly float _physicalPower = Plugin.PhysicalPower.Value;
-    public float PhysicalPower => _physicalPower;
-
-    readonly float _spellPower = Plugin.SpellPower.Value;
-    public float SpellPower => _spellPower;
-
-    readonly float _physicalCritChance = Plugin.PhysicalCritChance.Value;
-    public float PhysicalCritChance => _physicalCritChance;
-
-    readonly float _physicalCritDamage = Plugin.PhysicalCritDamage.Value;
-    public float PhysicalCritDamage => _physicalCritDamage;
-
-    readonly float _spellCritChance = Plugin.SpellCritChance.Value;
-    public float SpellCritChance => _spellCritChance;
-
-    readonly float _spellCritDamage = Plugin.SpellCritDamage.Value;
-    public float SpellCritDamage => _spellCritDamage;
-
-    readonly bool _bloodSystem = Plugin.BloodSystem.Value;
-    public bool BloodSystem => _bloodSystem;
-
-    readonly int _maxLegacyPrestiges = Plugin.MaxLegacyPrestiges.Value;
-    public int MaxLegacyPrestiges => _maxLegacyPrestiges;
-
-    readonly bool _bloodQualityBonus = Plugin.BloodQualityBonus.Value;
-    public bool BloodQualityBonus => _bloodQualityBonus;
-
-    readonly float _prestigeBloodQuality = Plugin.PrestigeBloodQuality.Value;
-    public float PrestigeBloodQuality => _prestigeBloodQuality;
-
-    readonly int _maxBloodLevel = Plugin.MaxBloodLevel.Value;
-    public int MaxBloodLevel => _maxBloodLevel;
-
-    readonly float _unitLegacyMultiplier = Plugin.UnitLegacyMultiplier.Value;
-    public float UnitLegacyMultiplier => _unitLegacyMultiplier;
-
-    readonly float _vBloodLegacyMultiplier = Plugin.VBloodLegacyMultipler.Value;
-    public float VBloodLegacyMultiplier => _vBloodLegacyMultiplier;
-
-    readonly int _legacyStatChoices = Plugin.LegacyStatChoices.Value;
-    public int LegacyStatChoices => _legacyStatChoices;
-
-    readonly int _resetLegacyItem = Plugin.ResetLegacyItem.Value;
-    public int ResetLegacyItem => _resetLegacyItem;
-
-    readonly int _resetLegacyItemQuantity = Plugin.ResetLegacyItemQuantity.Value;
-    public int ResetLegacyItemQuantity => _resetLegacyItemQuantity;
-
-    readonly float _healingReceived = Plugin.HealingReceived.Value;
-    public float HealingReceived => _healingReceived;
-
-    readonly float _damageReduction = Plugin.DamageReduction.Value;
-    public float DamageReduction => _damageReduction;
-
-    readonly float _physicalResistance = Plugin.PhysicalResistance.Value;
-    public float PhysicalResistance => _physicalResistance;
-
-    readonly float _spellResistance = Plugin.SpellResistance.Value;
-    public float SpellResistance => _spellResistance;
-
-    readonly float _resourceYield = Plugin.ResourceYield.Value;
-    public float ResourceYield => _resourceYield;
-
-    readonly float _ccReduction = Plugin.CCReduction.Value;
-    public float CCReduction => _ccReduction;
-
-    readonly float _spellCooldownRecoveryRate = Plugin.SpellCooldownRecoveryRate.Value;
-    public float SpellCooldownRecoveryRate => _spellCooldownRecoveryRate;
-
-    readonly float _weaponCooldownRecoveryRate = Plugin.WeaponCooldownRecoveryRate.Value;
-    public float WeaponCooldownRecoveryRate => _weaponCooldownRecoveryRate;
-
-    readonly float _ultimateCooldownRecoveryRate = Plugin.UltimateCooldownRecoveryRate.Value;
-    public float UltimateCooldownRecoveryRate => _ultimateCooldownRecoveryRate;
-
-    readonly float _minionDamage = Plugin.MinionDamage.Value;
-    public float MinionDamage => _minionDamage;
-
-    readonly float _shieldAbsorb = Plugin.ShieldAbsorb.Value;
-    public float ShieldAbsorb => _shieldAbsorb;
-
-    readonly float _bloodEfficiency = Plugin.BloodEfficiency.Value;
-    public float BloodEfficiency => _bloodEfficiency;
-
-    readonly bool _professionSystem = Plugin.ProfessionSystem.Value;
-    public bool ProfessionSystem => _professionSystem;
-
-    readonly int _maxProfessionLevel = Plugin.MaxProfessionLevel.Value;
-    public int MaxProfessionLevel => _maxProfessionLevel;
-
-    readonly float _professionMultiplier = Plugin.ProfessionMultiplier.Value;
-    public float ProfessionMultiplier => _professionMultiplier;
-
-    readonly bool _extraRecipes = Plugin.ExtraRecipes.Value;
-    public bool ExtraRecipes => _extraRecipes;
-
-    readonly bool _familiarSystem = Plugin.FamiliarSystem.Value;
-    public bool FamiliarSystem => _familiarSystem;
-
-    readonly bool _shareUnlocks = Plugin.ShareUnlocks.Value;
-    public bool ShareUnlocks => _shareUnlocks;
-
-    readonly bool _familiarCombat = Plugin.FamiliarCombat.Value;
-    public bool FamiliarCombat => _familiarCombat;
-
-    readonly bool _familiarPrestige = Plugin.FamiliarPrestige.Value;
-    public bool FamiliarPrestige => _familiarPrestige;
-
-    readonly int _maxFamiliarPrestiges = Plugin.MaxFamiliarPrestiges.Value;
-    public int MaxFamiliarPrestiges => _maxFamiliarPrestiges;
-
-    readonly float _familiarPrestigeStatMultiplier = Plugin.FamiliarPrestigeStatMultiplier.Value;
-    public float FamiliarPrestigeStatMultiplier => _familiarPrestigeStatMultiplier;
-
-    readonly int _maxFamiliarLevel = Plugin.MaxFamiliarLevel.Value;
-    public int MaxFamiliarLevel => _maxFamiliarLevel;
-
-    readonly bool _allowVBloods = Plugin.AllowVBloods.Value;
-    public bool AllowVBloods => _allowVBloods;
-
-    readonly string _bannedUnits = Plugin.BannedUnits.Value;
-    public string BannedUnits => _bannedUnits;
-
-    readonly string _bannedTypes = Plugin.BannedTypes.Value;
-    public string BannedTypes => _bannedTypes;
-
-    readonly float _unitFamiliarMultiplier = Plugin.UnitFamiliarMultiplier.Value;
-    public float UnitFamiliarMultiplier => _unitFamiliarMultiplier;
-
-    readonly float _vBloodFamiliarMultiplier = Plugin.VBloodFamiliarMultiplier.Value;
-    public float VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier;
-
-    readonly float _unitUnlockChance = Plugin.UnitUnlockChance.Value;
-    public float UnitUnlockChance => _unitUnlockChance;
-
-    readonly float _vBloodUnlockChance = Plugin.VBloodUnlockChance.Value;
-    public float VBloodUnlockChance => _vBloodUnlockChance;
-
-    readonly float _shinyChance = Plugin.ShinyChance.Value;
-    public float ShinyChance => _shinyChance;
-
-    readonly int _shinyCostItemPrefab = Plugin.ShinyCostItemPrefab.Value;
-    public int ShinyCostItemPrefab => _shinyCostItemPrefab;
-
-    readonly int _shinyCostItemQuantity = Plugin.ShinyCostItemQuantity.Value;
-    public int ShinyCostItemQuantity => _shinyCostItemQuantity;
-
-    readonly float _vBloodDamageMultiplier = Plugin.VBloodDamageMultiplier.Value;
-    public float VBloodDamageMultiplier => _vBloodDamageMultiplier;
-
-    readonly float _playerVampireDamageMultiplier = Plugin.PlayerVampireDamageMultiplier.Value;
-    public float PlayerVampireDamageMultiplier => _playerVampireDamageMultiplier;
-
-    readonly bool _softSynergies = Plugin.SoftSynergies.Value;
-    public bool SoftSynergies => _softSynergies;
-
-    readonly bool _hardSynergies = Plugin.HardSynergies.Value;
-    public bool HardSynergies => _hardSynergies;
-
-    readonly bool _classSpellSchoolOnHitEffects = Plugin.ClassSpellSchoolOnHitEffects.Value;
-    public bool ClassSpellSchoolOnHitEffects => _classSpellSchoolOnHitEffects;
-
-    readonly float _onHitProcChance = Plugin.OnHitProcChance.Value;
-    public float OnHitProcChance => _onHitProcChance;
-
-    readonly float _statSynergyMultiplier = Plugin.StatSynergyMultiplier.Value;
-    public float StatSynergyMultiplier => _statSynergyMultiplier;
-
-    readonly string _bloodKnightWeapon = Plugin.BloodKnightWeapon.Value;
-    public string BloodKnightWeapon => _bloodKnightWeapon;
-
-    readonly string _bloodKnightBlood = Plugin.BloodKnightBlood.Value;
-    public string BloodKnightBlood => _bloodKnightBlood;
-
-    readonly string _bloodKnightSpells = Plugin.BloodKnightSpells.Value;
-    public string BloodKnightSpells => _bloodKnightSpells;
-
-    readonly string _demonHunterWeapon = Plugin.DemonHunterWeapon.Value;
-    public string DemonHunterWeapon => _demonHunterWeapon;
-
-    readonly string _demonHunterBlood = Plugin.DemonHunterBlood.Value;
-    public string DemonHunterBlood => _demonHunterBlood;
-
-    readonly string _demonHunterSpells = Plugin.DemonHunterSpells.Value;
-    public string DemonHunterSpells => _demonHunterSpells;
-
-    readonly string _vampireLordWeapon = Plugin.VampireLordWeapon.Value;
-    public string VampireLordWeapon => _vampireLordWeapon;
-
-    readonly string _vampireLordBlood = Plugin.VampireLordBlood.Value;
-    public string VampireLordBlood => _vampireLordBlood;
-
-    readonly string _vampireLordSpells = Plugin.VampireLordSpells.Value;
-    public string VampireLordSpells => _vampireLordSpells;
-
-    readonly string _shadowBladeWeapon = Plugin.ShadowBladeWeapon.Value;
-    public string ShadowBladeWeapon => _shadowBladeWeapon;
-
-    readonly string _shadowBladeBlood = Plugin.ShadowBladeBlood.Value;
-    public string ShadowBladeBlood => _shadowBladeBlood;
-
-    readonly string _shadowBladeSpells = Plugin.ShadowBladeSpells.Value;
-    public string ShadowBladeSpells => _shadowBladeSpells;
-
-    readonly string _arcaneSorcererWeapon = Plugin.ArcaneSorcererWeapon.Value;
-    public string ArcaneSorcererWeapon => _arcaneSorcererWeapon;
-
-    readonly string _arcaneSorcererBlood = Plugin.ArcaneSorcererBlood.Value;
-    public string ArcaneSorcererBlood => _arcaneSorcererBlood;
-
-    readonly string _arcaneSorcererSpells = Plugin.ArcaneSorcererSpells.Value;
-    public string ArcaneSorcererSpells => _arcaneSorcererSpells;
-
-    readonly string _deathMageWeapon = Plugin.DeathMageWeapon.Value;
-    public string DeathMageWeapon => _deathMageWeapon;
-
-    readonly string _deathMageBlood = Plugin.DeathMageBlood.Value;
-    public string DeathMageBlood => _deathMageBlood;
-
-    readonly string _deathMageSpells = Plugin.DeathMageSpells.Value;
-    public string DeathMageSpells => _deathMageSpells;
-
-    // Few bool combinations that are handy to have in one place
-    public bool ClassesInactive => !_softSynergies && !_hardSynergies;
-    public bool Classes => _softSynergies || _hardSynergies;
+    public static string LanguageLocalization { get; private set; }
+    public static bool ClientCompanion { get; private set; }
+    public static bool EliteShardBearers { get; private set; }
+    public static bool PotionStacking { get; private set; }
+    public static bool StarterKit { get; private set; }
+    public static string KitPrefabs { get; private set; }
+    public static string KitQuantities { get; private set; }
+    public static bool QuestSystem { get; private set; }
+    public static bool InfiniteDailies { get; private set; }
+    public static string QuestRewards { get; private set; }
+    public static string QuestRewardAmounts { get; private set; }
+    public static bool LevelingSystem { get; private set; }
+    public static bool RestedXPSystem { get; private set; }
+    public static float RestedXPRate { get; private set; }
+    public static int RestedXPMax { get; private set; }
+    public static float RestedXPTickRate { get; private set; }
+    public static int MaxLevel { get; private set; }
+    public static int StartingLevel { get; private set; }
+    public static float UnitLevelingMultiplier { get; private set; }
+    public static float VBloodLevelingMultiplier { get; private set; }
+    public static float DocileUnitMultiplier { get; private set; }
+    public static float WarEventMultiplier { get; private set; }
+    public static float UnitSpawnerMultiplier { get; private set; }
+    public static int ChangeClassItem { get; private set; }
+    public static int ChangeClassQuantity { get; private set; }
+    public static float GroupLevelingMultiplier { get; private set; }
+    public static float LevelScalingMultiplier { get; private set; }
+    public static bool PlayerParties { get; private set; }
+    public static int MaxPartySize { get; private set; }
+    public static float ExpShareDistance { get; private set; }
+    public static bool PrestigeSystem { get; private set; }
+    public static string PrestigeBuffs { get; private set; }
+    public static string PrestigeLevelsToUnlockClassSpells { get; private set; }
+    public static int MaxLevelingPrestiges { get; private set; }
+    public static float LevelingPrestigeReducer { get; private set; }
+    public static float PrestigeRatesReducer { get; private set; }
+    public static float PrestigeStatMultiplier { get; private set; }
+    public static float PrestigeRateMultiplier { get; private set; }
+    public static bool ExoPrestiging { get; private set; }
+    public static int ExoPrestiges { get; private set; }
+    public static int ExoPrestigeReward { get; private set; }
+    public static int ExoPrestigeRewardQuantity { get; private set; }
+    public static float ExoPrestigeDamageTakenMultiplier { get; private set; }
+    public static float ExoPrestigeDamageDealtMultiplier { get; private set; }
+    public static bool ExpertiseSystem { get; private set; }
+    public static int MaxExpertisePrestiges { get; private set; }
+    public static bool UnarmedSlots { get; private set; }
+    public static bool ShiftSlot { get; private set; }
+    public static int MaxExpertiseLevel { get; private set; }
+    public static float UnitExpertiseMultiplier { get; private set; }
+    public static float VBloodExpertiseMultiplier { get; private set; }
+    public static int ExpertiseStatChoices { get; private set; }
+    public static int ResetExpertiseItem { get; private set; }
+    public static int ResetExpertiseItemQuantity { get; private set; }
+    public static float MaxHealth { get; private set; }
+    public static float MovementSpeed { get; private set; }
+    public static float PrimaryAttackSpeed { get; private set; }
+    public static float PhysicalLifeLeech { get; private set; }
+    public static float SpellLifeLeech { get; private set; }
+    public static float PrimaryLifeLeech { get; private set; }
+    public static float PhysicalPower { get; private set; }
+    public static float SpellPower { get; private set; }
+    public static float PhysicalCritChance { get; private set; }
+    public static float PhysicalCritDamage { get; private set; }
+    public static float SpellCritChance { get; private set; }
+    public static float SpellCritDamage { get; private set; }
+    public static bool BloodSystem { get; private set; }
+    public static int MaxLegacyPrestiges { get; private set; }
+    public static bool BloodQualityBonus { get; private set; }
+    public static float PrestigeBloodQuality { get; private set; }
+    public static int MaxBloodLevel { get; private set; }
+    public static float UnitLegacyMultiplier { get; private set; }
+    public static float VBloodLegacyMultiplier { get; private set; }
+    public static int LegacyStatChoices { get; private set; }
+    public static int ResetLegacyItem { get; private set; }
+    public static int ResetLegacyItemQuantity { get; private set; }
+    public static float HealingReceived { get; private set; }
+    public static float DamageReduction { get; private set; }
+    public static float PhysicalResistance { get; private set; }
+    public static float SpellResistance { get; private set; }
+    public static float ResourceYield { get; private set; }
+    public static float CCReduction { get; private set; }
+    public static float SpellCooldownRecoveryRate { get; private set; }
+    public static float WeaponCooldownRecoveryRate { get; private set; }
+    public static float UltimateCooldownRecoveryRate { get; private set; }
+    public static float MinionDamage { get; private set; }
+    public static float ShieldAbsorb { get; private set; }
+    public static float BloodEfficiency { get; private set; }
+    public static bool ProfessionSystem { get; private set; }
+    public static int MaxProfessionLevel { get; private set; }
+    public static float ProfessionMultiplier { get; private set; }
+    public static bool ExtraRecipes { get; private set; }
+    public static bool FamiliarSystem { get; private set; }
+    public static bool ShareUnlocks { get; private set; }
+    public static bool FamiliarCombat { get; private set; }
+    public static bool FamiliarPrestige { get; private set; }
+    public static int MaxFamiliarPrestiges { get; private set; }
+    public static float FamiliarPrestigeStatMultiplier { get; private set; }
+    public static int MaxFamiliarLevel { get; private set; }
+    public static bool AllowVBloods { get; private set; }
+    public static string BannedUnits { get; private set; }
+    public static string BannedTypes { get; private set; }
+    public static float VBloodDamageMultiplier { get; private set; }
+    public static float UnitFamiliarMultiplier { get; private set; }
+    public static float VBloodFamiliarMultiplier { get; private set; }
+    public static float UnitUnlockChance { get; private set; }
+    public static float VBloodUnlockChance { get; private set; }
+    public static float ShinyChance { get; private set; }
+    public static int ShinyCostItemPrefab { get; private set; }
+    public static int ShinyCostItemQuantity { get; private set; }
+    public static bool SoftSynergies { get; private set; }
+    public static bool HardSynergies { get; private set; }
+    public static bool ClassSpellSchoolOnHitEffects { get; private set; }
+    public static float OnHitProcChance { get; private set; }
+    public static float StatSynergyMultiplier { get; private set; }
+    public static string BloodKnightWeapon { get; private set; }
+    public static string BloodKnightBlood { get; private set; }
+    public static string DemonHunterWeapon { get; private set; }
+    public static string DemonHunterBlood { get; private set; }
+    public static string VampireLordWeapon { get; private set; }
+    public static string VampireLordBlood { get; private set; }
+    public static string ShadowBladeWeapon { get; private set; }
+    public static string ShadowBladeBlood { get; private set; }
+    public static string ArcaneSorcererWeapon { get; private set; }
+    public static string ArcaneSorcererBlood { get; private set; }
+    public static string DeathMageWeapon { get; private set; }
+    public static string DeathMageBlood { get; private set; }
+    public static string BloodKnightBuffs { get; private set; }
+    public static string BloodKnightSpells { get; private set; }
+    public static string DemonHunterBuffs { get; private set; }
+    public static string DemonHunterSpells { get; private set; }
+    public static string VampireLordBuffs { get; private set; }
+    public static string VampireLordSpells { get; private set; }
+    public static string ShadowBladeBuffs { get; private set; }
+    public static string ShadowBladeSpells { get; private set; }
+    public static string ArcaneSorcererBuffs { get; private set; }
+    public static string ArcaneSorcererSpells { get; private set; }
+    public static string DeathMageBuffs { get; private set; }
+    public static string DeathMageSpells { get; private set; }
+    public static class ConfigInitialization
+    {
+        static readonly Regex regex = new(@"^\[(.+)\]$");
+
+        public static readonly List<string> DirectoryPaths =
+        [
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME), // 0
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerLeveling"), // 1
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Quests"), // 2
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "WeaponExpertise"), // 3
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "BloodLegacies"), // 4
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Professions"), // 5
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars"), // 6
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"), // 7
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks") // 8
+        ];
+
+        static readonly List<string> SectionOrder =
+        [
+            "General",
+            "StarterKit",
+            "Quests",
+            "Leveling",
+            "Prestige",
+            "Expertise",
+            "Legacies",
+            "Familiars",
+            "Professions"
+        ];
+        public class ConfigEntryDefinition(string section, string key, object defaultValue, string description)
+        {
+            public string Section { get; } = section;
+            public string Key { get; } = key;
+            public object DefaultValue { get; } = defaultValue;
+            public string Description { get; } = description;
+        }
+        public static void InitializeConfig()
+        {
+            foreach (string path in DirectoryPaths)
+            {
+                CreateDirectory(path);
+            }
+
+            foreach (ConfigEntryDefinition entry in ConfigEntries)
+            {
+                // Get the type of DefaultValue
+                Type entryType = entry.DefaultValue.GetType();
+
+                // Reflect on the nested ConfigInitialization class within ConfigService
+                Type nestedClassType = typeof(ConfigService).GetNestedType("ConfigInitialization", BindingFlags.Static | BindingFlags.Public);
+
+                // Use reflection to call InitConfigEntry with the appropriate type
+                MethodInfo method = nestedClassType.GetMethod("InitConfigEntry", BindingFlags.Static | BindingFlags.NonPublic);
+                MethodInfo generic = method.MakeGenericMethod(entryType);
+
+                // Invoke the generic method
+                var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
+
+                PropertyInfo propertyInfo = typeof(ConfigService).GetProperty(entry.Key, BindingFlags.Static | BindingFlags.Public);
+                if (propertyInfo != null && propertyInfo.CanWrite)
+                {
+                    object value = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
+
+                    if (value != null)
+                    {
+                        propertyInfo.SetValue(null, Convert.ChangeType(value, propertyInfo.PropertyType));
+                    }
+                    else
+                    {
+                        throw new Exception($"Value property on configEntry is null for section {entry.Section} and key {entry.Key}.");
+                    }
+                }
+            }
+
+            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+            if (File.Exists(configFile)) CleanAndOrganizeConfig(configFile);
+        }
+        static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
+        {
+            // Bind the configuration entry with the default value in the new section
+            var entry = Plugin.Instance.Config.Bind(section, key, defaultValue, description);
+
+            // Define the path to the configuration file
+            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+
+            // Ensure the configuration file is only loaded if it exists
+            if (File.Exists(configFile))
+            {
+                string[] configLines = File.ReadAllLines(configFile);
+                foreach (var line in configLines)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+                    {
+                        continue;
+                    }
+
+                    var keyValue = line.Split('=');
+                    if (keyValue.Length == 2)
+                    {
+                        var configKey = keyValue[0].Trim();
+                        var configValue = keyValue[1].Trim();
+
+                        // Check if the key matches the provided key
+                        if (configKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Try to convert the string value to the expected type
+                            try
+                            {
+                                var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
+                                entry.Value = convertedValue;
+                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value}");
+                            }
+                            catch (Exception ex)
+                            {
+                                //Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
+                            }
+                            break; // Stop searching once the key is found
+                        }
+                    }
+                }
+            }
+            return entry;
+        }
+
+        static readonly List<ConfigEntryDefinition> ConfigEntries =
+        [
+            new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
+            new ConfigEntryDefinition("General", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config."),
+            new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
+            new ConfigEntryDefinition("General", "PotionStacking", true, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
+            new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
+            new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit."),
+            new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
+            new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (currently only kill quests)."),
+            new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
+            new ConfigEntryDefinition("Quests", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool."),
+            new ConfigEntryDefinition("Quests", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3)."),
+            new ConfigEntryDefinition("Leveling", "LevelingSystem", false, "Enable or disable the leveling system."),
+            new ConfigEntryDefinition("Leveling", "RestedXPSystem", true, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp."),
+            new ConfigEntryDefinition("Leveling", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffin will provide maximum current rested XP)."),
+            new ConfigEntryDefinition("Leveling", "RestedXPMax", 5, "Maximum extra levels worth of rested XP a player can accumulate."),
+            new ConfigEntryDefinition("Leveling", "RestedXPTickRate", 120f, "Minutes required to accumulate one tick of Rested XP."),
+            new ConfigEntryDefinition("Leveling", "MaxLevel", 90, "The maximum level a player can reach."),
+            new ConfigEntryDefinition("Leveling", "StartingLevel", 0, "Starting level for players if no data is found."),
+            new ConfigEntryDefinition("Leveling", "UnitLevelingMultiplier", 7.5f, "The multiplier for experience gained from units."),
+            new ConfigEntryDefinition("Leveling", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods."),
+            new ConfigEntryDefinition("Leveling", "DocileUnitMultiplier", 0.15f, "The multiplier for experience gained from docile units."),
+            new ConfigEntryDefinition("Leveling", "WarEventMultiplier", 0.2f, "The multiplier for experience gained from war event trash spawns."),
+            new ConfigEntryDefinition("Leveling", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs)."),
+            new ConfigEntryDefinition("Leveling", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills."),
+            new ConfigEntryDefinition("Leveling", "LevelScalingMultiplier", 0.05f, "Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove."),
+            new ConfigEntryDefinition("Leveling", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience/familiar unlock sharing."),
+            new ConfigEntryDefinition("Leveling", "MaxPartySize", 5, "The maximum number of players that can share experience in a group."),
+            new ConfigEntryDefinition("Leveling", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths."),
+            new ConfigEntryDefinition("Prestige", "PrestigeSystem", false, "Enable or disable the prestige system (requires leveling to be enabled)"),
+            new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level"),
+            new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start"),
+            new ConfigEntryDefinition("Prestige", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling"),
+            new ConfigEntryDefinition("Prestige", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling"),
+            new ConfigEntryDefinition("Prestige", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy"),
+            new ConfigEntryDefinition("Prestige", "PrestigeStatMultiplier", 0.10f, "Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy"),
+            new ConfigEntryDefinition("Prestige", "PrestigeRateMultiplier", 0.10f, "Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestiging", false, "Enable or disable exo prestiges (need to max normal prestiges first)"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestiges", 100, "The number of exo prestiges available"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default)"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestigeDamageTakenMultiplier", 0.05f, "The damage multiplier per exo prestige (applies to damage taken by the player)"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestigeDamageDealtMultiplier", 0.025f, "The damage multiplier per exo prestige (applies to damage dealt by the player)"),
+            new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system"),
+            new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise"),
+            new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots"),
+            new ConfigEntryDefinition("Expertise", "ShiftSlot", false, "Enable or disable using class spell on shift"),
+            new ConfigEntryDefinition("Expertise", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise"),
+            new ConfigEntryDefinition("Expertise", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units"),
+            new ConfigEntryDefinition("Expertise", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods"),
+            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise"),
+            new ConfigEntryDefinition("Expertise", "ResetExpertiseItem", 576389135, "Item PrefabGUID cost for resetting weapon stats"),
+            new ConfigEntryDefinition("Expertise", "ResetExpertiseItemQuantity", 500, "Quantity of item required for resetting stats"),
+            new ConfigEntryDefinition("Expertise", "MaxHealth", 250f, "The base cap for maximum health"),
+            new ConfigEntryDefinition("Expertise", "MovementSpeed", 0.25f, "The base cap for movement speed"),
+            new ConfigEntryDefinition("Expertise", "PrimaryAttackSpeed", 0.10f, "The base cap for primary attack speed"),
+            new ConfigEntryDefinition("Expertise", "PhysicalLifeLeech", 0.10f, "The base cap for physical life leech"),
+            new ConfigEntryDefinition("Expertise", "SpellLifeLeech", 0.10f, "The base cap for spell life leech"),
+            new ConfigEntryDefinition("Expertise", "PrimaryLifeLeech", 0.15f, "The base cap for primary life leech"),
+            new ConfigEntryDefinition("Expertise", "PhysicalPower", 10f, "The base cap for physical power"),
+            new ConfigEntryDefinition("Expertise", "SpellPower", 10f, "The base cap for spell power"),
+            new ConfigEntryDefinition("Expertise", "PhysicalCritChance", 0.10f, "The base cap for physical critical strike chance"),
+            new ConfigEntryDefinition("Expertise", "PhysicalCritDamage", 0.50f, "The base cap for physical critical strike damage"),
+            new ConfigEntryDefinition("Expertise", "SpellCritChance", 0.10f, "The base cap for spell critical strike chance"),
+            new ConfigEntryDefinition("Expertise", "SpellCritDamage", 0.50f, "The base cap for spell critical strike damage"),
+            new ConfigEntryDefinition("Legacies", "BloodSystem", false, "Enable or disable the blood legacy system"),
+            new ConfigEntryDefinition("Legacies", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies"),
+            new ConfigEntryDefinition("Legacies", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using prestige, legacy level will be used with _prestigeBloodQuality multiplier below)"),
+            new ConfigEntryDefinition("Legacies", "PrestigeBloodQuality", 5f, "Blood quality bonus per prestige legacy level"),
+            new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies"),
+            new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units"),
+            new ConfigEntryDefinition("Legacies", "VBloodLegacyMultiplier", 5f, "The multiplier for lineage gained from VBloods"),
+            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy"),
+            new ConfigEntryDefinition("Legacies", "ResetLegacyItem", 576389135, "Item PrefabGUID cost for resetting blood stats"),
+            new ConfigEntryDefinition("Legacies", "ResetLegacyItemQuantity", 500, "Quantity of item required for resetting blood stats"),
+            new ConfigEntryDefinition("Legacies", "HealingReceived", 0.15f, "The base cap for healing received"),
+            new ConfigEntryDefinition("Legacies", "DamageReduction", 0.05f, "The base cap for damage reduction"),
+            new ConfigEntryDefinition("Legacies", "PhysicalResistance", 0.10f, "The base cap for physical resistance"),
+            new ConfigEntryDefinition("Legacies", "SpellResistance", 0.10f, "The base cap for spell resistance"),
+            new ConfigEntryDefinition("Legacies", "ResourceYield", 0.25f, "The base cap for resource yield"),
+            new ConfigEntryDefinition("Legacies", "CCReduction", 0.20f, "The base cap for crowd control reduction"),
+            new ConfigEntryDefinition("Legacies", "SpellCooldownRecoveryRate", 0.10f, "The base cap for spell cooldown recovery rate"),
+            new ConfigEntryDefinition("Legacies", "WeaponCooldownRecoveryRate", 0.10f, "The base cap for weapon cooldown recovery rate"),
+            new ConfigEntryDefinition("Legacies", "UltimateCooldownRecoveryRate", 0.20f, "The base cap for ultimate cooldown recovery rate"),
+            new ConfigEntryDefinition("Legacies", "MinionDamage", 0.25f, "The base cap for minion damage"),
+            new ConfigEntryDefinition("Legacies", "ShieldAbsorb", 0.50f, "The base cap for shield absorb"),
+            new ConfigEntryDefinition("Legacies", "BloodEfficiency", 0.10f, "The base cap for blood efficiency"),
+            new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system"),
+            new ConfigEntryDefinition("Professions", "MaxProfessionLevel", 100, "The maximum level a player can reach in professions"),
+            new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained"),
+            new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes"),
+            new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system"),
+            new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)"),
+            new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars"),
+            new ConfigEntryDefinition("Familiars", "FamiliarPrestige", false, "Enable or disable the prestige system for familiars"),
+            new ConfigEntryDefinition("Familiars", "MaxFamiliarPrestiges", 10, "The maximum number of prestiges a familiar can reach"),
+            new ConfigEntryDefinition("Familiars", "FamiliarPrestigeStatMultiplier", 0.10f, "The multiplier for stats gained from familiar prestiges"),
+            new ConfigEntryDefinition("Familiars", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach"),
+            new ConfigEntryDefinition("Familiars", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list)"),
+            new ConfigEntryDefinition("Familiars", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs"),
+            new ConfigEntryDefinition("Familiars", "BannedTypes", "", "The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast)"),
+            new ConfigEntryDefinition("Familiars", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods)"),
+            new ConfigEntryDefinition("Familiars", "UnitFamiliarMultiplier", 7.5f, "The multiplier for experience gained from units"),
+            new ConfigEntryDefinition("Familiars", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods"),
+            new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar"),
+            new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar"),
+            new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a visual when unlocking a familiar"),
+            new ConfigEntryDefinition("Familiars", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual (currently demon fragment by default, fyi)"),
+            new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 1, "Quantity of item required for changing shiny visual"),
+            new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)"),
+            new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)"),
+            new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),
+            new ConfigEntryDefinition("Classes", "ChangeClassQuantity", 750, "Quantity of item required for changing class."),
+            new ConfigEntryDefinition("Classes", "ClassSpellSchoolOnHitEffects", false, "Enable or disable class spell school on hit effects"),
+            new ConfigEntryDefinition("Classes", "OnHitProcChance", 0.075f, "The chance for a class effect to proc on hit"),
+            new ConfigEntryDefinition("Classes", "StatSynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap"),
+            new ConfigEntryDefinition("Classes", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies"),
+            new ConfigEntryDefinition("Classes", "BloodKnightBlood", "1,5,7,10", "Blood Knight blood synergies"),
+            new ConfigEntryDefinition("Classes", "DemonHunterWeapon", "1,2,8,9", "Demon Hunter weapon synergies"),
+            new ConfigEntryDefinition("Classes", "DemonHunterBlood", "2,5,7,9", "Demon Hunter blood synergies"),
+            new ConfigEntryDefinition("Classes", "VampireLordWeapon", "0,4,6,7", "Vampire Lord weapon synergies"),
+            new ConfigEntryDefinition("Classes", "VampireLordBlood", "1,3,8,11", "Vampire Lord blood synergies"),
+            new ConfigEntryDefinition("Classes", "ShadowBladeWeapon", "1,2,6,9", "Shadow Blade weapon synergies"),
+            new ConfigEntryDefinition("Classes", "ShadowBladeBlood", "3,5,7,10", "Shadow Blade blood synergies"),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererWeapon", "4,7,10,11", "Arcane Sorcerer weapon synergies"),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies"),
+            new ConfigEntryDefinition("Classes", "DeathMageWeapon", "0,4,7,11", "Death Mage weapon synergies"),
+            new ConfigEntryDefinition("Classes", "DeathMageBlood", "2,3,6,9", "Death Mage blood synergies"),
+            new ConfigEntryDefinition("Classes", "BloodKnightBuffs", "1828387635,-534491790,-1055766373,-584203677", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs)"),
+            new ConfigEntryDefinition("Classes", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-397097531", "The PrefabGUID hashes for demon hunter leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "DemonHunterSpells", "-433204738,1611191665,-328617085,-1161896955", "Demon Hunter shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "VampireLordBuffs", "1558171501,997154800,-1413561088,1103099361", "The PrefabGUID hashes for vampire lord leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "VampireLordSpells", "-433204738,716346677,1450902136,-254080557", "Vampire Lord shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "ShadowBladeBuffs", "894725875,-1596803256,-993492354,210193036", "The PrefabGUID hashes for shadow blade leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "ShadowBladeSpells", "-433204738,94933870,642767950,1922493152", "Shadow Blade shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererBuffs", "1614027598,884683323,-1576592687,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererSpells", "-433204738,495259674,1217615468,-1503327574", "Arcane Sorcerer shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige")
+        ];
+        static void CreateDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
+        static void CleanAndOrganizeConfig(string configFile)
+        {
+            Dictionary<string, List<string>> OrderedSections = [];
+            string currentSection = "";
+
+            string[] lines = File.ReadAllLines(configFile);
+            string[] fileHeader = lines[0..3];
+
+            foreach (var line in lines)
+            {
+                string trimmedLine = line.Trim();
+                var match = regex.Match(trimmedLine);
+
+                if (match.Success)
+                {
+                    currentSection = match.Groups[1].Value;
+                    if (!OrderedSections.ContainsKey(currentSection))
+                    {
+                        OrderedSections[currentSection] = [];
+                    }
+                }
+                else if (SectionOrder.Contains(currentSection))
+                {
+                    OrderedSections[currentSection].Add(trimmedLine);
+                }
+            }
+
+            using StreamWriter writer = new(configFile, false);
+            foreach (var header in fileHeader)
+            {
+                writer.WriteLine(header);
+            }
+            foreach (var section in SectionOrder)
+            {
+                if (OrderedSections.ContainsKey(section))
+                {
+                    writer.WriteLine($"[{section}]");
+                    foreach (var line in OrderedSections[section])
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+            }
+        }
+    }
+    public static class PlayerDataInitialization
+    {
+        public static void LoadPlayerData()
+        {
+            try
+            {
+                string PlayerSanguimancyJson = Path.Combine(ConfigInitialization.DirectoryPaths[3], "player_sanguimancy.json"); // handle old format to new
+                string PlayerUnarmedJson = Path.Combine(ConfigInitialization.DirectoryPaths[3], "player_unarmed.json");
+
+                if (File.Exists(PlayerSanguimancyJson) && !File.Exists(PlayerUnarmedJson))
+                {
+                    // Copy the old file to the new file name
+                    File.Copy(PlayerSanguimancyJson, Core.JsonFiles.PlayerUnarmedExpertiseJson, overwrite: false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError($"Failed to migrate sanguimancy data to unarmed: {ex}");
+            }
+
+            Core.DataStructures.LoadPlayerBools();
+
+            if (PlayerParties)
+            {
+                Core.DataStructures.LoadPlayerParties();
+            }
+
+            if (SoftSynergies || HardSynergies)
+            {
+                Core.DataStructures.LoadPlayerClasses();
+            }
+
+            if (QuestSystem)
+            {
+                Core.DataStructures.LoadPlayerQuests();
+            }
+
+            if (LevelingSystem)
+            {
+                foreach (var loadFunction in loadLeveling)
+                {
+                    loadFunction();
+                }
+                if (RestedXPSystem)
+                {
+                    Core.DataStructures.LoadPlayerRestedXP();
+                }
+            }
+
+            if (ExpertiseSystem)
+            {
+                foreach (var loadFunction in loadExpertises)
+                {
+                    loadFunction();
+                }
+            }
+
+            if (BloodSystem)
+            {
+                foreach (var loadFunction in loadLegacies)
+                {
+                    loadFunction();
+                }
+            }
+
+            if (ProfessionSystem)
+            {
+                foreach (var loadFunction in loadProfessions)
+                {
+                    loadFunction();
+                }
+            }
+
+            if (FamiliarSystem)
+            {
+                foreach (var loadFunction in loadFamiliars)
+                {
+                    loadFunction();
+                }
+            }
+        }
+
+        static readonly Action[] loadLeveling =
+        [
+            Core.DataStructures.LoadPlayerExperience,
+            Core.DataStructures.LoadPlayerPrestiges
+        ];
+
+        static readonly Action[] loadExpertises =
+        [
+            Core.DataStructures.LoadPlayerSwordExpertise,
+            Core.DataStructures.LoadPlayerAxeExpertise,
+            Core.DataStructures.LoadPlayerMaceExpertise,
+            Core.DataStructures.LoadPlayerSpearExpertise,
+            Core.DataStructures.LoadPlayerCrossbowExpertise,
+            Core.DataStructures.LoadPlayerGreatSwordExpertise,
+            Core.DataStructures.LoadPlayerSlashersExpertise,
+            Core.DataStructures.LoadPlayerPistolsExpertise,
+            Core.DataStructures.LoadPlayerReaperExpertise,
+            Core.DataStructures.LoadPlayerLongbowExpertise,
+            Core.DataStructures.LoadPlayerWhipExpertise,
+            Core.DataStructures.LoadPlayerFishingPoleExpertise,
+            Core.DataStructures.LoadPlayerUnarmedExpertise,
+            Core.DataStructures.LoadPlayerSpells,
+            Core.DataStructures.LoadPlayerWeaponStats
+        ];
+
+        static readonly Action[] loadLegacies =
+        [
+            Core.DataStructures.LoadPlayerWorkerLegacy,
+            Core.DataStructures.LoadPlayerWarriorLegacy,
+            Core.DataStructures.LoadPlayerScholarLegacy,
+            Core.DataStructures.LoadPlayerRogueLegacy,
+            Core.DataStructures.LoadPlayerMutantLegacy,
+            Core.DataStructures.LoadPlayerVBloodLegacy,
+            Core.DataStructures.LoadPlayerDraculinLegacy,
+            Core.DataStructures.LoadPlayerImmortalLegacy,
+            Core.DataStructures.LoadPlayerCreatureLegacy,
+            Core.DataStructures.LoadPlayerBruteLegacy,
+            Core.DataStructures.LoadPlayerBloodStats
+        ];
+
+        static readonly Action[] loadProfessions =
+        [
+            Core.DataStructures.LoadPlayerWoodcutting,
+            Core.DataStructures.LoadPlayerMining,
+            Core.DataStructures.LoadPlayerFishing,
+            Core.DataStructures.LoadPlayerBlacksmithing,
+            Core.DataStructures.LoadPlayerTailoring,
+            Core.DataStructures.LoadPlayerEnchanting,
+            Core.DataStructures.LoadPlayerAlchemy,
+            Core.DataStructures.LoadPlayerHarvesting,
+        ];
+
+        static readonly Action[] loadFamiliars =
+        [
+            Core.DataStructures.LoadPlayerFamiliarActives,
+            Core.DataStructures.LoadPlayerFamiliarSets
+        ];
+    }
 }

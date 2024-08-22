@@ -6,13 +6,13 @@ using Stunlock.Core;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
-namespace Bloodcraft.SystemUtilities.Professions;
+namespace Bloodcraft.Systems.Professions;
 internal static class ProfessionSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 

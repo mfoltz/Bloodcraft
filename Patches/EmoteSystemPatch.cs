@@ -1,5 +1,5 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.Systems.Familiars;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -19,7 +19,8 @@ internal static class EmoteSystemPatch
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;

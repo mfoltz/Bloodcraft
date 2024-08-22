@@ -1,6 +1,6 @@
-using Bloodcraft.Patches;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.Systems.Experience;
 using ProjectM.Network;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -11,7 +11,8 @@ namespace Bloodcraft.Commands;
 internal static class LevelingCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
 
@@ -46,12 +47,12 @@ internal static class LevelingCommands
 
         if (PlayerExperience.TryGetValue(steamId, out var levelKvp))
         {
-            int prestigeLevel = PlayerPrestiges.TryGetValue(steamId, out var prestiges) ? prestiges[SystemUtilities.Leveling.PrestigeSystem.PrestigeType.Experience] : 0;
+            int prestigeLevel = PlayerPrestiges.TryGetValue(steamId, out var prestiges) ? prestiges[PrestigeType.Experience] : 0;
             int level = levelKvp.Key;
             int progress = (int)(levelKvp.Value - LevelingSystem.ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
-            if (ConfigService.RestedXP && PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
+            if (ConfigService.RestedXPSystem && PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
             {
                 int roundedXP = (int)(Math.Round(restedData.Value / 100.0) * 100);
                 LocalizationService.HandleReply(ctx, $"<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~");
@@ -81,9 +82,9 @@ internal static class LevelingCommands
 
         User foundUser = foundUserEntity.Read<User>();
 
-        if (level < 0 || level > ConfigService.MaxPlayerLevel)
+        if (level < 0 || level > ConfigService.MaxLevel)
         {
-            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxPlayerLevel}");
+            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxLevel}");
             return;
         }
         ulong steamId = foundUser.PlatformId;

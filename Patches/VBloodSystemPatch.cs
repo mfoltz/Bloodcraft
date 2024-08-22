@@ -1,9 +1,9 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Quests;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -17,7 +17,7 @@ internal static class VBloodSystemPatch
 {
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem; 
-    static ConfigService ConfigService => Core.ConfigService;
+    
 
     static Dictionary<ulong, DateTime> LastUpdateCache = [];
 

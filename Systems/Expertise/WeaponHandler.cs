@@ -1,13 +1,13 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
 using Unity.Entities;
-using static Bloodcraft.SystemUtilities.Expertise.WeaponHandler.WeaponStats;
+using static Bloodcraft.Systems.Expertise.WeaponHandler.WeaponStats;
 
-namespace Bloodcraft.SystemUtilities.Expertise;
+namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponHandler
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
 
     public static bool ChooseStat(ulong steamId, WeaponSystem.WeaponType weaponType, WeaponStatType statType)
     {

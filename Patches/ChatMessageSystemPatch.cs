@@ -12,7 +12,8 @@ namespace Bloodcraft.Patches;
 internal static class ChatMessageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
 
     static readonly Regex regex = new(@"^\[\d+\]:");
 

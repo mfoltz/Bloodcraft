@@ -1,13 +1,13 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Leveling;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Core.DataStructures;
-using static Bloodcraft.SystemUtilities.Experience.LevelingSystem;
-using static Bloodcraft.SystemUtilities.Expertise.WeaponHandler.WeaponStats;
-using static Bloodcraft.SystemUtilities.Legacies.BloodHandler.BloodStats;
+using static Bloodcraft.Systems.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Expertise.WeaponHandler.WeaponStats;
+using static Bloodcraft.Systems.Legacies.BloodHandler.BloodStats;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
@@ -15,13 +15,14 @@ namespace Bloodcraft.Commands;
 [CommandGroup("class")]
 internal static class ClassCommands
 {
-    static ConfigService ConfigService => Core.ConfigService;
     static LocalizationService LocalizationService => Core.LocalizationService;
+
+    static bool ClassesInactive => !ConfigService.SoftSynergies && !ConfigService.HardSynergies;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
     public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -50,7 +51,7 @@ internal static class ClassCommands
     [Command(name: "choosespell", shortHand: "csp", adminOnly: false, usage: ".class csp [#]", description: "Sets shift spell for class if prestige level is high enough.")]
     public static void ChooseClassSpell(ChatCommandContext ctx, int choice)
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -71,7 +72,7 @@ internal static class ClassCommands
                 return;
             }
             PlayerClasses playerClass = classes.Keys.FirstOrDefault();
-            if (PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel))
+            if (PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
                 if (prestigeLevel < ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
                 {
@@ -116,7 +117,7 @@ internal static class ClassCommands
     [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
     public static void ClassChangeCommand(ChatCommandContext ctx, string className)
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -139,7 +140,7 @@ internal static class ClassCommands
 
         if (ConfigService.ChangeClassItem != 0 && !HandleClassChangeItem(ctx, steamId))
         {
-            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes. ({new PrefabGUID(ConfigService.ChangeClassItem).GetPrefabName()}x{ConfigService.ChangeClassItemQuantity})");
+            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes. ({new PrefabGUID(ConfigService.ChangeClassItem).GetPrefabName()}x{ConfigService.ChangeClassQuantity})");
             return;
         }
 
@@ -153,7 +154,7 @@ internal static class ClassCommands
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
     public static void SyncClassBuffsCommand(ChatCommandContext ctx)
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -191,7 +192,7 @@ internal static class ClassCommands
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".class l", description: "Lists classes.")]
     public static void ListClasses(ChatCommandContext ctx)
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -204,7 +205,7 @@ internal static class ClassCommands
     [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [ClassType]", description: "Shows perks that can be gained from class.")]
     public static void ClassPerks(ChatCommandContext ctx, string classType = "")
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -247,7 +248,7 @@ internal static class ClassCommands
     [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [ClassType]", description: "Shows spells that can be gained from class.")]
     public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;

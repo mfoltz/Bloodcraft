@@ -1,6 +1,6 @@
-﻿using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Legacies;
+﻿using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacies;
 using ProjectM;
 using ProjectM.Network;
 using System.Text.RegularExpressions;
@@ -10,7 +10,7 @@ namespace Bloodcraft.Services;
 internal static class EclipseService
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static PlayerService PlayerService => Core.PlayerService;
     static LocalizationService LocalizationService => Core.LocalizationService;
 

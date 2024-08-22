@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Services;
 using VampireCommandFramework;
-using static Bloodcraft.SystemUtilities.Experience.LevelingSystem.PartyUtilities;
+using static Bloodcraft.Systems.Experience.LevelingSystem.PartyUtilities;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
@@ -8,13 +8,13 @@ namespace Bloodcraft.Commands;
 [CommandGroup(name: "party")]
 internal static class PartyCommands
 {
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
 
     [Command(name: "toggleinvites", shortHand: "inv", adminOnly: false, usage: ".party inv", description: "Toggles being able to be invited to parties, prevents damage and share exp.")]
     public static void TogglePartyInvitesCommand(ChatCommandContext ctx)
     {
-        if (!ConfigService.Parties)
+        if (!ConfigService.PlayerParties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -40,7 +40,7 @@ internal static class PartyCommands
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]
     public static void PartyAddCommand(ChatCommandContext ctx, string name)
     {
-        if (!ConfigService.Parties)
+        if (!ConfigService.PlayerParties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -53,7 +53,7 @@ internal static class PartyCommands
     [Command(name: "remove", shortHand: "r", adminOnly: false, usage: ".party r [Player]", description: "Removes player from party.")]
     public static void PartyRemoveCommand(ChatCommandContext ctx, string name)
     {
-        if (!ConfigService.Parties)
+        if (!ConfigService.PlayerParties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -74,7 +74,7 @@ internal static class PartyCommands
     [Command(name: "listmembers", shortHand: "lm", adminOnly: false, usage: ".party lm", description: "Lists party members of your active party.")]
     public static void PartyMembersCommand(ChatCommandContext ctx)
     {
-        if (!ConfigService.Parties)
+        if (!ConfigService.PlayerParties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -87,7 +87,7 @@ internal static class PartyCommands
     [Command(name: "disband", shortHand: "end", adminOnly: false, usage: ".party end", description: "Disbands party.")]
     public static void DisbandPartyCommand(ChatCommandContext ctx)
     {
-        if (!ConfigService.Parties)
+        if (!ConfigService.PlayerParties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;
@@ -109,7 +109,7 @@ internal static class PartyCommands
     [Command(name: "leave", shortHand: "drop", adminOnly: false, usage: ".party drop", description: "Leaves party if in one.")]
     public static void LeavePartyCommand(ChatCommandContext ctx)
     {
-        if (!ConfigService.Parties)
+        if (!ConfigService.PlayerParties)
         {
             LocalizationService.HandleReply(ctx, "Parties are not enabled.");
             return;

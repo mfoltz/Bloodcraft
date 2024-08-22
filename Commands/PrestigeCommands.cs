@@ -1,7 +1,7 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Leveling;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -10,7 +10,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Utilities;
 using static Bloodcraft.Core.DataStructures;
-using static Bloodcraft.SystemUtilities.Leveling.PrestigeSystem;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 
 namespace Bloodcraft.Commands;
 
@@ -19,7 +19,8 @@ internal static class PrestigeCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
 
@@ -44,7 +45,7 @@ internal static class PrestigeCommands
         {
             if (PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var xpPrestige) && xpPrestige == ConfigService.MaxLevelingPrestiges)
             {
-                if (PlayerExperience.TryGetValue(steamId, out var expData) && expData.Key < ConfigService.MaxPlayerLevel)
+                if (PlayerExperience.TryGetValue(steamId, out var expData) && expData.Key < ConfigService.MaxLevel)
                 {
                     LocalizationService.HandleReply(ctx, "You must reach max level before <color=#90EE90>Exo</color> prestiging again.");
                     return;
@@ -59,7 +60,7 @@ internal static class PrestigeCommands
                 PlayerExperience[steamId] = expData;
                 SavePlayerExperience();
 
-                if (ConfigService.RestedXP) LevelingSystem.ResetRestedXP(steamId);
+                if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
 
                 LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
 

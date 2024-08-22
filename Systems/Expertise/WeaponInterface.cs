@@ -1,4 +1,4 @@
-﻿namespace Bloodcraft.SystemUtilities.Expertise;
+﻿namespace Bloodcraft.Systems.Expertise;
 public interface IExpertiseHandler
 {
     void AddExpertise(ulong steamID, float experience);

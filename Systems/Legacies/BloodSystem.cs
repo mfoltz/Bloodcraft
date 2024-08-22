@@ -1,17 +1,16 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Leveling;
+﻿using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using static Bloodcraft.Utilities;
 
-namespace Bloodcraft.SystemUtilities.Legacies;
+namespace Bloodcraft.Systems.Legacies;
 public static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
 
     const float BloodConstant = 0.1f; // constant for calculating level from xp
@@ -32,17 +31,17 @@ public static class BloodSystem
         Brute
     }
 
-    public static readonly Dictionary<BloodType, PrestigeSystem.PrestigeType> BloodPrestigeMap = new()
+    public static readonly Dictionary<BloodType, PrestigeType> BloodPrestigeMap = new()
     {
-        { BloodType.Worker, PrestigeSystem.PrestigeType.WorkerLegacy },
-        { BloodType.Warrior, PrestigeSystem.PrestigeType.WarriorLegacy },
-        { BloodType.Scholar, PrestigeSystem.PrestigeType.ScholarLegacy },
-        { BloodType.Rogue, PrestigeSystem.PrestigeType.RogueLegacy },
-        { BloodType.Mutant, PrestigeSystem.PrestigeType.MutantLegacy },
-        { BloodType.Draculin, PrestigeSystem.PrestigeType.DraculinLegacy },
-        { BloodType.Immortal, PrestigeSystem.PrestigeType.ImmortalLegacy },
-        { BloodType.Creature, PrestigeSystem.PrestigeType.CreatureLegacy },
-        { BloodType.Brute, PrestigeSystem.PrestigeType.BruteLegacy }
+        { BloodType.Worker, PrestigeType.WorkerLegacy },
+        { BloodType.Warrior, PrestigeType.WarriorLegacy },
+        { BloodType.Scholar, PrestigeType.ScholarLegacy },
+        { BloodType.Rogue, PrestigeType.RogueLegacy },
+        { BloodType.Mutant, PrestigeType.MutantLegacy },
+        { BloodType.Draculin, PrestigeType.DraculinLegacy },
+        { BloodType.Immortal, PrestigeType.ImmortalLegacy },
+        { BloodType.Creature, PrestigeType.CreatureLegacy },
+        { BloodType.Brute, PrestigeType.BruteLegacy }
     };
 
     public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new()
@@ -100,9 +99,9 @@ public static class BloodSystem
                 }
 
                 // Apply rate gain with linear increase
-                if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
+                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
-                    changeFactor += 1 + (ConfigService.PrestigeRatesMultiplier * xpPrestige);
+                    changeFactor += 1 + (ConfigService.PrestigeRateMultiplier * xpPrestige);
                 }
             }
 

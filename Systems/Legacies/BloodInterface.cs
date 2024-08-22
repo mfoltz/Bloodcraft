@@ -1,4 +1,4 @@
-﻿namespace Bloodcraft.SystemUtilities.Legacies;
+﻿namespace Bloodcraft.Systems.Legacies;
 public interface IBloodHandler
 {
     void AddLegacy(ulong steamID, float experience);

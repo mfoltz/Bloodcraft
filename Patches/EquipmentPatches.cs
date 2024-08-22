@@ -1,7 +1,7 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Professions;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -18,7 +18,8 @@ internal static class EquipmentPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]

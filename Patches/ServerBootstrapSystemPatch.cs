@@ -1,16 +1,13 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Leveling;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Familiars;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Stunlock.Network;
-using System.Text.RegularExpressions;
-using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
 
@@ -21,11 +18,11 @@ internal static class ServerBootstrapSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static ConfigService ConfigService => Core.ConfigService;
     static LocalizationService LocalizationService => Core.LocalizationService;
 
     static readonly PrefabGUID woodenCoffin = new(381160212);
     static readonly PrefabGUID stoneCoffin = new(569692162);
+    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly Dictionary<string, bool> DefaultBools = new()
     {
@@ -297,8 +294,8 @@ internal static class ServerBootstrapSystemPatch
 
             if (ConfigService.PrestigeSystem && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
             {
-                var prestigeDict = new Dictionary<PrestigeSystem.PrestigeType, int>();
-                foreach (var prestigeType in Enum.GetValues<PrestigeSystem.PrestigeType>())
+                var prestigeDict = new Dictionary<PrestigeType, int>();
+                foreach (var prestigeType in Enum.GetValues<PrestigeType>())
                 {
                     prestigeDict.Add(prestigeType, 0);
                 }
@@ -310,7 +307,7 @@ internal static class ServerBootstrapSystemPatch
             {
                 // Ensure all keys are present in the existing dictionary
                 var prestigeDict = Core.DataStructures.PlayerPrestiges[steamId];
-                foreach (var prestigeType in Enum.GetValues<PrestigeSystem.PrestigeType>())
+                foreach (var prestigeType in Enum.GetValues<PrestigeType>())
                 {
                     if (!prestigeDict.ContainsKey(prestigeType))
                     {
@@ -324,7 +321,7 @@ internal static class ServerBootstrapSystemPatch
                 LevelingSystem.SetLevel(character);
             }
 
-            if (ConfigService.RestedXP)
+            if (ConfigService.RestedXPSystem)
             {
                 if (!Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
                 {
@@ -348,7 +345,7 @@ internal static class ServerBootstrapSystemPatch
                         //float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * ConfigService.RestedXPMax; // need to redo the math here
 
                         int currentLevel = Core.DataStructures.PlayerExperience[steamId].Key;
-                        int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxPlayerLevel);
+                        int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxProfessionLevel);
 
                         float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
 
@@ -399,7 +396,7 @@ internal static class ServerBootstrapSystemPatch
             }
         }
 
-        if (ConfigService.Classes)
+        if (Classes)
         {
             if (!Core.DataStructures.PlayerClass.ContainsKey(steamId))
             {
@@ -441,7 +438,7 @@ internal static class ServerBootstrapSystemPatch
 
         if (ConfigService.LevelingSystem)
         {
-            if (ConfigService.RestedXP && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
+            if (ConfigService.RestedXPSystem && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                 Core.DataStructures.PlayerRestedXP[steamId] = restedData;

@@ -1,17 +1,16 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Leveling;
+﻿using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using static Bloodcraft.Utilities;
 
-namespace Bloodcraft.SystemUtilities.Expertise;
+namespace Bloodcraft.Systems.Expertise;
 public static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
 
     const float ExpertiseConstant = 0.1f; // constant for calculating level from xp
@@ -33,21 +32,21 @@ public static class WeaponSystem
         FishingPole
     }
 
-    public static readonly Dictionary<WeaponType, PrestigeSystem.PrestigeType> WeaponPrestigeMap = new()
+    public static readonly Dictionary<WeaponType, PrestigeType> WeaponPrestigeMap = new()
     {
-        { WeaponType.Sword, PrestigeSystem.PrestigeType.SwordExpertise },
-        { WeaponType.Axe, PrestigeSystem.PrestigeType.AxeExpertise },
-        { WeaponType.Mace, PrestigeSystem.PrestigeType.MaceExpertise },
-        { WeaponType.Spear, PrestigeSystem.PrestigeType.SpearExpertise },
-        { WeaponType.Crossbow, PrestigeSystem.PrestigeType.CrossbowExpertise },
-        { WeaponType.GreatSword, PrestigeSystem.PrestigeType.GreatSwordExpertise },
-        { WeaponType.Slashers, PrestigeSystem.PrestigeType.SlashersExpertise },
-        { WeaponType.Pistols, PrestigeSystem.PrestigeType.PistolsExpertise },
-        { WeaponType.Reaper, PrestigeSystem.PrestigeType.ReaperExpertise },
-        { WeaponType.Longbow, PrestigeSystem.PrestigeType.LongbowExpertise },
-        { WeaponType.Whip, PrestigeSystem.PrestigeType.WhipExpertise },
-        { WeaponType.Unarmed, PrestigeSystem.PrestigeType.UnarmedExpertise }, 
-        { WeaponType.FishingPole, PrestigeSystem.PrestigeType.FishingPoleExpertise }
+        { WeaponType.Sword, PrestigeType.SwordExpertise },
+        { WeaponType.Axe, PrestigeType.AxeExpertise },
+        { WeaponType.Mace, PrestigeType.MaceExpertise },
+        { WeaponType.Spear, PrestigeType.SpearExpertise },
+        { WeaponType.Crossbow, PrestigeType.CrossbowExpertise },
+        { WeaponType.GreatSword, PrestigeType.GreatSwordExpertise },
+        { WeaponType.Slashers, PrestigeType.SlashersExpertise },
+        { WeaponType.Pistols, PrestigeType.PistolsExpertise },
+        { WeaponType.Reaper, PrestigeType.ReaperExpertise },
+        { WeaponType.Longbow, PrestigeType.LongbowExpertise },
+        { WeaponType.Whip, PrestigeType.WhipExpertise },
+        { WeaponType.Unarmed, PrestigeType.UnarmedExpertise }, 
+        { WeaponType.FishingPole, PrestigeType.FishingPoleExpertise }
     };
     public static void UpdateExpertise(Entity Killer, Entity Victim)
     {
@@ -71,9 +70,9 @@ public static class WeaponSystem
                     changeFactor -= (ConfigService.PrestigeRatesReducer * expertisePrestige);
                 }
 
-                if (prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
+                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
                 {
-                    changeFactor += (ConfigService.PrestigeRatesMultiplier * xpPrestige);
+                    changeFactor += (ConfigService.PrestigeRateMultiplier * xpPrestige);
                 }
             }
 

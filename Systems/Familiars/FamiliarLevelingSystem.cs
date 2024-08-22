@@ -6,12 +6,12 @@ using Bloodcraft.Services;
 using static Bloodcraft.Core;
 using static Bloodcraft.Core.DataStructures;
 
-namespace Bloodcraft.SystemUtilities.Familiars;
+namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarLevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     const float EXPConstant = 0.1f; // constant for calculating level from xp

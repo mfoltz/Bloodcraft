@@ -3,7 +3,7 @@ using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 
-namespace Bloodcraft.SystemUtilities.Professions;
+namespace Bloodcraft.Systems.Professions;
 internal static class RecipeUtilities // would like to tie this into professions eventually, for now only useful as custom merchant currencies and such
 {
     static SystemService SystemService => Core.SystemService;

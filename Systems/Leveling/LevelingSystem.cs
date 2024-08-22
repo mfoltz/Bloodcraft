@@ -1,29 +1,24 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Leveling;
+﻿using Bloodcraft.Services;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodcraft.SystemUtilities.Expertise.WeaponSystem;
 using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
 
-namespace Bloodcraft.SystemUtilities.Experience;
+namespace Bloodcraft.Systems.Experience;
 internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static PlayerService PlayerService => Core.PlayerService;
     static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
@@ -31,6 +26,7 @@ internal static class LevelingSystem
 
     const float EXPConstant = 0.1f; // constant for calculating level from xp
     const float EXPPower = 2f; // power for calculating level from xp
+    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
@@ -120,7 +116,7 @@ internal static class LevelingSystem
         foreach (Entity participant in participants)
         {
             ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId; // participants are character entities
-            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= ConfigService.MaxPlayerLevel) continue; // Check if already at max level
+            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= ConfigService.MaxLevel) continue; // Check if already at max level
             ProcessExperienceGain(participant, victimEntity, steamId, groupMultiplier);
         }
     }
@@ -130,7 +126,7 @@ internal static class LevelingSystem
         User killerUser = userEntity.Read<User>();
         HashSet<Entity> players = [killer];
 
-        if (ConfigService.Parties)
+        if (ConfigService.PlayerParties)
         {
             foreach (var groupEntry in Core.DataStructures.PlayerParties)
             {
@@ -180,13 +176,13 @@ internal static class LevelingSystem
         gainedXP += additionalXP;
         int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
 
-        if (currentLevel >= ConfigService.MaxPlayerLevel) return;
+        if (currentLevel >= ConfigService.MaxLevel) return;
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
         
-        if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
+        if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
-            int exoLevel = prestiges.TryGetValue(PrestigeSystem.PrestigeType.Exo, out var exo) ? exo : 0;
+            int exoLevel = prestiges.TryGetValue(PrestigeType.Exo, out var exo) ? exo : 0;
             float expReductionFactor = 1 - (ConfigService.LevelingPrestigeReducer * PrestigeData);
             if (exoLevel == 0)
             {
@@ -223,7 +219,7 @@ internal static class LevelingSystem
 
         gainedXP *= groupMultiplier;
         int rested = 0;
-        if (ConfigService.RestedXP) gainedXP = HandleRestedXP(SteamID, gainedXP, ref rested);
+        if (ConfigService.RestedXPSystem) gainedXP = HandleRestedXP(SteamID, gainedXP, ref rested);
 
         UpdatePlayerExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel, rested);
@@ -275,10 +271,10 @@ internal static class LevelingSystem
         float newExperience = xpData.Value + gainedXP;
         int newLevel = ConvertXpToLevel(newExperience);
 
-        if (newLevel > ConfigService.MaxPlayerLevel)
+        if (newLevel > ConfigService.MaxLevel)
         {
-            newLevel = ConfigService.MaxPlayerLevel; // Cap the level at the maximum
-            newExperience = ConvertLevelToXp(ConfigService.MaxPlayerLevel); // Adjust the XP to the max level's XP
+            newLevel = ConfigService.MaxLevel; // Cap the level at the maximum
+            newExperience = ConvertLevelToXp(ConfigService.MaxLevel); // Adjust the XP to the max level's XP
         }
 
         Core.DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, newExperience);
@@ -302,7 +298,7 @@ internal static class LevelingSystem
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (ConfigService.Classes) ApplyClassBuffsAtThresholds(characterEntity, SteamID, fromCharacter);
+            if (Classes) ApplyClassBuffsAtThresholds(characterEntity, SteamID, fromCharacter);
         }
         NotifyPlayer(userEntity, SteamID, (int)gainedXP, leveledUp, restedXP);
     }
@@ -325,8 +321,8 @@ internal static class LevelingSystem
             int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
             SetLevel(character);
 
-            if (newLevel <= ConfigService.MaxPlayerLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
-            if (GetPlayerBool(SteamID, "Reminders") && ConfigService.Classes && !HasClass(SteamID))
+            if (newLevel <= ConfigService.MaxLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+            if (GetPlayerBool(SteamID, "Reminders") && Classes && !HasClass(SteamID))
             {
                 LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use '.class l' to view choices and see what they have to offer with '.class lb [Class]' (buffs), '.class lsp [Class]' (spells), and '.class lst [Class]' (stat synergies).");
             }
@@ -417,7 +413,7 @@ internal static class LevelingSystem
         var buffs = GetClassBuffs(SteamID);
         //int levelStep = 20;
         if (buffs.Count == 0) return;
-        int levelStep = ConfigService.MaxPlayerLevel / buffs.Count;
+        int levelStep = ConfigService.MaxLevel / buffs.Count;
 
         int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
         if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count)
@@ -855,8 +851,8 @@ internal static class LevelingSystem
     }
     public static bool HandleClassChangeItem(ChatCommandContext ctx, ulong steamId)
     {
-        PrefabGUID item = new(Plugin.ChangeClassItem.Value);
-        int quantity = Plugin.ChangeClassItemQuantity.Value;
+        PrefabGUID item = new(ConfigService.ChangeClassItem);
+        int quantity = ConfigService.ChangeClassQuantity;
 
         if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
             ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
@@ -900,7 +896,7 @@ internal static class LevelingSystem
         var buffs = GetClassBuffs(steamId);
 
         if (buffs.Count == 0) return;
-        int levelStep = ConfigService.MaxPlayerLevel / buffs.Count;
+        int levelStep = ConfigService.MaxLevel / buffs.Count;
 
         int playerLevel = 0;
 
@@ -914,9 +910,9 @@ internal static class LevelingSystem
             playerLevel = (int)equipment.GetFullLevel();
         }
 
-        if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeSystem.PrestigeType.Experience] > 0)
+        if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeType.Experience] > 0)
         {
-            playerLevel = ConfigService.MaxPlayerLevel;
+            playerLevel = ConfigService.MaxLevel;
         }
 
         int numBuffsToApply = playerLevel / levelStep;
@@ -1058,7 +1054,7 @@ internal static class LevelingSystem
             return;
         }
 
-        int step = ConfigService.MaxPlayerLevel / perks.Count;
+        int step = ConfigService.MaxLevel / perks.Count;
 
         var classBuffs = perks.Select((perk, index) =>
         {

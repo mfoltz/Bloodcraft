@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -14,10 +14,10 @@ using static Bloodcraft.Core.FamiliarBuffsManager;
 using static Bloodcraft.Core.FamiliarPrestigeManager;
 using static Bloodcraft.Core.FamiliarUnlocksManager;
 using static Bloodcraft.Core.FamiliarExperienceManager;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarSummonSystem;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarSummonSystem.FamiliarUtilities;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarLevelingSystem;
-using static Bloodcraft.SystemUtilities.Familiars.FamiliarUnlockSystem;
+using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
+using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem.FamiliarUtilities;
+using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
+using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
 
 namespace Bloodcraft.Commands;
 
@@ -27,7 +27,8 @@ internal static class FamiliarCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;

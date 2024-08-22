@@ -9,7 +9,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class UnitSpawnerPatch
 {
-    static ConfigService ConfigService => Core.ConfigService;
+    
    
     [HarmonyPatch(typeof(UnitSpawnerReactSystem), nameof(UnitSpawnerReactSystem.OnUpdate))]
     [HarmonyPrefix]

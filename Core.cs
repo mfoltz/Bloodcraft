@@ -1,13 +1,13 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Leveling;
-using Bloodcraft.SystemUtilities.Professions;
-using Bloodcraft.SystemUtilities.Quests;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Systems.Professions;
+using Bloodcraft.Systems.Quests;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -16,6 +16,8 @@ using System.Text.Json;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Core.DataStructures;
+using static Bloodcraft.Services.ConfigService.ConfigInitialization;
+using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 
 namespace Bloodcraft;
 internal static class Core
@@ -24,7 +26,8 @@ internal static class Core
     public static EntityManager EntityManager => Server.EntityManager;
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
-    public static ConfigService ConfigService { get; } = new();
+
+    //public static ConfigService ConfigService { get; } = new();
     public static PlayerService PlayerService { get; } = new();
     public static LocalizationService LocalizationService { get; } = new();
     public static QuestService QuestService { get; } = ConfigService.QuestSystem ? new() : null;
@@ -74,7 +77,7 @@ internal static class Core
         private static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
         private static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
         private static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)>> playerClass = [];
-        private static Dictionary<ulong, Dictionary<PrestigeSystem.PrestigeType, int>> playerPrestiges = [];
+        private static Dictionary<ulong, Dictionary<PrestigeType, int>> playerPrestiges = [];
 
         // professions
 
@@ -700,7 +703,7 @@ internal static class Core
     }
     public static class FamiliarExperienceManager
     {
-        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_experience.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_experience.json");
 
         public static void SaveFamiliarExperience(ulong playerId, FamiliarExperienceData data)
         {
@@ -722,7 +725,7 @@ internal static class Core
     }
     public static class FamiliarPrestigeManager
     {
-        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarExperiencePath, $"{playerId}_familiar_prestige.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_prestige.json");
 
         public static void SaveFamiliarPrestige(ulong playerId, FamiliarPrestigeData data)
         {
@@ -744,7 +747,7 @@ internal static class Core
     }
     public static class FamiliarBuffsManager
     {
-        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarUnlocksPath, $"{playerId}_familiar_buffs.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_buffs.json");
 
         public static void SaveFamiliarBuffs(ulong playerId, FamiliarBuffsData data)
         {
@@ -766,7 +769,7 @@ internal static class Core
     }
     public static class FamiliarUnlocksManager
     {
-        static string GetFilePath(ulong playerId) => Path.Combine(Plugin.FamiliarUnlocksPath, $"{playerId}_familiar_unlocks.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_unlocks.json");
 
         public static void SaveUnlockedFamiliars(ulong playerId, UnlockedFamiliarData data)
         {
@@ -788,49 +791,49 @@ internal static class Core
     }
     public static class JsonFiles
     {
-        public static readonly string PlayerExperienceJson = Path.Combine(Plugin.PlayerLevelingPath, "player_experience.json");
-        public static readonly string PlayerRestedXPJson = Path.Combine(Plugin.PlayerLevelingPath, "player_rested_xp.json");
-        public static readonly string PlayerQuestsJson = Path.Combine(Plugin.PlayerQuestsPath, "player_quests.json");
-        public static readonly string PlayerPrestigesJson = Path.Combine(Plugin.PlayerLevelingPath, "player_prestiges.json");
-        public static readonly string PlayerClassesJson = Path.Combine(Plugin.ConfigFiles, "player_classes.json");
-        public static readonly string PlayerBoolsJson = Path.Combine(Plugin.ConfigFiles, "player_bools.json");
-        public static readonly string PlayerPartiesJson = Path.Combine(Plugin.ConfigFiles, "player_parties.json");
-        public static readonly string PlayerWoodcuttingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_woodcutting.json");
-        public static readonly string PlayerMiningJson = Path.Combine(Plugin.PlayerProfessionPath, "player_mining.json");
-        public static readonly string PlayerFishingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_fishing.json");
-        public static readonly string PlayerBlacksmithingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_blacksmithing.json");
-        public static readonly string PlayerTailoringJson = Path.Combine(Plugin.PlayerProfessionPath, "player_tailoring.json");
-        public static readonly string PlayerEnchantingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_enchanting.json");
-        public static readonly string PlayerAlchemyJson = Path.Combine(Plugin.PlayerProfessionPath, "player_alchemy.json");
-        public static readonly string PlayerHarvestingJson = Path.Combine(Plugin.PlayerProfessionPath, "player_harvesting.json");
-        public static readonly string PlayerSwordExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_sword.json");
-        public static readonly string PlayerAxeExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_axe.json");
-        public static readonly string PlayerMaceExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_mace.json");
-        public static readonly string PlayerSpearExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_spear.json");
-        public static readonly string PlayerCrossbowExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_crossbow.json");
-        public static readonly string PlayerGreatSwordExpertise = Path.Combine(Plugin.PlayerExpertisePath, "player_greatsword.json");
-        public static readonly string PlayerSlashersExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_slashers.json");
-        public static readonly string PlayerPistolsExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_pistols.json");
-        public static readonly string PlayerReaperExpertise = Path.Combine(Plugin.PlayerExpertisePath, "player_reaper.json");
-        public static readonly string PlayerLongbowExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_longbow.json");
-        public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_unarmed.json");
-        public static readonly string PlayerWhipExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_whip.json");
-        public static readonly string PlayerFishingPoleExpertiseJson = Path.Combine(Plugin.PlayerExpertisePath, "player_fishingpole.json");
-        public static readonly string PlayerSpellsJson = Path.Combine(Plugin.PlayerLevelingPath, "player_spells.json");
-        public static readonly string PlayerWeaponStatsJson = Path.Combine(Plugin.PlayerExpertisePath, "player_weapon_stats.json");
-        public static readonly string PlayerWorkerLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_worker.json");
-        public static readonly string PlayerWarriorLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_warrior.json");
-        public static readonly string PlayerScholarLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_scholar.json");
-        public static readonly string PlayerRogueLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_rogue.json");
-        public static readonly string PlayerMutantLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_mutant.json");
-        public static readonly string PlayerVBloodLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_vblood.json");
-        public static readonly string PlayerDraculinLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_draculin.json");
-        public static readonly string PlayerImmortalLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_immortal.json");
-        public static readonly string PlayerCreatureLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_creature.json");
-        public static readonly string PlayerBruteLegacyJson = Path.Combine(Plugin.PlayerBloodPath, "player_brute.json");
-        public static readonly string PlayerBloodStatsJson = Path.Combine(Plugin.PlayerBloodPath, "player_blood_stats.json");
-        public static readonly string PlayerFamiliarActivesJson = Path.Combine(Plugin.PlayerFamiliarsPath, "player_familiar_actives.json");
-        public static readonly string PlayerFamiliarSetsJson = Path.Combine(Plugin.FamiliarUnlocksPath, "player_familiar_sets.json");
+        public static readonly string PlayerExperienceJson = Path.Combine(DirectoryPaths[1], "player_experience.json");
+        public static readonly string PlayerRestedXPJson = Path.Combine(DirectoryPaths[1], "player_rested_xp.json");
+        public static readonly string PlayerQuestsJson = Path.Combine(DirectoryPaths[2], "player_quests.json");
+        public static readonly string PlayerPrestigesJson = Path.Combine(DirectoryPaths[1], "player_prestiges.json");
+        public static readonly string PlayerClassesJson = Path.Combine(DirectoryPaths[0], "player_classes.json");
+        public static readonly string PlayerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
+        public static readonly string PlayerPartiesJson = Path.Combine(DirectoryPaths[0], "player_parties.json");
+        public static readonly string PlayerWoodcuttingJson = Path.Combine(DirectoryPaths[5], "player_woodcutting.json");
+        public static readonly string PlayerMiningJson = Path.Combine(DirectoryPaths[5], "player_mining.json");
+        public static readonly string PlayerFishingJson = Path.Combine(DirectoryPaths[5], "player_fishing.json");
+        public static readonly string PlayerBlacksmithingJson = Path.Combine(DirectoryPaths[5], "player_blacksmithing.json");
+        public static readonly string PlayerTailoringJson = Path.Combine(DirectoryPaths[5], "player_tailoring.json");
+        public static readonly string PlayerEnchantingJson = Path.Combine(DirectoryPaths[5], "player_enchanting.json");
+        public static readonly string PlayerAlchemyJson = Path.Combine(DirectoryPaths[5], "player_alchemy.json");
+        public static readonly string PlayerHarvestingJson = Path.Combine(DirectoryPaths[5], "player_harvesting.json");
+        public static readonly string PlayerSwordExpertiseJson = Path.Combine(DirectoryPaths[3], "player_sword.json");
+        public static readonly string PlayerAxeExpertiseJson = Path.Combine(DirectoryPaths[3], "player_axe.json");
+        public static readonly string PlayerMaceExpertiseJson = Path.Combine(DirectoryPaths[3], "player_mace.json");
+        public static readonly string PlayerSpearExpertiseJson = Path.Combine(DirectoryPaths[3], "player_spear.json");
+        public static readonly string PlayerCrossbowExpertiseJson = Path.Combine(DirectoryPaths[3], "player_crossbow.json");
+        public static readonly string PlayerGreatSwordExpertise = Path.Combine(DirectoryPaths[3], "player_greatsword.json");
+        public static readonly string PlayerSlashersExpertiseJson = Path.Combine(DirectoryPaths[3], "player_slashers.json");
+        public static readonly string PlayerPistolsExpertiseJson = Path.Combine(DirectoryPaths[3], "player_pistols.json");
+        public static readonly string PlayerReaperExpertise = Path.Combine(DirectoryPaths[3], "player_reaper.json");
+        public static readonly string PlayerLongbowExpertiseJson = Path.Combine(DirectoryPaths[3], "player_longbow.json");
+        public static readonly string PlayerUnarmedExpertiseJson = Path.Combine(DirectoryPaths[3], "player_unarmed.json");
+        public static readonly string PlayerWhipExpertiseJson = Path.Combine(DirectoryPaths[3], "player_whip.json");
+        public static readonly string PlayerFishingPoleExpertiseJson = Path.Combine(DirectoryPaths[3], "player_fishingpole.json");
+        public static readonly string PlayerSpellsJson = Path.Combine(DirectoryPaths[1], "player_spells.json");
+        public static readonly string PlayerWeaponStatsJson = Path.Combine(DirectoryPaths[3], "player_weapon_stats.json");
+        public static readonly string PlayerWorkerLegacyJson = Path.Combine(DirectoryPaths[4], "player_worker.json");
+        public static readonly string PlayerWarriorLegacyJson = Path.Combine(DirectoryPaths[4], "player_warrior.json");
+        public static readonly string PlayerScholarLegacyJson = Path.Combine(DirectoryPaths[4], "player_scholar.json");
+        public static readonly string PlayerRogueLegacyJson = Path.Combine(DirectoryPaths[4], "player_rogue.json");
+        public static readonly string PlayerMutantLegacyJson = Path.Combine(DirectoryPaths[4], "player_mutant.json");
+        public static readonly string PlayerVBloodLegacyJson = Path.Combine(DirectoryPaths[4], "player_vblood.json");
+        public static readonly string PlayerDraculinLegacyJson = Path.Combine(DirectoryPaths[4], "player_draculin.json");
+        public static readonly string PlayerImmortalLegacyJson = Path.Combine(DirectoryPaths[4], "player_immortal.json");
+        public static readonly string PlayerCreatureLegacyJson = Path.Combine(DirectoryPaths[4], "player_creature.json");
+        public static readonly string PlayerBruteLegacyJson = Path.Combine(DirectoryPaths[4], "player_brute.json");
+        public static readonly string PlayerBloodStatsJson = Path.Combine(DirectoryPaths[4], "player_blood_stats.json");
+        public static readonly string PlayerFamiliarActivesJson = Path.Combine(DirectoryPaths[6], "player_familiar_actives.json");
+        public static readonly string PlayerFamiliarSetsJson = Path.Combine(DirectoryPaths[8], "player_familiar_sets.json");
     }
 }
 /*

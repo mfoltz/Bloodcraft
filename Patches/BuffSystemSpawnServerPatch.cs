@@ -1,10 +1,10 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Professions;
-using Bloodcraft.SystemUtilities.Quests;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Professions;
+using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -13,8 +13,6 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using static Bloodcraft.Utilities;
 using EnterShapeshiftEvent = ProjectM.Network.EnterShapeshiftEvent;
 
@@ -26,7 +24,8 @@ internal static class BuffSpawnSystemPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;

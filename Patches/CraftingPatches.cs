@@ -1,5 +1,5 @@
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Professions;
+using Bloodcraft.Systems.Professions;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Shared;
@@ -14,7 +14,8 @@ namespace Bloodcraft.Patches;
 internal static class CraftingPatches
 {
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     const float CraftThreshold = 0.995f;

@@ -1,6 +1,5 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -9,14 +8,14 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Utilities;
 
-namespace Bloodcraft.SystemUtilities.Leveling;
+namespace Bloodcraft.Systems.Leveling;
 public static class PrestigeSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PlayerService PlayerService => Core.PlayerService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
@@ -48,76 +47,76 @@ public static class PrestigeSystem
         BruteLegacy
     }
 
-    public static readonly Dictionary<PrestigeSystem.PrestigeType, int> PrestigeTypeToMaxLevel = new()
+    public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxLevel = new()
     {
-        { PrestigeSystem.PrestigeType.Experience, ConfigService.MaxPlayerLevel },
-        { PrestigeSystem.PrestigeType.Exo, ConfigService.MaxLevelingPrestiges },
-        { PrestigeSystem.PrestigeType.SwordExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.AxeExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.MaceExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.SpearExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.CrossbowExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.GreatSwordExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.SlashersExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.PistolsExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.ReaperExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.LongbowExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.WhipExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.UnarmedExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.FishingPoleExpertise, ConfigService.MaxExpertiseLevel },
-        { PrestigeSystem.PrestigeType.WorkerLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.WarriorLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.ScholarLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.RogueLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.MutantLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.DraculinLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.ImmortalLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.CreatureLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeSystem.PrestigeType.BruteLegacy, ConfigService.MaxBloodLevel }
+        { PrestigeType.Experience, ConfigService.MaxLevel },
+        { PrestigeType.Exo, ConfigService.MaxLevelingPrestiges },
+        { PrestigeType.SwordExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.AxeExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.MaceExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.SpearExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.CrossbowExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.GreatSwordExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.SlashersExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.PistolsExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.ReaperExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.LongbowExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.WhipExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.UnarmedExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.FishingPoleExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.WorkerLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.WarriorLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.ScholarLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.RogueLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.MutantLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.DraculinLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.ImmortalLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.CreatureLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.BruteLegacy, ConfigService.MaxBloodLevel }
     };
 
-    public static readonly Dictionary<PrestigeSystem.PrestigeType, int> PrestigeTypeToMaxPrestiges = new()
+    public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxPrestiges = new()
     {
-        { PrestigeSystem.PrestigeType.Experience, ConfigService.MaxLevelingPrestiges },
-        { PrestigeSystem.PrestigeType.Exo, ConfigService.ExoPrestiges },
-        { PrestigeSystem.PrestigeType.SwordExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.AxeExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.MaceExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.SpearExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.CrossbowExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.GreatSwordExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.SlashersExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.PistolsExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.ReaperExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.LongbowExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.WhipExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.UnarmedExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.FishingPoleExpertise, ConfigService.MaxExpertisePrestiges },
-        { PrestigeSystem.PrestigeType.WorkerLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.WarriorLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.ScholarLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.RogueLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.MutantLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.DraculinLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.ImmortalLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.CreatureLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeSystem.PrestigeType.BruteLegacy, ConfigService.MaxLegacyPrestiges }
+        { PrestigeType.Experience, ConfigService.MaxLevelingPrestiges },
+        { PrestigeType.Exo, ConfigService.ExoPrestiges },
+        { PrestigeType.SwordExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.AxeExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.MaceExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.SpearExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.CrossbowExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.GreatSwordExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.SlashersExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.PistolsExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.ReaperExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.LongbowExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.WhipExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.UnarmedExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.FishingPoleExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.WorkerLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.WarriorLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.ScholarLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.RogueLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.MutantLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.DraculinLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.ImmortalLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.CreatureLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.BruteLegacy, ConfigService.MaxLegacyPrestiges }
     };
-    public static void DisplayPrestigeInfo(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel, int maxPrestigeLevel)
+    public static void DisplayPrestigeInfo(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel, int maxPrestigeLevel)
     {
         float reductionFactor = 1.0f;
         float gainMultiplier = 1.0f;
 
-        if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+        if (parsedPrestigeType == PrestigeType.Experience)
         {
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-                prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+                prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
                 reductionFactor = ConfigService.LevelingPrestigeReducer * expPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
-                gainMultiplier = ConfigService.PrestigeRatesMultiplier * expPrestigeLevel;
+                gainMultiplier = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
             }
 
             string reductionPercentage = (reductionFactor * 100).ToString("F2") + "%";
@@ -131,13 +130,13 @@ public static class PrestigeSystem
         else
         {
             if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-                prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+                prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
                 reductionFactor = ConfigService.LevelingPrestigeReducer * expPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
-                gainMultiplier = ConfigService.PrestigeRatesMultiplier * expPrestigeLevel;
+                gainMultiplier = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
             }
 
             float combinedFactor = gainMultiplier - reductionFactor;
@@ -156,20 +155,20 @@ public static class PrestigeSystem
             LocalizationService.HandleReply(ctx, $"Total change in growth rate including leveling prestige bonus: <color=yellow>{totalEffectString}</color>");
         }
     }
-    public static bool CanPrestige(ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int xpKey)
+    public static bool CanPrestige(ulong steamId, PrestigeType parsedPrestigeType, int xpKey)
     {
-        return xpKey >= PrestigeSystem.PrestigeTypeToMaxLevel[parsedPrestigeType] &&
+        return xpKey >= PrestigeTypeToMaxLevel[parsedPrestigeType] &&
                Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) &&
-               prestigeLevel < PrestigeSystem.PrestigeTypeToMaxPrestiges[parsedPrestigeType];
+               prestigeLevel < PrestigeTypeToMaxPrestiges[parsedPrestigeType];
     }
-    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, IPrestigeHandler handler)
+    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestigeHandler handler)
     {
         handler.Prestige(steamId);
         handler.SaveChanges();
 
         var updatedPrestigeLevel = Core.DataStructures.PlayerPrestiges[steamId][parsedPrestigeType];
-        if (parsedPrestigeType == PrestigeSystem.PrestigeType.Experience)
+        if (parsedPrestigeType == PrestigeType.Experience)
         {
             HandleExperiencePrestige(ctx, updatedPrestigeLevel);
         }
@@ -240,22 +239,22 @@ public static class PrestigeSystem
         PrefabGUID buffPrefab = new(buffs[prestigeLevel-1]);
         if (!buffPrefab.GuidHash.Equals(0)) HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
 
-        if (ConfigService.RestedXP) LevelingSystem.ResetRestedXP(steamId);
+        if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
 
         float levelingReducer = ConfigService.LevelingPrestigeReducer * prestigeLevel;
         string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
 
-        float gainMultiplier = ConfigService.PrestigeRatesMultiplier * prestigeLevel;
+        float gainMultiplier = ConfigService.PrestigeRateMultiplier * prestigeLevel;
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
         LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
-    static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeSystem.PrestigeType parsedPrestigeType, int prestigeLevel)
+    static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel)
     {
-        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
+        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
         float ratesReduction = prestigeLevel * ConfigService.PrestigeRatesReducer; // Example: 0.1 (10%)
-        float ratesMultiplier = expPrestige * ConfigService.PrestigeRatesMultiplier;
+        float ratesMultiplier = expPrestige * ConfigService.PrestigeRateMultiplier;
 
         float combinedFactor = ratesMultiplier - ratesReduction;
 
@@ -297,17 +296,17 @@ public static class PrestigeSystem
 
         string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
 
-        float gainMultiplier = ConfigService.PrestigeRatesMultiplier * level;
+        float gainMultiplier = ConfigService.PrestigeRateMultiplier * level;
 
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
         LocalizationService.HandleServerReply(EntityManager, user, $"Player <color=green>{user.CharacterName.Value}</color> has prestiged in <color=#90EE90>Experience</color>[<color=white>{level}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
-    public static void ApplyOtherPrestigeEffects(User user, ulong playerId, PrestigeSystem.PrestigeType parsedPrestigeType, int level)
+    public static void ApplyOtherPrestigeEffects(User user, ulong playerId, PrestigeType parsedPrestigeType, int level)
     {
-        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestiges) && prestiges.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
+        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
         float ratesReduction = level * ConfigService.PrestigeRatesReducer;
-        float ratesMultiplier = expPrestige * ConfigService.PrestigeRatesMultiplier;
+        float ratesMultiplier = expPrestige * ConfigService.PrestigeRateMultiplier;
 
         float combinedFactor = ratesMultiplier - ratesReduction;
 
@@ -330,10 +329,10 @@ public static class PrestigeSystem
     public static int GetExperiencePrestigeLevel(ulong steamId)
     {
         return Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
-               prestigeData.TryGetValue(PrestigeSystem.PrestigeType.Experience, out var prestigeLevel) &&
+               prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel) &&
                prestigeLevel > 0 ? prestigeLevel : 0;
     }
-    public static bool TryParsePrestigeType(string prestigeType, out PrestigeSystem.PrestigeType parsedPrestigeType)
+    public static bool TryParsePrestigeType(string prestigeType, out PrestigeType parsedPrestigeType)
     {
         // Attempt to parse the prestigeType string to the PrestigeType enum.
         if (Enum.TryParse(prestigeType, true, out parsedPrestigeType))
@@ -342,12 +341,12 @@ public static class PrestigeSystem
         }
 
         // If the initial parse failed, try to find a matching PrestigeType enum value containing the input string.
-        parsedPrestigeType = Enum.GetValues(typeof(PrestigeSystem.PrestigeType))
-                                 .Cast<PrestigeSystem.PrestigeType>()
+        parsedPrestigeType = Enum.GetValues(typeof(PrestigeType))
+                                 .Cast<PrestigeType>()
                                  .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
 
         // Check if a valid enum value was found that contains the input string.
-        if (!parsedPrestigeType.Equals(default(PrestigeSystem.PrestigeType)))
+        if (!parsedPrestigeType.Equals(default(PrestigeType)))
         {
             return true; // Found a matching enum value
         }
@@ -376,8 +375,8 @@ public static class PrestigeSystem
     public static void AdjustCharacterStats(Entity character, ulong platformId)
     {
         var prestigeData = Core.DataStructures.PlayerPrestiges[platformId];
-        float damageTakenMultiplier = ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeSystem.PrestigeType.Exo];
-        float damageDealtMultiplier = ConfigService.ExoPrestigeDamageDealtMultiplier * prestigeData[PrestigeSystem.PrestigeType.Exo];
+        float damageTakenMultiplier = ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeType.Exo];
+        float damageDealtMultiplier = ConfigService.ExoPrestigeDamageDealtMultiplier * prestigeData[PrestigeType.Exo];
 
         AdjustResistStats(character, -damageTakenMultiplier);
         AdjustDamageStats(character, damageDealtMultiplier);

@@ -1,5 +1,5 @@
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Professions;
+using Bloodcraft.Systems.Professions;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
@@ -11,7 +11,7 @@ namespace Bloodcraft.Commands;
 internal static class ProfessionCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
 

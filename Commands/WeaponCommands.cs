@@ -1,6 +1,6 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Expertise;
+using Bloodcraft.Systems.Expertise;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -8,7 +8,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.SystemUtilities.Expertise.WeaponHandler;
+using static Bloodcraft.Systems.Expertise.WeaponHandler;
 using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Commands;
@@ -19,7 +19,8 @@ internal static class WeaponCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;

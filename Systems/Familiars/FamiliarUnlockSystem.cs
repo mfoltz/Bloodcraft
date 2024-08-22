@@ -1,4 +1,4 @@
-﻿using Bloodcraft.SystemUtilities.Experience;
+﻿using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -6,11 +6,11 @@ using Unity.Entities;
 using Bloodcraft.Services;
 using static Bloodcraft.Core;
 
-namespace Bloodcraft.SystemUtilities.Familiars;
+namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
 
     static readonly Random Random = new();

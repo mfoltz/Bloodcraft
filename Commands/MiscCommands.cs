@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Familiars;
+using Bloodcraft.Systems.Familiars;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -21,12 +21,12 @@ internal static class MiscCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    static SystemService SystemService => Core.SystemService;  
     static LocalizationService LocalizationService => Core.LocalizationService;
     static CombatMusicSystem_Server CombatMusicSystem_Server => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
+    static bool ClassesInactive => !ConfigService.SoftSynergies && !ConfigService.HardSynergies;
 
     static readonly ComponentType[] DisabledFamiliarComponents =
     [
@@ -39,7 +39,6 @@ internal static class MiscCommands
 
     static readonly PrefabGUID combatBuff = new(581443919);
     public static Dictionary<PrefabGUID, int> KitPrefabs = [];
-
 
     [Command(name: "reminders", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
@@ -122,7 +121,7 @@ internal static class MiscCommands
     [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
     public static void ShiftPlayerSpells(ChatCommandContext ctx)
     {
-        if (ConfigService.ClassesInactive)
+        if (ClassesInactive)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
             return;

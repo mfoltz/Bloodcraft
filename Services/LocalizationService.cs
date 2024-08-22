@@ -14,7 +14,7 @@ using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 namespace Bloodcraft.Services;
 internal class LocalizationService
 {
-    static ConfigService ConfigService => Core.ConfigService;
+    
 
     static readonly string regexPattern = @"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)";
     static readonly Regex regex = new(regexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);

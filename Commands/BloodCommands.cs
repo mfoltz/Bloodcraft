@@ -1,6 +1,6 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Legacies;
+using Bloodcraft.Systems.Legacies;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -8,7 +8,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Core.DataStructures;
-using static Bloodcraft.SystemUtilities.Legacies.BloodHandler;
+using static Bloodcraft.Systems.Legacies.BloodHandler;
 
 namespace Bloodcraft.Commands;
 
@@ -17,7 +17,8 @@ internal static class BloodCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static ConfigService ConfigService => Core.ConfigService;
+    
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PlayerService PlayerService => Core.PlayerService;
 

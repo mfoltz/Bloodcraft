@@ -1,10 +1,10 @@
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
-using Bloodcraft.SystemUtilities.Expertise;
-using Bloodcraft.SystemUtilities.Familiars;
-using Bloodcraft.SystemUtilities.Legacies;
-using Bloodcraft.SystemUtilities.Professions;
-using Bloodcraft.SystemUtilities.Quests;
+using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Professions;
+using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -19,7 +19,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CreateGameplayEventOnDestroySystemPatch
 {
-    static ConfigService ConfigService => Core.ConfigService;
+    
 
     const int BaseFishingXP = 100;
     static readonly PrefabGUID fishingTravelToTarget = new(-1130746976);

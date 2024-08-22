@@ -1,5 +1,5 @@
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Legacies;
+using Bloodcraft.Systems.Legacies;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -14,7 +14,6 @@ namespace Bloodcraft.Patches;
 internal static class ScriptSpawnServerPatch
 {
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]

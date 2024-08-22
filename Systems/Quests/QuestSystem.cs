@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.SystemUtilities.Experience;
+using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -13,14 +13,14 @@ using Regex = System.Text.RegularExpressions.Regex;
 using static Bloodcraft.Core.DataStructures;
 using Random = System.Random;
 
-namespace Bloodcraft.SystemUtilities.Quests;
+namespace Bloodcraft.Systems.Quests;
 internal static class QuestSystem
 {
     static readonly Regex Regex = new(@"T\d{2}");
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ConfigService ConfigService => Core.ConfigService;
+    
     static LocalizationService LocalizationService => Core.LocalizationService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
