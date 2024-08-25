@@ -75,13 +75,13 @@ internal static class FamiliarCommands
         
         if (steamId.TryGetFamiliarActives(out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
-            SetPlayerBool(steamId, "Emotes", true);
             if (choice < 1 || choice > famKeys.Count)
             {
                 LocalizationService.HandleReply(ctx, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>)");
                 return;
             }
 
+            SetPlayerBool(steamId, "Binding", true);
             steamId.SetFamiliarDefault(choice);
 
             data = new(Entity.Null, famKeys[choice - 1]);

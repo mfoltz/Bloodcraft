@@ -400,7 +400,7 @@ internal static class FamiliarPatches
                 if (!Core.hasInitialized) continue;
                 if (!ConfigService.FamiliarSystem) continue;
 
-                //Core.Log.LogInfo($"LinkMinionToOwnerOnSpawnSystem: {entity.Read<PrefabGUID>().LookupName()}");
+                Core.Log.LogInfo($"LinkMinionToOwnerOnSpawnSystem: {entity.Read<PrefabGUID>().LookupName()}");
 
                 Entity Owner = entity.GetOwner();
                 if (Owner.TryGetFollowedPlayer(out Entity player))

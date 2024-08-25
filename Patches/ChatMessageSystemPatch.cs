@@ -58,7 +58,6 @@ internal static class ChatMessageSystemPatch
             string receivedMAC = match.Groups[1].Value;
             string intermediateMessage = regexMAC.Replace(receivedMessage, "");
             string recalculatedMAC = GenerateMAC(intermediateMessage);
-            //Core.Log.LogInfo($"Received MAC: {receivedMAC} | Recalculated MAC: {recalculatedMAC}");
 
             // Compare the MACs
             if (CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(recalculatedMAC), Encoding.UTF8.GetBytes(receivedMAC)))

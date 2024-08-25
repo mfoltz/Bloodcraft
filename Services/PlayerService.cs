@@ -55,7 +55,8 @@ internal class PlayerService
                     };
                 })
                 .SelectMany(entry => new[] { entry.PlayerNameEntry, entry.SteamIdEntry })
-                .ToDictionary(entry => entry.Key, entry => entry.Value)
+                .GroupBy(entry => entry.Key)
+                .ToDictionary(group => group.Key, group => group.First().Value)
                 .ForEach(kvp => PlayerCache[kvp.Key] = kvp.Value);
 
             yield return Delay;

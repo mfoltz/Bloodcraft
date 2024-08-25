@@ -6,6 +6,8 @@
 - familiars now seen as minions of the player by the game, for PvE prevents targetting other players and for PvP prevents them from dealing damage to PvP protected targets
 - added config option to enable sending updates to clientside mod for UI (needs to be enabled on the server or client mod won't do anything by itself)
 - added reminders for various mod features that will be sent to players on occasion for classes/expertise/legacies, can be toggled on and off via command (.remindme)
+- fixed familiar aggro bug when using call/dismiss even if familiar combat is disabled via config
+- added command to clean up old disabled familiars (building spot bug)
 
 `1.2.4`
 - special thanks to Odjit for tracking down the party bug and discovering the reroll issue <3
