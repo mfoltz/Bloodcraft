@@ -1,12 +1,11 @@
-﻿using Stunlock.Core;
+﻿using Bloodcraft.Services;
+using Stunlock.Core;
 
 namespace Bloodcraft.Systems.Professions;
 public interface IProfessionHandler 
 {
-    void AddExperience(ulong steamID, float experience);
-    void SaveChanges();
-    KeyValuePair<int, float> GetExperienceData(ulong steamID);
-    void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData);
+    KeyValuePair<int, float> GetProfessionData(ulong steamID);
+    void SetProfessionData(ulong steamID, KeyValuePair<int, float> xpData);
     string GetProfessionName();
 }
 public static class ProfessionHandlerFactory
@@ -82,37 +81,20 @@ public static class ProfessionHandlerFactory
 
 public abstract class BaseProfessionHandler : IProfessionHandler
 {
-    // Abstract property to get the specific data structure for each profession.
-    protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
-    public virtual void AddExperience(ulong steamID, float experience)
-    {
-        if (DataStructure.TryGetValue(steamID, out var currentData))
-        {
-            DataStructure[steamID] = new KeyValuePair<int, float>(currentData.Key, currentData.Value + experience);
-        }
-        else
-        {
-            DataStructure.Add(steamID, new KeyValuePair<int, float>(0, experience));
-        }
-    }
-    public KeyValuePair<int, float> GetExperienceData(ulong steamID)
-    {
-        return DataStructure[steamID];
-    }
-    public void UpdateExperienceData(ulong steamID, KeyValuePair<int, float> xpData)
-    {
-        DataStructure[steamID] = xpData;
-    }
-    // Abstract methods to be implemented by derived classes.
-    public abstract void SaveChanges();
+    // Abstract methods that return the appropriate extension methods for getting and setting data.
+    public abstract KeyValuePair<int, float> GetProfessionData(ulong steamID);
+    public abstract void SetProfessionData(ulong steamID, KeyValuePair<int, float> data);
     public abstract string GetProfessionName();
 }
 public class EnchantingHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerEnchanting;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerEnchanting();
+        return steamID.TryGetPlayerEnchanting(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerEnchanting(data);
     }
     public override string GetProfessionName()
     {
@@ -121,10 +103,13 @@ public class EnchantingHandler : BaseProfessionHandler
 }
 public class AlchemyHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAlchemy;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerAlchemy();
+        return steamID.TryGetPlayerAlchemy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerAlchemy(data);
     }
     public override string GetProfessionName()
     {
@@ -133,10 +118,13 @@ public class AlchemyHandler : BaseProfessionHandler
 }
 public class HarvestingHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerHarvesting;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerHarvesting();
+        return steamID.TryGetPlayerHarvesting(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerHarvesting(data);
     }
     public override string GetProfessionName()
     {
@@ -145,10 +133,13 @@ public class HarvestingHandler : BaseProfessionHandler
 }
 public class BlacksmithingHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerBlacksmithing;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerBlacksmithing();
+        return steamID.TryGetPlayerBlacksmithing(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerBlacksmithing(data);
     }
     public override string GetProfessionName()
     {
@@ -157,10 +148,13 @@ public class BlacksmithingHandler : BaseProfessionHandler
 }
 public class TailoringHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerTailoring;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerTailoring();
+        return steamID.TryGetPlayerTailoring(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerTailoring(data);
     }
     public override string GetProfessionName()
     {
@@ -169,10 +163,13 @@ public class TailoringHandler : BaseProfessionHandler
 }
 public class WoodcuttingHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWoodcutting;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerWoodcutting();
+        return steamID.TryGetPlayerWoodcutting(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerWoodcutting(data);
     }
     public override string GetProfessionName()
     {
@@ -181,10 +178,13 @@ public class WoodcuttingHandler : BaseProfessionHandler
 }
 public class MiningHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMining;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerMining();
+        return steamID.TryGetPlayerMining(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerMining(data);
     }
     public override string GetProfessionName()
     {
@@ -193,10 +193,13 @@ public class MiningHandler : BaseProfessionHandler
 }
 public class FishingHandler : BaseProfessionHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishing;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetProfessionData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerFishing();
+        return steamID.TryGetPlayerFishing(out var data) ? data : new KeyValuePair<int, float>(0, 0);
+    }
+    public override void SetProfessionData(ulong steamID, KeyValuePair<int, float> data)
+    {
+        steamID.SetPlayerFishing(data);
     }
     public override string GetProfessionName()
     {

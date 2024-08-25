@@ -148,7 +148,6 @@ public static class ConfigService
     public static class ConfigInitialization
     {
         static readonly Regex regex = new(@"^\[(.+)\]$");
-
         public static readonly List<string> DirectoryPaths =
         [
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME), // 0
@@ -161,7 +160,6 @@ public static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"), // 7
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks") // 8
         ];
-
         static readonly List<string> SectionOrder =
         [
             "General",
@@ -181,94 +179,6 @@ public static class ConfigService
             public object DefaultValue { get; } = defaultValue;
             public string Description { get; } = description;
         }
-        public static void InitializeConfig()
-        {
-            foreach (string path in DirectoryPaths)
-            {
-                CreateDirectory(path);
-            }
-
-            foreach (ConfigEntryDefinition entry in ConfigEntries)
-            {
-                // Get the type of DefaultValue
-                Type entryType = entry.DefaultValue.GetType();
-
-                // Reflect on the nested ConfigInitialization class within ConfigService
-                Type nestedClassType = typeof(ConfigService).GetNestedType("ConfigInitialization", BindingFlags.Static | BindingFlags.Public);
-
-                // Use reflection to call InitConfigEntry with the appropriate type
-                MethodInfo method = nestedClassType.GetMethod("InitConfigEntry", BindingFlags.Static | BindingFlags.NonPublic);
-                MethodInfo generic = method.MakeGenericMethod(entryType);
-
-                // Invoke the generic method
-                var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
-
-                PropertyInfo propertyInfo = typeof(ConfigService).GetProperty(entry.Key, BindingFlags.Static | BindingFlags.Public);
-                if (propertyInfo != null && propertyInfo.CanWrite)
-                {
-                    object value = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
-
-                    if (value != null)
-                    {
-                        propertyInfo.SetValue(null, Convert.ChangeType(value, propertyInfo.PropertyType));
-                    }
-                    else
-                    {
-                        throw new Exception($"Value property on configEntry is null for section {entry.Section} and key {entry.Key}.");
-                    }
-                }
-            }
-
-            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
-            if (File.Exists(configFile)) CleanAndOrganizeConfig(configFile);
-        }
-        static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
-        {
-            // Bind the configuration entry with the default value in the new section
-            var entry = Plugin.Instance.Config.Bind(section, key, defaultValue, description);
-
-            // Define the path to the configuration file
-            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
-
-            // Ensure the configuration file is only loaded if it exists
-            if (File.Exists(configFile))
-            {
-                string[] configLines = File.ReadAllLines(configFile);
-                foreach (var line in configLines)
-                {
-                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
-                    {
-                        continue;
-                    }
-
-                    var keyValue = line.Split('=');
-                    if (keyValue.Length == 2)
-                    {
-                        var configKey = keyValue[0].Trim();
-                        var configValue = keyValue[1].Trim();
-
-                        // Check if the key matches the provided key
-                        if (configKey.Equals(key, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // Try to convert the string value to the expected type
-                            try
-                            {
-                                var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
-                                entry.Value = convertedValue;
-                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value}");
-                            }
-                            catch (Exception ex)
-                            {
-                                //Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
-                            }
-                            break; // Stop searching once the key is found
-                        }
-                    }
-                }
-            }
-            return entry;
-        }
-
         static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
@@ -411,6 +321,93 @@ public static class ConfigService
             new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
             new ConfigEntryDefinition("Classes", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige")
         ];
+        public static void InitializeConfig()
+        {
+            foreach (string path in DirectoryPaths)
+            {
+                CreateDirectory(path);
+            }
+
+            foreach (ConfigEntryDefinition entry in ConfigEntries)
+            {
+                // Get the type of DefaultValue
+                Type entryType = entry.DefaultValue.GetType();
+
+                // Reflect on the nested ConfigInitialization class within ConfigService
+                Type nestedClassType = typeof(ConfigService).GetNestedType("ConfigInitialization", BindingFlags.Static | BindingFlags.Public);
+
+                // Use reflection to call InitConfigEntry with the appropriate type
+                MethodInfo method = nestedClassType.GetMethod("InitConfigEntry", BindingFlags.Static | BindingFlags.NonPublic);
+                MethodInfo generic = method.MakeGenericMethod(entryType);
+
+                // Invoke the generic method
+                var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
+
+                PropertyInfo propertyInfo = typeof(ConfigService).GetProperty(entry.Key, BindingFlags.Static | BindingFlags.Public);
+                if (propertyInfo != null && propertyInfo.CanWrite)
+                {
+                    object value = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
+
+                    if (value != null)
+                    {
+                        propertyInfo.SetValue(null, Convert.ChangeType(value, propertyInfo.PropertyType));
+                    }
+                    else
+                    {
+                        throw new Exception($"Value property on configEntry is null for section {entry.Section} and key {entry.Key}.");
+                    }
+                }
+            }
+
+            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+            if (File.Exists(configFile)) CleanAndOrganizeConfig(configFile);
+        }
+        static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
+        {
+            // Bind the configuration entry with the default value in the new section
+            var entry = Plugin.Instance.Config.Bind(section, key, defaultValue, description);
+
+            // Define the path to the configuration file
+            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+
+            // Ensure the configuration file is only loaded if it exists
+            if (File.Exists(configFile))
+            {
+                string[] configLines = File.ReadAllLines(configFile);
+                foreach (var line in configLines)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+                    {
+                        continue;
+                    }
+
+                    var keyValue = line.Split('=');
+                    if (keyValue.Length == 2)
+                    {
+                        var configKey = keyValue[0].Trim();
+                        var configValue = keyValue[1].Trim();
+
+                        // Check if the key matches the provided key
+                        if (configKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Try to convert the string value to the expected type
+                            try
+                            {
+                                var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
+                                entry.Value = convertedValue;
+                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value}");
+                            }
+                            catch (Exception ex)
+                            {
+                                //Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
+                            }
+                            break; // Stop searching once the key is found
+                        }
+                    }
+                }
+            }
+            return entry;
+        }
         static void CreateDirectory(string path)
         {
             if (!Directory.Exists(path))
@@ -462,145 +459,5 @@ public static class ConfigService
                 }
             }
         }
-    }
-    public static class PlayerDataInitialization
-    {
-        public static void LoadPlayerData()
-        {
-            try
-            {
-                string PlayerSanguimancyJson = Path.Combine(ConfigInitialization.DirectoryPaths[3], "player_sanguimancy.json"); // handle old format to new
-                string PlayerUnarmedJson = Path.Combine(ConfigInitialization.DirectoryPaths[3], "player_unarmed.json");
-
-                if (File.Exists(PlayerSanguimancyJson) && !File.Exists(PlayerUnarmedJson))
-                {
-                    // Copy the old file to the new file name
-                    File.Copy(PlayerSanguimancyJson, Core.JsonFiles.PlayerUnarmedExpertiseJson, overwrite: false);
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError($"Failed to migrate sanguimancy data to unarmed: {ex}");
-            }
-
-            Core.DataStructures.LoadPlayerBools();
-
-            if (PlayerParties)
-            {
-                Core.DataStructures.LoadPlayerParties();
-            }
-
-            if (SoftSynergies || HardSynergies)
-            {
-                Core.DataStructures.LoadPlayerClasses();
-            }
-
-            if (QuestSystem)
-            {
-                Core.DataStructures.LoadPlayerQuests();
-            }
-
-            if (LevelingSystem)
-            {
-                foreach (var loadFunction in loadLeveling)
-                {
-                    loadFunction();
-                }
-                if (RestedXPSystem)
-                {
-                    Core.DataStructures.LoadPlayerRestedXP();
-                }
-            }
-
-            if (ExpertiseSystem)
-            {
-                foreach (var loadFunction in loadExpertises)
-                {
-                    loadFunction();
-                }
-            }
-
-            if (BloodSystem)
-            {
-                foreach (var loadFunction in loadLegacies)
-                {
-                    loadFunction();
-                }
-            }
-
-            if (ProfessionSystem)
-            {
-                foreach (var loadFunction in loadProfessions)
-                {
-                    loadFunction();
-                }
-            }
-
-            if (FamiliarSystem)
-            {
-                foreach (var loadFunction in loadFamiliars)
-                {
-                    loadFunction();
-                }
-            }
-        }
-
-        static readonly Action[] loadLeveling =
-        [
-            Core.DataStructures.LoadPlayerExperience,
-            Core.DataStructures.LoadPlayerPrestiges
-        ];
-
-        static readonly Action[] loadExpertises =
-        [
-            Core.DataStructures.LoadPlayerSwordExpertise,
-            Core.DataStructures.LoadPlayerAxeExpertise,
-            Core.DataStructures.LoadPlayerMaceExpertise,
-            Core.DataStructures.LoadPlayerSpearExpertise,
-            Core.DataStructures.LoadPlayerCrossbowExpertise,
-            Core.DataStructures.LoadPlayerGreatSwordExpertise,
-            Core.DataStructures.LoadPlayerSlashersExpertise,
-            Core.DataStructures.LoadPlayerPistolsExpertise,
-            Core.DataStructures.LoadPlayerReaperExpertise,
-            Core.DataStructures.LoadPlayerLongbowExpertise,
-            Core.DataStructures.LoadPlayerWhipExpertise,
-            Core.DataStructures.LoadPlayerFishingPoleExpertise,
-            Core.DataStructures.LoadPlayerUnarmedExpertise,
-            Core.DataStructures.LoadPlayerSpells,
-            Core.DataStructures.LoadPlayerWeaponStats
-        ];
-
-        static readonly Action[] loadLegacies =
-        [
-            Core.DataStructures.LoadPlayerWorkerLegacy,
-            Core.DataStructures.LoadPlayerWarriorLegacy,
-            Core.DataStructures.LoadPlayerScholarLegacy,
-            Core.DataStructures.LoadPlayerRogueLegacy,
-            Core.DataStructures.LoadPlayerMutantLegacy,
-            Core.DataStructures.LoadPlayerVBloodLegacy,
-            Core.DataStructures.LoadPlayerDraculinLegacy,
-            Core.DataStructures.LoadPlayerImmortalLegacy,
-            Core.DataStructures.LoadPlayerCreatureLegacy,
-            Core.DataStructures.LoadPlayerBruteLegacy,
-            Core.DataStructures.LoadPlayerBloodStats
-        ];
-
-        static readonly Action[] loadProfessions =
-        [
-            Core.DataStructures.LoadPlayerWoodcutting,
-            Core.DataStructures.LoadPlayerMining,
-            Core.DataStructures.LoadPlayerFishing,
-            Core.DataStructures.LoadPlayerBlacksmithing,
-            Core.DataStructures.LoadPlayerTailoring,
-            Core.DataStructures.LoadPlayerEnchanting,
-            Core.DataStructures.LoadPlayerAlchemy,
-            Core.DataStructures.LoadPlayerHarvesting,
-        ];
-
-        static readonly Action[] loadFamiliars =
-        [
-            Core.DataStructures.LoadPlayerFamiliarActives,
-            Core.DataStructures.LoadPlayerFamiliarSets
-        ];
     }
 }

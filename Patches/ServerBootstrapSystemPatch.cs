@@ -1,7 +1,8 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Familiars;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Scripting;
@@ -9,7 +10,10 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Stunlock.Network;
 using Unity.Entities;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
+using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Patches;
 
@@ -18,7 +22,6 @@ internal static class ServerBootstrapSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static LocalizationService LocalizationService => Core.LocalizationService;
 
     static readonly PrefabGUID woodenCoffin = new(381160212);
     static readonly PrefabGUID stoneCoffin = new(569692162);
@@ -37,7 +40,7 @@ internal static class ServerBootstrapSystemPatch
         { "Grouping", false },
         { "Emotes", false },
         { "Binding", false },
-        { "Kit", false },
+        { "Kit", true },
         { "VBloodEmotes", true },
         { "FamiliarVisual", true},
         { "ShinyChoice", false },
@@ -54,312 +57,285 @@ internal static class ServerBootstrapSystemPatch
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
 
-        Entity character = EntityManager.Exists(user.LocalCharacter._Entity) ? user.LocalCharacter._Entity : Entity.Null;
+        bool exists = false;
+        Entity character = Entity.Null;
 
-        if (!Core.DataStructures.PlayerBools.ContainsKey(steamId))
+        if (user.LocalCharacter._Entity.Exists())
         {
-            Core.DataStructures.PlayerBools.Add(steamId, DefaultBools);
-            Core.DataStructures.SavePlayerBools();
+            exists = true;
+            character = user.LocalCharacter._Entity;
+        }
+
+        if (!steamId.TryGetPlayerBools(out var bools))
+        {
+            steamId.SetPlayerBools(DefaultBools);
         }
         else
         {
-            Dictionary<string, bool> existingBools = Core.DataStructures.PlayerBools[steamId];
-
             foreach (string key in DefaultBools.Keys)
             {
-                if (!existingBools.ContainsKey(key))
+                if (!bools.ContainsKey(key))
                 {
-                    existingBools[key] = DefaultBools[key];
+                    bools[key] = DefaultBools[key];
                 }
             }
-
-            Core.DataStructures.PlayerBools[steamId] = existingBools;
-            Core.DataStructures.SavePlayerBools();
+            steamId.SetPlayerBools(bools);
         }
 
         if (ConfigService.ProfessionSystem)
         {
-            if (!Core.DataStructures.PlayerWoodcutting.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerWoodcutting(out var woodcutting))
             {
-                Core.DataStructures.PlayerWoodcutting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerWoodcutting();
+                steamId.SetPlayerWoodcutting(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerMining.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerMining(out var rmining))
             {
-                Core.DataStructures.PlayerMining.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerMining();
+                steamId.SetPlayerMining(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerFishing.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerFishing(out var fishing))
             {
-                Core.DataStructures.PlayerFishing.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerFishing();
+                steamId.SetPlayerFishing(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerBlacksmithing.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerBlacksmithing(out var blacksmithing))
             {
-                Core.DataStructures.PlayerBlacksmithing.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerBlacksmithing();
+                steamId.SetPlayerBlacksmithing(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerTailoring.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerTailoring(out var tailoring))
             {
-                Core.DataStructures.PlayerTailoring.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerTailoring();
+                steamId.SetPlayerTailoring(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerAlchemy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerAlchemy(out var alchemy))
             {
-                Core.DataStructures.PlayerAlchemy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerAlchemy();
+                steamId.SetPlayerAlchemy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerHarvesting.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerHarvesting(out var harvesting))
             {
-                Core.DataStructures.PlayerHarvesting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerHarvesting();
+                steamId.SetPlayerHarvesting(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerEnchanting.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerEnchanting(out var enchanting))
             {
-                Core.DataStructures.PlayerEnchanting.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerEnchanting();
+                steamId.SetPlayerEnchanting(new KeyValuePair<int, float>(0, 0f));
             }
         }
 
         if (ConfigService.ExpertiseSystem)
         {
-            if (!Core.DataStructures.PlayerUnarmedExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerUnarmedExpertise(out var unarmed))
             {
-                Core.DataStructures.PlayerUnarmedExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerUnarmedExpertise();
+                steamId.SetPlayerUnarmedExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerSpells.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerSpells(out var spells))
             {
-                Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
-                Core.DataStructures.SavePlayerSpells();
+                steamId.SetPlayerSpells((0, 0, 0));
             }
 
-            if (!Core.DataStructures.PlayerSwordExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerSwordExpertise(out var sword))
             {
-                Core.DataStructures.PlayerSwordExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSwordExpertise();
+                steamId.SetPlayerSwordExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerAxeExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerAxeExpertise(out var axe))
             {
-                Core.DataStructures.PlayerAxeExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerAxeExpertise();
+                steamId.SetPlayerAxeExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerMaceExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerMaceExpertise(out var mace))
             {
-                Core.DataStructures.PlayerMaceExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerMaceExpertise();
+                steamId.SetPlayerMaceExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerSpearExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerSpearExpertise(out var spear))
             {
-                Core.DataStructures.PlayerSpearExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSpearExpertise();
+                steamId.SetPlayerSpearExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerCrossbowExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerCrossbowExpertise(out var crossbow))
             {
-                Core.DataStructures.PlayerCrossbowExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerCrossbowExpertise();
+                steamId.SetPlayerCrossbowExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerGreatSwordExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerGreatSwordExpertise(out var greatSword))
             {
-                Core.DataStructures.PlayerGreatSwordExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerGreatSwordExpertise();
+                steamId.SetPlayerGreatSwordExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerSlashersExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerSlashersExpertise(out var slashers))
             {
-                Core.DataStructures.PlayerSlashersExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerSlashersExpertise();
+                steamId.SetPlayerSlashersExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerPistolsExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerPistolsExpertise(out var pistols))
             {
-                Core.DataStructures.PlayerPistolsExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerPistolsExpertise();
+                steamId.SetPlayerPistolsExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerReaperExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerReaperExpertise(out var reaper))
             {
-                Core.DataStructures.PlayerReaperExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerReaperExpertise();
+                steamId.SetPlayerReaperExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerLongbowExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerLongbowExpertise(out var longbow))
             {
-                Core.DataStructures.PlayerLongbowExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerLongbowExpertise();
+                steamId.SetPlayerLongbowExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerWhipExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerWhipExpertise(out var whip))
             {
-                Core.DataStructures.PlayerWhipExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerWhipExpertise();
+                steamId.SetPlayerWhipExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerFishingPoleExpertise.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerFishingPoleExpertise(out var fishingPole))
             {
-                Core.DataStructures.PlayerFishingPoleExpertise.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerFishingPoleExpertise();
+                steamId.SetPlayerFishingPoleExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerWeaponStats.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerWeaponStats(out var weaponStats))
             {
-                Core.DataStructures.PlayerWeaponStats.Add(steamId, []);
-                Core.DataStructures.SavePlayerWeaponStats();
+                weaponStats = [];
+                foreach (WeaponType weaponType in Enum.GetValues<WeaponType>())
+                {
+                    weaponStats.Add(weaponType, []);
+                }
+                steamId.SetPlayerWeaponStats(weaponStats);  // Assuming the weapon stats are a list or similar collection.
             }
         }
 
         if (ConfigService.BloodSystem)
         {
-            if (!Core.DataStructures.PlayerWorkerLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerWorkerLegacy(out var worker))
             {
-                Core.DataStructures.PlayerWorkerLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerWorkerLegacy();
+                steamId.SetPlayerWorkerLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerWarriorLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerWarriorLegacy(out var warrior))
             {
-                Core.DataStructures.PlayerWarriorLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerWarriorLegacy();
+                steamId.SetPlayerWarriorLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerScholarLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerScholarLegacy(out var scholar))
             {
-                Core.DataStructures.PlayerScholarLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerScholarLegacy();
+                steamId.SetPlayerScholarLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerRogueLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerRogueLegacy(out var rogue))
             {
-                Core.DataStructures.PlayerRogueLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerRogueLegacy();
+                steamId.SetPlayerRogueLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerMutantLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerMutantLegacy(out var mutant))
             {
-                Core.DataStructures.PlayerMutantLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerMutantLegacy();
+                steamId.SetPlayerMutantLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerVBloodLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerVBloodLegacy(out var vBlood))
             {
-                Core.DataStructures.PlayerVBloodLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerVBloodLegacy();
+                steamId.SetPlayerVBloodLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerDraculinLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerDraculinLegacy(out var draculin))
             {
-                Core.DataStructures.PlayerDraculinLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerDraculinLegacy();
+                steamId.SetPlayerDraculinLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerImmortalLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerImmortalLegacy(out var immortal))
             {
-                Core.DataStructures.PlayerImmortalLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerImmortalLegacy();
+                steamId.SetPlayerImmortalLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerCreatureLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerCreatureLegacy(out var creature))
             {
-                Core.DataStructures.PlayerCreatureLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerCreatureLegacy();
+                steamId.SetPlayerCreatureLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!Core.DataStructures.PlayerBruteLegacy.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerBruteLegacy(out var brute))
             {
-                Core.DataStructures.PlayerBruteLegacy.Add(steamId, new KeyValuePair<int, float>(0, 0f));
-                Core.DataStructures.SavePlayerBruteLegacy();
+                steamId.SetPlayerBruteLegacy(new KeyValuePair<int, float>(0, 0f));
+            }
+
+            if (!steamId.TryGetPlayerBloodStats(out var bloodStats))
+            {
+                bloodStats = [];
+                foreach (BloodType bloodType in Enum.GetValues<BloodType>())
+                {
+                    bloodStats.Add(bloodType, []);
+                }
+                steamId.SetPlayerBloodStats(bloodStats);
             }
         }
 
         if (ConfigService.LevelingSystem)
         { 
-            if (!Core.DataStructures.PlayerExperience.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerExperience(out var experience))
             {
-                Core.DataStructures.PlayerExperience.Add(steamId, new KeyValuePair<int, float>(ConfigService.StartingLevel, LevelingSystem.ConvertLevelToXp(ConfigService.StartingLevel)));
-                Core.DataStructures.SavePlayerExperience();
-            }
-
-            if (ConfigService.PrestigeSystem && !Core.DataStructures.PlayerPrestiges.ContainsKey(steamId))
-            {
-                var prestigeDict = new Dictionary<PrestigeType, int>();
-                foreach (var prestigeType in Enum.GetValues<PrestigeType>())
-                {
-                    prestigeDict.Add(prestigeType, 0);
-                }
-
-                Core.DataStructures.PlayerPrestiges.Add(steamId, prestigeDict);
-                Core.DataStructures.SavePlayerPrestiges();
-            }
-            else if (ConfigService.PrestigeSystem)
-            {
-                // Ensure all keys are present in the existing dictionary
-                var prestigeDict = Core.DataStructures.PlayerPrestiges[steamId];
-                foreach (var prestigeType in Enum.GetValues<PrestigeType>())
-                {
-                    if (!prestigeDict.ContainsKey(prestigeType))
-                    {
-                        prestigeDict.Add(prestigeType, 0);
-                    }
-                }
-            }
-
-            if (character != Entity.Null)
-            {
-                LevelingSystem.SetLevel(character);
+                steamId.SetPlayerExperience(new KeyValuePair<int, float>(ConfigService.StartingLevel, LevelingSystem.ConvertLevelToXp(ConfigService.StartingLevel)));
             }
 
             if (ConfigService.RestedXPSystem)
             {
-                if (!Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
+                if (!steamId.TryGetPlayerRestedXP(out var restedData))
                 {
-                    Core.DataStructures.PlayerRestedXP.Add(steamId, new KeyValuePair<DateTime, float>(DateTime.MinValue, 0f));
-                    Core.DataStructures.SavePlayerRestedXP();
+                    steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, 0));
                 }
-                else if (character != Entity.Null && Core.DataStructures.PlayerRestedXP.ContainsKey(steamId))
+                else if (character.Exists())
                 {
                     float restedMultiplier = 0;
 
                     if (ServerGameManager.HasBuff(character, woodenCoffin)) restedMultiplier = 0.5f;
                     else if (ServerGameManager.HasBuff(character, stoneCoffin)) restedMultiplier = 1f;
 
-                    var restedData = Core.DataStructures.PlayerRestedXP[steamId];
                     DateTime lastLogout = restedData.Key;
-
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
+
                     if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0)
                     {
                         float currentRestedXP = restedData.Value;
-                        //float restedCap = Core.DataStructures.PlayerExperience[steamId].Value * ConfigService.RestedXPMax; // need to redo the math here
 
-                        int currentLevel = Core.DataStructures.PlayerExperience[steamId].Key;
-                        int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxProfessionLevel);
-
+                        int currentLevel = experience.Key;
+                        int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxLevel);
                         float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
 
                         float earnedPerTick = ConfigService.RestedXPRate * restedCap;
-
                         float earnedRestedXP = (float)timeOffline.TotalMinutes / ConfigService.RestedXPTickRate * earnedPerTick * restedMultiplier;
+
                         currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
                         int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
 
-                        Core.DataStructures.PlayerRestedXP[steamId] = new KeyValuePair<DateTime, float>(DateTime.UtcNow, currentRestedXP);
-                        Core.DataStructures.SavePlayerRestedXP();
-
+                        steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, currentRestedXP));
                         string message = $"+<color=#FFD700>{roundedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> earned from being logged out in your coffin!";
                         LocalizationService.HandleServerReply(EntityManager, user, message);
+                    }
+                }
+            }
+
+            if (exists) LevelingSystem.SetLevel(character);
+        }
+
+        if (ConfigService.PrestigeSystem)
+        {
+            if (!steamId.TryGetPlayerPrestiges(out var prestiges))
+            {
+                var prestigeDict = new Dictionary<PrestigeType, int>();
+                foreach (var prestigeType in Enum.GetValues<PrestigeType>())
+                {
+                    prestigeDict.Add(prestigeType, 0);
+                }
+                steamId.SetPlayerPrestiges(prestigeDict);
+            }
+            else
+            {
+                foreach (var prestigeType in Enum.GetValues<PrestigeType>())
+                {
+                    if (!prestiges.ContainsKey(prestigeType))
+                    {
+                        prestiges.Add(prestigeType, 0);
                     }
                 }
             }
@@ -367,47 +343,45 @@ internal static class ServerBootstrapSystemPatch
 
         if (ConfigService.FamiliarSystem)
         {
-            if (!Core.DataStructures.FamiliarActives.ContainsKey(steamId))
+            if (!steamId.TryGetFamiliarActives(out var actives))
             {
-                Core.DataStructures.FamiliarActives.Add(steamId, (Entity.Null, 0));
-                Core.DataStructures.SavePlayerFamiliarActives();
+                steamId.SetFamiliarActives(new(Entity.Null, 0));
             }
 
-            if (!Core.DataStructures.FamiliarSet.ContainsKey(steamId))
+            if (!steamId.TryGetFamiliarBox(out var box))
             {
-                Core.DataStructures.FamiliarSet.Add(steamId, "");
-                Core.DataStructures.SavePlayerFamiliarSets();
+                steamId.SetFamiliarBox("");
             }
 
-            Core.FamiliarExperienceManager.SaveFamiliarExperience(steamId, Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId));
-            Core.FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
+            FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
+            FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
 
-            if (character != Entity.Null && character.Has<FollowerBuffer>())
+            if (character.Has<FollowerBuffer>())
             {
                 var buffer = character.ReadBuffer<FollowerBuffer>();
+
                 foreach (var follower in buffer)
                 {
-                    if (EntityManager.Exists(follower.Entity._Entity))
+                    if (follower.Entity._Entity.Exists())
                     {
                         DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
                     }
                 }
-                FamiliarSummonSystem.FamiliarUtilities.ClearFamiliarActives(steamId);
+
+                ClearFamiliarActives(steamId);
             }
         }
 
         if (Classes)
         {
-            if (!Core.DataStructures.PlayerClass.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerClasses(out var classes))
             {
-                Core.DataStructures.PlayerClass.Add(steamId, []);
-                Core.DataStructures.SavePlayerClasses();
+                steamId.SetPlayerClasses([]);
             }
 
-            if (!Core.DataStructures.PlayerSpells.ContainsKey(steamId))
+            if (!steamId.TryGetPlayerSpells(out var spells))
             {
-                Core.DataStructures.PlayerSpells.Add(steamId, (0, 0, 0));
-                Core.DataStructures.SavePlayerSpells();
+                steamId.SetPlayerSpells((0, 0, 0));
             }
         }
     }
@@ -423,30 +397,28 @@ internal static class ServerBootstrapSystemPatch
         Entity character = user.LocalCharacter._Entity;
         ulong steamId = user.PlatformId;
 
-        if (ConfigService.FamiliarSystem && EntityManager.Exists(character) && character.Has<FollowerBuffer>())
+        if (ConfigService.FamiliarSystem && character.Has<FollowerBuffer>())
         {
             var buffer = character.ReadBuffer<FollowerBuffer>();
+
             foreach (var follower in buffer)
             {
-                if (EntityManager.Exists(follower.Entity._Entity))
+                if (follower.Entity._Entity.Exists())
                 {
                     DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
                 }
             }
-            FamiliarSummonSystem.FamiliarUtilities.ClearFamiliarActives(steamId);
+
+            ClearFamiliarActives(steamId);
         }
 
         if (ConfigService.LevelingSystem)
         {
-            if (ConfigService.RestedXPSystem && Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData))
+            if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
-                Core.DataStructures.PlayerRestedXP[steamId] = restedData;
-                Core.DataStructures.SavePlayerRestedXP();
+                steamId.SetPlayerRestedXP(restedData);
             }
         }
     }
-    
-
-
 }

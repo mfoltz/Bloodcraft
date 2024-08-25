@@ -8,6 +8,8 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Transforms;
 using VampireCommandFramework;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
@@ -15,8 +17,6 @@ internal static class FamiliarSummonSystem
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
@@ -57,7 +57,7 @@ internal static class FamiliarSummonSystem
             int famKey = familiar.Read<PrefabGUID>().GuidHash;
             ulong steamId = user.PlatformId;
 
-            if (Core.FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(famKey, out var xpData) && xpData.Key > 1)
+            if (FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(famKey, out var xpData) && xpData.Key > 1)
             {
                 level = xpData.Key;
             }
@@ -85,11 +85,10 @@ internal static class FamiliarSummonSystem
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
-            //ModifyAggro(familiar);
             if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
-            if (Utilities.GetPlayerBool(steamId, "FamiliarVisual"))
+            if (GetPlayerBool(steamId, "FamiliarVisual"))
             {
-                Core.DataStructures.FamiliarBuffsData data = Core.FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+                FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
                 if (data.FamiliarBuffs.ContainsKey(famKey)) 
                 {
                     FamiliarPatches.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
@@ -208,7 +207,7 @@ internal static class FamiliarSummonSystem
         int prestigeLevel = 0;
         List<FamiliarStatType> stats = [];
 
-        if (Core.FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
             prestigeLevel = prestigeData.Key;
             stats = prestigeData.Value;
@@ -354,88 +353,6 @@ internal static class FamiliarSummonSystem
             var item = buffer[i];
             item.DropTrigger = DropTriggerType.OnSalvageDestroy;
             buffer[i] = item;
-        }
-    }
-    public static class FamiliarUtilities
-    {
-        public static Entity FindPlayerFamiliar(Entity character)
-        {
-            if (!character.Has<FollowerBuffer>()) return Entity.Null;
-
-            var followers = character.ReadBuffer<FollowerBuffer>();
-            ulong steamId = character.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-            if (!followers.IsEmpty) // if buffer not empty check here first, only need the rest if familiar is disabled via call/dismiss since that removes from followerBuffer to enable waygate use and such
-            {
-                foreach (FollowerBuffer follower in followers)
-                {
-                    Entity familiar = follower.Entity._Entity;
-                    if (!familiar.Has<CharmSource>() && familiar.Exists()) return familiar;
-                }
-            }
-            else if (Utilities.HasDismissed(steamId, out Entity familiar)) return familiar;
-            return Entity.Null;
-        }
-        public static void ClearFamiliarActives(ulong steamId)
-        {
-            if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives))
-            {
-                actives = (Entity.Null, 0);
-                Core.DataStructures.FamiliarActives[steamId] = actives;
-                Core.DataStructures.SavePlayerFamiliarActives();
-            }
-        }
-        public static void HandleFamiliarMinions(Entity familiar)
-        {
-            if (FamiliarPatches.FamiliarMinions.ContainsKey(familiar))
-            {
-                foreach (Entity minion in FamiliarPatches.FamiliarMinions[familiar])
-                {
-                    DestroyUtility.CreateDestroyEvent(EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
-                }
-                FamiliarPatches.FamiliarMinions.Remove(familiar);
-            }
-        }
-        public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
-        {
-            if (Enum.TryParse(statType, true, out parsedStatType))
-            {
-                return true;
-            }
-
-            parsedStatType = Enum.GetValues(typeof(FamiliarStatType))
-                .Cast<FamiliarStatType>()
-                .FirstOrDefault(pt => pt.ToString().Contains(statType, StringComparison.OrdinalIgnoreCase));
-
-            if (!parsedStatType.Equals(default(FamiliarStatType)))
-            {
-                return true;
-            }
-
-            parsedStatType = default;
-            return false;
-        }
-        public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
-        {
-            if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))
-            {
-                bools["FamiliarVisual"] = !bools["FamiliarVisual"];
-                Core.DataStructures.PlayerBools[steamId] = bools;
-                Core.DataStructures.SavePlayerBools();
-
-                LocalizationService.HandleReply(ctx, bools["FamiliarVisual"] ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
-            }
-        }
-        public static void ToggleVBloodEmotes(ChatCommandContext ctx, ulong steamId)
-        {
-            if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools))
-            {
-                bools["VBloodEmotes"] = !bools["VBloodEmotes"];
-                Core.DataStructures.PlayerBools[steamId] = bools;
-                Core.DataStructures.SavePlayerBools();
-
-                LocalizationService.HandleReply(ctx, bools["VBloodEmotes"] ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
-            }
         }
     }
 }

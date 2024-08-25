@@ -33,11 +33,9 @@ internal static class ChatMessageSystemPatch
 
                 ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
-                //Core.Log.LogInfo($"Received message: {message}");
 
                 if (VerifyMAC(message, out string originalMessage))
                 {
-                    //Core.Log.LogInfo($"Verified message, handling...");
                     EclipseService.HandleClientMessage(originalMessage);
                     EntityManager.DestroyEntity(entity);
                 }

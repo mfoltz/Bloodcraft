@@ -8,6 +8,7 @@ using Stunlock.Core;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
 internal static class Extensions
@@ -15,7 +16,6 @@ internal static class Extensions
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     
     public delegate void ActionRef<T>(ref T item);
@@ -25,7 +25,6 @@ internal static class Extensions
         action(ref item);
         EntityManager.SetComponentData(entity, item);
     }
-    
     public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
     {
         // Get the ComponentType for T
@@ -123,14 +122,14 @@ internal static class Extensions
     {
         return ServerGameManager.GetOwner(entity);
     }
-    public static bool FollowingPlayer(this Entity entity, out Entity player)
+    public static bool TryGetFollowedPlayer(this Entity entity, out Entity player)
     {
         player = Entity.Null;
         if (entity.Has<Follower>())
         {
             Follower follower = entity.Read<Follower>();
             Entity followed = follower.Followed._Value;
-            if (followed.Has<PlayerCharacter>())
+            if (followed.IsPlayer())
             {
                 player = followed;
                 return true;
@@ -138,7 +137,7 @@ internal static class Extensions
         }
         return false;
     }
-    public static bool HasPlayer(this Entity entity, out Entity player)
+    public static bool TryGetPlayer(this Entity entity, out Entity player)
     {
         player = Entity.Null;
         if (entity.Has<PlayerCharacter>())
@@ -148,7 +147,7 @@ internal static class Extensions
         }
         return false;
     }
-    public static bool IsVampire(this Entity entity)
+    public static bool IsPlayer(this Entity entity)
     {
         if (entity.Has<VampireTag>())
         {
@@ -187,5 +186,22 @@ internal static class Extensions
     public static ulong GetSteamId(this Entity entity)
     {
         return entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+    }
+    public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+    {
+        foreach (var item in source)
+        {
+            action(item);
+        }
+    }
+    public static bool TryGetPlayerInfo(this ulong steamId, out PlayerInfo playerInfo)
+    {
+        if (PlayerCache.TryGetValue(steamId.ToString(), out playerInfo)) return true;
+        return false;
+    }
+    public static bool TryGetPlayerInfo(this string playerName, out PlayerInfo playerInfo)
+    {
+        if (PlayerCache.TryGetValue(playerName, out playerInfo)) return true;
+        return false;
     }
 }

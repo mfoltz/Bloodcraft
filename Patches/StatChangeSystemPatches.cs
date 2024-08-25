@@ -10,6 +10,7 @@ using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
 using Random = System.Random;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -53,7 +54,7 @@ internal static class StatChangeSystemPatches
 
                     if (!statChangeEvent.Entity.Has<Blood>()) continue;
 
-                    BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
+                    BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
                     ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
@@ -61,7 +62,7 @@ internal static class StatChangeSystemPatches
                     
                     float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
 
-                    if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige) && bloodPrestige > 0)
+                    if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige))
                     {
                         legacyKey = (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
                         if (legacyKey > 0)
@@ -114,7 +115,7 @@ internal static class StatChangeSystemPatches
 
                 if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue;
 
-                if (dealDamageEvent.SpellSource.GetOwner().HasPlayer(out Entity player) && !dealDamageEvent.Target.IsVampire())
+                if (dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player) && !dealDamageEvent.Target.IsPlayer())
                 {                    
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;

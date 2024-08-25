@@ -1,219 +1,250 @@
-﻿namespace Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Services;
+using static Bloodcraft.Systems.Expertise.WeaponSystem;
+
+namespace Bloodcraft.Systems.Expertise;
+public enum WeaponType
+{
+    Sword,
+    Axe,
+    Mace,
+    Spear,
+    Crossbow,
+    GreatSword,
+    Slashers,
+    Pistols,
+    Reaper,
+    Longbow,
+    Whip,
+    Unarmed,
+    FishingPole
+}
 public interface IExpertiseHandler
 {
-    void AddExpertise(ulong steamID, float experience);
-
-    void SaveChanges();
-
     KeyValuePair<int, float> GetExpertiseData(ulong steamID);
-
-    void UpdateExpertiseData(ulong steamID, KeyValuePair<int, float> xpData);
-
-    WeaponSystem.WeaponType GetWeaponType();
+    void SetExpertiseData(ulong steamID, KeyValuePair<int, float> xpData);
+    WeaponType GetWeaponType();
 }
 public static class ExpertiseHandlerFactory
 {
-    public static IExpertiseHandler GetExpertiseHandler(WeaponSystem.WeaponType weaponType)
+    public static IExpertiseHandler GetExpertiseHandler(WeaponType weaponType)
     {
         return weaponType switch
         {
-            WeaponSystem.WeaponType.Sword => new SwordHandler(),
-            WeaponSystem.WeaponType.Axe => new AxeHandler(),
-            WeaponSystem.WeaponType.Mace => new MaceHandler(),
-            WeaponSystem.WeaponType.Spear => new SpearHandler(),
-            WeaponSystem.WeaponType.Crossbow => new CrossbowHandler(),
-            WeaponSystem.WeaponType.GreatSword => new GreatSwordHandler(),
-            WeaponSystem.WeaponType.Slashers => new SlashersHandler(),
-            WeaponSystem.WeaponType.Pistols => new PistolsHandler(),
-            WeaponSystem.WeaponType.Reaper => new ReaperHandler(),
-            WeaponSystem.WeaponType.Longbow => new LongbowHandler(),
-            WeaponSystem.WeaponType.Whip => new WhipHandler(),
-            WeaponSystem.WeaponType.FishingPole => new FishingPoleHandler(),
-            WeaponSystem.WeaponType.Unarmed => new UnarmedHandler(),
+            WeaponType.Sword => new SwordHandler(),
+            WeaponType.Axe => new AxeHandler(),
+            WeaponType.Mace => new MaceHandler(),
+            WeaponType.Spear => new SpearHandler(),
+            WeaponType.Crossbow => new CrossbowHandler(),
+            WeaponType.GreatSword => new GreatSwordHandler(),
+            WeaponType.Slashers => new SlashersHandler(),
+            WeaponType.Pistols => new PistolsHandler(),
+            WeaponType.Reaper => new ReaperHandler(),
+            WeaponType.Longbow => new LongbowHandler(),
+            WeaponType.Whip => new WhipHandler(),
+            WeaponType.FishingPole => new FishingPoleHandler(),
+            WeaponType.Unarmed => new UnarmedHandler(),
             _ => null,
         };
     }
 }
 public abstract class BaseExpertiseHandler : IExpertiseHandler
 {
-    protected abstract IDictionary<ulong, KeyValuePair<int, float>> DataStructure { get; }
-    public void AddExpertise(ulong steamID, float experience)
-    {
-        if (DataStructure.TryGetValue(steamID, out var currentData))
-        {
-            DataStructure[steamID] = new KeyValuePair<int, float>(currentData.Key, currentData.Value + experience);
-        }
-        else
-        {
-            DataStructure.Add(steamID, new KeyValuePair<int, float>(0, experience));
-        }
-    }
-    public KeyValuePair<int, float> GetExpertiseData(ulong steamID)
-    {
-        if (DataStructure.TryGetValue(steamID, out var xpData))
-            return xpData;
-        return new KeyValuePair<int, float>(0, 0);
-    }
-    public void UpdateExpertiseData(ulong steamID, KeyValuePair<int, float> xpData)
-    {
-        DataStructure[steamID] = xpData;
-    }
-    public abstract void SaveChanges();
-    public abstract WeaponSystem.WeaponType GetWeaponType();
+    public abstract KeyValuePair<int, float> GetExpertiseData(ulong steamID);
+    public abstract void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data);
+    public abstract WeaponType GetWeaponType();
 }
 public class SwordHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSwordExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerSwordExpertise();
+        return steamID.TryGetPlayerSwordExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Sword;
+        steamID.SetPlayerSwordExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Sword;
     }
 }
 public class AxeHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerAxeExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerAxeExpertise();
+        return steamID.TryGetPlayerAxeExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Axe;
+        steamID.SetPlayerAxeExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Axe;
     }
 }
 public class MaceHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerMaceExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerMaceExpertise();
+        return steamID.TryGetPlayerMaceExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Mace;
+        steamID.SetPlayerMaceExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Mace;
     }
 }
 public class SpearHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSpearExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerSpearExpertise();
+        return steamID.TryGetPlayerSpearExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Spear;
+        steamID.SetPlayerSpearExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Spear;
     }
 }
 public class CrossbowHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerCrossbowExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerCrossbowExpertise();
+        return steamID.TryGetPlayerCrossbowExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Crossbow;
+        steamID.SetPlayerCrossbowExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Crossbow;
     }
 }
 public class GreatSwordHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerGreatSwordExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerGreatSwordExpertise();
+        return steamID.TryGetPlayerGreatSwordExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.GreatSword;
+        steamID.SetPlayerGreatSwordExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.GreatSword;
     }
 }
 public class SlashersHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerSlashersExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerSlashersExpertise();
+        return steamID.TryGetPlayerSlashersExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Slashers;
+        steamID.SetPlayerSlashersExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Slashers;
     }
 }
 public class PistolsHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerPistolsExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerPistolsExpertise();
+        return steamID.TryGetPlayerPistolsExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Pistols;
+        steamID.SetPlayerPistolsExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Pistols;
     }
 }
 public class ReaperHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerReaperExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerReaperExpertise();
+        return steamID.TryGetPlayerReaperExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Reaper;
+        steamID.SetPlayerReaperExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Reaper;
     }
 }
 public class LongbowHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerLongbowExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerLongbowExpertise();
+        return steamID.TryGetPlayerLongbowExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Longbow;
+        steamID.SetPlayerLongbowExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Longbow;
     }
 }
 public class WhipHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerWhipExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerWhipExpertise();
+        return steamID.TryGetPlayerWhipExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Whip;
+        steamID.SetPlayerWhipExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Whip;
     }
 }
 public class FishingPoleHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerFishingPoleExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerFishingPoleExpertise();
+        return steamID.TryGetPlayerFishingPoleExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.FishingPole;
+        steamID.SetPlayerFishingPoleExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.FishingPole;
     }
 }
 public class UnarmedHandler : BaseExpertiseHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerUnarmedExpertise;
-    public override void SaveChanges()
+    public override KeyValuePair<int, float> GetExpertiseData(ulong steamID)
     {
-        Core.DataStructures.SavePlayerUnarmedExpertise();
+        return steamID.TryGetPlayerUnarmedExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
-    public override WeaponSystem.WeaponType GetWeaponType()
+    public override void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data)
     {
-        return WeaponSystem.WeaponType.Unarmed;
+        steamID.SetPlayerUnarmedExpertise(data);
+    }
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.Unarmed;
     }
 }

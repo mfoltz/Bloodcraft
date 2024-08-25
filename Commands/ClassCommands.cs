@@ -1,13 +1,12 @@
 ﻿using Bloodcraft.Services;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using Bloodcraft.Systems.Leveling;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Core.DataStructures;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
-using static Bloodcraft.Systems.Expertise.WeaponHandler.WeaponStats;
-using static Bloodcraft.Systems.Legacies.BloodHandler.BloodStats;
+using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
+using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
@@ -15,14 +14,12 @@ namespace Bloodcraft.Commands;
 [CommandGroup("class")]
 internal static class ClassCommands
 {
-    static LocalizationService LocalizationService => Core.LocalizationService;
-
-    static bool ClassesInactive => !ConfigService.SoftSynergies && !ConfigService.HardSynergies;
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
     public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -36,26 +33,26 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (PlayerClass.TryGetValue(steamId, out var classes))
+        if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
         {
-            if (classes.Keys.Count > 0)
-            {
-                LocalizationService.HandleReply(ctx, "You have already chosen a class.");
-                return;
-            }
             UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
             LocalizationService.HandleReply(ctx, $"You have chosen <color=white>{parsedClassType}</color>");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "You have already chosen a class.");
         }
     }
 
     [Command(name: "choosespell", shortHand: "csp", adminOnly: false, usage: ".class csp [#]", description: "Sets shift spell for class if prestige level is high enough.")]
     public static void ChooseClassSpell(ChatCommandContext ctx, int choice)
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
+
         if (!ConfigService.ShiftSlot)
         {
             LocalizationService.HandleReply(ctx, "Shift slots are not enabled for class spells.");
@@ -64,15 +61,11 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (PlayerClass.TryGetValue(steamId, out var classes))
+        if (HasClass(steamId))
         {
-            if (classes.Keys.Count == 0)
-            {
-                LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
-                return;
-            }
-            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
-            if (PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
+            PlayerClasses playerClass = GetPlayerClass(steamId);
+
+            if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
                 if (prestigeLevel < ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
                 {
@@ -94,11 +87,10 @@ internal static class ClassCommands
                     return;
                 }
 
-                if (PlayerSpells.TryGetValue(steamId, out var spellsData))
+                if (steamId.TryGetPlayerSpells(out var spellsData))
                 {
                     spellsData.ClassSpell = spells[choice - 1];
-                    PlayerSpells[steamId] = spellsData;
-                    SavePlayerSpells();
+                    steamId.SetPlayerSpells(spellsData);
 
                     LocalizationService.HandleReply(ctx, $"You have chosen spell <color=#CBC3E3>{new PrefabGUID(spells[choice - 1]).LookupName()}</color> from <color=white>{playerClass}</color>, it will be available on weapons and unarmed if .shift is enabled.");
                 }
@@ -117,7 +109,7 @@ internal static class ClassCommands
     [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
     public static void ClassChangeCommand(ChatCommandContext ctx, string className)
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -132,7 +124,7 @@ internal static class ClassCommands
         ulong steamId = ctx.Event.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (!PlayerClass.TryGetValue(steamId, out var classes))
+        if (steamId.TryGetPlayerClasses(out var classes) && !HasClass(steamId))
         {
             LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
             return;
@@ -144,17 +136,17 @@ internal static class ClassCommands
             return;
         }
 
-        RemoveClassBuffs(ctx, steamId);
-
         classes.Clear();
+        RemoveClassBuffs(ctx, steamId);
         UpdateClassData(character, parsedClassType, classes, steamId);
+
         LocalizationService.HandleReply(ctx, $"You have changed to <color=white>{parsedClassType}</color>");
     }
 
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
     public static void SyncClassBuffsCommand(ChatCommandContext ctx)
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -162,19 +154,14 @@ internal static class ClassCommands
 
         var steamId = ctx.Event.User.PlatformId;
 
-        if (PlayerClass.TryGetValue(steamId, out var classes))
+        if (HasClass(steamId))
         {
-            if (classes.Keys.Count == 0)
-            {
-                LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
-                return;
-            }
-            PlayerClasses playerClass = classes.Keys.FirstOrDefault();
+            PlayerClasses playerClass = GetPlayerClass(steamId);
             List<int> perks = GetClassBuffs(steamId);
 
             if (perks.Count == 0)
             {
-                LocalizationService.HandleReply(ctx, "Class buffs not found.");
+                LocalizationService.HandleReply(ctx, "Class buffs not found...");
                 return;
             }
 
@@ -187,12 +174,16 @@ internal static class ClassCommands
             ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, fromCharacter);
             LocalizationService.HandleReply(ctx, $"Class buffs applied for <color=white>{playerClass}</color>");
         }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
+        }
     }
 
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".class l", description: "Lists classes.")]
     public static void ListClasses(ChatCommandContext ctx)
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -205,85 +196,69 @@ internal static class ClassCommands
     [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [ClassType]", description: "Shows perks that can be gained from class.")]
     public static void ClassPerks(ChatCommandContext ctx, string classType = "")
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
+
         ulong steamId = ctx.Event.User.PlatformId;
-        if (PlayerClass.TryGetValue(steamId, out var classes))
+
+        if (HasClass(steamId))
         {
-            // Parse classType parameter
-            PlayerClasses playerClass;
+            PlayerClasses playerClass = GetPlayerClass(steamId);
+
             if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
             {
                 playerClass = requestedClass;
             }
-            else
-            {
-                playerClass = classes.Keys.FirstOrDefault();
-            }
 
-            ShowClassBuffs(ctx, playerClass);
+            ReplyClassBuffs(ctx, playerClass);
         }
         else
         {
-            if (string.IsNullOrEmpty(classType))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
             {
-                foreach (PlayerClasses cls in Enum.GetValues(typeof(PlayerClasses)))
-                {
-                    ShowClassBuffs(ctx, cls);
-                }
-            }
-            else if (TryParseClass(classType, out PlayerClasses requestedClass))
-            {
-                ShowClassBuffs(ctx, requestedClass);
+                ReplyClassBuffs(ctx, requestedClass);
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid class type.");
+                LocalizationService.HandleReply(ctx, "Invalid class type. Use '.class l' to see options.");
             }
         }
     }
+
     [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [ClassType]", description: "Shows spells that can be gained from class.")]
     public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
         }
+
         ulong steamId = ctx.Event.User.PlatformId;
-        if (PlayerClass.TryGetValue(steamId, out var classes))
+
+        if (HasClass(steamId))
         {
-            PlayerClasses playerClass;
+            PlayerClasses playerClass = GetPlayerClass(steamId);
+
             if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
             {
                 playerClass = requestedClass;
             }
-            else
-            {
-                playerClass = classes.Keys.FirstOrDefault();
-            }
 
-            ShowClassSpells(ctx, playerClass);
+            ReplyClassSpells(ctx, playerClass);
         }
         else
         {
-            if (string.IsNullOrEmpty(classType))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
             {
-                foreach (PlayerClasses cls in Enum.GetValues(typeof(PlayerClasses)))
-                {
-                    ShowClassSpells(ctx, cls);
-                }
-            }
-            else if (TryParseClass(classType, out PlayerClasses requestedClass))
-            {
-                ShowClassSpells(ctx, requestedClass);
+                ReplyClassSpells(ctx, requestedClass);
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid class type.");
+                LocalizationService.HandleReply(ctx, "Invalid class type. Use '.class l' to see options.");
             }
         }
     }
@@ -301,7 +276,7 @@ internal static class ClassCommands
 
                 if (weaponStats.Count == 0 && bloodStats.Count == 0)
                 {
-                    LocalizationService.HandleReply(ctx, "No stats found for the specified class.");
+                    LocalizationService.HandleReply(ctx, "No stat synergies found for class.");
                     return;
                 }
 

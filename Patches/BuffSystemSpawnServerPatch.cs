@@ -23,9 +23,7 @@ internal static class BuffSpawnSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-
-    
+    static SystemService SystemService => Core.SystemService; 
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
@@ -69,6 +67,8 @@ internal static class BuffSpawnSystemPatches
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 string prefabName = prefabGUID.LookupName().ToLower();
 
+                Core.Log.LogInfo(prefabName); // check if spawn buff for minions from fam with player as owner
+
                 Entity player;
                 
                 if (prefabName.Contains("holybubble"))
@@ -103,7 +103,7 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 }
 
-                if (prefabName.Contains("emote_onaggro") && entity.GetBuffTarget().FollowingPlayer(out player))
+                if (prefabName.Contains("emote_onaggro") && entity.GetBuffTarget().TryGetFollowedPlayer(out player))
                 {
                     ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     if (!GetPlayerBool(steamId, "VBloodEmotes"))
@@ -113,9 +113,9 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 }
 
-                if (entity.GetBuffTarget().FollowingPlayer(out player))
+                if (entity.GetBuffTarget().TryGetFollowedPlayer(out player))
                 {
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FindPlayerFamiliar(player);
                     if (familiar.Exists())
                     {
                         if (prefabGUID.Equals(draculaReturnHide))
@@ -156,9 +156,9 @@ internal static class BuffSpawnSystemPatches
 
                 if (ConfigService.FamiliarSystem && (prefabGUID.Equals(combatStance) || prefabGUID.Equals(combatBuff)))
                 {
-                    if (entity.GetBuffTarget().HasPlayer(out player))
+                    if (entity.GetBuffTarget().TryGetPlayer(out player))
                     {
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = FindPlayerFamiliar(player);
                         if (EntityManager.Exists(familiar))
                         {
                             ReturnFamiliar(player, familiar);
@@ -167,11 +167,11 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 } // return familiar when entering combat if far enough away
 
-                if (ConfigService.ProfessionSystem && prefabName.Contains("consumable") && entity.GetBuffTarget().HasPlayer(out player))
+                if (ConfigService.ProfessionSystem && prefabName.Contains("consumable") && entity.GetBuffTarget().TryGetPlayer(out player))
                 {
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                     ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    int level = handler.GetExperienceData(steamId).Key;
+                    int level = handler.GetProfessionData(steamId).Key;
 
                     if (ConfigService.PotionStacking)
                     {
@@ -198,9 +198,9 @@ internal static class BuffSpawnSystemPatches
                     }
                 } // alchemy bonuses/potion stacking
 
-                if (ConfigService.FamiliarSystem && prefabName.Contains("consumable") && entity.GetBuffTarget().HasPlayer(out player))
+                if (ConfigService.FamiliarSystem && prefabName.Contains("consumable") && entity.GetBuffTarget().TryGetPlayer(out player))
                 {
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FindPlayerFamiliar(player);
                     if (familiar != Entity.Null)
                     {
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -219,14 +219,14 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 } // familiar potion sharing
 
-                if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.GetBuffTarget().HasPlayer(out player)) // teleport familiar to player after waygate
+                if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.GetBuffTarget().TryGetPlayer(out player)) // teleport familiar to player after waygate
                 {
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FindPlayerFamiliar(player);
                     if (familiar.Exists())
                     {
                         ReturnFamiliar(player, familiar);
                     }
-                    else if (Core.DataStructures.FamiliarActives.TryGetValue(player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId, out var data))
+                    else if (player.GetSteamId().TryGetFamiliarActives(out var data))
                     {
                         if (data.Familiar.Exists())
                         {
@@ -236,7 +236,7 @@ internal static class BuffSpawnSystemPatches
                     continue;
                 }
 
-                if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().HasPlayer(out player)) // feed execute kills
+                if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().TryGetPlayer(out player)) // feed execute kills
                 {
                     Entity died = entity.Read<SpellTarget>().Target._Entity;
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
@@ -280,7 +280,7 @@ internal static class BuffSpawnSystemPatches
                     Entity userEntity = fromCharacter.User;
                     ulong steamId = userEntity.Read<User>().PlatformId;
 
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+                    Entity familiar = FindPlayerFamiliar(character);
                     if (familiar.Exists() && !familiar.Disabled())
                     {
                         EmoteSystemPatch.CallDismiss(userEntity, character, steamId);
@@ -309,9 +309,9 @@ internal static class BuffSpawnSystemPatches
 
                 if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
                 {
-                    if (entity.GetBuffTarget().HasPlayer(out Entity player))
+                    if (entity.GetBuffTarget().TryGetPlayer(out Entity player))
                     {
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = FindPlayerFamiliar(player);
                         if (familiar.Exists())
                         {
                             player.With((ref CombatMusicListener_Shared shared) =>

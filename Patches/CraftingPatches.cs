@@ -14,8 +14,6 @@ namespace Bloodcraft.Patches;
 internal static class CraftingPatches
 {
     static SystemService SystemService => Core.SystemService;
-
-    
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     const float CraftThreshold = 0.995f;
@@ -75,7 +73,7 @@ internal static class CraftingPatches
 
                                 if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
 
-                                int level = handler.GetExperienceData(steamId).Key;
+                                int level = handler.GetProfessionData(steamId).Key;
 
                                 durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
                                 durability.Value = durability.MaxDurability;
@@ -116,6 +114,7 @@ internal static class CraftingPatches
 
                         Entity userEntity = item.InitiateUser;
                         User user = userEntity.Read<User>();
+                        ulong steamId = user.PlatformId;
 
                         PrefabGUID recipePrefab = item.RecipeGuid;
                         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
@@ -154,10 +153,9 @@ internal static class CraftingPatches
                             var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                             PrefabGUID itemPrefab = outputBuffer[0].Guid;
 
-                            if (!Core.DataStructures.PlayerCraftingJobs.TryGetValue(userEntity, out var playerJobs))
+                            if (!steamId.TryGetPlayerCraftingJobs(out var playerJobs))
                             {
-                                playerJobs = [];
-                                Core.DataStructures.PlayerCraftingJobs.Add(userEntity, playerJobs);
+                                steamId.SetPlayerCraftingJobs([]);
                             }
 
                             if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))

@@ -1,4 +1,3 @@
-using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
@@ -8,8 +7,11 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Expertise.WeaponHandler;
-using static Bloodcraft.Core.DataStructures;
+using static Bloodcraft.Systems.Expertise.WeaponManager;
+using static Bloodcraft.Systems.Expertise.WeaponSystem;
+using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
+using static Bloodcraft.Utilities;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Commands;
 
@@ -19,10 +21,6 @@ internal static class WeaponCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
-    static PlayerService PlayerService => Core.PlayerService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 
@@ -35,7 +33,7 @@ internal static class WeaponCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        WeaponSystem.WeaponType weaponType = GetCurrentWeaponType(character);
+        WeaponType weaponType = GetCurrentWeaponType(character);
 
         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (handler == null)
@@ -48,13 +46,13 @@ internal static class WeaponCommands
         var ExpertiseData = handler.GetExpertiseData(steamID);
         int progress = (int)(ExpertiseData.Value - WeaponSystem.ConvertLevelToXp(ExpertiseData.Key));
 
-        int prestigeLevel = PlayerPrestiges.TryGetValue(steamID, out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
+        int prestigeLevel = steamID.TryGetPlayerPrestiges( out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
             LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{WeaponSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
 
-            if (PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
+            if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {
                 List<KeyValuePair<WeaponStats.WeaponStatType, string>> bonusWeaponStats = [];
                 foreach (var stat in stats)
@@ -98,12 +96,8 @@ internal static class WeaponCommands
         }
         var SteamID = ctx.Event.User.PlatformId;
 
-        if (PlayerBools.TryGetValue(SteamID, out var bools))
-        {
-            bools["ExpertiseLogging"] = !bools["ExpertiseLogging"];
-        }
-        SavePlayerBools();
-        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(bools["ExpertiseLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");          
+        TogglePlayerBool(SteamID, "ExpertiseLogging");
+        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(GetPlayerBool(SteamID, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");          
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
@@ -121,7 +115,7 @@ internal static class WeaponCommands
             return;
         }
 
-        if (!Enum.TryParse<WeaponSystem.WeaponType>(weaponType, true, out var WeaponType))
+        if (!Enum.TryParse<WeaponType>(weaponType, true, out var WeaponType))
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon choice.");
             return;
@@ -131,7 +125,6 @@ internal static class WeaponCommands
         if (ChooseStat(steamID, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
-            SavePlayerWeaponStats();
         }
         else
         {
@@ -150,7 +143,7 @@ internal static class WeaponCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         ulong steamID = ctx.Event.User.PlatformId;
-        WeaponSystem.WeaponType weaponType = GetCurrentWeaponType(character);
+        WeaponType weaponType = GetCurrentWeaponType(character);
 
         if (!ConfigService.ResetExpertiseItem.Equals(0))
         {
@@ -187,14 +180,12 @@ internal static class WeaponCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.UserCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!EntityManager.Exists(foundUserEntity))
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
             return;
         }
-
-        User foundUser = foundUserEntity.Read<User>();
 
         if (level < 0 || level > ConfigService.MaxExpertiseLevel)
         {
@@ -203,7 +194,7 @@ internal static class WeaponCommands
             return;
         }
 
-        if (!Enum.TryParse<WeaponSystem.WeaponType>(weapon, true, out var weaponType))
+        if (!Enum.TryParse<WeaponType>(weapon, true, out var weaponType))
         {
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxExpertiseLevel}.");
             return;
@@ -217,13 +208,18 @@ internal static class WeaponCommands
             return;
         }
 
-        ulong steamId = foundUser.PlatformId;
+        ulong steamId = playerInfo.User.PlatformId;
 
         var xpData = new KeyValuePair<int, float>(level, WeaponSystem.ConvertLevelToXp(level));
-        expertiseHandler.UpdateExpertiseData(steamId, xpData);
-        expertiseHandler.SaveChanges();
-
-        LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
+        if (SetExtensionMap.TryGetValue(weaponType, out var setFunc))
+        {
+            setFunc(steamId, xpData);
+            LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find matching save method from weapon type...");
+        }
     }
 
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".wep lst", description: "Lists weapon stats available.")]
@@ -258,7 +254,8 @@ internal static class WeaponCommands
             LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
             return;
         }
-        string weaponTypes = string.Join(", ", Enum.GetNames(typeof(WeaponSystem.WeaponType)));
+
+        string weaponTypes = string.Join(", ", Enum.GetNames(typeof(WeaponType)));
         LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 
@@ -276,30 +273,28 @@ internal static class WeaponCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.UserCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!EntityManager.Exists(foundUserEntity))
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
             return;
         }
 
-        User foundUser = foundUserEntity.Read<User>();
-        ulong SteamID = foundUser.PlatformId;
+        ulong SteamID = playerInfo.User.PlatformId;
 
-        if (PlayerSpells.TryGetValue(SteamID, out var spells))
+        if (SteamID.TryGetPlayerSpells(out var spells))
         {
             if (slot == 1)
             {
                 spells.FirstUnarmed = ability;
-                LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{foundUser.CharacterName.Value}</color>.");
+                LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
             }
             else
             {
                 spells.SecondUnarmed = ability;
-                LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{foundUser.CharacterName.Value}</color>.");
+                LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
             }
-            PlayerSpells[SteamID] = spells;
-            SavePlayerSpells();
+            SteamID.SetPlayerSpells(spells);
         }    
     }
 
@@ -327,6 +322,7 @@ internal static class WeaponCommands
                     itemEntity.Write(weaponLevelSource);
                 }
             }
+
             LocalizationService.HandleReply(ctx, "Set weapon levels to original values.");
         }
     }

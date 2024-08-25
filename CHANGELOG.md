@@ -1,10 +1,11 @@
 `1.3.0`
 - added config option for potion stacking
 - added configurable item cost for choosing familiar visual if already shiny via '.fam v [SpellSchool]', will override current visual (freebie still works as before, cost will take precedence if familiar already has a visual unlocked)
-- rested XP (working, needs minor refinements. idea from Odjit)
-- familiar options command (where general familiar toggles now live that don't warrant use of an emote action)
-- familiar aggro/team stuff (TeamService, WIP)
-- added general functionality needed to support client companion (WIP)
+- rested XP (solid idea from Odjit), if enabled earn bonus experience as configured for logging out in your coffin!
+- familiar options command (where familiar settings now live that don't warrant use of an emote action, currently shiny/vbloodemote toggles)
+- familiars now seen as minions of the player by the game, for PvE prevents targetting other players and for PvP prevents them from dealing damage to PvP protected targets
+- added config option to enable sending updates to clientside mod for UI (needs to be enabled on the server or client mod won't do anything by itself)
+- added reminders for various mod features that will be sent to players on occasion for classes/expertise/legacies, can be toggled on and off via command (.remindme)
 
 `1.2.4`
 - special thanks to Odjit for tracking down the party bug and discovering the reroll issue <3

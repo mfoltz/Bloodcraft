@@ -1,12 +1,38 @@
-﻿using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+﻿using Bloodcraft.Services;
 
 namespace Bloodcraft.Systems.Leveling;
+public enum PrestigeType
+{
+    Experience,
+    Exo,
+    SwordExpertise,
+    AxeExpertise,
+    MaceExpertise,
+    SpearExpertise,
+    CrossbowExpertise,
+    GreatSwordExpertise,
+    SlashersExpertise,
+    PistolsExpertise,
+    ReaperExpertise,
+    LongbowExpertise,
+    WhipExpertise,
+    UnarmedExpertise,
+    FishingPoleExpertise,
+    WorkerLegacy,
+    WarriorLegacy,
+    ScholarLegacy,
+    RogueLegacy,
+    MutantLegacy,
+    DraculinLegacy,
+    ImmortalLegacy,
+    CreatureLegacy,
+    BruteLegacy
+}
 public interface IPrestigeHandler
 {
     void Prestige(ulong steamID);
-    KeyValuePair<int, float> GetExperienceData(ulong steamID);
     int GetPrestigeLevel(ulong steamID);
-    void SaveChanges();
+    KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID);
     PrestigeType GetPrestigeType();
 }
 public static class PrestigeHandlerFactory
@@ -44,43 +70,43 @@ public static class PrestigeHandlerFactory
 }
 public abstract class BasePrestigeHandler : IPrestigeHandler
 {
-    protected abstract IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure { get; }
-    protected abstract IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure { get; }
-    public void Prestige(ulong steamID)
+    public abstract void Prestige(ulong steamID);
+    public virtual int GetPrestigeLevel(ulong steamID)
     {
-        if (PrimaryStructure.ContainsKey(steamID))
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
         {
-            PrimaryStructure[steamID] = new KeyValuePair<int, float>(0, 0);
-            Core.DataStructures.PlayerPrestiges[steamID][GetPrestigeType()] += 1;
-            Core.DataStructures.SavePlayerPrestiges();
-        }
-    }
-    public KeyValuePair<int, float> GetExperienceData(ulong steamID)
-    {
-        if (PrimaryStructure.TryGetValue(steamID, out var xpData)) return xpData;
-        return new KeyValuePair<int, float>(0, 0);
-    }
-    public int GetPrestigeLevel(ulong steamID)
-    {
-        if (SecondaryStructure.TryGetValue(steamID, out var prestigeData))
-        {
-            if (prestigeData.TryGetValue(GetPrestigeType(), out var prestigeLevel))
-            {
-                return prestigeLevel;
-            }
+            return prestigeLevel;
         }
         return 0;
     }
-    public abstract void SaveChanges();
+    public abstract KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID);
     public abstract PrestigeType GetPrestigeType();
 }
 public class LevelingPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerExperience;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerExperience();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerExperience(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerExperience(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerExperience(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -89,11 +115,28 @@ public class LevelingPrestigeHandler : BasePrestigeHandler
 }
 public class SwordPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerSwordExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerSwordExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerSwordExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerSwordExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerSwordExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -102,11 +145,28 @@ public class SwordPrestigeHandler : BasePrestigeHandler
 }
 public class AxePrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerAxeExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerAxeExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerAxeExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerAxeExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerAxeExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -115,11 +175,28 @@ public class AxePrestigeHandler : BasePrestigeHandler
 }
 public class MacePrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerMaceExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerMaceExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerMaceExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerMaceExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerMaceExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -128,11 +205,28 @@ public class MacePrestigeHandler : BasePrestigeHandler
 }
 public class SpearPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerSpearExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerSpearExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerSpearExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerSpearExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerSpearExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -141,11 +235,28 @@ public class SpearPrestigeHandler : BasePrestigeHandler
 }
 public class CrossbowPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerCrossbowExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerCrossbowExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerCrossbowExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerCrossbowExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerCrossbowExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -154,11 +265,28 @@ public class CrossbowPrestigeHandler : BasePrestigeHandler
 }
 public class GreatSwordPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerGreatSwordExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerGreatSwordExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerGreatSwordExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerGreatSwordExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerGreatSwordExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -167,11 +295,28 @@ public class GreatSwordPrestigeHandler : BasePrestigeHandler
 }
 public class SlashersPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerSlashersExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerSlashersExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerSlashersExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerSlashersExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerSlashersExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -180,11 +325,28 @@ public class SlashersPrestigeHandler : BasePrestigeHandler
 }
 public class PistolsPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerPistolsExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerPistolsExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerPistolsExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerPistolsExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerPistolsExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -193,11 +355,28 @@ public class PistolsPrestigeHandler : BasePrestigeHandler
 }
 public class ReaperPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerReaperExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerReaperExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerReaperExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerReaperExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerReaperExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -206,11 +385,28 @@ public class ReaperPrestigeHandler : BasePrestigeHandler
 }
 public class LongbowPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerLongbowExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerLongbowExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerLongbowExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerLongbowExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerLongbowExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -219,11 +415,28 @@ public class LongbowPrestigeHandler : BasePrestigeHandler
 }
 public class WhipPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerWhipExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerWhipExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerWhipExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerWhipExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerWhipExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -232,11 +445,28 @@ public class WhipPrestigeHandler : BasePrestigeHandler
 }
 public class UnarmedPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerUnarmedExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerUnarmedExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerUnarmedExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerUnarmedExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerUnarmedExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -245,11 +475,28 @@ public class UnarmedPrestigeHandler : BasePrestigeHandler
 }
 public class FishingPolePrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerFishingPoleExpertise;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerFishingPoleExpertise();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerFishingPoleExpertise(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerFishingPoleExpertise(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerFishingPoleExpertise(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -258,11 +505,28 @@ public class FishingPolePrestigeHandler : BasePrestigeHandler
 }
 public class WorkerLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerWorkerLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerWorkerLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerWorkerLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerWorkerLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerWorkerLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -271,11 +535,28 @@ public class WorkerLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class WarriorLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerWarriorLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerWarriorLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerWarriorLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerWarriorLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerWarriorLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -284,11 +565,28 @@ public class WarriorLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class ScholarLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerScholarLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerScholarLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerScholarLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerScholarLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerScholarLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -297,11 +595,28 @@ public class ScholarLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class RogueLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerRogueLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerRogueLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerRogueLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerRogueLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerRogueLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -310,11 +625,28 @@ public class RogueLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class MutantLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerMutantLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerMutantLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerMutantLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerMutantLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerMutantLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -339,11 +671,28 @@ public class VBloodLegacyPrestigeHandler : BasePrestigeHandler
 */
 public class DraculinLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerDraculinLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerDraculinLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerDraculinLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerDraculinLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerDraculinLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -352,11 +701,28 @@ public class DraculinLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class ImmortalLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerImmortalLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerImmortalLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerImmortalLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerImmortalLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerImmortalLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -365,11 +731,28 @@ public class ImmortalLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class CreatureLegacyPrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerCreatureLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerCreatureLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerCreatureLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerCreatureLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerCreatureLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {
@@ -378,11 +761,28 @@ public class CreatureLegacyPrestigeHandler : BasePrestigeHandler
 }
 public class BrutePrestigeHandler : BasePrestigeHandler
 {
-    protected override IDictionary<ulong, KeyValuePair<int, float>> PrimaryStructure => Core.DataStructures.PlayerBruteLegacy;
-    protected override IDictionary<ulong, Dictionary<PrestigeType, int>> SecondaryStructure => Core.DataStructures.PlayerPrestiges;
-    public override void SaveChanges()
+    public override void Prestige(ulong steamID)
     {
-        Core.DataStructures.SavePlayerBruteLegacy();
+        PrestigeType prestigeType = GetPrestigeType();
+        if (steamID.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(prestigeType, out var prestigeLevel))
+        {
+            if (steamID.TryGetPlayerBruteLegacy(out var data))
+            {
+                data = new KeyValuePair<int, float>(0, 0);
+                prestigeLevel++;
+                prestigeData[prestigeType] = prestigeLevel;
+                steamID.SetPlayerBruteLegacy(data);
+                steamID.SetPlayerPrestiges(prestigeData);
+            }
+        }
+    }
+    public override int GetPrestigeLevel(ulong steamID)
+    {
+        return base.GetPrestigeLevel(steamID);
+    }
+    public override KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID)
+    {
+        return steamID.TryGetPlayerBruteLegacy(out var data) ? data : new KeyValuePair<int, float>(0, 0);
     }
     public override PrestigeType GetPrestigeType()
     {

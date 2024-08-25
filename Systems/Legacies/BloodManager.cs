@@ -1,67 +1,73 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
 using Unity.Entities;
-using static Bloodcraft.Systems.Legacies.BloodHandler.BloodStats;
+using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
+using static Bloodcraft.Systems.Legacies.BloodSystem;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Legacies;
-internal static class BloodHandler
+internal static class BloodManager
 {
     static EntityManager EntityManager => Core.EntityManager;
     
-    public static bool ChooseStat(ulong steamId, BloodSystem.BloodType BloodType, BloodStats.BloodStatType statType)
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    public static bool ChooseStat(ulong steamId, BloodType BloodType, BloodStatType statType)
     {
-        if (!Core.DataStructures.PlayerBloodStats.TryGetValue(steamId, out var bloodStats) || !bloodStats.TryGetValue(BloodType, out var Stats))
+        if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
         {
-            Stats = [];
-            Core.DataStructures.PlayerBloodStats[steamId][BloodType] = Stats;
-        }
-
-        if (ConfigService.HardSynergies)
-        {
-            if (!Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) || classes.Count == 0)
+            if (ConfigService.HardSynergies)
             {
-                return false;
-            }
-                
-            List<int> playerClassStats = classes.First().Value.Item2;
-            List<BloodStatType> weaponStatTypes = playerClassStats.Select(value => (BloodStatType)value).ToList();
+                if (!HasClass(steamId))
+                {
+                    return false;
+                }
 
-            if (!weaponStatTypes.Contains(statType))
+                var classes = steamId.TryGetPlayerClasses(out var classData) ? classData : [];
+                var (_, BloodStats) = classes.First().Value; // get class to check if stat allowed
+                List<BloodStatType> bloodStatTypes = BloodStats.Select(value => (BloodStatType)value).ToList();
+
+                if (!bloodStatTypes.Contains(statType)) // hard synergy stat check
+                {
+                    return false;
+                }
+
+                if (Stats.Count >= ConfigService.LegacyStatChoices || Stats.Contains(statType))
+                {
+                    return false; // Only allow configured amount of stats to be chosen and no duplicates
+                }
+
+                Stats.Add(statType);
+                steamId.SetPlayerBloodStats(bloodStats);
+
+                return true;
+            }
+            else
             {
-                return false;
+                if (Stats.Count >= ConfigService.LegacyStatChoices || Stats.Contains(statType))
+                {
+                    return false; // Only allow configured amount of stats to be chosen and no duplicates
+                }
+
+                Stats.Add(statType);
+                steamId.SetPlayerBloodStats(bloodStats);
+
+                return true;
             }
-
-            if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= ConfigService.LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
-            {
-                return false; // Only allow configured amount of stats to be chosen per blood, only allow one stat type per blood
-            }
-
-            Core.DataStructures.PlayerBloodStats[steamId][BloodType].Add(statType);
-            Core.DataStructures.SavePlayerWeaponStats();
-            return true;
         }
-
-        if (Core.DataStructures.PlayerBloodStats[steamId][BloodType].Count >= ConfigService.LegacyStatChoices || Core.DataStructures.PlayerBloodStats[steamId][BloodType].Contains(statType))
-        {
-            return false; // Only allow configured amount of stats to be chosen per weapon
-        }
-            
-        Core.DataStructures.PlayerBloodStats[steamId][BloodType].Add(statType);
-        Core.DataStructures.SavePlayerBloodStats();
-        return true;
+        return false;
     }
-    public static void ResetStats(ulong steamId, BloodSystem.BloodType BloodType)
+    public static void ResetStats(ulong steamId, BloodType BloodType)
     {
-        if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamId, out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
+        if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
         {
             Stats.Clear();
-            Core.DataStructures.SavePlayerBloodStats();
+            steamId.SetPlayerBloodStats(bloodStats);
         }
     }
-    public static void ApplyBloodBonuses(ulong steamId, BloodSystem.BloodType bloodType, Entity bloodBuff)
+    public static void ApplyBloodBonuses(ulong steamId, BloodType bloodType, Entity bloodBuff)
     {
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
-        if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamId, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
+        if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
         {
             if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>())
             {
@@ -106,24 +112,25 @@ internal static class BloodHandler
             }
         }
     }
-    public static float CalculateScaledBloodBonus(IBloodHandler handler, ulong steamId, BloodSystem.BloodType bloodType, BloodHandler.BloodStats.BloodStatType statType)
+    public static float CalculateScaledBloodBonus(IBloodHandler handler, ulong steamId, BloodType bloodType, BloodStatType statType)
     {
         if (handler != null)
         {
             var xpData = handler.GetLegacyData(steamId);
-            float maxBonus = BloodHandler.BloodStats.BloodStatValues[statType];
-
-            if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Count > 0)
+            float maxBonus = BloodStatValues[statType];
+            
+            if (Classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
             {
-                List<int> playerClassStats = classes.First().Value.Item2;
-                List<BloodHandler.BloodStats.BloodStatType> bloodStatTypes = playerClassStats.Select(value => (BloodHandler.BloodStats.BloodStatType)value).ToList();
+                var (_, classBloodStats) = classes.First().Value; // get class to check if stat allowed
+                List<BloodStatType> bloodStatTypes = classBloodStats.Select(value => (BloodStatType)value).ToList();
+
                 if (bloodStatTypes.Contains(statType))
                 {
                     maxBonus *= ConfigService.StatSynergyMultiplier;
                 }
             }
 
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var PrestigeData) && PrestigeData > 0)
+            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var PrestigeData))
             {
                 float gainFactor = 1 + (ConfigService.PrestigeStatMultiplier * PrestigeData);
                 maxBonus *= gainFactor;
@@ -134,12 +141,11 @@ internal static class BloodHandler
         }
         return 0; // Return 0 if no handler is found or other error
     }
-    public static BloodSystem.BloodType GetCurrentBloodType(Entity character)
+    public static BloodType GetCurrentBloodType(Entity character)
     {
         Blood blood = character.Read<Blood>();
-        return BloodSystem.GetBloodTypeFromPrefab(blood.BloodType);
+        return GetBloodTypeFromPrefab(blood.BloodType);
     }
-    
     public class BloodStats
     {
         public enum BloodStatType

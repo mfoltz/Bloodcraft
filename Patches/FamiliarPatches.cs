@@ -12,6 +12,10 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
+using static Bloodcraft.Services.DataService.PlayerDictionaries;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Utilities;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Patches;
 
@@ -21,10 +25,7 @@ internal static class FamiliarPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static PlayerService PlayerService => Core.PlayerService;
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly PrefabGUID abilityGroupSlot = new(-633717863);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -50,9 +51,7 @@ internal static class FamiliarPatches
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
-    public static Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
-
-    public static Queue<Entity> PlayerEntities = [];
+    public static readonly Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
 
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -75,11 +74,13 @@ internal static class FamiliarPatches
                         Entity familiar = behaviourTreeStateChangedEvent.Entity;
                         behaviourTreeState.Value = GenericEnemyState.Follow;
                         behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
+
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
+
                         if (FamiliarMinions.ContainsKey(familiar))
                         {
-                            FamiliarSummonSystem.FamiliarUtilities.HandleFamiliarMinions(familiar);
+                            HandleFamiliarMinions(familiar);
                         }
                     }
                 }
@@ -186,53 +187,44 @@ internal static class FamiliarPatches
 
                 if (level == 1)
                 {
-                    Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(Core.DataStructures.FamiliarActives);
+                    Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
                     ulong steamId = FamiliarActives
                         .Where(f => f.Value.FamKey == famKey)
                         .Select(f => f.Key)
-                        .FirstOrDefault(id => Core.DataStructures.PlayerBools.TryGetValue(id, out var bools) && bools["Binding"]);
+                        .FirstOrDefault(id => GetPlayerBool(id, "Binding"));
 
-                    if (steamId != 0)
+                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                     {
-                        Dictionary<string, Entity> PlayerCache = new(PlayerService.UserCache);
-                        Entity userEntity = PlayerCache
-                                              .Where(kvp => kvp.Value.Read<User>().PlatformId == steamId)
-                                              .Select(kvp => kvp.Value)
-                                              .FirstOrDefault();
+                        User user = playerInfo.User;
+                        Entity character = playerInfo.CharEntity;
 
-                        if (userEntity != Entity.Null)
+                        if (FamiliarSummonSystem.HandleFamiliar(character, entity))
                         {
-                            User user = userEntity.Read<User>();
-                            Entity character = user.LocalCharacter._Entity;
+                            SetPlayerBool(steamId, "Binding", false);
+                            string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+                            FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
 
-                            if (FamiliarSummonSystem.HandleFamiliar(character, entity))
+                            // Check if the familiar has buffs and update the color based on RandomVisuals
+                            if (buffsData.FamiliarBuffs.ContainsKey(famKey))
                             {
-                                Core.DataStructures.PlayerBools[steamId]["Binding"] = false;
-                                Core.DataStructures.SavePlayerBools();
-                                string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
-                                Core.DataStructures.FamiliarBuffsData buffsData = Core.FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
-
-                                // Check if the familiar has buffs and update the color based on RandomVisuals
-                                if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+                                // Look up the color from the RandomVisuals dictionary if it exists
+                                if (FamiliarUnlockSystem.RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
                                 {
-                                    // Look up the color from the RandomVisuals dictionary if it exists
-                                    if (FamiliarUnlockSystem.RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
-                                    {
-                                        colorCode = $"<color={hexColor}>";
-                                    }
+                                    colorCode = $"<color={hexColor}>";
                                 }
+                            }
 
-                                string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>{colorCode}*</color>" : $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>";
-                                LocalizationService.HandleServerReply(EntityManager, user, message);
-                                summon = true;
-                            }
-                            else // if this fails for any reason destroy the entity and inform player
-                            {
-                                DestroyUtility.Destroy(EntityManager, entity);
-                                LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
-                            }
+                            string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>{colorCode}*</color>" : $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>";
+                            LocalizationService.HandleServerReply(EntityManager, user, message);
+                            summon = true;
+                        }
+                        else // if this fails for any reason destroy the entity and inform player
+                        {
+                            DestroyUtility.Destroy(EntityManager, entity);
+                            LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
                         }
                     }
+                    
                 }
 
                 if (summon) continue;
@@ -297,7 +289,7 @@ internal static class FamiliarPatches
 
                     if (prefabGUID.GuidHash.Equals(-986064531) || prefabGUID.GuidHash.Equals(985937733)) // player using waygate
                     {
-                        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(entityOwner.Owner);
+                        Entity familiar = FindPlayerFamiliar(entityOwner.Owner);
                         Entity userEntity = entityOwner.Owner.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 
@@ -398,7 +390,7 @@ internal static class FamiliarPatches
 
     [HarmonyPatch(typeof(LinkMinionToOwnerOnSpawnSystem), nameof(LinkMinionToOwnerOnSpawnSystem.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance) // get EntityOwner (familiar), apply ModifyTeamBuff
+    static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance)
     {
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); //    All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
         try
@@ -411,9 +403,9 @@ internal static class FamiliarPatches
                 //Core.Log.LogInfo($"LinkMinionToOwnerOnSpawnSystem: {entity.Read<PrefabGUID>().LookupName()}");
 
                 Entity Owner = entity.GetOwner();
-                if (Owner.FollowingPlayer(out Entity player))
+                if (Owner.TryGetFollowedPlayer(out Entity player))
                 {
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = FindPlayerFamiliar(player);
                     if (familiar != Entity.Null)
                     {
                         if (!FamiliarMinions.ContainsKey(familiar))

@@ -7,15 +7,15 @@ using ProjectM;
 using ProjectM.Network;
 using System.Text;
 using System.Text.RegularExpressions;
+using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using static Bloodcraft.Services.PlayerService;
+using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Services;
 internal static class EclipseService
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static PlayerService PlayerService => Core.PlayerService;
-    static LocalizationService LocalizationService => Core.LocalizationService;
 
     static readonly Regex regex = new(@"^\[(\d+)\]:");
 
@@ -38,17 +38,11 @@ internal static class EclipseService
     }
     static void RegisterUser(ulong steamId)
     {
-        Dictionary<string, Entity> UserCache = new(PlayerService.UserCache);
-
-        Entity userEntity = UserCache
-            .Values
-            .FirstOrDefault(userEntity => userEntity.Read<User>().PlatformId == steamId);
-
-        if (userEntity.Exists())
+        if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.UserEntity.Exists())
         {
             Core.Log.LogInfo($"User {steamId} registered for Eclipse updates...");
             RegisteredUsers.Add(steamId);
-            SendClientProgress(userEntity.Read<User>().LocalCharacter._Entity, steamId);
+            SendClientProgress(playerInfo.CharEntity, steamId);
         }
     }
     public static void SendClientProgress(Entity character, ulong SteamID)
@@ -96,7 +90,7 @@ internal static class EclipseService
 
         if (ConfigService.BloodSystem)
         {
-            BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
+            BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
             IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
 
             if (bloodHandler != null)
@@ -124,7 +118,7 @@ internal static class EclipseService
 
         if (ConfigService.ExpertiseSystem)
         {
-            WeaponSystem.WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
+            WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
             IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
             if (expertiseHandler != null)
@@ -149,7 +143,7 @@ internal static class EclipseService
         int goal = 0;
         int target = 0;
 
-        if (ConfigService.QuestSystem && Core.DataStructures.PlayerQuests.TryGetValue(SteamID, out var questData))
+        if (ConfigService.QuestSystem && SteamID.TryGetPlayerQuests(out var questData))
         {
             if (questData.TryGetValue(questType, out var quest) && !quest.Objective.Complete)
             {
@@ -161,7 +155,7 @@ internal static class EclipseService
 
         return (progress, goal, target);
     }
-    static string BuildProgressMessage((int Percent, int Level, int Prestige) experienceData,
+    static string BuildProgressMessage((int Percent, int Level, int Prestige) experienceData, //want to send bonuses as well
         (int Percent, int Level, int Prestige, int Enum) legacyData,
         (int Percent, int Level, int Prestige, int Enum) expertiseData,
         (int Progress, int Goal, int Target) dailyQuestData,
@@ -177,103 +171,4 @@ internal static class EclipseService
 
         return sb.ToString();
     }
-    /*
-    public static void SendClientProgress(Entity character, ulong SteamID)
-    {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-
-        int experiencePercent = 0;
-        int experienceLevel = 0;
-        int experiencePrestige = 0;
-
-        int legacyPercent = 0;
-        int legacyLevel = 0;
-        int legacyPrestige = 0;
-        int legacyEnum = 0;
-
-        int expertisePercent = 0;
-        int expertiseLevel = 0;
-        int expertisePrestige = 0;
-        int expertiseEnum = 0;
-
-        int dailyProgress = 0;
-        int dailyGoal = 0;
-        int dailyTarget = 0;
-
-        int weeklyProgress = 0;
-        int weeklyGoal = 0;
-        int weeklyTarget = 0;
-
-        if (ConfigService.LevelingSystem)
-        {
-            experiencePercent = LevelingSystem.GetLevelProgress(SteamID);
-            experienceLevel = LevelingSystem.GetLevel(SteamID);
-
-            if (ConfigService.PrestigeSystem)
-            {
-                IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(PrestigeType.Experience);
-                experiencePrestige = prestigeHandler.GetPrestigeLevel(SteamID);
-            }
-        }
-
-        if (ConfigService.BloodSystem)
-        {
-            BloodSystem.BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
-            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
-
-            if (bloodHandler != null)
-            {
-                legacyPercent = BloodSystem.GetLevelProgress(SteamID, bloodHandler);
-                legacyLevel = BloodSystem.GetLevel(SteamID, bloodHandler);
-                legacyEnum = (int)bloodType;
-            }
-
-            if (ConfigService.PrestigeSystem)
-            {
-                IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(BloodSystem.BloodPrestigeMap[bloodType]);
-                legacyPrestige = prestigeHandler.GetPrestigeLevel(SteamID);
-            }
-        }
-
-        if (ConfigService.ExpertiseSystem)
-        {
-            WeaponSystem.WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
-            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
-
-            if (expertiseHandler != null)
-            {
-                expertisePercent = WeaponSystem.GetLevelProgress(SteamID, expertiseHandler);
-                expertiseLevel = WeaponSystem.GetLevel(SteamID, expertiseHandler);
-                expertiseEnum = (int)weaponType;
-            }
-
-            if (ConfigService.PrestigeSystem)
-            {
-                IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponSystem.WeaponPrestigeMap[weaponType]);
-                expertisePrestige = prestigeHandler.GetPrestigeLevel(SteamID);
-            }
-        }
-
-        if (ConfigService.QuestSystem && Core.DataStructures.PlayerQuests.TryGetValue(SteamID, out var questData))
-        {
-            if (questData.TryGetValue(Systems.Quests.QuestSystem.QuestType.Daily, out var dailyQuest) && !dailyQuest.Objective.Complete)
-            {
-                dailyProgress = dailyQuest.Progress;
-                dailyGoal = dailyQuest.Objective.RequiredAmount;
-                dailyTarget = dailyQuest.Objective.Target.GuidHash;
-            }
-
-            if (questData.TryGetValue(Systems.Quests.QuestSystem.QuestType.Weekly, out var weeklyQuest) && !weeklyQuest.Objective.Complete)
-            {
-                weeklyProgress = weeklyQuest.Progress;
-                weeklyGoal = weeklyQuest.Objective.RequiredAmount;
-                weeklyTarget = weeklyQuest.Objective.Target.GuidHash;
-            }
-        }
-
-        string message = $"[{(int)NetworkEventSubType.ProgressToClient}]:{experiencePercent:D2},{experienceLevel:D2},{experiencePrestige:D2},{legacyPercent:D2},{legacyLevel:D2},{legacyPrestige:D2},{legacyEnum:D2},{expertisePercent:D2},{expertiseLevel:D2},{expertisePrestige:D2},{expertiseEnum:D2},{dailyProgress:D2},{dailyGoal:D2},{dailyTarget},{weeklyProgress:D2},{weeklyGoal:D2},{weeklyTarget}";
-        LocalizationService.HandleServerReply(EntityManager, user, message);
-    }
-    */
 }

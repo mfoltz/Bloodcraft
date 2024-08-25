@@ -19,9 +19,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CreateGameplayEventOnDestroySystemPatch
 {
-    
-
     const int BaseFishingXP = 100;
+
     static readonly PrefabGUID fishingTravelToTarget = new(-1130746976);
     static readonly PrefabGUID feedComplete = new(-1106009274);
 
@@ -72,7 +71,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     }
                 }
 
-                if (PrefabGUID.Equals(feedComplete) && entity.GetOwner().HasPlayer(out Entity player)) // feed complete non-vblood kills
+                if (PrefabGUID.Equals(feedComplete) && entity.GetOwner().TryGetPlayer(out Entity player)) // feed complete non-vblood kills
                 {
                     Entity died = entity.GetSpellTarget();
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;

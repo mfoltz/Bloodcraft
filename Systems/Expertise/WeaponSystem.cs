@@ -3,34 +3,154 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using Bloodcraft.Systems.Leveling;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Expertise;
-public static class WeaponSystem
+internal static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
 
     const float ExpertiseConstant = 0.1f; // constant for calculating level from xp
     const int ExpertisePower = 2; // power for calculating level from xp
-    public enum WeaponType
+
+    public static readonly Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
-        Sword,
-        Axe,
-        Mace,
-        Spear,
-        Crossbow,
-        GreatSword,
-        Slashers,
-        Pistols,
-        Reaper,
-        Longbow,
-        Whip,
-        Unarmed,
-        FishingPole
-    }
+        { WeaponType.Sword, steamID =>
+            {
+                if (steamID.TryGetPlayerSwordExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Axe, steamID =>
+            {
+                if (steamID.TryGetPlayerAxeExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Mace, steamID =>
+            {
+                if (steamID.TryGetPlayerMaceExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Spear, steamID =>
+            {
+                if (steamID.TryGetPlayerSpearExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Crossbow, steamID =>
+            {
+                if (steamID.TryGetPlayerCrossbowExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.GreatSword, steamID =>
+            {
+                if (steamID.TryGetPlayerGreatSwordExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Slashers, steamID =>
+            {
+                if (steamID.TryGetPlayerSlashersExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Pistols, steamID =>
+            {
+                if (steamID.TryGetPlayerPistolsExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Reaper, steamID =>
+            {
+                if (steamID.TryGetPlayerReaperExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Longbow, steamID =>
+            {
+                if (steamID.TryGetPlayerLongbowExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Whip, steamID =>
+            {
+                if (steamID.TryGetPlayerWhipExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Unarmed, steamID =>
+            {
+                if (steamID.TryGetPlayerUnarmedExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.FishingPole, steamID =>
+            {
+                if (steamID.TryGetPlayerFishingPoleExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        }
+    };
+
+    public static readonly Dictionary<WeaponType, Action<ulong, KeyValuePair<int, float>>> SetExtensionMap = new()
+    {
+        { WeaponType.Sword, (steamID, data) => steamID.SetPlayerSwordExpertise(data) },
+        { WeaponType.Axe, (steamID, data) => steamID.SetPlayerAxeExpertise(data) },
+        { WeaponType.Mace, (steamID, data) => steamID.SetPlayerMaceExpertise(data) },
+        { WeaponType.Spear, (steamID, data) => steamID.SetPlayerSpearExpertise(data) },
+        { WeaponType.Crossbow, (steamID, data) => steamID.SetPlayerCrossbowExpertise(data) },
+        { WeaponType.GreatSword, (steamID, data) => steamID.SetPlayerGreatSwordExpertise(data) },
+        { WeaponType.Slashers, (steamID, data) => steamID.SetPlayerSlashersExpertise(data) },
+        { WeaponType.Pistols, (steamID, data) => steamID.SetPlayerPistolsExpertise(data) },
+        { WeaponType.Reaper, (steamID, data) => steamID.SetPlayerReaperExpertise(data) },
+        { WeaponType.Longbow, (steamID, data) => steamID.SetPlayerLongbowExpertise(data) },
+        { WeaponType.Whip, (steamID, data) => steamID.SetPlayerWhipExpertise(data) },
+        { WeaponType.Unarmed, (steamID, data) => steamID.SetPlayerUnarmedExpertise(data) },
+        { WeaponType.FishingPole, (steamID, data) => steamID.SetPlayerFishingPoleExpertise(data) }
+    };
 
     public static readonly Dictionary<WeaponType, PrestigeType> WeaponPrestigeMap = new()
     {
@@ -55,7 +175,7 @@ public static class WeaponSystem
         Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
-        WeaponType weaponType = WeaponHandler.GetCurrentWeaponType(Killer);
+        WeaponType weaponType = WeaponManager.GetCurrentWeaponType(Killer);
 
         if (Victim.Has<UnitStats>())
         {
@@ -63,14 +183,14 @@ public static class WeaponSystem
             float ExpertiseValue = CalculateExpertiseValue(VictimStats, Victim.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
 
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
+            if (steamID.TryGetPlayerPrestiges(out var prestiges))
             {
-                if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige) && expertisePrestige > 0)
+                if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige))
                 {
                     changeFactor -= (ConfigService.PrestigeRatesReducer * expertisePrestige);
                 }
 
-                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
+                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige))
                 {
                     changeFactor += (ConfigService.PrestigeRateMultiplier * xpPrestige);
                 }
@@ -97,13 +217,10 @@ public static class WeaponSystem
                         newLevel = ConfigService.MaxExpertiseLevel;
                         newExperience = ConvertLevelToXp(ConfigService.MaxExpertiseLevel);
                     }
-                    // update stats here?
-
                 }
 
                 var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
-                handler.UpdateExpertiseData(steamID, updatedXPData);
-                handler.SaveChanges();
+                handler.SetExpertiseData(steamID, updatedXPData);
                 NotifyPlayer(user, weaponType, ExpertiseValue, leveledUp, newLevel, handler);
             }
         }
@@ -125,7 +242,7 @@ public static class WeaponSystem
             if (newLevel <= ConfigService.MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
             if (GetPlayerBool(steamID, "Reminders"))
             {
-                if (Core.DataStructures.PlayerWeaponStats.TryGetValue(steamID, out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
+                if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
                 {
                     if (Stats.Count < ConfigService.ExpertiseStatChoices)
                     {

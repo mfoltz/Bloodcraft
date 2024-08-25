@@ -4,6 +4,8 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 
@@ -11,9 +13,6 @@ namespace Bloodcraft.Commands;
 internal static class ProfessionCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
-    static PlayerService PlayerService => Core.PlayerService;
 
     [Command(name: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
@@ -25,13 +24,9 @@ internal static class ProfessionCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
+        TogglePlayerBool(SteamID, "ProfessionLogging");
 
-        if (Core.DataStructures.PlayerBools.TryGetValue(SteamID, out var bools))
-        {
-            bools["ProfessionLogging"] = !bools["ProfessionLogging"];
-        }
-        Core.DataStructures.SavePlayerBools();
-        LocalizationService.HandleReply(ctx, $"Profession logging is now {(bools["ProfessionLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Profession logging is now {(GetPlayerBool(SteamID, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]
@@ -50,7 +45,7 @@ internal static class ProfessionCommands
             LocalizationService.HandleReply(ctx, "Invalid profession.");
             return;
         }
-        var data = professionHandler.GetExperienceData(steamID);
+        var data = professionHandler.GetProfessionData(steamID);
         int progress = (int)(data.Value - ProfessionSystem.ConvertLevelToXp(data.Key));
         if (data.Key > 0)
         {
@@ -70,13 +65,14 @@ internal static class ProfessionCommands
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
-        Entity foundUserEntity = PlayerService.UserCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!EntityManager.Exists(foundUserEntity))
+
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
             return;
         }
-        User foundUser = foundUserEntity.Read<User>();
+
         if (level < 0 || level > ConfigService.MaxProfessionLevel)
         {
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxProfessionLevel}.");
@@ -90,12 +86,11 @@ internal static class ProfessionCommands
             return;
         }
 
-        ulong steamId = foundUser.PlatformId;
+        ulong steamId = playerInfo.User.PlatformId;
         float xp = ProfessionSystem.ConvertLevelToXp(level);
-        professionHandler.UpdateExperienceData(steamId, new KeyValuePair<int, float>(level, xp));
-        professionHandler.SaveChanges();
+        professionHandler.SetProfessionData(steamId, new KeyValuePair<int, float>(level, xp));
 
-        LocalizationService.HandleReply(ctx, $"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{foundUser.CharacterName}</color>");
+        LocalizationService.HandleReply(ctx, $"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>");
     }
 
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".prof l", description: "Lists professions available.")]

@@ -9,43 +9,261 @@ using VampireCommandFramework;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Leveling;
-public static class PrestigeSystem
+internal static class PrestigeSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static PlayerService PlayerService => Core.PlayerService;
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
-    public enum PrestigeType
+
+    public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
-        Experience,
-        Exo,
-        SwordExpertise,
-        AxeExpertise,
-        MaceExpertise,
-        SpearExpertise,
-        CrossbowExpertise,
-        GreatSwordExpertise,
-        SlashersExpertise,
-        PistolsExpertise,
-        ReaperExpertise,
-        LongbowExpertise,
-        WhipExpertise,
-        UnarmedExpertise,
-        FishingPoleExpertise,
-        WorkerLegacy,
-        WarriorLegacy,
-        ScholarLegacy,
-        RogueLegacy,
-        MutantLegacy,
-        DraculinLegacy,
-        ImmortalLegacy,
-        CreatureLegacy,
-        BruteLegacy
-    }
+        { PrestigeType.Experience, steamID =>
+            {
+                if (steamID.TryGetPlayerExperience(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.Exo, steamID =>
+            {
+                if (steamID.TryGetPlayerExperience(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.SwordExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerSwordExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.AxeExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerAxeExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.MaceExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerMaceExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.SpearExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerSpearExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.CrossbowExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerCrossbowExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.GreatSwordExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerGreatSwordExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.SlashersExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerSlashersExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.PistolsExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerPistolsExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.ReaperExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerReaperExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.LongbowExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerLongbowExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.WhipExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerWhipExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.UnarmedExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerUnarmedExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.FishingPoleExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerFishingPoleExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.WorkerLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerWorkerLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.WarriorLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerWarriorLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.ScholarLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerScholarLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.RogueLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerRogueLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.MutantLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerMutantLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.DraculinLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerDraculinLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.ImmortalLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerImmortalLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.CreatureLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerCreatureLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.BruteLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerBruteLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        }
+    };
+
+    public static readonly Dictionary<PrestigeType, Action<ulong, KeyValuePair<int, float>>> SetExtensionMap = new()
+    {
+        { PrestigeType.Experience, (steamID, data) => steamID.SetPlayerExperience(data) },
+        { PrestigeType.Exo, (steamID, data) => steamID.SetPlayerExperience(data)},
+        { PrestigeType.SwordExpertise, (steamID, data) => steamID.SetPlayerSwordExpertise(data) },
+        { PrestigeType.AxeExpertise, (steamID, data) => steamID.SetPlayerAxeExpertise(data) },
+        { PrestigeType.MaceExpertise, (steamID, data) => steamID.SetPlayerMaceExpertise(data) },
+        { PrestigeType.SpearExpertise, (steamID, data) => steamID.SetPlayerSpearExpertise(data) },
+        { PrestigeType.CrossbowExpertise, (steamID, data) => steamID.SetPlayerCrossbowExpertise(data) },
+        { PrestigeType.GreatSwordExpertise, (steamID, data) => steamID.SetPlayerGreatSwordExpertise(data) },
+        { PrestigeType.SlashersExpertise, (steamID, data) => steamID.SetPlayerSlashersExpertise(data) },
+        { PrestigeType.PistolsExpertise, (steamID, data) => steamID.SetPlayerPistolsExpertise(data) },
+        { PrestigeType.ReaperExpertise, (steamID, data) => steamID.SetPlayerReaperExpertise(data) },
+        { PrestigeType.LongbowExpertise, (steamID, data) => steamID.SetPlayerLongbowExpertise(data) },
+        { PrestigeType.WhipExpertise, (steamID, data) => steamID.SetPlayerWhipExpertise(data) },
+        { PrestigeType.UnarmedExpertise, (steamID, data) => steamID.SetPlayerUnarmedExpertise(data) },
+        { PrestigeType.FishingPoleExpertise, (steamID, data) => steamID.SetPlayerFishingPoleExpertise(data) },
+        { PrestigeType.WorkerLegacy, (steamID, data) => steamID.SetPlayerWorkerLegacy(data) },
+        { PrestigeType.WarriorLegacy, (steamID, data) => steamID.SetPlayerWarriorLegacy(data) },
+        { PrestigeType.ScholarLegacy, (steamID, data) => steamID.SetPlayerScholarLegacy(data) },
+        { PrestigeType.RogueLegacy, (steamID, data) => steamID.SetPlayerRogueLegacy(data) },
+        { PrestigeType.MutantLegacy, (steamID, data) => steamID.SetPlayerRogueLegacy(data) },
+        { PrestigeType.DraculinLegacy, (steamID, data) => steamID.SetPlayerDraculinLegacy(data) },
+        { PrestigeType.ImmortalLegacy, (steamID, data) => steamID.SetPlayerImmortalLegacy(data) },
+        { PrestigeType.CreatureLegacy, (steamID, data) => steamID.SetPlayerCreatureLegacy(data) },
+        { PrestigeType.BruteLegacy, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }        
+    };
 
     public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxLevel = new()
     {
@@ -109,7 +327,7 @@ public static class PrestigeSystem
 
         if (parsedPrestigeType == PrestigeType.Experience)
         {
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
                 prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
@@ -129,7 +347,7 @@ public static class PrestigeSystem
         }
         else
         {
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+            if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
                 prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
@@ -158,16 +376,16 @@ public static class PrestigeSystem
     public static bool CanPrestige(ulong steamId, PrestigeType parsedPrestigeType, int xpKey)
     {
         return xpKey >= PrestigeTypeToMaxLevel[parsedPrestigeType] &&
-               Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+               steamId.TryGetPlayerPrestiges(out var prestigeData) &&
                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) &&
                prestigeLevel < PrestigeTypeToMaxPrestiges[parsedPrestigeType];
     }
     public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestigeHandler handler)
     {
         handler.Prestige(steamId);
-        handler.SaveChanges();
 
-        var updatedPrestigeLevel = Core.DataStructures.PlayerPrestiges[steamId][parsedPrestigeType];
+        if (!steamId.TryGetPlayerPrestiges(out var prestigeData)) return;
+        int updatedPrestigeLevel = prestigeData[parsedPrestigeType];
         if (parsedPrestigeType == PrestigeType.Experience)
         {
             HandleExperiencePrestige(ctx, updatedPrestigeLevel);
@@ -251,7 +469,7 @@ public static class PrestigeSystem
     }
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel)
     {
-        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
+        int expPrestige = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
         float ratesReduction = prestigeLevel * ConfigService.PrestigeRatesReducer; // Example: 0.1 (10%)
         float ratesMultiplier = expPrestige * ConfigService.PrestigeRateMultiplier;
@@ -303,7 +521,7 @@ public static class PrestigeSystem
     }
     public static void ApplyOtherPrestigeEffects(User user, ulong playerId, PrestigeType parsedPrestigeType, int level)
     {
-        int expPrestige = Core.DataStructures.PlayerPrestiges.TryGetValue(playerId, out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
+        int expPrestige = playerId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
         float ratesReduction = level * ConfigService.PrestigeRatesReducer;
         float ratesMultiplier = expPrestige * ConfigService.PrestigeRateMultiplier;
@@ -328,7 +546,7 @@ public static class PrestigeSystem
     }
     public static int GetExperiencePrestigeLevel(ulong steamId)
     {
-        return Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) &&
+        return steamId.TryGetPlayerPrestiges(out var prestigeData) &&
                prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel) &&
                prestigeLevel > 0 ? prestigeLevel : 0;
     }
@@ -357,7 +575,7 @@ public static class PrestigeSystem
     }
     public static Dictionary<string, int> GetPrestigeForType(PrestigeType prestigeType)
     {
-        return Core.DataStructures.PlayerPrestiges
+        return DataService.PlayerDictionaries.playerPrestiges
             .Where(p => p.Value.ContainsKey(prestigeType))
             .Select(p => new
             {
@@ -366,7 +584,7 @@ public static class PrestigeSystem
             })
             .Select(p => new
             {
-                PlayerName = PlayerService.UserCache.FirstOrDefault(pc => pc.Value.Read<User>().PlatformId == p.SteamId).Key,
+                PlayerName = PlayerService.PlayerCache.FirstOrDefault(pc => pc.Value.User.PlatformId == p.SteamId).Key,
                 p.Prestige
             })
             .Where(p => !string.IsNullOrEmpty(p.PlayerName))
@@ -374,7 +592,7 @@ public static class PrestigeSystem
     }
     public static void AdjustCharacterStats(Entity character, ulong platformId)
     {
-        var prestigeData = Core.DataStructures.PlayerPrestiges[platformId];
+        if (!platformId.TryGetPlayerPrestiges(out var prestigeData)) return;
         float damageTakenMultiplier = ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeType.Exo];
         float damageDealtMultiplier = ConfigService.ExoPrestigeDamageDealtMultiplier * prestigeData[PrestigeType.Exo];
 

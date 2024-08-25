@@ -18,7 +18,6 @@ internal static class VBloodSystemPatch
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem; 
     
-
     static Dictionary<ulong, DateTime> LastUpdateCache = [];
 
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
@@ -51,7 +50,7 @@ internal static class VBloodSystemPatch
                     FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
                     FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
                 }
-                if (ConfigService.QuestSystem && Core.DataStructures.PlayerQuests.TryGetValue(steamId, out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
+                if (ConfigService.QuestSystem && steamId.TryGetPlayerQuests(out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)

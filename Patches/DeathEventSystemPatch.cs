@@ -11,6 +11,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -35,11 +36,9 @@ internal static class DeathEventListenerSystemPatch
                 {
                     ulong steamId = deathEvent.Died.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     //if (FamiliarPatches.familiarMinions.ContainsKey(deathEvent.Died)) Core.FamiliarService.HandleFamiliarMinions(deathEvent.Died);
-                    if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
+                    if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
                     {
-                        actives = new(Entity.Null, 0);
-                        Core.DataStructures.FamiliarActives[steamId] = actives;
-                        Core.DataStructures.SavePlayerFamiliarActives();
+                        ClearFamiliarActives(steamId);
                     }
                 }
 
@@ -126,7 +125,7 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
                 {
                     Follower follower = deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>();
-                    Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
+                    Entity familiar = FindPlayerFamiliar(follower.Followed._Value);
                     ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     if (familiar != Entity.Null)

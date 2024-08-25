@@ -14,11 +14,8 @@ using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 namespace Bloodcraft.Services;
 internal class LocalizationService
 {
-    
-
-    static readonly string regexPattern = @"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)";
-    static readonly Regex regex = new(regexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    static readonly string LanguageLocalization = ConfigService.LanguageLocalization;
+    static readonly Regex Regex = new(@"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    static readonly string Language = ConfigService.LanguageLocalization;
     struct Code
     {
         public string Key { get; set; }
@@ -42,9 +39,9 @@ internal class LocalizationService
         public Words[] Words { get; set; }
     }
 
-    static Dictionary<string, string> Localization = [];
-    static Dictionary<int, string> PrefabNames = [];
-    static Dictionary<string, string> LocalizedWords = [];
+    static readonly Dictionary<string, string> Localization = [];
+    static readonly Dictionary<int, string> PrefabNames = [];
+    static readonly Dictionary<string, string> LocalizedWords = [];
 
     static readonly Dictionary<string, string> LocalizationMapping = new()
     {
@@ -95,7 +92,7 @@ internal class LocalizationService
     }
     static void LoadLocalizations()
     {
-        var resourceName = LocalizationMapping.ContainsKey(LanguageLocalization) ? LocalizationMapping[LanguageLocalization] : "Bloodcraft.Localization.English.json";
+        var resourceName = LocalizationMapping.ContainsKey(Language) ? LocalizationMapping[Language] : "Bloodcraft.Localization.English.json";
 
         var assembly = Assembly.GetExecutingAssembly();
         var stream = assembly.GetManifestResourceStream(resourceName);
@@ -103,14 +100,17 @@ internal class LocalizationService
         using StreamReader localizationReader = new(stream);
         string jsonContent = localizationReader.ReadToEnd();
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-        Localization = localizationFile.Nodes.ToDictionary(x => x.Guid, x => x.Text);
 
-        if (LanguageLocalization == "English")
+        localizationFile.Nodes
+            .ToDictionary(x => x.Guid, x => x.Text)
+            .ForEach(kvp => Localization[kvp.Key] = kvp.Value);
+
+        if (Language == "English")
         {
             return;
         }
 
-        resourceName = LanguageMapping.ContainsKey(LanguageLocalization) ? LanguageMapping[LanguageLocalization] : "";
+        resourceName = LanguageMapping.ContainsKey(Language) ? LanguageMapping[Language] : "";
 
         if (string.IsNullOrEmpty(resourceName)) return;
 
@@ -119,7 +119,10 @@ internal class LocalizationService
         using StreamReader languageReader = new(stream);
         jsonContent = languageReader.ReadToEnd();
         localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-        LocalizedWords = localizationFile.Words.OrderByDescending(x => x.Original.Length).ToDictionary(x => x.Original.ToLower(), x => x.Translation);
+        localizationFile.Words
+            .OrderByDescending(x => x.Original.Length)
+            .ToDictionary(x => x.Original.ToLower(), x => x.Translation)
+            .ForEach(kvp => LocalizedWords[kvp.Key] = kvp.Value);
     }
     static void LoadPrefabNames()
     {
@@ -129,11 +132,12 @@ internal class LocalizationService
 
         using StreamReader reader = new(stream);
         string jsonContent = reader.ReadToEnd();
-        PrefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
+        var prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
+        prefabNames.ForEach(kvp => PrefabNames[kvp.Key] = kvp.Value);
     }
-    public void HandleReply(ChatCommandContext ctx, string message)
+    internal static void HandleReply(ChatCommandContext ctx, string message)
     {
-        if (LanguageLocalization == "English")
+        if (Language == "English")
         {
             ctx.Reply(message);
         }
@@ -142,9 +146,9 @@ internal class LocalizationService
             ctx.Reply(GetLocalizedWords(message));
         }
     }
-    public void HandleServerReply(EntityManager entityManager, User user, string message)
+    internal static void HandleServerReply(EntityManager entityManager, User user, string message)
     {
-        if (LanguageLocalization == "English")
+        if (Language == "English")
         {
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
         }
@@ -153,12 +157,12 @@ internal class LocalizationService
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
         }
     }
-    public string GetLocalizationFromKey(LocalizationKey key)
+    public static string GetLocalizationFromKey(LocalizationKey key)
     {
         var guid = key.Key.ToGuid().ToString();
         return GetLocalization(guid);
     }
-    public string GetPrefabName(PrefabGUID prefabGUID)
+    public static string GetPrefabName(PrefabGUID prefabGUID)
     {
         if (PrefabNames.TryGetValue(prefabGUID.GuidHash, out var itemLocalizationHash))
         {
@@ -166,7 +170,7 @@ internal class LocalizationService
         }
         return prefabGUID.LookupName();
     }
-    public string GetLocalization(string Guid)
+    static string GetLocalization(string Guid)
     {
         if (Localization.TryGetValue(Guid, out var Text))
         {
@@ -174,12 +178,12 @@ internal class LocalizationService
         }
         return "Couldn't find key for localization...";
     }
-    public string GetLocalizedWords(string message)
+    static string GetLocalizedWords(string message)
     {
         StringBuilder result = new();
         int lastIndex = 0;
 
-        foreach (Match match in regex.Matches(message).Cast<Match>())
+        foreach (Match match in Regex.Matches(message).Cast<Match>())
         {   
             result.Append(message, lastIndex, match.Index - lastIndex);
 

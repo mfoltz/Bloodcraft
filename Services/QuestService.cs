@@ -1,4 +1,5 @@
-﻿using Il2CppInterop.Runtime;
+﻿using Epic.OnlineServices.Achievements;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
@@ -7,16 +8,14 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
 using static Bloodcraft.Utilities;
-using static Bloodcraft.Core.DataStructures;
 
 namespace Bloodcraft.Services;
 internal class QuestService
 {
     static EntityManager EntityManager => Core.EntityManager;
-    
-    static PlayerService PlayerService => Core.PlayerService;
 
     static readonly WaitForSeconds updateDelay = new(60);
     static readonly WaitForSeconds startDelay = new(30);
@@ -31,15 +30,7 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<Translation>())
     ];
 
-    static readonly ComponentType[] VBloodComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<VBloodUnit>()),
-        ComponentType.ReadOnly(Il2CppType.Of<VBloodConsumeSource>()),
-        ComponentType.ReadOnly(Il2CppType.Of<UnitRespawnTime>())
-    ];
-
     static EntityQuery UnitQuery;
-    static EntityQuery VBloodQuery; // using other one worked better, need to check this at some point but just using other query for now
 
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
     public static DateTime LastUpdate;
@@ -60,13 +51,14 @@ internal class QuestService
             All = UnitComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
+        QuestRewards();
         Core.StartCoroutine(QuestUpdateLoop());
     }
     static IEnumerator QuestUpdateLoop()
     {
         while (true)
         {
-            if (ConfigService.EliteShardBearers && !ShardBearersReset) // would fit better elsewhere probably but can reuse the query so here it stays for now
+            if (ConfigService.EliteShardBearers && !ShardBearersReset) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
             {
                 IEnumerable<Entity> vBloods = GetEntitiesEnumerable(UnitQuery);
                 foreach (Entity entity in vBloods)
@@ -75,45 +67,30 @@ internal class QuestService
                     if (vBloodPrefab == manticore || vBloodPrefab == dracula || vBloodPrefab == monster || vBloodPrefab == solarus)
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
-                        Core.Log.LogInfo($"Destroyed {vBloodPrefab.LookupName()}");
                     }
                 }
                 ShardBearersReset = true;
             }
 
-            if (PlayerService.UserCache.Keys.Count == 0)
+            if (PlayerCache.Keys.Count == 0)
             {
                 yield return startDelay; // Wait 30 seconds if no players
                 continue;
             }
 
-            Dictionary<string, Entity> players = new(PlayerService.UserCache); // Copy the player cache to make sure updates to that don't interfere with loop
-            foreach (string player in players.Keys)
+            Dictionary<string, PlayerInfo> players = new(PlayerCache); // Copy the player cache to make sure updates to that don't interfere with loop
+            foreach (PlayerInfo playerInfo in players.Values)
             {
-                User user = players[player].Read<User>();
-                ulong steamId = user.PlatformId;
+                User user = playerInfo.User;
+                ulong steamId = playerInfo.User.PlatformId;
+
                 if (!ConfigService.LevelingSystem)
                 {
-                    Entity character = user.LocalCharacter._Entity;
-                    if (PlayerQuests.ContainsKey(steamId))
-                    {
-                        RefreshQuests(user, steamId, (int)character.Read<Equipment>().GetFullLevel());
-                    }
-                    else
-                    {
-                        InitializePlayerQuests(steamId, (int)character.Read<Equipment>().GetFullLevel());
-                    }
+                    RefreshQuests(user, steamId, (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel());
                 }
-                else if (ConfigService.LevelingSystem && PlayerExperience.TryGetValue(steamId, out var xpData))
+                else if (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var xpData))
                 {
-                    if (PlayerQuests.ContainsKey(steamId))
-                    {
-                        RefreshQuests(user, steamId, xpData.Key);
-                    }
-                    else
-                    {
-                        InitializePlayerQuests(steamId, xpData.Key);
-                    }
+                    RefreshQuests(user, steamId, xpData.Key);
                 }
             }
 

@@ -9,22 +9,20 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Match = System.Text.RegularExpressions.Match;
-using Regex = System.Text.RegularExpressions.Regex;
-using static Bloodcraft.Core.DataStructures;
 using Random = System.Random;
+using Regex = System.Text.RegularExpressions.Regex;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Quests;
 internal static class QuestSystem
 {
-    static readonly Regex Regex = new(@"T\d{2}");
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
+    static SystemService SystemService => Core.SystemService;    
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly Random Random = new();
+    static readonly Regex Regex = new(@"T\d{2}");
 
     //public static HashSet<PrefabGUID> UnitPrefabs = [];
     public static HashSet<PrefabGUID> CraftPrefabs = [];
@@ -47,6 +45,7 @@ internal static class QuestSystem
         Daily,
         Weekly
     }
+
     static readonly Dictionary<QuestType, int> QuestMultipliers = new()
     {
         { QuestType.Daily, 1 },
@@ -256,20 +255,20 @@ internal static class QuestSystem
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        PlayerQuests.TryAdd(steamId, new Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)>
+        Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData = new()
             {
                 { QuestType.Daily, (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow) },
                 { QuestType.Weekly, (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow) }
-            });
+            };
 
-        SavePlayerQuests();
+        steamId.SetPlayerQuests(questData);
     }
     public static void RefreshQuests(User user, ulong steamId, int level)
     {
-        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (steamId.TryGetPlayerQuests(out var questData))
         {
-            DateTime lastDaily = playerQuestData[QuestType.Daily].LastReset;
-            DateTime lastWeekly = playerQuestData[QuestType.Weekly].LastReset;
+            DateTime lastDaily = questData[QuestType.Daily].LastReset;
+            DateTime lastWeekly = questData[QuestType.Weekly].LastReset;
 
             DateTime nextDaily = lastDaily.AddDays(1);
             DateTime nextWeekly = lastWeekly.AddDays(7);
@@ -286,16 +285,16 @@ internal static class QuestSystem
 
                 if (refreshDaily)
                 {
-                    playerQuestData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, now);
+                    questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed~");
                 }
 
                 if (refreshWeekly)
                 {
-                    playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, now);
+                    questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed~");
                 }
-                SavePlayerQuests();
+                steamId.SetPlayerQuests(questData);
             }
         }
         else
@@ -308,12 +307,11 @@ internal static class QuestSystem
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (steamId.TryGetPlayerQuests(out var questData))
         {
-            playerQuestData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
-            playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
-
-            SavePlayerQuests();
+            questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
+            questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
+            steamId.SetPlayerQuests(questData);
         }
         else
         {
@@ -325,10 +323,10 @@ internal static class QuestSystem
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (steamId.TryGetPlayerQuests(out var questData))
         {
-            playerQuestData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
-            SavePlayerQuests();
+            questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
+            steamId.SetPlayerQuests(questData);
             LocalizationService.HandleServerReply(EntityManager, user, "<color=#00FFFF>Daily Quest</color> has been rerolled~");
         }
     }
@@ -337,10 +335,10 @@ internal static class QuestSystem
         QuestGoal goal = QuestGoal.Kill;
         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
-        if (PlayerQuests.TryGetValue(steamId, out var playerQuestData))
+        if (steamId.TryGetPlayerQuests(out var questData))
         {
-            playerQuestData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
-            SavePlayerQuests();
+            questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
+            steamId.SetPlayerQuests(questData);
             LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
         }
     }
@@ -352,7 +350,8 @@ internal static class QuestSystem
         {
             User user = participant.Read<PlayerCharacter>().UserEntity.Read<User>();
             ulong steamId = user.PlatformId; // participants are character entities
-            if (PlayerQuests.TryGetValue(steamId, out var questData) && !processed.Contains(steamId))
+
+            if (steamId.TryGetPlayerQuests(out var questData) && !processed.Contains(steamId))
             {
                 ProcessQuestProgress(questData, target, 1, user);
                 processed.Add(steamId);
@@ -362,6 +361,8 @@ internal static class QuestSystem
     public static void ProcessQuestProgress(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, PrefabGUID target, int amount, User user)
     {
         bool updated = false;
+        ulong steamId = user.PlatformId;
+
         for (int i = 0; i < questData.Count; i++)
         {
             var quest = questData.ElementAt(i);
@@ -371,7 +372,7 @@ internal static class QuestSystem
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
 
-                if (PlayerBools.TryGetValue(user.PlatformId, out var bools) && bools["QuestLogging"] && !quest.Value.Objective.Complete)
+                if (GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
                 {
                     string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> <color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> [<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
                     LocalizationService.HandleServerReply(EntityManager, user, message);
@@ -416,18 +417,18 @@ internal static class QuestSystem
 
                     if (quest.Key == QuestType.Daily && ConfigService.InfiniteDailies)
                     {
-                        int level = ConfigService.LevelingSystem ? PlayerExperience[user.PlatformId].Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                         QuestGoal goal = QuestGoal.Kill;
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
                         var dailyQuest = questData[QuestType.Daily];
-                        SavePlayerQuests();
                         LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>Daily Quest</color> available: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
                     }
                 }
             }
         }
-        if (updated) SavePlayerQuests();
+        if (updated) steamId.SetPlayerQuests(questData);
+
     }
     public static string GetCardinalDirection(float3 direction)
     {

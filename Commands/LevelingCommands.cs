@@ -1,21 +1,16 @@
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Leveling;
 using ProjectM.Network;
-using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Core.DataStructures;
+using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities;
+
 namespace Bloodcraft.Commands;
 
 [CommandGroup(name:"level", "lvl")]
 internal static class LevelingCommands
 {
-    static EntityManager EntityManager => Core.EntityManager;
-
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
-    static PlayerService PlayerService => Core.PlayerService;
-
     [Command(name: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
@@ -26,12 +21,9 @@ internal static class LevelingCommands
         }
         var SteamID = ctx.Event.User.PlatformId;
 
-        if (PlayerBools.TryGetValue(SteamID, out var bools))
-        {
-            bools["ExperienceLogging"] = !bools["ExperienceLogging"];
-        }
-        SavePlayerBools();
-        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(bools["ExperienceLogging"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(SteamID, "ExperienceLogging");
+
+        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
@@ -45,14 +37,14 @@ internal static class LevelingCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (PlayerExperience.TryGetValue(steamId, out var levelKvp))
+        if (steamId.TryGetPlayerExperience(out var xpData))
         {
-            int prestigeLevel = PlayerPrestiges.TryGetValue(steamId, out var prestiges) ? prestiges[PrestigeType.Experience] : 0;
-            int level = levelKvp.Key;
-            int progress = (int)(levelKvp.Value - LevelingSystem.ConvertLevelToXp(level));
+            int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[PrestigeType.Experience] : 0;
+            int level = xpData.Key;
+            int progress = (int)(xpData.Value - LevelingSystem.ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
-            if (ConfigService.RestedXPSystem && PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
+            if (ConfigService.RestedXPSystem && steamId.TryGetPlayerExperience(out var restedData) && restedData.Value > 0)
             {
                 int roundedXP = (int)(Math.Round(restedData.Value / 100.0) * 100);
                 LocalizationService.HandleReply(ctx, $"<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~");
@@ -73,28 +65,30 @@ internal static class LevelingCommands
             return;
         }
 
-        Entity foundUserEntity = PlayerService.UserCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!EntityManager.Exists(foundUserEntity))
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
             return;
         }
 
-        User foundUser = foundUserEntity.Read<User>();
+        User foundUser = playerInfo.User;
 
         if (level < 0 || level > ConfigService.MaxLevel)
         {
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxLevel}");
             return;
         }
+
         ulong steamId = foundUser.PlatformId;
-        if (PlayerExperience.TryGetValue(steamId, out var _))
+
+        if (steamId.TryGetPlayerExperience(out var xpData))
         {
-            var xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
-            PlayerExperience[steamId] = xpData;
-            SavePlayerExperience();
-            LevelingSystem.SetLevel(foundUser.LocalCharacter._Entity);
-            LocalizationService.HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");
+            xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
+            steamId.SetPlayerExperience(xpData);
+
+            LevelingSystem.SetLevel(playerInfo.CharEntity);
+            LocalizationService.HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>");
         }
         else
         {

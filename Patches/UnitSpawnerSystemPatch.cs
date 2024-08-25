@@ -9,8 +9,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class UnitSpawnerPatch
 {
-    
-   
     [HarmonyPatch(typeof(UnitSpawnerReactSystem), nameof(UnitSpawnerReactSystem.OnUpdate))]
     [HarmonyPrefix]
     private static void OnUpdatePrefix(UnitSpawnerReactSystem __instance)

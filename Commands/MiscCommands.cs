@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -11,10 +10,10 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodcraft.Core.DataStructures;
+using static Bloodcraft.Services.DataService.PlayerDictionaries;
+using static Bloodcraft.Utilities;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 internal static class MiscCommands
@@ -22,11 +21,11 @@ internal static class MiscCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;  
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static CombatMusicSystem_Server CombatMusicSystem_Server => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
-    static bool ClassesInactive => !ConfigService.SoftSynergies && !ConfigService.HardSynergies;
+
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly ComponentType[] DisabledFamiliarComponents =
     [
@@ -57,15 +56,19 @@ internal static class MiscCommands
             LocalizationService.HandleReply(ctx, "Starter kit is not enabled.");
             return;
         }
-        if (PlayerBools.TryGetValue(ctx.Event.User.PlatformId, out var bools) && !bools["Kit"])
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
         {
-            bools["Kit"] = true;
+            SetPlayerBool(steamId, "Kit", false);
             Entity character = ctx.Event.SenderCharacterEntity;
-            SavePlayerBools();
+
             foreach (var item in KitPrefabs)
             {
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
             }
+
             LocalizationService.HandleReply(ctx, "You've received a starting kit with blood essence, stone, wood, and bone!");
         }
         else
@@ -82,13 +85,16 @@ internal static class MiscCommands
             LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
+
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
         PrefabGUID achievementPrefabGUID = new(560247139); // Journal_GettingReadyForTheHunt
+
         Entity userEntity = ctx.Event.SenderUserEntity;
         Entity characterEntity = ctx.Event.SenderCharacterEntity;
         Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
+
         ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
-        LocalizationService.HandleReply(ctx, "You are now prepared for the hunt.");
+        LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
     }
 
     [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
@@ -103,29 +109,26 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (PlayerBools.TryGetValue(SteamID, out var bools))
+        TogglePlayerBool(SteamID, "SpellLock");
+        if (GetPlayerBool(SteamID, "SpellLock"))
         {
-            bools["SpellLock"] = !bools["SpellLock"];
-            if (bools["SpellLock"])
-            {
-                LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, "Spells set.");
-            }
-            SavePlayerBools();
+            LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
         }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Spells set.");
+        }        
     }
 
     [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
     public static void ShiftPlayerSpells(ChatCommandContext ctx)
     {
-        if (ClassesInactive)
+        if (!Classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
             return;
         }
+
         if (!ConfigService.ShiftSlot)
         {
             LocalizationService.HandleReply(ctx, "Shift slots are not enabled.");
@@ -135,18 +138,14 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        if (PlayerBools.TryGetValue(SteamID, out var bools))
+        TogglePlayerBool(SteamID, "ShiftLock");
+        if (GetPlayerBool(SteamID, "ShiftLock"))
         {
-            bools["ShiftLock"] = !bools["ShiftLock"];
-            if (bools["ShiftLock"])
-            {
-                LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
-            }
-            SavePlayerBools();
+            LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
         }
     }
 
@@ -192,10 +191,10 @@ internal static class MiscCommands
     public static void ServantFamTesting(ChatCommandContext ctx)
     {        
         Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = FindPlayerFamiliar(character);
         if (!familiar.Exists()) return;
         
-        FamiliarPatches.PlayerEntities.Enqueue(character);
+        //FamiliarPatches.PlayerEntities.Enqueue(character);
 
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
         SpawnDebugEvent spawnDebugEvent = new()
@@ -226,7 +225,7 @@ internal static class MiscCommands
             Options = EntityQueryOptions.IncludeDisabled
         });
 
-        Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = new(FamiliarActives);
+        Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
         List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
 
         IEnumerable<Entity> disabledFamiliars = GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
@@ -241,5 +240,7 @@ internal static class MiscCommands
                 }
             }
         }
+
+        familiarsQuery.Dispose();
     }
 }

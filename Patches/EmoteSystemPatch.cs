@@ -10,6 +10,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using User = ProjectM.Network.User;
+using static Bloodcraft.Utilities;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
 
 namespace Bloodcraft.Patches;
 
@@ -19,9 +21,6 @@ internal static class EmoteSystemPatch
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
@@ -58,7 +57,7 @@ internal static class EmoteSystemPatch
                 Entity character = fromCharacter.Character;
 
                 ulong steamId = userEntity.Read<User>().PlatformId;
-                if (Core.DataStructures.PlayerBools.TryGetValue(steamId, out var bools) && bools["Emotes"])
+                if (GetPlayerBool(steamId, "Emotes"))
                 {
                     if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
                     else if (ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
@@ -75,14 +74,13 @@ internal static class EmoteSystemPatch
     }
     public static void BindPreset(Entity userEntity, Entity character, ulong steamId)
     {
-        if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId))
+        if (!steamId.TryGetFamiliarDefault(out var preset))
         {
             LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No familiar preset found to bind, use .fam bind # at least once first.");
             return;
         }
 
-        int preset = Core.DataStructures.FamiliarChoice[steamId];
-        Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = FindPlayerFamiliar(character);
         User user = userEntity.Read<User>();
 
         if (ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
@@ -97,7 +95,8 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        string set = Core.DataStructures.FamiliarSet[steamId];
+        string set = "";
+        steamId.TryGetFamiliarBox(out set);
 
         if (string.IsNullOrEmpty(set))
         {
@@ -105,23 +104,18 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(steamId, out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && Core.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
+        if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
-            Core.DataStructures.PlayerBools[steamId]["Binding"] = true;
+            SetPlayerBool(steamId, "Binding", true);
+
             if (preset < 1 || preset > famKeys.Count)
             {
                 LocalizationService.HandleServerReply(EntityManager, user, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>) and make sure to update preset for new active boxes.");
                 return;
             }
 
-            if (!Core.DataStructures.FamiliarChoice.ContainsKey(steamId)) // cache, set choice once per session then can use emote to bind same choice
-            {
-                Core.DataStructures.FamiliarChoice[steamId] = preset;
-            }
-
             data = new(Entity.Null, famKeys[preset - 1]);
-            Core.DataStructures.FamiliarActives[steamId] = data;
-            Core.DataStructures.SavePlayerFamiliarActives();
+            steamId.SetFamiliarActives(data);
 
             FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[preset - 1]);
         }
@@ -132,9 +126,9 @@ internal static class EmoteSystemPatch
     }
     public static void CallDismiss(Entity userEntity, Entity character, ulong playerId)
     {
-        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
+        if (playerId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
             
             if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
             {
@@ -149,7 +143,7 @@ internal static class EmoteSystemPatch
 
             if (!familiar.Has<Disabled>())
             {
-                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) FamiliarSummonSystem.FamiliarUtilities.HandleFamiliarMinions(familiar);
+                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
                 EntityManager.AddComponent<Disabled>(familiar);
                 
                 Follower follower = familiar.Read<Follower>();
@@ -172,9 +166,8 @@ internal static class EmoteSystemPatch
                     }
                 }
 
-                data = (familiar, data.FamKey);
-                Core.DataStructures.FamiliarActives[playerId] = data;
-                Core.DataStructures.SavePlayerFamiliarActives();
+                data = (familiar, data.FamKey); // entity stored when dismissed
+                playerId.SetFamiliarActives(data);
 
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
             }
@@ -199,8 +192,8 @@ internal static class EmoteSystemPatch
                 }
                 
                 data = (Entity.Null, data.FamKey);
-                Core.DataStructures.FamiliarActives[playerId] = data;
-                Core.DataStructures.SavePlayerFamiliarActives();
+                playerId.SetFamiliarActives(data);
+
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
             }
         }
@@ -217,11 +210,11 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        if (Core.DataStructures.FamiliarActives.TryGetValue(playerId, out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
+        if (playerId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
-            if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
+            if (!familiar.Exists() && data.Familiar.Exists())
             {
                 familiar = data.Familiar;
             }
@@ -232,7 +225,7 @@ internal static class EmoteSystemPatch
                 return;
             }
 
-            if (ServerGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity _)) // remove and enable combat
+            if (ServerGameManager.HasBuff(familiar, invulnerableBuff.ToIdentifier())) // remove and enable combat
             {
                 BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
                 EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();

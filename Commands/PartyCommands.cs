@@ -1,16 +1,15 @@
 ﻿using Bloodcraft.Services;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Experience.LevelingSystem.PartyUtilities;
-using static Bloodcraft.Core.DataStructures;
+using static Bloodcraft.Services.DataService.PlayerDictionaries;
+using static Bloodcraft.Services.DataService.PlayerPersistence;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 
 [CommandGroup(name: "party")]
 internal static class PartyCommands
 {
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
-
     [Command(name: "toggleinvites", shortHand: "inv", adminOnly: false, usage: ".party inv", description: "Toggles being able to be invited to parties, prevents damage and share exp.")]
     public static void TogglePartyInvitesCommand(ChatCommandContext ctx)
     {
@@ -23,18 +22,14 @@ internal static class PartyCommands
         ulong SteamID = ctx.Event.User.PlatformId;
         string name = ctx.Event.User.CharacterName.Value;
 
-        if (PlayerParties.Any(kvp => kvp.Value.Contains(name)))
+        if (playerParties.Any(kvp => kvp.Value.Contains(name)))
         {
             LocalizationService.HandleReply(ctx, "You are already in a party. Leave or disband if owned before enabling invites.");
             return;
         }
 
-        if (PlayerBools.TryGetValue(SteamID, out var bools))
-        {
-            bools["Grouping"] = !bools["Grouping"];
-        }
-        SavePlayerBools();
-        LocalizationService.HandleReply(ctx, $"Party invites {(bools["Grouping"] ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(SteamID, "Grouping");
+        LocalizationService.HandleReply(ctx, $"Party invites {(GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]
@@ -61,13 +56,13 @@ internal static class PartyCommands
 
         ulong ownerId = ctx.Event.User.PlatformId;
 
-        if (!PlayerParties.ContainsKey(ownerId))
+        if (!playerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You don't have a party.");
             return;
         }
 
-        HashSet<string> party = PlayerParties[ownerId]; // check size and if player is already present in group before adding
+        HashSet<string> party = playerParties[ownerId]; // check size and if player is already present in group before adding
         RemovePlayerFromParty(ctx, party, name);
     }
 
@@ -80,7 +75,6 @@ internal static class PartyCommands
             return;
         }
 
-        Dictionary<ulong, HashSet<string>> playerParties = PlayerParties;
         ListPartyMembers(ctx, playerParties);
     }
 
@@ -95,15 +89,15 @@ internal static class PartyCommands
 
         ulong ownerId = ctx.Event.User.PlatformId;
 
-        if (!PlayerParties.ContainsKey(ownerId))
+        if (!playerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You don't have a party to disband.");
             return;
         }
 
-        PlayerParties.Remove(ownerId);
-        LocalizationService.HandleReply(ctx, "Party disbanded.");
+        playerParties.Remove(ownerId);
         SavePlayerParties();
+        LocalizationService.HandleReply(ctx, "Party disbanded.");
     }
 
     [Command(name: "leave", shortHand: "drop", adminOnly: false, usage: ".party drop", description: "Leaves party if in one.")]
@@ -118,13 +112,13 @@ internal static class PartyCommands
         ulong ownerId = ctx.Event.User.PlatformId;
         string playerName = ctx.Event.User.CharacterName.Value;
 
-        if (PlayerParties.ContainsKey(ownerId))
+        if (playerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You can't leave your own party. Disband it instead.");
             return;
         }
 
-        var party = PlayerParties.Values.FirstOrDefault(set => set.Contains(playerName));
+        var party = playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
         if (party != null)
         {
             RemovePlayerFromParty(ctx, party, playerName);

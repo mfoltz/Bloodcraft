@@ -1,5 +1,5 @@
 ﻿using Bloodcraft.Services;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
@@ -9,6 +9,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
 
@@ -18,15 +19,12 @@ internal static class LevelingSystem
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    
-    static PlayerService PlayerService => Core.PlayerService;
-    static LocalizationService LocalizationService => Core.LocalizationService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     const float EXPConstant = 0.1f; // constant for calculating level from xp
     const float EXPPower = 2f; // power for calculating level from xp
-    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
+
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
@@ -116,7 +114,7 @@ internal static class LevelingSystem
         foreach (Entity participant in participants)
         {
             ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId; // participants are character entities
-            if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData) && xpData.Key >= ConfigService.MaxLevel) continue; // Check if already at max level
+            if (steamId.TryGetPlayerExperience(out var xpData) && xpData.Key >= ConfigService.MaxLevel) continue; // Check if already at max level
             ProcessExperienceGain(participant, victimEntity, steamId, groupMultiplier);
         }
     }
@@ -128,18 +126,18 @@ internal static class LevelingSystem
 
         if (ConfigService.PlayerParties)
         {
-            foreach (var groupEntry in Core.DataStructures.PlayerParties)
+            foreach (var groupEntry in DataService.PlayerDictionaries.playerParties)
             {
                 if (groupEntry.Value.Contains(killerUser.CharacterName.Value))
                 {
                     foreach (string name in groupEntry.Value)
                     {
-                        if (PlayerService.UserCache.TryGetValue(name, out var player))
+                        if (name.TryGetPlayerInfo(out PlayerInfo playerInfo))
                         {
-                            if (!player.Read<User>().IsConnected) continue;
-                            var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
+                            if (!playerInfo.User.IsConnected) continue;
+                            var distance = UnityEngine.Vector3.Distance(killerPosition, playerInfo.CharEntity.Read<Translation>().Value);
                             if (distance > ConfigService.ExpShareDistance) continue;
-                            players.Add(player.Read<User>().LocalCharacter._Entity);
+                            players.Add(playerInfo.CharEntity);
                         }
                     }
                     break;
@@ -174,13 +172,13 @@ internal static class LevelingSystem
         float gainedXP = CalculateExperienceGained(victimLevel.Level._Value, isVBlood);
 
         gainedXP += additionalXP;
-        int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
+        int currentLevel = SteamID.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
 
         if (currentLevel >= ConfigService.MaxLevel) return;
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
         
-        if (Core.DataStructures.PlayerPrestiges.TryGetValue(SteamID, out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
+        if (SteamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
             int exoLevel = prestiges.TryGetValue(PrestigeType.Exo, out var exo) ? exo : 0;
             float expReductionFactor = 1 - (ConfigService.LevelingPrestigeReducer * PrestigeData);
@@ -226,17 +224,16 @@ internal static class LevelingSystem
     }
     static float HandleRestedXP(ulong steamId, float gainedXP, ref int rested)
     {
-        if (Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
+        if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
             float restedXP = restedData.Value;
             float bonusXP = Math.Min(gainedXP, restedXP);
             float totalXP = gainedXP + bonusXP;
             restedXP -= bonusXP;
 
-            Core.DataStructures.PlayerRestedXP[steamId] = new KeyValuePair<DateTime, float>(restedData.Key, restedXP);
-            Core.DataStructures.SavePlayerRestedXP();
-
+            steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(restedData.Key, restedXP));
             rested = (int)bonusXP;
+
             return totalXP;
         }
         return gainedXP;
@@ -245,7 +242,7 @@ internal static class LevelingSystem
     {
         ulong SteamID = user.PlatformId;
         Entity character = user.LocalCharacter._Entity;
-        int currentLevel = Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData) ? xpData.Key : 0;
+        int currentLevel = SteamID.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
         float gainedXP = (float)ConvertLevelToXp(currentLevel) * 0.03f * multiplier;
 
         UpdatePlayerExperience(SteamID, gainedXP);
@@ -263,7 +260,7 @@ internal static class LevelingSystem
     }
     static void UpdatePlayerExperience(ulong SteamID, float gainedXP)
     {
-        if (!Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData))
+        if (!SteamID.TryGetPlayerExperience(out var xpData))
         {
             xpData = new KeyValuePair<int, float>(0, 0); // Initialize if not present
         }
@@ -277,8 +274,7 @@ internal static class LevelingSystem
             newExperience = ConvertLevelToXp(ConfigService.MaxLevel); // Adjust the XP to the max level's XP
         }
 
-        Core.DataStructures.PlayerExperience[SteamID] = new KeyValuePair<int, float>(newLevel, newExperience);
-        Core.DataStructures.SavePlayerExperience();
+        SteamID.SetPlayerExperience(new KeyValuePair<int, float>(newLevel, newExperience));
     }
     static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, float gainedXP, int currentLevel, int restedXP = 0)
     {
@@ -304,7 +300,7 @@ internal static class LevelingSystem
     }
     static bool CheckForLevelUp(ulong SteamID, int currentLevel)
     {
-        int newLevel = ConvertXpToLevel(Core.DataStructures.PlayerExperience[SteamID].Value);
+        int newLevel = ConvertXpToLevel(GetXp(SteamID));
         if (newLevel > currentLevel)
         {
             return true;
@@ -318,7 +314,7 @@ internal static class LevelingSystem
 
         if (leveledUp)
         {
-            int newLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
+            int newLevel = GetLevel(SteamID);
             SetLevel(character);
 
             if (newLevel <= ConfigService.MaxLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
@@ -345,12 +341,18 @@ internal static class LevelingSystem
     }
     static float GetXp(ulong SteamID)
     {
-        if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Value;
-        return 0;
+        if (SteamID.TryGetPlayerExperience(out var xpData))
+        {
+            return xpData.Value;
+        }
+        return 0f;
     }
     public static int GetLevel(ulong SteamID)
     {
-        if (Core.DataStructures.PlayerExperience.TryGetValue(SteamID, out var xpData)) return xpData.Key;
+        if (SteamID.TryGetPlayerExperience(out var xpData))
+        {
+            return xpData.Key;
+        }
         return 0;
     }
     static int GetLevelFromXp(ulong SteamID)
@@ -402,7 +404,7 @@ internal static class LevelingSystem
     public static void SetLevel(Entity player)
     {
         ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-        if (Core.DataStructures.PlayerExperience.TryGetValue(steamId, out var xpData))
+        if (steamId.TryGetPlayerExperience(out var xpData))
         {
             int playerLevel = xpData.Key;
             Equipment equipment = player.Read<Equipment>();
@@ -420,7 +422,7 @@ internal static class LevelingSystem
         if (buffs.Count == 0) return;
         int levelStep = ConfigService.MaxLevel / buffs.Count;
 
-        int playerLevel = Core.DataStructures.PlayerExperience[SteamID].Key;
+        int playerLevel = GetLevel(SteamID);
         if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count)
         {
             int buffIndex = playerLevel / levelStep - 1;
@@ -431,38 +433,36 @@ internal static class LevelingSystem
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (ServerGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff)) // if present, modify based on prestige level
+            if (ServerGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff)) // if present, modify based on prestige level
             {
-                //Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.GetPrefabName()} for class buff, modifying...");
+                HandleBloodBuff(buff);
 
-                HandleBloodBuff(firstBuff);
-
-                if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
+                if (buff.Has<RemoveBuffOnGameplayEvent>())
                 {
-                    firstBuff.Remove<RemoveBuffOnGameplayEvent>();
+                    buff.Remove<RemoveBuffOnGameplayEvent>();
                 }
-                if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
+                if (buff.Has<RemoveBuffOnGameplayEventEntry>())
                 {
-                    firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
+                    buff.Remove<RemoveBuffOnGameplayEventEntry>();
                 }
-                if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
+                if (buff.Has<CreateGameplayEventsOnSpawn>())
                 {
-                    firstBuff.Remove<CreateGameplayEventsOnSpawn>();
+                    buff.Remove<CreateGameplayEventsOnSpawn>();
                 }
-                if (firstBuff.Has<GameplayEventListeners>())
+                if (buff.Has<GameplayEventListeners>())
                 {
-                    firstBuff.Remove<GameplayEventListeners>();
+                    buff.Remove<GameplayEventListeners>();
                 }
-                if (!firstBuff.Has<Buff_Persists_Through_Death>())
+                if (!buff.Has<Buff_Persists_Through_Death>())
                 {
-                    firstBuff.Add<Buff_Persists_Through_Death>();
+                    buff.Add<Buff_Persists_Through_Death>();
                 }
-                if (firstBuff.Has<LifeTime>())
+                if (buff.Has<LifeTime>())
                 {
-                    LifeTime lifeTime = firstBuff.Read<LifeTime>();
+                    LifeTime lifeTime = buff.Read<LifeTime>();
                     lifeTime.Duration = -1;
                     lifeTime.EndAction = LifeTimeEndAction.None;
-                    firstBuff.Write(lifeTime);
+                    buff.Write(lifeTime);
                 }
             }
         }
@@ -854,291 +854,29 @@ internal static class LevelingSystem
             return;
         }   
     }
-    public static bool HandleClassChangeItem(ChatCommandContext ctx, ulong steamId)
-    {
-        PrefabGUID item = new(ConfigService.ChangeClassItem);
-        int quantity = ConfigService.ChangeClassQuantity;
-
-        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
-            ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
-        {
-            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes ({item.GetPrefabName()}x{quantity})");
-            return false;
-        }
-
-        if (!ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
-        {
-            LocalizationService.HandleReply(ctx, $"Failed to remove the required item ({item.GetPrefabName()}x{quantity})");
-            return false;
-        }
-
-        RemoveClassBuffs(ctx, steamId);
-
-        return true;
-    }
-    public static void UpdateClassData(Entity character, PlayerClasses parsedClassType, Dictionary<PlayerClasses, (List<int>, List<int>)> classes, ulong steamId)
-    {
-        var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
-        var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
-        var classWeaponStats = ParseConfigString(weaponConfigEntry);
-        var classBloodStats = ParseConfigString(bloodConfigEntry);
-
-        classes[parsedClassType] = (classWeaponStats, classBloodStats);
-
-        Core.DataStructures.PlayerClass[steamId] = classes;
-        Core.DataStructures.SavePlayerClasses();
-
-        FromCharacter fromCharacter = new()
-        {
-            Character = character,
-            User = character.Read<PlayerCharacter>().UserEntity,
-        };
-
-        ApplyClassBuffs(character, steamId, fromCharacter);
-    }
-    public static void ApplyClassBuffs(Entity character, ulong steamId, FromCharacter fromCharacter)
-    {
-        var buffs = GetClassBuffs(steamId);
-
-        if (buffs.Count == 0) return;
-        int levelStep = ConfigService.MaxLevel / buffs.Count;
-
-        int playerLevel = 0;
-
-        if (ConfigService.LevelingSystem)
-        {
-            playerLevel = Core.DataStructures.PlayerExperience[steamId].Key;
-        }
-        else
-        {
-            Equipment equipment = character.Read<Equipment>();
-            playerLevel = (int)equipment.GetFullLevel();
-        }
-
-        if (ConfigService.PrestigeSystem && Core.DataStructures.PlayerPrestiges.TryGetValue(steamId, out var prestigeData) && prestigeData[PrestigeType.Experience] > 0)
-        {
-            playerLevel = ConfigService.MaxLevel;
-        }
-
-        int numBuffsToApply = playerLevel / levelStep;
-
-        if (numBuffsToApply > 0 && numBuffsToApply <= buffs.Count)
-        {
-            //Core.Log.LogInfo($"Applying {numBuffsToApply} class buff(s) at level {playerLevel}");
-
-            for (int i = 0; i < numBuffsToApply; i++)
-            {
-                ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                {
-                    BuffPrefabGUID = new(buffs[i])
-                };
-                if (!ServerGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity _))
-                {
-                    DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                    if (ServerGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity firstBuff))
-                    {
-                        //Core.Log.LogInfo($"Applied {applyBuffDebugEvent.BuffPrefabGUID.LookupName()} for class buff");
-
-                        HandleBloodBuff(firstBuff);
-
-                        if (firstBuff.Has<RemoveBuffOnGameplayEvent>())
-                        {
-                            firstBuff.Remove<RemoveBuffOnGameplayEvent>();
-                        }
-                        if (firstBuff.Has<RemoveBuffOnGameplayEventEntry>())
-                        {
-                            firstBuff.Remove<RemoveBuffOnGameplayEventEntry>();
-                        }
-                        if (firstBuff.Has<CreateGameplayEventsOnSpawn>())
-                        {
-                            firstBuff.Remove<CreateGameplayEventsOnSpawn>();
-                        }
-                        if (firstBuff.Has<GameplayEventListeners>())
-                        {
-                            firstBuff.Remove<GameplayEventListeners>();
-                        }
-                        if (!firstBuff.Has<Buff_Persists_Through_Death>())
-                        {
-                            firstBuff.Add<Buff_Persists_Through_Death>();
-                        }
-                        if (firstBuff.Has<LifeTime>())
-                        {
-                            LifeTime lifeTime = firstBuff.Read<LifeTime>();
-                            lifeTime.Duration = -1;
-                            lifeTime.EndAction = LifeTimeEndAction.None;
-                            firstBuff.Write(lifeTime);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    public static void RemoveClassBuffs(ChatCommandContext ctx, ulong steamId)
-    {
-        List<int> buffs = GetClassBuffs(steamId);
-        var buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
-        var entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
-        if (buffs.Count == 0) return;
-
-        for (int i = 0; i < buffs.Count; i++)
-        {
-            if (buffs[i] == 0) continue;
-            PrefabGUID buffPrefab = new(buffs[i]);
-            if (ServerGameManager.HasBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier()))
-            {
-                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
-            }
-        }
-    }
-    public static Dictionary<int, int> GetSpellPrefabs()
-    {
-        Dictionary<int, int> spellPrefabs = [];
-        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
-        {
-            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
-        }
-        return spellPrefabs;
-    }
-    public static List<int> GetClassBuffs(ulong steamId)
-    {
-        if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
-        {
-            var playerClass = classes.Keys.FirstOrDefault();
-            return ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
-        }
-        return [];
-    }
-    public static PlayerClasses GetPlayerClass(ulong steamId)
-    {
-        return Core.DataStructures.PlayerClass[steamId].Keys.First();
-    }
-    public static bool HasClass(ulong steamId)
-    {
-        return Core.DataStructures.PlayerClass.ContainsKey(steamId) && Core.DataStructures.PlayerClass[steamId].Keys.Count > 0;
-    }
-    public static List<int> GetClassSpells(ulong steamId)
-    {
-        if (Core.DataStructures.PlayerClass.TryGetValue(steamId, out var classes) && classes.Keys.Count > 0)
-        {
-            var playerClass = classes.Keys.FirstOrDefault();
-            return ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
-        }
-        return [];
-    }
-    public static bool TryParseClass(string classType, out PlayerClasses parsedClassType)
-    {
-        // Attempt to parse the classType string to the PlayerClasses enum.
-        if (Enum.TryParse(classType, true, out parsedClassType))
-        {
-            return true; // Successfully parsed
-        }
-
-        // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
-        parsedClassType = Enum.GetValues(typeof(PlayerClasses))
-                              .Cast<PlayerClasses>()
-                              .FirstOrDefault(pc => pc.ToString().Contains(classType, StringComparison.OrdinalIgnoreCase));
-
-        // Check if a valid enum value was found that contains the input string.
-        if (!parsedClassType.Equals(default(PlayerClasses)))
-        {
-            return true; // Found a matching enum value
-        }
-
-        // If no match is found, return false and set the out parameter to default value.
-        parsedClassType = default;
-        return false; // Parsing failed
-    }
-    public static void ShowClassBuffs(ChatCommandContext ctx, PlayerClasses playerClass)
-    {
-        List<int> perks = ParseConfigString(LevelingSystem.ClassPrestigeBuffsMap[playerClass]);
-
-        if (perks.Count == 0)
-        {
-            LocalizationService.HandleReply(ctx, $"{playerClass} buffs not found.");
-            return;
-        }
-
-        int step = ConfigService.MaxLevel / perks.Count;
-
-        var classBuffs = perks.Select((perk, index) =>
-        {
-            int level = (index + 1) * step;
-            string prefab = new PrefabGUID(perk).LookupName();
-            int prefabIndex = prefab.IndexOf("Prefab");
-            if (prefabIndex != -1)
-            {
-                prefab = prefab[..prefabIndex].TrimEnd();
-            }
-            return $"<color=white>{prefab}</color> at level <color=yellow>{level}</color>";
-        }).ToList();
-
-        for (int i = 0; i < classBuffs.Count; i += 6)
-        {
-            var batch = classBuffs.Skip(i).Take(6);
-            string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
-        }
-    }
-    public static void ShowClassSpells(ChatCommandContext ctx, PlayerClasses playerClass)
-    {
-        List<int> perks = ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]);
-
-        if (perks.Count == 0)
-        {
-            LocalizationService.HandleReply(ctx, $"{playerClass} spells not found.");
-            return;
-        }
-
-        var classSpells = perks.Select(perk =>
-        {
-            string prefab = new PrefabGUID(perk).LookupName();
-            int prefabIndex = prefab.IndexOf("Prefab");
-            if (prefabIndex != -1)
-            {
-                prefab = prefab[..prefabIndex].TrimEnd();
-            }
-            return $"<color=white>{prefab}</color>";
-        }).ToList();
-
-        for (int i = 0; i < classSpells.Count; i += 6)
-        {
-            var batch = classSpells.Skip(i).Take(6);
-            string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
-        }
-    }
     public static void ResetRestedXP(ulong steamId)
     { 
-        if (Core.DataStructures.PlayerRestedXP.TryGetValue(steamId, out var restedData) && restedData.Value > 0)
+        if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
             restedData = new KeyValuePair<DateTime, float>(restedData.Key, 0);
-            Core.DataStructures.PlayerRestedXP[steamId] = restedData;
-            Core.DataStructures.SavePlayerRestedXP();
+            steamId.SetPlayerRestedXP(restedData);
         }
     }
     public class PartyUtilities
     {
         public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
         {
-            string playerKey = PlayerService.UserCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && PlayerService.UserCache.TryGetValue(playerKey, out Entity player))
+            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(playerKey) && playerKey.TryGetPlayerInfo(out PlayerInfo playerInfo))
             {
-                if (player.Equals(Entity.Null))
-                {
-                    LocalizationService.HandleReply(ctx, "Player not found...");
-                    return;
-                }
-
-                User foundUser = player.Read<User>();
-                if (foundUser.PlatformId == ownerId)
+                if (playerInfo.User.PlatformId == ownerId)
                 {
                     LocalizationService.HandleReply(ctx, "Can't add yourself to your own party.");
                     return;
                 }
 
-                string playerName = foundUser.CharacterName.Value;
-                if (IsPlayerEligibleForParty(foundUser, playerName))
+                string playerName = playerInfo.User.CharacterName.Value;
+                if (IsPlayerEligibleForParty(playerInfo.User.PlatformId, playerName))
                 {
                     AddPlayerToParty(ctx, ownerId, playerName);
                 }
@@ -1152,14 +890,13 @@ internal static class LevelingSystem
                 LocalizationService.HandleReply(ctx, "Player not found...");
             }  
         }
-        public static bool IsPlayerEligibleForParty(User foundUser, string playerName)
+        public static bool IsPlayerEligibleForParty(ulong steamId, string playerName)
         {
-            if (Core.DataStructures.PlayerBools.TryGetValue(foundUser.PlatformId, out var bools) && bools["Grouping"])
+            if (GetPlayerBool(steamId, "Grouping"))
             {
-                if (!Core.DataStructures.PlayerParties.ContainsKey(foundUser.PlatformId) && !Core.DataStructures.PlayerParties.Values.Any(party => party.Equals(playerName)))
+                if (!steamId.TryGetPlayerParties(out var parties) && !DataService.PlayerDictionaries.playerParties.Values.Any(party => party.Equals(playerName)))
                 {
-                    bools["Grouping"] = false;
-                    Core.DataStructures.SavePlayerBools();
+                    SetPlayerBool(steamId, "Grouping", false);
                     return true;
                 }
             }
@@ -1167,15 +904,13 @@ internal static class LevelingSystem
         }
         public static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
         {
-            if (!Core.DataStructures.PlayerParties.ContainsKey(ownerId))
+            if (!ownerId.TryGetPlayerParties(out var _))
             {
-                Core.DataStructures.PlayerParties[ownerId] = [];
+                ownerId.SetPlayerParties([]);
             }
 
             string ownerName = ctx.Event.User.CharacterName.Value;
-            HashSet<string> party = Core.DataStructures.PlayerParties[ownerId];
-
-            if (party.Count < ConfigService.MaxPartySize && !party.Contains(playerName))
+            if (ownerId.TryGetPlayerParties(out var party) && party.Count < ConfigService.MaxPartySize && !party.Contains(playerName))
             {
                 party.Add(playerName);
 
@@ -1184,7 +919,7 @@ internal static class LevelingSystem
                     party.Add(ownerName);
                 }
 
-                Core.DataStructures.SavePlayerParties();
+                ownerId.SetPlayerParties(party);
                 LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party.");
             }
             else
@@ -1194,11 +929,12 @@ internal static class LevelingSystem
         }
         public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
         {
-            string playerKey = PlayerService.UserCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+            ulong steamId = ctx.Event.User.PlatformId;
+            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
             {
                 party.Remove(playerKey);
-                Core.DataStructures.SavePlayerParties();
+                steamId.SetPlayerParties(party);
                 LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from party.");
             }
             else

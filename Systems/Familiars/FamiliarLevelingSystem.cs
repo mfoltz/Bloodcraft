@@ -1,21 +1,19 @@
-﻿using ProjectM;
+﻿using Bloodcraft.Services;
+using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using Bloodcraft.Services;
-using static Bloodcraft.Core;
-using static Bloodcraft.Core.DataStructures;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarLevelingSystem
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
-    
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
-    const float EXPConstant = 0.1f; // constant for calculating level from xp
-    const int EXPPower = 2; // power for calculating level from xp
+    const float EXPConstant = 0.1f;
+    const int EXPPower = 2;
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     public static void UpdateFamiliar(Entity player, Entity victimEntity)
@@ -35,16 +33,16 @@ internal static class FamiliarLevelingSystem
 
         ulong steamId = userEntity.Read<User>().PlatformId;
 
-        if (FamiliarActives.TryGetValue(steamId, out var actives) && !actives.Familiar.Equals(Entity.Null)) return; // don't process if familiar not out
+        if (steamId.TryGetFamiliarActives(out var actives) && actives.Familiar.Exists()) return; // don't process if familiar not out
 
-        Entity familiarEntity = FamiliarSummonSystem.FamiliarUtilities.FindPlayerFamiliar(player);
-        if (familiarEntity == Entity.Null || !EntityManager.Exists(familiarEntity)) return;
+        Entity familiar = FindPlayerFamiliar(player);
+        if (!familiar.Exists()) return; // don't process if familiar not found
 
-        if (familiarEntity.Has<Aggroable>() && !familiarEntity.Read<Aggroable>().Value._Value) return; // don't process if familiar combat disabled
+        if (familiar.Has<Aggroable>() && !familiar.Read<Aggroable>().Value._Value) return; // don't process if familiar combat disabled
 
-        PrefabGUID familiarUnit = familiarEntity.Read<PrefabGUID>();
+        PrefabGUID familiarUnit = familiar.Read<PrefabGUID>();
         int familiarId = familiarUnit.GuidHash;
-        ProcessExperienceGain(familiarEntity, victimEntity, steamId, familiarId);
+        ProcessExperienceGain(familiar, victimEntity, steamId, familiarId);
     }
     static void ProcessExperienceGain(Entity familiarEntity, Entity victimEntity, ulong steamID, int familiarId)
     {
@@ -91,8 +89,6 @@ internal static class FamiliarLevelingSystem
     } 
     static void CheckAndHandleLevelUp(Entity familiarEntity, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel)
     {
-        Entity userEntity = familiarEntity.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity;
-
         bool leveledUp = false;
         int newLevel = ConvertXpToLevel(familiarXP.Value);
 
@@ -114,7 +110,7 @@ internal static class FamiliarLevelingSystem
             FromCharacter fromCharacter = new()
             {
                 Character = familiarEntity,
-                User = userEntity,
+                User = familiarEntity.TryGetFollowedPlayer(out var player) ? player.Read<PlayerCharacter>().UserEntity : familiarEntity
             };
 
             int famKey = familiarEntity.Read<PrefabGUID>().GuidHash;
@@ -122,12 +118,6 @@ internal static class FamiliarLevelingSystem
             UnitLevel unitLevel = familiarEntity.Read<UnitLevel>();
             unitLevel.Level._Value = newLevel;
             familiarEntity.Write(unitLevel);
-
-            int prestigeLevel = 0;
-            if (FamiliarPrestigeManager.LoadFamiliarPrestige(steamID).FamiliarPrestige.TryGetValue(familiarEntity.Read<PrefabGUID>().GuidHash, out var prestigeData) && prestigeData.Key > 0)
-            {
-                prestigeLevel = prestigeData.Key;
-            }
 
             FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel, steamID, famKey);
             if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiarEntity, newLevel);

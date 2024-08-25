@@ -3,33 +3,124 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using Bloodcraft.Systems.Leveling;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Legacies;
-public static class BloodSystem
+internal static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    
-    static LocalizationService LocalizationService => Core.LocalizationService;
 
-    const float BloodConstant = 0.1f; // constant for calculating level from xp
-    const int BloodPower = 2; // power for calculating level from xp
-    public enum BloodType
+    const float BloodConstant = 0.1f;
+    const int BloodPower = 2;
+
+    public static readonly Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
-        Worker,
-        Warrior,
-        Scholar,
-        Rogue,
-        Mutant,
-        VBlood,
-        None,
-        GateBoss,
-        Draculin,
-        Immortal,
-        Creature,
-        Brute
-    }
+        { BloodType.Worker, steamID =>
+            {
+                if (steamID.TryGetPlayerWorkerLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Warrior, steamID =>
+            {
+                if (steamID.TryGetPlayerWarriorLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Scholar, steamID =>
+            {
+                if (steamID.TryGetPlayerScholarLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Rogue, steamID =>
+            {
+                if (steamID.TryGetPlayerRogueLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Mutant, steamID =>
+            {
+                if (steamID.TryGetPlayerMutantLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.VBlood, steamID =>
+            {
+                if (steamID.TryGetPlayerVBloodLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Draculin, steamID =>
+            {
+                if (steamID.TryGetPlayerDraculinLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Immortal, steamID =>
+            {
+                if (steamID.TryGetPlayerImmortalLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Creature, steamID =>
+            {
+                if (steamID.TryGetPlayerCreatureLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { BloodType.Brute, steamID =>
+            {
+                if (steamID.TryGetPlayerBruteLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        }
+    };
+
+    public static readonly Dictionary<BloodType, Action<ulong, KeyValuePair<int, float>>> SetExtensionMap = new()
+    {
+        { BloodType.Worker, (steamID, data) => steamID.SetPlayerWorkerLegacy(data) },
+        { BloodType.Warrior, (steamID, data) => steamID.SetPlayerWarriorLegacy(data) },
+        { BloodType.Scholar, (steamID, data) => steamID.SetPlayerScholarLegacy(data) },
+        { BloodType.Rogue, (steamID, data) => steamID.SetPlayerRogueLegacy(data) },
+        { BloodType.Mutant, (steamID, data) => steamID.SetPlayerMutantLegacy(data) },
+        { BloodType.VBlood, (steamID, data) => steamID.SetPlayerVBloodLegacy(data) },
+        { BloodType.Draculin, (steamID, data) => steamID.SetPlayerDraculinLegacy(data) },
+        { BloodType.Immortal, (steamID, data) => steamID.SetPlayerImmortalLegacy(data) },
+        { BloodType.Creature, (steamID, data) => steamID.SetPlayerCreatureLegacy(data) },
+        { BloodType.Brute, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }
+    };
 
     public static readonly Dictionary<BloodType, PrestigeType> BloodPrestigeMap = new()
     {
@@ -76,7 +167,7 @@ public static class BloodSystem
 
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
-        BloodSystem.BloodType bloodType = BloodHandler.GetCurrentBloodType(Killer);
+        BloodType bloodType = BloodManager.GetCurrentBloodType(Killer);
         if (bloodType.Equals(BloodType.None)) return;
 
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
@@ -89,17 +180,17 @@ public static class BloodSystem
 
             float changeFactor = 1f;
 
-            if (Core.DataStructures.PlayerPrestiges.TryGetValue(steamID, out var prestiges))
+            if (steamID.TryGetPlayerPrestiges(out var prestiges))
             {
                 // Apply rate reduction with diminishing returns
-                if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige) && legacyPrestige > 0)
+                if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige))
                 {
                     changeFactor -= (ConfigService.PrestigeRatesReducer * legacyPrestige);
                     changeFactor = MathF.Max(changeFactor, 0);
                 }
 
                 // Apply rate gain with linear increase
-                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige) && xpPrestige > 0)
+                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige))
                 {
                     changeFactor += 1 + (ConfigService.PrestigeRateMultiplier * xpPrestige);
                 }
@@ -120,13 +211,13 @@ public static class BloodSystem
                     newExperience = ConvertLevelToXp(ConfigService.MaxBloodLevel);
                 }
             }
+
             var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
-            handler.UpdateLegacyData(steamID, updatedXPData);
-            handler.SaveChanges();
+            handler.SetLegacyData(steamID, updatedXPData);
             NotifyPlayer(user, bloodType, BloodValue, leveledUp, newLevel, handler);
         }
     }
-    public static void NotifyPlayer(User user, BloodSystem.BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
+    public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
     {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP; // Convert to integer if necessary
@@ -137,7 +228,7 @@ public static class BloodSystem
             if (newLevel <= ConfigService.MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
             if (GetPlayerBool(steamID, "Reminders"))
             {
-                if (Core.DataStructures.PlayerBloodStats.TryGetValue(steamID, out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
+                if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
                 {
                     if (Stats.Count < ConfigService.LegacyStatChoices)
                     {
@@ -147,7 +238,7 @@ public static class BloodSystem
             }
         }
         
-        if (Core.DataStructures.PlayerBools.TryGetValue(steamID, out var bools) && bools["BloodLogging"])
+        if (GetPlayerBool(steamID, "BloodLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }

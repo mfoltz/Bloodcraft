@@ -1,18 +1,15 @@
-﻿using Bloodcraft.Systems.Experience;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Experience;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using Bloodcraft.Services;
-using static Bloodcraft.Core;
-
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     
-    static LocalizationService LocalizationService => Core.LocalizationService;
-
     static readonly Random Random = new();
 
     // List of banned PrefabGUIDs
@@ -83,17 +80,16 @@ internal static class FamiliarUnlockSystem
         User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
         ulong playerId = user.PlatformId;
 
-        DataStructures.UnlockedFamiliarData data = FamiliarUnlocksManager.LoadUnlockedFamiliars(playerId);
+        UnlockedFamiliarData data = FamiliarUnlocksManager.LoadUnlockedFamiliars(playerId);
         string lastListName = data.UnlockedFamiliars.Keys.LastOrDefault();
 
         if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
         {
             lastListName = $"box{data.UnlockedFamiliars.Count + 1}";
             data.UnlockedFamiliars[lastListName] = [];
-            if (Core.DataStructures.FamiliarSet[playerId] == "")
+            if (playerId.TryGetFamiliarBox(out var box) && string.IsNullOrEmpty(box))
             {
-                Core.DataStructures.FamiliarSet[playerId] = lastListName;
-                Core.DataStructures.SavePlayerFamiliarSets();
+                playerId.SetFamiliarBox(lastListName);
             }
         }
 
@@ -128,7 +124,7 @@ internal static class FamiliarUnlockSystem
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)
     {
-        DataStructures.FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+        FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
         if (chance < 1f && RollForChance(chance)) // roll
         {
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
