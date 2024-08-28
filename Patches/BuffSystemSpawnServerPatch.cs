@@ -67,7 +67,7 @@ internal static class BuffSpawnSystemPatches
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 string prefabName = prefabGUID.LookupName().ToLower();
 
-                if (prefabName.Contains("spawn") || prefabName.Contains("life")) Core.Log.LogInfo(prefabName); // check if spawn buff for minions from fam with player as owner
+                //if (prefabName.Contains("spawn") || prefabName.Contains("life")) Core.Log.LogInfo(prefabName); // check if spawn buff for minions from fam with player as owner
 
                 Entity player;
                 
