@@ -101,7 +101,7 @@ internal static class DeathEventListenerSystemPatch
 
                     if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
-                        EclipseService.SendClientProgress(deathEvent.Killer, steamId);
+                        EclipseService.SendClientProgress(followedPlayer, steamId);
                     }
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>()) // player summon kills
@@ -119,7 +119,7 @@ internal static class DeathEventListenerSystemPatch
 
                     if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
-                        EclipseService.SendClientProgress(deathEvent.Killer, steamId);
+                        EclipseService.SendClientProgress(killer, steamId);
                     }
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
@@ -142,7 +142,7 @@ internal static class DeathEventListenerSystemPatch
 
                     if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
-                        EclipseService.SendClientProgress(deathEvent.Killer, steamId);
+                        EclipseService.SendClientProgress(follower.Followed._Value, steamId);
                     }
                 }
             }

@@ -6,6 +6,7 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -266,6 +267,12 @@ internal static class EquipmentPatches
                 if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
+                    ulong steamId = player.GetSteamId();
+
+                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
+                    {
+                        EclipseService.SendClientProgress(player, steamId);
+                    }
                 }
             }
         }

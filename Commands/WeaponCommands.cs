@@ -94,6 +94,7 @@ internal static class WeaponCommands
             LocalizationService.HandleReply(ctx, "Expertise is not enabled.");
             return;
         }
+
         var SteamID = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(SteamID, "ExpertiseLogging");
@@ -122,6 +123,7 @@ internal static class WeaponCommands
         }
 
         ulong steamID = ctx.Event.User.PlatformId;
+
         if (ChooseStat(steamID, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");

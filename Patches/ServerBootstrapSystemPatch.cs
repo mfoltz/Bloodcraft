@@ -206,6 +206,13 @@ internal static class ServerBootstrapSystemPatch
                 }
                 steamId.SetPlayerWeaponStats(weaponStats);  // Assuming the weapon stats are a list or similar collection.
             }
+            else
+            {
+                foreach (WeaponType weaponType in Enum.GetValues<WeaponType>())
+                {
+                    if (!weaponStats.ContainsKey(weaponType)) weaponStats.Add(weaponType, []);
+                }
+            }
         }
 
         if (ConfigService.BloodSystem)
@@ -268,6 +275,13 @@ internal static class ServerBootstrapSystemPatch
                     bloodStats.Add(bloodType, []);
                 }
                 steamId.SetPlayerBloodStats(bloodStats);
+            }
+            else
+            {
+                foreach (BloodType bloodType in Enum.GetValues<BloodType>())
+                {
+                    if (!bloodStats.ContainsKey(bloodType)) bloodStats.Add(bloodType, []);
+                }
             }
         }
 
@@ -333,10 +347,7 @@ internal static class ServerBootstrapSystemPatch
             {
                 foreach (var prestigeType in Enum.GetValues<PrestigeType>())
                 {
-                    if (!prestiges.ContainsKey(prestigeType))
-                    {
-                        prestiges.Add(prestigeType, 0);
-                    }
+                    if (!prestiges.ContainsKey(prestigeType)) prestiges.Add(prestigeType, 0);
                 }
             }
         }

@@ -44,11 +44,6 @@ internal static class ScriptSpawnServerPatch
                         BloodManager.ApplyBloodBonuses(steamId, bloodType, entity);
                         ModifyUnitStatBuffSystem_Spawn.OnUpdate();
                     }
-
-                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
-                    {
-                        EclipseService.SendClientProgress(player, steamId);
-                    }
                 }
             }
         }

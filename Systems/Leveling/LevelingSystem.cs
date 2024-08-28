@@ -48,6 +48,16 @@ internal static class LevelingSystem
         { PlayerClasses.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
     };
 
+    public static readonly Dictionary<PlayerClasses, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
+    {
+        { PlayerClasses.BloodKnight, (ParseConfigString(ConfigService.BloodKnightWeapon), ParseConfigString(ConfigService.BloodKnightBlood)) },
+        { PlayerClasses.DemonHunter, (ParseConfigString(ConfigService.DemonHunterWeapon), ParseConfigString(ConfigService.DemonHunterBlood)) },
+        { PlayerClasses.VampireLord, (ParseConfigString(ConfigService.VampireLordWeapon), ParseConfigString(ConfigService.VampireLordBlood)) },
+        { PlayerClasses.ShadowBlade, (ParseConfigString(ConfigService.ShadowBladeWeapon), ParseConfigString(ConfigService.ShadowBladeBlood)) },
+        { PlayerClasses.ArcaneSorcerer, (ParseConfigString(ConfigService.ArcaneSorcererWeapon), ParseConfigString(ConfigService.ArcaneSorcererBlood)) },
+        { PlayerClasses.DeathMage, (ParseConfigString(ConfigService.DeathMageWeapon), ParseConfigString(ConfigService.DeathMageBlood)) }
+    };
+
     public static readonly Dictionary<PlayerClasses, string> ClassPrestigeBuffsMap = new()
     {
         { PlayerClasses.BloodKnight, ConfigService.BloodKnightBuffs },

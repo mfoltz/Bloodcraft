@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using static Bloodcraft.Systems.Expertise.WeaponSystem;
 
 namespace Bloodcraft.Systems.Expertise;
 public enum WeaponType

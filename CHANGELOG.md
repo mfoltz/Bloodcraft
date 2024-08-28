@@ -8,6 +8,8 @@
 - added reminders for various mod features that will be sent to players on occasion for classes/expertise/legacies, can be toggled on and off via command (.remindme)
 - fixed familiar aggro bug when using call/dismiss even if familiar combat is disabled via config
 - added command to clean up old disabled familiars (building spot bug)
+- config options are in sections now! should carry over existing values but make a backup of your config just in case
+- added command to show userStats (same ones from the credits after Dracula I think)
 
 `1.2.4`
 - special thanks to Odjit for tracking down the party bug and discovering the reroll issue <3

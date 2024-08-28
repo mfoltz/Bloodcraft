@@ -170,6 +170,7 @@ public static class ConfigService
             "Expertise",
             "Legacies",
             "Familiars",
+            "Classes",
             "Professions"
         ];
         public class ConfigEntryDefinition(string section, string key, object defaultValue, string description)
@@ -230,7 +231,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Expertise", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise"),
             new ConfigEntryDefinition("Expertise", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units"),
             new ConfigEntryDefinition("Expertise", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods"),
-            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise"),
+            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItem", 576389135, "Item PrefabGUID cost for resetting weapon stats"),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItemQuantity", 500, "Quantity of item required for resetting stats"),
             new ConfigEntryDefinition("Expertise", "MaxHealth", 250f, "The base cap for maximum health"),
@@ -252,7 +253,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies"),
             new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units"),
             new ConfigEntryDefinition("Legacies", "VBloodLegacyMultiplier", 5f, "The multiplier for lineage gained from VBloods"),
-            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy"),
+            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Legacies", "ResetLegacyItem", 576389135, "Item PrefabGUID cost for resetting blood stats"),
             new ConfigEntryDefinition("Legacies", "ResetLegacyItemQuantity", 500, "Quantity of item required for resetting blood stats"),
             new ConfigEntryDefinition("Legacies", "HealingReceived", 0.15f, "The base cap for healing received"),

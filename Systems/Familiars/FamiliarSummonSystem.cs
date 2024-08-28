@@ -155,18 +155,22 @@ internal static class FamiliarSummonSystem
 
         if (familiar.Has<IsMinion>())
         {
-            familiar.Write(new IsMinion { Value = true });
+            //familiar.Write(new IsMinion { Value = true }); // this or the entityOwner is sufficient apparently to stop player attacks, guess it was this? skellie priest summoning again as well
+            // this prevents summoners from summoning so do not want
         }
 
         if (!familiar.Has<Minion>())
         {
-            familiar.Add<Minion>();
+            familiar.Add<Minion>(); //try taking this one off first and see if they summon things again, may also be related to entityOwner
+            // this works for stopping targetting players for PvE and does not stop summoning, still respects pvp prot as well
         }
 
         if (familiar.Has<EntityOwner>())
         {
             familiar.Write(new EntityOwner { Owner = player });
         }
+
+        familiar.Add<BlockFeedBuff>();
 
         var followerBuffer = player.ReadBuffer<FollowerBuffer>();
         followerBuffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });
@@ -177,7 +181,6 @@ internal static class FamiliarSummonSystem
         bloodConsumeSource.BloodQuality = level / (float)ConfigService.MaxFamiliarLevel * 100;
         bloodConsumeSource.CanBeConsumed = false;
         familiar.Write(bloodConsumeSource);
-        familiar.Add<BlockFeedBuff>();
     }
     public enum FamiliarStatType
     {
