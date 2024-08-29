@@ -44,7 +44,8 @@ internal static class ServerBootstrapSystemPatch
         { "VBloodEmotes", true },
         { "FamiliarVisual", true},
         { "ShinyChoice", false },
-        { "Reminders", true }
+        { "Reminders", true },
+        { "PrepareHunt", false}
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
@@ -287,6 +288,17 @@ internal static class ServerBootstrapSystemPatch
 
         if (ConfigService.LevelingSystem)
         { 
+            if (!GetPlayerBool(steamId, "PrepareHunt"))
+            {
+                EntityCommandBuffer entityCommandBuffer = Core.SystemService.EntityCommandBufferSystem.CreateCommandBuffer();
+                PrefabGUID achievementPrefabGUID = new(560247139); // Journal_GettingReadyForTheHunt
+                Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
+
+                Core.SystemService.ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, character, achievementOwnerEntity, false, true);
+
+                SetPlayerBool(steamId, "prepareHunt", true);
+            }
+
             if (!steamId.TryGetPlayerExperience(out var experience))
             {
                 steamId.SetPlayerExperience(new KeyValuePair<int, float>(ConfigService.StartingLevel, LevelingSystem.ConvertLevelToXp(ConfigService.StartingLevel)));
