@@ -232,7 +232,7 @@ internal static class BloodSystem
                 {
                     if (Stats.Count < ConfigService.LegacyStatChoices)
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.LegacyStatChoices - Stats.Count} stat bonuses available for <color=red>{bloodType.ToString().ToLower()}</color>; use '.bl cst {bloodType} [Stat]' to make your choice and '.bl lst' to view legacy stat options.");
+                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.LegacyStatChoices - Stats.Count} <color=white>stat</color> <color=#00FFFF>bonuses</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to make your choice and '<color=white>.bl lst</color>' to view legacy stat options.");
                     }
                 }
             }

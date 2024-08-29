@@ -68,5 +68,8 @@
 	<Target Name="BuildToServer" AfterTargets="Build">
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\VRising_Server\BepInEx\plugins" />
 	</Target>
+	<Target Name="CreateReadme" AfterTargets="Build">
+		<Exec Command="dotnet run --project C:\Users\mitch\source\Repos\GenerateReadme\GenerateReadme.csproj" />
+	</Target>
 	
 </Project>

@@ -1,8 +1,5 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
-using ProjectM.Network;
-using ProjectM.Scripting;
-using Steamworks;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;

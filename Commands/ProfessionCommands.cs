@@ -1,6 +1,5 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
-using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -12,8 +11,6 @@ namespace Bloodcraft.Commands;
 [CommandGroup(name: "profession", "prof")] 
 internal static class ProfessionCommands
 {
-    static EntityManager EntityManager => Core.EntityManager;
-
     [Command(name: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
     {

@@ -2,7 +2,6 @@
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
