@@ -97,6 +97,14 @@ public static class ConfigService
     public static bool ProfessionSystem { get; private set; }
     public static int MaxProfessionLevel { get; private set; }
     public static float ProfessionMultiplier { get; private set; }
+    public static float WoodcuttingFactor { get; private set; }
+    public static float MiningFactor { get; private set; }
+    public static float BlacksmithingFactor { get; private set; }
+    public static float TailoringFactor { get; private set; }
+    public static float FishingFactor { get; private set; }
+    public static float AlchemyFactor { get; private set; }
+    public static float HarvestingFactor { get; private set; }
+    public static float EnchangingFactor { get; private set; }
     public static bool ExtraRecipes { get; private set; }
     public static bool FamiliarSystem { get; private set; }
     public static bool ShareUnlocks { get; private set; }
@@ -271,6 +279,14 @@ public static class ConfigService
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system"),
             new ConfigEntryDefinition("Professions", "MaxProfessionLevel", 100, "The maximum level a player can reach in professions"),
             new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained"),
+            new ConfigEntryDefinition("Professions", "WoodcuttingFactor" , 1f, "Modify woodcutting profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "MiningFactor" , 1f, "Modify mining profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "BlacksmithingFactor" , 3f, "Modify blacksmithing profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "TailoringFactor" , 3f, "Modify tailoring profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "FishingFactor" , 3f, "Modify fishing profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "AlchemyFactor" , 2f, "Modify alchemy profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "HarvestingFactor" , 0.05f, "Modify harvesting profession xp by factor"),
+            new ConfigEntryDefinition("Professions", "EnchangingFactor" , 4f, "Modify enchanging profession xp by factor"),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes"),
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system"),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)"),
