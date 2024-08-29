@@ -75,26 +75,6 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
-    public static void QuickStartCommand(ChatCommandContext ctx)
-    {
-        if (!ConfigService.LevelingSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
-            return;
-        }
-
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-        PrefabGUID achievementPrefabGUID = new(560247139); // Journal_GettingReadyForTheHunt
-
-        Entity userEntity = ctx.Event.SenderUserEntity;
-        Entity characterEntity = ctx.Event.SenderCharacterEntity;
-        Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
-
-        ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
-        LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
-    }
-
     [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
     public static void LockPlayerSpells(ChatCommandContext ctx)
     {

@@ -245,9 +245,6 @@ Jairon Orellana; Odjit; Jera;
 - `.starterkit`
   - Grants kit if configured.
   - Shortcut: *.kitme*
-- `.prepareforthehunt`
-  - Completes GettingReadyForTheHunt if not already completed. 
-  - Shortcut: *.prepare*
 - `.lockSpell`
   - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.locksp*
