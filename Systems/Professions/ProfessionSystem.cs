@@ -163,13 +163,13 @@ internal static class ProfessionSystem
     public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
     {
         var xpData = handler.GetProfessionData(steamID);
-
         if (xpData.Key >= ConfigService.MaxProfessionLevel) return;
 
         UpdateProfessionExperience(user, steamID, xpData, value, handler);
     }
     static void UpdateProfessionExperience(User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
     {
+        gainedXP *= ProfessionMappings.GetProfessionFactor(handler.GetProfessionName());
         float newExperience = xpData.Value + gainedXP;
         int newLevel = ConvertXpToLevel(newExperience);
         bool leveledUp = false;
@@ -235,6 +235,18 @@ internal static class ProfessionSystem
 }
 internal static class ProfessionMappings
 {
+    static readonly Dictionary<string, float> ProfessionFactors = new()
+    {
+        { "woodcutting", ConfigService.WoodcuttingFactor },
+        { "mining", ConfigService.WoodcuttingFactor },
+        { "blacksmithing", ConfigService.WoodcuttingFactor },
+        { "tailoring", ConfigService.WoodcuttingFactor },
+        { "fishing", ConfigService.WoodcuttingFactor },
+        { "alchemy", ConfigService.WoodcuttingFactor },
+        { "harvesting", ConfigService.WoodcuttingFactor },
+        { "enchanging", ConfigService.WoodcuttingFactor }
+    };
+    
     static readonly Dictionary<string, int> FishingMultipliers = new()
     {
         { "farbane", 1 },
@@ -313,6 +325,17 @@ internal static class ProfessionMappings
         { "t08", 8 },
         { "t09", 9 },
     };
+    public static float GetProfessionFactor(string name)
+    {
+        foreach (KeyValuePair<string, float> profession in ProfessionFactors)
+        {
+            if (name.ToLower().Contains(profession.Key))
+            {
+                return profession.Value;
+            }
+        }
+        return 1;
+    }
     public static int GetFishingModifier(PrefabGUID prefab)
     {
         foreach (KeyValuePair<string, int> location in FishingMultipliers)
