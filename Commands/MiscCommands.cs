@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -29,7 +28,6 @@ internal static class MiscCommands
 
     static readonly ComponentType[] DisabledFamiliarComponents =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>()),
         ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
         ComponentType.ReadOnly(Il2CppType.Of<Disabled>()),
         ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),

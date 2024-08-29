@@ -443,5 +443,10 @@ internal static class ServerBootstrapSystemPatch
                 steamId.SetPlayerRestedXP(restedData);
             }
         }
+
+        if (ConfigService.ClientCompanion)
+        {
+            if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
+        }
     }
 }

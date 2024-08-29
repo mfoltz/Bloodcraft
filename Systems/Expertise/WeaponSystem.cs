@@ -246,7 +246,7 @@ internal static class WeaponSystem
                 {
                     if (Stats.Count < ConfigService.ExpertiseStatChoices)
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.ExpertiseStatChoices - Stats.Count} stat bonuses available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '.wep cst {weaponType} [Stat]' to make your choice and '.wep lst' to view expertise stat options.");
+                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.ExpertiseStatChoices - Stats.Count} <color=white>stat</color> <color=#00FFFF>bonuses</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to make your choice and '<color=white>.wep lst</color>' to view expertise stat options.");
                     }
                 }
             }

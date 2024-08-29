@@ -1,13 +1,18 @@
 ## Table of Contents
 
+- [Sponsors](#sponsors)
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
-- [Sponsors](#sponsors)
+- [Recommended Mods](#recommended)
 
 ## Sponsor this project
 
 [![patreon](https://i.imgur.com/u6aAqeL.png)](https://www.patreon.com/join/4865914)  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfolmt)
+
+## Sponsors
+
+Jairon Orellana; Odjit; Jera;
 
 ## Features
 
@@ -232,6 +237,9 @@
 - `.familiar resetvisualchoice [Name]` 🔒
   - Allows players to use '.fam v [SpellSchool]' again at admin discretion if so desired. Note that this will not remove visuals the player has chosen for a familiar with that command.
   - Shortcut: *.fam rv [Name]*
+- `.familiar option [setting]`
+  - Controls various familiar settings (currently shiny/vbloodemotes).
+  - Shortcut: *.fam option [Setting]*
 
 ### Misc Commands
 - `.starterkit`
@@ -243,9 +251,18 @@
 - `.lockshift`
   - Toggles set class spell on shift. Works for unarmed and weapons.
   - Shortcut: *.shift*
+- `.remindme`
+  - Toggle reminders from mod for various features.
+  - Shortcut: *.remindme*
+- `.userstats`
+  - Shows stats from credits on demand.
+  - Shortcut: *.userstats*
 - `.silence`
   - Gets rid of combat music that gets bugged on player if needed.
   - Shortcut: *.silence*
+- `.cleanupfams`
+  - Finds and destroys old familiars preventing from building in a location.
+  - Shortcut: *.cleanupfams*
 
 ### Quest Commands
 - `.quest log`
@@ -275,6 +292,10 @@
   PrefabGUIDs for the starter kit.
 - **KitQuantities**: `KitQuantities` (string, default: "500,1000,1000,250")
   Quantities for the starter kit.
+- **Potion Stacking**: `PotionStacking` (bool, default: false)  
+  Enable or disable stacking T01/T02 potions.
+- **Client Companion**: `ClientCompanion` (bool, default: false)  
+  Enable or disable allowing clients to register with server for UI updates.
 
 ### Leveling/Prestige Systems
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
@@ -469,6 +490,10 @@
   The chance for a VBlood to unlock a familiar when killed.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)  
   The chance to unlock a visual for a familiar when first unlocking unit.
+- **Shiny Cost Item**: `ShinyCostItemPrefab` (int, default: -77477508)  
+  Item PrefabGUID cost for choosing shiny visual if familiar already has one.
+- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)  
+  Quantity of item cost required shiny cost item.
 
 ### Class System
 - **Soft Synergies**: `SoftSynergies` (bool, default: false)
@@ -530,6 +555,13 @@
 - **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 1000)  
   Quantity of item cost required to change class.
 
-## Sponsors
-
-Jairon Orellana; Odjit; Jera;
+## Recommended
+- [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/)
+- [KindredLogistics](https://thunderstore.io/c/v-rising/p/Kindred/KindredLogistics/)
+- [KindredArenas](https://thunderstore.io/c/v-rising/p/odjit/KindredArenas/)
+- [KindredSchematics](https://thunderstore.io/c/v-rising/p/odjit/KindredSchematics/)
+- [KindredPortals](https://thunderstore.io/c/v-rising/p/odjit/KindredPortals/)
+- [Sanguis](https://thunderstore.io/c/v-rising/p/zfolmt/Sanguis/)
+- [BloodyNotify](https://thunderstore.io/c/v-rising/p/Trodi/Notify/)
+- [BloodyMerchants](https://thunderstore.io/c/v-rising/p/Trodi/BloodyMerchant/)
+- [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)

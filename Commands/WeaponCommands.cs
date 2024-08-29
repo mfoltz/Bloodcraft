@@ -1,17 +1,16 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
-using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 using static Bloodcraft.Utilities;
-using static Bloodcraft.Services.PlayerService;
+using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Commands;
 
