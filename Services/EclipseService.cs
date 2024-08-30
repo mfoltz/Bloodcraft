@@ -272,13 +272,11 @@ internal class EclipseService
                 continue;
             }
 
-            Dictionary<string, PlayerInfo> players = new(PlayerCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
+            Dictionary<string, PlayerInfo> players = new(OnlinePlayerCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
             HashSet<ulong> users = new(RegisteredUsers);
 
             foreach (PlayerInfo playerInfo in players.Values)
             {
-                if (!playerInfo.User.IsConnected) continue;
-
                 if (users.Contains(playerInfo.User.PlatformId))
                 {
                     try

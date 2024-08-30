@@ -26,6 +26,8 @@ internal class PlayerService
 	static EntityQuery UserQuery;
 
     public static readonly Dictionary<string, PlayerInfo> PlayerCache = [];
+
+    public static readonly Dictionary<string, PlayerInfo> OnlinePlayerCache = [];
     public PlayerService()
 	{
 		UserQuery = EntityManager.CreateEntityQuery(UserComponent);
@@ -36,6 +38,7 @@ internal class PlayerService
         while (true)
         {
             PlayerCache.Clear();
+            OnlinePlayerCache.Clear();
 
             var players = GetEntitiesEnumerable(UserQuery);
             players
@@ -57,7 +60,15 @@ internal class PlayerService
                 .SelectMany(entry => new[] { entry.PlayerNameEntry, entry.SteamIdEntry })
                 .GroupBy(entry => entry.Key)
                 .ToDictionary(group => group.Key, group => group.First().Value)
-                .ForEach(kvp => PlayerCache[kvp.Key] = kvp.Value);
+                .ForEach(kvp =>
+                {
+                    PlayerCache[kvp.Key] = kvp.Value; // Add to PlayerCache
+
+                    if (kvp.Value.User.IsConnected) // Add to OnlinePlayerCache if connected
+                    {
+                        OnlinePlayerCache[kvp.Key] = kvp.Value;
+                    }
+                });
 
             yield return Delay;
         }
