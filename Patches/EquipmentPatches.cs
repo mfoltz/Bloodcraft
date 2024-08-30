@@ -271,7 +271,7 @@ internal static class EquipmentPatches
 
                     if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
                     {
-                        EclipseService.SendClientProgress(player, steamId);
+                        //EclipseService.SendClientProgress(player, steamId);
                     }
                 }
             }

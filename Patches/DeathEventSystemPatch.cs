@@ -8,6 +8,7 @@ using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -42,6 +43,9 @@ internal static class DeathEventListenerSystemPatch
                     }
                 }
 
+                Entity playerCharacter = Entity.Null;
+                ulong playerId = 0;
+
                 if (deathEvent.Killer.Has<PlayerCharacter>())
                 {
                     Entity userEntity = deathEvent.Killer.Read<PlayerCharacter>().UserEntity;
@@ -59,6 +63,9 @@ internal static class DeathEventListenerSystemPatch
                                 FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
                             }
                             if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+
+                            playerId = steamId;
+                            playerCharacter = deathEvent.Killer;
                         }
                         else if (deathEvent.Died.Has<VBloodUnit>())
                         {
@@ -71,6 +78,9 @@ internal static class DeathEventListenerSystemPatch
                             }
                             if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(deathEvent.Killer, deathEvent.Died);
                             if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
+
+                            playerId = steamId;
+                            playerCharacter = deathEvent.Killer;
                         }
                     }
                     else
@@ -79,11 +89,6 @@ internal static class DeathEventListenerSystemPatch
                         {
                             ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
                         }
-                    }
-
-                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
-                    {
-                        EclipseService.SendClientProgress(deathEvent.Killer, steamId);
                     }
                 }
                 else if (deathEvent.Killer.Has<Follower>() && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // player familiar kills
@@ -99,10 +104,8 @@ internal static class DeathEventListenerSystemPatch
                         if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(followedPlayer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
 
-                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
-                    {
-                        EclipseService.SendClientProgress(followedPlayer, steamId);
-                    }
+                    playerId = steamId;
+                    playerCharacter = followedPlayer;
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>()) // player summon kills
                 {
@@ -117,10 +120,8 @@ internal static class DeathEventListenerSystemPatch
                         if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
                     }
 
-                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
-                    {
-                        EclipseService.SendClientProgress(killer, steamId);
-                    }
+                    playerId = steamId;
+                    playerCharacter = killer;
                 }
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
                 {
@@ -140,10 +141,13 @@ internal static class DeathEventListenerSystemPatch
                         }
                     }
 
-                    if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(steamId))
-                    {
-                        EclipseService.SendClientProgress(follower.Followed._Value, steamId);
-                    }
+                    playerId = steamId;
+                    playerCharacter = follower.Followed._Value;
+                }
+
+                if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(playerId))
+                {
+                    //EclipseService.SendClientProgress(playerCharacter, playerId);
                 }
             }
         }

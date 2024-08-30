@@ -5,9 +5,11 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
+using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 using Unity.Entities;
+using UnityEngine;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
@@ -15,15 +17,23 @@ using static Bloodcraft.Utilities;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Services;
-internal static class EclipseService
+internal class EclipseService
 {
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
+    static readonly WaitForSeconds Delay = new(2.5f);
+
     static readonly Regex regex = new(@"^\[(\d+)\]:");
 
     public static HashSet<ulong> RegisteredUsers = [];
+
+    public EclipseService()
+    {
+        Core.StartCoroutine(ClientUpdateLoop());
+    }
+
     public enum NetworkEventSubType
     {
         RegisterUser,
@@ -209,7 +219,7 @@ internal static class EclipseService
         // need prestige stat multipliers, class stat synergies, and bonus stat base values
         List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
         List<float> bloodStatValues = Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatValues[stat]).ToList();
-        
+
         float prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
         float statSynergyMultiplier = ConfigService.StatSynergyMultiplier;
 
@@ -251,5 +261,39 @@ internal static class EclipseService
             sb.Length--;
 
         return sb.ToString();
+    }
+    static IEnumerator ClientUpdateLoop()
+    {
+        while (true)
+        {
+            if (RegisteredUsers.Count == 0)
+            {
+                yield return Delay; // Wait 30 seconds if no players
+                continue;
+            }
+
+            Dictionary<string, PlayerInfo> players = new(PlayerCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
+            HashSet<ulong> users = new(RegisteredUsers);
+
+            foreach (PlayerInfo playerInfo in players.Values)
+            {
+                if (!playerInfo.User.IsConnected) continue;
+
+                if (users.Contains(playerInfo.User.PlatformId))
+                {
+                    try
+                    {
+                        SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                    }
+                    catch (Exception e)
+                    {
+                        Core.Log.LogError($"Error sending Eclipse progress to {playerInfo.User.PlatformId}: {e}");
+                    }
+                }
+
+                yield return null;
+            }
+            yield return Delay;
+        }
     }
 }

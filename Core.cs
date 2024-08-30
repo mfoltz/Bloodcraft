@@ -31,6 +31,7 @@ internal static class Core
         if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
         if (ConfigService.StarterKit) Utilities.StarterKit();
         if (ConfigService.QuestSystem) _ = new QuestService();
+        if (ConfigService.ClientCompanion) _ = new EclipseService();
 
         hasInitialized = true;
     }

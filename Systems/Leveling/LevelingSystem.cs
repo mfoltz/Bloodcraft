@@ -336,6 +336,7 @@ internal static class LevelingSystem
 
         if (GetPlayerBool(SteamID, "ExperienceLogging"))
         {
+            //Core.Log.LogInfo($"Player {user.CharacterName.Value} gained {gainedXP} rested {restedXP} leveled up {leveledUp} progress {GetLevelProgress(SteamID)}");
             int levelProgress = GetLevelProgress(SteamID);
             string message = restedXP > 0 ? $"+<color=yellow>{gainedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)" : $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
             LocalizationService.HandleServerReply(EntityManager, user, message);
