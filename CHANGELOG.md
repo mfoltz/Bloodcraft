@@ -1,3 +1,9 @@
+`1.3.1`
+- changed UI updates to work via coroutine, more reliable and less prone to error so far
+- fixed bug where wrong BloodType enum was sent to client when frailed
+- no restedXP message if at max level when logging in while in coffin and restedXP is enabled
+- added max level for player, legacy, and expertise to config data sent to client when registering to properly make bars full at max levels
+
 `1.3.0`
 - added config option for potion stacking
 - added configurable item cost for choosing familiar visual if already shiny via '.fam v [SpellSchool]', will override current visual (freebie still works as before, cost will take precedence if familiar already has a visual unlocked)

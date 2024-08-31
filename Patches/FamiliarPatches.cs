@@ -224,7 +224,6 @@ internal static class FamiliarPatches
                             LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
                         }
                     }
-                    
                 }
 
                 if (summon) continue;

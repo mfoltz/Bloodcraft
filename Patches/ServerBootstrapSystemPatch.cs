@@ -308,20 +308,21 @@ internal static class ServerBootstrapSystemPatch
                     DateTime lastLogout = restedData.Key;
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
 
-                    if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0)
+                    if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0 && experience.Key < ConfigService.MaxLevel)
                     {
                         float currentRestedXP = restedData.Value;
 
                         int currentLevel = experience.Key;
                         int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxLevel);
                         float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
-
+                        
                         float earnedPerTick = ConfigService.RestedXPRate * restedCap;
                         float earnedRestedXP = (float)timeOffline.TotalMinutes / ConfigService.RestedXPTickRate * earnedPerTick * restedMultiplier;
 
                         currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
                         int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
 
+                        //Core.Log.LogInfo($"Rested XP: {currentRestedXP} | Earned: {earnedRestedXP} | Rounded: {roundedXP} | Rested Cap: {restedCap} | Max Rested Level: {maxRestedLevel}");
                         steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, currentRestedXP));
                         string message = $"+<color=#FFD700>{roundedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> earned from being logged out in your coffin!";
                         LocalizationService.HandleServerReply(EntityManager, user, message);

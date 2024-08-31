@@ -141,6 +141,10 @@ internal class EclipseService
                     if (stats.Count != 0) bonusStats = int.Parse(string.Join("", stats.Select(stat => ((int)stat + 1).ToString("D2"))));
                 }
             }
+            else if (bloodType.Equals(BloodType.None))
+            {
+                legacyEnum = (int)bloodType;
+            }
         }
 
         return (legacyPercent, legacyLevel, legacyPrestige, legacyEnum, bonusStats);
@@ -223,9 +227,13 @@ internal class EclipseService
         float prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
         float statSynergyMultiplier = ConfigService.StatSynergyMultiplier;
 
+        int maxPlayerLevel = ConfigService.MaxLevel;
+        int maxLegacyLevel = ConfigService.MaxBloodLevel;
+        int maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
+
         var sb = new StringBuilder();
         sb.AppendFormat("[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat("{0:F2},{1:F2},", prestigeStatMultiplier, statSynergyMultiplier); // Add multipliers to the message
+            .AppendFormat("{0:F2},{1:F2},{2},{3},{4},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel); // Add multipliers to the message
 
         sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
             .Append(',');
