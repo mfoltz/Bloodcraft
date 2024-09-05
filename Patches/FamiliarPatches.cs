@@ -269,7 +269,7 @@ internal static class FamiliarPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(InteractValidateAndStopSystemServer __instance)
     {
-        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.Temp); // check _1 query if needed, maybe give players short buff here to prevent sudden team changes while knocking for 5s or so?
+        NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
