@@ -26,7 +26,7 @@ internal static class StatChangeSystemPatches
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
     static readonly Random Random = new();
-    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
     static readonly PrefabGUID stormShield03 = new(1095865904);
