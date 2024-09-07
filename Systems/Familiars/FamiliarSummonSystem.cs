@@ -91,7 +91,7 @@ internal static class FamiliarSummonSystem
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
                 if (data.FamiliarBuffs.ContainsKey(famKey)) 
                 {
-                    SpawnTransformSystemOnSpawnPatch.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
+                    HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
                     PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
                 }
             }

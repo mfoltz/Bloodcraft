@@ -17,6 +17,7 @@ using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
 using static Bloodcraft.Utilities;
+using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 
 namespace Bloodcraft.Commands;
 
@@ -110,7 +111,7 @@ internal static class FamiliarCommands
 
         if (familiar != Entity.Null)
         {
-            if (SpawnTransformSystemOnSpawnPatch.FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
+            if (FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
             DestroyUtility.CreateDestroyEvent(EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
             ClearFamiliarActives(steamId);
             LocalizationService.HandleReply(ctx, "Familiar unbound.");
@@ -122,7 +123,7 @@ internal static class FamiliarCommands
         }
         else if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
         {
-            if (SpawnTransformSystemOnSpawnPatch.FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
+            if (FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
             if (data.Familiar.Has<Disabled>()) data.Familiar.Remove<Disabled>();
             DestroyUtility.CreateDestroyEvent(EntityManager, data.Familiar, DestroyReason.Default, DestroyDebugReason.None);
             ClearFamiliarActives(steamId);
