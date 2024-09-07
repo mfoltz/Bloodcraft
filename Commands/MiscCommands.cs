@@ -20,7 +20,7 @@ internal static class MiscCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;  
-    static CombatMusicSystem_Server CombatMusicSystem_Server => SystemService.CombatMusicSystem_Server;
+    static CombatMusicSystem_Server CombatMusicSystemServer => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
@@ -181,7 +181,7 @@ internal static class MiscCommands
         combatMusicListener_Shared.UnitPrefabGuid = new PrefabGUID(0);
         character.Write(combatMusicListener_Shared);
 
-        CombatMusicSystem_Server.OnUpdate();
+        CombatMusicSystemServer.OnUpdate();
         ctx.Reply($"Combat music cleared~");
     }
 

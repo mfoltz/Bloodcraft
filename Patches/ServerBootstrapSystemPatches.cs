@@ -11,6 +11,7 @@ using Stunlock.Core;
 using Stunlock.Network;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
@@ -18,7 +19,7 @@ using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class ServerBootstrapSystemPatch
+internal static class ServerBootstrapSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -396,6 +397,18 @@ internal static class ServerBootstrapSystemPatch
                 steamId.SetPlayerSpells((0, 0, 0));
             }
         }
+
+        if (ConfigService.ClientCompanion && exists)
+        {
+            PlayerInfo playerInfo = new()
+            {
+                CharEntity = character,
+                UserEntity = userEntity,
+                User = user
+            };
+
+            TestCache[steamId.ToString()] = playerInfo;
+        }
     }
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
@@ -436,6 +449,7 @@ internal static class ServerBootstrapSystemPatch
         if (ConfigService.ClientCompanion)
         {
             if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
+            if (TestCache.ContainsKey(steamId.ToString())) TestCache.Remove(steamId.ToString());
         }
     }
 }

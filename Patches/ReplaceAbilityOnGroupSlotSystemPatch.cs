@@ -134,32 +134,4 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 
         steamId.SetPlayerSpells(spells);
     }
-
-    [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(AbilityRunScriptsSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {   
-                if (!Core.hasInitialized) return;
-                if (!Classes) return;
-
-                AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
-                PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
-
-                if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab.GuidHash))
-                {
-                    float cooldown = ClassSpells[abilityGroupPrefab.GuidHash].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab.GuidHash] * 15f;
-                    ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
-                }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
 }

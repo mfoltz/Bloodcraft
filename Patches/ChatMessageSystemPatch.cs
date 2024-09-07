@@ -28,8 +28,8 @@ internal static class ChatMessageSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) continue;
-                if (!ConfigService.ClientCompanion) continue;
+                if (!Core.hasInitialized) return;
+                if (!ConfigService.ClientCompanion) return;
 
                 ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;

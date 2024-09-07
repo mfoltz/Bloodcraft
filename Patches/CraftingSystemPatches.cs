@@ -11,98 +11,99 @@ using User = ProjectM.Network.User;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class CraftingPatches
+internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftingSystem
 {
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     const float CraftThreshold = 0.995f;
-    static Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
-
     static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem.Settings.CraftRateModifier;
 
+    static readonly Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
+
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
-    static class ForgeSystem_UpdatesPatch
+    [HarmonyPrefix]
+    static void Prefix(ForgeSystem_Update __instance)
     {
-        static void Prefix(ForgeSystem_Update __instance)
+        var repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
+        try
         {
-            var repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
-            try
+            foreach (Entity entity in repairEntities)
             {
-                foreach (Entity entity in repairEntities)
+                if (!Core.hasInitialized) return;
+
+                if (!ConfigService.ProfessionSystem) continue;
+
+                Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
+                if (forge_Shared.State == ForgeState.Empty) continue;
+
+                UserOwner userOwner = entity.Read<UserOwner>();
+                Entity userEntity = userOwner.Owner._Entity;
+                User user = userEntity.Read<User>();
+                ulong steamId = user.PlatformId;
+
+                Entity itemEntity = forge_Shared.ItemEntity._Entity;
+                PrefabGUID itemPrefab = itemEntity.Read<PrefabGUID>();
+
+                if (itemEntity.Has<ShatteredItem>())
                 {
-                    if (!Core.hasInitialized) continue;
-                    if (!ConfigService.ProfessionSystem) continue;
+                    itemPrefab = itemEntity.Read<ShatteredItem>().OutputItem;
+                }
+                else if (itemEntity.Has<UpgradeableLegendaryItem>())
+                {
+                    int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                    var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
+                    itemPrefab = buffer[tier].TierPrefab;
+                }
 
-                    Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
-                    if (forge_Shared.State == ForgeState.Empty) continue;
-
-                    UserOwner userOwner = entity.Read<UserOwner>();
-                    Entity userEntity = userOwner.Owner._Entity;
-                    User user = userEntity.Read<User>();
-                    ulong steamId = user.PlatformId;
-
-                    Entity itemEntity = forge_Shared.ItemEntity._Entity;
-                    PrefabGUID itemPrefab = itemEntity.Read<PrefabGUID>();
-
-                    if (itemEntity.Has<ShatteredItem>())
+                if (forge_Shared.State == ForgeState.Finished)
+                {
+                    //Core.Log.LogInfo($"Forge finished: {itemPrefab.LookupName()} | {itemEntity.Read<PrefabGUID>().LookupName()}");
+                    float ProfessionValue = 50f;
+                    ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
+                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
+                    if (handler != null)
                     {
-                        itemPrefab = itemEntity.Read<ShatteredItem>().OutputItem;
-                    }
-                    else if (itemEntity.Has<UpgradeableLegendaryItem>())
-                    {
-                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
-                        var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
-                        itemPrefab = buffer[tier].TierPrefab;
-                    }
-
-                    if (forge_Shared.State == ForgeState.Finished)
-                    {
-                        //Core.Log.LogInfo($"Forge finished: {itemPrefab.LookupName()} | {itemEntity.Read<PrefabGUID>().LookupName()}");
-                        float ProfessionValue = 50f;
-                        ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
-                        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
-                        if (handler != null)
+                        if (itemEntity.Has<Durability>())
                         {
-                            if (itemEntity.Has<Durability>())
-                            {
-                                Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
+                            Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
 
-                                Durability durability = itemEntity.Read<Durability>();
-                                Durability originalDurability = originalItem.Read<Durability>();
+                            Durability durability = itemEntity.Read<Durability>();
+                            Durability originalDurability = originalItem.Read<Durability>();
 
-                                if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
+                            if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
 
-                                int level = handler.GetProfessionData(steamId).Key;
+                            int level = handler.GetProfessionData(steamId).Key;
 
-                                durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
-                                durability.Value = durability.MaxDurability;
-                                itemEntity.Write(durability);
+                            durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                            durability.Value = durability.MaxDurability;
+                            itemEntity.Write(durability);
 
-                                ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
-                            }
+                            ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
                         }
                     }
                 }
             }
-            finally
-            {
-                repairEntities.Dispose();
-            }
         }
+        finally
+        {
+            repairEntities.Dispose();
+        }   
     }
 
     [HarmonyPatch(typeof(UpdateCraftingSystem), nameof(UpdateCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
+        if (__instance == null) return;
+
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) continue;
-                if (!ConfigService.ProfessionSystem) continue;
+                if (!Core.hasInitialized) return;
+                if (!ConfigService.ProfessionSystem) return;
 
                 if (entity.Has<CastleWorkstation>() && entity.Has<QueuedWorkstationCraftAction>())
                 {

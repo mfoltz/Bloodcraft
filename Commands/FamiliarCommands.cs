@@ -110,7 +110,7 @@ internal static class FamiliarCommands
 
         if (familiar != Entity.Null)
         {
-            if (FamiliarPatches.FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
+            if (SpawnTransformSystemOnSpawnPatch.FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
             DestroyUtility.CreateDestroyEvent(EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
             ClearFamiliarActives(steamId);
             LocalizationService.HandleReply(ctx, "Familiar unbound.");
@@ -122,7 +122,7 @@ internal static class FamiliarCommands
         }
         else if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
         {
-            if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
+            if (SpawnTransformSystemOnSpawnPatch.FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
             if (data.Familiar.Has<Disabled>()) data.Familiar.Remove<Disabled>();
             DestroyUtility.CreateDestroyEvent(EntityManager, data.Familiar, DestroyReason.Default, DestroyDebugReason.None);
             ClearFamiliarActives(steamId);

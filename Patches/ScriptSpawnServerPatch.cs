@@ -25,7 +25,8 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) continue;
+                if (!Core.hasInitialized) return;
+
                 if (!entity.Has<BloodBuff>() || !entity.Has<EntityOwner>()) continue;
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))
@@ -41,7 +42,7 @@ internal static class ScriptSpawnServerPatch
 
                     if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out BloodType bloodType)) // applies stat choices to blood types when changed
                     {
-                        BloodManager.ApplyBloodBonuses(steamId, bloodType, entity);
+                        BloodManager.UpdateBloodBonuses(steamId, bloodType, entity);
                         ModifyUnitStatBuffSystem_Spawn.OnUpdate();
                     }
                 }

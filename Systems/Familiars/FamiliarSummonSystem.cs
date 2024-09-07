@@ -91,7 +91,7 @@ internal static class FamiliarSummonSystem
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
                 if (data.FamiliarBuffs.ContainsKey(famKey)) 
                 {
-                    FamiliarPatches.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
+                    SpawnTransformSystemOnSpawnPatch.HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
                     PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
                 }
             }
@@ -167,7 +167,7 @@ internal static class FamiliarSummonSystem
 
         if (familiar.Has<EntityOwner>())
         {
-            familiar.Write(new EntityOwner { Owner = player });
+            familiar.Write(new EntityOwner { Owner = player }); //try taking this away? see if SCT persists and what else is affected, like if they now just die immediately when summoned -_-
         }
 
         familiar.Add<BlockFeedBuff>();

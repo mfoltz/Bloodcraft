@@ -413,37 +413,55 @@ internal static class PrestigeSystem
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             if (ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
-                LevelingSystem.HandleBloodBuff(buffEntity);
+                if (buffEntity.Has<BloodBuff>()) LevelingSystem.HandleBloodBuff(buffEntity); // don't do all those if checks unless actually a blood buff
+
                 if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
                 {
                     buffEntity.Remove<RemoveBuffOnGameplayEvent>();
                 }
+
                 if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
                 {
                     buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
                 }
+
                 if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
                 {
                     buffEntity.Remove<CreateGameplayEventsOnSpawn>();
                 }
+
                 if (buffEntity.Has<GameplayEventListeners>())
                 {
                     buffEntity.Remove<GameplayEventListeners>();
                 }
+
                 if (!buffEntity.Has<Buff_Persists_Through_Death>())
                 {
                     buffEntity.Add<Buff_Persists_Through_Death>();
                 }
+
                 if (buffEntity.Has<DestroyOnGameplayEvent>())
                 {
                     buffEntity.Remove<DestroyOnGameplayEvent>();
                 }
-                if (buffEntity.Has<LifeTime>())
+
+                if (buffEntity.Has<LifeTime>()) // add LifeTime if doesn't have one to mark for checking the prestige buff list later? so can reference prestige buff list then see if the buff had an infinite lifetime to determine if should sync again or not
                 {
                     LifeTime lifeTime = buffEntity.Read<LifeTime>();
                     lifeTime.Duration = -1;
                     lifeTime.EndAction = LifeTimeEndAction.None;
                     buffEntity.Write(lifeTime);
+                }
+                else
+                {
+                    buffEntity.Add<LifeTime>();
+                    buffEntity.With((ref LifeTime lifeTime) =>
+                    {
+                        lifeTime.Duration = -1;
+                        lifeTime.EndAction = LifeTimeEndAction.None;
+                    });
+                    LifeTime lifeTime = buffEntity.Read<LifeTime>();
+                    Core.Log.LogInfo($"Added LifeTime to buff {buffPrefab.LookupName()} with duration {lifeTime.Duration} and endAction {lifeTime.EndAction.ToString()} (making sure With extension is working)");
                 }
             }
         }

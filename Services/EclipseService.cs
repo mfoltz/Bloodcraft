@@ -27,13 +27,11 @@ internal class EclipseService
 
     static readonly Regex regex = new(@"^\[(\d+)\]:");
 
-    public static HashSet<ulong> RegisteredUsers = [];
-
+    public readonly static HashSet<ulong> RegisteredUsers = [];
     public EclipseService()
     {
         Core.StartCoroutine(ClientUpdateLoop());
     }
-
     public enum NetworkEventSubType
     {
         RegisterUser,
@@ -53,9 +51,20 @@ internal class EclipseService
     }
     static void RegisterUser(ulong steamId)
     {
-        if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.UserEntity.Exists())
+        if (RegisteredUsers.Contains(steamId)) return;
+
+        PlayerInfo playerInfo;
+
+        if (steamId.TryGetPlayerInfo(out playerInfo))
         {
-            Core.Log.LogInfo($"User {steamId} registered for Eclipse updates...");
+            Core.Log.LogInfo($"User {steamId} registered for Eclipse updates from PlayerCache...");
+            RegisteredUsers.Add(steamId);
+            SendClientConfig(playerInfo.User);
+            SendClientProgress(playerInfo.CharEntity, steamId);
+        }
+        else if (TestCache.TryGetValue(steamId.ToString(), out playerInfo))
+        {
+            Core.Log.LogInfo($"User {steamId} registered for Eclipse updates from TestCache...");
             RegisteredUsers.Add(steamId);
             SendClientConfig(playerInfo.User);
             SendClientProgress(playerInfo.CharEntity, steamId);
@@ -281,14 +290,30 @@ internal class EclipseService
             }
 
             Dictionary<string, PlayerInfo> players = new(OnlinePlayerCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
+            Dictionary<string, PlayerInfo> testPlayers = new(TestCache);
+
             HashSet<ulong> users = new(RegisteredUsers);
 
-            foreach (PlayerInfo playerInfo in players.Values)
+            PlayerInfo playerInfo;
+            foreach (ulong steamId in users)
             {
-                if (users.Contains(playerInfo.User.PlatformId))
+                if (players.TryGetValue(steamId.ToString(), out playerInfo))
                 {
                     try
                     {
+                        Core.Log.LogInfo("Sending client progress (OnlineCache)...");
+                        SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                    }
+                    catch (Exception e)
+                    {
+                        Core.Log.LogError($"Error sending Eclipse progress to {playerInfo.User.PlatformId}: {e}");
+                    }
+                }
+                else if (testPlayers.TryGetValue(steamId.ToString(), out playerInfo))
+                {
+                    try
+                    {
+                        Core.Log.LogInfo("Sending client progress (TestCache)...");
                         SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
                     }
                     catch (Exception e)
@@ -299,6 +324,7 @@ internal class EclipseService
 
                 yield return null;
             }
+
             yield return Delay;
         }
     }

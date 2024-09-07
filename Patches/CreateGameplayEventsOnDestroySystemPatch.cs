@@ -19,7 +19,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CreateGameplayEventOnDestroySystemPatch
 {
-    const int BaseFishingXP = 100;
+    const int BaseFishingXP = 100; // somewhat arbitrary constant that I need to revisit when looking at professions again soon
 
     static readonly PrefabGUID fishingTravelToTarget = new(-1130746976);
     static readonly PrefabGUID feedComplete = new(-1106009274);
@@ -33,7 +33,8 @@ internal static class CreateGameplayEventOnDestroySystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) continue;
+                if (!Core.hasInitialized) return;
+
                 if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
 
                 PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
@@ -75,7 +76,6 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                 {
                     Entity died = entity.GetSpellTarget();
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
-                    User user = userEntity.Read<User>();
 
                     if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, died);
                     if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, died);

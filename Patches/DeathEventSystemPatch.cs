@@ -8,7 +8,6 @@ using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -28,7 +27,7 @@ internal static class DeathEventListenerSystemPatch
         {
             foreach (DeathEvent deathEvent in deathEvents)
             {
-                if (!Core.hasInitialized) continue;
+                if (!Core.hasInitialized) return;
 
                 bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
                 bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
@@ -143,11 +142,6 @@ internal static class DeathEventListenerSystemPatch
 
                     playerId = steamId;
                     playerCharacter = follower.Followed._Value;
-                }
-
-                if (ConfigService.ClientCompanion && EclipseService.RegisteredUsers.Contains(playerId))
-                {
-                    //EclipseService.SendClientProgress(playerCharacter, playerId);
                 }
             }
         }

@@ -135,8 +135,8 @@ internal static class BloodSystem
         { BloodType.Brute, PrestigeType.BruteLegacy }
     };
 
-    public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new()
-{
+    public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new() // base buffs present regardless of blood quality indicating type consumed
+    {
         { new PrefabGUID(-773025435), BloodType.Worker }, // yield bonus
         { new PrefabGUID(-804597757), BloodType.Warrior }, // phys bonus
         { new PrefabGUID(1934870645), BloodType.Scholar }, // spell bonus
@@ -147,6 +147,20 @@ internal static class BloodSystem
         { new PrefabGUID(-488475343), BloodType.Immortal }, // phys/spell bonus
         { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
         { new PrefabGUID(1828387635), BloodType.Brute } // primary life leech
+    };
+
+    public static readonly Dictionary<BloodType, PrefabGUID> BloodTypeToBuffMap = new()
+    {
+        { BloodType.Worker, new PrefabGUID(-773025435) }, // yield bonus
+        { BloodType.Warrior, new PrefabGUID(-804597757) }, // phys bonus
+        { BloodType.Scholar, new PrefabGUID(1934870645) }, // spell bonus
+        { BloodType.Rogue, new PrefabGUID(1201299233) }, // crit bonus
+        { BloodType.Mutant, new PrefabGUID(-1266262267) }, // drain bonus
+        { BloodType.VBlood, new PrefabGUID(560247144) }, // vblood_0
+        { BloodType.Draculin, new PrefabGUID(1558171501) }, // speed bonus
+        { BloodType.Immortal, new PrefabGUID(-488475343) }, // phys/spell bonus
+        { BloodType.Creature, new PrefabGUID(894725875) }, // speed bonus
+        { BloodType.Brute, new PrefabGUID(1828387635) } // primary life leech
     };
     public static void UpdateLegacy(Entity Killer, Entity Victim)
     {
@@ -226,6 +240,7 @@ internal static class BloodSystem
         if (leveledUp)
         {
             if (newLevel <= ConfigService.MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+            
             if (GetPlayerBool(steamID, "Reminders"))
             {
                 if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
@@ -236,6 +251,8 @@ internal static class BloodSystem
                     }
                 }
             }
+
+            BloodManager.UpdateBloodBonuses(steamID, bloodType, user.LocalCharacter.GetEntityOnServer()); // if leveled up legacy, update stat bonuses
         }
         
         if (GetPlayerBool(steamID, "BloodLogging"))

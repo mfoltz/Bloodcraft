@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Legacies;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -9,86 +8,26 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
-using Random = System.Random;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class StatChangeSystemPatches
+internal static class DealDamageSystemPatch
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
-    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
-
     static readonly Random Random = new();
-    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    static readonly PrefabGUID pvpProtBuff = new(1111481396);
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+
     static readonly PrefabGUID stormShield03 = new(1095865904);
     static readonly PrefabGUID stormShield02 = new(-1192885497);
     static readonly PrefabGUID stormShield01 = new(1044565673);
     static readonly PrefabGUID garlicDebuff = new(-1701323826);
     static readonly PrefabGUID silverDebuff = new(853298599);
-
-    [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(StatChangeMutationSystem __instance)
-    {
-        NativeArray<Entity> entities = __instance._StatChangeEventQuery.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!Core.hasInitialized) continue;
-                if (!entity.Exists()) continue;
-
-                if (ConfigService.BloodSystem && ConfigService.BloodQualityBonus && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
-                {
-                    StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
-                    BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();
-
-                    if (!statChangeEvent.Entity.Has<Blood>()) continue;
-
-                    BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
-                    ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-                    IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
-                    if (bloodHandler == null) continue;
-                    
-                    float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
-
-                    if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige))
-                    {
-                        legacyKey = (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
-                        if (legacyKey > 0)
-                        {
-                            bloodQualityChange.Quality += legacyKey;
-                            bloodQualityChange.ForceReapplyBuff = true;
-                            entity.Write(bloodQualityChange);
-                        }
-                    }
-                    else if (!ConfigService.PrestigeSystem)
-                    {
-                        if (legacyKey > 0)
-                        {
-                            bloodQualityChange.Quality += legacyKey;
-                            bloodQualityChange.ForceReapplyBuff = true;
-                            entity.Write(bloodQualityChange);
-                        }
-                    }
-                }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
 
     [HarmonyPatch(typeof(DealDamageSystem), nameof(DealDamageSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -99,24 +38,23 @@ internal static class StatChangeSystemPatches
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) continue;
-                if (!ConfigService.ClassSpellSchoolOnHitEffects || !Classes) continue;
+                if (!Core.hasInitialized) return;
+                if (!ConfigService.ClassSpellSchoolOnHitEffects || !Classes) return;
+
                 if (!entity.Exists() || !entity.Has<DealDamageEvent>()) continue;
 
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
 
-                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue;
+                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
 
                 if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // null entities are NOT to make it in here, don't know why or how but last time it happened messed up the save pretty badly
 
                 PrefabGUID sourcePrefab = dealDamageEvent.SpellSource.Read<PrefabGUID>();
 
-                //Core.Log.LogInfo($"Source Prefab: {sourcePrefab.LookupName()}");
-
-                if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue;
+                if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue; // skip if source is silver or garlic
 
                 if (dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player) && !dealDamageEvent.Target.IsPlayer())
-                {                    
+                {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;
                     if (!HasClass(steamId)) continue;
@@ -136,7 +74,7 @@ internal static class StatChangeSystemPatches
                         {
                             BuffPrefabGUID = prefabGUID,
                         };
-                        
+
                         if (ServerGameManager.HasBuff(dealDamageEvent.Target, prefabGUID.ToIdentifier()))
                         {
                             applyBuffDebugEvent.BuffPrefabGUID = ClassOnHitEffectMap[playerClass];

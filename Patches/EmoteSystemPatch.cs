@@ -12,6 +12,7 @@ using Unity.Transforms;
 using User = ProjectM.Network.User;
 using static Bloodcraft.Utilities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 
 namespace Bloodcraft.Patches;
 
@@ -47,8 +48,8 @@ internal static class EmoteSystemPatch
         {
             foreach (var entity in entities)
             {
-                if (!Core.hasInitialized) continue;
-                if (!ConfigService.FamiliarSystem) continue;
+                if (!Core.hasInitialized) return;
+                if (!ConfigService.FamiliarSystem) return;
 
                 UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
@@ -83,7 +84,7 @@ internal static class EmoteSystemPatch
         Entity familiar = FindPlayerFamiliar(character);
         User user = userEntity.Read<User>();
 
-        if (ServerGameManager.TryGetBuff(character, combatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, pvpCombatBuff.ToIdentifier(), out Entity _) || ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You can't bind a familiar while in combat or dominating presence is active.");
             return;
@@ -143,7 +144,7 @@ internal static class EmoteSystemPatch
 
             if (!familiar.Has<Disabled>())
             {
-                if (FamiliarPatches.FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
+                if (FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
                 EntityManager.AddComponent<Disabled>(familiar);
                 
                 Follower follower = familiar.Read<Follower>();

@@ -18,7 +18,7 @@ internal static class VBloodSystemPatch
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem; 
     
-    static Dictionary<ulong, DateTime> LastUpdateCache = [];
+    static readonly Dictionary<ulong, DateTime> LastUpdateCache = [];
 
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -30,7 +30,7 @@ internal static class VBloodSystemPatch
         {
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-                if (!Core.hasInitialized) continue;
+                if (!Core.hasInitialized) return;
 
                 Entity player = vBloodConsumed.Target;
                 User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();

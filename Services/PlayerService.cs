@@ -8,12 +8,6 @@ using static Bloodcraft.Utilities;
 namespace Bloodcraft.Services;
 internal class PlayerService
 {
-    public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
-    {
-        public User User { get; set; } = user;
-        public Entity UserEntity { get; set; } = userEntity;
-        public Entity CharEntity { get; set; } = charEntity;
-    }
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly WaitForSeconds Delay = new(60);
@@ -28,6 +22,14 @@ internal class PlayerService
     public static readonly Dictionary<string, PlayerInfo> PlayerCache = [];
 
     public static readonly Dictionary<string, PlayerInfo> OnlinePlayerCache = [];
+
+    public static readonly Dictionary<string, PlayerInfo> TestCache = [];
+    public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
+    {
+        public User User { get; set; } = user;
+        public Entity UserEntity { get; set; } = userEntity;
+        public Entity CharEntity { get; set; } = charEntity;
+    }
     public PlayerService()
 	{
 		UserQuery = EntityManager.CreateEntityQuery(UserComponent);

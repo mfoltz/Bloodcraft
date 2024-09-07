@@ -169,9 +169,9 @@ public static class ConfigService
             "Prestige",
             "Expertise",
             "Legacies",
+            "Professions",
             "Familiars",
-            "Classes",
-            "Professions"
+            "Classes"
         ];
         public class ConfigEntryDefinition(string section, string key, object defaultValue, string description)
         {
@@ -375,6 +375,7 @@ public static class ConfigService
             if (File.Exists(configFile))
             {
                 string[] configLines = File.ReadAllLines(configFile);
+                //Plugin.LogInstance.LogInfo(configLines);
                 foreach (var line in configLines)
                 {
                     if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
@@ -396,11 +397,12 @@ public static class ConfigService
                             {
                                 var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 entry.Value = convertedValue;
-                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value}");
+                                //Plugin.LogInstance.LogInfo(line);
+                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value} | {configKey}:{configValue}");
                             }
                             catch (Exception ex)
                             {
-                                //Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
+                                Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
                             }
                             break; // Stop searching once the key is found
                         }

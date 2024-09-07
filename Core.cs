@@ -17,12 +17,14 @@ internal static class Core
     public static SystemService SystemService { get; } = new(Server);
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
-    
-    public static bool hasInitialized;
+
+    public static bool hasInitialized = false;
     static MonoBehaviour MonoBehaviour;
     public static void Initialize()
     {
         if (hasInitialized) return;
+
+        //SCTFixTest(); only useful for removing SCT prefabs if for some reason they are being generated in mass and causing the server to crash
 
         _ = new PlayerService();
         _ = new LocalizationService();
@@ -30,6 +32,7 @@ internal static class Core
         if (ConfigService.FamiliarSystem) Utilities.FamiliarBans();
         if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
         if (ConfigService.StarterKit) Utilities.StarterKit();
+        if (ConfigService.PrestigeSystem) Utilities.PrestigeBuffs();
         if (ConfigService.QuestSystem) _ = new QuestService();
         if (ConfigService.ClientCompanion) _ = new EclipseService();
 
@@ -48,4 +51,54 @@ internal static class Core
         }
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
+    /*
+    static readonly ComponentType[] PrefabGUIDComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+    ];
+
+    static readonly PrefabGUID SCTPrefab = new(-1661525964);
+    
+    static void SCTFixTest() // one off thing hopefully but leaving since those have a habit of coming back around
+    {
+        // -1661525964 SCT prefab
+
+        EntityQuery prefabQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = PrefabGUIDComponent,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        int counter = 0;
+        IEnumerable<Entity> prefabEntities = GetEntitiesEnumerable(prefabQuery); // find SCT prefab entities and destroy them
+
+        foreach (Entity entity in prefabEntities)
+        {
+            PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+            if (prefabGUID.Equals(SCTPrefab) && !entity.Has<SpawnTag>()) // don't destroy the spawner... or do >_>? check syncToUserBuffer first and see who these are for
+            {
+                if (entity.Has<SyncToUserBuffer>())
+                {
+                    var syncToUserBuffer = entity.ReadBuffer<SyncToUserBuffer>();
+                    foreach (SyncToUserBuffer syncToUser in syncToUserBuffer)
+                    {
+                        if (syncToUser.UserEntity.Exists() && syncToUser.UserEntity.Has<User>())
+                        {
+                            Log.LogInfo($"SCTFixTest: {syncToUser.UserEntity} | {syncToUser.UserEntity.Read<User>().CharacterName.Value}");
+                        }
+                        else
+                        {
+                            Log.LogInfo($"SCTFixTest: userEntity does not exist in syncToUserBuffer... {syncToUser.UserEntity}");
+                        }
+                    }
+                }
+                EntityManager.DestroyEntity(entity);
+                counter++;
+            }
+        }
+        
+        Log.LogInfo($"SCTFixTest: {counter} SCT prefab entities destroyed!");
+        prefabQuery.Dispose();
+    }
+    */
 }

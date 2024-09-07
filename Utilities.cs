@@ -17,6 +17,7 @@ using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
+using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 
 namespace Bloodcraft;
 internal static class Utilities
@@ -26,6 +27,8 @@ internal static class Utilities
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
+
+    // need to organize methods although it is convenient to access them like this >_>
     public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, bool checkBuffBuffer = false) // not sure if need to actually check for empty buff buffer for quest targets but don't really want to find out
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);
@@ -124,13 +127,96 @@ internal static class Utilities
     }
     public static void HandleFamiliarMinions(Entity familiar) //  need to see if game will handle familiar minions as player minions without extra effort, that would be neat
     {
-        if (FamiliarPatches.FamiliarMinions.ContainsKey(familiar))
+        if (FamiliarMinions.ContainsKey(familiar))
         {
-            foreach (Entity minion in FamiliarPatches.FamiliarMinions[familiar])
+            foreach (Entity minion in FamiliarMinions[familiar])
             {
                 DestroyUtility.CreateDestroyEvent(EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
             }
-            FamiliarPatches.FamiliarMinions.Remove(familiar);
+            FamiliarMinions.Remove(familiar);
+        }
+    }
+    public static void HandleVisual(Entity entity, PrefabGUID visual)
+    {
+        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        {
+            BuffPrefabGUID = visual,
+        };
+
+        FromCharacter fromCharacter = new()
+        {
+            Character = entity,
+            User = entity
+        };
+
+        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+        if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
+        {
+            if (buff.Has<Buff>())
+            {
+                BuffCategory component = buff.Read<BuffCategory>();
+                component.Groups = BuffCategoryFlag.None;
+                buff.Write(component);
+            }
+            if (buff.Has<CreateGameplayEventsOnSpawn>())
+            {
+                buff.Remove<CreateGameplayEventsOnSpawn>();
+            }
+            if (buff.Has<GameplayEventListeners>())
+            {
+                buff.Remove<GameplayEventListeners>();
+            }
+            if (buff.Has<LifeTime>())
+            {
+                LifeTime lifetime = buff.Read<LifeTime>();
+                lifetime.Duration = -1;
+                lifetime.EndAction = LifeTimeEndAction.None;
+                buff.Write(lifetime);
+            }
+            if (buff.Has<RemoveBuffOnGameplayEvent>())
+            {
+                buff.Remove<RemoveBuffOnGameplayEvent>();
+            }
+            if (buff.Has<RemoveBuffOnGameplayEventEntry>())
+            {
+                buff.Remove<RemoveBuffOnGameplayEventEntry>();
+            }
+            if (buff.Has<DealDamageOnGameplayEvent>())
+            {
+                buff.Remove<DealDamageOnGameplayEvent>();
+            }
+            if (buff.Has<HealOnGameplayEvent>())
+            {
+                buff.Remove<HealOnGameplayEvent>();
+            }
+            if (buff.Has<BloodBuffScript_ChanceToResetCooldown>())
+            {
+                buff.Remove<BloodBuffScript_ChanceToResetCooldown>();
+            }
+            if (buff.Has<ModifyMovementSpeedBuff>())
+            {
+                buff.Remove<ModifyMovementSpeedBuff>();
+            }
+            if (buff.Has<ApplyBuffOnGameplayEvent>())
+            {
+                buff.Remove<ApplyBuffOnGameplayEvent>();
+            }
+            if (buff.Has<DestroyOnGameplayEvent>())
+            {
+                buff.Remove<DestroyOnGameplayEvent>();
+            }
+            if (buff.Has<WeakenBuff>())
+            {
+                buff.Remove<WeakenBuff>();
+            }
+            if (buff.Has<ReplaceAbilityOnSlotBuff>())
+            {
+                buff.Remove<ReplaceAbilityOnSlotBuff>();
+            }
+            if (buff.Has<AmplifyBuff>())
+            {
+                buff.Remove<AmplifyBuff>();
+            }
         }
     }
     public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
@@ -180,6 +266,14 @@ internal static class Utilities
         List<string> typeBans = ConfigService.BannedTypes.Split(',').Select(s => s.Trim()).ToList();
         if (unitBans.Count > 0) FamiliarUnlockSystem.ExemptPrefabs = unitBans;
         if (typeBans.Count > 0) FamiliarUnlockSystem.ExemptTypes = typeBans;
+    }
+    public static void PrestigeBuffs()
+    {
+        List<int> prestigeBuffs = ParseConfigString(ConfigService.PrestigeBuffs);
+        foreach (int buff in prestigeBuffs)
+        {
+            UpdateBuffsBufferDestroyPatch.PrestigeBuffPrefabs.Add(new PrefabGUID(buff));
+        }
     }
     public static bool HandleClassChangeItem(ChatCommandContext ctx, ulong steamId)
     {

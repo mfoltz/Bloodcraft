@@ -98,7 +98,7 @@ internal static class QuestSystem
             if (Math.Abs(level.Level._Value - playerLevel) <= 10)
             {
                 if (prefabEntity.Has<VBloodUnit>() && level.Level._Value > playerLevel) continue;
-                if (FamiliarPatches.shardBearers.Contains(prefabGUID) || prefabGUID.Equals(villageElder)) continue;
+                if (SpawnTransformSystemOnSpawnPatch.shardBearers.Contains(prefabGUID) || prefabGUID.Equals(villageElder)) continue;
                 prefabs.Add(prefabGUID);
             }
         }

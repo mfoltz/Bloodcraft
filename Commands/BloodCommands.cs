@@ -8,6 +8,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodManager;
+using static Bloodcraft.Systems.Legacies.BloodSystem;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
@@ -103,7 +104,7 @@ internal static class BloodCommands
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]
-    public static void ChooseBloodStat(ChatCommandContext ctx, string bloodType, string statType)
+    public static void ChooseBloodStat(ChatCommandContext ctx, string blood, string statType)
     {
         if (!ConfigService.BloodSystem)
         {
@@ -117,7 +118,7 @@ internal static class BloodCommands
             return;
         }
 
-        if (!Enum.TryParse<BloodType>(bloodType, true, out var BloodType))
+        if (!Enum.TryParse<BloodType>(blood, true, out var BloodType))
         {
             LocalizationService.HandleReply(ctx, "Invalid blood type, use '.bl l' to see options.");
             return;
@@ -133,7 +134,15 @@ internal static class BloodCommands
 
         if (ChooseStat(steamID, BloodType, StatType))
         {
-            LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and will apply after reacquiring.");
+            LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and will begin applying immediately if present or when next equipped.");
+
+            Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+            BloodType bloodType = GetCurrentBloodType(playerCharacter); // get current bloodType then get buff prefab from map after checking if current bloodType matches the type for the entered stat bonus
+            
+            if (bloodType.Equals(BloodType) && BloodTypeToBuffMap.TryGetValue(bloodType, out PrefabGUID bloodBuffPrefab) && ServerGameManager.TryGetBuff(playerCharacter, bloodBuffPrefab.ToIdentifier(), out Entity bloodBuff)) // update bonuses if find matching bloodBuff from base prefab
+            {
+                UpdateBloodBonuses(steamID, BloodType, bloodBuff);
+            }
         }
         else
         {

@@ -64,14 +64,18 @@ internal static class BloodManager
             steamId.SetPlayerBloodStats(bloodStats);
         }
     }
-    public static void ApplyBloodBonuses(ulong steamId, BloodType bloodType, Entity bloodBuff)
+    public static void UpdateBloodBonuses(ulong steamId, BloodType bloodType, Entity bloodBuff)
     {
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
-        if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
+        if (handler != null && steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
         {
-            if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>())
+            if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>()) // add bonuses if doesn't have buffer
             {
                 EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
+            }
+            else if (bloodBuff.Has<ModifyUnitStatBuff_DOTS>()) // update bonuses if does have buffer by clearing and redoing scaling math for bonus
+            {
+                bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>().Clear();
             }
 
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
