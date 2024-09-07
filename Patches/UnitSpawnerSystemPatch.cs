@@ -19,6 +19,7 @@ internal static class UnitSpawnerPatch
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) return;
+                if (!ConfigService.LevelingSystem) return;
 
                 if (ConfigService.UnitSpawnerMultiplier < 1f && entity.Has<IsMinion>())
                 {

@@ -790,14 +790,14 @@ internal static class FamiliarCommands
             FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // if no shiny unlocked already use the freebie
             {
-                bool hasShinyChoice = GetPlayerBool(steamId, "ShinyChoice");
+                bool madeShinyChoice = GetPlayerBool(steamId, "ShinyChoice");
 
-                if (hasShinyChoice && HandleShiny(famKey, steamId, 1f, visual.GuidHash)) // if true use free visual then set to false
+                if (!madeShinyChoice && HandleShiny(famKey, steamId, 1f, visual.GuidHash)) // if false use free visual then set to true
                 {
-                    SetPlayerBool(steamId, "ShinyChoice", false);
+                    SetPlayerBool(steamId, "ShinyChoice", true);
                     LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
                 }
-                else if (!hasShinyChoice)
+                else if (madeShinyChoice)
                 {
                     LocalizationService.HandleReply(ctx, "You've already used your free familiar visual.");
                 }
@@ -810,7 +810,7 @@ internal static class FamiliarCommands
                     int quantity = ConfigService.ShinyCostItemQuantity;
                     if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
                     {
-                        if (Core.ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity) && HandleShiny(famKey, steamId, 1f, visual.GuidHash))
+                        if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity) && HandleShiny(famKey, steamId, 1f, visual.GuidHash))
                         {
                             LocalizationService.HandleReply(ctx, "Visual assigned for cost succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
                             return;
@@ -851,14 +851,14 @@ internal static class FamiliarCommands
 
         ulong steamId = playerInfo.User.PlatformId;
         string playerName = playerInfo.User.CharacterName.Value;
-        bool hasShinyChoice = GetPlayerBool(steamId, "ShinyChoice");
+        bool madeShinyChoice = GetPlayerBool(steamId, "ShinyChoice");
 
-        if (!hasShinyChoice)
+        if (madeShinyChoice)
         {
-            SetPlayerBool(steamId, "ShinyChoice", true);
+            SetPlayerBool(steamId, "ShinyChoice", false);
             LocalizationService.HandleReply(ctx, $"Visual choice reset for <color=white>{playerName}</color>. (does not remove previously chosen visuals from player data)");
         }
-        else if (hasShinyChoice)
+        else if (!madeShinyChoice)
         {
             LocalizationService.HandleReply(ctx, "Player is already able to choose a free familiar visual.");
         }

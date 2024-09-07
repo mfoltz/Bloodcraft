@@ -407,7 +407,7 @@ internal static class ServerBootstrapSystemPatches
                 User = user
             };
 
-            TestCache[steamId.ToString()] = playerInfo;
+            if (!OnlineCache.ContainsKey(steamId.ToString())) OnlineCache.TryAdd(steamId.ToString(), playerInfo);
         }
     }
 
@@ -449,7 +449,6 @@ internal static class ServerBootstrapSystemPatches
         if (ConfigService.ClientCompanion)
         {
             if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
-            if (TestCache.ContainsKey(steamId.ToString())) TestCache.Remove(steamId.ToString());
         }
     }
 }

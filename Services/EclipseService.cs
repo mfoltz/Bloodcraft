@@ -62,13 +62,6 @@ internal class EclipseService
             SendClientConfig(playerInfo.User);
             SendClientProgress(playerInfo.CharEntity, steamId);
         }
-        else if (TestCache.TryGetValue(steamId.ToString(), out playerInfo))
-        {
-            Core.Log.LogInfo($"User {steamId} registered for Eclipse updates from TestCache...");
-            RegisteredUsers.Add(steamId);
-            SendClientConfig(playerInfo.User);
-            SendClientProgress(playerInfo.CharEntity, steamId);
-        }
     }
     public static void SendClientConfig(User user)
     {
@@ -140,7 +133,7 @@ internal class EclipseService
 
                 if (ConfigService.PrestigeSystem)
                 {
-                    IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(BloodSystem.BloodPrestigeMap[bloodType]);
+                    IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(BloodSystem.BloodTypeToPrestigeMap[bloodType]);
                     legacyPrestige = prestigeHandler.GetPrestigeLevel(SteamID);
                 }
 
@@ -289,9 +282,7 @@ internal class EclipseService
                 continue;
             }
 
-            Dictionary<string, PlayerInfo> players = new(OnlinePlayerCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
-            Dictionary<string, PlayerInfo> testPlayers = new(TestCache);
-
+            Dictionary<string, PlayerInfo> players = new(OnlineCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
             HashSet<ulong> users = new(RegisteredUsers);
 
             PlayerInfo playerInfo;
@@ -301,19 +292,7 @@ internal class EclipseService
                 {
                     try
                     {
-                        Core.Log.LogInfo("Sending client progress (OnlineCache)...");
-                        SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                    }
-                    catch (Exception e)
-                    {
-                        Core.Log.LogError($"Error sending Eclipse progress to {playerInfo.User.PlatformId}: {e}");
-                    }
-                }
-                else if (testPlayers.TryGetValue(steamId.ToString(), out playerInfo))
-                {
-                    try
-                    {
-                        Core.Log.LogInfo("Sending client progress (TestCache)...");
+                        //Core.Log.LogInfo("Sending client progress (OnlineCache)...");
                         SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
                     }
                     catch (Exception e)

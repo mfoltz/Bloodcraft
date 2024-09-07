@@ -1,9 +1,10 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using Bloodcraft.Systems.Leveling;
+using static Bloodcraft.Systems.Legacies.BloodManager;
 using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Legacies;
@@ -122,7 +123,7 @@ internal static class BloodSystem
         { BloodType.Brute, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }
     };
 
-    public static readonly Dictionary<BloodType, PrestigeType> BloodPrestigeMap = new()
+    public static readonly Dictionary<BloodType, PrestigeType> BloodTypeToPrestigeMap = new()
     {
         { BloodType.Worker, PrestigeType.WorkerLegacy },
         { BloodType.Warrior, PrestigeType.WarriorLegacy },
@@ -162,6 +163,19 @@ internal static class BloodSystem
         { BloodType.Creature, new PrefabGUID(894725875) }, // speed bonus
         { BloodType.Brute, new PrefabGUID(1828387635) } // primary life leech
     };
+
+    public static readonly Dictionary<BloodType, PrefabGUID> BloodTypeToConsumeSourceMap = new()
+    {
+        { BloodType.Worker, new PrefabGUID(1743532914) }, // CHAR_Bandit_Worker_Gatherer
+        { BloodType.Warrior, new PrefabGUID(923140362) }, // CHAR_Bandit_Thief
+        { BloodType.Scholar, new PrefabGUID(-700632469) }, // CHAR_Militia_Nun
+        { BloodType.Rogue, new PrefabGUID(1220569089) }, // CHAR_Bandit_Scout
+        { BloodType.Mutant, new PrefabGUID(1092792896) }, // CHAR_Mutant_Spitter
+        { BloodType.Draculin, new PrefabGUID(-494298686) }, // CHAR_Legion_NightMaiden
+        { BloodType.Creature, new PrefabGUID(-218175217) }, // CHAR_Cursed_Wolf
+        { BloodType.Immortal, new PrefabGUID(55100532) }, // CHAR_Dracula_BloodSoul_heart
+        { BloodType.Brute, new PrefabGUID(2005508157) } // CHAR_Militia_Heavy
+    };
     public static void UpdateLegacy(Entity Killer, Entity Victim)
     {
         if (Killer == Victim || Victim.Has<Minion>() || !Victim.Has<BloodConsumeSource>() || !Victim.Has<UnitLevel>()) return;
@@ -197,7 +211,7 @@ internal static class BloodSystem
             if (steamID.TryGetPlayerPrestiges(out var prestiges))
             {
                 // Apply rate reduction with diminishing returns
-                if (prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var legacyPrestige))
+                if (prestiges.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var legacyPrestige))
                 {
                     changeFactor -= (ConfigService.PrestigeRatesReducer * legacyPrestige);
                     changeFactor = MathF.Max(changeFactor, 0);
@@ -233,6 +247,7 @@ internal static class BloodSystem
     }
     public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
     {
+        Entity player = user.LocalCharacter.GetEntityOnServer();
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP; // Convert to integer if necessary
         int levelProgress = GetLevelProgress(steamID, handler); // Calculate the current progress to the next level
@@ -247,12 +262,14 @@ internal static class BloodSystem
                 {
                     if (Stats.Count < ConfigService.LegacyStatChoices)
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, $"{ConfigService.LegacyStatChoices - Stats.Count} <color=white>stat</color> <color=#00FFFF>bonuses</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to make your choice and '<color=white>.bl lst</color>' to view legacy stat options.");
+                        int choices = ConfigService.LegacyStatChoices - Stats.Count;
+                        string bonusString = choices > 1 ? "bonuses" : "bonus";
+                        LocalizationService.HandleServerReply(EntityManager, user, $"{choices} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to make your choice and '<color=white>.bl lst</color>' to view legacy stat options. (toggle reminders with <color=white>'.remindme'</color>)");
                     }
                 }
             }
 
-            BloodManager.UpdateBloodBonuses(steamID, bloodType, user.LocalCharacter.GetEntityOnServer()); // if leveled up legacy, update stat bonuses
+            UpdateBloodStats(player, user, bloodType);
         }
         
         if (GetPlayerBool(steamID, "BloodLogging"))

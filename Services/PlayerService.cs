@@ -21,9 +21,7 @@ internal class PlayerService
 
     public static readonly Dictionary<string, PlayerInfo> PlayerCache = [];
 
-    public static readonly Dictionary<string, PlayerInfo> OnlinePlayerCache = [];
-
-    public static readonly Dictionary<string, PlayerInfo> TestCache = [];
+    public static readonly Dictionary<string, PlayerInfo> OnlineCache = [];
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -40,7 +38,7 @@ internal class PlayerService
         while (true)
         {
             PlayerCache.Clear();
-            OnlinePlayerCache.Clear();
+            OnlineCache.Clear();
 
             var players = GetEntitiesEnumerable(UserQuery);
             players
@@ -68,7 +66,7 @@ internal class PlayerService
 
                     if (kvp.Value.User.IsConnected) // Add to OnlinePlayerCache if connected
                     {
-                        OnlinePlayerCache[kvp.Key] = kvp.Value;
+                        OnlineCache[kvp.Key] = kvp.Value;
                     }
                 });
 

@@ -1,8 +1,9 @@
 `1.3.2`
 - legacy stat bonuses will update when applied and when leveling up
 - prestige buff automatically reapplied if one of them is found being destroyed
-- skeletons from graves should now be left untouched
-- 
+- skeletons from graves are now be left untouched
+- fixed total experience being displayed as rested experience for '.lvl get'
+
 `1.3.1`
 - changed UI updates to work via coroutine, more reliable and less prone to error so far
 - fixed bug where wrong BloodType enum was sent to client when frailed

@@ -63,7 +63,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(entity);
                     if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) // apply it here since it won't appear in the system naturally as they don't have the component till added
                     {
-                        WeaponManager.ApplyWeaponBonuses(steamId, weaponType, entity);
+                        WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
                         ModifyUnitStatBuffSystemSpawn.OnUpdate();
                     }
                 }

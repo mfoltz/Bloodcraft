@@ -33,7 +33,7 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
                     if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) continue; // handled in weapon level spawn since they shouldn't show up here but just incase
 
                     ulong steamId = player.GetSteamId();
-                    WeaponManager.ApplyWeaponBonuses(steamId, weaponType, entity);
+                    WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
                 }
             }
         }

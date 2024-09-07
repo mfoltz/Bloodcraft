@@ -63,7 +63,7 @@ internal static class WeaponManager
             steamId.SetPlayerWeaponStats(weaponStats);
         }
     }
-    public static void ApplyWeaponBonuses(ulong steamId, WeaponType weaponType, Entity weaponEntity)
+    public static void ApplyWeaponStats(ulong steamId, WeaponType weaponType, Entity weaponEntity)
     {
         IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))

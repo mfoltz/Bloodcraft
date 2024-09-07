@@ -330,7 +330,7 @@ internal static class LevelingSystem
             if (newLevel <= ConfigService.MaxLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             if (GetPlayerBool(SteamID, "Reminders") && Classes && !HasClass(SteamID))
             {
-                LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use '.class l' to view choices and see what they have to offer with '.class lb [Class]' (buffs), '.class lsp [Class]' (spells), and '.class lst [Class]' (stat synergies).");
+                LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
             }
         }
 

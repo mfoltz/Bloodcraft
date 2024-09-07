@@ -41,7 +41,7 @@ internal static class StatChangeMutationSystemPatch
                     
                     float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
 
-                    if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodPrestigeMap[bloodType], out var bloodPrestige))
+                    if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
                     {
                         legacyKey = (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
                         if (legacyKey > 0)

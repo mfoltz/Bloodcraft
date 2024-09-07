@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
+using ProjectM.Network;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
@@ -9,6 +10,9 @@ namespace Bloodcraft.Systems.Legacies;
 internal static class BloodManager
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     public static bool ChooseStat(ulong steamId, BloodType BloodType, BloodStatType statType)
@@ -64,7 +68,7 @@ internal static class BloodManager
             steamId.SetPlayerBloodStats(bloodStats);
         }
     }
-    public static void UpdateBloodBonuses(ulong steamId, BloodType bloodType, Entity bloodBuff)
+    public static void ApplyBloodStats(ulong steamId, BloodType bloodType, Entity bloodBuff)
     {
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
         if (handler != null && steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
@@ -72,10 +76,6 @@ internal static class BloodManager
             if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>()) // add bonuses if doesn't have buffer
             {
                 EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
-            }
-            else if (bloodBuff.Has<ModifyUnitStatBuff_DOTS>()) // update bonuses if does have buffer by clearing and redoing scaling math for bonus
-            {
-                bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>().Clear();
             }
 
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
@@ -114,6 +114,8 @@ internal static class BloodManager
                     buffer.Add(newStatBuff);
                 }
             }
+
+            ModifyUnitStatBuffSystemSpawn.OnUpdate();
         }
     }
     public static float CalculateScaledBloodBonus(IBloodHandler handler, ulong steamId, BloodType bloodType, BloodStatType statType)
@@ -134,7 +136,7 @@ internal static class BloodManager
                 }
             }
 
-            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodPrestigeMap[bloodType], out var PrestigeData))
+            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var PrestigeData))
             {
                 float gainFactor = 1 + (ConfigService.PrestigeStatMultiplier * PrestigeData);
                 maxBonus *= gainFactor;
@@ -145,12 +147,46 @@ internal static class BloodManager
         }
         return 0; // Return 0 if no handler is found or other error
     }
+    public static void UpdateBloodStats(Entity player, User user, BloodType bloodType)
+    {
+        ulong steamId = user.PlatformId;
+        Blood blood = player.Read<Blood>();
+
+        float amount = blood.Value;
+        float quality = blood.Quality;
+
+        if (ConfigService.BloodQualityBonus) // unless accounted for this will stack, we don't want that here. subtract what will be added in StatMutationSystemPatch
+        {
+            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
+            {
+                quality -= (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
+            }
+            else if (!ConfigService.PrestigeSystem)
+            {
+                IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
+                if (handler != null)
+                {
+                    quality -= (float)handler.GetLegacyData(steamId).Key;
+                }
+            }
+        }
+
+        // applying same blood to player again and letting game handle the ModifyUnitStatDOTS is much easier than trying to handle it manually
+        ConsumeBloodDebugEvent consumeBloodDebugEvent = new()
+        {
+            Amount = (int)amount,
+            Quality = quality,
+            Source = BloodTypeToConsumeSourceMap[bloodType]
+        };
+
+        DebugEventsSystem.ConsumeBloodEvent(user.Index, ref consumeBloodDebugEvent);
+    }
     public static BloodType GetCurrentBloodType(Entity character)
     {
         Blood blood = character.Read<Blood>();
         return GetBloodTypeFromPrefab(blood.BloodType);
     }
-    public class BloodStats
+    public static class BloodStats
     {
         public enum BloodStatType
         {

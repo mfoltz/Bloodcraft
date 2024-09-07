@@ -95,7 +95,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
-        if (__instance == null) return;
+        if (__instance == null || !__instance.__query_1831452865_0.HasAnyMatches) return;
 
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try
@@ -109,6 +109,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 {
                     var buffer = entity.ReadBuffer<QueuedWorkstationCraftAction>();
                     double recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75 : 1;
+
                     for (int i = 0; i < buffer.Length; i++)
                     {
                         var item = buffer[i];

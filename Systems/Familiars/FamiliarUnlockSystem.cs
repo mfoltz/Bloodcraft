@@ -34,7 +34,7 @@ internal static class FamiliarUnlockSystem
         string lowerName = diedPrefab.LookupName().ToLower();
         //Core.Log.LogInfo(lowerName);
         if (died.Has<Minion>()) return; // component checks
-        if ((lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("werewolf")) && !lowerName.Contains("gateboss")) return; // prefab name checks
+        if ((lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("werewolf")) || lowerName.Contains("tombsummon") && !lowerName.Contains("gateboss")) return; // prefab name checks
         if (IsBannedUnit(diedPrefab)) return; // banned prefab checks, no using currently
         if (IsBannedType(diedCategory)) return; // banned type checks, no using currently
 

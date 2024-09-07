@@ -42,8 +42,7 @@ internal static class ScriptSpawnServerPatch
 
                     if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(entity.Read<PrefabGUID>(), out BloodType bloodType)) // applies stat choices to blood types when changed
                     {
-                        BloodManager.UpdateBloodBonuses(steamId, bloodType, entity);
-                        ModifyUnitStatBuffSystem_Spawn.OnUpdate();
+                        BloodManager.ApplyBloodStats(steamId, bloodType, entity);
                     }
                 }
             }
