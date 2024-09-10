@@ -1,7 +1,7 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Professions;
+using Bloodcraft.Utilities;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using System.Collections;
@@ -19,6 +19,7 @@ internal static class Core
     public static ManualLogSource Log => Plugin.LogInstance;
 
     public static bool hasInitialized = false;
+
     static MonoBehaviour MonoBehaviour;
     public static void Initialize()
     {
@@ -29,10 +30,10 @@ internal static class Core
         _ = new PlayerService();
         _ = new LocalizationService();
 
-        if (ConfigService.FamiliarSystem) Utilities.FamiliarBans();
+        if (ConfigService.FamiliarSystem) ConfigUtilities.FamiliarBans();
         if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
-        if (ConfigService.StarterKit) Utilities.StarterKit();
-        if (ConfigService.PrestigeSystem) Utilities.PrestigeBuffs();
+        if (ConfigService.StarterKit) ConfigUtilities.StarterKit();
+        if (ConfigService.PrestigeSystem) BuffUtilities.PrestigeBuffs();
         if (ConfigService.QuestSystem) _ = new QuestService();
         if (ConfigService.ClientCompanion) _ = new EclipseService();
 

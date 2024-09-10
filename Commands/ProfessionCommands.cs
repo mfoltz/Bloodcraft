@@ -1,14 +1,13 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
+using Bloodcraft.Utilities;
 using Stunlock.Core;
-using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup(name: "profession", "prof")] 
+[CommandGroup(name: "profession", "prof")]
 internal static class ProfessionCommands
 {
     [Command(name: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
@@ -21,9 +20,9 @@ internal static class ProfessionCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
-        TogglePlayerBool(SteamID, "ProfessionLogging");
+        PlayerUtilities.TogglePlayerBool(SteamID, "ProfessionLogging");
 
-        LocalizationService.HandleReply(ctx, $"Profession logging is now {(GetPlayerBool(SteamID, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Profession logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]

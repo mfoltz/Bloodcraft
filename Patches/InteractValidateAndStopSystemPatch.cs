@@ -1,12 +1,12 @@
-﻿using HarmonyLib;
-using ProjectM.Gameplay.Systems;
-using ProjectM.Scripting;
+﻿using Bloodcraft.Utilities;
+using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
+using ProjectM.Network;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
-using ProjectM.Network;
 
 namespace Bloodcraft.Patches;
 
@@ -41,7 +41,7 @@ internal static class InteractValidateAndStopSystemPatch
                             continue;
                         }
 
-                        Entity familiar = FindPlayerFamiliar(player);
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                         Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 

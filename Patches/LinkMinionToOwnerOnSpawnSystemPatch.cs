@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -6,7 +7,6 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -37,7 +37,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
 
                 if (entity.GetOwner().TryGetFollowedPlayer(out Entity player)) // if following player most likely a familiar minion summon
                 {
-                    Entity familiar = FindPlayerFamiliar(player);
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())
                     {
                         if (!FamiliarMinions.ContainsKey(familiar))

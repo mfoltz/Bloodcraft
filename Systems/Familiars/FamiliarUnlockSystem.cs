@@ -9,7 +9,7 @@ namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    
+
     static readonly Random Random = new();
 
     // List of banned PrefabGUIDs

@@ -88,15 +88,13 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         finally
         {
             repairEntities.Dispose();
-        }   
+        }
     }
 
     [HarmonyPatch(typeof(UpdateCraftingSystem), nameof(UpdateCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
-        if (__instance == null || !__instance.__query_1831452865_0.HasAnyMatches) return;
-
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try
         {
@@ -105,32 +103,43 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 if (!Core.hasInitialized) return;
                 if (!ConfigService.ProfessionSystem) return;
 
+                //Core.Log.LogInfo("Check 1");
+                if (!entity.Exists()) continue;
+
                 if (entity.Has<CastleWorkstation>() && entity.Has<QueuedWorkstationCraftAction>())
                 {
+                    //Core.Log.LogInfo("Check 2");
                     var buffer = entity.ReadBuffer<QueuedWorkstationCraftAction>();
                     double recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75 : 1;
 
+                    //Core.Log.LogInfo("Check 3");
                     for (int i = 0; i < buffer.Length; i++)
                     {
                         var item = buffer[i];
 
+                        //Core.Log.LogInfo("Check 4");
                         Entity userEntity = item.InitiateUser;
                         User user = userEntity.Read<User>();
                         ulong steamId = user.PlatformId;
 
+                        //Core.Log.LogInfo("Check 5");
                         PrefabGUID recipePrefab = item.RecipeGuid;
-                        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab];
+                        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipePrefab) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab] : Entity.Null;
                         double totalTime = recipeEntity.Read<RecipeData>().CraftDuration * recipeReduction;
-                        
+
+                        //Core.Log.LogInfo("Check 6");
                         if (CraftRateModifier != 1f)
                         {
                             totalTime /= CraftRateModifier;
                         }
 
+                        //Core.Log.LogInfo("Check 7");
                         float progress = item.ProgressTime;
                         if (progress / (float)totalTime >= CraftThreshold)
                         {
                             DateTime now = DateTime.UtcNow;
+
+                            //Core.Log.LogInfo("Check 8");
                             if (CraftCooldowns.TryGetValue(userEntity, out var cooldowns))
                             {
                                 if (cooldowns.TryGetValue(recipePrefab, out var lastCrafted))
@@ -143,37 +152,56 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                                 }
                                 else
                                 {
-                                    cooldowns.Add(recipePrefab, now);
+                                    cooldowns.TryAdd(recipePrefab, now);
                                 }
                             }
                             else
                             {
                                 //Core.Log.LogInfo($"Adding stamp for {recipePrefab.LookupName()} at: {now}");
-                                CraftCooldowns.Add(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, now } });
+                                CraftCooldowns.TryAdd(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, now } });
                             }
 
                             var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
                             PrefabGUID itemPrefab = outputBuffer[0].Guid;
 
-                            if (!steamId.TryGetPlayerCraftingJobs(out var playerJobs))
+                            if (steamId.TryGetPlayerCraftingJobs(out var playerJobs))
                             {
-                                steamId.SetPlayerCraftingJobs([]);
-                            }
-
-                            if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
-                            {
-                                //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
-                                recipeJobs++;
+                                if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
+                                {
+                                    //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
+                                    recipeJobs++;
+                                }
+                                else
+                                {
+                                    //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
+                                    playerJobs.TryAdd(itemPrefab, 1);
+                                }
                             }
                             else
                             {
-                                //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
-                                playerJobs.Add(itemPrefab, 1);
+                                steamId.SetPlayerCraftingJobs([]);
+                                if (steamId.TryGetPlayerCraftingJobs(out playerJobs))
+                                {
+                                    if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
+                                    {
+                                        //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
+                                        recipeJobs++;
+                                    }
+                                    else
+                                    {
+                                        //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
+                                        playerJobs.TryAdd(itemPrefab, 1);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            Core.Log.LogError("UpdateCraftingSystem error..." + e);
         }
         finally
         {

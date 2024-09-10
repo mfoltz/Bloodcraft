@@ -96,7 +96,7 @@ internal class LocalizationService
 
         var assembly = Assembly.GetExecutingAssembly();
         var stream = assembly.GetManifestResourceStream(resourceName);
-        
+
         using StreamReader localizationReader = new(stream);
         string jsonContent = localizationReader.ReadToEnd();
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
@@ -184,7 +184,7 @@ internal class LocalizationService
         int lastIndex = 0;
 
         foreach (Match match in Regex.Matches(message).Cast<Match>())
-        {   
+        {
             result.Append(message, lastIndex, match.Index - lastIndex);
 
             if (match.Groups["open"].Success)

@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -10,7 +11,6 @@ using Unity.Entities;
 using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
-using static Bloodcraft.Utilities;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -19,7 +19,7 @@ internal static class MiscCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;  
+    static SystemService SystemService => Core.SystemService;
     static CombatMusicSystem_Server CombatMusicSystemServer => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
@@ -41,9 +41,9 @@ internal static class MiscCommands
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
         var SteamID = ctx.Event.User.PlatformId;
-
-        TogglePlayerBool(SteamID, "Reminders");
-        LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "Reminders");
+        LocalizationService.HandleReply(ctx, $"Reminders {(PlayerUtilities.GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -57,9 +57,9 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
+        if (PlayerUtilities.GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
         {
-            SetPlayerBool(steamId, "Kit", false);
+            PlayerUtilities.SetPlayerBool(steamId, "Kit", false);
             Entity character = ctx.Event.SenderCharacterEntity;
 
             foreach (var item in KitPrefabs)
@@ -106,16 +106,16 @@ internal static class MiscCommands
 
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
-
-        TogglePlayerBool(SteamID, "SpellLock");
-        if (GetPlayerBool(SteamID, "SpellLock"))
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "SpellLock");
+        if (PlayerUtilities.GetPlayerBool(SteamID, "SpellLock"))
         {
             LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
         }
         else
         {
             LocalizationService.HandleReply(ctx, "Spells set.");
-        }        
+        }
     }
 
     [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
@@ -135,9 +135,9 @@ internal static class MiscCommands
 
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
-
-        TogglePlayerBool(SteamID, "ShiftLock");
-        if (GetPlayerBool(SteamID, "ShiftLock"))
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "ShiftLock");
+        if (PlayerUtilities.GetPlayerBool(SteamID, "ShiftLock"))
         {
             LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
         }
@@ -187,11 +187,11 @@ internal static class MiscCommands
 
     //[Command(name: "servantfam", adminOnly: true, usage: ".servantfam", description: "Tired of remaking commands to test one thing at a time, just gonna leave this here and comment out in future releases :p")]
     public static void ServantFamTesting(ChatCommandContext ctx)
-    {        
+    {
         Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FindPlayerFamiliar(character);
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
         if (!familiar.Exists()) return;
-        
+
         //FamiliarPatches.PlayerEntities.Enqueue(character);
 
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
@@ -210,7 +210,7 @@ internal static class MiscCommands
             User = ctx.Event.SenderUserEntity
         };
 
-        Core.SystemService.DebugEventsSystem.SpawnDebugEvent(ctx.Event.User.Index, ref spawnDebugEvent, entityCommandBuffer, ref fromCharacter);        
+        Core.SystemService.DebugEventsSystem.SpawnDebugEvent(ctx.Event.User.Index, ref spawnDebugEvent, entityCommandBuffer, ref fromCharacter);
     }
 
     [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
@@ -226,7 +226,7 @@ internal static class MiscCommands
         Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
         List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
 
-        IEnumerable<Entity> disabledFamiliars = GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
+        IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
         foreach (Entity entity in disabledFamiliars)
         {
             if (dismissedFamiliars.Contains(entity)) continue;

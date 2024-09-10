@@ -11,7 +11,6 @@ using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
-using static Bloodcraft.Systems.Legacies.BloodManager;
 
 namespace Bloodcraft;
 internal static class Extensions
@@ -20,7 +19,7 @@ internal static class Extensions
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
-    
+
     public delegate void ActionRef<T>(ref T item);
     public static void With<T>(this Entity entity, ActionRef<T> action) where T : struct
     {
@@ -214,7 +213,7 @@ internal static class Extensions
         {
             var buffer = player.ReadBuffer<BloodQualityBuff>();
 
-            foreach(BloodQualityBuff buff in buffer)
+            foreach (BloodQualityBuff buff in buffer)
             {
                 Core.Log.LogInfo(buff.BloodQualityBuffPrefabGuid.LookupName());
                 if (BuffToBloodTypeMap.ContainsKey(buff.BloodQualityBuffPrefabGuid))

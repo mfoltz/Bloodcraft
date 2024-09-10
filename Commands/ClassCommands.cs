@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
@@ -7,7 +8,6 @@ using VampireCommandFramework;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 
@@ -33,9 +33,9 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
+        if (!ClassUtilities.HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
         {
-            UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
+            ClassUtilities.UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
             LocalizationService.HandleReply(ctx, $"You have chosen <color=white>{parsedClassType}</color>");
         }
         else
@@ -61,19 +61,19 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (HasClass(steamId))
+        if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = GetPlayerClass(steamId);
+            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
 
             if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
-                if (prestigeLevel < ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
+                if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
                 {
                     LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                     return;
                 }
 
-                List<int> spells = ParseConfigString(ClassSpellsMap[playerClass]);
+                List<int> spells = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
 
                 if (spells.Count == 0)
                 {
@@ -124,21 +124,21 @@ internal static class ClassCommands
         ulong steamId = ctx.Event.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (steamId.TryGetPlayerClasses(out var classes) && !HasClass(steamId))
+        if (steamId.TryGetPlayerClasses(out var classes) && !ClassUtilities.HasClass(steamId))
         {
             LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
             return;
         }
 
-        if (ConfigService.ChangeClassItem != 0 && !HandleClassChangeItem(ctx, steamId))
+        if (ConfigService.ChangeClassItem != 0 && !ClassUtilities.HandleClassChangeItem(ctx, steamId))
         {
             LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes. ({new PrefabGUID(ConfigService.ChangeClassItem).GetPrefabName()}x{ConfigService.ChangeClassQuantity})");
             return;
         }
 
         classes.Clear();
-        RemoveClassBuffs(ctx, steamId);
-        UpdateClassData(character, parsedClassType, classes, steamId);
+        ClassUtilities.RemoveClassBuffs(ctx, steamId);
+        ClassUtilities.UpdateClassData(character, parsedClassType, classes, steamId);
 
         LocalizationService.HandleReply(ctx, $"You have changed to <color=white>{parsedClassType}</color>");
     }
@@ -154,10 +154,10 @@ internal static class ClassCommands
 
         var steamId = ctx.Event.User.PlatformId;
 
-        if (HasClass(steamId))
+        if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = GetPlayerClass(steamId);
-            List<int> perks = GetClassBuffs(steamId);
+            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+            List<int> perks = ClassUtilities.GetClassBuffs(steamId);
 
             if (perks.Count == 0)
             {
@@ -170,8 +170,8 @@ internal static class ClassCommands
                 Character = ctx.Event.SenderCharacterEntity,
                 User = ctx.Event.SenderUserEntity
             };
-
-            ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, fromCharacter);
+            BuffUtilities.
+                        ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, fromCharacter);
             LocalizationService.HandleReply(ctx, $"Class buffs applied for <color=white>{playerClass}</color>");
         }
         else
@@ -204,22 +204,23 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (HasClass(steamId))
+        if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = GetPlayerClass(steamId);
+            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
             {
                 playerClass = requestedClass;
             }
 
-            ReplyClassBuffs(ctx, playerClass);
+            ClassUtilities.
+                        ReplyClassBuffs(ctx, playerClass);
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
             {
-                ReplyClassBuffs(ctx, requestedClass);
+                ClassUtilities.ReplyClassBuffs(ctx, requestedClass);
             }
             else
             {
@@ -239,22 +240,23 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (HasClass(steamId))
+        if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = GetPlayerClass(steamId);
+            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
             {
                 playerClass = requestedClass;
             }
 
-            ReplyClassSpells(ctx, playerClass);
+            ClassUtilities.
+                        ReplyClassSpells(ctx, playerClass);
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
             {
-                ReplyClassSpells(ctx, requestedClass);
+                ClassUtilities.ReplyClassSpells(ctx, requestedClass);
             }
             else
             {
@@ -267,7 +269,7 @@ internal static class ClassCommands
     public static void ListClassStats(ChatCommandContext ctx, string classType = "")
     {
         // Parse classType parameter
-        if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClasses requestedClass))
+        if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
         {
             if (ClassWeaponBloodMap.TryGetValue(requestedClass, out var weaponBloodStats))
             {

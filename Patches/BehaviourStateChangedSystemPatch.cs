@@ -1,11 +1,11 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -36,8 +36,8 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
 
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
-
-                        HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
+                        FamiliarUtilities.
+                                                HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
                     }
                 }
             }

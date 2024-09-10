@@ -1,10 +1,10 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodManager
@@ -13,7 +13,7 @@ internal static class BloodManager
     static SystemService SystemService => Core.SystemService;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    
+
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     public static bool ChooseStat(ulong steamId, BloodType BloodType, BloodStatType statType)
     {
@@ -21,7 +21,7 @@ internal static class BloodManager
         {
             if (ConfigService.HardSynergies)
             {
-                if (!HasClass(steamId))
+                if (!ClassUtilities.HasClass(steamId))
                 {
                     return false;
                 }
@@ -124,7 +124,7 @@ internal static class BloodManager
         {
             var xpData = handler.GetLegacyData(steamId);
             float maxBonus = BloodStatValues[statType];
-            
+
             if (Classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
             {
                 var (_, classBloodStats) = classes.First().Value; // get class to check if stat allowed

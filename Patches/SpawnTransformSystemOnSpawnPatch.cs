@@ -1,9 +1,8 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using ProjectM.Shared.Systems;
@@ -13,7 +12,6 @@ using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -67,7 +65,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                 int level = entity.Read<UnitLevel>().Level._Value;
                 int famKey = prefabGUID.GuidHash;
                 bool summon = false;
-                
+
                 /* nothing to see here move along >_>
                 if (level == 1 && prefabGUID.Equals(paladinServantPrefab))
                 {
@@ -150,7 +148,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                     ulong steamId = FamiliarActives
                         .Where(f => f.Value.FamKey == famKey)
                         .Select(f => f.Key)
-                        .FirstOrDefault(id => GetPlayerBool(id, "Binding"));
+                        .FirstOrDefault(id => PlayerUtilities.GetPlayerBool(id, "Binding"));
 
                     if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                     {
@@ -159,7 +157,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
                         if (FamiliarSummonSystem.HandleFamiliar(character, entity))
                         {
-                            SetPlayerBool(steamId, "Binding", false);
+                            PlayerUtilities.SetPlayerBool(steamId, "Binding", false);
                             string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
                             FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
 
@@ -223,7 +221,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         {
             entities.Dispose();
         }
-    }   
+    }
     static void HandleManticore(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
@@ -248,8 +246,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 5f;
         aiMoveSpeeds.Run._Value = 6.5f;
         entity.Write(aiMoveSpeeds);
-
-        HandleVisual(entity, manticoreVisual);
+        BuffUtilities.
+                HandleVisual(entity, manticoreVisual);
     }
     static void HandleMonster(Entity entity)
     {
@@ -275,8 +273,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 2.5f;
         aiMoveSpeeds.Run._Value = 5.5f;
         entity.Write(aiMoveSpeeds);
-        
-        HandleVisual(entity, monsterVisual);
+        BuffUtilities.
+                HandleVisual(entity, monsterVisual);
     }
     static void HandleSolarus(Entity entity)
     {
@@ -301,8 +299,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
         aiMoveSpeeds.Walk._Value = 4f;
         entity.Write(aiMoveSpeeds);
-
-        HandleVisual(entity, solarusVisual);
+        BuffUtilities.
+                HandleVisual(entity, solarusVisual);
     }
     static void HandleAngel(Entity entity)
     {
@@ -325,8 +323,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 5f;
         aiMoveSpeeds.Run._Value = 7.5f;
         entity.Write(aiMoveSpeeds);
-
-        HandleVisual(entity, solarusVisual);
+        BuffUtilities.
+                HandleVisual(entity, solarusVisual);
     }
     static void HandleFallenAngel(Entity entity)
     {
@@ -344,7 +342,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         health.MaxHealth._Value *= 5;
         health.Value = health.MaxHealth._Value;
         entity.Write(health);
-        
+
         UnitStats unitStats = entity.Read<UnitStats>();
         unitStats.PhysicalPower._Value *= 1.5f;
         unitStats.SpellPower._Value *= 1.5f;
@@ -360,7 +358,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Run._Value = 3.5f;
         aiMoveSpeeds.Circle._Value = 3.5f;
         entity.Write(aiMoveSpeeds);
-
-        HandleVisual(entity, draculaVisual);
+        BuffUtilities.
+                HandleVisual(entity, draculaVisual);
     }
 }

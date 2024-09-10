@@ -1,8 +1,8 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponManager
@@ -16,7 +16,7 @@ internal static class WeaponManager
         {
             if (ConfigService.HardSynergies)
             {
-                if (!HasClass(steamId))
+                if (!ClassUtilities.HasClass(steamId))
                 {
                     return false;
                 }
@@ -167,7 +167,7 @@ internal static class WeaponManager
         }
 
         public static readonly Dictionary<WeaponStatType, string> WeaponStatFormats = new()
-        { 
+        {
             { WeaponStatType.MaxHealth, "integer" },
             { WeaponStatType.MovementSpeed, "decimal" },
             { WeaponStatType.PrimaryAttackSpeed, "percentage" },

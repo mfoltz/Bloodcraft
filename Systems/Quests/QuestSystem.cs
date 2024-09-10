@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -11,14 +12,13 @@ using Unity.Mathematics;
 using Match = System.Text.RegularExpressions.Match;
 using Random = System.Random;
 using Regex = System.Text.RegularExpressions.Regex;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Quests;
 internal static class QuestSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;    
+    static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly Random Random = new();
@@ -58,7 +58,7 @@ internal static class QuestSystem
         public QuestGoal Goal { get; set; }
         public PrefabGUID Target { get; set; }
         public int RequiredAmount { get; set; }
-        public bool Complete { get; set;}
+        public bool Complete { get; set; }
     }
 
     static readonly Dictionary<string, (int MinLevel, int MaxLevel)> EquipmentTierLevelRangeMap = new()
@@ -92,7 +92,7 @@ internal static class QuestSystem
             string check = prefabGUID.LookupName();
 
             if (check.Contains("Trader") || check.Contains("Vermin") || check.Contains("Servant") || check.Contains("Horse") || check.Contains("Carriage") || check.Contains("Minion") || check.Contains("Unholy") || check.Contains("Surprise")) continue; // need to check if behaviour prefab matches with name for some units for valid spawns?
-            if (!prefabEntity.Has<UnitLevel>() || prefabEntity.Has<Minion>()) continue;     
+            if (!prefabEntity.Has<UnitLevel>() || prefabEntity.Has<Minion>()) continue;
 
             UnitLevel level = prefabEntity.Read<UnitLevel>();
             if (Math.Abs(level.Level._Value - playerLevel) <= 10)
@@ -127,7 +127,7 @@ internal static class QuestSystem
             {
                 continue;
             }
-            
+
             // Check if the item is within the player's level range based on T01, etc
             if (itemData.ItemType == ItemType.Equippable)
             {
@@ -372,7 +372,7 @@ internal static class QuestSystem
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
 
-                if (GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
+                if (PlayerUtilities.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
                 {
                     string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> <color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> [<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
                     LocalizationService.HandleServerReply(EntityManager, user, message);

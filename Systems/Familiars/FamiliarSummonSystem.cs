@@ -1,5 +1,5 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -7,9 +7,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Transforms;
-using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
@@ -51,15 +49,24 @@ internal static class FamiliarSummonSystem
     public static bool HandleFamiliar(Entity player, Entity familiar)
     {
         User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
+
         try
         {
-            int level = familiar.Read<UnitLevel>().Level._Value;
+            UnitLevel unitLevel = familiar.Read<UnitLevel>();
+            int level = unitLevel.Level._Value;
             int famKey = familiar.Read<PrefabGUID>().GuidHash;
             ulong steamId = user.PlatformId;
 
-            if (FamiliarExperienceManager.LoadFamiliarExperience(steamId).FamiliarExperience.TryGetValue(famKey, out var xpData) && xpData.Key > 1)
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            if (famData.FamiliarExperience.TryGetValue(famKey, out var xpData))
             {
                 level = xpData.Key;
+                if (level == 0)
+                {
+                    level = 1;
+                    xpData = new(level, 0);
+                    FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+                }
             }
 
             if (HandleFamiliarModifications(user, steamId, famKey, player, familiar, level)) return true;
@@ -79,22 +86,60 @@ internal static class FamiliarSummonSystem
         try
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
+
             ModifyFollowerAndTeam(player, familiar);
             ModifyDamageStats(familiar, level, steamId, famKey);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
+
             if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
-            if (GetPlayerBool(steamId, "FamiliarVisual"))
+
+            if (PlayerUtilities.GetPlayerBool(steamId, "FamiliarVisual"))
             {
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
-                if (data.FamiliarBuffs.ContainsKey(famKey)) 
+                if (data.FamiliarBuffs.ContainsKey(famKey))
                 {
-                    HandleVisual(familiar, new(data.FamiliarBuffs[famKey][0]));
                     PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
+                    BuffUtilities.HandleVisual(familiar, visualBuff);
                 }
             }
+
+            if (!familiar.Has<NameableInteractable>()) familiar.Add<NameableInteractable>();
+
+            /*
+            if (!familiar.Has<InventoryInstanceElement>()) EntityManager.AddBuffer<InventoryInstanceElement>(familiar);
+
+            if (!familiar.Has<FeedableInventory>()) familiar.Add<FeedableInventory>();
+
+            if (!familiar.Has<Mountable>()) familiar.Add<Mountable>();
+
+            if (!familiar.Has<JumpFromCliffs>()) familiar.Add<JumpFromCliffs>();
+
+            familiar.With((ref FeedableInventory feedableInventory) =>
+            {
+                feedableInventory.InventoryPrefabGuid = new(-323855418);
+                feedableInventory.RequiredItemType = new(-1409142667);
+                feedableInventory.RequiredItemCount = 250;
+                feedableInventory.FeedTime = 30000;
+                feedableInventory.FeedProgressTime = 60000;
+                feedableInventory.DamageTickDuration = 5;
+                feedableInventory.DamageTickTime = 5;
+                feedableInventory.DamageTickPercentage = 0.25f;
+                feedableInventory.IsActive = true;
+                feedableInventory.IsFed = true;
+            });
+
+            familiar.With((ref Mountable mountable) =>
+            {
+                mountable.MaxSpeedRange = new Unity.Mathematics.float2(8f, 11f);
+                mountable.AccelerationRange = new Unity.Mathematics.float2(3f, 7f);
+                mountable.RotationSpeedRange = new Unity.Mathematics.float2(120f, 140f);
+                mountable.MountBuff = new(2112789321);
+            });
+            */
+
             return true;
         }
         catch (Exception ex)
@@ -145,7 +190,7 @@ internal static class FamiliarSummonSystem
     static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
-        factionReference.FactionGuid._Value = playerFaction; 
+        factionReference.FactionGuid._Value = playerFaction;
         familiar.Write(factionReference);
 
         Follower follower = familiar.Read<Follower>();
@@ -162,7 +207,7 @@ internal static class FamiliarSummonSystem
         if (!familiar.Has<Minion>())
         {
             familiar.Add<Minion>(); //try taking this one off first and see if they summon things again, may also be related to entityOwner
-            // this works for stopping targetting players for PvE and does not stop summoning, still respects pvp prot as well
+            familiar.With((ref Minion minion) => minion.MasterDeathAction = MinionMasterDeathAction.Kill); // kill fam on owner death
         }
 
         if (familiar.Has<EntityOwner>())
@@ -204,7 +249,7 @@ internal static class FamiliarSummonSystem
     };
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
-        float scalingFactor = 0.1f + (level / (float)ConfigService.MaxFamiliarLevel) *0.9f; // Calculate scaling factor
+        float scalingFactor = 0.1f + (level / (float)ConfigService.MaxFamiliarLevel) * 0.9f; // Calculate scaling factor
         float healthScalingFactor = 1.0f + (level / (float)ConfigService.MaxFamiliarLevel) * 4.0f; // Calculate scaling factor for max health
 
         int prestigeLevel = 0;
@@ -258,10 +303,11 @@ internal static class FamiliarSummonSystem
                     break;
             }
         }
-
         familiar.Write(familiarStats);
+
         UnitLevel unitLevel = familiar.Read<UnitLevel>();
         unitLevel.Level._Value = level;
+        unitLevel.HideLevel = false;
         familiar.Write(unitLevel);
 
         Health familiarHealth = familiar.Read<Health>();

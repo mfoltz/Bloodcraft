@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -9,10 +10,9 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using User = ProjectM.Network.User;
-using static Bloodcraft.Utilities;
-using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
 
@@ -58,7 +58,7 @@ internal static class EmoteSystemPatch
                 Entity character = fromCharacter.Character;
 
                 ulong steamId = userEntity.Read<User>().PlatformId;
-                if (GetPlayerBool(steamId, "Emotes"))
+                if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
                 {
                     if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
                     else if (ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
@@ -81,7 +81,7 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        Entity familiar = FindPlayerFamiliar(character);
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
         User user = userEntity.Read<User>();
 
         if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
@@ -107,7 +107,7 @@ internal static class EmoteSystemPatch
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
-            SetPlayerBool(steamId, "Binding", true);
+            PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
 
             if (preset < 1 || preset > famKeys.Count)
             {
@@ -129,8 +129,8 @@ internal static class EmoteSystemPatch
     {
         if (playerId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
-            
+            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+
             if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
             {
                 familiar = data.Familiar;
@@ -144,9 +144,9 @@ internal static class EmoteSystemPatch
 
             if (!familiar.Has<Disabled>())
             {
-                if (FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
+                if (FamiliarMinions.ContainsKey(data.Familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
                 EntityManager.AddComponent<Disabled>(familiar);
-                
+
                 Follower follower = familiar.Read<Follower>();
                 follower.Followed._Value = Entity.Null;
                 familiar.Write(follower);
@@ -176,7 +176,7 @@ internal static class EmoteSystemPatch
             {
                 float3 position = character.Read<Translation>().Value;
                 familiar.Remove<Disabled>();
-                
+
                 familiar.Write(new Translation { Value = position });
                 familiar.Write(new LastTranslation { Value = position });
 
@@ -191,7 +191,7 @@ internal static class EmoteSystemPatch
                     aggroConsumer.Active._Value = true;
                     familiar.Write(aggroConsumer);
                 }
-                
+
                 data = (Entity.Null, data.FamKey);
                 playerId.SetFamiliarActives(data);
 
@@ -213,7 +213,7 @@ internal static class EmoteSystemPatch
 
         if (playerId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
             if (!familiar.Exists() && data.Familiar.Exists())
             {
@@ -245,11 +245,11 @@ internal static class EmoteSystemPatch
                 aggroable.DistanceFactor._Value = 1f;
                 aggroable.AggroFactor._Value = 1f;
                 familiar.Write(aggroable);
-                
+
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
             }
             else // if not, disable combat
-            {  
+            {
                 FactionReference factionReference = familiar.Read<FactionReference>();
                 factionReference.FactionGuid._Value = ignoredFaction;
                 familiar.Write(factionReference);
@@ -286,7 +286,7 @@ internal static class EmoteSystemPatch
                         lifetime.Duration = -1;
                         lifetime.EndAction = LifeTimeEndAction.None;
                         invlunerableBuff.Write(lifetime);
-                    }              
+                    }
                 }
 
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");

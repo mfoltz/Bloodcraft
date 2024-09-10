@@ -1,5 +1,7 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
+using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -7,6 +9,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
@@ -16,8 +19,6 @@ using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
-using static Bloodcraft.Utilities;
-using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 
 namespace Bloodcraft.Commands;
 
@@ -26,17 +27,29 @@ internal static class FamiliarCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
 
+    static readonly ComponentType[] NetworkEventComponents =
+    [
+        ComponentType.ReadWrite(Il2CppType.Of<FromCharacter>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ReceiveNetworkEventTag>()),
+        ComponentType.ReadWrite(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadWrite(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
+    ];
+    static readonly NetworkEventType EventType = new()
+    {
+        IsAdminEvent = false,
+        EventId = NetworkEvents.EventId_RenameInteractable,
+        IsDebugEvent = false
+    };
+
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> FamiliarSettings = new()
     {
-        {"VBloodEmotes", ToggleVBloodEmotes},
-        {"Shiny", ToggleShinies}
+        {"VBloodEmotes", FamiliarUtilities.ToggleVBloodEmotes},
+        {"Shiny", FamiliarUtilities.ToggleShinies}
     };
 
     [Command(name: "bind", shortHand: "b", adminOnly: false, usage: ".fam b [#]", description: "Activates specified familiar from current list.")]
@@ -51,7 +64,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
-        Entity familiar = FindPlayerFamiliar(character);
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
 
         if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
         {
@@ -73,7 +86,7 @@ internal static class FamiliarCommands
             LocalizationService.HandleReply(ctx, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
             return;
         }
-        
+
         if (steamId.TryGetFamiliarActives(out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
             if (choice < 1 || choice > famKeys.Count)
@@ -82,13 +95,14 @@ internal static class FamiliarCommands
                 return;
             }
 
-            SetPlayerBool(steamId, "Binding", true);
+            PlayerUtilities.
+                        SetPlayerBool(steamId, "Binding", true);
             steamId.SetFamiliarDefault(choice);
 
             data = new(Entity.Null, famKeys[choice - 1]);
             steamId.SetFamiliarActives(data);
 
-            SummonFamiliar(character, userEntity, famKeys[choice -1]);
+            SummonFamiliar(character, userEntity, famKeys[choice - 1]);
         }
         else
         {
@@ -103,30 +117,30 @@ internal static class FamiliarCommands
         {
             LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
             return;
-        }   
+        }
 
         ulong steamId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FindPlayerFamiliar(character);
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
 
         if (familiar != Entity.Null)
         {
-            if (FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
+            if (FamiliarMinions.ContainsKey(familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
             DestroyUtility.CreateDestroyEvent(EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
-            ClearFamiliarActives(steamId);
+            FamiliarUtilities.ClearFamiliarActives(steamId);
             LocalizationService.HandleReply(ctx, "Familiar unbound.");
         }
         else if (steamId.TryGetFamiliarActives(out var data) && data.Familiar.Equals(Entity.Null) && !data.FamKey.Equals(0))
         {
             LocalizationService.HandleReply(ctx, "Couldn't find familiar, assuming dead/destroyed and unbinding...");
-            ClearFamiliarActives(steamId);
+            FamiliarUtilities.ClearFamiliarActives(steamId);
         }
         else if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
         {
-            if (FamiliarMinions.ContainsKey(data.Familiar)) HandleFamiliarMinions(familiar);
+            if (FamiliarMinions.ContainsKey(data.Familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
             if (data.Familiar.Has<Disabled>()) data.Familiar.Remove<Disabled>();
             DestroyUtility.CreateDestroyEvent(EntityManager, data.Familiar, DestroyReason.Default, DestroyDebugReason.None);
-            ClearFamiliarActives(steamId);
+            FamiliarUtilities.ClearFamiliarActives(steamId);
             LocalizationService.HandleReply(ctx, "Familiar unbound.");
         }
         else
@@ -305,8 +319,8 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "add", shortHand: "a", adminOnly: true, usage: ".fam a [Name] [PrefabGUID]", description: "Unit testing.")]
-    public static void AddFamiliar(ChatCommandContext ctx, string name, int unit)
+    [Command(name: "add", shortHand: "a", adminOnly: true, usage: ".fam a [Name] [PrefabGUID/CHAR_Unit_Name]", description: "Unit testing.")]
+    public static void AddFamiliar(ChatCommandContext ctx, string name, string unit)
     {
         if (!ConfigService.FamiliarSystem)
         {
@@ -323,32 +337,28 @@ internal static class FamiliarCommands
 
         User foundUser = playerInfo.User;
         ulong steamId = foundUser.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
 
-        if (steamId.TryGetFamiliarBox(out var activeSet))
+        if (steamId.TryGetFamiliarBox(out string activeSet)) // add to active box if one exists
         {
-            // Remove the old set
-            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(unit), out var Entity))
-            {
-                // Add to set
-                if (!Entity.Read<PrefabGUID>().LookupName().ToLower().Contains("char"))
-                {
-                    LocalizationService.HandleReply(ctx, "Invalid unit.");
-                    return;
-                }
+            FamiliarUtilities.ParseAddedFamiliar(ctx, steamId, unit, activeSet);
+        }
+        else // add to last existing box if one exists or add a new box
+        {
+            UnlockedFamiliarData unlocksData = LoadUnlockedFamiliars(steamId);
+            string lastListName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
 
-                data.UnlockedFamiliars[activeSet].Add(unit);
-                SaveUnlockedFamiliars(steamId, data);
-                LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(unit).GetPrefabName()}</color> added to <color=white>{activeSet}</color>.");
+            if (string.IsNullOrEmpty(lastListName)) // add a box if none created yet
+            {
+                lastListName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
+                unlocksData.UnlockedFamiliars[lastListName] = [];
+                SaveUnlockedFamiliars(steamId, unlocksData);
+                FamiliarUtilities.
+                                ParseAddedFamiliar(ctx, steamId, unit, lastListName);
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Invalid unit.");
+                FamiliarUtilities.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
             }
-        }
-        else
-        {
-            LocalizationService.HandleReply(ctx, "No active set found to add to for player (unlock at least 1 unit to create one or make sure it is set as their active set)");
         }
     }
 
@@ -439,9 +449,9 @@ internal static class FamiliarCommands
         }
 
         ulong platformId = ctx.User.PlatformId;
-
-        TogglePlayerBool(platformId, "Emotes");
-        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");     
+        PlayerUtilities.
+                TogglePlayerBool(platformId, "Emotes");
+        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(PlayerUtilities.GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
     }
 
     [Command(name: "listemoteactions", shortHand: "le", usage: ".fam le", description: "List emote actions.", adminOnly: false)]
@@ -482,7 +492,7 @@ internal static class FamiliarCommands
             int progress = (int)(xpData.Value - ConvertLevelToXp(xpData.Key));
             int percent = GetLevelProgress(steamId, data.FamKey);
 
-            Entity familiar = FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
+            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
 
             int prestigeLevel = 0;
 
@@ -525,7 +535,7 @@ internal static class FamiliarCommands
                 string familiarPrestigeStats = string.Join(", ",
                     Enum.GetNames(typeof(FamiliarStatType))
                         .Select(name => $"<color=white>{name}</color>")
-                ); 
+                );
 
                 LocalizationService.HandleReply(ctx, $"<color=#00FFFF>MaxHealth</color>: <color=white>{(int)maxHealth}</color>, <color=#00FFFF>PhysicalPower</color>: <color=white>{(int)physicalPower}</color>, <color=#00FFFF>SpellPower</color>: <color=white>{(int)spellPower}</color>, <color=#00FFFF>PhysCritChance</color>: <color=white>{physCrit}</color>, <color=#00FFFF>SpellCritChance</color>: <color=white>{spellCrit}</color>");
                 LocalizationService.HandleReply(ctx, $"<color=#00FFFF>HealingReceived</color>: <color=white>{healing}</color>, <color=#00FFFF>PhysResist</color>: <color=white>{physRes}</color>, <color=#00FFFF>SpellResist</color>: <color=white>{spellRes}</color>, <color=#00FFFF>CCReduction</color>: <color=white>{ccRed}</color>, <color=#00FFFF>ShieldAbsorb</color>: <color=white>{shieldAbs}</color>");
@@ -559,7 +569,7 @@ internal static class FamiliarCommands
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
             Entity player = ctx.Event.SenderCharacterEntity;
-            Entity familiar = FindPlayerFamiliar(player);
+            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
             int famKey = data.FamKey;
 
             KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
@@ -619,7 +629,7 @@ internal static class FamiliarCommands
 
                 if (stats.Count < FamiliarStatValues.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
-                    if (!TryParseFamiliarStat(bonusStat, out var stat))
+                    if (!FamiliarUtilities.TryParseFamiliarStat(bonusStat, out var stat))
                     {
                         var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarStatType))
                         .Cast<FamiliarStatType>()
@@ -662,7 +672,7 @@ internal static class FamiliarCommands
                 SaveFamiliarPrestige(steamId, prestigeData);
 
                 Entity player = ctx.Event.SenderCharacterEntity;
-                Entity familiar = FindPlayerFamiliar(player);
+                Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
                 if (HandleFamiliarModifications(user, steamId, data.FamKey, player, familiar, newXP.Key))
                 {
@@ -701,7 +711,8 @@ internal static class FamiliarCommands
             }
         }
 
-        ClearFamiliarActives(steamId);
+        FamiliarUtilities.
+                ClearFamiliarActives(steamId);
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
 
@@ -782,7 +793,7 @@ internal static class FamiliarCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FindPlayerFamiliar(character);
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
         int famKey = familiar.Read<PrefabGUID>().GuidHash;
 
         if (familiar != Entity.Null)
@@ -790,11 +801,11 @@ internal static class FamiliarCommands
             FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // if no shiny unlocked already use the freebie
             {
-                bool madeShinyChoice = GetPlayerBool(steamId, "ShinyChoice");
+                bool madeShinyChoice = PlayerUtilities.GetPlayerBool(steamId, "ShinyChoice");
 
                 if (!madeShinyChoice && HandleShiny(famKey, steamId, 1f, visual.GuidHash)) // if false use free visual then set to true
                 {
-                    SetPlayerBool(steamId, "ShinyChoice", true);
+                    PlayerUtilities.SetPlayerBool(steamId, "ShinyChoice", true);
                     LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
                 }
                 else if (madeShinyChoice)
@@ -851,11 +862,11 @@ internal static class FamiliarCommands
 
         ulong steamId = playerInfo.User.PlatformId;
         string playerName = playerInfo.User.CharacterName.Value;
-        bool madeShinyChoice = GetPlayerBool(steamId, "ShinyChoice");
+        bool madeShinyChoice = PlayerUtilities.GetPlayerBool(steamId, "ShinyChoice");
 
         if (madeShinyChoice)
         {
-            SetPlayerBool(steamId, "ShinyChoice", false);
+            PlayerUtilities.SetPlayerBool(steamId, "ShinyChoice", false);
             LocalizationService.HandleReply(ctx, $"Visual choice reset for <color=white>{playerName}</color>. (does not remove previously chosen visuals from player data)");
         }
         else if (!madeShinyChoice)
@@ -878,7 +889,7 @@ internal static class FamiliarCommands
             .Where(kvp => kvp.Key.ToLower() == option.ToLower())
             .Select(kvp => kvp.Value)
             .FirstOrDefault();
-        
+
         if (action != null)
         {
             action(ctx, steamId);
@@ -888,6 +899,43 @@ internal static class FamiliarCommands
             string validOptions = string.Join(", ", FamiliarSettings.Keys.Select(kvp => $"<color=white>{kvp}</color>"));
             LocalizationService.HandleReply(ctx, $"Invalid option. Please choose from the following: {validOptions}");
         }
+    }
+
+    [Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Names active familiar.")]
+    public static void NameFamiliar(ChatCommandContext ctx, string newName) // All Components: ProjectM.Network.FromCharacter [ReadOnly], ProjectM.Network.InteractEvents_Client+RenameInteractable [ReadOnly]
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
+        if (!familiar.Exists() || !familiar.Has<NameableInteractable>())
+        {
+            LocalizationService.HandleReply(ctx, "Make sure familiar is active and present before naming it.");
+            return;
+        }
+
+        BuffUtilities.
+                ApplyBuff(new(-182838302), familiar); // hijacking this for the ModifyTargetHUD, handle in buffSpawn
+
+        FromCharacter fromCharacter = new()
+        {
+            Character = ctx.Event.SenderCharacterEntity,
+            User = ctx.Event.SenderUserEntity
+        };
+
+        InteractEvents_Client.RenameInteractable renameInteractable = new() // named means they show their nameplate?
+        {
+            InteractableId = familiar.Read<NetworkId>(),
+            NewName = new Unity.Collections.FixedString64Bytes(newName)
+        };
+
+        Entity networkEntity = EntityManager.CreateEntity(NetworkEventComponents);
+        networkEntity.Write(fromCharacter);
+        networkEntity.Write(EventType);
+        networkEntity.Write(renameInteractable);
     }
 }
 

@@ -3,7 +3,7 @@ using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 
-namespace Bloodcraft.Systems.Professions;
+namespace Bloodcraft.Utilities;
 internal static class RecipeUtilities // would like to tie this into professions eventually, for now only useful as custom merchant currencies and such
 {
     static SystemService SystemService => Core.SystemService;
@@ -30,13 +30,13 @@ internal static class RecipeUtilities // would like to tie this into professions
         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[vampiricDust];
 
         RecipeData recipeData = recipeEntity.Read<RecipeData>();
-        
+
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;
         recipeData.HudSortingOrder = 0;
 
         recipeEntity.Write(recipeData);
-        
+
         recipeMap[vampiricDust] = recipeData;
 
         GameDataSystem.RegisterRecipes();

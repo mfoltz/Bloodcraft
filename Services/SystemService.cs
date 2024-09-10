@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
 using Unity.Entities;
@@ -44,6 +45,15 @@ public class SystemService(World world)
 
     CombatMusicSystem_Server _combatMusicSystem_Server;
     public CombatMusicSystem_Server CombatMusicSystem_Server => _combatMusicSystem_Server ??= GetSystem<CombatMusicSystem_Server>();
+
+    NameableInteractableSystem _nameableInteractableSystem;
+    public NameableInteractableSystem NameableInteractableSystem => _nameableInteractableSystem ??= GetSystem<NameableInteractableSystem>();
+
+    FeedableInventorySystem_Spawn _feedableInventorySystem_Spawn;
+    public FeedableInventorySystem_Spawn FeedableInventorySystem_Spawn => _feedableInventorySystem_Spawn ??= GetSystem<FeedableInventorySystem_Spawn>();
+
+    NetworkIdSystem.Singleton _networkIdSystem_Singleton;
+    public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
 
     // Generic method to get or create a system
     T GetSystem<T>() where T : ComponentSystemBase

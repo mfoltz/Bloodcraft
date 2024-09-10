@@ -1,5 +1,6 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -7,7 +8,6 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodManager;
-using static Bloodcraft.Utilities;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -18,7 +18,6 @@ internal static class BloodCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
 
     [Command(name: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display your current blood legacy progress.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = "")
@@ -99,9 +98,9 @@ internal static class BloodCommands
             return;
         }
         var SteamID = ctx.Event.User.PlatformId;
-
-        TogglePlayerBool(SteamID, "BloodLogging");
-        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(GetPlayerBool(SteamID, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "BloodLogging");
+        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(PlayerUtilities.GetPlayerBool(SteamID, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]

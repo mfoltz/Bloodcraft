@@ -108,15 +108,15 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     {
                         entity.Write(new WeaponLevel { Level = unarmedLevel });
                     }
-                } 
+                }
             }
         }
         finally
         {
             entities.Dispose();
-        }  
+        }
     }
-    
+
     [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(WeaponLevelSystem_Spawn __instance)

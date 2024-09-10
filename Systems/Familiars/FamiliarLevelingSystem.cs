@@ -1,10 +1,10 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarLevelingSystem
@@ -35,7 +35,7 @@ internal static class FamiliarLevelingSystem
 
         if (steamId.TryGetFamiliarActives(out var actives) && actives.Familiar.Exists()) return; // don't process if familiar not out
 
-        Entity familiar = FindPlayerFamiliar(player);
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
         if (!familiar.Exists()) return; // don't process if familiar not found
 
         if (familiar.Has<Aggroable>() && !familiar.Read<Aggroable>().Value._Value) return; // don't process if familiar combat disabled
@@ -56,7 +56,7 @@ internal static class FamiliarLevelingSystem
 
         int currentLevel = ConvertXpToLevel(familiarXP.Value);
 
-        UpdateFamiliarExperience(familiarEntity, familiarId, steamID, familiarXP, gainedXP, currentLevel);            
+        UpdateFamiliarExperience(familiarEntity, familiarId, steamID, familiarXP, gainedXP, currentLevel);
     }
     static bool IsVBlood(Entity victimEntity)
     {
@@ -86,7 +86,7 @@ internal static class FamiliarLevelingSystem
         {
             return new(0, 0);
         }
-    } 
+    }
     static void CheckAndHandleLevelUp(Entity familiarEntity, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel)
     {
         bool leveledUp = false;
@@ -122,7 +122,7 @@ internal static class FamiliarLevelingSystem
             FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel, steamID, famKey);
             if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiarEntity, newLevel);
         }
-    }   
+    }
     public static int ConvertXpToLevel(float xp)
     {
         // Assuming a basic square root scaling for experience to level conversion

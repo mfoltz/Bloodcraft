@@ -1,10 +1,10 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using Bloodcraft.Systems.Leveling;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponSystem
@@ -165,7 +165,7 @@ internal static class WeaponSystem
         { WeaponType.Reaper, PrestigeType.ReaperExpertise },
         { WeaponType.Longbow, PrestigeType.LongbowExpertise },
         { WeaponType.Whip, PrestigeType.WhipExpertise },
-        { WeaponType.Unarmed, PrestigeType.UnarmedExpertise }, 
+        { WeaponType.Unarmed, PrestigeType.UnarmedExpertise },
         { WeaponType.FishingPole, PrestigeType.FishingPoleExpertise }
     };
     public static void UpdateExpertise(Entity Killer, Entity Victim)
@@ -240,7 +240,7 @@ internal static class WeaponSystem
         if (leveledUp)
         {
             if (newLevel <= ConfigService.MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
-            if (GetPlayerBool(steamID, "Reminders"))
+            if (PlayerUtilities.GetPlayerBool(steamID, "Reminders"))
             {
                 if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
                 {
@@ -255,7 +255,7 @@ internal static class WeaponSystem
             }
         }
 
-        if (GetPlayerBool(steamID, "ExpertiseLogging"))
+        if (PlayerUtilities.GetPlayerBool(steamID, "ExpertiseLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }

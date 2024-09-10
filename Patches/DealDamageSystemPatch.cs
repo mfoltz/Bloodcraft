@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -8,7 +9,6 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Experience.LevelingSystem;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -57,9 +57,9 @@ internal static class DealDamageSystemPatch
                 {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;
-                    if (!HasClass(steamId)) continue;
+                    if (!ClassUtilities.HasClass(steamId)) continue;
 
-                    PlayerClasses playerClass = GetPlayerClass(steamId);
+                    PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
                     if (Random.NextDouble() <= ConfigService.OnHitProcChance)
                     {
                         PrefabGUID prefabGUID = ClassOnHitDebuffMap[playerClass];

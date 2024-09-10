@@ -1,14 +1,14 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM.Network;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup(name:"level", "lvl")]
+[CommandGroup(name: "level", "lvl")]
 internal static class LevelingCommands
 {
     [Command(name: "log", adminOnly: false, usage: ".lvl log", description: "Toggles leveling progress logging.")]
@@ -20,10 +20,10 @@ internal static class LevelingCommands
             return;
         }
         var SteamID = ctx.Event.User.PlatformId;
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "ExperienceLogging");
 
-        TogglePlayerBool(SteamID, "ExperienceLogging");
-
-        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(PlayerUtilities.GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]

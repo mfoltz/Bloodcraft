@@ -1,11 +1,11 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem
@@ -255,8 +255,8 @@ internal static class BloodSystem
         if (leveledUp)
         {
             if (newLevel <= ConfigService.MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
-            
-            if (GetPlayerBool(steamID, "Reminders"))
+
+            if (PlayerUtilities.GetPlayerBool(steamID, "Reminders"))
             {
                 if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
                 {
@@ -271,8 +271,8 @@ internal static class BloodSystem
 
             UpdateBloodStats(player, user, bloodType);
         }
-        
-        if (GetPlayerBool(steamID, "BloodLogging"))
+
+        if (PlayerUtilities.GetPlayerBool(steamID, "BloodLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }

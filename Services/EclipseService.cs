@@ -3,9 +3,11 @@ using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using System.Collections;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Unity.Entities;
@@ -13,7 +15,6 @@ using UnityEngine;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
-using static Bloodcraft.Utilities;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Services;
@@ -105,9 +106,9 @@ internal class EclipseService
             }
         }
 
-        if (Classes && HasClass(SteamID))
+        if (Classes && ClassUtilities.HasClass(SteamID))
         {
-            classEnum = (int)GetPlayerClass(SteamID) + 1; // 0 for no class on client
+            classEnum = (int)ClassUtilities.GetPlayerClass(SteamID) + 1; // 0 for no class on client
         }
 
         return (experiencePercent, experienceLevel, experiencePrestige, classEnum);
@@ -211,12 +212,12 @@ internal class EclipseService
         (int Progress, int Goal, string Target) weeklyQuestData)
     {
         var sb = new StringBuilder();
-        sb.AppendFormat("[{0}]:", (int)NetworkEventSubType.ProgressToClient)
-            .AppendFormat("{0:D2},{1:D2},{2:D2},{3},", experienceData.Percent, experienceData.Level, experienceData.Prestige, experienceData.Class)
-            .AppendFormat("{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", legacyData.Percent, legacyData.Level, legacyData.Prestige, legacyData.Enum, legacyData.BonusStats)
-            .AppendFormat("{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", expertiseData.Percent, expertiseData.Level, expertiseData.Prestige, expertiseData.Enum, expertiseData.BonusStats)
-            .AppendFormat("{0:D2},{1:D2},{2},", dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target)
-            .AppendFormat("{0:D2},{1:D2},{2}", weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target);
+        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3},", experienceData.Percent, experienceData.Level, experienceData.Prestige, experienceData.Class)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", legacyData.Percent, legacyData.Level, legacyData.Prestige, legacyData.Enum, legacyData.BonusStats)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", expertiseData.Percent, expertiseData.Level, expertiseData.Prestige, expertiseData.Enum, expertiseData.BonusStats)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},", dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2}", weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target);
 
         return sb.ToString();
     }
@@ -234,8 +235,8 @@ internal class EclipseService
         int maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
 
         var sb = new StringBuilder();
-        sb.AppendFormat("[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat("{0:F2},{1:F2},{2},{3},{4},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel); // Add multipliers to the message
+        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel); // Add multipliers to the message
 
         sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
             .Append(',');
@@ -251,7 +252,7 @@ internal class EclipseService
             var (weaponSynergies, bloodSynergies) = classEntry.Value;
 
             // Append class enum as an integer
-            sb.AppendFormat("{0:D2},", (int)playerClass + 1);
+            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
 
             // Append weapon synergies as a concatenated string of integers
             sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
@@ -285,10 +286,9 @@ internal class EclipseService
             Dictionary<string, PlayerInfo> players = new(OnlineCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
             HashSet<ulong> users = new(RegisteredUsers);
 
-            PlayerInfo playerInfo;
             foreach (ulong steamId in users)
             {
-                if (players.TryGetValue(steamId.ToString(), out playerInfo))
+                if (players.TryGetValue(steamId.ToString(), out PlayerInfo playerInfo))
                 {
                     try
                     {

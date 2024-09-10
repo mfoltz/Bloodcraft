@@ -1,11 +1,11 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -46,7 +46,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                     {
                         HandleShiftSpell(entity, steamId, spells);
                     }
-                    else if (!entity.Has<WeaponLevel>() && GetPlayerBool(steamId, "SpellLock") && steamId.TryGetPlayerSpells(out spells))
+                    else if (!entity.Has<WeaponLevel>() && PlayerUtilities.GetPlayerBool(steamId, "SpellLock") && steamId.TryGetPlayerSpells(out spells))
                     {
                         LockSpells(entity, steamId, spells);
                     }
@@ -87,7 +87,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
             buffer.Add(buff);
         }
 
-        if (GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
+        if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {
@@ -103,7 +103,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
     static void HandleShiftSpell(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>(); // prevent people switching jewels if item with spellmod is equipped?
-        if (GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
+        if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {

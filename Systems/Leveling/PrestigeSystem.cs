@@ -1,12 +1,12 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Systems.Leveling;
 internal static class PrestigeSystem
@@ -262,7 +262,7 @@ internal static class PrestigeSystem
         { PrestigeType.DraculinLegacy, (steamID, data) => steamID.SetPlayerDraculinLegacy(data) },
         { PrestigeType.ImmortalLegacy, (steamID, data) => steamID.SetPlayerImmortalLegacy(data) },
         { PrestigeType.CreatureLegacy, (steamID, data) => steamID.SetPlayerCreatureLegacy(data) },
-        { PrestigeType.BruteLegacy, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }        
+        { PrestigeType.BruteLegacy, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }
     };
 
     public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxLevel = new()
@@ -407,7 +407,7 @@ internal static class PrestigeSystem
             Character = player,
             User = player.Read<PlayerCharacter>().UserEntity,
         };
-        
+
         if (!ServerGameManager.HasBuff(player, buffPrefab.ToIdentifier()))
         {
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
@@ -471,8 +471,8 @@ internal static class PrestigeSystem
         LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
         ulong steamId = ctx.Event.User.PlatformId;
 
-        List<int> buffs = ParseConfigString(ConfigService.PrestigeBuffs);
-        PrefabGUID buffPrefab = new(buffs[prestigeLevel-1]);
+        List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
+        PrefabGUID buffPrefab = new(buffs[prestigeLevel - 1]);
         if (!buffPrefab.GuidHash.Equals(0)) HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
 
         if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
@@ -506,7 +506,7 @@ internal static class PrestigeSystem
     }
     public static void RemovePrestigeBuffs(Entity character, int prestigeLevel)
     {
-        var buffs = ParseConfigString(ConfigService.PrestigeBuffs);
+        var buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
         var buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
         var entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
@@ -517,7 +517,7 @@ internal static class PrestigeSystem
     }
     public static void ApplyPrestigeBuffs(Entity character, int prestigeLevel)
     {
-        List<int> buffs = ParseConfigString(ConfigService.PrestigeBuffs);
+        List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
         if (buffs.Count == 0) return;
         for (int i = 0; i < prestigeLevel; i++)
         {

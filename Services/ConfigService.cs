@@ -329,6 +329,30 @@ public static class ConfigService
                 CreateDirectory(path);
             }
 
+            // Load old config file if it exists
+            var oldConfigFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+            Dictionary<string, string> oldConfigValues = [];
+
+            if (File.Exists(oldConfigFile))
+            {
+                string[] oldConfigLines = File.ReadAllLines(oldConfigFile);
+                foreach (var line in oldConfigLines)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+                    {
+                        continue;
+                    }
+
+                    var keyValue = line.Split('=');
+                    if (keyValue.Length == 2)
+                    {
+                        var configKey = keyValue[0].Trim();
+                        var configValue = keyValue[1].Trim();
+                        oldConfigValues[configKey] = configValue;
+                    }
+                }
+            }
+
             foreach (ConfigEntryDefinition entry in ConfigEntries)
             {
                 // Get the type of DefaultValue
@@ -341,6 +365,29 @@ public static class ConfigService
                 MethodInfo method = nestedClassType.GetMethod("InitConfigEntry", BindingFlags.Static | BindingFlags.NonPublic);
                 MethodInfo generic = method.MakeGenericMethod(entryType);
 
+                // Check if the old config has the key
+                if (oldConfigValues.TryGetValue(entry.Key, out var oldValue))
+                {
+                    // Convert the old value to the correct type
+                    try
+                    {
+                        var convertedValue = Convert.ChangeType(oldValue, entryType);
+                        var configEntry = generic.Invoke(null, new object[] { entry.Section, entry.Key, convertedValue, entry.Description });
+                        UpdateConfigProperty(entry.Key, configEntry);
+                        Plugin.LogInstance.LogInfo($"Migrated key {entry.Key} from old config to section {entry.Section} with value {convertedValue}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.LogInstance.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    // Use default value if key is not in the old config
+                    var configEntry = generic.Invoke(null, new object[] { entry.Section, entry.Key, entry.DefaultValue, entry.Description });
+                    UpdateConfigProperty(entry.Key, configEntry);
+                }
+                /*
                 // Invoke the generic method
                 var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
 
@@ -358,10 +405,28 @@ public static class ConfigService
                         throw new Exception($"Value property on configEntry is null for section {entry.Section} and key {entry.Key}.");
                     }
                 }
+                */
             }
 
             var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
             if (File.Exists(configFile)) CleanAndOrganizeConfig(configFile);
+        }
+        static void UpdateConfigProperty(string key, object configEntry)
+        {
+            PropertyInfo propertyInfo = typeof(ConfigService).GetProperty(key, BindingFlags.Static | BindingFlags.Public);
+            if (propertyInfo != null && propertyInfo.CanWrite)
+            {
+                object value = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
+
+                if (value != null)
+                {
+                    propertyInfo.SetValue(null, Convert.ChangeType(value, propertyInfo.PropertyType));
+                }
+                else
+                {
+                    throw new Exception($"Value property on configEntry is null for key {key}.");
+                }
+            }
         }
         static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
         {
@@ -398,7 +463,7 @@ public static class ConfigService
                                 var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 entry.Value = convertedValue;
                                 //Plugin.LogInstance.LogInfo(line);
-                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value} | {configKey}:{configValue}");
+                                Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value} | {configKey}:{configValue}");
                             }
                             catch (Exception ex)
                             {

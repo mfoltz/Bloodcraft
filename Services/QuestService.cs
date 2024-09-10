@@ -1,4 +1,4 @@
-﻿using Epic.OnlineServices.Achievements;
+﻿using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
@@ -10,7 +10,6 @@ using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Services;
 internal class QuestService
@@ -51,7 +50,7 @@ internal class QuestService
             All = UnitComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
-        QuestRewards();
+        ConfigUtilities.QuestRewards();
         Core.StartCoroutine(QuestUpdateLoop());
     }
     static IEnumerator QuestUpdateLoop()
@@ -60,7 +59,7 @@ internal class QuestService
         {
             if (ConfigService.EliteShardBearers && !ShardBearersReset) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
             {
-                IEnumerable<Entity> vBloods = GetEntitiesEnumerable(UnitQuery);
+                IEnumerable<Entity> vBloods = EntityUtilities.GetEntitiesEnumerable(UnitQuery);
                 foreach (Entity entity in vBloods)
                 {
                     PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
@@ -94,7 +93,7 @@ internal class QuestService
                 }
             }
 
-            TargetCache = GetEntitiesEnumerable(UnitQuery, true)
+            TargetCache = EntityUtilities.GetEntitiesEnumerable(UnitQuery, true)
                 .GroupBy(entity => entity.Read<PrefabGUID>())
                 .ToDictionary(
                     group => group.Key,

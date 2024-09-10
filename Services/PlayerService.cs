@@ -1,9 +1,9 @@
+using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM.Network;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Services;
 internal class PlayerService
@@ -12,12 +12,12 @@ internal class PlayerService
 
     static readonly WaitForSeconds Delay = new(60);
 
-	static readonly ComponentType[] UserComponent =
-	[
-		ComponentType.ReadOnly(Il2CppType.Of<User>()),
-	];
+    static readonly ComponentType[] UserComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<User>()),
+    ];
 
-	static EntityQuery UserQuery;
+    static EntityQuery UserQuery;
 
     public static readonly Dictionary<string, PlayerInfo> PlayerCache = [];
 
@@ -29,18 +29,18 @@ internal class PlayerService
         public Entity CharEntity { get; set; } = charEntity;
     }
     public PlayerService()
-	{
-		UserQuery = EntityManager.CreateEntityQuery(UserComponent);
-		Core.StartCoroutine(PlayerUpdateLoop());
-	}
-	static IEnumerator PlayerUpdateLoop()
+    {
+        UserQuery = EntityManager.CreateEntityQuery(UserComponent);
+        Core.StartCoroutine(PlayerUpdateLoop());
+    }
+    static IEnumerator PlayerUpdateLoop()
     {
         while (true)
         {
             PlayerCache.Clear();
             OnlineCache.Clear();
 
-            var players = GetEntitiesEnumerable(UserQuery);
+            var players = EntityUtilities.GetEntitiesEnumerable(UserQuery);
             players
                 .Select(userEntity =>
                 {

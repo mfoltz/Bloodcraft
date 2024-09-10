@@ -1,16 +1,11 @@
-﻿using HarmonyLib;
-using ProjectM.Network;
+﻿using Bloodcraft.Utilities;
+using HarmonyLib;
 using ProjectM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ProjectM.Network;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 using EnterShapeshiftEvent = ProjectM.Network.EnterShapeshiftEvent;
-using Stunlock.Core;
 
 namespace Bloodcraft.Patches;
 
@@ -39,7 +34,7 @@ internal static class ShapeshiftSystemPatch
                     Entity userEntity = fromCharacter.User;
                     ulong steamId = userEntity.Read<User>().PlatformId;
 
-                    Entity familiar = FindPlayerFamiliar(character);
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
                     if (familiar.Exists() && !familiar.Disabled())
                     {
                         EmoteSystemPatch.CallDismiss(userEntity, character, steamId);

@@ -16,8 +16,8 @@ namespace Bloodcraft.Patches;
 internal static class VBloodSystemPatch
 {
     static SystemService SystemService => Core.SystemService;
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem; 
-    
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+
     static readonly Dictionary<ulong, DateTime> LastUpdateCache = [];
 
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
@@ -37,7 +37,7 @@ internal static class VBloodSystemPatch
                 ulong steamId = user.PlatformId;
 
                 if (LastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
-                
+
                 LastUpdateCache[steamId] = now;
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];

@@ -1,5 +1,6 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -9,12 +10,11 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
-using static Bloodcraft.Utilities;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup(name: "weapon", "wep")] 
+[CommandGroup(name: "weapon", "wep")]
 internal static class WeaponCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
@@ -22,7 +22,7 @@ internal static class WeaponCommands
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")] 
+    [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.ExpertiseSystem)
@@ -45,7 +45,7 @@ internal static class WeaponCommands
         var ExpertiseData = handler.GetExpertiseData(steamID);
         int progress = (int)(ExpertiseData.Value - WeaponSystem.ConvertLevelToXp(ExpertiseData.Key));
 
-        int prestigeLevel = steamID.TryGetPlayerPrestiges( out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
+        int prestigeLevel = steamID.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
@@ -95,9 +95,9 @@ internal static class WeaponCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
-
-        TogglePlayerBool(SteamID, "ExpertiseLogging");
-        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(GetPlayerBool(SteamID, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");          
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "ExpertiseLogging");
+        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
@@ -165,7 +165,7 @@ internal static class WeaponCommands
                 LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
                 return;
             }
-    
+
         }
 
         ResetStats(steamID, weaponType);
@@ -262,7 +262,7 @@ internal static class WeaponCommands
 
     [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGUID]", description: "Manually sets spells for testing.")]
     public static void SetSpellCommand(ChatCommandContext ctx, string name, int slot, int ability)
-    { 
+    {
         if (!ConfigService.UnarmedSlots)
         {
             LocalizationService.HandleReply(ctx, "Extra spell slots are not enabled.");
@@ -296,7 +296,7 @@ internal static class WeaponCommands
                 LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
             }
             SteamID.SetPlayerSpells(spells);
-        }    
+        }
     }
 
     [Command(name: "restorelevels", shortHand: "restore", adminOnly: false, usage: ".wep restore", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]

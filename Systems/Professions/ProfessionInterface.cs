@@ -2,7 +2,7 @@
 using Stunlock.Core;
 
 namespace Bloodcraft.Systems.Professions;
-public interface IProfessionHandler 
+public interface IProfessionHandler
 {
     KeyValuePair<int, float> GetProfessionData(ulong steamID);
     void SetProfessionData(ulong steamID, KeyValuePair<int, float> xpData);

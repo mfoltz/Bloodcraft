@@ -5,15 +5,16 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -22,7 +23,7 @@ internal static class BuffSpawnSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService; 
+    static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
@@ -31,23 +32,29 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID draculaFinal = new(1269681960); // final stage buff Dracula, force him to evolve -2005193286 (ability group)
     static readonly PrefabGUID solarusFinal = new(2144624015); // final stage buff Solarus, remove 358972271 (holy bubble)
     static readonly PrefabGUID monsterFinal = new(-2079981449); // this one looks like it might just work
-    static readonly PrefabGUID phasing = new(-79611032); // lol switch bodies with familiar? hmmm
     static readonly PrefabGUID draculaEvolve = new(-2005193286);
+
     static readonly PrefabGUID swordBuff = new(-6635580);
     static readonly PrefabGUID highlordSwordBuff = new(-916946628);
+
     static readonly PrefabGUID dominateAbility = new(-1908054166);
+
     static readonly PrefabGUID pvpProtBuff = new(1111481396);
     static readonly PrefabGUID pvpVampire = new(697095869);
+
     static readonly PrefabGUID combatBuff = new(581443919);
     static readonly PrefabGUID combatStance = new(-952067173);
+
     static readonly PrefabGUID holyBeamPowerBuff = new(-1584595113);
-    static readonly PrefabGUID solarus = new(-740796338);
-    static readonly PrefabGUID generalStunDebuffFX = new(796254181);
-    static readonly PrefabGUID generalStunDebuff = new(355774169);
-    static readonly PrefabGUID meredithVBlood = new(850622034);
+    static readonly PrefabGUID Solarus = new(-740796338);
+
+    static readonly PrefabGUID phasing = new(-79611032); // lol switch bodies with familiar? hmmm
     static readonly PrefabGUID feedExecute = new(366323518);
-    static readonly PrefabGUID insideBuff = new(-1930363607);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
+
+    static readonly PrefabGUID castlemanCombatBuff = new(731266864);
+
+    static readonly PrefabGUID modifyHUDTarget = new(-182838302);
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -65,7 +72,6 @@ internal static class BuffSpawnSystemPatches
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 string prefabName = prefabGUID.LookupName().ToLower();
-
                 Entity player = Entity.Null;
 
                 // sections should be grouped appropriately to not interfere with each other
@@ -90,7 +96,7 @@ internal static class BuffSpawnSystemPatches
                 {
                     Entity character = entity.GetBuffTarget();
 
-                    if (character.Read<PrefabGUID>().Equals(solarus) && !ServerGameManager.HasBuff(character, holyBeamPowerBuff))
+                    if (character.Read<PrefabGUID>().Equals(Solarus) && !ServerGameManager.HasBuff(character, holyBeamPowerBuff))
                     {
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
                         {
@@ -118,23 +124,23 @@ internal static class BuffSpawnSystemPatches
                 }
                 else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.GetBuffTarget().TryGetPlayer(out player)) // teleport familiar to player after waygate
                 {
-                    Entity familiar = FindPlayerFamiliar(player);
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())
                     {
-                        ReturnFamiliar(player, familiar);
+                        FamiliarUtilities.ReturnFamiliar(player, familiar);
                     }
                     else if (player.GetSteamId().TryGetFamiliarActives(out var data))
                     {
                         if (data.Familiar.Exists())
                         {
-                            ReturnFamiliar(player, familiar);
+                            FamiliarUtilities.ReturnFamiliar(player, familiar);
                         }
                     }
                 }
                 else if (ConfigService.FamiliarSystem && prefabName.Contains("emote_onaggro") && entity.GetBuffTarget().TryGetFollowedPlayer(out player))
                 {
                     ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    if (!GetPlayerBool(steamId, "VBloodEmotes"))
+                    if (!PlayerUtilities.GetPlayerBool(steamId, "VBloodEmotes"))
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
                     }
@@ -143,10 +149,10 @@ internal static class BuffSpawnSystemPatches
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out player))
                     {
-                        Entity familiar = FindPlayerFamiliar(player);
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                         if (EntityManager.Exists(familiar))
                         {
-                            ReturnFamiliar(player, familiar);
+                            FamiliarUtilities.ReturnFamiliar(player, familiar);
                         }
                     }
                 }
@@ -162,7 +168,7 @@ internal static class BuffSpawnSystemPatches
 
                     if (ConfigService.FamiliarSystem) // player->familiar potion sharing
                     {
-                        Entity familiar = FindPlayerFamiliar(player);
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                         if (familiar != Entity.Null)
                         {
                             ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -206,7 +212,7 @@ internal static class BuffSpawnSystemPatches
                 }
                 else if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out player)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end
                 {
-                    Entity familiar = FindPlayerFamiliar(player);
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
                     if (familiar.Exists())
                     {
@@ -236,15 +242,20 @@ internal static class BuffSpawnSystemPatches
                                 if (swordPermabuff.Has<AmplifyBuff>()) swordPermabuff.Remove<AmplifyBuff>();
                             }
                         }
-
-                        // 99% sure I don't want this anymore but commenting instead of removing incase mistaken
-                        /*
-                        if (entity.Has<EntityOwner>() && entity.Read<EntityOwner>().Owner.Has<PlayerCharacter>()) // if from player and targeting familiar, destroy buff entity
+                        else if (prefabGUID.Equals(castlemanCombatBuff))
                         {
-                            DestroyUtility.Destroy(EntityManager, entity);
-                            continue;
+                            if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
                         }
-                        */
+                        else if (prefabGUID.Equals(holyBeamPowerBuff))
+                        {
+                            if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 30f, EndAction = LifeTimeEndAction.Destroy });
+                        }
+                        else if (prefabGUID.Equals(modifyHUDTarget))
+                        {
+                            BuffUtilities.
+                                                        // strip unwanted components, just using this in hopes ModifyTargetHUD system will activate
+                                                        HandleModifyTargetHUDBuff(entity);
+                        }
                     }
                 }
             }

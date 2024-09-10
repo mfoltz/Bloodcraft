@@ -1,8 +1,8 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Scripting;
@@ -12,7 +12,6 @@ using Stunlock.Network;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
@@ -287,7 +286,7 @@ internal static class ServerBootstrapSystemPatches
         }
 
         if (ConfigService.LevelingSystem)
-        { 
+        {
             if (!steamId.TryGetPlayerExperience(out var experience))
             {
                 steamId.SetPlayerExperience(new KeyValuePair<int, float>(ConfigService.StartingLevel, LevelingSystem.ConvertLevelToXp(ConfigService.StartingLevel)));
@@ -316,7 +315,7 @@ internal static class ServerBootstrapSystemPatches
                         int currentLevel = experience.Key;
                         int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxLevel);
                         float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
-                        
+
                         float earnedPerTick = ConfigService.RestedXPRate * restedCap;
                         float earnedRestedXP = (float)timeOffline.TotalMinutes / ConfigService.RestedXPTickRate * earnedPerTick * restedMultiplier;
 
@@ -381,7 +380,8 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                ClearFamiliarActives(steamId);
+                FamiliarUtilities.
+                                ClearFamiliarActives(steamId);
             }
         }
 
@@ -434,7 +434,8 @@ internal static class ServerBootstrapSystemPatches
                 }
             }
 
-            ClearFamiliarActives(steamId);
+            FamiliarUtilities.
+                        ClearFamiliarActives(steamId);
         }
 
         if (ConfigService.LevelingSystem)

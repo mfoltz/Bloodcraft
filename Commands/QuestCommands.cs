@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -6,7 +7,6 @@ using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
-using static Bloodcraft.Utilities;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -27,9 +27,9 @@ internal static class QuestCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
-
-        TogglePlayerBool(SteamID, "QuestLogging");
-        LocalizationService.HandleReply(ctx, $"Quest logging is now {(GetPlayerBool(SteamID, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "QuestLogging");
+        LocalizationService.HandleReply(ctx, $"Quest logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "daily", shortHand: "d", adminOnly: false, usage: ".quest d", description: "Display your current daily quest progress.")]

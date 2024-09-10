@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -8,7 +9,6 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Leveling.PrestigeSystem;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Commands;
 
@@ -218,7 +218,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        List<int> buffs = ParseConfigString(ConfigService.PrestigeBuffs);
+        List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
 
         if (buffs.Count == 0)
         {
@@ -309,7 +309,7 @@ internal static class PrestigeCommands
         var steamId = ctx.Event.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (steamId.TryGetPlayerPrestiges( out var prestigeData) &&
+        if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
             prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
         {
             ApplyPrestigeBuffs(character, prestigeLevel);

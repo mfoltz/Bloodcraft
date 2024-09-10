@@ -23,5 +23,5 @@ internal static class InitializationPatch
         {
             Core.Log.LogError($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] failed to initialize, exiting on try-catch...");
         }
-    }  
+    }
 }

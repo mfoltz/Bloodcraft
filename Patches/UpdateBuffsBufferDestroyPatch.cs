@@ -1,11 +1,11 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -32,7 +32,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out Entity player))
                     {
-                        Entity familiar = FindPlayerFamiliar(player);
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                         if (familiar.Exists())
                         {
                             player.With((ref CombatMusicListener_Shared shared) =>

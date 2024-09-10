@@ -1,9 +1,9 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Experience.LevelingSystem.PartyUtilities;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
-using static Bloodcraft.Utilities;
+using static Bloodcraft.Systems.Experience.LevelingSystem.PartyUtilities;
 
 namespace Bloodcraft.Commands;
 
@@ -28,8 +28,9 @@ internal static class PartyCommands
             return;
         }
 
-        TogglePlayerBool(SteamID, "Grouping");
-        LocalizationService.HandleReply(ctx, $"Party invites {(GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        PlayerUtilities.
+                TogglePlayerBool(SteamID, "Grouping");
+        LocalizationService.HandleReply(ctx, $"Party invites {(PlayerUtilities.GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]

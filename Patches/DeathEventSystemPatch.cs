@@ -5,13 +5,13 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities;
 
 namespace Bloodcraft.Patches;
 
@@ -38,7 +38,7 @@ internal static class DeathEventListenerSystemPatch
                     //if (FamiliarPatches.familiarMinions.ContainsKey(deathEvent.Died)) Core.FamiliarService.HandleFamiliarMinions(deathEvent.Died);
                     if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
                     {
-                        ClearFamiliarActives(steamId);
+                        FamiliarUtilities.ClearFamiliarActives(steamId);
                     }
                 }
 
@@ -52,7 +52,7 @@ internal static class DeathEventListenerSystemPatch
 
                     if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
                     {
-                        if (!isStatChangeInvalid ) // only process non-feed related deaths here except for gatebosses
+                        if (!isStatChangeInvalid) // only process non-feed related deaths here except for gatebosses
                         {
                             if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
                             if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
@@ -125,7 +125,7 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
                 {
                     Follower follower = deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>();
-                    Entity familiar = FindPlayerFamiliar(follower.Followed._Value);
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
                     ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     if (familiar != Entity.Null)
@@ -149,5 +149,5 @@ internal static class DeathEventListenerSystemPatch
         {
             deathEvents.Dispose();
         }
-    } 
+    }
 }

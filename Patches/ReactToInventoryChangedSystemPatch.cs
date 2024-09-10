@@ -29,6 +29,8 @@ internal static class ReactToInventoryChangedSystemPatch
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
 
                 if (!inventory.Exists()) continue;
+                entity.LogComponentTypes();
+                inventory.LogComponentTypes();
                 if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
                 {
                     UserOwner userOwner = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>();

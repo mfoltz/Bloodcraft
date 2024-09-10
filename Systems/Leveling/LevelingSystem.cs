@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
@@ -10,7 +11,6 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Systems.Experience;
@@ -50,12 +50,12 @@ internal static class LevelingSystem
 
     public static readonly Dictionary<PlayerClasses, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
     {
-        { PlayerClasses.BloodKnight, (ParseConfigString(ConfigService.BloodKnightWeapon), ParseConfigString(ConfigService.BloodKnightBlood)) },
-        { PlayerClasses.DemonHunter, (ParseConfigString(ConfigService.DemonHunterWeapon), ParseConfigString(ConfigService.DemonHunterBlood)) },
-        { PlayerClasses.VampireLord, (ParseConfigString(ConfigService.VampireLordWeapon), ParseConfigString(ConfigService.VampireLordBlood)) },
-        { PlayerClasses.ShadowBlade, (ParseConfigString(ConfigService.ShadowBladeWeapon), ParseConfigString(ConfigService.ShadowBladeBlood)) },
-        { PlayerClasses.ArcaneSorcerer, (ParseConfigString(ConfigService.ArcaneSorcererWeapon), ParseConfigString(ConfigService.ArcaneSorcererBlood)) },
-        { PlayerClasses.DeathMage, (ParseConfigString(ConfigService.DeathMageWeapon), ParseConfigString(ConfigService.DeathMageBlood)) }
+        { PlayerClasses.BloodKnight, (ConfigUtilities.ParseConfigString(ConfigService.BloodKnightWeapon), ConfigUtilities.ParseConfigString(ConfigService.BloodKnightBlood)) },
+        { PlayerClasses.DemonHunter, (ConfigUtilities.ParseConfigString(ConfigService.DemonHunterWeapon), ConfigUtilities.ParseConfigString(ConfigService.DemonHunterBlood)) },
+        { PlayerClasses.VampireLord, (ConfigUtilities.ParseConfigString(ConfigService.VampireLordWeapon), ConfigUtilities.ParseConfigString(ConfigService.VampireLordBlood)) },
+        { PlayerClasses.ShadowBlade, (ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeWeapon), ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeBlood)) },
+        { PlayerClasses.ArcaneSorcerer, (ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererWeapon), ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererBlood)) },
+        { PlayerClasses.DeathMage, (ConfigUtilities.ParseConfigString(ConfigService.DeathMageWeapon), ConfigUtilities.ParseConfigString(ConfigService.DeathMageBlood)) }
     };
 
     public static readonly Dictionary<PlayerClasses, string> ClassPrestigeBuffsMap = new()
@@ -90,7 +90,7 @@ internal static class LevelingSystem
 
     public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassOnHitEffectMap = new() // tier 2
     {
-        
+
         { PlayerClasses.BloodKnight, new(2085766220) }, // lesser bloodrage
         { PlayerClasses.DemonHunter, new(-737425100) }, // lesser stormshield
         { PlayerClasses.VampireLord, new(620130895) }, // lesser frozenweapon
@@ -118,7 +118,7 @@ internal static class LevelingSystem
             ProcessExperienceGain(killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
             return;
         }
-        
+
         HashSet<Entity> participants = GetParticipants(killerEntity, userEntity); // want list of participants to process experience for
         if (participants.Count > 1) groupMultiplier = ConfigService.GroupLevelingMultiplier; // if more than 1 participant, apply group multiplier
         foreach (Entity participant in participants)
@@ -153,7 +153,7 @@ internal static class LevelingSystem
                     break;
                 }
             }
-        }   
+        }
 
         if (killerUser.ClanEntity._Entity.Equals(Entity.Null)) return players;
 
@@ -187,7 +187,7 @@ internal static class LevelingSystem
         if (currentLevel >= ConfigService.MaxLevel) return;
 
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
-        
+
         if (SteamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
             int exoLevel = prestiges.TryGetValue(PrestigeType.Exo, out var exo) ? exo : 0;
@@ -297,6 +297,7 @@ internal static class LevelingSystem
             {
                 BuffPrefabGUID = levelUpBuff,
             };
+
             FromCharacter fromCharacter = new()
             {
                 Character = characterEntity,
@@ -328,13 +329,13 @@ internal static class LevelingSystem
             SetLevel(character);
 
             if (newLevel <= ConfigService.MaxLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
-            if (GetPlayerBool(SteamID, "Reminders") && Classes && !HasClass(SteamID))
+            if (PlayerUtilities.GetPlayerBool(SteamID, "Reminders") && Classes && !ClassUtilities.HasClass(SteamID))
             {
                 LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
             }
         }
 
-        if (GetPlayerBool(SteamID, "ExperienceLogging"))
+        if (PlayerUtilities.GetPlayerBool(SteamID, "ExperienceLogging"))
         {
             //Core.Log.LogInfo($"Player {user.CharacterName.Value} gained {gainedXP} rested {restedXP} leveled up {leveledUp} progress {GetLevelProgress(SteamID)}");
             int levelProgress = GetLevelProgress(SteamID);
@@ -428,12 +429,13 @@ internal static class LevelingSystem
     }
     static void ApplyClassBuffsAtThresholds(Entity characterEntity, ulong SteamID, FromCharacter fromCharacter)
     {
-        var buffs = GetClassBuffs(SteamID);
-        //int levelStep = 20;
-        if (buffs.Count == 0) return;
-        int levelStep = ConfigService.MaxLevel / buffs.Count;
+        var buffs = ClassUtilities.GetClassBuffs(SteamID);
 
+        if (buffs.Count == 0) return;
+
+        int levelStep = ConfigService.MaxLevel / buffs.Count;
         int playerLevel = GetLevel(SteamID);
+
         if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count)
         {
             int buffIndex = playerLevel / levelStep - 1;
@@ -443,8 +445,10 @@ internal static class LevelingSystem
                 BuffPrefabGUID = new(buffs[buffIndex])
             };
 
+            if (ServerGameManager.HasBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier())) return; // haven't had issues with these stacking before but probably wouldn't hurt to make sure
+
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (ServerGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff)) // if present, modify based on prestige level
+            if (ServerGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
             {
                 HandleBloodBuff(buff);
 
@@ -680,7 +684,10 @@ internal static class LevelingSystem
                 buff.Write(rogueSpeedBonus);
                 return;
             }
-            return;
+            else
+            {
+                return;
+            }
         }
 
         if (buff.Has<BloodBuff_CritAmplifyProc_DataShared>())
@@ -863,10 +870,10 @@ internal static class LevelingSystem
             bruteAttackSpeedBonus.GearLevel = 0f;
             buff.Write(bruteAttackSpeedBonus);
             return;
-        }   
+        }
     }
     public static void ResetRestedXP(ulong steamId)
-    { 
+    {
         if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
             restedData = new KeyValuePair<DateTime, float>(restedData.Key, 0);
@@ -899,15 +906,15 @@ internal static class LevelingSystem
             else
             {
                 LocalizationService.HandleReply(ctx, "Player not found...");
-            }  
+            }
         }
         public static bool IsPlayerEligibleForParty(ulong steamId, string playerName)
         {
-            if (GetPlayerBool(steamId, "Grouping"))
+            if (PlayerUtilities.GetPlayerBool(steamId, "Grouping"))
             {
                 if (!steamId.TryGetPlayerParties(out var parties) && !DataService.PlayerDictionaries.playerParties.Values.Any(party => party.Equals(playerName)))
                 {
-                    SetPlayerBool(steamId, "Grouping", false);
+                    PlayerUtilities.SetPlayerBool(steamId, "Grouping", false);
                     return true;
                 }
             }
