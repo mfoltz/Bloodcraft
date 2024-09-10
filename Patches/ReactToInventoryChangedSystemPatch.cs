@@ -29,11 +29,27 @@ internal static class ReactToInventoryChangedSystemPatch
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
 
                 if (!inventory.Exists()) continue;
-                entity.LogComponentTypes();
-                inventory.LogComponentTypes();
-                if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>() && inventory.Read<InventoryConnection>().InventoryOwner.Has<UserOwner>())
+
+                if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>())
                 {
-                    UserOwner userOwner = inventory.Read<InventoryConnection>().InventoryOwner.Read<UserOwner>();
+                    InventoryConnection inventoryConnection = inventory.Read<InventoryConnection>();
+
+                    if (!inventoryConnection.InventoryOwner.Has<UserOwner>())
+                    {
+                        if (inventoryConnection.InventoryOwner.Has<EntityOwner>())
+                        {
+                            Entity inventoryOwner = inventoryConnection.InventoryOwner.GetOwner();
+                            PrefabGUID ownerPrefab = inventoryOwner.Read<PrefabGUID>();
+                            if (ownerPrefab.LookupName().ToLower().Contains("horse"))
+                            {
+                                entity.LogComponentTypes();
+                                inventory.LogComponentTypes();
+                            }
+                        }
+                        continue;
+                    }
+
+                    UserOwner userOwner = inventoryConnection.InventoryOwner.Read<UserOwner>();
                     Entity userEntity = userOwner.Owner._Entity;
 
                     if (!userEntity.Exists())

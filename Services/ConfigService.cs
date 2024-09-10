@@ -133,6 +133,7 @@ public static class ConfigService
     public static string ArcaneSorcererBlood { get; private set; }
     public static string DeathMageWeapon { get; private set; }
     public static string DeathMageBlood { get; private set; }
+    public static int DefaultClassSpell { get; private set; }
     public static string BloodKnightBuffs { get; private set; }
     public static string BloodKnightSpells { get; private set; }
     public static string DemonHunterBuffs { get; private set; }
@@ -309,6 +310,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Classes", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies"),
             new ConfigEntryDefinition("Classes", "DeathMageWeapon", "0,4,7,11", "Death Mage weapon synergies"),
             new ConfigEntryDefinition("Classes", "DeathMageBlood", "2,3,6,9", "Death Mage blood synergies"),
+            new ConfigEntryDefinition("Classes", "DefaultClassSpell", -433204738, "If a spell already on shift is detected being placed in one of the normal slots, shift will be replaced with this spell for all classes to avoid a rather unfun bug with jewels."),
             new ConfigEntryDefinition("Classes", "BloodKnightBuffs", "1828387635,-534491790,-1055766373,-584203677", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs)"),
             new ConfigEntryDefinition("Classes", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-397097531", "The PrefabGUID hashes for demon hunter leveling blood buffs"),
@@ -374,7 +376,7 @@ public static class ConfigService
                         var convertedValue = Convert.ChangeType(oldValue, entryType);
                         var configEntry = generic.Invoke(null, new object[] { entry.Section, entry.Key, convertedValue, entry.Description });
                         UpdateConfigProperty(entry.Key, configEntry);
-                        Plugin.LogInstance.LogInfo($"Migrated key {entry.Key} from old config to section {entry.Section} with value {convertedValue}");
+                        //Plugin.LogInstance.LogInfo($"Migrated key {entry.Key} from old config to section {entry.Section} with value {convertedValue}");
                     }
                     catch (Exception ex)
                     {
@@ -463,7 +465,7 @@ public static class ConfigService
                                 var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 entry.Value = convertedValue;
                                 //Plugin.LogInstance.LogInfo(line);
-                                Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value} | {configKey}:{configValue}");
+                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value} | {configKey}:{configValue}");
                             }
                             catch (Exception ex)
                             {

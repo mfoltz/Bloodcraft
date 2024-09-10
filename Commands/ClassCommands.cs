@@ -67,12 +67,6 @@ internal static class ClassCommands
 
             if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
-                if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
-                {
-                    LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
-                    return;
-                }
-
                 List<int> spells = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
 
                 if (spells.Count == 0)
@@ -81,9 +75,27 @@ internal static class ClassCommands
                     return;
                 }
 
-                if (choice < 1 || choice > spells.Count)
+                if (choice < 0 || choice > spells.Count)
                 {
-                    LocalizationService.HandleReply(ctx, $"Invalid spell choice. (Use 1-{spells.Count})");
+                    LocalizationService.HandleReply(ctx, $"Invalid spell choice. (Use 0-{spells.Count})");
+                    return;
+                }
+
+                if (choice == 0) // set default for all classes
+                {
+                    if (steamId.TryGetPlayerSpells(out var data))
+                    {
+                        data.ClassSpell = ConfigService.DefaultClassSpell;
+                        steamId.SetPlayerSpells(data);
+
+                        LocalizationService.HandleReply(ctx, $"You have chosen the default class spell <color=#CBC3E3>{new PrefabGUID(ConfigService.DefaultClassSpell).LookupName()}</color>, it will be available on weapons and unarmed if .shift is enabled.");
+                        return;
+                    }
+                }
+
+                if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
+                {
+                    LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                     return;
                 }
 

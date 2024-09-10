@@ -48,7 +48,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                     }
                     else if (!entity.Has<WeaponLevel>() && PlayerUtilities.GetPlayerBool(steamId, "SpellLock") && steamId.TryGetPlayerSpells(out spells))
                     {
-                        LockSpells(entity, steamId, spells);
+                        SetSpells(entity, character, steamId, spells);
                     }
                 }
             }
@@ -116,22 +116,41 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
             buffer.Add(buff);
         }
     }
-    static void LockSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void SetSpells(Entity entity, Entity player, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
+
         foreach (var buff in buffer)
         {
             if (buff.Slot == 5)
             {
-                spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot);
+                spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot); // then want to check on the spell in shift and get rid of it if the same prefab, same for slot 6 below
+                HandleDuplicate(entity, buff, player, steamId, spells);
             }
 
             if (buff.Slot == 6)
             {
                 spells = (spells.FirstSlot, buff.NewGroupId.GuidHash, spells.ShiftSlot);
+                HandleDuplicate(entity, buff, player, steamId, spells);
             }
         }
 
         steamId.SetPlayerSpells(spells);
+    }
+    static void HandleDuplicate(Entity entity, ReplaceAbilityOnSlotBuff buff, Entity player, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    {
+        Entity abilityGroup = ServerGameManager.GetAbilityGroup(player, 3); // get ability currently on shift, if it exists and matches what was just equipped set shift to default extra spell instead
+
+        if (abilityGroup.Exists())
+        {
+            PrefabGUID abilityPrefab = abilityGroup.Read<PrefabGUID>();
+
+            if (buff.NewGroupId == abilityPrefab)
+            {
+                ServerGameManager.ModifyAbilityGroupOnSlot(entity, player, 3, new(ConfigService.DefaultClassSpell));
+                spells.ShiftSlot = ConfigService.DefaultClassSpell;
+                steamId.SetPlayerSpells(spells);
+            }
+        }
     }
 }

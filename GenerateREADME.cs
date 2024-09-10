@@ -1,42 +1,54 @@
-﻿using Microsoft.Build.Framework;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Bloodcraft;
-public class GenerateREADME : ITask
+
+internal static class GenerateREADME
 {
-    public IBuildEngine BuildEngine { get; set; }
-    public ITaskHost HostObject { get; set; }
+    // Paths set by the user or build script
+    static string CommandsPath { get; set; }
+    static string ReadMePath { get; set; }
 
-    // Required properties for our task
-    [Required]
-    public string CommandsPath { get; set; }
-
-    [Required]
-    public string ReadMePath { get; set; }
-
+    // Static regex patterns for parsing commands
     static readonly Regex CommandGroupRegex = new(@"\[CommandGroup\((?:name:\s*""(?<name>[^""]+)""\s*,\s*)?""(?<group>[^""]+)""(?:\s*,\s*""(?<short>[^""]+)"")?\)\]");
     static readonly Regex CommandAttributeRegex = new(@"\[Command\((?:name:\s*""(?<name>[^""]+)"")?(?:,\s*shortHand:\s*""(?<shortHand>[^""]+)"")?(?:,\s*adminOnly:\s*(?<adminOnly>\w+))?(?:,\s*usage:\s*""(?<usage>[^""]+)"")?(?:,\s*description:\s*""(?<description>[^""]+)"")?\)\]");
     static readonly Regex CommandSectionPattern = new(@"^(?!.*using\s+static).*?\b[A-Z][a-zA-Z]*Commands\b");
 
-    public bool Execute()
+    // Entry point for post-build invocation
+    public static void Main(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Console.WriteLine("Usage: GenerateREADME <CommandsPath> <ReadMePath>");
+            return;
+        }
+
+        // Set the paths from the command-line arguments
+        CommandsPath = args[0];
+        ReadMePath = args[1];
+
+        Generate();
+    }
+
+    // Main method to generate the README
+    static void Generate()
     {
         try
         {
-            // Run the logic to generate the README section
+            // Call the command generation logic
             GenerateCommandsSection();
-            return true;
+            Console.WriteLine("README generated successfully.");
         }
         catch (Exception ex)
         {
-            BuildEngine.LogErrorEvent(new BuildErrorEventArgs("Error", "", "GenerateReadmeTask", 0, 0, 0, 0, ex.Message, "", "GenerateReadmeTask"));
-            return false;
+            Console.WriteLine($"Error generating README: {ex.Message}");
         }
     }
 
-    private void GenerateCommandsSection()
+    // Method to generate the commands section of the README
+    static void GenerateCommandsSection()
     {
-        // Get all text files in the directory
+        // Get all C# files from the CommandsPath
         string[] files = Directory.GetFiles(CommandsPath, "*.cs");
 
         // StringBuilder to construct new Commands section
@@ -79,62 +91,38 @@ public class GenerateREADME : ITask
                     string usage = match.Groups["usage"].Value;
                     string description = match.Groups["description"].Value;
 
-                    string commandPrefix = "";
+                    // Formulate command prefix
+                    string commandPrefix = $"- `.{commandGroup} {usage}`";
 
-                    if (!string.IsNullOrEmpty(commandGroupShort))
-                    {
-                        if (!string.IsNullOrEmpty(shortHand))
-                        {
-                            commandPrefix = $"- `.{commandGroup} {usage.Replace("." + shortHand, name)}`";
-                        }
-                        else
-                        {
-                            commandPrefix = $"- `.{commandGroup} {usage.Replace("." + commandGroupShort + " ", "")}`";
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(commandGroup))
-                    {
-                        if (!string.IsNullOrEmpty(shortHand))
-                        {
-                            commandPrefix = $"- `.{commandGroup} {usage.Replace("." + shortHand, name)}`";
-                        }
-                        else
-                        {
-                            commandPrefix = $"- `.{usage}`";
-                        }
-                    }
-                    else
-                    {
-                        commandPrefix = $"- `.{usage}`";
-                    }
-
-                    string commandDescription = $"  - {description}";
-                    string commandShortcut = $"  - Shortcut: *{usage}*";
-
+                    // Append information to the section
+                    commandsSection.AppendLine(commandPrefix);
+                    commandsSection.AppendLine($"  - {description}");
                     if (bool.Parse(adminOnly))
                     {
-                        commandPrefix += " 🔒";
+                        commandsSection.AppendLine($"  - Admin-only");
                     }
-
-                    // Append the formatted command to the section
-                    commandsSection.AppendLine(commandPrefix);
-                    commandsSection.AppendLine(commandDescription);
-                    commandsSection.AppendLine(commandShortcut);
                 }
             }
         }
 
+        // Write the new Commands section to the README
+        UpdateReadme(commandsSection.ToString());
+    }
+
+    // Method to update the README with the new Commands section
+    static void UpdateReadme(string commandsSection)
+    {
         // Load the existing README file
         string[] readmeLines = File.ReadAllLines(ReadMePath);
 
-        // Find the start and end of the old Commands section
+        // Find start and end of the Commands section
         int commandsStartIndex = Array.FindIndex(readmeLines, line => line.StartsWith("## Commands"));
         int commandsEndIndex = Array.FindIndex(readmeLines, commandsStartIndex + 1, line => line.StartsWith("## "));
 
         // Replace the old Commands section with the new one
         StringBuilder updatedReadme = new();
         updatedReadme.Append(string.Join(Environment.NewLine, readmeLines.Take(commandsStartIndex)));
-        updatedReadme.AppendLine(commandsSection.ToString());
+        updatedReadme.AppendLine(commandsSection);
         updatedReadme.Append(string.Join(Environment.NewLine, readmeLines.Skip(commandsEndIndex)));
 
         // Write the updated content back to the README file

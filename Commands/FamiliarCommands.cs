@@ -95,8 +95,7 @@ internal static class FamiliarCommands
                 return;
             }
 
-            PlayerUtilities.
-                        SetPlayerBool(steamId, "Binding", true);
+            PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
             steamId.SetFamiliarDefault(choice);
 
             data = new(Entity.Null, famKeys[choice - 1]);
@@ -126,6 +125,7 @@ internal static class FamiliarCommands
         if (familiar != Entity.Null)
         {
             if (FamiliarMinions.ContainsKey(familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
+            if (familiar.Has<Disabled>()) familiar.Remove<Disabled>();
             DestroyUtility.CreateDestroyEvent(EntityManager, familiar, DestroyReason.Default, DestroyDebugReason.None);
             FamiliarUtilities.ClearFamiliarActives(steamId);
             LocalizationService.HandleReply(ctx, "Familiar unbound.");
