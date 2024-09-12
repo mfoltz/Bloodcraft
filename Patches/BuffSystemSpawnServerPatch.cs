@@ -250,12 +250,9 @@ internal static class BuffSpawnSystemPatches
                         {
                             if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 30f, EndAction = LifeTimeEndAction.Destroy });
                         }
-                        else if (prefabGUID.Equals(modifyHUDTarget))
-                        {
-                            BuffUtilities.HandleModifyTargetHUDBuff(entity);
-                        }
                     }
                 }
+                /*
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(captureBuff))
                 {
                     Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName());
@@ -303,6 +300,7 @@ internal static class BuffSpawnSystemPatches
                 {
                     entity.LogComponentTypes();
                 }
+                */
             }
         }
         finally
