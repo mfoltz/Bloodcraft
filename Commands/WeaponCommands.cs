@@ -293,7 +293,7 @@ internal static class WeaponCommands
             else
             {
                 spells.SecondUnarmed = ability;
-                LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
             }
             SteamID.SetPlayerSpells(spells);
         }

@@ -5,7 +5,6 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Patches.ReplaceAbilityOnGroupSlotSystemPatch;
 
 namespace Bloodcraft.Patches;
 
@@ -15,6 +14,8 @@ internal static class AbilityRunScriptsSystemPatch
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+
+    public static Dictionary<int, int> ClassSpells = [];
 
     [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
     [HarmonyPrefix]

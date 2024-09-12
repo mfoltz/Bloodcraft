@@ -5,7 +5,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Utilities;
 

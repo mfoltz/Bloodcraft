@@ -34,10 +34,10 @@ internal static class FamiliarCommands
 
     static readonly ComponentType[] NetworkEventComponents =
     [
-        ComponentType.ReadWrite(Il2CppType.Of<FromCharacter>()),
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
         ComponentType.ReadOnly(Il2CppType.Of<ReceiveNetworkEventTag>()),
-        ComponentType.ReadWrite(Il2CppType.Of<NetworkEventType>()),
-        ComponentType.ReadWrite(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
+        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
     ];
     static readonly NetworkEventType EventType = new()
     {
@@ -901,7 +901,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Names active familiar.")]
+    //[Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Names active familiar.")]
     public static void NameFamiliar(ChatCommandContext ctx, string newName) // All Components: ProjectM.Network.FromCharacter [ReadOnly], ProjectM.Network.InteractEvents_Client+RenameInteractable [ReadOnly]
     {
         if (!ConfigService.FamiliarSystem)
@@ -917,8 +917,25 @@ internal static class FamiliarCommands
             return;
         }
 
-        BuffUtilities.
-                ApplyBuff(new(-182838302), familiar); // hijacking this for the ModifyTargetHUD, handle in buffSpawn
+        if (familiar.Has<FeedableInventory>())
+        {
+            FeedableInventory feedableInventory = familiar.Read<FeedableInventory>();
+            if (feedableInventory.FeedableInventoryEntity.TryGetSyncedEntity(out Entity feedableEntity))
+            {
+                if (feedableEntity.Has<SyncToUserBuffer>()) feedableEntity.ReadBuffer<SyncToUserBuffer>().Add(new SyncToUserBuffer { UserEntity = ctx.Event.SenderUserEntity });
+                else
+                {
+                    Core.Log.LogInfo($"FeedableEntity SyncToUserBuffer not found for familiar...");
+                }
+                feedableEntity.LogComponentTypes();
+            }
+            else
+            {
+                Core.Log.LogInfo($"FeedableInventoryEntity not found for familiar...");
+            }
+        }
+
+        BuffUtilities.ApplyBuff(new(-182838302), familiar); // hijacking this for the ModifyTargetHUD, handle in buffSpawn
 
         FromCharacter fromCharacter = new()
         {

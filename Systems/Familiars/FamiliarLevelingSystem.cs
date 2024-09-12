@@ -4,6 +4,7 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 
 namespace Bloodcraft.Systems.Familiars;
@@ -16,16 +17,11 @@ internal static class FamiliarLevelingSystem
     const int EXPPower = 2;
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
-    public static void UpdateFamiliar(Entity player, Entity victimEntity)
+    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        if (!IsValidVictim(victimEntity)) return;
-        HandleExperienceUpdate(player, victimEntity);
+        ProcessFamiliarExperience(deathEvent.Source, deathEvent.Target);
     }
-    static bool IsValidVictim(Entity victimEntity)
-    {
-        return !victimEntity.Has<Minion>() && victimEntity.Has<UnitLevel>();
-    }
-    static void HandleExperienceUpdate(Entity player, Entity victimEntity)
+    public static void ProcessFamiliarExperience(Entity player, Entity victimEntity)
     {
         if (!player.Has<PlayerCharacter>()) return;
         PlayerCharacter playerCharacter = player.Read<PlayerCharacter>();

@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 
 namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponSystem
@@ -168,7 +169,11 @@ internal static class WeaponSystem
         { WeaponType.Unarmed, PrestigeType.UnarmedExpertise },
         { WeaponType.FishingPole, PrestigeType.FishingPoleExpertise }
     };
-    public static void UpdateExpertise(Entity Killer, Entity Victim)
+    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
+    {
+        ProcessExpertise(deathEvent.Source, deathEvent.Target);
+    }
+    public static void ProcessExpertise(Entity Killer, Entity Victim)
     {
         if (Killer == Victim || Victim.Has<Minion>()) return;
 

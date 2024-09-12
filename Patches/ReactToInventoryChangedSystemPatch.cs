@@ -33,21 +33,7 @@ internal static class ReactToInventoryChangedSystemPatch
                 if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>())
                 {
                     InventoryConnection inventoryConnection = inventory.Read<InventoryConnection>();
-
-                    if (!inventoryConnection.InventoryOwner.Has<UserOwner>())
-                    {
-                        if (inventoryConnection.InventoryOwner.Has<EntityOwner>())
-                        {
-                            Entity inventoryOwner = inventoryConnection.InventoryOwner.GetOwner();
-                            PrefabGUID ownerPrefab = inventoryOwner.Read<PrefabGUID>();
-                            if (ownerPrefab.LookupName().ToLower().Contains("horse"))
-                            {
-                                entity.LogComponentTypes();
-                                inventory.LogComponentTypes();
-                            }
-                        }
-                        continue;
-                    }
+                    if (!inventoryConnection.InventoryOwner.Has<UserOwner>()) continue;
 
                     UserOwner userOwner = inventoryConnection.InventoryOwner.Read<UserOwner>();
                     Entity userEntity = userOwner.Owner._Entity;
@@ -58,7 +44,6 @@ internal static class ReactToInventoryChangedSystemPatch
                     }
 
                     PrefabGUID itemPrefab = inventoryChangedEvent.Item;
-
                     if (inventoryChangedEvent.ItemEntity.Has<UpgradeableLegendaryItem>())
                     {
                         int tier = inventoryChangedEvent.ItemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;

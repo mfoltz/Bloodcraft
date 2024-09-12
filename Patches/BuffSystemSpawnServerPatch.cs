@@ -1,10 +1,5 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Professions;
-using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
@@ -55,6 +50,7 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID castlemanCombatBuff = new(731266864);
 
     static readonly PrefabGUID modifyHUDTarget = new(-182838302);
+    static readonly PrefabGUID captureBuff = new(548966542);
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -75,10 +71,12 @@ internal static class BuffSpawnSystemPatches
                 Entity player = Entity.Null;
 
                 // sections should be grouped appropriately to not interfere with each other
+
+                /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out
                 if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().TryGetPlayer(out player)) // feed execute kills
                 {
-                    Entity died = entity.Read<SpellTarget>().Target._Entity;
-                    Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
+                    Entity died = entity.GetSpellTarget();
+
                     if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, died);
                     if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, died);
                     if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(player, died);
@@ -89,10 +87,12 @@ internal static class BuffSpawnSystemPatches
                     }
                     if (ConfigService.QuestSystem)
                     {
-                        QuestSystem.UpdateQuests(player, userEntity, died.Read<PrefabGUID>());
+                        QuestSystem.UpdateQuests(player, died);
                     }
                 }
-                else if (ConfigService.EliteShardBearers && prefabName.Contains("holybubble")) // holy mortar effect for Solarus when eliteShardBearers active
+                */
+
+                if (ConfigService.EliteShardBearers && prefabName.Contains("holybubble")) // holy mortar effect for Solarus when eliteShardBearers active
                 {
                     Entity character = entity.GetBuffTarget();
 
@@ -252,11 +252,56 @@ internal static class BuffSpawnSystemPatches
                         }
                         else if (prefabGUID.Equals(modifyHUDTarget))
                         {
-                            BuffUtilities.
-                                                        // strip unwanted components, just using this in hopes ModifyTargetHUD system will activate
-                                                        HandleModifyTargetHUDBuff(entity);
+                            BuffUtilities.HandleModifyTargetHUDBuff(entity);
                         }
                     }
+                }
+                else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(captureBuff))
+                {
+                    Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName());
+
+                    if (entity.Has<GameplayEventListeners>()) entity.Remove<GameplayEventListeners>();
+                    if (entity.Has<PlaySequenceOnGameplayEvent>()) entity.Remove<PlaySequenceOnGameplayEvent>();
+                    if (entity.Has<GameplayEventIdMapping>()) entity.Remove<GameplayEventIdMapping>();
+                    if (entity.Has<ApplyBuffOnGameplayEvent>()) entity.Remove<ApplyBuffOnGameplayEvent>();
+                    if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
+                    if (entity.Has<CreateGameplayEventsOnDestroy>()) entity.Remove<CreateGameplayEventsOnDestroy>();
+                    if (entity.Has<CreateGameplayEventsOnTick>()) entity.Remove<CreateGameplayEventsOnTick>();
+                    if (entity.Has<BuffModificationFlagData>()) entity.Remove<BuffModificationFlagData>();
+                    if (entity.Has<DestroyBuffOnDamageTaken>()) entity.Remove<DestroyBuffOnDamageTaken>();
+                    if (entity.Has<MultiplyAbsorbCapBySpellPower>()) entity.Remove<MultiplyAbsorbCapBySpellPower>();
+                    if (entity.Has<AbsorbCapStackModifier>()) entity.Remove<AbsorbCapStackModifier>();
+                    if (entity.Has<AbsorbBuff>()) entity.Remove<AbsorbBuff>();
+
+                    if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
+                    if (entity.Has<GetTranslationOnSpawn>()) entity.Write(new GetTranslationOnSpawn { TranslationSource = GetTranslationSource.BuffTarget, SnapToGround = false });
+
+                    AmplifyBuff amplifyBuff = new()
+                    {
+                        AmplifyModifier = -1f
+                    };
+                    entity.Add<AmplifyBuff>();
+                    entity.Write(amplifyBuff);
+
+                    entity.Add<HideTargetHUD>();
+
+                    Script_Buff_Stealth_DataServer script_Buff_Stealth_DataServer = new()
+                    {
+                        ModelInvisible = true
+                    };
+                    entity.Add<Script_Buff_Stealth_DataServer>();
+                    entity.Write(script_Buff_Stealth_DataServer);
+
+                    DisableAggroBuff disableAggroBuff = new()
+                    {
+                        Mode = DisableAggroBuffMode.TargetDontAttackOthers | DisableAggroBuffMode.OthersDontAttackTarget
+                    };
+                    entity.Add<DisableAggroBuff>();
+                    entity.Write(disableAggroBuff);
+                }
+                else if (prefabGUID.Equals(captureBuff))
+                {
+                    entity.LogComponentTypes();
                 }
             }
         }

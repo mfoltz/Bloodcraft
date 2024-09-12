@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -10,10 +9,11 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.PlayerService;
 using User = ProjectM.Network.User;
 
-namespace Bloodcraft.Systems.Experience;
+namespace Bloodcraft.Systems.Leveling;
 internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
@@ -98,16 +98,11 @@ internal static class LevelingSystem
         { PlayerClasses.ArcaneSorcerer, new(1433921398) }, // lesser aegis
         { PlayerClasses.DeathMage, new(-2071441247) } // guardian block :p
     };
-    public static void UpdateLeveling(Entity killerEntity, Entity victimEntity)
+    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        if (!IsValidVictim(victimEntity)) return;
-        HandleExperienceUpdate(killerEntity, victimEntity);
+        ProcessExperience(deathEvent.Source, deathEvent.Target);
     }
-    static bool IsValidVictim(Entity victimEntity)
-    {
-        return !victimEntity.Has<Minion>() && victimEntity.Has<UnitLevel>();
-    }
-    static void HandleExperienceUpdate(Entity killerEntity, Entity victimEntity)
+    public static void ProcessExperience(Entity killerEntity, Entity victimEntity)
     {
         PlayerCharacter player = killerEntity.Read<PlayerCharacter>();
         Entity userEntity = player.UserEntity;
@@ -115,7 +110,7 @@ internal static class LevelingSystem
 
         if (IsVBlood(victimEntity))
         {
-            ProcessExperienceGain(killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods
+            ProcessExperienceGain(killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods since they're all in the event list from VBloodSystem if involved in same kill
             return;
         }
 
@@ -179,7 +174,7 @@ internal static class LevelingSystem
 
         bool isVBlood = IsVBlood(victimEntity);
         int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
-        float gainedXP = CalculateExperienceGained(victimLevel.Level._Value, isVBlood);
+        float gainedXP = GetBaseExperience(victimLevel.Level._Value, isVBlood);
 
         gainedXP += additionalXP;
         int currentLevel = SteamID.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
@@ -191,7 +186,7 @@ internal static class LevelingSystem
         if (SteamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
         {
             int exoLevel = prestiges.TryGetValue(PrestigeType.Exo, out var exo) ? exo : 0;
-            float expReductionFactor = 1 - (ConfigService.LevelingPrestigeReducer * PrestigeData);
+            float expReductionFactor = 1 - ConfigService.LevelingPrestigeReducer * PrestigeData;
             if (exoLevel == 0)
             {
                 gainedXP *= expReductionFactor;
@@ -227,12 +222,12 @@ internal static class LevelingSystem
 
         gainedXP *= groupMultiplier;
         int rested = 0;
-        if (ConfigService.RestedXPSystem) gainedXP = HandleRestedXP(SteamID, gainedXP, ref rested);
+        if (ConfigService.RestedXPSystem) gainedXP = AddRestedXP(SteamID, gainedXP, ref rested);
 
-        UpdatePlayerExperience(SteamID, gainedXP);
+        SaveExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel, rested);
     }
-    static float HandleRestedXP(ulong steamId, float gainedXP, ref int rested)
+    static float AddRestedXP(ulong steamId, float gainedXP, ref int rested)
     {
         if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
@@ -253,22 +248,22 @@ internal static class LevelingSystem
         ulong SteamID = user.PlatformId;
         Entity character = user.LocalCharacter._Entity;
         int currentLevel = SteamID.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
-        float gainedXP = (float)ConvertLevelToXp(currentLevel) * 0.03f * multiplier;
+        float gainedXP = ConvertLevelToXp(currentLevel) * 0.03f * multiplier;
 
-        UpdatePlayerExperience(SteamID, gainedXP);
+        SaveExperience(SteamID, gainedXP);
         CheckAndHandleLevelUp(character, SteamID, gainedXP, currentLevel);
     }
     static bool IsVBlood(Entity victimEntity)
     {
         return victimEntity.Has<VBloodConsumeSource>();
     }
-    static float CalculateExperienceGained(int victimLevel, bool isVBlood)
+    static float GetBaseExperience(int victimLevel, bool isVBlood)
     {
         int baseXP = victimLevel;
         if (isVBlood) return baseXP * ConfigService.VBloodLevelingMultiplier;
         return baseXP * ConfigService.UnitLevelingMultiplier;
     }
-    static void UpdatePlayerExperience(ulong SteamID, float gainedXP)
+    static void SaveExperience(ulong SteamID, float gainedXP)
     {
         if (!SteamID.TryGetPlayerExperience(out var xpData))
         {
@@ -884,7 +879,7 @@ internal static class LevelingSystem
     {
         public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
         {
-            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            string playerKey = PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(playerKey) && playerKey.TryGetPlayerInfo(out PlayerInfo playerInfo))
             {
                 if (playerInfo.User.PlatformId == ownerId)
@@ -948,7 +943,7 @@ internal static class LevelingSystem
         public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
         {
             ulong steamId = ctx.Event.User.PlatformId;
-            string playerKey = PlayerService.PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+            string playerKey = PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
             {
                 party.Remove(playerKey);

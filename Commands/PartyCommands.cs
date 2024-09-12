@@ -3,7 +3,7 @@ using Bloodcraft.Utilities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
-using static Bloodcraft.Systems.Experience.LevelingSystem.PartyUtilities;
+using static Bloodcraft.Systems.Leveling.LevelingSystem.PartyUtilities;
 
 namespace Bloodcraft.Commands;
 

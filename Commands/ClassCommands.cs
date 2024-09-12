@@ -5,9 +5,9 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Experience.LevelingSystem;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
+using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Commands;
 
@@ -144,7 +144,6 @@ internal static class ClassCommands
 
         if (ConfigService.ChangeClassItem != 0 && !ClassUtilities.HandleClassChangeItem(ctx, steamId))
         {
-            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes. ({new PrefabGUID(ConfigService.ChangeClassItem).GetPrefabName()}x{ConfigService.ChangeClassQuantity})");
             return;
         }
 

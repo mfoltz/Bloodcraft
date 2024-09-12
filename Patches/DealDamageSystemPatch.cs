@@ -8,7 +8,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Patches;
 

@@ -35,7 +35,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
 
                 //Core.Log.LogInfo($"LinkMinionToOwnerOnSpawnSystem: {entity.Read<PrefabGUID>().LookupName()}");
 
-                if (entity.GetOwner().TryGetFollowedPlayer(out Entity player)) // if following player most likely a familiar minion summon
+                if (entity.GetOwner().TryGetFollowedPlayer(out Entity player)) // if owner following player most likely a familiar minion summon
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())

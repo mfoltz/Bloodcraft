@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -9,6 +9,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using Match = System.Text.RegularExpressions.Match;
 using Random = System.Random;
 using Regex = System.Text.RegularExpressions.Regex;
@@ -342,10 +343,17 @@ internal static class QuestSystem
             LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
         }
     }
-    public static void UpdateQuests(Entity source, Entity userEntity, PrefabGUID target)
+    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        HashSet<Entity> participants = LevelingSystem.GetParticipants(source, userEntity); // want list of participants to process quest credit for, this is doing double right now?
-        List<ulong> processed = [];
+        List<ulong> processed = []; // may not need to check this with new event subscription stuff, will check later
+
+        Entity source = deathEvent.Source;
+        Entity died = deathEvent.Target;
+
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        PrefabGUID target = died.Read<PrefabGUID>();
+
+        HashSet<Entity> participants = LevelingSystem.GetParticipants(source, userEntity);
         foreach (Entity participant in participants)
         {
             User user = participant.Read<PlayerCharacter>().UserEntity.Read<User>();

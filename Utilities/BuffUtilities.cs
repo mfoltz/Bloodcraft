@@ -6,7 +6,7 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Systems.Experience.LevelingSystem;
+using static Bloodcraft.Systems.Leveling.LevelingSystem;
 using static Bloodcraft.Utilities.ClassUtilities;
 
 namespace Bloodcraft.Utilities;
@@ -106,10 +106,15 @@ internal static class BuffUtilities
             }
         }
     }
+    public static void HandleCaptureBuff(Entity buffEntity)
+    {
+
+    }
     public static void HandleModifyTargetHUDBuff(Entity buffEntity)
     {
-        if (buffEntity.Has<LifeTime>()) buffEntity.Write(new LifeTime { Duration = -1f, EndAction = LifeTimeEndAction.Destroy });
-
+        if (buffEntity.Has<LifeTime>()) buffEntity.Write(new LifeTime { Duration = -1f, EndAction = LifeTimeEndAction.None });
+        if (buffEntity.Has<HideWeapon>()) buffEntity.Remove<HideWeapon>();
+        if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
         if (buffEntity.Has<ModifyTargetHUDBuff>())
         {
             buffEntity.With((ref ModifyTargetHUDBuff modifyTargetHUDBuff) =>

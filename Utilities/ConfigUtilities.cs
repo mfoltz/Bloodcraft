@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Commands;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Stunlock.Core;
 
@@ -34,5 +35,14 @@ internal static class ConfigUtilities
         List<PrefabGUID> kitPrefabs = ParseConfigString(ConfigService.KitPrefabs).Select(x => new PrefabGUID(x)).ToList();
         List<int> kitAmounts = [.. ParseConfigString(ConfigService.KitQuantities)];
         MiscCommands.KitPrefabs = kitPrefabs.Zip(kitAmounts, (item, amount) => new { item, amount }).ToDictionary(x => x.item, x => x.amount);
+    }
+    public static Dictionary<int, int> CreateClassSpellCooldowns()
+    {
+        Dictionary<int, int> spellPrefabs = [];
+        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
+        {
+            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
+        }
+        return spellPrefabs;
     }
 }

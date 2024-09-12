@@ -1,5 +1,4 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM.Network;

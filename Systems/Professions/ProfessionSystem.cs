@@ -19,13 +19,9 @@ internal static class ProfessionSystem
     const int ProfessionPower = 2; // power for calculating level from xp
     public static void UpdateProfessions(Entity Killer, Entity Victim)
     {
-        if (Killer == Victim) return;
-
         Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong SteamID = user.PlatformId;
-
-        if (!Victim.Has<UnitLevel>() || Victim.Has<Movement>()) return;
 
         PrefabGUID PrefabGUID = new(0);
         if (Victim.Has<YieldResourcesOnDamageTaken>() && Victim.Has<EntityCategory>())

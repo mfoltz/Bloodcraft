@@ -1,8 +1,8 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
@@ -42,13 +42,13 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(player, vBlood);
-                if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, vBlood);
-                if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, vBlood);
+                if (ConfigService.LevelingSystem) LevelingSystem.ProcessExperience(player, vBlood);
+                if (ConfigService.ExpertiseSystem) WeaponSystem.ProcessExpertise(player, vBlood);
+                if (ConfigService.BloodSystem) BloodSystem.ProcessLegacy(player, vBlood);
                 if (ConfigService.FamiliarSystem)
                 {
-                    FamiliarLevelingSystem.UpdateFamiliar(player, vBlood);
-                    FamiliarUnlockSystem.HandleUnitUnlock(player, vBlood);
+                    FamiliarLevelingSystem.ProcessFamiliarExperience(player, vBlood);
+                    FamiliarUnlockSystem.ProcessUnlock(player, vBlood);
                 }
                 if (ConfigService.QuestSystem && steamId.TryGetPlayerQuests(out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }

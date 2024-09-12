@@ -10,13 +10,14 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class ReplaceAbilityOnGroupSlotSystemPatch
+internal static class ReplaceAbilityOnSlotSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly PrefabGUID shadowGreatSword = new(1322254792);
+    static readonly PrefabGUID highlordSwordPrimary = new(-328302080);
 
-    public static Dictionary<int, int> ClassSpells = [];
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -44,9 +45,9 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
                     }
                     else if (ConfigService.ShiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleShiftSpell(entity, steamId, spells);
+                        HandleShiftSpell(entity, steamId, character, spells);
                     }
-                    else if (!entity.Has<WeaponLevel>() && PlayerUtilities.GetPlayerBool(steamId, "SpellLock") && steamId.TryGetPlayerSpells(out spells))
+                    else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
                         SetSpells(entity, character, steamId, spells);
                     }
@@ -100,7 +101,7 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
             buffer.Add(buff);
         }
     }
-    static void HandleShiftSpell(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void HandleShiftSpell(Entity entity, ulong steamId, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>(); // prevent people switching jewels if item with spellmod is equipped?
         if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
@@ -115,23 +116,66 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 
             buffer.Add(buff);
         }
+
+        /*
+        Equipment equipment = character.Read<Equipment>();
+        Entity weaponEntity = equipment.WeaponSlot.SlotEntity.GetEntityOnServer();
+        if (weaponEntity.Has<PrefabGUID>())
+        {
+            PrefabGUID weaponPrefab = weaponEntity.Read<PrefabGUID>();
+            if (weaponPrefab.Equals(shadowGreatSword))
+            {
+                PrefabGUID abilityPrefab = new(0);
+
+                if (counter == 0)
+                {
+                    abilityPrefab = draculaShockwaveSlash;
+                }
+                else if (counter == 1)
+                {
+                    abilityPrefab = highlordSwordPrimary;
+                }
+                else if (counter == 2)
+                {
+                    abilityPrefab = solarusEmpoweredMelee;
+                }
+
+                ReplaceAbilityOnSlotBuff buff = new()
+                {
+                    Slot = 0,
+                    NewGroupId = abilityPrefab,
+                    CopyCooldown = true,
+                    Priority = 0,
+                };
+
+                buffer.Add(buff);
+
+                counter++;
+                if (counter == 3)
+                {
+                    counter = 0;
+                }
+            }
+        }
+        */
     }
     static void SetSpells(Entity entity, Entity player, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
+        bool lockSpells = PlayerUtilities.GetPlayerBool(steamId, "SpellLock");
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
 
         foreach (var buff in buffer)
         {
             if (buff.Slot == 5)
             {
-                spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot); // then want to check on the spell in shift and get rid of it if the same prefab, same for slot 6 below
-                HandleDuplicate(entity, buff, player, steamId, spells);
+                if (lockSpells) spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot); // then want to check on the spell in shift and get rid of it if the same prefab, same for slot 6 below
+                //HandleDuplicate(entity, buff, player, steamId, spells);
             }
 
             if (buff.Slot == 6)
             {
-                spells = (spells.FirstSlot, buff.NewGroupId.GuidHash, spells.ShiftSlot);
-                HandleDuplicate(entity, buff, player, steamId, spells);
+                if (lockSpells) spells = (spells.FirstSlot, buff.NewGroupId.GuidHash, spells.ShiftSlot);
+                //HandleDuplicate(entity, buff, player, steamId, spells);
             }
         }
 
@@ -147,10 +191,19 @@ internal static class ReplaceAbilityOnGroupSlotSystemPatch
 
             if (buff.NewGroupId == abilityPrefab)
             {
+                Core.Log.LogInfo("AbilityGroup entity found, matching prefab...");
                 ServerGameManager.ModifyAbilityGroupOnSlot(entity, player, 3, new(ConfigService.DefaultClassSpell));
                 spells.ShiftSlot = ConfigService.DefaultClassSpell;
                 steamId.SetPlayerSpells(spells);
             }
+            else
+            {
+                Core.Log.LogInfo("AbilityGroup entity found, no matching prefab...");
+            }
+        }
+        else
+        {
+            Core.Log.LogInfo("No AbilityGroup entity found...");
         }
     }
 }

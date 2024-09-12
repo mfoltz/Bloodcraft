@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Systems.Legacies.BloodManager;
 
 namespace Bloodcraft.Systems.Legacies;
@@ -176,14 +177,18 @@ internal static class BloodSystem
         { BloodType.Immortal, new PrefabGUID(55100532) }, // CHAR_Dracula_BloodSoul_heart
         { BloodType.Brute, new PrefabGUID(2005508157) } // CHAR_Militia_Heavy
     };
-    public static void UpdateLegacy(Entity Killer, Entity Victim)
+    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        if (Killer == Victim || Victim.Has<Minion>() || !Victim.Has<BloodConsumeSource>() || !Victim.Has<UnitLevel>()) return;
+        ProcessLegacy(deathEvent.Source, deathEvent.Target);
+    }
+    public static void ProcessLegacy(Entity Killer, Entity Victim)
+    {
+        if (!Victim.Has<BloodConsumeSource>()) return;
         BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
 
-        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         int unitLevel = Victim.Read<UnitLevel>().Level;
         float BloodValue = 0;
+
         if (Victim.Has<VBloodConsumeSource>())
         {
             BloodValue = 10 * unitLevel * ConfigService.VBloodLegacyMultiplier;
@@ -193,8 +198,10 @@ internal static class BloodSystem
             BloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * ConfigService.UnitLegacyMultiplier;
         }
 
+        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
+
         BloodType bloodType = BloodManager.GetCurrentBloodType(Killer);
         if (bloodType.Equals(BloodType.None)) return;
 

@@ -106,9 +106,9 @@ internal static class FamiliarSummonSystem
                 }
             }
 
-            if (!familiar.Has<NameableInteractable>()) familiar.Add<NameableInteractable>();
-
             /*
+            if (!familiar.Has<NameableInteractable>()) familiar.Add<NameableInteractable>();
+            
             if (!familiar.Has<InventoryInstanceElement>()) EntityManager.AddBuffer<InventoryInstanceElement>(familiar);
 
             if (!familiar.Has<FeedableInventory>()) familiar.Add<FeedableInventory>();
@@ -137,7 +137,7 @@ internal static class FamiliarSummonSystem
                 mountable.AccelerationRange = new Unity.Mathematics.float2(3f, 7f);
                 mountable.RotationSpeedRange = new Unity.Mathematics.float2(120f, 140f);
                 mountable.MountBuff = new(2112789321);
-            });
+            });  
             */
 
             return true;

@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -13,6 +14,8 @@ namespace Bloodcraft.Patches;
 internal static class UpdateBuffsBufferDestroyPatch
 {
     static readonly PrefabGUID combatBuff = new(581443919);
+    static readonly PrefabGUID captureBuff = new(548966542);
+
     public static readonly List<PrefabGUID> PrestigeBuffPrefabs = [];
 
     [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
@@ -27,6 +30,8 @@ internal static class UpdateBuffsBufferDestroyPatch
                 if (!Core.hasInitialized) return;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+
+                //if (prefabGUID.Equals(new PrefabGUID(-182838302))) Core.Log.LogInfo("Destroyed Buff: " + prefabGUID.LookupName());
 
                 if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
                 {
@@ -55,6 +60,12 @@ internal static class UpdateBuffsBufferDestroyPatch
                             if (prestigeLevel > PrestigeBuffPrefabs.IndexOf(prefabGUID)) PrestigeSystem.HandlePrestigeBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
+                }
+                else if (ConfigService.FamiliarSystem && entity.GetOwner().TryGetPlayer(out player) && prefabGUID.Equals(captureBuff))
+                {
+                    Entity target = entity.GetBuffTarget();
+                    FamiliarUnlockSystem.HandleRoll(1f, target, player);
+                    target.Add<DestroyTag>();
                 }
             }
         }

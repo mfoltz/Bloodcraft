@@ -225,6 +225,7 @@ internal static class MiscCommands
 
         Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
         List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
+        int counter = 0;
 
         IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
         foreach (Entity entity in disabledFamiliars)
@@ -235,10 +236,12 @@ internal static class MiscCommands
                 if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
                 {
                     DestroyUtility.Destroy(EntityManager, entity);
+                    counter++;
                 }
             }
         }
 
         familiarsQuery.Dispose();
+        LocalizationService.HandleReply(ctx, $"Cleared <color=white>{counter}</color> disabled familiars");
     }
 }

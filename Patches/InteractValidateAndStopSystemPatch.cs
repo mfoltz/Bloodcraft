@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Utilities;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -27,10 +28,12 @@ internal static class InteractValidateAndStopSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!Core.hasInitialized) return;
+                if (!ConfigService.FamiliarSystem) return;
 
                 if (!entity.Has<PrefabGUID>()) continue;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+                //Core.Log.LogInfo($"InteractValidateAndStopSystemPatch: {prefabGUID.LookupName()}");
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {

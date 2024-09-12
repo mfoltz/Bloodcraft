@@ -1,9 +1,10 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
@@ -25,28 +26,28 @@ internal static class FamiliarUnlockSystem
         { new PrefabGUID(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
         { new PrefabGUID(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
     };
-    public static void HandleUnitUnlock(Entity killer, Entity died)
+    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
+    {
+        ProcessUnlock(deathEvent.Source, deathEvent.Target);
+    }
+    public static void ProcessUnlock(Entity killer, Entity died)
     {
         if (!died.Has<PrefabGUID>() || !died.Has<EntityCategory>()) return;
 
         EntityCategory diedCategory = died.Read<EntityCategory>();
         PrefabGUID diedPrefab = died.Read<PrefabGUID>();
+
         string lowerName = diedPrefab.LookupName().ToLower();
-        //Core.Log.LogInfo(lowerName);
-        if (died.Has<Minion>()) return; // component checks
         if ((lowerName.Contains("trader") || lowerName.Contains("carriage") || lowerName.Contains("horse") || lowerName.Contains("werewolf")) || lowerName.Contains("tombsummon") && !lowerName.Contains("gateboss")) return; // prefab name checks
+
         if (IsBannedUnit(diedPrefab)) return; // banned prefab checks, no using currently
         if (IsBannedType(diedCategory)) return; // banned type checks, no using currently
 
-        if (!died.Has<VBloodConsumeSource>() && (int)diedCategory.UnitCategory < 5) // units
+        if (!died.Has<VBloodUnit>() && (int)diedCategory.UnitCategory < 5) // units
         {
             HandleRoll(ConfigService.UnitUnlockChance, died, killer);
         }
-        else if (died.Has<VBloodConsumeSource>()) // VBloods
-        {
-            if (ConfigService.AllowVBloods) HandleRoll(ConfigService.VBloodUnlockChance, died, killer);
-        }
-        else if (died.Has<VBloodUnit>()) // Shadow VBloods
+        else if (died.Has<VBloodUnit>()) // VBloods and Shadow VBloods
         {
             if (ConfigService.AllowVBloods) HandleRoll(ConfigService.VBloodUnlockChance, died, killer);
         }
@@ -59,7 +60,7 @@ internal static class FamiliarUnlockSystem
     {
         return ExemptTypes.Contains(category.UnitCategory.ToString());
     }
-    static void HandleRoll(float dropChance, Entity died, Entity killer)
+    public static void HandleRoll(float dropChance, Entity died, Entity killer)
     {
         if (ConfigService.ShareUnlocks && !died.Has<VBloodConsumeSource>()) // pretty sure everyone in the vblood feed already gets their own roll, no double-dipping
         {

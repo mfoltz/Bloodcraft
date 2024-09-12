@@ -1,10 +1,5 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Professions;
-using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -72,6 +67,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     }
                 }
 
+                /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out
                 if (PrefabGUID.Equals(feedComplete) && entity.GetOwner().TryGetPlayer(out Entity player)) // feed complete non-vblood kills
                 {
                     Entity died = entity.GetSpellTarget();
@@ -87,9 +83,10 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     }
                     if (ConfigService.QuestSystem)
                     {
-                        QuestSystem.UpdateQuests(player, userEntity, died.Read<PrefabGUID>());
+                        QuestSystem.UpdateQuests(player, died);
                     }
                 }
+                */
             }
         }
         finally

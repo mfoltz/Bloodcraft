@@ -1,14 +1,8 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Professions;
-using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -18,6 +12,18 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
+    public class DeathEventArgs : EventArgs
+    {
+        public Entity Source { get; set; }
+        public Entity Target { get; set; }
+    }
+
+    public static event EventHandler<DeathEventArgs> OnDeathEvent;
+    static void RaiseDeathEvent(DeathEventArgs deathEvent)
+    {
+        OnDeathEvent?.Invoke(null, deathEvent);
+    }
+
     [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(DeathEventListenerSystem __instance)
@@ -29,119 +35,23 @@ internal static class DeathEventListenerSystemPatch
             {
                 if (!Core.hasInitialized) return;
 
-                bool isStatChangeInvalid = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
-                bool hasVBloodConsumeSource = deathEvent.Died.Has<VBloodConsumeSource>();
-
-                if (ConfigService.FamiliarSystem && deathEvent.Died.Has<Follower>() && deathEvent.Died.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // update player familiar actives data
+                if (!ValidateTarget(deathEvent)) continue;
+                else if (deathEvent.Died.Has<Movement>())
                 {
-                    ulong steamId = deathEvent.Died.Read<Follower>().Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    //if (FamiliarPatches.familiarMinions.ContainsKey(deathEvent.Died)) Core.FamiliarService.HandleFamiliarMinions(deathEvent.Died);
-                    if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
+                    Entity deathSource = ValidateSource(deathEvent.Killer);
+                    if (deathSource.Exists())
                     {
-                        FamiliarUtilities.ClearFamiliarActives(steamId);
+                        DeathEventArgs deathArgs = new()
+                        {
+                            Source = deathSource,
+                            Target = deathEvent.Died
+                        };
+                        if (deathArgs.Source != deathArgs.Target) RaiseDeathEvent(deathArgs);
                     }
                 }
-
-                Entity playerCharacter = Entity.Null;
-                ulong playerId = 0;
-
-                if (deathEvent.Killer.Has<PlayerCharacter>())
+                else if (ConfigService.ProfessionSystem && deathEvent.Killer.IsPlayer())
                 {
-                    Entity userEntity = deathEvent.Killer.Read<PlayerCharacter>().UserEntity;
-                    ulong steamId = userEntity.Read<User>().PlatformId;
-
-                    if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
-                    {
-                        if (!isStatChangeInvalid) // only process non-feed related deaths here except for gatebosses
-                        {
-                            if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
-                            if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
-                            if (ConfigService.FamiliarSystem)
-                            {
-                                FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
-                                FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                            }
-                            if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
-
-                            playerId = steamId;
-                            playerCharacter = deathEvent.Killer;
-                        }
-                        else if (deathEvent.Died.Has<VBloodUnit>())
-                        {
-                            if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(deathEvent.Killer, deathEvent.Died);
-                            if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(deathEvent.Killer, deathEvent.Died);
-                            if (ConfigService.FamiliarSystem)
-                            {
-                                FamiliarLevelingSystem.UpdateFamiliar(deathEvent.Killer, deathEvent.Died);
-                                FamiliarUnlockSystem.HandleUnitUnlock(deathEvent.Killer, deathEvent.Died); // familiar unlocks
-                            }
-                            if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(deathEvent.Killer, deathEvent.Died);
-                            if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(deathEvent.Killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
-
-                            playerId = steamId;
-                            playerCharacter = deathEvent.Killer;
-                        }
-                    }
-                    else
-                    {
-                        if (ConfigService.ProfessionSystem && !hasVBloodConsumeSource) // if no movement, handle resource harvest
-                        {
-                            ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
-                        }
-                    }
-                }
-                else if (deathEvent.Killer.Has<Follower>() && deathEvent.Killer.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // player familiar kills
-                {
-                    Entity followedPlayer = deathEvent.Killer.Read<Follower>().Followed._Value;
-                    Entity userEntity = followedPlayer.Read<PlayerCharacter>().UserEntity;
-                    ulong steamId = userEntity.Read<User>().PlatformId;
-
-                    if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
-                    {
-                        if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(followedPlayer, deathEvent.Died);
-                        if (ConfigService.FamiliarSystem) FamiliarLevelingSystem.UpdateFamiliar(followedPlayer, deathEvent.Died);
-                        if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(followedPlayer, userEntity, deathEvent.Died.Read<PrefabGUID>());
-                    }
-
-                    playerId = steamId;
-                    playerCharacter = followedPlayer;
-                }
-                else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<PlayerCharacter>() && deathEvent.Died.Has<Movement>()) // player summon kills
-                {
-                    Entity killer = deathEvent.Killer.Read<EntityOwner>().Owner;
-                    Entity userEntity = killer.Read<PlayerCharacter>().UserEntity;
-                    ulong steamId = userEntity.Read<User>().PlatformId;
-
-                    if (!hasVBloodConsumeSource)
-                    {
-                        if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(killer, deathEvent.Died);
-                        if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(killer, deathEvent.Died);
-                        if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(killer, userEntity, deathEvent.Died.Read<PrefabGUID>());
-                    }
-
-                    playerId = steamId;
-                    playerCharacter = killer;
-                }
-                else if (deathEvent.Killer.Has<EntityOwner>() && deathEvent.Killer.Read<EntityOwner>().Owner.Has<Follower>() && deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>().Followed._Value.Has<PlayerCharacter>()) // familiar summon kills
-                {
-                    Follower follower = deathEvent.Killer.Read<EntityOwner>().Owner.Read<Follower>();
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(follower.Followed._Value);
-                    ulong steamId = follower.Followed._Value.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-
-                    if (familiar != Entity.Null)
-                    {
-                        Entity character = follower.Followed._Value;
-                        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-                        if (deathEvent.Died.Has<Movement>() && !hasVBloodConsumeSource)
-                        {
-                            if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(follower.Followed._Value, deathEvent.Died);
-                            if (ConfigService.FamiliarSystem) FamiliarLevelingSystem.UpdateFamiliar(follower.Followed._Value, deathEvent.Died);
-                            if (ConfigService.QuestSystem) QuestSystem.UpdateQuests(character, userEntity, deathEvent.Died.Read<PrefabGUID>());
-                        }
-                    }
-
-                    playerId = steamId;
-                    playerCharacter = follower.Followed._Value;
+                    ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
                 }
             }
         }
@@ -149,5 +59,32 @@ internal static class DeathEventListenerSystemPatch
         {
             deathEvents.Dispose();
         }
+    }
+    static Entity ValidateSource(Entity killer)
+    {
+        Entity deathSource = Entity.Null;
+
+        if (killer.IsPlayer()) deathSource = killer; // player kills
+        else if (killer.GetOwner().TryGetPlayer(out Entity player)) deathSource = player; // player familiar and player summon kills
+        else if (killer.GetOwner().TryGetFollowedPlayer(out Entity followedPlayer)) deathSource = followedPlayer; // player familiar summon kills
+
+        return deathSource;
+    }
+    static bool ValidateTarget(DeathEvent deathEvent)
+    {
+        if (ConfigService.FamiliarSystem && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
+        {
+            ulong steamId = player.GetSteamId();
+            if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
+            {
+                FamiliarUtilities.ClearFamiliarActives(steamId);
+                return false;
+            }
+        }
+        else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
+        else if (deathEvent.Died.Has<Minion>() || !deathEvent.Died.Has<UnitLevel>()) return false;
+        //else if (deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodUnit>()) return false; see if feed executes and completes play nice here
+
+        return true;
     }
 }

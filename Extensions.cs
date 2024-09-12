@@ -1,5 +1,4 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Legacies;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -10,7 +9,6 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Systems.Legacies.BloodSystem;
 
 namespace Bloodcraft;
 internal static class Extensions
@@ -157,6 +155,18 @@ internal static class Extensions
         }
         return false;
     }
+    public static bool IsFollowingPlayer(this Entity entity)
+    {
+        if (entity.Has<Follower>())
+        {
+            Follower follower = entity.Read<Follower>();
+            if (follower.Followed._Value.IsPlayer())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     public static Entity GetBuffTarget(this Entity entity)
     {
         return CreateGameplayEventServerUtility.GetBuffTarget(EntityManager, entity);
@@ -204,32 +214,6 @@ internal static class Extensions
     public static bool TryGetPlayerInfo(this string playerName, out PlayerInfo playerInfo)
     {
         if (PlayerCache.TryGetValue(playerName, out playerInfo)) return true;
-        return false;
-    }
-    public static bool TryGetBaseBloodBuff(this Entity player, BloodType bloodType, out Entity bloodBuff)
-    {
-        bloodBuff = Entity.Null;
-        if (player.Has<BloodQualityBuff>())
-        {
-            var buffer = player.ReadBuffer<BloodQualityBuff>();
-
-            foreach (BloodQualityBuff buff in buffer)
-            {
-                Core.Log.LogInfo(buff.BloodQualityBuffPrefabGuid.LookupName());
-                if (BuffToBloodTypeMap.ContainsKey(buff.BloodQualityBuffPrefabGuid))
-                {
-                    Core.Log.LogInfo("Found base blood buff...");
-                    bloodBuff = buff.BloodQualityBuffEntity;
-                    break;
-                }
-            }
-
-            if (bloodBuff.Exists())
-            {
-                Core.Log.LogInfo("Blood buff entity exists...");
-                return true;
-            }
-        }
         return false;
     }
 }

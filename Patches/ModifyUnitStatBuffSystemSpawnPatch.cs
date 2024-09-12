@@ -1,6 +1,6 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Experience;
 using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Leveling;
 using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
