@@ -67,7 +67,9 @@ internal static class MiscCommands
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
             }
 
-            LocalizationService.HandleReply(ctx, "You've received a starting kit with blood essence, stone, wood, and bone!");
+            string kitItems = KitPrefabs.Select(x => $"<color=#ffd9eb>{x.Key.GetPrefabName()}</color>")
+                                        .Aggregate((x, y) => $"{x}, <color=#ffd9eb>{y}</color>");
+            LocalizationService.HandleReply(ctx, $"You've received a starting kit with {kitItems}!");
         }
         else
         {
