@@ -562,7 +562,9 @@ Jairon Orellana; Odjit; Jera; Eve winters;
 
 ## Recommended
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/)
+  Highly recommend getting this if you plan on using Bloodcraft or any other mods for V Rising in general. Invaluable set of tools and options that will greatly improve your modding experience.
 - [KindredLogistics](https://thunderstore.io/c/v-rising/p/Kindred/KindredLogistics/)
+  If you mourn QuickStash, this is for you! It comes with much more that will drastically improve your inventory-managing experience in V Rising, and only requires server installation as well.
 - [KindredArenas](https://thunderstore.io/c/v-rising/p/odjit/KindredArenas/)
 - [KindredSchematics](https://thunderstore.io/c/v-rising/p/odjit/KindredSchematics/)
 - [KindredPortals](https://thunderstore.io/c/v-rising/p/odjit/KindredPortals/)
