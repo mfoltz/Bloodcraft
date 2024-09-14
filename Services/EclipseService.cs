@@ -188,12 +188,13 @@ internal class EclipseService
 
         return (expertisePercent, expertiseLevel, expertisePrestige, expertiseEnum, bonusStats);
     }
-    static (int Progress, int Goal, string Target, string IsVBlood) GetQuestData(ulong SteamID, Systems.Quests.QuestSystem.QuestType questType)
+    static (int Progress, int Goal, string Target, string IsVBlood, int level) GetQuestData(ulong SteamID, Systems.Quests.QuestSystem.QuestType questType)
     {
         int progress = 0;
         int goal = 0;
         string target = "";
         string isVBlood = "";
+        int level = 0;
 
         if (ConfigService.QuestSystem && SteamID.TryGetPlayerQuests(out var questData))
         {
@@ -203,24 +204,26 @@ internal class EclipseService
                 goal = quest.Objective.RequiredAmount;
                 target = quest.Objective.Target.GetPrefabName();
                 if (PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(quest.Objective.Target)) isVBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[quest.Objective.Target].Has<VBloodConsumeSource>().ToString();
+                Core.SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(quest.Objective.Target, out Entity prefabEntity);
+                level = prefabEntity.Read<UnitLevel>().Level._Value;
             }
         }
 
-        return (progress, goal, target, isVBlood);
+        return (progress, goal, target, isVBlood, level);
     }
     static string BuildProgressMessage((int Percent, int Level, int Prestige, int Class) experienceData, //want to send bonuses as well
         (int Percent, int Level, int Prestige, int Enum, int BonusStats) legacyData,
         (int Percent, int Level, int Prestige, int Enum, int BonusStats) expertiseData,
-        (int Progress, int Goal, string Target, string IsVBlood) dailyQuestData,
-        (int Progress, int Goal, string Target, string IsVBlood) weeklyQuestData)
+        (int Progress, int Goal, string Target, string IsVBlood, int Level) dailyQuestData,
+        (int Progress, int Goal, string Target, string IsVBlood, int Level) weeklyQuestData)
     {
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3},", experienceData.Percent, experienceData.Level, experienceData.Prestige, experienceData.Class)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", legacyData.Percent, legacyData.Level, legacyData.Prestige, legacyData.Enum, legacyData.BonusStats)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", expertiseData.Percent, expertiseData.Level, expertiseData.Prestige, expertiseData.Enum, expertiseData.BonusStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},{3},", dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target, dailyQuestData.IsVBlood)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},{3}", weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target, weeklyQuestData.IsVBlood);
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},{3},{3:D2},", dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target, dailyQuestData.IsVBlood, dailyQuestData.Level)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},{3},{3:D2}", weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target, weeklyQuestData.IsVBlood, weeklyQuestData.Level);
 
         return sb.ToString();
     }

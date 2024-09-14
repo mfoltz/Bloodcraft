@@ -374,7 +374,10 @@ internal static class QuestSystem
         for (int i = 0; i < questData.Count; i++)
         {
             var quest = questData.ElementAt(i);
-            if (quest.Value.Objective.Target == target)
+
+            Core.SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(quest.Value.Objective.Target, out Entity questEntity);
+            Core.SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(target, out Entity targetEntity);
+            if (quest.Value.Objective.Target.GetPrefabName() == target.GetPrefabName() && questEntity.Read<UnitLevel>().Level._Value <= targetEntity.Read<UnitLevel>().Level._Value)
             {
                 updated = true;
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
