@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Utilities;
+﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -18,12 +19,14 @@ internal static class ShapeshiftSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ShapeshiftSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem) return;
+
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
 
                 EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();

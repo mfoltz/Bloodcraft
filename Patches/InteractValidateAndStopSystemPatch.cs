@@ -22,19 +22,17 @@ internal static class InteractValidateAndStopSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(InteractValidateAndStopSystemServer __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_195794971_3.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.FamiliarSystem) return;
-
                 if (!entity.Has<PrefabGUID>()) continue;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
-                //Core.Log.LogInfo($"InteractValidateAndStopSystemPatch: {prefabGUID.LookupName()}");
-
                 if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     if (prefabGUID.GuidHash.Equals(-986064531) || prefabGUID.GuidHash.Equals(985937733)) // player using world or castle waygate

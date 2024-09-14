@@ -23,13 +23,13 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Buff [ReadOnly], ProjectM.ReplaceAbilityOnSlotData [ReadOnly], ProjectM.ReplaceAbilityOnSlotBuff [Buffer] [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (entity.GetOwner().TryGetPlayer(out Entity character))
                 {
                     ulong steamId = character.GetSteamId();
@@ -116,48 +116,6 @@ internal static class ReplaceAbilityOnSlotSystemPatch
 
             buffer.Add(buff);
         }
-
-        /*
-        Equipment equipment = character.Read<Equipment>();
-        Entity weaponEntity = equipment.WeaponSlot.SlotEntity.GetEntityOnServer();
-        if (weaponEntity.Has<PrefabGUID>())
-        {
-            PrefabGUID weaponPrefab = weaponEntity.Read<PrefabGUID>();
-            if (weaponPrefab.Equals(shadowGreatSword))
-            {
-                PrefabGUID abilityPrefab = new(0);
-
-                if (counter == 0)
-                {
-                    abilityPrefab = draculaShockwaveSlash;
-                }
-                else if (counter == 1)
-                {
-                    abilityPrefab = highlordSwordPrimary;
-                }
-                else if (counter == 2)
-                {
-                    abilityPrefab = solarusEmpoweredMelee;
-                }
-
-                ReplaceAbilityOnSlotBuff buff = new()
-                {
-                    Slot = 0,
-                    NewGroupId = abilityPrefab,
-                    CopyCooldown = true,
-                    Priority = 0,
-                };
-
-                buffer.Add(buff);
-
-                counter++;
-                if (counter == 3)
-                {
-                    counter = 0;
-                }
-            }
-        }
-        */
     }
     static void SetSpells(Entity entity, Entity player, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
@@ -185,7 +143,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     {
         Entity abilityGroup = ServerGameManager.GetAbilityGroup(player, 3); // get ability currently on shift, if it exists and matches what was just equipped set shift to default extra spell instead
 
-        if (abilityGroup.Exists())
+        if (abilityGroup.Has<PrefabGUID>())
         {
             PrefabGUID abilityPrefab = abilityGroup.Read<PrefabGUID>();
 

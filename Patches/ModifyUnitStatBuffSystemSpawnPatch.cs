@@ -16,14 +16,14 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ExpertiseSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
         try
         {
             foreach (var entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.ExpertiseSystem) return;
-
                 if (!entity.Has<WeaponLevel>() || !entity.Has<EntityOwner>()) continue;
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))
@@ -47,14 +47,14 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
     [HarmonyPostfix]
     static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.LevelingSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.LevelingSystem) return;
-
                 if (!entity.Has<EntityOwner>()) continue;
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))

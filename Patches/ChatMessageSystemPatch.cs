@@ -23,14 +23,14 @@ internal static class ChatMessageSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ClientCompanion) return;
+
         NativeArray<Entity> entities = __instance.__query_661171423_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.ClientCompanion) return;
-
                 ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
 

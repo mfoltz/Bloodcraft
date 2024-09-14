@@ -23,18 +23,18 @@ internal static class CreateGameplayEventOnDestroySystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnDestroySystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ProfessionSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_1297357609_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
 
                 PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
-
-                if (ConfigService.ProfessionSystem && PrefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
+                if (PrefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entity.GetOwner();
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
@@ -58,15 +58,13 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     }
 
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "");
-                    int multiplier = ProfessionMappings.GetFishingModifier(toProcess);
-
                     if (handler != null)
                     {
+                        int multiplier = ProfessionMappings.GetFishingModifier(toProcess);
                         ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
                         ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }
-
                 /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out
                 if (PrefabGUID.Equals(feedComplete) && entity.GetOwner().TryGetPlayer(out Entity player)) // feed complete non-vblood kills
                 {

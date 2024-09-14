@@ -21,12 +21,17 @@ internal class QuestService
 
     static readonly ComponentType[] UnitComponents =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<AiMoveSpeeds>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
         ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
-        ComponentType.ReadOnly(Il2CppType.Of<TilePosition>()),
+        //ComponentType.ReadOnly(Il2CppType.Of<TilePosition>()),
         ComponentType.ReadOnly(Il2CppType.Of<Team>()),
-        ComponentType.ReadOnly(Il2CppType.Of<BuffBuffer>()),
+        //ComponentType.ReadOnly(Il2CppType.Of<BuffBuffer>()),
         ComponentType.ReadOnly(Il2CppType.Of<Translation>())
+    ];
+
+    static readonly ComponentType[] SpawnTag =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<SpawnTag>())
     ];
 
     static EntityQuery UnitQuery;
@@ -34,22 +39,22 @@ internal class QuestService
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
     public static DateTime LastUpdate;
 
-    static readonly PrefabGUID enchantedCross = new(-1449314709);
-    static readonly PrefabGUID divineAngel = new(-1737346940);
-    static readonly PrefabGUID fallenAngel = new(-76116724);
     static readonly PrefabGUID manticore = new(-393555055);
     static readonly PrefabGUID dracula = new(-327335305);
     static readonly PrefabGUID monster = new(1233988687);
     static readonly PrefabGUID solarus = new(-740796338);
 
     static bool ShardBearersReset = false;
+    //static bool targetsLogged = false;
     public QuestService()
     {
         UnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = UnitComponents,
+            None = SpawnTag,
             Options = EntityQueryOptions.IncludeDisabled
         });
+
         ConfigUtilities.QuestRewards();
         Core.StartCoroutine(QuestUpdateLoop());
     }
@@ -112,9 +117,22 @@ internal class QuestService
                     }
                 );
 
-            if (TargetCache.ContainsKey(enchantedCross)) TargetCache.Remove(enchantedCross);
-            if (TargetCache.ContainsKey(divineAngel)) TargetCache.Remove(divineAngel);
-            if (TargetCache.ContainsKey(fallenAngel)) TargetCache.Remove(fallenAngel);
+            if (TargetCache.ContainsKey(manticore)) TargetCache.Remove(manticore);
+            if (TargetCache.ContainsKey(dracula)) TargetCache.Remove(dracula);
+            if (TargetCache.ContainsKey(monster)) TargetCache.Remove(monster);
+            if (TargetCache.ContainsKey(solarus)) TargetCache.Remove(solarus);
+
+            /*
+            if (!targetsLogged)
+            {
+                Core.Log.LogInfo(TargetCache.Count);
+                foreach (var kvp in TargetCache)
+                {
+                    //Core.Log.LogInfo(kvp.Key.LookupName());
+                }
+                targetsLogged = true;
+            }
+            */
 
             LastUpdate = DateTime.UtcNow;
             yield return updateDelay; // Wait 60 seconds before processing players/units again

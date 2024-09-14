@@ -16,14 +16,14 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.FamiliarSystem) return;
-
                 BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
                 if (behaviourTreeStateChangedEvent.Entity.Has<Follower>() && behaviourTreeStateChangedEvent.Entity.Read<Follower>().Followed._Value.Has<PlayerCharacter>())
                 {

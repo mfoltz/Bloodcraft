@@ -56,13 +56,13 @@ internal static class BuffSpawnSystemPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
                 if (!entity.GetBuffTarget().Exists()) continue;
 

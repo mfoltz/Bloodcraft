@@ -25,15 +25,14 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     static void Prefix(ForgeSystem_Update __instance)
     {
-        var repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ProfessionSystem) return;
+
+        NativeArray<Entity> repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in repairEntities)
             {
-                if (!Core.hasInitialized) return;
-
-                if (!ConfigService.ProfessionSystem) continue;
-
                 Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
                 if (forge_Shared.State == ForgeState.Empty) continue;
 
@@ -95,58 +94,47 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ProfessionSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.ProfessionSystem) return;
-
-                //Core.Log.LogInfo("Check 1");
-                if (!entity.Exists()) continue;
-
                 if (entity.Has<CastleWorkstation>() && entity.Has<QueuedWorkstationCraftAction>())
                 {
-                    //Core.Log.LogInfo("Check 2");
                     var buffer = entity.ReadBuffer<QueuedWorkstationCraftAction>();
                     double recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75 : 1;
 
-                    //Core.Log.LogInfo("Check 3");
                     for (int i = 0; i < buffer.Length; i++)
                     {
                         var item = buffer[i];
 
-                        //Core.Log.LogInfo("Check 4");
                         Entity userEntity = item.InitiateUser;
                         User user = userEntity.Read<User>();
                         ulong steamId = user.PlatformId;
 
-                        //Core.Log.LogInfo("Check 5");
                         PrefabGUID recipePrefab = item.RecipeGuid;
                         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipePrefab) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab] : Entity.Null;
                         double totalTime = recipeEntity.Read<RecipeData>().CraftDuration * recipeReduction;
 
-                        //Core.Log.LogInfo("Check 6");
                         if (CraftRateModifier != 1f)
                         {
                             totalTime /= CraftRateModifier;
                         }
 
-                        //Core.Log.LogInfo("Check 7");
                         float progress = item.ProgressTime;
                         if (progress / (float)totalTime >= CraftThreshold)
                         {
                             DateTime now = DateTime.UtcNow;
 
-                            //Core.Log.LogInfo("Check 8");
                             if (CraftCooldowns.TryGetValue(userEntity, out var cooldowns))
                             {
                                 if (cooldowns.TryGetValue(recipePrefab, out var lastCrafted))
                                 {
                                     if ((now - lastCrafted).TotalSeconds < 5)
                                     {
-                                        //Core.Log.LogInfo($"Recipe {recipePrefab.LookupName()} on cooldown for {(now - lastCrafted).TotalSeconds} more seconds...");
                                         continue;
                                     }
                                 }
@@ -157,7 +145,6 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                             }
                             else
                             {
-                                //Core.Log.LogInfo($"Adding stamp for {recipePrefab.LookupName()} at: {now}");
                                 CraftCooldowns.TryAdd(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, now } });
                             }
 
@@ -168,12 +155,10 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                             {
                                 if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
                                 {
-                                    //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
                                     recipeJobs++;
                                 }
                                 else
                                 {
-                                    //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
                                     playerJobs.TryAdd(itemPrefab, 1);
                                 }
                             }
@@ -184,12 +169,10 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                                 {
                                     if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
                                     {
-                                        //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
                                         recipeJobs++;
                                     }
                                     else
                                     {
-                                        //Core.Log.LogInfo("updatecraftpatch" + itemPrefab.LookupName());
                                         playerJobs.TryAdd(itemPrefab, 1);
                                     }
                                 }

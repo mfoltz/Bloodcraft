@@ -17,16 +17,15 @@ internal static class StatChangeMutationSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(StatChangeMutationSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.BloodSystem || !ConfigService.BloodQualityBonus) return;
+
         NativeArray<Entity> entities = __instance._StatChangeEventQuery.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
-                if (!entity.Exists()) continue;
-
-                if (ConfigService.BloodSystem && ConfigService.BloodQualityBonus && entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
+                if (entity.Has<StatChangeEvent>() && entity.Has<BloodQualityChange>())
                 {
                     StatChangeEvent statChangeEvent = entity.Read<StatChangeEvent>();
                     BloodQualityChange bloodQualityChange = entity.Read<BloodQualityChange>();

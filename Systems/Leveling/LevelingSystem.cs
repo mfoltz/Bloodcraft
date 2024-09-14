@@ -8,6 +8,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.PlayerService;
@@ -20,6 +21,7 @@ internal static class LevelingSystem
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     const float EXPConstant = 0.1f; // constant for calculating level from xp
     const float EXPPower = 2f; // power for calculating level from xp
@@ -28,6 +30,9 @@ internal static class LevelingSystem
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
+
+    static readonly AssetGuid assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly float3 color = new(1.0f, 0.7529f, 0.7961f);
     public enum PlayerClasses
     {
         BloodKnight,
@@ -225,7 +230,7 @@ internal static class LevelingSystem
         if (ConfigService.RestedXPSystem) gainedXP = AddRestedXP(SteamID, gainedXP, ref rested);
 
         SaveExperience(SteamID, gainedXP);
-        CheckAndHandleLevelUp(killerEntity, SteamID, gainedXP, currentLevel, rested);
+        CheckAndHandleLevelUp(killerEntity, victimEntity, SteamID, gainedXP, currentLevel, rested);
     }
     static float AddRestedXP(ulong steamId, float gainedXP, ref int rested)
     {
@@ -243,7 +248,7 @@ internal static class LevelingSystem
         }
         return gainedXP;
     }
-    public static void ProcessQuestExperienceGain(User user, int multiplier)
+    public static void ProcessQuestExperienceGain(User user, Entity victim, int multiplier)
     {
         ulong SteamID = user.PlatformId;
         Entity character = user.LocalCharacter._Entity;
@@ -251,7 +256,7 @@ internal static class LevelingSystem
         float gainedXP = ConvertLevelToXp(currentLevel) * 0.03f * multiplier;
 
         SaveExperience(SteamID, gainedXP);
-        CheckAndHandleLevelUp(character, SteamID, gainedXP, currentLevel);
+        CheckAndHandleLevelUp(character, victim, SteamID, gainedXP, currentLevel);
     }
     static bool IsVBlood(Entity victimEntity)
     {
@@ -281,7 +286,7 @@ internal static class LevelingSystem
 
         SteamID.SetPlayerExperience(new KeyValuePair<int, float>(newLevel, newExperience));
     }
-    static void CheckAndHandleLevelUp(Entity characterEntity, ulong SteamID, float gainedXP, int currentLevel, int restedXP = 0)
+    static void CheckAndHandleLevelUp(Entity characterEntity, Entity victim, ulong SteamID, float gainedXP, int currentLevel, int restedXP = 0)
     {
         Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
 
@@ -302,7 +307,7 @@ internal static class LevelingSystem
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
             if (Classes) ApplyClassBuffsAtThresholds(characterEntity, SteamID, fromCharacter);
         }
-        NotifyPlayer(userEntity, SteamID, (int)gainedXP, leveledUp, restedXP);
+        NotifyPlayer(userEntity, victim, SteamID, (int)gainedXP, leveledUp, restedXP);
     }
     static bool CheckForLevelUp(ulong SteamID, int currentLevel)
     {
@@ -313,7 +318,7 @@ internal static class LevelingSystem
         }
         return false;
     }
-    static void NotifyPlayer(Entity userEntity, ulong SteamID, int gainedXP, bool leveledUp, int restedXP)
+    static void NotifyPlayer(Entity userEntity, Entity victim, ulong SteamID, int gainedXP, bool leveledUp, int restedXP)
     {
         User user = userEntity.Read<User>();
         Entity character = user.LocalCharacter._Entity;
@@ -337,6 +342,24 @@ internal static class LevelingSystem
             string message = restedXP > 0 ? $"+<color=yellow>{gainedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)" : $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
+
+        if (victim.Equals(Entity.Null)) return;
+
+        //float3 randomPosition = GetRandomPositionAroundEntity(victim.Read<Translation>().Value, 0.5f);
+        //EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+        //Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, entityCommandBuffer, assetGuid, victim.Read<Translation>().Value, color, character, gainedXP + restedXP, default, userEntity);
+    }
+    static float3 GetRandomPositionAroundEntity(float3 entityPosition, float radius)
+    {
+        // Generate a random angle in radians (0 to 2 * Pi for a full circle)
+        float randomAngle = UnityEngine.Random.Range(0f, 2f * Mathf.PI);
+
+        // Calculate the X and Z offsets using trigonometry (we assume Y remains the same)
+        float offsetX = Mathf.Cos(randomAngle) * radius;
+        float offsetZ = Mathf.Sin(randomAngle) * radius;
+
+        // Return the new position, keeping the Y axis (height) unchanged
+        return new float3(entityPosition.x + offsetX, entityPosition.y, entityPosition.z + offsetZ);
     }
     public static int ConvertXpToLevel(float xp)
     {

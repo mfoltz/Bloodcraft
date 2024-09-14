@@ -28,13 +28,13 @@ internal static class DeathEventListenerSystemPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(DeathEventListenerSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
         try
         {
             foreach (DeathEvent deathEvent in deathEvents)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!ValidateTarget(deathEvent)) continue;
                 else if (deathEvent.Died.Has<Movement>())
                 {

@@ -20,13 +20,13 @@ internal static class ScriptSpawnServerPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ScriptSpawnServer __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_1231292176_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<BloodBuff>() || !entity.Has<EntityOwner>()) continue;
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))

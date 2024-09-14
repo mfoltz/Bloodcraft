@@ -25,17 +25,15 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem) return;
+
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.FamiliarSystem) return;
-
-                //Core.Log.LogInfo($"LinkMinionToOwnerOnSpawnSystem: {entity.Read<PrefabGUID>().LookupName()}");
-
-                if (entity.GetOwner().TryGetFollowedPlayer(out Entity player)) // if owner following player most likely a familiar minion summon
+                if (entity.GetOwner().TryGetFollowedPlayer(out Entity player))
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())

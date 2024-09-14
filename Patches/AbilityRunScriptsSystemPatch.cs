@@ -21,14 +21,14 @@ internal static class AbilityRunScriptsSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(AbilityRunScriptsSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!Classes) return;
+
         NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!Classes) return;
-
                 AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
 

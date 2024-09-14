@@ -4,10 +4,12 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Stunlock.Network;
+using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
@@ -433,8 +435,7 @@ internal static class ServerBootstrapSystemPatches
                 }
             }
 
-            FamiliarUtilities.
-                        ClearFamiliarActives(steamId);
+            FamiliarUtilities.ClearFamiliarActives(steamId);
         }
 
         if (ConfigService.LevelingSystem)
@@ -449,6 +450,60 @@ internal static class ServerBootstrapSystemPatches
         if (ConfigService.ClientCompanion)
         {
             if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
+        }
+    }
+
+    [HarmonyPatch(typeof(KickBanSystem_Server), nameof(KickBanSystem_Server.OnUpdate))] // treat this an OnUserDisconnected to account for player swaps
+    [HarmonyPrefix]
+    static void OnUserDisconnectedPrefix(KickBanSystem_Server __instance)
+    {
+        NativeArray<Entity> entities = __instance._KickQuery.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TryGetComponent(out KickEvent kickEvent))
+                {
+                    ulong steamId = kickEvent.PlatformId;
+                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                    {
+                        Entity character = playerInfo.CharEntity;
+
+                        if (ConfigService.FamiliarSystem && character.Has<FollowerBuffer>())
+                        {
+                            var buffer = character.ReadBuffer<FollowerBuffer>();
+
+                            foreach (var follower in buffer)
+                            {
+                                if (follower.Entity._Entity.Exists())
+                                {
+                                    DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
+                                }
+                            }
+
+                            FamiliarUtilities.ClearFamiliarActives(steamId);
+                        }
+
+                        if (ConfigService.LevelingSystem)
+                        {
+                            if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+                            {
+                                restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
+                                steamId.SetPlayerRestedXP(restedData);
+                            }
+                        }
+
+                        if (ConfigService.ClientCompanion)
+                        {
+                            if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
+                        }
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
         }
     }
 }

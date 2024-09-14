@@ -24,13 +24,14 @@ internal static class VBloodSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(VBloodSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeList<VBloodConsumed> events = __instance.EventList;
         DateTime now = DateTime.UtcNow;
         try
         {
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-                if (!Core.hasInitialized) return;
 
                 Entity player = vBloodConsumed.Target;
                 User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();

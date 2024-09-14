@@ -33,14 +33,14 @@ internal static class DealDamageSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(DealDamageSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ClassSpellSchoolOnHitEffects || !Classes) return;
+
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.ClassSpellSchoolOnHitEffects || !Classes) return;
-
                 if (!entity.Exists() || !entity.Has<DealDamageEvent>()) continue;
 
                 DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();

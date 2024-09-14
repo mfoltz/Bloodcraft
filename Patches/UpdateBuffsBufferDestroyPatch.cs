@@ -22,12 +22,13 @@ internal static class UpdateBuffsBufferDestroyPatch
     [HarmonyPostfix]
     static void OnUpdatePostix(UpdateBuffsBuffer_Destroy __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_401358720_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 
@@ -61,12 +62,14 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
                     }
                 }
+                /*
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().TryGetPlayer(out player) && prefabGUID.Equals(captureBuff))
                 {
                     Entity target = entity.GetBuffTarget();
                     FamiliarUnlockSystem.HandleRoll(1f, target, player);
                     target.Add<DestroyTag>();
                 }
+                */
             }
         }
         finally

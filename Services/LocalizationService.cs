@@ -157,7 +157,7 @@ internal class LocalizationService
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
         }
     }
-    public static string GetLocalizationFromKey(LocalizationKey key)
+    static string GetLocalizationFromKey(LocalizationKey key)
     {
         var guid = key.Key.ToGuid().ToString();
         return GetLocalization(guid);
@@ -170,7 +170,7 @@ internal class LocalizationService
         }
         return prefabGUID.LookupName();
     }
-    static string GetLocalization(string Guid)
+    public static string GetLocalization(string Guid)
     {
         if (Localization.TryGetValue(Guid, out var Text))
         {

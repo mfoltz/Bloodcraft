@@ -17,17 +17,16 @@ internal static class ReactToInventoryChangedSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.ProfessionSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)
             {
-                if (!Core.hasInitialized) return; // probably going to change what should be a continue to a return at some point and maybe if I acknowldege it here will make that less likely to happen? >_>
-                if (!ConfigService.ProfessionSystem) return;
-
                 InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
-
                 if (!inventory.Exists()) continue;
 
                 if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>())

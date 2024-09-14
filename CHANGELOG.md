@@ -1,10 +1,15 @@
+`1.3.3`
+- slight changes to communication with Eclipse that will need version 0.2.0 of that to work correctly
+- more filtering for quest targets
+- cleaning up from experimenting with a variety of things that I really need to stop messing with if I ever want to publish this again >_>
+
 `1.3.2`
 - legacy stat bonuses will update when applied and when leveling up
 - prestige buff automatically reapplied if one of them is found being destroyed
 - skeletons from graves are now left untouched
 - fixed total experience being displayed as rested experience for '.lvl get'
 - fixed spell cooldowns for classes
-- fixed null reference in creftingPatch that was interfering with profession experience
+- fixed null reference in craftingPatch that was interfering with profession experience
 
 `1.3.1`
 - changed UI updates to work via coroutine, more reliable and less prone to error so far

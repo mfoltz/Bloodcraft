@@ -13,9 +13,11 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Utilities.EntityUtilities;
 
@@ -80,68 +82,49 @@ internal static class Core
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
 
-    static readonly ComponentType[] PrefabGUIDComponent =
+    static readonly ComponentType[] SCTComponent =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
     ];
 
     static readonly PrefabGUID SCTPrefab = new(-1661525964);
-
     static void SCTFixTest() // one off thing hopefully but leaving since those have a habit of coming back around
     {
         // -1661525964 SCT prefab
-
-        EntityQuery prefabQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        EntityQuery sctQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = PrefabGUIDComponent,
+            All = SCTComponent,
             Options = EntityQueryOptions.IncludeDisabled
         });
 
         int counter = 0;
-
         try
         {
-            List<Entity> processed = [];
-            IEnumerable<Entity> prefabEntities = GetEntitiesEnumerable(prefabQuery); // find SCT prefab entities and destroy them
-            foreach (Entity entity in prefabEntities)
+            IEnumerable<Entity> prefabEntities = GetEntitiesEnumerable(sctQuery); // destroy errant SCT entities and log what's going on
+            if (prefabEntities.Count() > 5000)
             {
-                if (!entity.Has<PrefabGUID>()) continue;
-
-                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
-                if (prefabGUID.Equals(SCTPrefab) && !entity.Has<SpawnTag>()) // don't destroy the spawner... or do >_>? check syncToUserBuffer first and see who these are for
+                foreach (Entity entity in prefabEntities)
                 {
-                    if (entity.Has<SyncToUserBuffer>())
+                    if (!entity.Has<PrefabGUID>()) continue;
+                    PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+                    if (prefabGUID.Equals(SCTPrefab) && !entity.Has<SpawnTag>()) // don't destroy the spawner prefab probably >_>
                     {
-                        var syncToUserBuffer = entity.ReadBuffer<SyncToUserBuffer>();
-                        foreach (SyncToUserBuffer syncToUser in syncToUserBuffer)
+                        if (ServerGameManager.TryGetBuffer<SyncToUserBuffer>(entity, out var syncToUserBuffer))
                         {
-                            if (syncToUser.UserEntity.Exists() && syncToUser.UserEntity.Has<User>() && !processed.Contains(syncToUser.UserEntity))
+                            if (entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatText))
                             {
-                                User user = syncToUser.UserEntity.Read<User>();
-                                Entity localCharacter = user.LocalCharacter.GetEntityOnServer();
-
-                                if (localCharacter.Has<FollowerBuffer>())
+                                Entity target = scrollingCombatText.Target.GetSyncedEntityOrNull();
+                                if (target.Exists())
                                 {
-                                    var buffer = localCharacter.ReadBuffer<FollowerBuffer>();
-                                    if (!buffer.IsEmpty)
-                                    {
-                                        foreach (FollowerBuffer follower in buffer)
-                                        {
-                                            Entity familiar = follower.Entity.GetEntityOnServer();
-                                            if (familiar.Has<Disabled>()) familiar.Remove<Disabled>();
-                                            EntityManager.DestroyEntity(familiar);
-                                        }
-
-                                        buffer.Clear();
-                                        processed.Add(syncToUser.UserEntity);
-                                    }
+                                    DestroyUtility.Destroy(EntityManager, target);
                                 }
                             }
                         }
+                        DestroyUtility.Destroy(EntityManager, entity);
+                        counter++;
                     }
-                    EntityManager.DestroyEntity(entity);
-                    counter++;
                 }
+                Log.LogWarning($"Cleared {counter} SCT entities");
             }
         }
         catch (Exception e)
@@ -150,8 +133,7 @@ internal static class Core
         }
         finally
         {
-            Log.LogInfo($"SCTFixTest: {counter} SCT prefab entities destroyed!");
-            prefabQuery.Dispose();
+            sctQuery.Dispose();
         }
     }
 }

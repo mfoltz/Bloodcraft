@@ -21,16 +21,17 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void WeaponLevelDestroyPostfix(WeaponLevelSystem_Destroy __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.LevelingSystem) return;
+
         NativeArray<Entity> entities = __instance.__query_1111682408_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<EntityOwner>()) continue;
 
-                if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
+                if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -46,13 +47,13 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPrefix]
     static void OnUpdatePrefix(WeaponLevelSystem_Spawn __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<WeaponLevel>() || !entity.Has<EntityOwner>()) continue;
 
                 Entity player;

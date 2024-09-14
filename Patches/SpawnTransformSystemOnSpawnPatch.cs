@@ -52,12 +52,14 @@ internal static class SpawnTransformSystemOnSpawnPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem && !ConfigService.EliteShardBearers) return;
+
         NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
 
                 if (!entity.Has<UnitLevel>()) continue;
 

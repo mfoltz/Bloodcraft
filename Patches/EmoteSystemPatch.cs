@@ -43,14 +43,14 @@ internal static class EmoteSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem) return;
+
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)
             {
-                if (!Core.hasInitialized) return;
-                if (!ConfigService.FamiliarSystem) return;
-
                 UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
 
