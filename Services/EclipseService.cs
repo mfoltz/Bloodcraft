@@ -201,7 +201,7 @@ internal class EclipseService
         int progress = 0;
         int goal = 0;
         string target = "";
-        string isVBlood = "";
+        string isVBlood = "false";
 
         if (ConfigService.QuestSystem && SteamID.TryGetPlayerQuests(out var questData))
         {

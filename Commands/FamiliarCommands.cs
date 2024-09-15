@@ -711,8 +711,7 @@ internal static class FamiliarCommands
             }
         }
 
-        FamiliarUtilities.
-                ClearFamiliarActives(steamId);
+        FamiliarUtilities.ClearFamiliarActives(steamId);
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
 

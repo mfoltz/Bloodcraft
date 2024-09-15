@@ -381,8 +381,7 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                FamiliarUtilities.
-                                ClearFamiliarActives(steamId);
+                FamiliarUtilities.ClearFamiliarActives(steamId);
             }
         }
 
