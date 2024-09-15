@@ -1,7 +1,5 @@
 ## Table of Contents
 
-If you plan on using the leveling system this note is for you! 
-
 - [Sponsors](#sponsors)
 - [Features](#features)
 - [Commands](#commands)
