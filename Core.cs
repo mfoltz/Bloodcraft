@@ -8,18 +8,11 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
-using ProjectM;
-using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared;
-using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
-using static Bloodcraft.Utilities.EntityUtilities;
 
 namespace Bloodcraft;
 internal static class Core
@@ -37,8 +30,6 @@ internal static class Core
     public static void Initialize()
     {
         if (hasInitialized) return;
-
-        //SCTFixTest(); // only useful for removing SCT prefabs if for some reason they are being generated in mass
 
         hasInitialized = true;
 
@@ -82,9 +73,10 @@ internal static class Core
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
 
+    /*
     static readonly ComponentType[] SCTComponent =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ScrollingCombatTextMessage>()),
     ];
 
     static readonly PrefabGUID SCTPrefab = new(-1661525964);
@@ -100,8 +92,12 @@ internal static class Core
         int counter = 0;
         try
         {
+            Dictionary<string, Dictionary<string, int>> userTargetCounts = [];
             IEnumerable<Entity> prefabEntities = GetEntitiesEnumerable(sctQuery); // destroy errant SCT entities and log what's going on
-            if (prefabEntities.Count() > 5000)
+            int entityCount = prefabEntities.Count();
+
+            Core.Log.LogInfo(entityCount); // okay yeah definitely something with either familiar summons or just undead summons?
+            if (entityCount > 5000)
             {
                 foreach (Entity entity in prefabEntities)
                 {
@@ -111,12 +107,32 @@ internal static class Core
                     {
                         if (ServerGameManager.TryGetBuffer<SyncToUserBuffer>(entity, out var syncToUserBuffer))
                         {
-                            if (entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatText))
+                            if (!syncToUserBuffer.IsEmpty)
                             {
-                                Entity target = scrollingCombatText.Target.GetSyncedEntityOrNull();
-                                if (target.Exists())
+                                string userName = syncToUserBuffer[0].UserEntity.Read<User>().CharacterName.Value;
+
+                                if (entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatText))
                                 {
-                                    DestroyUtility.Destroy(EntityManager, target);
+                                    Entity target = scrollingCombatText.Target.GetSyncedEntityOrNull();
+                                    if (target.Exists() && !target.IsPlayer())
+                                    {
+                                        string targetName = target.Read<PrefabGUID>().LookupName();
+
+                                        if (!userTargetCounts.ContainsKey(userName))
+                                        {
+                                            userTargetCounts[userName] = [];
+                                        }
+
+                                        Dictionary<string, int> targetCounts = userTargetCounts[userName];
+
+                                        if (!targetCounts.ContainsKey(targetName))
+                                        {
+                                            targetCounts[targetName] = 0;
+                                        }
+
+                                        targetCounts[targetName]++;
+                                        DestroyUtility.Destroy(EntityManager, target);
+                                    }
                                 }
                             }
                         }
@@ -125,6 +141,20 @@ internal static class Core
                     }
                 }
                 Log.LogWarning($"Cleared {counter} SCT entities");
+            }
+
+            foreach (var userEntry in userTargetCounts)
+            {
+                string userName = userEntry.Key;
+                var targetCounts = userEntry.Value;
+
+                Log.LogInfo($"User: {userName}");
+                foreach (var targetEntry in targetCounts)
+                {
+                    string targetName = targetEntry.Key;
+                    int count = targetEntry.Value;
+                    Log.LogInfo($"\tTarget: {targetName}, Count: {count}");
+                }
             }
         }
         catch (Exception e)
@@ -136,4 +166,48 @@ internal static class Core
             sctQuery.Dispose();
         }
     }
+
+    static readonly ComponentType[] PrefabGUIDComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+    ];
+
+    static readonly PrefabGUID WitheredPrefab = new(-1584807109);
+    static void UnitFixTest() // one off thing hopefully but leaving since those have a habit of coming back around
+    {
+        // -1661525964 SCT prefab
+        EntityQuery prefabQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = PrefabGUIDComponent,
+            Options = EntityQueryOptions.IncludeAll
+        });
+
+        try
+        {
+            Dictionary<string, Dictionary<string, int>> userTargetCounts = [];
+            IEnumerable<Entity> prefabEntities = GetEntitiesEnumerable(prefabQuery);
+            int entityCount = prefabEntities.Count();
+
+            int counter = 0;
+            //Core.Log.LogInfo(entityCount); 
+            foreach (Entity entity in prefabEntities)
+            {
+                if (entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(WitheredPrefab) && entity.Has<BlockFeedBuff>() && entity.TryGetComponent(out EntityOwner owner) && owner.Owner.Exists())
+                {
+                    StatChangeUtility.KillOrDestroyEntity(EntityManager, entity, owner.Owner, owner.Owner, ServerTime, StatChangeReason.Default, true);
+                    counter++;
+                }
+            }
+            Log.LogWarning($"Destroyed {counter} withered units");
+        }
+        catch (Exception e)
+        {
+            Log.LogError(e);
+        }
+        finally
+        {
+            prefabQuery.Dispose();
+        }
+    }
+    */
 }

@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -71,6 +70,7 @@ internal static class BuffSpawnSystemPatches
                 Entity player = Entity.Null;
 
                 // sections should be grouped appropriately to not interfere with each other
+                //Core.Log.LogInfo($"BuffSystem_Spawn_Server Prefix: {prefabGUID.LookupName()}");
 
                 /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out
                 if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().TryGetPlayer(out player)) // feed execute kills
@@ -242,14 +242,17 @@ internal static class BuffSpawnSystemPatches
                                 if (swordPermabuff.Has<AmplifyBuff>()) swordPermabuff.Remove<AmplifyBuff>();
                             }
                         }
-                        else if (prefabGUID.Equals(castlemanCombatBuff))
-                        {
-                            if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
-                        }
                         else if (prefabGUID.Equals(holyBeamPowerBuff))
                         {
                             if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 30f, EndAction = LifeTimeEndAction.Destroy });
                         }
+                        /* apparently doesn't actually go through here, huh
+                        else if (prefabGUID.Equals(castlemanCombatBuff))
+                        {
+                            if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
+                            Core.Log.LogInfo("Removed AdaptLevel from CastleMan combat buff...");
+                        }
+                        */
                     }
                 }
                 /*

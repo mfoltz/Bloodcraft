@@ -110,7 +110,7 @@ internal static class FamiliarUtilities
                     return;
                 }
 
-                data.UnlockedFamiliars[activeSet].Add(prefab);
+                data.UnlockedFamiliars[activeSet].Add(result.GuidHash);
                 SaveUnlockedFamiliars(steamId, data);
                 LocalizationService.HandleReply(ctx, $"<color=green>{result.GetPrefabName()}</color> (<color=yellow>{result.GuidHash}</color>) added to <color=white>{activeSet}</color>.");
             }

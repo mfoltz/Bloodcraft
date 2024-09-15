@@ -70,10 +70,6 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                         }
                     }
                 }
-                else if (entity.GetOwner().TryGetPlayer(out Entity character))
-                {
-                    Core.Log.LogInfo($" {entity.Read<PrefabGUID>().LookupName()} minion linked to {character.Read<PlayerCharacter>().Name.Value}");
-                }
             }
         }
         finally

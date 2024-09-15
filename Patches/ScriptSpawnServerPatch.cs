@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Legacies;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
+using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
@@ -27,6 +28,19 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
+                if (entity.Has<Script_Castleman_AdaptLevel_DataShared>())
+                {
+                    //Core.Log.LogInfo("CastleManCombatBuff");
+                    if (entity.GetBuffTarget().TryGetFollowedPlayer(out Entity _))
+                    {
+                        if (entity.Has<ScriptSpawn>()) entity.Remove<ScriptSpawn>();
+                        if (entity.Has<ScriptUpdate>()) entity.Remove<ScriptUpdate>();
+                        if (entity.Has<ScriptDestroy>()) entity.Remove<ScriptDestroy>();
+                        if (entity.Has<Script_Buff_ModifyDynamicCollision_DataServer>()) entity.Remove<Script_Buff_ModifyDynamicCollision_DataServer>();
+                        entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
+                    }
+                }
+
                 if (!entity.Has<BloodBuff>() || !entity.Has<EntityOwner>()) continue;
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))

@@ -91,7 +91,7 @@ internal static class FamiliarCommands
         {
             if (choice < 1 || choice > famKeys.Count)
             {
-                LocalizationService.HandleReply(ctx, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{famKeys.Count}</color> (Current List: <color=yellow>{set}</color>)");
                 return;
             }
 
@@ -352,8 +352,7 @@ internal static class FamiliarCommands
                 lastListName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
                 unlocksData.UnlockedFamiliars[lastListName] = [];
                 SaveUnlockedFamiliars(steamId, unlocksData);
-                FamiliarUtilities.
-                                ParseAddedFamiliar(ctx, steamId, unit, lastListName);
+                FamiliarUtilities.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
             }
             else
             {
@@ -379,7 +378,7 @@ internal static class FamiliarCommands
             // Remove the old set
             if (choice < 1 || choice > familiarSet.Count)
             {
-                LocalizationService.HandleReply(ctx, $"Invalid choice, please use 1 to {familiarSet.Count} (Current List:<color=white>{familiarSet}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeSet}</color>)");
                 return;
             }
             PrefabGUID familiarId = new(familiarSet[choice - 1]);
