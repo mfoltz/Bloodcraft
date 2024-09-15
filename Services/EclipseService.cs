@@ -141,8 +141,12 @@ internal class EclipseService
 
                 if (SteamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
                 {
-                    // need to get a 00 value for each stat and add them together but not literally, just concatenating
-                    if (stats.Count != 0) bonusStats = int.Parse(string.Join("", stats.Select(stat => ((int)stat + 1).ToString("D2"))));
+                    //if (stats.Count != 0) bonusStats = int.Parse(string.Join("", stats.Select(stat => ((int)stat + 1).ToString("D2"))));
+                    var limitedStats = stats.Take(3).Select(stat => ((int)stat + 1).ToString("D2"));
+                    if (limitedStats.Any())
+                    {
+                        bonusStats = int.Parse(string.Join("", limitedStats));
+                    }
                 }
             }
             else if (bloodType.Equals(BloodType.None))
@@ -180,8 +184,12 @@ internal class EclipseService
 
                 if (SteamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
                 {
-                    // need to get a 00 value for each stat and add them together but not literally, just concatenating
-                    if (stats.Count != 0) bonusStats = int.Parse(string.Join("", stats.Select(stat => ((int)stat + 1).ToString("D2"))));
+                    //if (stats.Count != 0) bonusStats = int.Parse(string.Join("", stats.Select(stat => ((int)stat + 1).ToString("D2"))));
+                    var limitedStats = stats.Take(3).Select(stat => ((int)stat + 1).ToString("D2"));
+                    if (limitedStats.Any())
+                    {
+                        bonusStats = int.Parse(string.Join("", limitedStats));
+                    }
                 }
             }
         }
