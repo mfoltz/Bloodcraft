@@ -88,7 +88,8 @@ internal static class ClassCommands
                         data.ClassSpell = ConfigService.DefaultClassSpell;
                         steamId.SetPlayerSpells(data);
 
-                        LocalizationService.HandleReply(ctx, $"You have chosen the default class spell <color=#CBC3E3>{new PrefabGUID(ConfigService.DefaultClassSpell).LookupName()}</color>, it will be available on weapons and unarmed if .shift is enabled.");
+                        ClassUtilities.UpdateShift(ctx.Event.SenderCharacterEntity, new(data.ClassSpell));
+                        LocalizationService.HandleReply(ctx, $"You have chosen <color=#CBC3E3>{new PrefabGUID(ConfigService.DefaultClassSpell).GetPrefabName()}</color>, it will be available on weapons and unarmed if .shift is enabled.");
                         return;
                     }
                 }
@@ -104,7 +105,8 @@ internal static class ClassCommands
                     spellsData.ClassSpell = spells[choice - 1];
                     steamId.SetPlayerSpells(spellsData);
 
-                    LocalizationService.HandleReply(ctx, $"You have chosen spell <color=#CBC3E3>{new PrefabGUID(spells[choice - 1]).LookupName()}</color> from <color=white>{playerClass}</color>, it will be available on weapons and unarmed if .shift is enabled.");
+                    ClassUtilities.UpdateShift(ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
+                    LocalizationService.HandleReply(ctx, $"You have chosen <color=#CBC3E3>{new PrefabGUID(spells[choice - 1]).GetPrefabName()}</color> from <color=white>{playerClass}</color>, it will be available on weapons and unarmed if .shift is enabled.");
                 }
             }
             else

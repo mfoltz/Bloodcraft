@@ -23,7 +23,6 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
-    //static readonly Entity VBloodAbilityBuffPrefab = PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff];
 
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]

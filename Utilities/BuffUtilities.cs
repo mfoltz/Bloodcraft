@@ -144,6 +144,8 @@ internal static class BuffUtilities
         };
         entity.Add<DisableAggroBuff>();
         entity.Write(disableAggroBuff);
+
+        entity.Add<HideTargetHUD>();
     }
     public static void HandleBreakBuff(Entity entity)
     {

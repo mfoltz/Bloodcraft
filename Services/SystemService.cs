@@ -55,6 +55,9 @@ public class SystemService(World world)
     EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
     public EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => _endSimulationEntityCommandBufferSystem ??= GetSystem<EndSimulationEntityCommandBufferSystem>();
 
+    ReplaceAbilityOnSlotSystem _replaceAbilityOnSlotSystem;
+    public ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => _replaceAbilityOnSlotSystem ??= GetSystem<ReplaceAbilityOnSlotSystem>();
+    
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
     public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
     T GetSystem<T>() where T : ComponentSystemBase

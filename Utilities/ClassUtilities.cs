@@ -1,13 +1,16 @@
 ﻿using Bloodcraft.Services;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
+using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
+using static ProjectM.Tiles.TileConstants;
 
 namespace Bloodcraft.Utilities;
 
@@ -17,14 +20,12 @@ internal static class ClassUtilities
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+    static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
+    static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
 
-    static readonly ComponentType[] JewelComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<JewelInstance>()),
-        ComponentType.ReadOnly(Il2CppType.Of<JewelLevelSource>())
-    ];
+    static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
 
-    //static EntityQuery JewelQuery;
     public static List<int> GetClassBuffs(ulong steamId)
     {
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
@@ -180,6 +181,97 @@ internal static class ClassUtilities
         };
 
         BuffUtilities.ApplyClassBuffs(character, steamId, fromCharacter);
+    }
+    public static void UpdateShift(Entity character, PrefabGUID spellPrefabGUID)
+    {
+        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.TryGetComponent(out VBloodAbilityData vBloodAbilityData))
+        {
+            Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+            if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
+            {
+                Entity buffEntity = Entity.Null;
+                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
+                int index = -1;
+
+                for (int i = 0; i < firstBuffer.Length; i++)
+                {
+                    VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];
+                    if (vBloodAbilityBuffEntry.ActiveAbility.Equals(oldAbility) && vBloodAbilityBuffEntry.SlotId == 3)
+                    {
+                        buffEntity = vBloodAbilityBuffEntry.ActiveBuff;
+                        index = i;
+                        //Core.Log.LogInfo("Found old shift ability...");
+                        break;
+                    }
+                }
+
+                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
+                {
+                    firstBuffer.RemoveAt(index);
+                    DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                }
+            }
+
+            VBloodAbilityUtilities.InstantiateBuff(EntityManager, ActivateVBloodAbilitySystem._BuffSpawnerSystemData, character, PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff], spellPrefabGUID, 3);
+            if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var secondBuffer))
+            {
+                foreach (VBloodAbilityBuffEntry abilityEntry in secondBuffer)
+                {
+                    if (abilityEntry.ActiveAbility.Equals(spellPrefabGUID))
+                    {
+                        //Core.Log.LogInfo("Set correct ability type for shift...");
+                        abilityEntry.ActiveBuff.With((ref VBloodAbilityReplaceBuff vBloodAbilityReplaceBuff) =>
+                        {
+                            vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType;
+                        });
+                        break;
+                    }
+                }
+            }
+
+            ReplaceAbilityOnSlotSystem.OnUpdate();
+        }
+        else if (spellPrefabGUID.HasValue())
+        {
+            Entity buffEntity = Entity.Null;
+            var buffer = character.ReadBuffer<BuffBuffer>();
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                BuffBuffer item = buffer[i];
+                if (item.PrefabGuid.LookupName().StartsWith("EquipBuff_Weapon"))
+                {
+                    buffEntity = item.Entity;
+                    break;
+                }
+            }
+
+            var replaceBuffer = buffEntity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
+            int toRemove = -1;
+
+            for (int i = 0; i < replaceBuffer.Length; i++)
+            {
+                ReplaceAbilityOnSlotBuff item = replaceBuffer[i];
+                if (item.Slot == 3)
+                {
+                    toRemove = i;
+                    break;
+                }
+            }
+
+            if (replaceBuffer.IsIndexWithinRange(toRemove)) replaceBuffer.RemoveAt(toRemove);
+
+            ReplaceAbilityOnSlotBuff buff = new()
+            {
+                Slot = 3,
+                NewGroupId = spellPrefabGUID,
+                CopyCooldown = true,
+                Priority = 0,
+            };
+
+            replaceBuffer.Add(buff);
+            ReplaceAbilityOnSlotSystem.OnUpdate();
+        }
     }
     /*
     public static void GenerateAbilityJewelMap()
