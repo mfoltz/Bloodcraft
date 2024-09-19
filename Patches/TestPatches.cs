@@ -1,12 +1,17 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.CastleBuilding;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using ProjectM.Terrain;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine.TerrainUtils;
 
 namespace Bloodcraft.Patches;
 
@@ -16,21 +21,33 @@ internal static class TestPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    
-    [HarmonyPatch(typeof(SetupNetworkIdSystem_PreSerialize), nameof(SetupNetworkIdSystem_PreSerialize.OnUpdate))]
+    static SystemService SystemService => Core.SystemService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+ 
+    [HarmonyPatch(typeof(CharacterMenuOpenedSystem_Server), nameof(CharacterMenuOpenedSystem_Server.OnUpdate))]
     [HarmonyPrefix]
-    static void OnUpdatePrefix(SetupNetworkIdSystem_PreSerialize __instance)
+    static void OnUpdatePrefix(CharacterMenuOpenedSystem_Server __instance)
     {
         if (!Core.hasInitialized) return;
         
-        NativeArray<Entity> entities = __instance.__query_1510972495_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
-            foreach (Entity entity in entities)
+            foreach (Entity entity in entities) // Prefab AB_Interact_Mount_Owner_Buff_Horse PrefabGuid(854656674)
             {
-                if (entity.Has<ScrollingCombatTextMessage>())
+                if (entity.TryGetComponent(out FromCharacter fromCharacter))
                 {
-                    entity.LogComponentTypes();
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(fromCharacter.Character);
+                    if (familiar.Exists() && familiar.Has<Mountable>())
+                    {
+                        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+                        {
+                            BuffPrefabGUID = new(854656674),
+                            Who = fromCharacter.Character.Read<NetworkId>()
+                        };
+                        
+                        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                    }
                 }
             }
         }
@@ -41,4 +58,5 @@ internal static class TestPatches
     }
 }
 */
+
 

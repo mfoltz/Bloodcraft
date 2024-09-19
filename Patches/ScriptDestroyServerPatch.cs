@@ -9,6 +9,7 @@ using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
+/*
 [HarmonyPatch]
 internal static class ScriptDestroyServerPatch
 {
@@ -39,3 +40,4 @@ internal static class ScriptDestroyServerPatch
         }
     }
 }
+*/

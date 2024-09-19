@@ -19,6 +19,8 @@ public static class ConfigService
     public static string QuestRewardAmounts { get; private set; }
     public static int RerollDailyPrefab { get; private set; }
     public static int RerollDailyAmount { get; private set; }
+    public static int RerollWeeklyPrefab { get; private set; }
+    public static int RerollWeeklyAmount { get; private set; }
     public static bool LevelingSystem { get; private set; }
     public static bool RestedXPSystem { get; private set; }
     public static float RestedXPRate { get; private set; }
@@ -200,7 +202,9 @@ public static class ConfigService
             new ConfigEntryDefinition("Quests", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool."),
             new ConfigEntryDefinition("Quests", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3)."),
             new ConfigEntryDefinition("Quests", "RerollDailyPrefab", -949672483, "Prefab item for rerolling daily."),
-            new ConfigEntryDefinition("Quests", "RerollDailyAmount", 100, "Cost of prefab for rerolling daily."),
+            new ConfigEntryDefinition("Quests", "RerollDailyAmount", 50, "Cost of prefab for rerolling daily."),
+            new ConfigEntryDefinition("Quest", "RerollWeeklyPrefab", -949672483, "Prefab item for rerolling weekly."),
+            new ConfigEntryDefinition("Quest", "RerollWeeklyAmount", 50, "Cost of prefab for rerolling weekly. Won't work if already completed for the week."),
             new ConfigEntryDefinition("Leveling", "LevelingSystem", false, "Enable or disable the leveling system."),
             new ConfigEntryDefinition("Leveling", "RestedXPSystem", false, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp."),
             new ConfigEntryDefinition("Leveling", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffin will provide maximum current rested XP)."),

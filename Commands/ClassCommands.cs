@@ -153,7 +153,7 @@ internal static class ClassCommands
         ClassUtilities.RemoveClassBuffs(ctx, steamId);
         ClassUtilities.UpdateClassData(character, parsedClassType, classes, steamId);
 
-        LocalizationService.HandleReply(ctx, $"You have changed to <color=white>{parsedClassType}</color>");
+        LocalizationService.HandleReply(ctx, $"Class changed to <color=white>{parsedClassType}</color>!");
     }
 
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
@@ -281,7 +281,6 @@ internal static class ClassCommands
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".class lst [Class]", description: "Shows weapon and blood stat synergies for a class.")]
     public static void ListClassStats(ChatCommandContext ctx, string classType = "")
     {
-        // Parse classType parameter
         if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
         {
             if (ClassWeaponBloodMap.TryGetValue(requestedClass, out var weaponBloodStats))

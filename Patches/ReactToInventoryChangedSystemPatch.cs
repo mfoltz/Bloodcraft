@@ -5,7 +5,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -16,6 +15,7 @@ namespace Bloodcraft.Patches;
 internal static class ReactToInventoryChangedSystemPatch
 {
     const float ProfessionBaseXP = 50f;
+
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
@@ -42,25 +42,25 @@ internal static class ReactToInventoryChangedSystemPatch
                         steamId = user.PlatformId;
 
                         if (!DealDamageSystemPatch.LastDamageTime.ContainsKey(steamId)) continue;
-                        //Core.Log.LogInfo($"User {steamId} obtained {inventoryChangedEvent.Item.LookupName()}: {inventoryChangedEvent.Amount}");
-                        if (DealDamageSystemPatch.LastDamageTime.TryGetValue(steamId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
+                        else if (DealDamageSystemPatch.LastDamageTime.TryGetValue(steamId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
                         {
-                            //Core.Log.LogInfo($"{(DateTime.UtcNow - lastDamageTime).TotalSeconds} | Allowing credit...");
                             if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, user);
                             continue;
                         }
-                        //Core.Log.LogInfo($"{(DateTime.UtcNow - lastDamageTime).TotalSeconds} | Denying credit...");
+
+                        continue;
                     }
 
                     if (!inventoryConnection.InventoryOwner.TryGetComponent(out UserOwner userOwner)) continue;
-
                     Entity userEntity = userOwner.Owner._Entity;
-                    PrefabGUID itemPrefab = inventoryChangedEvent.Item;
 
-                    if (inventoryChangedEvent.ItemEntity.Has<UpgradeableLegendaryItem>())
+                    PrefabGUID itemPrefab = inventoryChangedEvent.Item;
+                    Entity itemEntity = inventoryChangedEvent.ItemEntity;
+
+                    if (itemEntity.Has<UpgradeableLegendaryItem>())
                     {
-                        int tier = inventoryChangedEvent.ItemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
-                        itemPrefab = inventoryChangedEvent.ItemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
+                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                        itemPrefab = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
                     }
 
                     if (!userEntity.TryGetComponent(out user)) continue;
@@ -79,11 +79,9 @@ internal static class ReactToInventoryChangedSystemPatch
                         if (handler != null)
                         {
                             if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
-
-                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler);
                             if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
 
-                            Entity itemEntity = inventoryChangedEvent.ItemEntity;
+                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler);
                             switch (handler)
                             {
                                 case BlacksmithingHandler:

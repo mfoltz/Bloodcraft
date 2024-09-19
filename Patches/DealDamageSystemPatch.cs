@@ -43,24 +43,15 @@ internal static class DealDamageSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Exists() || !entity.Has<DealDamageEvent>()) continue;
-
-                DealDamageEvent dealDamageEvent = entity.Read<DealDamageEvent>();
-
-                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
-
-                if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // null entities are NOT to make it in here, don't know why or how but last time it happened messed up the save pretty badly
-
-                PrefabGUID sourcePrefab = dealDamageEvent.SpellSource.Read<PrefabGUID>();
-
-                if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue; // skip if source is silver or garlic
+                if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent)) continue;
+                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue;
+                else if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
+                else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
 
                 Entity player;
                 if (dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
-                    //PrefabGUID target = lastEntry.ItemType;
-
                     LastDamageTime[steamId] = DateTime.UtcNow;
                 }
                 else if (dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())

@@ -161,6 +161,10 @@ internal static class BuffUtilities
 
         if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
     }
+    public static void HandleSuccessBuff(Entity entity)
+    {
+
+    }
     public static void HandleVisual(Entity entity, PrefabGUID visual)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()

@@ -31,10 +31,9 @@ internal static class CreateGameplayEventOnDestroySystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<Buff>() || !entity.Has<PrefabGUID>()) continue;
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
-                PrefabGUID PrefabGUID = entity.Read<PrefabGUID>();
-                if (PrefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
+                if (prefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entity.GetOwner();
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
@@ -52,10 +51,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                         }
                     }
 
-                    if (toProcess.GuidHash == 0)
-                    {
-                        continue;
-                    }
+                    if (toProcess.IsEmpty()) continue;
 
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(toProcess, "");
                     if (handler != null)

@@ -56,12 +56,12 @@ internal static class EmoteSystemPatch
 
                 Entity userEntity = fromCharacter.User;
                 Entity character = fromCharacter.Character;
-
                 ulong steamId = userEntity.Read<User>().PlatformId;
+
                 if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
                 {
                     if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
-                    else if (ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _))
+                    else if (ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
                     {
                         LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
                     }
@@ -90,21 +90,20 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        if (familiar != Entity.Null)
+        if (familiar.Exists())
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You already have an active familiar.");
             return;
         }
 
-        string set = "";
-        steamId.TryGetFamiliarBox(out set);
+        string set = steamId.TryGetFamiliarBox(out set) ? set : "";
 
         if (string.IsNullOrEmpty(set))
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
             return;
         }
-
+        
         if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
             PlayerUtilities.SetPlayerBool(steamId, "Binding", true);

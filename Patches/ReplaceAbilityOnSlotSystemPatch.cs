@@ -44,7 +44,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     bool shiftSpell = prefabName.Contains("weapon");
 
                     (int FirstSlot, int SecondSlot, int ShiftSlot) spells;
-                    if (ConfigService.UnarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
+                    if (ConfigService.UnarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells)) // rest of this probably redundant with instant switching on the command, noting to verify later
                     {
                         HandleExtraSpells(entity, character, steamId, spells);
                     }

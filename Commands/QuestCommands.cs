@@ -142,6 +142,16 @@ internal static class QuestCommands
             return;
         }
 
+        questType = questType.ToLower();
+        if (questType == "d")
+        {
+            questType = "Daily";
+        }
+        else if (questType == "w")
+        {
+            questType = "Weekly";
+        }
+
         if (!Enum.TryParse(questType, true, out QuestType type))
         {
             LocalizationService.HandleReply(ctx, "Invalid quest type. (Daily/Weekly)");
@@ -281,7 +291,7 @@ internal static class QuestCommands
     }
 
     [Command(name: "reroll", shortHand: "r", adminOnly: false, usage: ".quest r [QuestType]", description: "Reroll quest for cost (daily only currently).")]
-    public static void RerollQuestCommand(ChatCommandContext ctx, string name)
+    public static void RerollQuestCommand(ChatCommandContext ctx, string questType)
     {
         if (!ConfigService.QuestSystem)
         {
@@ -289,31 +299,87 @@ internal static class QuestCommands
             return;
         }
 
+        questType = questType.ToLower();
+        if (questType == "d")
+        {
+            questType = "Daily";
+        }
+        else if (questType == "w")
+        {
+            questType = "Weekly";
+        }
+
+        if (!Enum.TryParse(questType, true, out QuestType type))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid quest type. (Daily/Weekly)");
+            return;
+        }
+
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!ConfigService.RerollDailyPrefab.Equals(0))
+        if (type.Equals(QuestType.Daily))
         {
-            PrefabGUID item = new(ConfigService.RerollDailyPrefab);
-            int quantity = ConfigService.RerollDailyAmount;
-
-            if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+            if (steamId.TryGetPlayerQuests(out var questData) && questData[QuestType.Weekly].Objective.Complete && !ConfigService.InfiniteDailies)
             {
-                if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
-                {
-                    int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
-                    ForceDaily(ctx.Event.User, ctx.Event.User.PlatformId, level);
+                LocalizationService.HandleReply(ctx, "You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.");
+                return;
+            }
+            else if (!ConfigService.RerollDailyPrefab.Equals(0))
+            {
+                PrefabGUID item = new(ConfigService.RerollDailyPrefab);
+                int quantity = ConfigService.RerollDailyAmount;
 
-                    LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+                {
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
+                    {
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
+                        ForceDaily(ctx.Event.User, ctx.Event.User.PlatformId, level);
+
+                        LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                    }
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                LocalizationService.HandleReply(ctx, "No daily reroll item configured or couldn't find daily quest entry for player.");
             }
         }
-        else
+        else if (type.Equals(QuestType.Weekly))
         {
-            LocalizationService.HandleReply(ctx, "No daily reroll item configured.");
+            if (steamId.TryGetPlayerQuests(out var questData) && questData[QuestType.Weekly].Objective.Complete)
+            {
+                LocalizationService.HandleReply(ctx, "You've already completed your <color=#BF40BF>Weekly Quest</color>. Check back next week.");
+                return;
+            }
+            else if (!ConfigService.RerollWeeklyPrefab.Equals(0))
+            {
+                PrefabGUID item = new(ConfigService.RerollWeeklyPrefab);
+                int quantity = ConfigService.RerollWeeklyAmount;
+
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+                {
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
+                    {
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
+                        ForceWeekly(ctx.Event.User, ctx.Event.User.PlatformId, level);
+
+                        LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                    }
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                }
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "No weekly reroll item configured or couldn't find weekly quest entry for player.");
+            }
         }
     }
 }

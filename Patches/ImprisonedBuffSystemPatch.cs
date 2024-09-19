@@ -30,7 +30,7 @@ internal static class ImprisonedBuffSystemPatch
                 if (!buffTarget.Has<CharmSource>()) // if no charm source, found familiar being imprisoned, destroy it
                 {
                     if (buffTarget.Has<Disabled>()) buffTarget.Remove<Disabled>();
-                    DestroyUtility.CreateDestroyEvent(EntityManager, buffTarget, DestroyReason.Default, DestroyDebugReason.None);
+                    DestroyUtility.Destroy(EntityManager, buffTarget, DestroyDebugReason.None);
                 }
             }
         }

@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -29,14 +28,8 @@ internal static class UpdateBuffsBufferDestroyPatch
         {
             foreach (Entity entity in entities)
             {
-
-                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
-
-                //if (prefabGUID.Equals(new PrefabGUID(-182838302))) Core.Log.LogInfo("Destroyed Buff: " + prefabGUID.LookupName());
-
-                //if (prefabGUID.Equals(captureBuff)) Core.Log.LogInfo($"UpdateBuffsBufferDestroy: {captureBuff.LookupName()}");
-
-                if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out Entity player))
                     {
@@ -50,11 +43,10 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
                     }
                 }
-                else if (ConfigService.PrestigeSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player) && entity.Has<LifeTime>()) // check if need to reapply prestige buff
+                else if (ConfigService.PrestigeSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player) && entity.TryGetComponent(out LifeTime lifeTime)) // check if need to reapply prestige buff
                 {
-                    if (entity.Read<LifeTime>().Duration != -1f) continue; // filter for not having infinite duration
-
-                    if (PrestigeBuffPrefabs.Contains(prefabGUID)) // check if the buff is a prestige buff, will filter for any empty prestige buffs prefabs here as well
+                    if (lifeTime.Duration != -1f) continue; // filter for not having infinite duration
+                    else if (PrestigeBuffPrefabs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
                     {
                         ulong steamId = player.GetSteamId();
 
@@ -63,12 +55,6 @@ internal static class UpdateBuffsBufferDestroyPatch
                             if (prestigeLevel > PrestigeBuffPrefabs.IndexOf(prefabGUID)) PrestigeSystem.HandlePrestigeBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
-                }
-                else if (ConfigService.FamiliarSystem && entity.GetOwner().TryGetPlayer(out player) && prefabGUID.Equals(captureBuff))
-                {
-                    Entity target = entity.GetBuffTarget();
-                    FamiliarUnlockSystem.HandleRoll(1f, target, player);
-                    target.Add<DestroyTag>();       
                 }
             }
         }
