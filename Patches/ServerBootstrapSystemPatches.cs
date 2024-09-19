@@ -45,7 +45,8 @@ internal static class ServerBootstrapSystemPatches
         { "VBloodEmotes", true },
         { "FamiliarVisual", true},
         { "ShinyChoice", false },
-        { "Reminders", true }
+        { "Reminders", true },
+        { "ScrollingText", false}
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]

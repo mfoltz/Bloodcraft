@@ -248,8 +248,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 5f;
         aiMoveSpeeds.Run._Value = 6.5f;
         entity.Write(aiMoveSpeeds);
-        BuffUtilities.
-                HandleVisual(entity, manticoreVisual);
+        BuffUtilities.HandleVisual(entity, manticoreVisual);
     }
     static void HandleMonster(Entity entity)
     {
@@ -275,8 +274,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 2.5f;
         aiMoveSpeeds.Run._Value = 5.5f;
         entity.Write(aiMoveSpeeds);
-        BuffUtilities.
-                HandleVisual(entity, monsterVisual);
+        BuffUtilities.HandleVisual(entity, monsterVisual);
     }
     static void HandleSolarus(Entity entity)
     {
@@ -301,8 +299,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
         aiMoveSpeeds.Walk._Value = 4f;
         entity.Write(aiMoveSpeeds);
-        BuffUtilities.
-                HandleVisual(entity, solarusVisual);
+        BuffUtilities.HandleVisual(entity, solarusVisual);
     }
     static void HandleAngel(Entity entity)
     {
@@ -325,8 +322,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 5f;
         aiMoveSpeeds.Run._Value = 7.5f;
         entity.Write(aiMoveSpeeds);
-        BuffUtilities.
-                HandleVisual(entity, solarusVisual);
+        BuffUtilities.HandleVisual(entity, solarusVisual);
     }
     static void HandleFallenAngel(Entity entity)
     {
@@ -360,7 +356,6 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Run._Value = 3.5f;
         aiMoveSpeeds.Circle._Value = 3.5f;
         entity.Write(aiMoveSpeeds);
-        BuffUtilities.
-                HandleVisual(entity, draculaVisual);
+        BuffUtilities.HandleVisual(entity, draculaVisual);
     }
 }

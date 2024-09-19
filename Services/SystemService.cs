@@ -49,13 +49,14 @@ public class SystemService(World world)
     NameableInteractableSystem _nameableInteractableSystem;
     public NameableInteractableSystem NameableInteractableSystem => _nameableInteractableSystem ??= GetSystem<NameableInteractableSystem>();
 
-    FeedableInventorySystem_Spawn _feedableInventorySystem_Spawn;
-    public FeedableInventorySystem_Spawn FeedableInventorySystem_Spawn => _feedableInventorySystem_Spawn ??= GetSystem<FeedableInventorySystem_Spawn>();
+    ActivateVBloodAbilitySystem _activateVBloodAbilitySystem;
+    public ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => _activateVBloodAbilitySystem ??= GetSystem<ActivateVBloodAbilitySystem>();
+
+    EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
+    public EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => _endSimulationEntityCommandBufferSystem ??= GetSystem<EndSimulationEntityCommandBufferSystem>();
 
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
     public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
-
-    // Generic method to get or create a system
     T GetSystem<T>() where T : ComponentSystemBase
     {
         return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"Failed to get {Il2CppType.Of<T>().FullName} from the Server...");

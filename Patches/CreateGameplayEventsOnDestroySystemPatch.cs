@@ -61,7 +61,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     if (handler != null)
                     {
                         int multiplier = ProfessionMappings.GetFishingModifier(toProcess);
-                        ProfessionSystem.SetProfession(user, steamId, BaseFishingXP * multiplier, handler);
+                        ProfessionSystem.SetProfession(target, character, steamId, BaseFishingXP * multiplier, handler);
                         ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }

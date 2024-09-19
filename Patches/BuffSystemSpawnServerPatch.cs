@@ -43,13 +43,10 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID Solarus = new(-740796338);
 
     static readonly PrefabGUID phasing = new(-79611032); // lol switch bodies with familiar? hmmm
-    static readonly PrefabGUID feedExecute = new(366323518);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
-    static readonly PrefabGUID castlemanCombatBuff = new(731266864);
-
-    static readonly PrefabGUID modifyHUDTarget = new(-182838302);
-    static readonly PrefabGUID captureBuff = new(548966542);
+    static readonly PrefabGUID captureBuff = new(1280015305);
+    static readonly PrefabGUID immaterialBuff = new(-259674366);
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -69,10 +66,7 @@ internal static class BuffSpawnSystemPatches
                 string prefabName = prefabGUID.LookupName().ToLower();
                 Entity player = Entity.Null;
 
-                // sections should be grouped appropriately to not interfere with each other
-                //Core.Log.LogInfo($"BuffSystem_Spawn_Server Prefix: {prefabGUID.LookupName()}");
-
-                /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out
+                /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out, seems fine but still leaving for now
                 if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().TryGetPlayer(out player)) // feed execute kills
                 {
                     Entity died = entity.GetSpellTarget();
@@ -246,64 +240,18 @@ internal static class BuffSpawnSystemPatches
                         {
                             if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 30f, EndAction = LifeTimeEndAction.Destroy });
                         }
-                        /* apparently doesn't actually go through here, huh
-                        else if (prefabGUID.Equals(castlemanCombatBuff))
-                        {
-                            if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
-                            Core.Log.LogInfo("Removed AdaptLevel from CastleMan combat buff...");
-                        }
-                        */
                     }
                 }
-                /*
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(captureBuff))
                 {
-                    Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName());
-
-                    if (entity.Has<GameplayEventListeners>()) entity.Remove<GameplayEventListeners>();
-                    if (entity.Has<PlaySequenceOnGameplayEvent>()) entity.Remove<PlaySequenceOnGameplayEvent>();
-                    if (entity.Has<GameplayEventIdMapping>()) entity.Remove<GameplayEventIdMapping>();
-                    if (entity.Has<ApplyBuffOnGameplayEvent>()) entity.Remove<ApplyBuffOnGameplayEvent>();
-                    if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
-                    if (entity.Has<CreateGameplayEventsOnDestroy>()) entity.Remove<CreateGameplayEventsOnDestroy>();
-                    if (entity.Has<CreateGameplayEventsOnTick>()) entity.Remove<CreateGameplayEventsOnTick>();
-                    if (entity.Has<BuffModificationFlagData>()) entity.Remove<BuffModificationFlagData>();
-                    if (entity.Has<DestroyBuffOnDamageTaken>()) entity.Remove<DestroyBuffOnDamageTaken>();
-                    if (entity.Has<MultiplyAbsorbCapBySpellPower>()) entity.Remove<MultiplyAbsorbCapBySpellPower>();
-                    if (entity.Has<AbsorbCapStackModifier>()) entity.Remove<AbsorbCapStackModifier>();
-                    if (entity.Has<AbsorbBuff>()) entity.Remove<AbsorbBuff>();
-
-                    if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
-                    if (entity.Has<GetTranslationOnSpawn>()) entity.Write(new GetTranslationOnSpawn { TranslationSource = GetTranslationSource.BuffTarget, SnapToGround = false });
-
-                    AmplifyBuff amplifyBuff = new()
-                    {
-                        AmplifyModifier = -1f
-                    };
-                    entity.Add<AmplifyBuff>();
-                    entity.Write(amplifyBuff);
-
-                    entity.Add<HideTargetHUD>();
-
-                    Script_Buff_Stealth_DataServer script_Buff_Stealth_DataServer = new()
-                    {
-                        ModelInvisible = true
-                    };
-                    entity.Add<Script_Buff_Stealth_DataServer>();
-                    entity.Write(script_Buff_Stealth_DataServer);
-
-                    DisableAggroBuff disableAggroBuff = new()
-                    {
-                        Mode = DisableAggroBuffMode.TargetDontAttackOthers | DisableAggroBuffMode.OthersDontAttackTarget
-                    };
-                    entity.Add<DisableAggroBuff>();
-                    entity.Write(disableAggroBuff);
+                    //Core.Log.LogInfo("BuffSpawnSystem" + entity.Read<PrefabGUID>().LookupName());
+                    BuffUtilities.HandleCaptureBuff(entity);
                 }
-                else if (prefabGUID.Equals(captureBuff))
+                else if (ConfigService.FamiliarSystem && !entity.GetBuffTarget().IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(immaterialBuff))
                 {
-                    entity.LogComponentTypes();
+                    //Core.Log.LogInfo("BuffSpawnSystem" + entity.Read<PrefabGUID>().LookupName());
+                    BuffUtilities.HandleImmaterialBuff(entity);
                 }
-                */
             }
         }
         finally

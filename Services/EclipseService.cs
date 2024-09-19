@@ -54,10 +54,7 @@ internal class EclipseService
     static void RegisterUser(ulong steamId)
     {
         if (RegisteredUsers.Contains(steamId)) return;
-
-        PlayerInfo playerInfo;
-
-        if (steamId.TryGetPlayerInfo(out playerInfo))
+        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
         {
             Core.Log.LogInfo($"User {steamId} registered for Eclipse updates from PlayerCache...");
             RegisteredUsers.Add(steamId);
@@ -196,8 +193,9 @@ internal class EclipseService
 
         return (expertisePercent, expertiseLevel, expertisePrestige, expertiseEnum, bonusStats);
     }
-    static (int Progress, int Goal, string Target, string IsVBlood) GetQuestData(ulong SteamID, Systems.Quests.QuestSystem.QuestType questType)
+    static (int Type, int Progress, int Goal, string Target, string IsVBlood) GetQuestData(ulong SteamID, Systems.Quests.QuestSystem.QuestType questType)
     {
+        int type = 0; // kill by default
         int progress = 0;
         int goal = 0;
         string target = "";
@@ -207,28 +205,29 @@ internal class EclipseService
         {
             if (questData.TryGetValue(questType, out var quest) && !quest.Objective.Complete)
             {
+                type = (int)quest.Objective.Goal;
                 progress = quest.Progress;
                 goal = quest.Objective.RequiredAmount;
                 target = quest.Objective.Target.GetPrefabName();
-                if (PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(quest.Objective.Target)) isVBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[quest.Objective.Target].Has<VBloodConsumeSource>().ToString();
+                if (type == 0 && PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(quest.Objective.Target)) isVBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[quest.Objective.Target].Has<VBloodConsumeSource>().ToString();
             }
         }
 
-        return (progress, goal, target, isVBlood);
+        return (type, progress, goal, target, isVBlood);
     }
     static string BuildProgressMessage((int Percent, int Level, int Prestige, int Class) experienceData, //want to send bonuses as well
         (int Percent, int Level, int Prestige, int Enum, int BonusStats) legacyData,
         (int Percent, int Level, int Prestige, int Enum, int BonusStats) expertiseData,
-        (int Progress, int Goal, string Target, string IsVBlood) dailyQuestData,
-        (int Progress, int Goal, string Target, string IsVBlood) weeklyQuestData)
+        (int Type, int Progress, int Goal, string Target, string IsVBlood) dailyQuestData,
+        (int Type, int Progress, int Goal, string Target, string IsVBlood) weeklyQuestData)
     {
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3},", experienceData.Percent, experienceData.Level, experienceData.Prestige, experienceData.Class)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", legacyData.Percent, legacyData.Level, legacyData.Prestige, legacyData.Enum, legacyData.BonusStats)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", expertiseData.Percent, expertiseData.Level, expertiseData.Prestige, expertiseData.Enum, expertiseData.BonusStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},{3},", dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target, dailyQuestData.IsVBlood)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2},{3}", weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target, weeklyQuestData.IsVBlood);
+            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4},", dailyQuestData.Type, dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target, dailyQuestData.IsVBlood)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4}", weeklyQuestData.Type, weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target, weeklyQuestData.IsVBlood);
 
         return sb.ToString();
     }

@@ -2,6 +2,7 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -10,12 +11,13 @@ using static Bloodcraft.Systems.Leveling.LevelingSystem;
 using static Bloodcraft.Utilities.ClassUtilities;
 
 namespace Bloodcraft.Utilities;
-
 internal static class BuffUtilities
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+
+    const float CaptureTime = 6.25f; // with padding
     public static void ApplyBuff(PrefabGUID buffPrefab, Entity target)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -69,7 +71,6 @@ internal static class BuffUtilities
                 if (!ServerGameManager.HasBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier()))
                 {
                     DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-
                     if (ServerGameManager.TryGetBuff(character, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
                     {
                         HandleBloodBuff(buff);
@@ -106,24 +107,57 @@ internal static class BuffUtilities
             }
         }
     }
-    public static void HandleCaptureBuff(Entity buffEntity)
+    public static void HandleImmaterialBuff(Entity entity)
     {
+        //Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName() + " | " + entity.Read<PrefabGUID>().LookupName());
 
-    }
-    public static void HandleModifyTargetHUDBuff(Entity buffEntity)
-    {
-        if (buffEntity.Has<LifeTime>()) buffEntity.Write(new LifeTime { Duration = -1f, EndAction = LifeTimeEndAction.None });
-        if (buffEntity.Has<HideWeapon>()) buffEntity.Remove<HideWeapon>();
-        if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
-        if (buffEntity.Has<ModifyTargetHUDBuff>())
+        if (entity.Has<ModifyMovementSpeedBuff>()) entity.Remove<ModifyMovementSpeedBuff>();
+        entity.With((ref LifeTime lifeTime) =>
         {
-            buffEntity.With((ref ModifyTargetHUDBuff modifyTargetHUDBuff) =>
-            {
-                modifyTargetHUDBuff.BloodPrefabType = CharacterHUDEntryType.BloodType;
-                modifyTargetHUDBuff.PrefabType = CharacterHUDEntryType.BaseUnitNamed;
-                modifyTargetHUDBuff.Height = 2f;
-            });
-        }
+            lifeTime.Duration = CaptureTime;
+            lifeTime.EndAction = LifeTimeEndAction.Destroy;
+        });
+    }
+    public static void HandleCaptureBuff(Entity entity)
+    {
+        //Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName() +" | " + entity.Read<PrefabGUID>().LookupName());
+
+        if (entity.Has<AbilityProjectileFanOnGameplayEvent_DataServer>()) entity.Remove<AbilityProjectileFanOnGameplayEvent_DataServer>();
+        if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = CaptureTime, EndAction = LifeTimeEndAction.Destroy });
+
+        entity.With((ref AmplifyBuff amplifyBuff) =>
+        {
+            amplifyBuff.AmplifyModifier = -1f;
+        });
+
+        ModifyMovementSpeedBuff modifyMovementSpeedBuff = new()
+        {
+            MultiplyAdd = false,
+            MoveSpeed = 0f
+        };
+        entity.Add<ModifyMovementSpeedBuff>();
+        entity.Write(modifyMovementSpeedBuff);
+
+        DisableAggroBuff disableAggroBuff = new()
+        {
+            Mode = DisableAggroBuffMode.TargetDontAttackOthers
+        };
+        entity.Add<DisableAggroBuff>();
+        entity.Write(disableAggroBuff);
+    }
+    public static void HandleBreakBuff(Entity entity)
+    {
+        //Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName() + " | " + entity.Read<PrefabGUID>().LookupName());
+
+        entity.With((ref LifeTime lifeTime) =>
+        {
+            lifeTime.Duration = 1.5f;
+            lifeTime.EndAction = LifeTimeEndAction.Destroy;
+        });
+
+        entity.Add<BlockFeedBuff>();
+
+        if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
     }
     public static void HandleVisual(Entity entity, PrefabGUID visual)
     {
@@ -216,5 +250,4 @@ internal static class BuffUtilities
             UpdateBuffsBufferDestroyPatch.PrestigeBuffPrefabs.Add(new PrefabGUID(buff));
         }
     }
-
 }

@@ -39,6 +39,7 @@ internal static class FamiliarCommands
         ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
         ComponentType.ReadOnly(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
     ];
+
     static readonly NetworkEventType EventType = new()
     {
         IsAdminEvent = false,
@@ -64,6 +65,9 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
+
+        // start from the character to make the method
+
         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
 
         if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
@@ -78,8 +82,7 @@ internal static class FamiliarCommands
             return;
         }
 
-        string set = "";
-        steamId.TryGetFamiliarBox(out set);
+        string set = steamId.TryGetFamiliarBox(out set) ? set : "";
 
         if (string.IsNullOrEmpty(set))
         {
@@ -106,6 +109,151 @@ internal static class FamiliarCommands
         else
         {
             LocalizationService.HandleReply(ctx, "Couldn't find familiar or familiar already active.");
+        }
+    }
+
+    [Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
+    public static void BindFamiliar(ChatCommandContext ctx, string name, string box, int choice)
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
+        {
+            ctx.Reply($"Couldn't find player.");
+            return;
+        }
+
+        Entity character = playerInfo.CharEntity;
+        Entity userEntity = playerInfo.UserEntity;
+        ulong steamId = playerInfo.User.PlatformId;
+
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+
+        /* skip this for forcebind
+        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
+        {
+            LocalizationService.HandleReply(ctx, "You can't bind a familiar while in combat or dominating presence is active.");
+            return;
+        }
+        */
+
+        // this is still a good check though
+        if (familiar.Exists())
+        {
+            LocalizationService.HandleReply(ctx, $"<color=white>{playerInfo.User.CharacterName.Value}</color> already has an active familiar.");
+            return;
+        }
+
+        UnlockedFamiliarData unlocksData = LoadUnlockedFamiliars(steamId);
+
+        string set = unlocksData.UnlockedFamiliars.ContainsKey(box) ? box : "";
+        if (string.IsNullOrEmpty(set))
+        {
+            LocalizationService.HandleReply(ctx, $"Couldn't find box for <color=white>{playerInfo.User.CharacterName.Value}</color>. List player boxes by entering '<color=white>.fam lpf [Name]</color>' without a following specific box.");
+            return;
+        }
+
+        if (steamId.TryGetFamiliarActives(out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && unlocksData.UnlockedFamiliars.TryGetValue(set, out var famKeys))
+        {
+            if (choice < 1 || choice > famKeys.Count)
+            {
+                LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{famKeys.Count}</color> (Current List: <color=yellow>{set}</color>)");
+                return;
+            }
+
+            PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
+            steamId.SetFamiliarDefault(choice);
+
+            data = new(Entity.Null, famKeys[choice - 1]);
+            steamId.SetFamiliarActives(data);
+
+            SummonFamiliar(character, userEntity, famKeys[choice - 1]);
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar or familiar already active.");
+        }
+    }
+
+    [Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
+    public static void ListPlayerFamiliars(ChatCommandContext ctx, string name, string box = "")
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
+        {
+            ctx.Reply($"Couldn't find player.");
+            return;
+        }
+
+        ulong steamId = playerInfo.User.PlatformId;
+
+        if (string.IsNullOrEmpty(box))
+        {
+            UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+
+            if (data.UnlockedFamiliars.Keys.Count > 0)
+            {
+                List<string> sets = [];
+                foreach (var key in data.UnlockedFamiliars.Keys)
+                {
+                    sets.Add(key);
+                }
+
+                string fams = string.Join(", ", sets.Select(set => $"<color=yellow>{set}</color>"));
+                LocalizationService.HandleReply(ctx, $"Familiar Boxes for <color=white>{playerInfo.User.CharacterName.Value}</color>: {fams}");
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"<color=white>{playerInfo.User.CharacterName.Value}</color> doesn't have any unlocked familiars yet.");
+            }
+
+            return;
+        }
+        else
+        {
+            UnlockedFamiliarData unlocksData = LoadUnlockedFamiliars(steamId);
+            FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
+
+            string set = unlocksData.UnlockedFamiliars.ContainsKey(box) ? box : "";
+            if (unlocksData.UnlockedFamiliars.TryGetValue(set, out var famKeys))
+            {
+                int count = 1;
+
+                foreach (var famKey in famKeys)
+                {
+                    PrefabGUID famPrefab = new(famKey);
+                    string famName = famPrefab.GetPrefabName();
+                    string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+
+                    // Check if the familiar has buffs and update the color based on RandomVisuals
+                    if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+                    {
+                        // Look up the color from the RandomVisuals dictionary if it exists
+                        if (RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
+                        {
+                            colorCode = $"<color={hexColor}>";
+                        }
+                    }
+
+                    LocalizationService.HandleReply(ctx, $"<color=white>{count}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")}");
+                    count++;
+                }
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "Couldn't locate player box.");
+            }
         }
     }
 
@@ -163,8 +311,7 @@ internal static class FamiliarCommands
         UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
         FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
 
-        string set = "";
-        steamId.TryGetFamiliarBox(out set);
+        string set = steamId.TryGetFamiliarBox(out set) ? set : "";
 
         if (data.UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {

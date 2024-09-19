@@ -1,6 +1,8 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
+using ProjectM.Scripting;
+using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -16,6 +18,7 @@ namespace Bloodcraft.Commands;
 internal static class QuestCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     [Command(name: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
     public static void LogQuestCommand(ChatCommandContext ctx)
@@ -158,7 +161,7 @@ internal static class QuestCommands
 
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            if (type.Equals(QuestType.Daily) && questData.TryGetValue(QuestType.Daily, out var dailyQuest) && !dailyQuest.Objective.Complete)
+            if (type.Equals(QuestType.Daily) && questData.TryGetValue(QuestType.Daily, out var dailyQuest) && dailyQuest.Objective.Goal.Equals(TargetType.Kill) && !dailyQuest.Objective.Complete)
             {
                 if (!QuestService.TargetCache.TryGetValue(dailyQuest.Objective.Target, out HashSet<Entity> entities)) // if no valid targest refresh quest
                 {
@@ -200,7 +203,7 @@ internal static class QuestCommands
                     LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
                 }
             }
-            else if (type.Equals(QuestType.Weekly) && questData.TryGetValue(QuestType.Weekly, out var weeklyQuest) && !weeklyQuest.Objective.Complete)
+            else if (type.Equals(QuestType.Weekly) && questData.TryGetValue(QuestType.Weekly, out var weeklyQuest) && weeklyQuest.Objective.Goal.Equals(TargetType.Kill) && !weeklyQuest.Objective.Complete)
             {
                 if (!QuestService.TargetCache.TryGetValue(weeklyQuest.Objective.Target, out HashSet<Entity> entities)) // if no valid targets refresh quest
                 {
@@ -242,6 +245,10 @@ internal static class QuestCommands
                     LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
                 }
             }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "Tracking only works for incomplete kill quests.");
+            }
         }
         else
         {
@@ -249,7 +256,7 @@ internal static class QuestCommands
         }
     }
 
-    [Command(name: "refresh", shortHand: "r", adminOnly: true, usage: ".quest r [Name]", description: "Refreshes daily and weekly quests for player.")]
+    [Command(name: "refresh", shortHand: "rf", adminOnly: true, usage: ".quest rf [Name]", description: "Refreshes daily and weekly quests for player.")]
     public static void ForceRefreshQuests(ChatCommandContext ctx, string name)
     {
         if (!ConfigService.QuestSystem)
@@ -271,5 +278,42 @@ internal static class QuestCommands
         ForceRefresh(steamId, level);
 
         LocalizationService.HandleReply(ctx, $"Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.");
+    }
+
+    [Command(name: "reroll", shortHand: "r", adminOnly: false, usage: ".quest r [QuestType]", description: "Reroll quest for cost (daily only currently).")]
+    public static void RerollQuestCommand(ChatCommandContext ctx, string name)
+    {
+        if (!ConfigService.QuestSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Quests are not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (!ConfigService.RerollDailyPrefab.Equals(0))
+        {
+            PrefabGUID item = new(ConfigService.RerollDailyPrefab);
+            int quantity = ConfigService.RerollDailyAmount;
+
+            if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+            {
+                if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
+                {
+                    int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
+                    ForceDaily(ctx.Event.User, ctx.Event.User.PlatformId, level);
+
+                    LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                }
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+            }
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "No daily reroll item configured.");
+        }
     }
 }

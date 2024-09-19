@@ -38,23 +38,25 @@ internal static class StatChangeMutationSystemPatch
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
                     if (bloodHandler == null) continue;
 
-                    float legacyKey = bloodHandler.GetLegacyData(steamID).Value;
+                    float quality = bloodHandler.GetLegacyData(steamID).Value;
 
                     if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
                     {
-                        legacyKey = (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
-                        if (legacyKey > 0)
+                        float qualityPercentBonus = ConfigService.PrestigeBloodQuality > 1f ? ConfigService.PrestigeBloodQuality : ConfigService.PrestigeBloodQuality * 100f;
+
+                        quality = (float)bloodPrestige * qualityPercentBonus;
+                        if (quality > 0)
                         {
-                            bloodQualityChange.Quality += legacyKey;
+                            bloodQualityChange.Quality += quality;
                             bloodQualityChange.ForceReapplyBuff = true;
                             entity.Write(bloodQualityChange);
                         }
                     }
                     else if (!ConfigService.PrestigeSystem)
                     {
-                        if (legacyKey > 0)
+                        if (quality > 0)
                         {
-                            bloodQualityChange.Quality += legacyKey;
+                            bloodQualityChange.Quality += quality;
                             bloodQualityChange.ForceReapplyBuff = true;
                             entity.Write(bloodQualityChange);
                         }

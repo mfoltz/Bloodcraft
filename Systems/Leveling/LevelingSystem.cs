@@ -31,7 +31,7 @@ internal static class LevelingSystem
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
 
-    static readonly AssetGuid assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly AssetGuid assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience
     static readonly float3 color = new(1.0f, 0.7529f, 0.7961f);
     public enum PlayerClasses
     {
@@ -318,36 +318,43 @@ internal static class LevelingSystem
         }
         return false;
     }
-    static void NotifyPlayer(Entity userEntity, Entity victim, ulong SteamID, int gainedXP, bool leveledUp, int restedXP)
+    static void NotifyPlayer(Entity userEntity, Entity victim, ulong steamId, int gainedXP, bool leveledUp, int restedXP)
     {
         User user = userEntity.Read<User>();
         Entity character = user.LocalCharacter._Entity;
 
         if (leveledUp)
         {
-            int newLevel = GetLevel(SteamID);
+            int newLevel = GetLevel(steamId);
             SetLevel(character);
 
             if (newLevel <= ConfigService.MaxLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
-            if (PlayerUtilities.GetPlayerBool(SteamID, "Reminders") && Classes && !ClassUtilities.HasClass(SteamID))
+            if (PlayerUtilities.GetPlayerBool(steamId, "Reminders") && Classes && !ClassUtilities.HasClass(steamId))
             {
                 LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
             }
         }
 
-        if (PlayerUtilities.GetPlayerBool(SteamID, "ExperienceLogging"))
+        if (PlayerUtilities.GetPlayerBool(steamId, "ExperienceLogging"))
         {
             //Core.Log.LogInfo($"Player {user.CharacterName.Value} gained {gainedXP} rested {restedXP} leveled up {leveledUp} progress {GetLevelProgress(SteamID)}");
-            int levelProgress = GetLevelProgress(SteamID);
+            int levelProgress = GetLevelProgress(steamId);
             string message = restedXP > 0 ? $"+<color=yellow>{gainedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)" : $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
         if (victim.Equals(Entity.Null)) return;
 
-        //float3 randomPosition = GetRandomPositionAroundEntity(victim.Read<Translation>().Value, 0.5f);
-        //EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-        //Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, entityCommandBuffer, assetGuid, victim.Read<Translation>().Value, color, character, gainedXP + restedXP, default, userEntity);
+        /*
+        if (PlayerUtilities.GetPlayerBool(steamId, "ScrollingText"))
+        {
+            float3 position = victim.Read<Translation>().Value;
+            float3 adjacentPosition = new(position.x + 0.05f, position.y - 0.05f, position.z - 0.01f);
+
+            EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+            Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, entityCommandBuffer, assetGuidLeveling, adjacentPosition, color, character, gainedXP, default, userEntity);
+        }
+        */
     }
     static float3 GetRandomPositionAroundEntity(float3 entityPosition, float radius)
     {

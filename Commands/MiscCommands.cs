@@ -41,9 +41,18 @@ internal static class MiscCommands
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
         var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "Reminders");
+
+        PlayerUtilities.TogglePlayerBool(SteamID, "Reminders");
         LocalizationService.HandleReply(ctx, $"Reminders {(PlayerUtilities.GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+    }
+
+    [Command(name: "sct", adminOnly: false, usage: ".sct", description: "Toggles scrolling text.")]
+    public static void ToggleScrollingText(ChatCommandContext ctx)
+    {
+        var SteamID = ctx.Event.User.PlatformId;
+
+        PlayerUtilities.TogglePlayerBool(SteamID, "ScrollingText");
+        LocalizationService.HandleReply(ctx, $"ScrollingText {(PlayerUtilities.GetPlayerBool(SteamID, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -225,25 +234,30 @@ internal static class MiscCommands
             Options = EntityQueryOptions.IncludeDisabled
         });
 
-        Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
-        List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
         int counter = 0;
-
-        IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
-        foreach (Entity entity in disabledFamiliars)
+        try
         {
-            if (dismissedFamiliars.Contains(entity)) continue;
-            else
+            Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
+            List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
+
+            IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
+            foreach (Entity entity in disabledFamiliars)
             {
-                if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
+                if (dismissedFamiliars.Contains(entity)) continue;
+                else
                 {
-                    DestroyUtility.Destroy(EntityManager, entity);
-                    counter++;
+                    if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
+                    {
+                        DestroyUtility.Destroy(EntityManager, entity);
+                        counter++;
+                    }
                 }
             }
         }
-
-        familiarsQuery.Dispose();
-        LocalizationService.HandleReply(ctx, $"Cleared <color=white>{counter}</color> disabled familiars");
+        finally
+        {
+            familiarsQuery.Dispose();
+            LocalizationService.HandleReply(ctx, $"Cleared <color=white>{counter}</color> disabled familiars");
+        }
     }
 }

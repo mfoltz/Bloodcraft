@@ -6,6 +6,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static ProjectM.BuffUtility;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
 {
@@ -62,22 +63,24 @@ internal static class FamiliarUnlockSystem
     }
     public static void HandleRoll(float dropChance, Entity died, Entity killer)
     {
+        if (!died.TryGetComponent(out PrefabGUID prefabGUID)) return;
+
         if (ConfigService.ShareUnlocks && !died.Has<VBloodConsumeSource>()) // pretty sure everyone in the vblood feed already gets their own roll, no double-dipping
         {
             HashSet<Entity> players = LevelingSystem.GetParticipants(killer, killer.Read<PlayerCharacter>().UserEntity);
             foreach (Entity player in players)
             {
-                if (RollForChance(dropChance)) HandleUnlock(died, player);
+                if (RollForChance(dropChance)) HandleUnlock(prefabGUID, player);
             }
         }
         else
         {
-            if (RollForChance(dropChance)) HandleUnlock(died, killer);
+            if (RollForChance(dropChance)) HandleUnlock(prefabGUID, killer);
         }
     }
-    static void HandleUnlock(Entity died, Entity player)
+    public static void HandleUnlock(PrefabGUID famKey, Entity player, bool capture = false)
     {
-        int familiarKey = died.Read<PrefabGUID>().GuidHash;
+        int familiarKey = famKey.GuidHash;
         User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
         ulong playerId = user.PlatformId;
 
@@ -107,20 +110,42 @@ internal static class FamiliarUnlockSystem
             }
         }
 
+        if (!isAlreadyUnlocked && capture)
+        {
+            List<int> currentList = data.UnlockedFamiliars[lastListName];
+            currentList.Add(familiarKey);
+            FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
+            isShiny = HandleShiny(familiarKey, playerId, ConfigService.ShinyChance);
+            string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+
+            FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(playerId);
+            if (buffsData.FamiliarBuffs.ContainsKey(familiarKey))
+            {
+                if (RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[familiarKey].First()), out var hexColor))
+                {
+                    colorCode = $"<color={hexColor}>";
+                }
+            }
+
+            if (!isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{famKey.GetPrefabName()}</color> successfully dominated!"); // need better message but w/e for now
+            else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{famKey.GetPrefabName()}</color>{colorCode}*</color> successfully dominated!");
+            return;
+        }
+
         if (!isAlreadyUnlocked)
         {
             List<int> currentList = data.UnlockedFamiliars[lastListName];
             currentList.Add(familiarKey);
             FamiliarUnlocksManager.SaveUnlockedFamiliars(playerId, data);
             isShiny = HandleShiny(familiarKey, playerId, ConfigService.ShinyChance);
-            if (!isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
-            else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            if (!isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{famKey.GetPrefabName()}</color>");
+            else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{famKey.GetPrefabName()}</color>");
             return;
         }
 
         if (isShiny)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{died.Read<PrefabGUID>().GetPrefabName()}</color>");
+            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{famKey.GetPrefabName()}</color>");
         }
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)

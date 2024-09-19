@@ -159,7 +159,9 @@ internal static class BloodManager
         {
             if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
             {
-                quality -= (float)bloodPrestige * ConfigService.PrestigeBloodQuality;
+                float qualityPercentBonus = ConfigService.PrestigeBloodQuality > 1f ? ConfigService.PrestigeBloodQuality : ConfigService.PrestigeBloodQuality * 100f;
+
+                quality -= (float)bloodPrestige * qualityPercentBonus;
             }
             else if (!ConfigService.PrestigeSystem)
             {

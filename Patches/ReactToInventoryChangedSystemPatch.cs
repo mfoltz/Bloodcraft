@@ -1,9 +1,11 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
+using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -13,6 +15,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ReactToInventoryChangedSystemPatch
 {
+    const float ProfessionBaseXP = 50f;
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
@@ -27,58 +30,60 @@ internal static class ReactToInventoryChangedSystemPatch
             {
                 InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
-                if (!inventory.Exists()) continue;
 
-                if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.Has<InventoryConnection>())
+                if (inventory.TryGetComponent(out InventoryConnection inventoryConnection) && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained))
                 {
-                    InventoryConnection inventoryConnection = inventory.Read<InventoryConnection>();
-                    if (!inventoryConnection.InventoryOwner.Has<UserOwner>()) continue;
+                    User user;
+                    ulong steamId;
 
-                    UserOwner userOwner = inventoryConnection.InventoryOwner.Read<UserOwner>();
-                    Entity userEntity = userOwner.Owner._Entity;
-
-                    if (!userEntity.Exists())
+                    if (inventoryConnection.InventoryOwner.IsPlayer())
                     {
-                        continue;
+                        user = inventoryConnection.InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>();
+                        steamId = user.PlatformId;
+
+                        if (!DealDamageSystemPatch.LastDamageTime.ContainsKey(steamId)) continue;
+                        //Core.Log.LogInfo($"User {steamId} obtained {inventoryChangedEvent.Item.LookupName()}: {inventoryChangedEvent.Amount}");
+                        if (DealDamageSystemPatch.LastDamageTime.TryGetValue(steamId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
+                        {
+                            //Core.Log.LogInfo($"{(DateTime.UtcNow - lastDamageTime).TotalSeconds} | Allowing credit...");
+                            if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, user);
+                            continue;
+                        }
+                        //Core.Log.LogInfo($"{(DateTime.UtcNow - lastDamageTime).TotalSeconds} | Denying credit...");
                     }
 
+                    if (!inventoryConnection.InventoryOwner.TryGetComponent(out UserOwner userOwner)) continue;
+
+                    Entity userEntity = userOwner.Owner._Entity;
                     PrefabGUID itemPrefab = inventoryChangedEvent.Item;
+
                     if (inventoryChangedEvent.ItemEntity.Has<UpgradeableLegendaryItem>())
                     {
                         int tier = inventoryChangedEvent.ItemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                         itemPrefab = inventoryChangedEvent.ItemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
                     }
 
-                    User user = userEntity.Read<User>();
-                    ulong steamId = user.PlatformId;
+                    if (!userEntity.TryGetComponent(out user)) continue;
+                    steamId = user.PlatformId;
 
-                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
-                    if (steamId.TryGetPlayerCraftingJobs(out var playerJobs) && playerJobs.TryGetValue(itemPrefab, out int credits) && credits > 0)
+                    if (steamId.TryGetPlayerCraftingJobs(out Dictionary<PrefabGUID, int> playerJobs) && playerJobs.TryGetValue(itemPrefab, out int credits) && credits > 0)
                     {
                         credits--;
-                        if (credits == 0)
-                        {
-                            playerJobs.Remove(itemPrefab);
-                        }
-                        else
-                        {
-                            playerJobs[itemPrefab] = credits;
-                        }
 
-                        float ProfessionValue = 50f;
-                        ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
+                        if (credits == 0) playerJobs.Remove(itemPrefab);
+                        else playerJobs[itemPrefab] = credits;
+
+                        float professionXP = ProfessionBaseXP * ProfessionMappings.GetTierMultiplier(itemPrefab);
+                        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
 
                         if (handler != null)
                         {
-                            if (handler.GetProfessionName().ToLower().Contains("alchemy"))
-                            {
-                                ProfessionSystem.SetProfession(user, steamId, ProfessionValue * 3, handler);
-                                continue;
-                            }
+                            if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
 
-                            ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
+                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler);
+                            if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
+
                             Entity itemEntity = inventoryChangedEvent.ItemEntity;
-
                             switch (handler)
                             {
                                 case BlacksmithingHandler:

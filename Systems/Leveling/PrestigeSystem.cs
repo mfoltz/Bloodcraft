@@ -459,8 +459,7 @@ internal static class PrestigeSystem
                         lifeTime.Duration = -1;
                         lifeTime.EndAction = LifeTimeEndAction.None;
                     });
-                    LifeTime lifeTime = buffEntity.Read<LifeTime>();
-                    Core.Log.LogInfo($"Added LifeTime to buff {buffPrefab.LookupName()} with duration {lifeTime.Duration} and endAction {lifeTime.EndAction.ToString()} (making sure With extension is working)");
+                    //Core.Log.LogInfo($"Added LifeTime to buff {buffPrefab.LookupName()} with duration {lifeTime.Duration} and endAction {lifeTime.EndAction.ToString()} (making sure With extension is working)");
                 }
             }
         }

@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Stunlock.Core;
+using Unity.Mathematics;
 
 namespace Bloodcraft.Systems.Professions;
 public interface IProfessionHandler
@@ -7,6 +8,7 @@ public interface IProfessionHandler
     KeyValuePair<int, float> GetProfessionData(ulong steamID);
     void SetProfessionData(ulong steamID, KeyValuePair<int, float> xpData);
     string GetProfessionName();
+    float3 GetProfessionColor();
 }
 public static class ProfessionHandlerFactory
 {
@@ -67,7 +69,7 @@ public static class ProfessionHandlerFactory
                     return new FishingHandler();
                 if (itemTypeName.Contains("plant") || itemTypeName.Contains("trippyshroom"))
                     return new HarvestingHandler();
-                if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable"))
+                if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable") || itemTypeName.Contains("duskcaller"))
                     return new AlchemyHandler();
                 else
                     return null;
@@ -85,6 +87,7 @@ public abstract class BaseProfessionHandler : IProfessionHandler
     public abstract KeyValuePair<int, float> GetProfessionData(ulong steamID);
     public abstract void SetProfessionData(ulong steamID, KeyValuePair<int, float> data);
     public abstract string GetProfessionName();
+    public abstract float3 GetProfessionColor();
 }
 public class EnchantingHandler : BaseProfessionHandler
 {
@@ -99,6 +102,10 @@ public class EnchantingHandler : BaseProfessionHandler
     public override string GetProfessionName()
     {
         return "<color=#7E22CE>Enchanting</color>";
+    }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.494f, 0.133f, 0.808f);
     }
 }
 public class AlchemyHandler : BaseProfessionHandler
@@ -115,6 +122,10 @@ public class AlchemyHandler : BaseProfessionHandler
     {
         return "<color=#12D4A2>Alchemy</color>";
     }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.071f, 0.831f, 0.635f);
+    }
 }
 public class HarvestingHandler : BaseProfessionHandler
 {
@@ -129,6 +140,10 @@ public class HarvestingHandler : BaseProfessionHandler
     public override string GetProfessionName()
     {
         return "<color=#008000>Harvesting</color>";
+    }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.0f, 0.502f, 0.0f);
     }
 }
 public class BlacksmithingHandler : BaseProfessionHandler
@@ -145,6 +160,10 @@ public class BlacksmithingHandler : BaseProfessionHandler
     {
         return "<color=#353641>Blacksmithing</color>";
     }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.208f, 0.212f, 0.255f);
+    }
 }
 public class TailoringHandler : BaseProfessionHandler
 {
@@ -159,6 +178,10 @@ public class TailoringHandler : BaseProfessionHandler
     public override string GetProfessionName()
     {
         return "<color=#F9DEBD>Tailoring</color>";
+    }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.976f, 0.871f, 0.741f);
     }
 }
 public class WoodcuttingHandler : BaseProfessionHandler
@@ -175,6 +198,10 @@ public class WoodcuttingHandler : BaseProfessionHandler
     {
         return "<color=#A52A2A>Woodcutting</color>";
     }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.647f, 0.165f, 0.165f);
+    }
 }
 public class MiningHandler : BaseProfessionHandler
 {
@@ -190,6 +217,10 @@ public class MiningHandler : BaseProfessionHandler
     {
         return "<color=#808080>Mining</color>";
     }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.502f, 0.502f, 0.502f);
+    }
 }
 public class FishingHandler : BaseProfessionHandler
 {
@@ -204,5 +235,9 @@ public class FishingHandler : BaseProfessionHandler
     public override string GetProfessionName()
     {
         return "<color=#00FFFF>Fishing</color>";
+    }
+    public override float3 GetProfessionColor()
+    {
+        return new float3(0.0f, 1.0f, 1.0f);
     }
 }

@@ -1,5 +1,6 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
+using Bloodcraft.Systems.Quests;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Shared;
@@ -78,7 +79,8 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                             durability.Value = durability.MaxDurability;
                             itemEntity.Write(durability);
 
-                            ProfessionSystem.SetProfession(user, steamId, ProfessionValue, handler);
+                            ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler);
+                            if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
                         }
                     }
                 }

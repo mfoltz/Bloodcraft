@@ -1,7 +1,9 @@
 ﻿using Bloodcraft.Services;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -15,6 +17,14 @@ internal static class ClassUtilities
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
+
+    static readonly ComponentType[] JewelComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<JewelInstance>()),
+        ComponentType.ReadOnly(Il2CppType.Of<JewelLevelSource>())
+    ];
+
+    //static EntityQuery JewelQuery;
     public static List<int> GetClassBuffs(ulong steamId)
     {
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
@@ -49,7 +59,6 @@ internal static class ClassUtilities
             LocalizationService.HandleReply(ctx, $"Failed to remove the required item ({item.GetPrefabName()}x{quantity})");
             return false;
         }
-
 
         RemoveClassBuffs(ctx, steamId);
         return true;
@@ -137,26 +146,22 @@ internal static class ClassUtilities
     }
     public static bool TryParseClass(string classType, out PlayerClasses parsedClassType)
     {
-        // Attempt to parse the classType string to the PlayerClasses enum.
         if (Enum.TryParse(classType, true, out parsedClassType))
         {
-            return true; // Successfully parsed
+            return true;
         }
 
-        // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
         parsedClassType = Enum.GetValues(typeof(PlayerClasses))
                               .Cast<PlayerClasses>()
                               .FirstOrDefault(pc => pc.ToString().Contains(classType, StringComparison.OrdinalIgnoreCase));
 
-        // Check if a valid enum value was found that contains the input string.
         if (!parsedClassType.Equals(default(PlayerClasses)))
         {
-            return true; // Found a matching enum value
+            return true;
         }
 
-        // If no match is found, return false and set the out parameter to default value.
         parsedClassType = default;
-        return false; // Parsing failed
+        return false;
     }
     public static void UpdateClassData(Entity character, PlayerClasses parsedClassType, Dictionary<PlayerClasses, (List<int>, List<int>)> classes, ulong steamId)
     {
@@ -173,7 +178,46 @@ internal static class ClassUtilities
             Character = character,
             User = character.Read<PlayerCharacter>().UserEntity,
         };
-        BuffUtilities.
-                ApplyClassBuffs(character, steamId, fromCharacter);
+
+        BuffUtilities.ApplyClassBuffs(character, steamId, fromCharacter);
     }
+    /*
+    public static void GenerateAbilityJewelMap()
+    {
+        JewelQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = JewelComponents,
+            Options = EntityQueryOptions.IncludeAll
+        });
+
+        try
+        {
+            IEnumerable<Entity> jewelEntities = EntityUtilities.GetEntitiesEnumerable(JewelQuery);
+            foreach (Entity entity in jewelEntities)
+            {
+                if (!entity.TryGetComponent(out PrefabGUID prefab)) continue;
+                else if (entity.TryGetComponent(out JewelInstance jewelInstance) && jewelInstance.OverrideAbilityType.HasValue())
+                {
+                    if (!AbilityJewelMap.ContainsKey(jewelInstance.OverrideAbilityType))
+                    {
+                        AbilityJewelMap.Add(jewelInstance.OverrideAbilityType, []);
+                    }
+
+                    string prefabName = entity.Read<PrefabGUID>().LookupName().Split(" ", 2)[0];
+                    if (prefabName.EndsWith("T01") || prefabName.EndsWith("T02") || prefabName.EndsWith("T03") || prefabName.EndsWith("T04")) continue;
+                    else AbilityJewelMap[jewelInstance.OverrideAbilityType].Add(entity);
+                }
+            }
+
+            foreach(var kvp in AbilityJewelMap)
+            {
+                //Core.Log.LogInfo($"Ability {kvp.Key.LookupName()} has {kvp.Value.Count} jewel(s): {string.Join(", ", kvp.Value.Select(e => e.Read<PrefabGUID>().LookupName()))}");
+            }
+        }
+        finally
+        {
+            JewelQuery.Dispose();
+        }
+    }
+    */
 }

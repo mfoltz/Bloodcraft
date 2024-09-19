@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -7,8 +6,10 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using Match = System.Text.RegularExpressions.Match;
 using Random = System.Random;
@@ -22,25 +23,36 @@ internal static class QuestSystem
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
+    static readonly float ResourceYieldModifier = SystemService.ServerGameSettingsSystem._Settings.MaterialYieldModifier_Global;
+
     static readonly Random Random = new();
     static readonly Regex Regex = new(@"T\d{2}");
 
-    //public static HashSet<PrefabGUID> UnitPrefabs = [];
+    //public static HashSet<PrefabGUID> UnitPrefabs = []; live cache makes more sense for this b/c tracking but the other two should be fine to do once at startup
     public static HashSet<PrefabGUID> CraftPrefabs = [];
-    public static HashSet<PrefabGUID> GatherPrefabs = [];
+    public static HashSet<PrefabGUID> ResourcePrefabs = [];
 
     static readonly PrefabGUID graveyardSkeleton = new(1395549638);
     static readonly PrefabGUID forestWolf = new(-1418430647);
+
     static readonly PrefabGUID reinforcedBoneSword = new(-796306296);
     static readonly PrefabGUID reinforcedBoneMace = new(-1998017941);
-    static readonly PrefabGUID trackingBuff = new(746504391);
-    static readonly PrefabGUID villageElder = new(-1505705712);
-    public enum QuestGoal
+
+    static readonly PrefabGUID standardWood = new(-1593377811);
+    static readonly PrefabGUID stone = new(-1531666018);
+    public enum TargetType
     {
         Kill,
         Craft,
         Gather
     }
+
+    static readonly List<TargetType> TargetTypes =
+    [
+        TargetType.Kill,
+        TargetType.Craft,
+        TargetType.Gather
+    ];
     public enum QuestType
     {
         Daily,
@@ -56,7 +68,7 @@ internal static class QuestSystem
     public static Dictionary<PrefabGUID, int> QuestRewards = [];
     public class QuestObjective
     {
-        public QuestGoal Goal { get; set; }
+        public TargetType Goal { get; set; }
         public PrefabGUID Target { get; set; }
         public int RequiredAmount { get; set; }
         public bool Complete { get; set; }
@@ -64,118 +76,125 @@ internal static class QuestSystem
 
     static readonly Dictionary<string, (int MinLevel, int MaxLevel)> EquipmentTierLevelRangeMap = new()
     {
-        { "T01", (0, 10) },
-        { "T02", (11, 20) },
-        { "T03", (21, 30) },
-        { "T04", (31, 40) },
-        { "T05", (41, 50) },
-        { "T06", (51, 60) },
-        { "T07", (61, 70) },
-        { "T08", (71, 80) },
-        { "T09", (81, 90) }
+        { "T01", (0, 15) },
+        { "T02", (10, 30) },
+        { "T03", (20, 45) },
+        { "T04", (30, 60) },
+        { "T05", (40, 75) },
+        { "T06", (50, 90) },
+        { "T07", (60, ConfigService.MaxLevel) },
+        { "T08", (70, ConfigService.MaxLevel) },
+        { "T09", (80, ConfigService.MaxLevel) }
     };
 
     static readonly Dictionary<string, (int MinLevel, int MaxLevel)> ConsumableTierLevelRangeMap = new()
     {
-        { "T01", (0, 45) },
-        { "T02", (46, 90) }
+        { "Salve_Vermin", (0, 30) },
+        { "PhysicalPowerPotion_T01", (15, ConfigService.MaxLevel) },
+        { "SpellPowerPotion_T01", (15, ConfigService.MaxLevel) },
+        { "WranglersPotion_T01", (15, ConfigService.MaxLevel) },
+        { "SunResistancePotion_T01", (15, ConfigService.MaxLevel) },
+        { "HealingPotion_T01", (15, ConfigService.MaxLevel) },
+        { "FireResistancePotion_T01", (15, ConfigService.MaxLevel) },
+        { "DuskCaller", (50, ConfigService.MaxLevel) },
+        { "SpellLeechPotion_T01", (50, ConfigService.MaxLevel) },
+        { "PhysicalPowerPotion_T02", (65, ConfigService.MaxLevel) },
+        { "SpellPowerPotion_T02", (65, ConfigService.MaxLevel) },
+        { "HealingPotion_T02", (40, ConfigService.MaxLevel) },
+        { "HolyResistancePotion_T01", (40, ConfigService.MaxLevel) },
+        { "HolyResistancePotion_T02", (40, ConfigService.MaxLevel) }
     };
+
+    static readonly Dictionary<ulong, Dictionary<QuestType, (int Progress, bool Active)>> QuestCoroutines = [];
+    static readonly WaitForSeconds QuestMessageDelay = new(0.1f);
     static HashSet<PrefabGUID> GetKillPrefabsForLevel(int playerLevel)
     {
         Dictionary<PrefabGUID, HashSet<Entity>> TargetPrefabs = new(QuestService.TargetCache);
         HashSet<PrefabGUID> prefabs = [];
+
         foreach (PrefabGUID prefab in TargetPrefabs.Keys)
         {
-            if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity prefabEntity)) continue;
+            //if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity prefabEntity)) continue;
+            //PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
+            //string check = prefabGUID.LookupName();
+            //if (check.Contains("Trader") || check.Contains("Vermin") || check.Contains("Servant") || check.Contains("Horse") || check.Contains("Carriage") || check.Contains("Minion") || check.Contains("Unholy") || check.Contains("Surprise")) continue;
+            //if (!prefabEntity.Has<UnitLevel>() || prefabEntity.Has<Minion>()) continue;
+            //UnitLevel level = prefabEntity.Read<UnitLevel>();
 
-            PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
-
-            string check = prefabGUID.LookupName();
-
-            if (check.Contains("Trader") || check.Contains("Vermin") || check.Contains("Servant") || check.Contains("Horse") || check.Contains("Carriage") || check.Contains("Minion") || check.Contains("Unholy") || check.Contains("Surprise")) continue; // need to check if behaviour prefab matches with name for some units for valid spawns?
-            if (!prefabEntity.Has<UnitLevel>() || prefabEntity.Has<Minion>()) continue;
-
-            UnitLevel level = prefabEntity.Read<UnitLevel>();
-            if (Math.Abs(level.Level._Value - playerLevel) <= 10)
+            Entity targetEntity = TargetPrefabs[prefab].FirstOrDefault();
+            if (targetEntity.TryGetComponent(out UnitLevel unitLevel) && Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
             {
-                if (prefabEntity.Has<VBloodUnit>() && level.Level._Value > playerLevel) continue;
-                if (SpawnTransformSystemOnSpawnPatch.shardBearers.Contains(prefabGUID) || prefabGUID.Equals(villageElder)) continue;
-                prefabs.Add(prefabGUID);
+                //if (prefabEntity.Has<VBloodUnit>() && level.Level._Value > playerLevel) continue;
+                //if (TargetPrefabs[prefab].FirstOrDefault().Exists())
+                //if (SpawnTransformSystemOnSpawnPatch.shardBearers.Contains(prefabGUID) || prefabGUID.Equals(villageElder)) continue;
+
+                if (targetEntity.Has<VBloodUnit>() && unitLevel.Level._Value > playerLevel) continue;
+                prefabs.Add(prefab);
             }
         }
+
         return prefabs;
     }
     static HashSet<PrefabGUID> GetCraftPrefabsForLevel(int playerLevel)
     {
         HashSet<PrefabGUID> prefabs = [];
+
         foreach (PrefabGUID prefab in CraftPrefabs)
         {
             Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
-            //Core.Log.LogInfo($"Checking {prefabEntity.Read<PrefabGUID>().GuidHash}...");
             PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
-            if (prefabs.Contains(prefabGUID)) continue;
-            if (!prefabEntity.Has<ItemData>()) continue;
             ItemData itemData = prefabEntity.Read<ItemData>();
-            if (itemData.ItemType != ItemType.Equippable && itemData.ItemType != ItemType.Consumable) continue;
-            string tierCheck = prefabEntity.Read<PrefabGUID>().LookupName();
-            Match match = Regex.Match(tierCheck);
 
-            if (match.Success)
-            {
-                tierCheck = match.Value;
-            }
-            else
-            {
-                continue;
-            }
+            string prefabName = prefabGUID.LookupName();
+            string tier = "";
 
-            // Check if the item is within the player's level range based on T01, etc
+            Match match = Regex.Match(prefabName);
+            if (match.Success) tier = match.Value;
+            else continue;
+
             if (itemData.ItemType == ItemType.Equippable)
             {
-                if (IsWithinLevelRange(tierCheck, playerLevel, EquipmentTierLevelRangeMap))
+                if (IsWithinLevelRange(tier, playerLevel, EquipmentTierLevelRangeMap))
                 {
-                    string nameCheck = prefabGUID.LookupName();
-                    if (nameCheck.Contains("T01_Bone") || nameCheck.Contains("Item_Cloak") || nameCheck.Contains("BloodKey_T01")) continue;
                     prefabs.Add(prefabGUID);
                 }
             }
-            /*
             else if (itemData.ItemType == ItemType.Consumable)
             {
-                if (IsWithinLevelRange(tierCheck, playerLevel, ConsumableTierLevelRangeMap))
+                if (IsConsumableWithinLevelRange(prefabName, playerLevel, ConsumableTierLevelRangeMap))
                 {
                     prefabs.Add(prefabGUID);
                 }
             }
-            */
         }
+
         return prefabs;
     }
     static HashSet<PrefabGUID> GetGatherPrefabsForLevel(int playerLevel)
     {
         HashSet<PrefabGUID> prefabs = [];
-        foreach (PrefabGUID prefab in GatherPrefabs)
+        foreach (PrefabGUID prefab in ResourcePrefabs)
         {
             Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
-            //if (prefabEntity == Entity.Null || !EntityManager.Exists(prefabEntity)) continue;
-            //Core.Log.LogInfo($"Checking {prefabEntity.Read<PrefabGUID>().GuidHash}...");
-            if (!prefabEntity.Has<DropTableBuffer>() || !prefabEntity.Has<EntityCategory>()) continue;
-            int resourceLevel = prefabEntity.Read<EntityCategory>().ResourceLevel._Value;
-            if (resourceLevel <= playerLevel)
+
+            if (prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
             {
                 var buffer = prefabEntity.ReadBuffer<DropTableBuffer>();
+
                 foreach (var drop in buffer)
                 {
                     if (drop.DropTrigger == DropTriggerType.YieldResourceOnDamageTaken)
                     {
                         Entity dropTable = PrefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
                         if (!dropTable.Has<DropTableDataBuffer>()) continue;
+
                         var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
-                        foreach (var dropTableData in dropTableDataBuffer)
+                        foreach (DropTableDataBuffer dropTableData in dropTableDataBuffer)
                         {
                             if (dropTableData.ItemGuid.LookupName().Contains("Item_Ingredient"))
                             {
                                 prefabs.Add(dropTableData.ItemGuid);
+                                break;
                             }
                         }
                         break;
@@ -183,6 +202,7 @@ internal static class QuestSystem
                 }
             }
         }
+
         return prefabs;
     }
     static bool IsWithinLevelRange(string tier, int playerLevel, Dictionary<string, (int MinLevel, int MaxLevel)> tierMap)
@@ -193,14 +213,26 @@ internal static class QuestSystem
         }
         return false;
     }
-    static QuestObjective GenerateQuestObjective(QuestGoal goal, HashSet<PrefabGUID> targets, int level, QuestType questType)
+    static bool IsConsumableWithinLevelRange(string prefabName, int playerLevel, Dictionary<string, (int MinLevel, int MaxLevel)> tierMap)
+    {
+        foreach (var kvp in tierMap)
+        {
+            if (prefabName.Contains(kvp.Key))
+            {
+                return playerLevel >= kvp.Value.MinLevel && playerLevel <= kvp.Value.MaxLevel;
+            }
+        }
+        return false;
+    }
+    static QuestObjective GenerateQuestObjective(TargetType goal, HashSet<PrefabGUID> targets, int level, QuestType questType)
     {
         PrefabGUID target = new(0);
         int requiredAmount;
 
         switch (goal)
         {
-            case QuestGoal.Kill:
+            case TargetType.Kill:
+
                 if (targets.Count != 0)
                 {
                     target = targets.ElementAt(Random.Next(targets.Count));
@@ -208,7 +240,9 @@ internal static class QuestSystem
                 }
                 else if (questType.Equals(QuestType.Daily)) target = graveyardSkeleton;
                 else if (questType.Equals(QuestType.Weekly)) target = forestWolf;
+
                 requiredAmount = Random.Next(6, 8) * QuestMultipliers[questType];
+
                 if ((target.LookupName().ToLower().Contains("vblood") || target.LookupName().ToLower().Contains("vhunter")) && !questType.Equals(QuestType.Weekly))
                 {
                     requiredAmount = 2;
@@ -217,8 +251,10 @@ internal static class QuestSystem
                 {
                     requiredAmount = 10;
                 }
+
                 break;
-            case QuestGoal.Craft:
+            case TargetType.Craft:
+
                 if (targets.Count != 0)
                 {
                     target = targets.ElementAt(Random.Next(targets.Count));
@@ -226,26 +262,36 @@ internal static class QuestSystem
                 }
                 else if (questType.Equals(QuestType.Daily)) target = reinforcedBoneSword;
                 else if (questType.Equals(QuestType.Weekly)) target = reinforcedBoneMace;
-                requiredAmount = Random.Next(10, 15) * QuestMultipliers[questType];
+
+                requiredAmount = Random.Next(6, 8) * QuestMultipliers[questType];
+
                 break;
-            case QuestGoal.Gather:
-                targets = GetGatherPrefabsForLevel(level);
-                target = targets.ElementAt(Random.Next(targets.Count));
+            case TargetType.Gather:
+
+                if (targets.Count != 0)
+                {
+                    target = targets.ElementAt(Random.Next(targets.Count));
+                    targets.Remove(target);
+                }
+                else if (questType.Equals(QuestType.Daily)) target = standardWood;
+                else if (questType.Equals(QuestType.Weekly)) target = stone;
+
                 List<int> amounts = [500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000];
-                requiredAmount = amounts.ElementAt(Random.Next(amounts.Count)) * QuestMultipliers[questType];
+                requiredAmount = (int)(amounts.ElementAt(Random.Next(amounts.Count)) * QuestMultipliers[questType] * ResourceYieldModifier);
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
         return new QuestObjective { Goal = goal, Target = target, RequiredAmount = requiredAmount };
     }
-    static HashSet<PrefabGUID> GetGoalPrefabsForLevel(QuestGoal goal, int level)
+    static HashSet<PrefabGUID> GetGoalPrefabsForLevel(TargetType goal, int level)
     {
         HashSet<PrefabGUID> prefabs = goal switch
         {
-            QuestGoal.Kill => GetKillPrefabsForLevel(level),
-            QuestGoal.Craft => GetCraftPrefabsForLevel(level),
-            QuestGoal.Gather => GetGatherPrefabsForLevel(level),
+            TargetType.Kill => GetKillPrefabsForLevel(level),
+            TargetType.Craft => GetCraftPrefabsForLevel(level),
+            TargetType.Gather => GetGatherPrefabsForLevel(level),
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -253,13 +299,18 @@ internal static class QuestSystem
     }
     public static void InitializePlayerQuests(ulong steamId, int level)
     {
-        QuestGoal goal = QuestGoal.Kill;
-        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+        List<TargetType> targetTypes = GetRandomQuestTypes();
+
+        TargetType dailyGoal = targetTypes.First();
+        TargetType weeklyGoal = targetTypes.Last();
+
+        HashSet<PrefabGUID> dailyTargets = GetGoalPrefabsForLevel(dailyGoal, level);
+        HashSet<PrefabGUID> weeklyTargets = GetGoalPrefabsForLevel(weeklyGoal, level);
 
         Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData = new()
             {
-                { QuestType.Daily, (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow) },
-                { QuestType.Weekly, (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow) }
+                { QuestType.Daily, (GenerateQuestObjective(dailyGoal, dailyTargets, level, QuestType.Daily), 0, DateTime.UtcNow) },
+                { QuestType.Weekly, (GenerateQuestObjective(weeklyGoal, weeklyTargets, level, QuestType.Weekly), 0, DateTime.UtcNow) }
             };
 
         steamId.SetPlayerQuests(questData);
@@ -281,20 +332,42 @@ internal static class QuestSystem
 
             if (refreshDaily || refreshWeekly)
             {
-                QuestGoal goal = QuestGoal.Kill;
-                HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+                HashSet<PrefabGUID> targets;
+                TargetType goal;
 
-                if (refreshDaily)
+                if (refreshDaily && refreshWeekly)
                 {
+                    List<TargetType> targetTypes = GetRandomQuestTypes();
+
+                    goal = targetTypes.First();
+                    targets = GetGoalPrefabsForLevel(goal, level);
+
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed~");
-                }
 
-                if (refreshWeekly)
-                {
+                    goal = targetTypes.Last();
+                    targets = GetGoalPrefabsForLevel(goal, level);
+
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed~");
                 }
+                else if (refreshDaily)
+                {
+                    goal = GetRandomQuestType(questData, QuestType.Weekly);
+                    targets = GetGoalPrefabsForLevel(goal, level);
+
+                    questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, now);
+                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed~");
+                }
+                else if (refreshWeekly)
+                {
+                    goal = GetRandomQuestType(questData, QuestType.Daily);
+                    targets = GetGoalPrefabsForLevel(goal, level);
+
+                    questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, now);
+                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed~");
+                }
+
                 steamId.SetPlayerQuests(questData);
             }
         }
@@ -305,13 +378,18 @@ internal static class QuestSystem
     }
     public static void ForceRefresh(ulong steamId, int level)
     {
-        QuestGoal goal = QuestGoal.Kill;
-        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+        List<TargetType> goals = GetRandomQuestTypes();
+        TargetType dailyGoal = goals.First();
+        TargetType weeklyGoal = goals.Last();
 
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
-            questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
+            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(dailyGoal, level);
+            questData[QuestType.Daily] = (GenerateQuestObjective(dailyGoal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
+
+            targets = GetGoalPrefabsForLevel(weeklyGoal, level);
+            questData[QuestType.Weekly] = (GenerateQuestObjective(weeklyGoal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
+
             steamId.SetPlayerQuests(questData);
         }
         else
@@ -321,27 +399,50 @@ internal static class QuestSystem
     }
     public static void ForceDaily(User user, ulong steamId, int level)
     {
-        QuestGoal goal = QuestGoal.Kill;
-        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
-
         if (steamId.TryGetPlayerQuests(out var questData))
         {
+            TargetType goal = GetRandomQuestType(questData, QuestType.Weekly); // get unique goal different from weekly
+            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+
             questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
             steamId.SetPlayerQuests(questData);
+
             LocalizationService.HandleServerReply(EntityManager, user, "<color=#00FFFF>Daily Quest</color> has been rerolled~");
         }
     }
     public static void ForceWeekly(User user, ulong steamId, int level)
     {
-        QuestGoal goal = QuestGoal.Kill;
-        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
-
         if (steamId.TryGetPlayerQuests(out var questData))
         {
+            TargetType goal = GetRandomQuestType(questData, QuestType.Daily); // get unique goal different from daily
+            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+
             questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, level, QuestType.Weekly), 0, DateTime.UtcNow);
             steamId.SetPlayerQuests(questData);
+
             LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
         }
+    }
+    static TargetType GetRandomQuestType(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
+    {
+        List<TargetType> targetTypes = new(TargetTypes);      
+        if (questData.TryGetValue(questType, out var dailyData))
+        {
+            targetTypes.Remove(dailyData.Objective.Goal);
+        }
+
+        return targetTypes[Random.Next(targetTypes.Count)];
+    }
+    static List<TargetType> GetRandomQuestTypes()
+    {
+        List<TargetType> targetTypes = new(TargetTypes);
+
+        TargetType firstGoal = targetTypes[Random.Next(targetTypes.Count)];
+        targetTypes.Remove(firstGoal);
+
+        TargetType secondGoal = targetTypes[Random.Next(targetTypes.Count)];
+
+        return [firstGoal, secondGoal];
     }
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
@@ -378,17 +479,38 @@ internal static class QuestSystem
             {
                 updated = true;
                 string colorType = quest.Key == QuestType.Daily ? $"<color=#00FFFF>{QuestType.Daily} Quest</color>" : $"<color=#BF40BF>{QuestType.Weekly} Quest</color>";
+
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
 
+                if (!QuestCoroutines.ContainsKey(steamId))
+                {
+                    QuestCoroutines[steamId] = [];
+                }
+
+                if (!QuestCoroutines[steamId].ContainsKey(quest.Key))
+                {
+                    var questEntry = (questData[quest.Key].Progress, true);
+                    QuestCoroutines[steamId].Add(quest.Key, questEntry);
+
+                    Core.StartCoroutine(DelayedProgressUpdate(questData, quest, user, steamId, colorType));
+                }
+                else
+                {
+                    QuestCoroutines[steamId][quest.Key] = (questData[quest.Key].Progress, true);
+                }
+
+                /*
                 if (PlayerUtilities.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
                 {
                     string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> <color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> [<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
                     LocalizationService.HandleServerReply(EntityManager, user, message);
                 }
+                */
 
                 if (quest.Value.Objective.RequiredAmount <= questData[quest.Key].Progress && !quest.Value.Objective.Complete)
                 {
                     quest.Value.Objective.Complete = true;
+
                     LocalizationService.HandleServerReply(EntityManager, user, $"{colorType} complete!");
                     if (QuestRewards.Count > 0)
                     {
@@ -426,7 +548,7 @@ internal static class QuestSystem
                     if (quest.Key == QuestType.Daily && ConfigService.InfiniteDailies)
                     {
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-                        QuestGoal goal = QuestGoal.Kill;
+                        TargetType goal = TargetType.Kill;
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, level, QuestType.Daily), 0, DateTime.UtcNow);
                         var dailyQuest = questData[QuestType.Daily];
@@ -436,6 +558,35 @@ internal static class QuestSystem
             }
         }
         if (updated) steamId.SetPlayerQuests(questData);
+    }
+    static IEnumerator DelayedProgressUpdate(
+    Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData,
+    KeyValuePair<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> quest,
+    User user,
+    ulong steamId,
+    string colorType)
+    {
+        if (questData[quest.Key].Progress >= questData[quest.Key].Objective.RequiredAmount)
+        {
+            yield break;
+        }
+
+        yield return QuestMessageDelay;
+
+        if (PlayerUtilities.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
+        {
+            string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> " +
+                             $"<color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> " +
+                             $"[<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
+
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+
+        QuestCoroutines[steamId].Remove(quest.Key);
+        if (QuestCoroutines[steamId].Count == 0)
+        {
+            QuestCoroutines.Remove(steamId);
+        }
     }
     public static string GetCardinalDirection(float3 direction)
     {

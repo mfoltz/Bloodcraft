@@ -1,21 +1,48 @@
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine;
+using Random = System.Random;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal static class ScriptSpawnServerPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
+
+    static readonly Random Random = new();
+
+    static readonly WaitForSeconds CaptureTick = new(CaptureInterval);
+
+    const float CaptureTime = 6f; // 0.25f for timing cushioning for buff lifetimes though
+    const float CaptureInterval = 1.5f;
+    const int TicksRequired = (int)(CaptureTime / CaptureInterval);
+    const float BreakChanceMax = 0.50f;
+    const float BreakChanceMin = 0.10f;
+
+    static readonly PrefabGUID CaptureBuff = new(1280015305);
+    static readonly PrefabGUID ImmaterialBuff = new(-259674366);
+    static readonly PrefabGUID BreakBuff = new(-1466712470);
+
+    static readonly AssetGuid assetGuid = AssetGuid.FromString("98e5411c-d93f-43da-8366-b8bcc7172c66"); // percent
+    static readonly float3 color = new(0.0f, 1.0f, 1.0f);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -28,7 +55,16 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
-                if (entity.Has<Script_Castleman_AdaptLevel_DataShared>())
+                if (!entity.Has<EntityOwner>()) continue;
+
+                /* good to know for later but really need to cutoff messing with new stuff for now
+                if (entity.Has<MountBuff>())
+                {
+                    Core.Log.LogInfo("MountBuff");
+                }
+                */
+
+                if (ConfigService.FamiliarSystem && entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
                 {
                     //Core.Log.LogInfo("CastleManCombatBuff");
                     if (entity.GetBuffTarget().TryGetFollowedPlayer(out Entity _))
@@ -40,10 +76,23 @@ internal static class ScriptSpawnServerPatch
                         entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
                     }
                 }
+                else if (ConfigService.FamiliarSystem && entity.GetOwner().TryGetPlayer(out Entity player) && entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(CaptureBuff))
+                {
+                    //Core.Log.LogInfo($"ScriptSpawnServer: {prefab.LookupName()}");
 
-                if (!entity.Has<BloodBuff>() || !entity.Has<EntityOwner>()) continue;
+                    Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
+                    Entity target = entity.GetBuffTarget();
+                    float3 targetPosition = target.Read<Translation>().Value;
 
-                if (entity.GetOwner().TryGetPlayer(out Entity player))
+                    float healthFactor = target.Read<Health>().Value / target.Read<Health>().MaxHealth._Value;
+                    float adjustedBreakChance = Mathf.Lerp(BreakChanceMin, BreakChanceMax, healthFactor);
+
+                    //EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+                    Core.StartCoroutine(CaptureRoutine(target, player, userEntity, targetPosition, adjustedBreakChance));
+                }
+
+                if (!entity.Has<BloodBuff>()) continue;
+                else if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
 
@@ -64,6 +113,59 @@ internal static class ScriptSpawnServerPatch
         finally
         {
             entities.Dispose();
+        }
+    }
+    static IEnumerator CaptureRoutine(Entity target, Entity player, Entity userEntity, float3 targetPosition, float breakChance)
+    {
+        PrefabGUID targetPrefab = target.Read<PrefabGUID>();
+        float duration = 0f;
+        int captureTicks = 0;
+
+        while (target.Exists())
+        {
+            if (Random.NextDouble() < breakChance)
+            {
+                CaptureFailed(target);
+                //Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), assetGuid, targetPosition, color, player, duration, default, userEntity);
+
+                yield break;
+            }
+            else
+            {
+                duration += CaptureInterval;
+                float percentCaptured = (duration / CaptureTime) * 100;
+
+                Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), assetGuid, targetPosition, color, player, percentCaptured, default, userEntity);
+                captureTicks++;
+            }
+
+            if (captureTicks >= TicksRequired)
+            {
+                DestroyUtility.Destroy(EntityManager, target, DestroyDebugReason.None);
+                FamiliarUnlockSystem.HandleUnlock(targetPrefab, player, true); // Define this method as per your capture success logic
+
+                yield break;
+            }
+
+            yield return CaptureTick;
+        }
+    }
+    static void CaptureFailed(Entity target) 
+    {
+        if (ServerGameManager.TryGetBuff(target, CaptureBuff, out Entity captureBuffEntity))
+        {
+            DestroyUtility.Destroy(EntityManager, captureBuffEntity, DestroyDebugReason.TryRemoveBuff);
+        }
+
+        if (ServerGameManager.TryGetBuff(target, ImmaterialBuff, out Entity immaterialBuffEntity))
+        {
+            DestroyUtility.Destroy(EntityManager, immaterialBuffEntity, DestroyDebugReason.TryRemoveBuff);
+        }
+
+        BuffUtilities.ApplyBuff(BreakBuff, target);
+        if (ServerGameManager.TryGetBuff(target, CaptureBuff, out Entity breakBuffEntity))
+        {
+            BuffUtilities.HandleBreakBuff(breakBuffEntity);
         }
     }
 }

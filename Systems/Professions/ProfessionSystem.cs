@@ -4,7 +4,12 @@ using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine;
+using Random = System.Random;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Systems.Professions;
@@ -14,9 +19,16 @@ internal static class ProfessionSystem
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
+
+    static readonly Random Random = new();
+    static readonly WaitForSeconds SCTDelay = new(0.75f);
 
     const float ProfessionConstant = 0.1f; // constant for calculating level from xp
     const int ProfessionPower = 2; // power for calculating level from xp
+
+    static readonly AssetGuid assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
+    static readonly PrefabGUID sctResourceGain = new(1876501183); // SCT resource gain prefabguid
     public static void UpdateProfessions(Entity Killer, Entity Victim)
     {
         Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
@@ -68,7 +80,7 @@ internal static class ProfessionSystem
                 ProfessionValue *= ProfessionMappings.GetWoodcuttingModifier(PrefabGUID);
             }
 
-            SetProfession(user, SteamID, ProfessionValue, handler);
+            SetProfession(Victim, Killer, SteamID, ProfessionValue, handler);
             GiveProfessionBonus(prefab, Killer, user, SteamID, handler);
         }
     }
@@ -80,10 +92,9 @@ internal static class ProfessionSystem
         if (name.Contains("Fishing"))
         {
             List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefab);
-            Random random = new();
             int bonus = level / 20;
             if (bonus.Equals(0)) return;
-            int index = random.Next(fishDrops.Count);
+            int index = Random.Next(fishDrops.Count);
             PrefabGUID fish = fishDrops[index];
             if (ServerGameManager.TryAddInventoryItem(Killer, fish, bonus))
             {
@@ -156,15 +167,15 @@ internal static class ProfessionSystem
             }
         }
     }
-    public static void SetProfession(User user, ulong steamID, float value, IProfessionHandler handler)
+    public static void SetProfession(Entity target, Entity source, ulong steamID, float value, IProfessionHandler handler)
     {
         var xpData = handler.GetProfessionData(steamID);
 
         if (xpData.Key >= ConfigService.MaxProfessionLevel) return;
 
-        UpdateProfessionExperience(user, steamID, xpData, value, handler);
+        UpdateProfessionExperience(target, source, steamID, xpData, value, handler);
     }
-    static void UpdateProfessionExperience(User user, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
+    static void UpdateProfessionExperience(Entity target, Entity source, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
     {
         float newExperience = xpData.Value + gainedXP;
         int newLevel = ConvertXpToLevel(newExperience);
@@ -183,30 +194,51 @@ internal static class ProfessionSystem
         var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
         handler.SetProfessionData(steamID, updatedXPData);
 
-        NotifyPlayer(user, steamID, gainedXP, leveledUp, handler);
+        NotifyPlayer(target, source, steamID, gainedXP, leveledUp, handler);
     }
-    static void NotifyPlayer(User user, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+    static void NotifyPlayer(Entity target, Entity source, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
     {
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
+
         string professionName = handler.GetProfessionName();
+
         if (leveledUp)
         {
             int newLevel = ConvertXpToLevel(handler.GetProfessionData(steamID).Value);
             if (newLevel < ConfigService.MaxProfessionLevel) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
         }
+
         if (PlayerUtilities.GetPlayerBool(steamID, "ProfessionLogging"))
         {
             int levelProgress = GetLevelProgress(steamID, handler);
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
         }
+        
+        if (PlayerUtilities.GetPlayerBool(steamID, "ScrollingText"))
+        {
+            //float3 playerPosition = source.Read<Translation>().Value;
+            //float3 position = new(playerPosition.x + 1f, playerPosition.y, playerPosition.z);
+
+            float3 targetPosition = target.Read<Translation>().Value;
+            float3 professionColor = handler.GetProfessionColor();
+
+            //EntityCommandBuffer entityCommandBuffer = SystemService.EndSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+            //Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, entityCommandBuffer, assetGuid, targetPosition, professionColor, user.LocalCharacter.GetEntityOnServer(), gainedXP, sctResourceGain, userEntity);
+            Core.StartCoroutine(DelayedProfessionSCT(user.LocalCharacter.GetEntityOnServer(), userEntity, targetPosition, professionColor, gainedXP));
+        }     
+    }
+    static IEnumerator DelayedProfessionSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    {
+        yield return SCTDelay;
+        Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), assetGuid, position, color, character, gainedXP, sctResourceGain, userEntity);
     }
     static int ConvertXpToLevel(float xp)
     {
-        // Assuming a basic square root scaling for experience to level conversion
         return (int)(ProfessionConstant * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
-        // Reversing the formula used in ConvertXpToLevel for consistency
         return (int)Math.Pow(level / ProfessionConstant, ProfessionPower);
     }
     static float GetXp(ulong steamID, IProfessionHandler handler)

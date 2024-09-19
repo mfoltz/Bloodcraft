@@ -56,7 +56,7 @@ internal static class FamiliarSummonSystem
             int level = unitLevel.Level._Value;
             int famKey = familiar.Read<PrefabGUID>().GuidHash;
             ulong steamId = user.PlatformId;
-
+            
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
             if (famData.FamiliarExperience.TryGetValue(famKey, out var xpData))
             {
@@ -107,7 +107,8 @@ internal static class FamiliarSummonSystem
             }
 
             /*
-            if (!familiar.Has<NameableInteractable>()) familiar.Add<NameableInteractable>();
+             * 
+            //if (!familiar.Has<NameableInteractable>()) familiar.Add<NameableInteractable>();
             
             if (!familiar.Has<InventoryInstanceElement>()) EntityManager.AddBuffer<InventoryInstanceElement>(familiar);
 
@@ -136,8 +137,56 @@ internal static class FamiliarSummonSystem
                 mountable.MaxSpeedRange = new Unity.Mathematics.float2(8f, 11f);
                 mountable.AccelerationRange = new Unity.Mathematics.float2(3f, 7f);
                 mountable.RotationSpeedRange = new Unity.Mathematics.float2(120f, 140f);
-                mountable.MountBuff = new(2112789321);
+                mountable.MountBuff = new(854656674);
             });  
+
+            if (ServerGameManager.TryGetBuffer<InteractAbilityBuffer>(familiar, out var buffer))
+            {
+                Entity horsePrefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[new(1149585723)];
+
+                var horseBuffer = horsePrefabEntity.ReadBuffer<InteractAbilityBuffer>();
+                var horseItem = horseBuffer[0];
+
+                BlobAssetReference<ConditionBlob> conditionBlob = horseItem.Condition;
+                unsafe
+                {
+                    try
+                    {
+                        ConditionBlob* conditionBlobPtr = (ConditionBlob*)conditionBlob.GetUnsafePtr();
+                        ConditionInfo conditionInfo = conditionBlobPtr->Info;
+
+                        BlobString prefabBlobString = conditionInfo.Prefab;
+                        BlobString componentBlobString = conditionInfo.Component;
+
+                        string prefabString = prefabBlobString.ToString();
+                        string componentString = componentBlobString.ToString();
+
+                        Core.Log.LogInfo($"PrefabBlobString: {prefabString}, ComponentBlobString: {componentString}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogInfo($"Error parsing conditionBlob: {ex}");
+                    }
+                }
+
+                if (!buffer.IsEmpty)
+                {
+                    var item = buffer[0];
+
+                    item.Ability = horseItem.Ability;
+                    item.Condition = horseItem.Condition;
+                    item.HideInteractHUDWhileCasting = horseItem.HideInteractHUDWhileCasting;
+                    item.Importance = horseItem.Importance;
+
+                    buffer[0] = item;
+                    Core.Log.LogInfo($"InteractAbilityBuffer modified...");
+                }
+                else
+                {
+                    buffer.Add(horseItem);
+                    Core.Log.LogInfo($"InteractAbilityBuffer modified...");
+                }
+            }
             */
 
             return true;

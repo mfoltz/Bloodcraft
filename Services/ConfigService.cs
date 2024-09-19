@@ -17,6 +17,8 @@ public static class ConfigService
     public static bool InfiniteDailies { get; private set; }
     public static string QuestRewards { get; private set; }
     public static string QuestRewardAmounts { get; private set; }
+    public static int RerollDailyPrefab { get; private set; }
+    public static int RerollDailyAmount { get; private set; }
     public static bool LevelingSystem { get; private set; }
     public static bool RestedXPSystem { get; private set; }
     public static float RestedXPRate { get; private set; }
@@ -149,6 +151,7 @@ public static class ConfigService
     public static class ConfigInitialization
     {
         static readonly Regex regex = new(@"^\[(.+)\]$");
+
         public static readonly List<string> DirectoryPaths =
         [
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME), // 0
@@ -161,6 +164,7 @@ public static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"), // 7
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks") // 8
         ];
+
         static readonly List<string> SectionOrder =
         [
             "General",
@@ -181,6 +185,7 @@ public static class ConfigService
             public object DefaultValue { get; } = defaultValue;
             public string Description { get; } = description;
         }
+
         static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
@@ -194,8 +199,10 @@ public static class ConfigService
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
             new ConfigEntryDefinition("Quests", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool."),
             new ConfigEntryDefinition("Quests", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3)."),
+            new ConfigEntryDefinition("Quests", "RerollDailyPrefab", -949672483, "Prefab item for rerolling daily."),
+            new ConfigEntryDefinition("Quests", "RerollDailyAmount", 100, "Cost of prefab for rerolling daily."),
             new ConfigEntryDefinition("Leveling", "LevelingSystem", false, "Enable or disable the leveling system."),
-            new ConfigEntryDefinition("Leveling", "RestedXPSystem", true, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp."),
+            new ConfigEntryDefinition("Leveling", "RestedXPSystem", false, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp."),
             new ConfigEntryDefinition("Leveling", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffin will provide maximum current rested XP)."),
             new ConfigEntryDefinition("Leveling", "RestedXPMax", 5, "Maximum extra levels worth of rested XP a player can accumulate."),
             new ConfigEntryDefinition("Leveling", "RestedXPTickRate", 120f, "Minutes required to accumulate one tick of Rested XP."),
@@ -213,7 +220,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Leveling", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths."),
             new ConfigEntryDefinition("Prestige", "PrestigeSystem", false, "Enable or disable the prestige system (requires leveling to be enabled)"),
             new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level"),
-            new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start"),
+            new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3,4,5", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start"),
             new ConfigEntryDefinition("Prestige", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling"),
             new ConfigEntryDefinition("Prestige", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling"),
             new ConfigEntryDefinition("Prestige", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy"),
@@ -241,7 +248,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Expertise", "PhysicalLifeLeech", 0.10f, "The base cap for physical life leech"),
             new ConfigEntryDefinition("Expertise", "SpellLifeLeech", 0.10f, "The base cap for spell life leech"),
             new ConfigEntryDefinition("Expertise", "PrimaryLifeLeech", 0.15f, "The base cap for primary life leech"),
-            new ConfigEntryDefinition("Expertise", "PhysicalPower", 10f, "The base cap for physical power"),
+            new ConfigEntryDefinition("Expertise", "PhysicalPower", 20f, "The base cap for physical power"),
             new ConfigEntryDefinition("Expertise", "SpellPower", 10f, "The base cap for spell power"),
             new ConfigEntryDefinition("Expertise", "PhysicalCritChance", 0.10f, "The base cap for physical critical strike chance"),
             new ConfigEntryDefinition("Expertise", "PhysicalCritDamage", 0.50f, "The base cap for physical critical strike damage"),
@@ -250,7 +257,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Legacies", "BloodSystem", false, "Enable or disable the blood legacy system"),
             new ConfigEntryDefinition("Legacies", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies"),
             new ConfigEntryDefinition("Legacies", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using prestige, legacy level will be used with _prestigeBloodQuality multiplier below)"),
-            new ConfigEntryDefinition("Legacies", "PrestigeBloodQuality", 5f, "Blood quality bonus per prestige legacy level"),
+            new ConfigEntryDefinition("Legacies", "PrestigeBloodQuality", 0.05f, "Blood quality bonus per prestige legacy level."),
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies"),
             new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units"),
             new ConfigEntryDefinition("Legacies", "VBloodLegacyMultiplier", 5f, "The multiplier for lineage gained from VBloods"),
@@ -289,7 +296,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit to unlock a familiar"),
             new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood to unlock a familiar"),
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a visual when unlocking a familiar"),
-            new ConfigEntryDefinition("Familiars", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual (currently demon fragment by default, fyi)"),
+            new ConfigEntryDefinition("Familiars", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual if one is already unlocked (currently demon fragment by default)"),
             new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 1, "Quantity of item required for changing shiny visual"),
             new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)"),
             new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)"),
@@ -310,19 +317,19 @@ public static class ConfigService
             new ConfigEntryDefinition("Classes", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies"),
             new ConfigEntryDefinition("Classes", "DeathMageWeapon", "0,4,7,11", "Death Mage weapon synergies"),
             new ConfigEntryDefinition("Classes", "DeathMageBlood", "2,3,6,9", "Death Mage blood synergies"),
-            new ConfigEntryDefinition("Classes", "DefaultClassSpell", -433204738, "If a spell already on shift is detected being placed in one of the normal slots, shift will be replaced with this spell for all classes to avoid a rather unfun bug with jewels."),
+            new ConfigEntryDefinition("Classes", "DefaultClassSpell", -433204738, "Default spell (veil of shadow) available to all classes."),
             new ConfigEntryDefinition("Classes", "BloodKnightBuffs", "1828387635,-534491790,-1055766373,-584203677", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs)"),
-            new ConfigEntryDefinition("Classes", "BloodKnightSpells", "-433204738,-1161896955,1957691133,-7407393", "Blood Knight shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "BloodKnightSpells", "-880131926,651613264,2067760264,189403977,375131842", "Blood Knight shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-397097531", "The PrefabGUID hashes for demon hunter leveling blood buffs"),
-            new ConfigEntryDefinition("Classes", "DemonHunterSpells", "-433204738,1611191665,-328617085,-1161896955", "Demon Hunter shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "DemonHunterSpells", "-356990326,-987810170,1071205195,1249925269,-914344112", "Demon Hunter shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "VampireLordBuffs", "1558171501,997154800,-1413561088,1103099361", "The PrefabGUID hashes for vampire lord leveling blood buffs"),
-            new ConfigEntryDefinition("Classes", "VampireLordSpells", "-433204738,716346677,1450902136,-254080557", "Vampire Lord shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "VampireLordSpells", "78384915,295045820,-1000260252,91249849,1966330719", "Vampire Lord shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "ShadowBladeBuffs", "894725875,-1596803256,-993492354,210193036", "The PrefabGUID hashes for shadow blade leveling blood buffs"),
-            new ConfigEntryDefinition("Classes", "ShadowBladeSpells", "-433204738,94933870,642767950,1922493152", "Shadow Blade shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "ShadowBladeSpells", "1019568127,1575317901,1112116762,-358319417,1174831223", "Shadow Blade shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "ArcaneSorcererBuffs", "1614027598,884683323,-1576592687,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs"),
-            new ConfigEntryDefinition("Classes", "ArcaneSorcererSpells", "-433204738,495259674,1217615468,-1503327574", "Arcane Sorcerer shift spells, granted at levels of prestige"),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererSpells", "247896794,268059675,-242769430,-2053450457,1650878435", "Arcane Sorcerer shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
-            new ConfigEntryDefinition("Classes", "DeathMageSpells", "-433204738,234226418,1619461812,1006960825", "Death Mage shift spells, granted at levels of prestige")
+            new ConfigEntryDefinition("Classes", "DeathMageSpells", "-1204819086,481411985,1961570821,2138402840,-1781779733", "Death Mage shift spells, granted at levels of prestige")
         ];
         public static void InitializeConfig()
         {
@@ -374,7 +381,7 @@ public static class ConfigService
                     try
                     {
                         var convertedValue = Convert.ChangeType(oldValue, entryType);
-                        var configEntry = generic.Invoke(null, new object[] { entry.Section, entry.Key, convertedValue, entry.Description });
+                        var configEntry = generic.Invoke(null, [entry.Section, entry.Key, convertedValue, entry.Description]);
                         UpdateConfigProperty(entry.Key, configEntry);
                         //Plugin.LogInstance.LogInfo($"Migrated key {entry.Key} from old config to section {entry.Section} with value {convertedValue}");
                     }
@@ -386,7 +393,8 @@ public static class ConfigService
                 else
                 {
                     // Use default value if key is not in the old config
-                    var configEntry = generic.Invoke(null, new object[] { entry.Section, entry.Key, entry.DefaultValue, entry.Description });
+                    var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
+
                     UpdateConfigProperty(entry.Key, configEntry);
                 }
                 /*
@@ -513,10 +521,12 @@ public static class ConfigService
             }
 
             using StreamWriter writer = new(configFile, false);
+
             foreach (var header in fileHeader)
             {
                 writer.WriteLine(header);
             }
+
             foreach (var section in SectionOrder)
             {
                 if (OrderedSections.ContainsKey(section))

@@ -47,8 +47,6 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                             FamiliarMinions[familiar].Add(entity);
                         }
 
-                        if (entity.Read<PrefabGUID>().LookupName().ToLower().Contains("vblood")) continue; // this only applies for Voltatia as both the main one and the minion one pass through this system for some reason and want to leave the clone alone here
-
                         ApplyBuffDebugEvent applyBuffDebugEvent = new()
                         {
                             BuffPrefabGUID = InkCrawlerDeathBuff

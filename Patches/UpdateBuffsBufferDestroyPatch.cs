@@ -34,6 +34,8 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                 //if (prefabGUID.Equals(new PrefabGUID(-182838302))) Core.Log.LogInfo("Destroyed Buff: " + prefabGUID.LookupName());
 
+                //if (prefabGUID.Equals(captureBuff)) Core.Log.LogInfo($"UpdateBuffsBufferDestroy: {captureBuff.LookupName()}");
+
                 if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out Entity player))
@@ -62,14 +64,12 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
                     }
                 }
-                /*
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().TryGetPlayer(out player) && prefabGUID.Equals(captureBuff))
                 {
                     Entity target = entity.GetBuffTarget();
                     FamiliarUnlockSystem.HandleRoll(1f, target, player);
-                    target.Add<DestroyTag>();
+                    target.Add<DestroyTag>();       
                 }
-                */
             }
         }
         finally

@@ -2,7 +2,9 @@
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -12,12 +14,16 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ReplaceAbilityOnSlotSystemPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-
-    static readonly PrefabGUID shadowGreatSword = new(1322254792);
-    static readonly PrefabGUID highlordSwordPrimary = new(-328302080);
+    static SystemService SystemService => Core.SystemService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+    static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+
+    static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
+    //static readonly Entity VBloodAbilityBuffPrefab = PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff];
 
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -41,15 +47,15 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     (int FirstSlot, int SecondSlot, int ShiftSlot) spells;
                     if (ConfigService.UnarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleExtraSpells(entity, steamId, spells);
+                        HandleExtraSpells(entity, character, steamId, spells);
                     }
                     else if (ConfigService.ShiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleShiftSpell(entity, steamId, character, spells);
+                        HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));
                     }
                     else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
-                        SetSpells(entity, character, steamId, spells);
+                        SetSpells(entity, steamId, spells);
                     }
                 }
             }
@@ -59,7 +65,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             entities.Dispose();
         }
     }
-    static void HandleExtraSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void HandleExtraSpells(Entity entity, Entity character, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
         if (!spells.FirstSlot.Equals(0))
@@ -88,24 +94,61 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
-        {
-            ReplaceAbilityOnSlotBuff buff = new()
-            {
-                Slot = 3,
-                NewGroupId = new(spells.ShiftSlot),
-                CopyCooldown = true,
-                Priority = 0,
-            };
-
-            buffer.Add(buff);
-        }
+        HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));    
     }
-    static void HandleShiftSpell(Entity entity, ulong steamId, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void HandleShiftSpell(Entity entity, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
     {
-        var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>(); // prevent people switching jewels if item with spellmod is equipped?
-        if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock") && !spells.ShiftSlot.Equals(0))
+        PrefabGUID spellPrefabGUID = new(spells.ShiftSlot);
+
+        if (!shiftLock) return;
+        else if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.TryGetComponent(out VBloodAbilityData vBloodAbilityData))
         {
+            Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+            if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
+            {
+                Entity buffEntity = Entity.Null;
+                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
+                int index = -1;
+
+                for (int i = 0; i < firstBuffer.Length; i++)
+                {
+                    VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];
+                    if (vBloodAbilityBuffEntry.ActiveAbility.Equals(oldAbility) && vBloodAbilityBuffEntry.SlotId == 3)
+                    {
+                        buffEntity = vBloodAbilityBuffEntry.ActiveBuff;
+                        index = i;
+                        //Core.Log.LogInfo("Found old shift ability...");
+                        break;
+                    }
+                }
+
+                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
+                {
+                    firstBuffer.RemoveAt(index);
+                    DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                }
+            }
+            
+            VBloodAbilityUtilities.InstantiateBuff(EntityManager, ActivateVBloodAbilitySystem._BuffSpawnerSystemData, character, PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff], spellPrefabGUID, 3);
+            if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var secondBuffer))
+            {
+                foreach(VBloodAbilityBuffEntry abilityEntry in secondBuffer)
+                {
+                    if (abilityEntry.ActiveAbility.Equals(spellPrefabGUID))
+                    {
+                        //Core.Log.LogInfo("Set correct ability type for shift...");
+                        abilityEntry.ActiveBuff.With((ref VBloodAbilityReplaceBuff vBloodAbilityReplaceBuff) =>
+                        {
+                            vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType;
+                        });
+                        break;
+                    }
+                }
+            }       
+        }
+        else if (spellPrefabGUID.HasValue())
+        {
+            var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
@@ -115,9 +158,9 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             };
 
             buffer.Add(buff);
-        }
+        }   
     }
-    static void SetSpells(Entity entity, Entity player, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void SetSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
         bool lockSpells = PlayerUtilities.GetPlayerBool(steamId, "SpellLock");
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
@@ -138,30 +181,5 @@ internal static class ReplaceAbilityOnSlotSystemPatch
         }
 
         steamId.SetPlayerSpells(spells);
-    }
-    static void HandleDuplicate(Entity entity, ReplaceAbilityOnSlotBuff buff, Entity player, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
-    {
-        Entity abilityGroup = ServerGameManager.GetAbilityGroup(player, 3); // get ability currently on shift, if it exists and matches what was just equipped set shift to default extra spell instead
-
-        if (abilityGroup.Has<PrefabGUID>())
-        {
-            PrefabGUID abilityPrefab = abilityGroup.Read<PrefabGUID>();
-
-            if (buff.NewGroupId == abilityPrefab)
-            {
-                Core.Log.LogInfo("AbilityGroup entity found, matching prefab...");
-                ServerGameManager.ModifyAbilityGroupOnSlot(entity, player, 3, new(ConfigService.DefaultClassSpell));
-                spells.ShiftSlot = ConfigService.DefaultClassSpell;
-                steamId.SetPlayerSpells(spells);
-            }
-            else
-            {
-                Core.Log.LogInfo("AbilityGroup entity found, no matching prefab...");
-            }
-        }
-        else
-        {
-            Core.Log.LogInfo("No AbilityGroup entity found...");
-        }
     }
 }

@@ -9,6 +9,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
+using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
 
@@ -22,6 +23,7 @@ internal static class DealDamageSystemPatch
     static readonly Random Random = new();
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    public static readonly Dictionary<ulong, DateTime> LastDamageTime = [];
 
     static readonly PrefabGUID stormShield03 = new(1095865904);
     static readonly PrefabGUID stormShield02 = new(-1192885497);
@@ -53,7 +55,15 @@ internal static class DealDamageSystemPatch
 
                 if (sourcePrefab.Equals(silverDebuff) || sourcePrefab.Equals(garlicDebuff)) continue; // skip if source is silver or garlic
 
-                if (dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player) && !dealDamageEvent.Target.IsPlayer())
+                Entity player;
+                if (dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player))
+                {
+                    ulong steamId = player.GetSteamId();
+                    //PrefabGUID target = lastEntry.ItemType;
+
+                    LastDamageTime[steamId] = DateTime.UtcNow;
+                }
+                else if (dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
                 {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;

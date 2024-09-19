@@ -11,13 +11,9 @@ internal static class RecipeUtilities // would like to tie this into professions
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
     static readonly PrefabGUID advancedGrinder = new(-178579946); // vampiric dust
-    //static readonly PrefabGUID advancedLoom = new(1299929048);
-    static readonly PrefabGUID advancedFurnace = new(-222851985);
-    //static readonly PrefabGUID smallFurnace = new(-1150411622); // silver ingot
-    static readonly PrefabGUID fabricator = new(-465055967); // copper wires
-    //static readonly PrefabGUID artisanTable = new(-1718710437);
+    static readonly PrefabGUID advancedFurnace = new(-222851985); // silver ingot
+    static readonly PrefabGUID fabricator = new(-465055967); // copper wires, iron body
 
-    //static readonly PrefabGUID shadowGreatSword = new(-1525227854);
 
     static readonly PrefabGUID ironBody = new(-1270503528);
     static readonly PrefabGUID vampiricDust = new(311920560);
@@ -86,20 +82,6 @@ internal static class RecipeUtilities // would like to tie this into professions
         recipeEntity.Write(recipeData);
 
         recipeMap[silverIngot] = recipeData;
-
-        GameDataSystem.RegisterRecipes();
-
-        //recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[shadowGreatSword];
-
-        //recipeData = recipeEntity.Read<RecipeData>();
-
-        //recipeData.AlwaysUnlocked = true;
-        //recipeData.HideInStation = false;
-        //recipeData.HudSortingOrder = 0;
-
-        //recipeEntity.Write(recipeData);
-
-        //recipeMap[shadowGreatSword] = recipeData;
 
         GameDataSystem.RegisterRecipes();
 
