@@ -15,7 +15,6 @@ using ProjectM.Shared;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
-using VampireCommandFramework;
 
 namespace Bloodcraft;
 internal static class Core
@@ -82,6 +81,7 @@ internal static class Core
             Core.Log.LogInfo("=============================");
         }
         */
+        
 
         hasInitialized = true;
     }

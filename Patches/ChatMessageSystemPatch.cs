@@ -26,7 +26,7 @@ internal static class ChatMessageSystemPatch
         if (!Core.hasInitialized) return;
         if (!ConfigService.ClientCompanion) return;
 
-        NativeArray<Entity> entities = __instance.__query_661171423_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
