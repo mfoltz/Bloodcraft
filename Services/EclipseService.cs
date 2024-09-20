@@ -26,7 +26,9 @@ internal class EclipseService
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly WaitForSeconds Delay = new(2.5f);
+    static readonly WaitForSeconds NewUserDelay = new(15f);
 
+    const int Attempts = 20;
     static readonly Regex regex = new(@"^\[(\d+)\]:");
 
     public readonly static HashSet<ulong> RegisteredUsers = [];
@@ -60,6 +62,32 @@ internal class EclipseService
             RegisteredUsers.Add(steamId);
             SendClientConfig(playerInfo.User);
             SendClientProgress(playerInfo.CharEntity, steamId);
+        }
+        else // delayed registration, wait for cache to update/player to make character...
+        {
+            Core.StartCoroutine(DelayedRegistration(steamId));
+        }
+    }
+    static IEnumerator DelayedRegistration(ulong steamId)
+    {
+        int tries = 0;
+
+        while (tries <= Attempts)
+        {
+            yield return NewUserDelay;
+
+            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
+            {
+                Core.Log.LogInfo($"User {steamId} registered for Eclipse updates from PlayerCache...");
+                RegisteredUsers.Add(steamId);
+                SendClientConfig(playerInfo.User);
+                SendClientProgress(playerInfo.CharEntity, steamId);
+                yield break;
+            }
+            else
+            {
+                tries++;
+            }
         }
     }
     public static void SendClientConfig(User user)
