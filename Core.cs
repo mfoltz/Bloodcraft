@@ -55,7 +55,7 @@ internal static class Core
         }
         if (ConfigService.FamiliarSystem)
         {
-            CleanUpFams();
+            //CleanUpFams();
             ConfigUtilities.FamiliarBans();
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
