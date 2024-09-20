@@ -177,6 +177,7 @@ internal static class QuestCommands
                 {
                     int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                     ForceDaily(user, steamId, level);
+                    LocalizationService.HandleReply(ctx, $"No targets found, rerolling <color=#00FFFF>Daily Quest</color>...");
                 }
                 else if (entities.Count > 0)
                 {
@@ -219,6 +220,7 @@ internal static class QuestCommands
                 {
                     int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                     ForceWeekly(user, steamId, level);
+                    LocalizationService.HandleReply(ctx, $"No targets found, rerolling <color=#BF40BF>Weekly Quest</color>...");
                 }
                 else if (entities.Count > 0)
                 {

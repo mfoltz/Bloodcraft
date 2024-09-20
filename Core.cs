@@ -11,11 +11,11 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using Stunlock.Core;
-using Stunlock.Localization;
+using ProjectM.Shared;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
+using VampireCommandFramework;
 
 namespace Bloodcraft;
 internal static class Core
@@ -56,6 +56,7 @@ internal static class Core
         }
         if (ConfigService.FamiliarSystem)
         {
+            CleanUpFams();
             ConfigUtilities.FamiliarBans();
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
@@ -96,5 +97,31 @@ internal static class Core
             UnityEngine.Object.DontDestroyOnLoad(MonoBehaviour.gameObject);
         }
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    }
+    static void CleanUpFams()
+    {
+        // BlockFeedBuff, Disabled, TeamReference with UserTeam on entity, and see if name of prefab starts with CHAR?
+        EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = Commands.MiscCommands.DisabledFamiliarComponents,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        try
+        {
+            IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
+            foreach (Entity entity in disabledFamiliars)
+            {
+                if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
+                {
+                    if (entity.Has<Disabled>()) entity.Remove<Disabled>();
+                    DestroyUtility.Destroy(EntityManager, entity);
+                }
+            }
+        }
+        finally
+        {
+            familiarsQuery.Dispose();
+        }
     }
 }

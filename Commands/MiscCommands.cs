@@ -26,7 +26,7 @@ internal static class MiscCommands
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    static readonly ComponentType[] DisabledFamiliarComponents =
+    public static readonly ComponentType[] DisabledFamiliarComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
         ComponentType.ReadOnly(Il2CppType.Of<Disabled>()),
@@ -248,6 +248,7 @@ internal static class MiscCommands
                 {
                     if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
                     {
+                        if (entity.Has<Disabled>()) entity.Remove<Disabled>();
                         DestroyUtility.Destroy(EntityManager, entity);
                         counter++;
                     }

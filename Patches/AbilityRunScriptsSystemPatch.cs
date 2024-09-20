@@ -31,6 +31,7 @@ internal static class AbilityRunScriptsSystemPatch
             {
                 AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
+                if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
 
                 if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab.GuidHash))
                 {

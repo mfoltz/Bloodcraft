@@ -242,6 +242,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
+                /*
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(captureBuff))
                 {
                     //Core.Log.LogInfo("BuffSpawnSystem" + entity.Read<PrefabGUID>().LookupName());
@@ -252,6 +253,7 @@ internal static class BuffSpawnSystemPatches
                     //Core.Log.LogInfo("BuffSpawnSystem" + entity.Read<PrefabGUID>().LookupName());
                     BuffUtilities.HandleImmaterialBuff(entity);
                 }
+                */
             }
         }
         finally

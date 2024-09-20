@@ -78,6 +78,8 @@ internal static class ScriptSpawnServerPatch
                         entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
                     }
                 }
+
+                /*
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().TryGetPlayer(out Entity player) && entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(CaptureBuff))
                 {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
@@ -89,6 +91,7 @@ internal static class ScriptSpawnServerPatch
 
                     Core.StartCoroutine(CaptureRoutine(target, player, userEntity, targetPosition, adjustedBreakChance));
                 }
+                */
 
                 if (!entity.Has<BloodBuff>()) continue;
                 else if (entity.GetOwner().TryGetPlayer(out Entity player))
