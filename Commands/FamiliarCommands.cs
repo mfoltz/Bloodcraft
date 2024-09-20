@@ -112,7 +112,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
+    //[Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
     public static void BindFamiliar(ChatCommandContext ctx, string name, string box, int choice)
     {
         if (!ConfigService.FamiliarSystem)
@@ -180,7 +180,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
+    //[Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
     public static void ListPlayerFamiliars(ChatCommandContext ctx, string name, string box = "")
     {
         if (!ConfigService.FamiliarSystem)
@@ -1046,7 +1046,7 @@ internal static class FamiliarCommands
         }
     }
 
-    //[Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Names active familiar.")]
+    //[Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Names active familiar.")] for anyone curious no this doesn't work
     public static void NameFamiliar(ChatCommandContext ctx, string newName) // All Components: ProjectM.Network.FromCharacter [ReadOnly], ProjectM.Network.InteractEvents_Client+RenameInteractable [ReadOnly]
     {
         if (!ConfigService.FamiliarSystem)

@@ -129,7 +129,7 @@ internal static class ClassUtilities
 
         var classSpells = perks.Select(perk =>
         {
-            string prefab = new PrefabGUID(perk).LookupName();
+            string prefab = new PrefabGUID(perk).GetPrefabName();
             int prefabIndex = prefab.IndexOf("Prefab");
             if (prefabIndex != -1)
             {

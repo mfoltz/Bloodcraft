@@ -1,3 +1,11 @@
+`1.4.0`
+- config entries are now in sections (please save a backup of your config just incase but seems to be handling migration well now)
+- normal spells on shift by default again (should leave existing configs untouched if you'd rather use NPC spells), fixed bug with legendary weapons + equipping jewels sometimes cloning the weapon and eating the jewel 
+- added default class spell config and moved veil of shadows there (all classes can use this spell via '.class csp 0')
+- profession experience can optionally be shown as scrolling text! use '.sct' to enable/disable, will be exploring other uses for this in the future
+- changing class spells no longer requires switching weapons to take effect (this applies to blood legacy bonus stats as well but not expertise yet)
+- crafting/gathering objectives added to quest pool, can also reroll quests with '.quest r [QuestType]' for configurable cost/amount if uncompleted or if infinite dailies are enabled for dailies (admin quest refresh moved to '.quest rf [Name]')
+
 `1.3.3`
 - slight changes to communication with Eclipse that will need version 0.2.0 of that to work correctly
 - more filtering for quest targets

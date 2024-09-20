@@ -88,6 +88,12 @@ internal static class ClassCommands
                         data.ClassSpell = ConfigService.DefaultClassSpell;
                         steamId.SetPlayerSpells(data);
 
+                        if (ConfigService.DefaultClassSpell == 0)
+                        {
+                            LocalizationService.HandleReply(ctx, "No default spell found for classes.");
+                            return;
+                        }
+
                         ClassUtilities.UpdateShift(ctx.Event.SenderCharacterEntity, new(data.ClassSpell));
                         LocalizationService.HandleReply(ctx, $"You have chosen <color=#CBC3E3>{new PrefabGUID(ConfigService.DefaultClassSpell).GetPrefabName()}</color>, it will be available on weapons and unarmed if .shift is enabled.");
                         return;
@@ -262,8 +268,7 @@ internal static class ClassCommands
                 playerClass = requestedClass;
             }
 
-            ClassUtilities.
-                        ReplyClassSpells(ctx, playerClass);
+            ClassUtilities.ReplyClassSpells(ctx, playerClass);
         }
         else
         {
