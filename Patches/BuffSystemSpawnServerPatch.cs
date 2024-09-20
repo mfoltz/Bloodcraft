@@ -64,7 +64,6 @@ internal static class BuffSpawnSystemPatches
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 string prefabName = prefabGUID.LookupName().ToLower();
-                Entity player = Entity.Null;
 
                 /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out, seems fine but still leaving for now
                 if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().TryGetPlayer(out player)) // feed execute kills
@@ -116,7 +115,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.GetBuffTarget().TryGetPlayer(out player)) // teleport familiar to player after waygate
+                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.GetBuffTarget().TryGetPlayer(out Entity player)) // teleport familiar to player after waygate
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())

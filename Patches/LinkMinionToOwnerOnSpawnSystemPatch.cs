@@ -35,6 +35,8 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
             {
                 if (entity.GetOwner().TryGetFollowedPlayer(out Entity player))
                 {
+                    //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName() + " " + entity.GetOwner().Read<PrefabGUID>().LookupName());
+
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())
                     {
@@ -67,6 +69,10 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                             }
                         }
                     }
+                }
+                else
+                {
+                    //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName() + " " + entity.GetOwner().Read<PrefabGUID>().LookupName());
                 }
             }
         }
