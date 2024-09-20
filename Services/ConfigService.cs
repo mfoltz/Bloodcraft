@@ -224,7 +224,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Leveling", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths."),
             new ConfigEntryDefinition("Prestige", "PrestigeSystem", false, "Enable or disable the prestige system (requires leveling to be enabled)"),
             new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level"),
-            new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3,4,5", "The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start"),
+            new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3,4,5", "The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 if you want them unlocked from the start."),
             new ConfigEntryDefinition("Prestige", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling"),
             new ConfigEntryDefinition("Prestige", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling"),
             new ConfigEntryDefinition("Prestige", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy"),
