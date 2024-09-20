@@ -2,7 +2,6 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -16,8 +15,6 @@ internal static class BuffUtilities
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-
-    const float CaptureTime = 6.25f; // with padding
     public static void ApplyBuff(PrefabGUID buffPrefab, Entity target)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -106,64 +103,6 @@ internal static class BuffUtilities
                 }
             }
         }
-    }
-    public static void HandleImmaterialBuff(Entity entity)
-    {
-        //Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName() + " | " + entity.Read<PrefabGUID>().LookupName());
-
-        if (entity.Has<ModifyMovementSpeedBuff>()) entity.Remove<ModifyMovementSpeedBuff>();
-        entity.With((ref LifeTime lifeTime) =>
-        {
-            lifeTime.Duration = CaptureTime;
-            lifeTime.EndAction = LifeTimeEndAction.Destroy;
-        });
-    }
-    public static void HandleCaptureBuff(Entity entity)
-    {
-        //Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName() +" | " + entity.Read<PrefabGUID>().LookupName());
-
-        if (entity.Has<AbilityProjectileFanOnGameplayEvent_DataServer>()) entity.Remove<AbilityProjectileFanOnGameplayEvent_DataServer>();
-        if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = CaptureTime, EndAction = LifeTimeEndAction.Destroy });
-
-        entity.With((ref AmplifyBuff amplifyBuff) =>
-        {
-            amplifyBuff.AmplifyModifier = -1f;
-        });
-
-        ModifyMovementSpeedBuff modifyMovementSpeedBuff = new()
-        {
-            MultiplyAdd = false,
-            MoveSpeed = 0f
-        };
-        entity.Add<ModifyMovementSpeedBuff>();
-        entity.Write(modifyMovementSpeedBuff);
-
-        DisableAggroBuff disableAggroBuff = new()
-        {
-            Mode = DisableAggroBuffMode.TargetDontAttackOthers
-        };
-        entity.Add<DisableAggroBuff>();
-        entity.Write(disableAggroBuff);
-
-        entity.Add<HideTargetHUD>();
-    }
-    public static void HandleBreakBuff(Entity entity)
-    {
-        //Core.Log.LogInfo(entity.GetBuffTarget().Read<PrefabGUID>().LookupName() + " | " + entity.Read<PrefabGUID>().LookupName());
-
-        entity.With((ref LifeTime lifeTime) =>
-        {
-            lifeTime.Duration = 1.5f;
-            lifeTime.EndAction = LifeTimeEndAction.Destroy;
-        });
-
-        entity.Add<BlockFeedBuff>();
-
-        if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
-    }
-    public static void HandleSuccessBuff(Entity entity)
-    {
-
     }
     public static void HandleVisual(Entity entity, PrefabGUID visual)
     {

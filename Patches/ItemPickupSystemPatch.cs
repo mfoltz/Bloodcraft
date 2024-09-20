@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using ProjectM;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -24,7 +23,6 @@ internal static class ItemPickupSystemPatch
                 else if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
-                    Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName());
 
                     if (DealDamageSystemPatch.LastDamageTime.ContainsKey(steamId)) DealDamageSystemPatch.LastDamageTime.Remove(steamId);
                 }

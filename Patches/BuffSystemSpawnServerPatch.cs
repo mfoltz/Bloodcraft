@@ -241,18 +241,6 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                /*
-                else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(captureBuff))
-                {
-                    //Core.Log.LogInfo("BuffSpawnSystem" + entity.Read<PrefabGUID>().LookupName());
-                    BuffUtilities.HandleCaptureBuff(entity);
-                }
-                else if (ConfigService.FamiliarSystem && !entity.GetBuffTarget().IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(immaterialBuff))
-                {
-                    //Core.Log.LogInfo("BuffSpawnSystem" + entity.Read<PrefabGUID>().LookupName());
-                    BuffUtilities.HandleImmaterialBuff(entity);
-                }
-                */
             }
         }
         finally

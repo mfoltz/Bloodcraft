@@ -38,7 +38,7 @@ internal static class ClaimAchievementSystemPatch
             Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
             EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
-            __instance.CompleteAchievement(entityCommandBuffer, GettingReadyForTheHunt, userEntity, characterEntity, achievementOwnerEntity, false, true);
+            __instance.CompleteAchievement(entityCommandBuffer, GettingReadyForTheHunt, userEntity, characterEntity, achievementOwnerEntity, false, false);
         }
     }
 }

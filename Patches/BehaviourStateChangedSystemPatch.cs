@@ -47,26 +47,6 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                         FamiliarUtilities.HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
                     }
                 }
-                /*
-                else if (ServerGameManager.TryGetBuff(behaviourTreeStateChangedEvent.Entity, BreakBuff, out Entity breakBuff))
-                {
-                    if (breakBuff.Has<HealOnGameplayEvent>()) continue;
-                    else if (breakBuff.Has<BlockFeedBuff>()) // if no heal and extra component should be the BreakBuff
-                    {
-                        BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
-                        if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
-                        {
-                            Entity familiar = behaviourTreeStateChangedEvent.Entity;
-
-                            behaviourTreeState.Value = GenericEnemyState.Combat;
-                            behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Combat;
-
-                            entity.Write(behaviourTreeStateChangedEvent);
-                            behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
-                        }
-                    }
-                }
-                */
             }
         }
         finally
