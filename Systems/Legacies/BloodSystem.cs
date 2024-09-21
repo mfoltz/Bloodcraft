@@ -177,10 +177,12 @@ internal static class BloodSystem
         { BloodType.Immortal, new PrefabGUID(55100532) }, // CHAR_Dracula_BloodSoul_heart
         { BloodType.Brute, new PrefabGUID(2005508157) } // CHAR_Militia_Heavy
     };
+    /*
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         ProcessLegacy(deathEvent.Source, deathEvent.Target);
     }
+    */
     public static void ProcessLegacy(Entity Killer, Entity Victim)
     {
         if (!Victim.Has<BloodConsumeSource>()) return;

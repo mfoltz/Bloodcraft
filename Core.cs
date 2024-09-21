@@ -43,10 +43,14 @@ internal static class Core
         if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
         if (ConfigService.StarterKit) ConfigUtilities.StarterKit();
         if (ConfigService.PrestigeSystem) BuffUtilities.PrestigeBuffs();
-        if (ConfigService.SoftSynergies || ConfigService.HardSynergies) ConfigUtilities.CreateClassSpellCooldowns();
+        if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
+        {
+            ConfigUtilities.CreateClassSpellCooldowns();
+            ClassUtilities.GenerateAbilityJewelMap();
+        }
 
         if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEvent += LevelingSystem.OnUpdate;
-        if (ConfigService.BloodSystem) DeathEventListenerSystemPatch.OnDeathEvent += BloodSystem.OnUpdate;
+        //if (ConfigService.BloodSystem) DeathEventListenerSystemPatch.OnDeathEvent += BloodSystem.OnUpdate;
         if (ConfigService.ExpertiseSystem) DeathEventListenerSystemPatch.OnDeathEvent += WeaponSystem.OnUpdate;
         if (ConfigService.QuestSystem)
         {
@@ -80,8 +84,7 @@ internal static class Core
             }
             Core.Log.LogInfo("=============================");
         }
-        */
-        
+        */    
 
         hasInitialized = true;
     }

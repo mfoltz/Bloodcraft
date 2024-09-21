@@ -6,17 +6,18 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
-using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
-using static ProjectM.Tiles.TileConstants;
 
 namespace Bloodcraft.Utilities;
 
 internal static class ClassUtilities
 {
     static EntityManager EntityManager => Core.EntityManager;
+
+    static EntityManager EntityManagerRef = Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
@@ -26,6 +27,18 @@ internal static class ClassUtilities
 
     static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
 
+    static NativeParallelHashMap<PrefabGUID, ItemData> itemLookup = SystemService.GameDataSystem.ItemHashLookupMap;
+    static PrefabLookupMap PrefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
+
+    static readonly ComponentType[] JewelComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<JewelInstance>()),
+        ComponentType.ReadOnly(Il2CppType.Of<JewelLevelSource>())
+    ];
+
+    static EntityQuery JewelQuery;
+
+    static readonly Dictionary<PrefabGUID, List<Entity>> AbilityJewelMap = [];
     public static List<int> GetClassBuffs(ulong steamId)
     {
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
@@ -186,7 +199,12 @@ internal static class ClassUtilities
     {
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.TryGetComponent(out VBloodAbilityData vBloodAbilityData))
         {
+            bool tryEquip = false;
+
+            Entity inventoryEntity = Entity.Null;
+            Entity equippedJewelEntity = Entity.Null;
             Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+
             if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
             {
                 Entity buffEntity = Entity.Null;
@@ -200,8 +218,23 @@ internal static class ClassUtilities
                     {
                         buffEntity = vBloodAbilityBuffEntry.ActiveBuff;
                         index = i;
-                        //Core.Log.LogInfo("Found old shift ability...");
                         break;
+                    }
+                }
+
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out inventoryEntity))
+                {
+                    foreach (Entity jewel in AbilityJewelMap[oldAbility])
+                    {
+                        if (JewelEquipUtilitiesServer.TryGetEquippedJewel(EntityManager, character, jewel, out equippedJewelEntity) && equippedJewelEntity.Exists())
+                        {
+                            break;
+                        }
+                    }
+
+                    if (JewelEquipUtilitiesServer.TryUnequipJewel(EntityManager, ref itemLookup, inventoryEntity, abilityGroup))
+                    {
+                        tryEquip = true;
                     }
                 }
 
@@ -219,7 +252,6 @@ internal static class ClassUtilities
                 {
                     if (abilityEntry.ActiveAbility.Equals(spellPrefabGUID))
                     {
-                        //Core.Log.LogInfo("Set correct ability type for shift...");
                         abilityEntry.ActiveBuff.With((ref VBloodAbilityReplaceBuff vBloodAbilityReplaceBuff) =>
                         {
                             vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType;
@@ -230,6 +262,11 @@ internal static class ClassUtilities
             }
 
             ReplaceAbilityOnSlotSystem.OnUpdate();
+            
+            if (tryEquip && InventoryUtilities.TryGetItemSlot(EntityManager, character, equippedJewelEntity, out int slot))
+            {
+                JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);
+            }
         }
         else if (spellPrefabGUID.HasValue())
         {
@@ -273,7 +310,6 @@ internal static class ClassUtilities
             ReplaceAbilityOnSlotSystem.OnUpdate();
         }
     }
-    /*
     public static void GenerateAbilityJewelMap()
     {
         JewelQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
@@ -296,14 +332,10 @@ internal static class ClassUtilities
                     }
 
                     string prefabName = entity.Read<PrefabGUID>().LookupName().Split(" ", 2)[0];
+
                     if (prefabName.EndsWith("T01") || prefabName.EndsWith("T02") || prefabName.EndsWith("T03") || prefabName.EndsWith("T04")) continue;
                     else AbilityJewelMap[jewelInstance.OverrideAbilityType].Add(entity);
                 }
-            }
-
-            foreach(var kvp in AbilityJewelMap)
-            {
-                //Core.Log.LogInfo($"Ability {kvp.Key.LookupName()} has {kvp.Value.Count} jewel(s): {string.Join(", ", kvp.Value.Select(e => e.Read<PrefabGUID>().LookupName()))}");
             }
         }
         finally
@@ -311,5 +343,4 @@ internal static class ClassUtilities
             JewelQuery.Dispose();
         }
     }
-    */
 }

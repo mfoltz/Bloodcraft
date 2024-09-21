@@ -343,8 +343,6 @@ internal static class LevelingSystem
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
-        if (victim.Equals(Entity.Null)) return;
-
         /*
         if (PlayerUtilities.GetPlayerBool(steamId, "ScrollingText"))
         {
@@ -355,18 +353,6 @@ internal static class LevelingSystem
             Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, entityCommandBuffer, assetGuidLeveling, adjacentPosition, color, character, gainedXP, default, userEntity);
         }
         */
-    }
-    static float3 GetRandomPositionAroundEntity(float3 entityPosition, float radius)
-    {
-        // Generate a random angle in radians (0 to 2 * Pi for a full circle)
-        float randomAngle = UnityEngine.Random.Range(0f, 2f * Mathf.PI);
-
-        // Calculate the X and Z offsets using trigonometry (we assume Y remains the same)
-        float offsetX = Mathf.Cos(randomAngle) * radius;
-        float offsetZ = Mathf.Sin(randomAngle) * radius;
-
-        // Return the new position, keeping the Y axis (height) unchanged
-        return new float3(entityPosition.x + offsetX, entityPosition.y, entityPosition.z + offsetZ);
     }
     public static int ConvertXpToLevel(float xp)
     {
