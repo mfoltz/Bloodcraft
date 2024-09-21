@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -277,7 +278,14 @@ internal static class BloodSystem
                 }
             }
 
-            UpdateBloodStats(player, user, bloodType);
+            if (StatChangeMutationSystemPatch.RecentBloodChange.TryGetValue(steamID, out bool recentChange) && recentChange)
+            {
+                StatChangeMutationSystemPatch.RecentBloodChange.Remove(steamID);
+            }
+            else
+            {
+                UpdateBloodStats(player, user, bloodType);
+            }
         }
 
         if (PlayerUtilities.GetPlayerBool(steamID, "BloodLogging"))

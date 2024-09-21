@@ -27,10 +27,9 @@ internal static class ShapeshiftSystemPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!entity.TryGetComponent(out FromCharacter fromCharacter)) continue;
 
                 EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
-                FromCharacter fromCharacter = entity.Read<FromCharacter>();
-
                 if (enterShapeshiftEvent.Shapeshift.Equals(dominateAbility))
                 {
                     Entity character = fromCharacter.Character;

@@ -32,8 +32,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-
-                if (prefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
+                else if (prefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entity.GetOwner();
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();

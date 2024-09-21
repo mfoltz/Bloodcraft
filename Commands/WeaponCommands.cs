@@ -128,7 +128,7 @@ internal static class WeaponCommands
         if (ChooseStat(steamID, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
-            //UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+            //WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
         }
         else
         {

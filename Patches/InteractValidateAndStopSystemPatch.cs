@@ -31,10 +31,10 @@ internal static class InteractValidateAndStopSystemPatch
         {
             foreach (Entity entity in entities)
             {
+                if (!entity.Has<EntityOwner>()) continue;
                 if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                
-                Entity player = Entity.Null;
-                if (entity.GetOwner().TryGetPlayer(out player) && !ServerGameManager.HasBuff(player, dominateBuff.ToIdentifier()))
+
+                if (entity.GetOwner().TryGetPlayer(out Entity player) && !ServerGameManager.HasBuff(player, dominateBuff.ToIdentifier()))
                 {
                     if (prefabGUID.GuidHash.Equals(-986064531) || prefabGUID.GuidHash.Equals(985937733)) // player using world or castle waygate
                     {                        

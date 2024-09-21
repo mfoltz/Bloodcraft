@@ -60,89 +60,12 @@ internal static class SpawnTransformSystemOnSpawnPatch
         {
             foreach (Entity entity in entities)
             {
-
-                if (!entity.Has<UnitLevel>()) continue;
+                if (!entity.TryGetComponent(out UnitLevel unitLevel)) continue;
 
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
-                int level = entity.Read<UnitLevel>().Level._Value;
+                int level = unitLevel.Level._Value;
                 int famKey = prefabGUID.GuidHash;
                 bool summon = false;
-
-                /* nothing to see here move along >_>
-                if (level == 1 && prefabGUID.Equals(paladinServantPrefab))
-                {
-                    Entity character = PlayerEntities.Dequeue();
-                    Entity familiar = FamiliarSummonUtilities.FamiliarUtilities.FindPlayerFamiliar(character);
-
-                    if (!character.Exists() || !familiar.Exists())
-                    {
-                        continue;
-                    }
-
-                    ServantCoffinstation servantCoffinstation = new()
-                    {
-                        BloodQuality = 0,
-                        ConnectedServant = NetworkedEntity.ServerEntity(entity),
-                        State = ServantCoffinState.ServantAlive,
-                        ServantName = new FixedString64Bytes($"{character.Read<PlayerCharacter>().Name.Value}'s Familiar")
-                    };
-
-                    familiar.Add<ServantCoffinstation>();
-                    familiar.Write(servantCoffinstation);
-
-                    ServantConnectedCoffin servantConnectedCoffin = new()
-                    {
-                        CoffinEntity = NetworkedEntity.ServerEntity(familiar),
-                    };
-
-                    ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                    {
-                        BuffPrefabGUID = invisibleImmaterial
-                    };
-
-                    FromCharacter fromCharacter = new()
-                    {
-                        Character = entity,
-                        User = entity
-                    };
-
-                    Core.SystemService.DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                    if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID, out Entity buff))
-                    {
-                        if (buff.Has<LifeTime>())
-                        {
-                            buff.Write(new LifeTime { Duration = -1, EndAction = LifeTimeEndAction.None });
-                        }
-                        if (buff.Has<HideTargetHUD>())
-                        {
-                            buff.Remove<HideTargetHUD>();
-                        }
-                        if (!buff.Has<ServerControlsPositionBuff>())
-                        {
-                            buff.Add<ServerControlsPositionBuff>();
-                        }
-                        if (!buff.Has<AttachToCharacterTransformBuff>())
-                        {
-                            AttachToCharacterTransformBuff attachToCharacterTransformBuff = new()
-                            {
-                                ClientPositionOffset = new float3(0, 0, 0),
-                                ClientRotationOffset = new float3(0, 0, 0),
-                                CopyPosition = true,
-                                CopyRotation = true,
-                                HybridBone = 1,
-                                ServerPositionOffset = new float3(0, 0, 0)
-                            };
-                            buff.Add<AttachToCharacterTransformBuff>();
-                            buff.Write(attachToCharacterTransformBuff);
-                        }
-                        Core.Log.LogInfo($"finished modifying invisible buff for servant");
-                    }
-                    else
-                    {
-                        Core.Log.LogError($"failed to get invisible buff for servant");
-                    }
-                }
-                */
 
                 if (level == 1 && !PrefabsToIgnore.Contains(prefabGUID))
                 {

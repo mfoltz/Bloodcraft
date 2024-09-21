@@ -12,6 +12,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class StatChangeMutationSystemPatch
 {
+    public static readonly Dictionary<ulong, bool> RecentBloodChange = [];
 
     [HarmonyPatch(typeof(StatChangeMutationSystem), nameof(StatChangeMutationSystem.OnUpdate))] // increase blood quality if configured based on legacy/prestige
     [HarmonyPrefix]
@@ -43,7 +44,7 @@ internal static class StatChangeMutationSystemPatch
                     if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
                     {
                         float qualityPercentBonus = ConfigService.PrestigeBloodQuality > 1f ? ConfigService.PrestigeBloodQuality : ConfigService.PrestigeBloodQuality * 100f;
-                        Core.Log.LogInfo($"Prestige blood quality bonus in StatChangeMutationSystem: {qualityPercentBonus}");
+                        //Core.Log.LogInfo($"Prestige blood quality bonus in StatChangeMutationSystem: {qualityPercentBonus}");
 
                         quality = (float)bloodPrestige * qualityPercentBonus;
                         if (quality > 0)
@@ -62,6 +63,8 @@ internal static class StatChangeMutationSystemPatch
                             entity.Write(bloodQualityChange);
                         }
                     }
+
+                    RecentBloodChange[steamID] = true;
                 }
             }
         }

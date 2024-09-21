@@ -28,9 +28,9 @@ internal static class ReactToInventoryChangedSystemPatch
         {
             foreach (var entity in entities)
             {
-                InventoryChangedEvent inventoryChangedEvent = entity.Read<InventoryChangedEvent>();
-                Entity inventory = inventoryChangedEvent.InventoryEntity;
+                if (!entity.TryGetComponent(out InventoryChangedEvent inventoryChangedEvent)) continue;
 
+                Entity inventory = inventoryChangedEvent.InventoryEntity;
                 if (inventory.TryGetComponent(out InventoryConnection inventoryConnection) && inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained))
                 {
                     User user;

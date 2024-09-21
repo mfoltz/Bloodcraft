@@ -4,6 +4,7 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -13,6 +14,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class LinkMinionToOwnerOnSpawnSystemPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
@@ -33,11 +35,16 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (entity.GetOwner().TryGetFollowedPlayer(out Entity player))
+                if (!entity.Has<EntityOwner>()) continue;
+                else if (entity.GetOwner().TryGetFollowedPlayer(out Entity player))
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
-                    if (familiar.Exists())
+                    if (familiar.Has<Disabled>()) // for Kriig
+                    {
+                        DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
+                    }
+                    else if (familiar.Exists())
                     {
                         if (!FamiliarMinions.ContainsKey(familiar))
                         {
@@ -68,10 +75,6 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                             }
                         }
                     }
-                }
-                else
-                {
-                    //Core.Log.LogInfo(entity.Read<PrefabGUID>().LookupName() + " " + entity.GetOwner().Read<PrefabGUID>().LookupName());
                 }
             }
         }

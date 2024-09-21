@@ -30,8 +30,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
             foreach (Entity entity in entities)
             {
                 if (!entity.Has<EntityOwner>()) continue;
-
-                if (entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -56,8 +55,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
             {
                 if (!entity.Has<WeaponLevel>() || !entity.Has<EntityOwner>()) continue;
 
-                Entity player;
-                if (ConfigService.ExpertiseSystem && entity.GetOwner().TryGetPlayer(out player))
+                if (ConfigService.ExpertiseSystem && entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
 
@@ -122,16 +120,15 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void OnUpdatePostfix(WeaponLevelSystem_Spawn __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<EntityOwner>()) continue;
-
-                if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -147,16 +144,15 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPrefix]
     static void ArmorLevelSpawnPrefix(ArmorLevelSystem_Spawn __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<EntityOwner>()) continue;
-
-                if (ConfigService.LevelingSystem && entity.GetOwner().IsPlayer())
+                else if (ConfigService.LevelingSystem && entity.GetOwner().IsPlayer())
                 {
                     if (entity.Has<ArmorLevel>()) entity.Write(new ArmorLevel { Level = 0f });
                 }
@@ -172,16 +168,15 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<EntityOwner>()) continue;
-
-                if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -197,16 +192,15 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
     {
+        if (!Core.hasInitialized) return;
+
         NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!Core.hasInitialized) return;
-
                 if (!entity.Has<EntityOwner>()) continue;
-
-                if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }

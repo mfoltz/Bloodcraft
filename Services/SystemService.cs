@@ -58,6 +58,12 @@ public class SystemService(World world)
     ReplaceAbilityOnSlotSystem _replaceAbilityOnSlotSystem;
     public ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => _replaceAbilityOnSlotSystem ??= GetSystem<ReplaceAbilityOnSlotSystem>();
     
+    UnEquipItemSystem _unEquipItemSystem;
+    public UnEquipItemSystem UnEquipItemSystem => _unEquipItemSystem ??= GetSystem<UnEquipItemSystem>();
+
+    EquipItemSystem _equipItemSystem;
+    public EquipItemSystem EquipItemSystem => _equipItemSystem ??= GetSystem<EquipItemSystem>();
+
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
     public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
     T GetSystem<T>() where T : ComponentSystemBase

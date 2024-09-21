@@ -151,7 +151,7 @@ internal static class BloodManager
     {
         Blood blood = player.Read<Blood>();
         float quality = blood.Quality;
-
+        Core.Log.LogInfo("Pre debug event");
         /*
         if (ConfigService.BloodQualityBonus) // unless accounted for this will stack, we don't want that here. subtract what will be added in StatMutationSystemPatch
         {
@@ -181,6 +181,8 @@ internal static class BloodManager
         };
 
         DebugEventsSystem.ConsumeBloodEvent(user.Index, ref consumeBloodDebugEvent);
+        Core.Log.LogInfo("Post debug event");
+        DebugEventsSystem.OnUpdate(); // want this to either go before blood changes naturally or not do it at all if blood has just changed naturally
     }
     public static BloodType GetCurrentBloodType(Entity character)
     {

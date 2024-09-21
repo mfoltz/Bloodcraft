@@ -48,8 +48,7 @@ internal static class DealDamageSystemPatch
                 else if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
                 else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
 
-                Entity player;
-                if (dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player))
+                if (dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
                     LastDamageTime[steamId] = DateTime.UtcNow;

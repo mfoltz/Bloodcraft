@@ -35,7 +35,8 @@ internal static class ReplaceAbilityOnSlotSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (entity.GetOwner().TryGetPlayer(out Entity character))
+                if (!entity.Has<EntityOwner>()) continue;
+                else if (entity.GetOwner().TryGetPlayer(out Entity character))
                 {
                     ulong steamId = character.GetSteamId();
                     string prefabName = entity.Read<PrefabGUID>().LookupName().ToLower();
@@ -50,7 +51,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     }
                     else if (ConfigService.ShiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));
+                        //HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));
                     }
                     else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
