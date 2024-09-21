@@ -5,7 +5,6 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Systems.Legacies.BloodManager;
 
 namespace Bloodcraft.Systems.Legacies;

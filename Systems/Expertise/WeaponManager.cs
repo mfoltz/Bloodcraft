@@ -1,6 +1,10 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Network;
+using ProjectM.Scripting;
+using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 
@@ -8,8 +12,39 @@ namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponManager
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+
+    static readonly ComponentType[] UnequipNetworkEventComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ReceiveNetworkEventTag>()),
+        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnequipItemEvent>())
+    ];
+
+    static readonly NetworkEventType UnequipEventType = new()
+    {
+        IsAdminEvent = false,
+        EventId = NetworkEvents.EventId_UnequipItemEvent,
+        IsDebugEvent = false
+    };
+
+    static readonly ComponentType[] EquipNetworkEventComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ReceiveNetworkEventTag>()),
+        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<EquipItemEvent>())
+    ];
+
+    static readonly NetworkEventType EquipEventType = new()
+    {
+        IsAdminEvent = false,
+        EventId = NetworkEvents.EventId_EquipItemEvent,
+        IsDebugEvent = false
+    };
     public static bool ChooseStat(ulong steamId, WeaponType weaponType, WeaponStatType statType)
     {
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
@@ -147,6 +182,74 @@ internal static class WeaponManager
     {
         Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
         return WeaponSystem.GetWeaponTypeFromSlotEntity(weapon);
+    }
+    public static void UpdateWeaponStats(Entity character)
+    {
+        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity)) return;
+        
+        Equipment equipment = character.Read<Equipment>();
+        Entity weaponEntity = equipment.WeaponSlot.SlotEntity.GetEntityOnServer();
+        int slot = -1;
+
+        EquipItemEvent equipItemEvent = new();
+        FromCharacter fromCharacter = new();
+        Entity networkEntity = Entity.Null;
+
+        if (!weaponEntity.Exists() && ServerGameManager.TryGetBuffer<InventoryBuffer>(inventoryEntity, out var inventoryBuffer))
+        {
+            // iterate through inventory and find first equipbuff_weapon?
+            for (int i = 0; i < inventoryBuffer.Length; i++)
+            {
+                var item = inventoryBuffer[i];
+                if (item.ItemEntity.GetEntityOnServer().TryGetComponent(out Equippable equippable))
+                {
+                    slot = equippable.EquipBuff.TryGetComponent(out PrefabGUID itemPrefab) && itemPrefab.LookupName().StartsWith("EquipBuff_Weapon") ? i : -1;
+                    if (slot != -1) break;
+                }
+            }
+
+            equipItemEvent = new()
+            {
+                IsCosmetic = false,
+                SlotIndex = slot,
+            };
+
+            fromCharacter = new()
+            {
+                Character = character,
+                User = character.Read<PlayerCharacter>().UserEntity
+            };
+
+            networkEntity = EntityManager.CreateEntity(EquipNetworkEventComponents);
+
+            networkEntity.Write(fromCharacter);
+            networkEntity.Write(EquipEventType);
+            networkEntity.Write(equipItemEvent);
+
+            equipment.UnequipItem(EntityManager, character, EquipmentType.Weapon);
+            return;
+        }
+        else if (!InventoryUtilities.TryGetItemSlot(EntityManager, character, weaponEntity, out slot)) return;
+
+        equipment.UnequipItem(EntityManager, character, EquipmentType.Weapon);
+
+        equipItemEvent = new()
+        {
+            IsCosmetic = false,
+            SlotIndex = slot,
+        };
+
+        fromCharacter = new()
+        {
+            Character = character,
+            User = character.Read<PlayerCharacter>().UserEntity
+        };
+
+        networkEntity = EntityManager.CreateEntity(EquipNetworkEventComponents);
+
+        networkEntity.Write(fromCharacter);
+        networkEntity.Write(EquipEventType);
+        networkEntity.Write(equipItemEvent);
     }
     public class WeaponStats
     {

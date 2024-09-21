@@ -1,7 +1,9 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -126,6 +128,7 @@ internal static class WeaponCommands
         if (ChooseStat(steamID, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
+            //UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
         }
         else
         {

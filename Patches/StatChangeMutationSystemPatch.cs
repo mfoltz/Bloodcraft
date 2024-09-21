@@ -43,6 +43,7 @@ internal static class StatChangeMutationSystemPatch
                     if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
                     {
                         float qualityPercentBonus = ConfigService.PrestigeBloodQuality > 1f ? ConfigService.PrestigeBloodQuality : ConfigService.PrestigeBloodQuality * 100f;
+                        Core.Log.LogInfo($"Prestige blood quality bonus in StatChangeMutationSystem: {qualityPercentBonus}");
 
                         quality = (float)bloodPrestige * qualityPercentBonus;
                         if (quality > 0)

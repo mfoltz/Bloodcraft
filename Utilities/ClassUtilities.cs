@@ -261,8 +261,7 @@ internal static class ClassUtilities
                 }
             }
 
-            ReplaceAbilityOnSlotSystem.OnUpdate();
-            
+            ReplaceAbilityOnSlotSystem.OnUpdate();      
             if (tryEquip && InventoryUtilities.TryGetItemSlot(EntityManager, character, equippedJewelEntity, out int slot))
             {
                 JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);

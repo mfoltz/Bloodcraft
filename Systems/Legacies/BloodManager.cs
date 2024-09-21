@@ -149,12 +149,10 @@ internal static class BloodManager
     }
     public static void UpdateBloodStats(Entity player, User user, BloodType bloodType)
     {
-        ulong steamId = user.PlatformId;
         Blood blood = player.Read<Blood>();
-
-        float amount = blood.Value;
         float quality = blood.Quality;
 
+        /*
         if (ConfigService.BloodQualityBonus) // unless accounted for this will stack, we don't want that here. subtract what will be added in StatMutationSystemPatch
         {
             if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
@@ -171,12 +169,13 @@ internal static class BloodManager
                     quality -= (float)handler.GetLegacyData(steamId).Key;
                 }
             }
-        }
+        } // might just need to comment this out if the debug event below doesn't actually fire the statChangeMutation system as expected 
+        */
 
         // applying same blood to player again and letting game handle the ModifyUnitStatDOTS is much easier than trying to handle it manually
         ConsumeBloodDebugEvent consumeBloodDebugEvent = new()
         {
-            Amount = (int)amount,
+            Amount = 0,
             Quality = quality,
             Source = BloodTypeToConsumeSourceMap[bloodType]
         };
