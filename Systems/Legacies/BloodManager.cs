@@ -151,26 +151,6 @@ internal static class BloodManager
     {
         Blood blood = player.Read<Blood>();
         float quality = blood.Quality;
-        Core.Log.LogInfo("Pre debug event");
-        /*
-        if (ConfigService.BloodQualityBonus) // unless accounted for this will stack, we don't want that here. subtract what will be added in StatMutationSystemPatch
-        {
-            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
-            {
-                float qualityPercentBonus = ConfigService.PrestigeBloodQuality > 1f ? ConfigService.PrestigeBloodQuality : ConfigService.PrestigeBloodQuality * 100f;
-
-                quality -= (float)bloodPrestige * qualityPercentBonus;
-            }
-            else if (!ConfigService.PrestigeSystem)
-            {
-                IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
-                if (handler != null)
-                {
-                    quality -= (float)handler.GetLegacyData(steamId).Key;
-                }
-            }
-        } // might just need to comment this out if the debug event below doesn't actually fire the statChangeMutation system as expected 
-        */
 
         // applying same blood to player again and letting game handle the ModifyUnitStatDOTS is much easier than trying to handle it manually
         ConsumeBloodDebugEvent consumeBloodDebugEvent = new()
@@ -181,8 +161,6 @@ internal static class BloodManager
         };
 
         DebugEventsSystem.ConsumeBloodEvent(user.Index, ref consumeBloodDebugEvent);
-        Core.Log.LogInfo("Post debug event");
-        DebugEventsSystem.OnUpdate(); // want this to either go before blood changes naturally or not do it at all if blood has just changed naturally
     }
     public static BloodType GetCurrentBloodType(Entity character)
     {

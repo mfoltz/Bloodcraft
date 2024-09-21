@@ -28,7 +28,7 @@ internal static class ClaimAchievementSystemPatch
         if (!Core.hasInitialized) return;
         if (!ConfigService.LevelingSystem) return;
 
-        if (claimAchievementGUID.Equals(BeforeTheHunt)) // achievement prior to GettingReadyForTheHunt
+        if (claimAchievementGUID.Equals(BeforeTheHunt))
         {
             Entity characterEntity = fromCharacter.Character;
             Entity userEntity = fromCharacter.User;

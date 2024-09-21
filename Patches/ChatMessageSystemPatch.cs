@@ -54,7 +54,6 @@ internal static class ChatMessageSystemPatch
 
         if (match.Success)
         {
-            //Core.Log.LogInfo("MAC found, verifying...");
             string receivedMAC = match.Groups[1].Value;
             string intermediateMessage = regexMAC.Replace(receivedMessage, "");
             string recalculatedMAC = GenerateMAC(intermediateMessage);

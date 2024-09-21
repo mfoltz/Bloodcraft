@@ -50,7 +50,6 @@ internal static class Core
         }
 
         if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEvent += LevelingSystem.OnUpdate;
-        //if (ConfigService.BloodSystem) DeathEventListenerSystemPatch.OnDeathEvent += BloodSystem.OnUpdate;
         if (ConfigService.ExpertiseSystem) DeathEventListenerSystemPatch.OnDeathEvent += WeaponSystem.OnUpdate;
         if (ConfigService.QuestSystem)
         {

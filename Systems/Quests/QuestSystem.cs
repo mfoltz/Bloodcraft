@@ -28,7 +28,6 @@ internal static class QuestSystem
     static readonly Random Random = new();
     static readonly Regex Regex = new(@"T\d{2}");
 
-    //public static HashSet<PrefabGUID> UnitPrefabs = []; live cache makes more sense for this b/c tracking but the other two should be fine to do once at startup
     public static HashSet<PrefabGUID> CraftPrefabs = [];
     public static HashSet<PrefabGUID> ResourcePrefabs = [];
 
@@ -114,13 +113,6 @@ internal static class QuestSystem
 
         foreach (PrefabGUID prefab in TargetPrefabs.Keys)
         {
-            //if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity prefabEntity)) continue;
-            //PrefabGUID prefabGUID = prefabEntity.Read<PrefabGUID>();
-            //string check = prefabGUID.LookupName();
-            //if (check.Contains("Trader") || check.Contains("Vermin") || check.Contains("Servant") || check.Contains("Horse") || check.Contains("Carriage") || check.Contains("Minion") || check.Contains("Unholy") || check.Contains("Surprise")) continue;
-            //if (!prefabEntity.Has<UnitLevel>() || prefabEntity.Has<Minion>()) continue;
-            //UnitLevel level = prefabEntity.Read<UnitLevel>();
-
             Entity targetEntity = TargetPrefabs[prefab].FirstOrDefault();
             if (targetEntity.TryGetComponent(out UnitLevel unitLevel) && Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
             {

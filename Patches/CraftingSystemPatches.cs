@@ -58,7 +58,6 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                 if (forge_Shared.State == ForgeState.Finished)
                 {
-                    //Core.Log.LogInfo($"Forge finished: {itemPrefab.LookupName()} | {itemEntity.Read<PrefabGUID>().LookupName()}");
                     float ProfessionValue = 50f;
                     ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
@@ -183,10 +182,6 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                     }
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogError("UpdateCraftingSystem error..." + e);
         }
         finally
         {

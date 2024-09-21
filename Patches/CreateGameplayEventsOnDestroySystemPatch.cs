@@ -60,26 +60,6 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                         ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }
                 }
-                /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out
-                if (PrefabGUID.Equals(feedComplete) && entity.GetOwner().TryGetPlayer(out Entity player)) // feed complete non-vblood kills
-                {
-                    Entity died = entity.GetSpellTarget();
-                    Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
-
-                    if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, died);
-                    if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, died);
-                    if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(player, died);
-                    if (ConfigService.FamiliarSystem)
-                    {
-                        FamiliarLevelingSystem.UpdateFamiliar(player, died);
-                        FamiliarUnlockSystem.HandleUnitUnlock(player, died);
-                    }
-                    if (ConfigService.QuestSystem)
-                    {
-                        QuestSystem.UpdateQuests(player, died);
-                    }
-                }
-                */
             }
         }
         finally

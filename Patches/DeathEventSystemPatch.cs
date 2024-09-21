@@ -85,7 +85,6 @@ internal static class DeathEventListenerSystemPatch
         }
         else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
         else if (deathEvent.Died.Has<Minion>() || !deathEvent.Died.Has<UnitLevel>()) return false;
-        //else if (deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11) && !deathEvent.Died.Has<VBloodUnit>()) return false; see if feed executes and completes play nice here
 
         return true;
     }

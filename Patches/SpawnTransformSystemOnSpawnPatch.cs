@@ -36,9 +36,6 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID monsterVisual = new(-2067402784);
     static readonly PrefabGUID solarusVisual = new(178225731);
 
-    //static readonly PrefabGUID paladinServantPrefab = new(1649578802);
-    //static readonly PrefabGUID invisibleImmaterialBuff = new(-1144825660);
-
     public static readonly List<PrefabGUID> shardBearers = [manticore, dracula, monster, solarus];
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;

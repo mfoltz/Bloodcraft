@@ -222,9 +222,9 @@ internal static class ClassUtilities
                     }
                 }
 
-                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out inventoryEntity) && !oldAbility.GuidHash.Equals(-433204738))
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out inventoryEntity) && AbilityJewelMap.TryGetValue(oldAbility, out List<Entity> jewelEntities))
                 {
-                    foreach (Entity jewel in AbilityJewelMap[oldAbility])
+                    foreach (Entity jewel in jewelEntities)
                     {
                         if (JewelEquipUtilitiesServer.TryGetEquippedJewel(EntityManager, character, jewel, out equippedJewelEntity) && equippedJewelEntity.Exists())
                         {
@@ -246,6 +246,7 @@ internal static class ClassUtilities
             }
 
             VBloodAbilityUtilities.InstantiateBuff(EntityManager, ActivateVBloodAbilitySystem._BuffSpawnerSystemData, character, PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff], spellPrefabGUID, 3);
+            
             if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var secondBuffer))
             {
                 foreach (VBloodAbilityBuffEntry abilityEntry in secondBuffer)
@@ -262,6 +263,7 @@ internal static class ClassUtilities
             }
 
             ReplaceAbilityOnSlotSystem.OnUpdate();
+
             if (tryEquip && InventoryUtilities.TryGetItemSlot(EntityManager, character, equippedJewelEntity, out int slot))
             {
                 JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);

@@ -65,26 +65,6 @@ internal static class BuffSpawnSystemPatches
                 PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 string prefabName = prefabGUID.LookupName().ToLower();
 
-                /* there might be some reason I'm forgetting I don't just process these over in deathEventListerSystem but let's try and find out, seems fine but still leaving for now
-                if (prefabGUID.Equals(feedExecute) && entity.GetBuffTarget().TryGetPlayer(out player)) // feed execute kills
-                {
-                    Entity died = entity.GetSpellTarget();
-
-                    if (ConfigService.BloodSystem) BloodSystem.UpdateLegacy(player, died);
-                    if (ConfigService.ExpertiseSystem) WeaponSystem.UpdateExpertise(player, died);
-                    if (ConfigService.LevelingSystem) LevelingSystem.UpdateLeveling(player, died);
-                    if (ConfigService.FamiliarSystem)
-                    {
-                        FamiliarLevelingSystem.UpdateFamiliar(player, died);
-                        FamiliarUnlockSystem.HandleUnitUnlock(player, died);
-                    }
-                    if (ConfigService.QuestSystem)
-                    {
-                        QuestSystem.UpdateQuests(player, died);
-                    }
-                }
-                */
-
                 if (ConfigService.EliteShardBearers && prefabName.Contains("holybubble")) // holy mortar effect for Solarus when eliteShardBearers active
                 {
                     Entity character = entity.GetBuffTarget();
