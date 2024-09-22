@@ -228,7 +228,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                /*
+#if DEV
                 else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureBuff))
                 {
                     BuffUtilities.HandleCaptureBuff(entity);
@@ -249,7 +249,7 @@ internal static class BuffSpawnSystemPatches
                 {
                     BuffUtilities.HandleCaptureTierBuff(entity);
                 }
-                */
+#endif
             }
         }
         finally

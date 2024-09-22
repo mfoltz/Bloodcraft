@@ -16,9 +16,7 @@
 	<EnablePreviewFeatures>true</EnablePreviewFeatures>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	<Optimize>True</Optimize>
-	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 	
 	<ItemGroup>
 		<EmbeddedResource Include="Localization\Prefabs.json" />
@@ -77,5 +75,4 @@
 		<Exec Command="dotnet exec $(OutputPath)$(AssemblyName).dll $(ProjectDir)Commands $(ProjectDir)READMETEST.md" />
 	</Target>
 	-->
-	
 </Project>

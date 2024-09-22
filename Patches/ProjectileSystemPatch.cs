@@ -7,7 +7,7 @@ using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
-/*
+#if DEV
 [HarmonyPatch]
 internal static class ProjectileSystemPatch
 {
@@ -37,7 +37,7 @@ internal static class ProjectileSystemPatch
                 else if (entity.TryGetComponent(out PrefabGUID projectilePrefab) && projectilePrefab.Equals(VampiricCurseProjectile))
                 {
                     var applyBuffBuffer = entity.ReadBuffer<ApplyBuffOnGameplayEvent>();
-
+                    Core.Log.LogInfo("Logging for DEV");
                     ApplyBuffOnGameplayEvent applyBuffOnGameplayEvent = applyBuffBuffer[0];
                     if (!applyBuffOnGameplayEvent.Buff0.Equals(CaptureBuff))
                     {
@@ -59,4 +59,4 @@ internal static class ProjectileSystemPatch
         }
     }
 }
-*/
+#endif
