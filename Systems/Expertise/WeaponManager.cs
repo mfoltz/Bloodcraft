@@ -19,31 +19,15 @@ internal static class WeaponManager
 
     static readonly ComponentType[] UnequipNetworkEventComponents =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<SendEventToUser>()),
-        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
         ComponentType.ReadOnly(Il2CppType.Of<UnequipItemEvent>())
     ];
 
-    static readonly NetworkEventType UnequipEventType = new()
-    {
-        IsAdminEvent = false,
-        EventId = NetworkEvents.EventId_UnequipItemEvent,
-        IsDebugEvent = false
-    };
-
     static readonly ComponentType[] EquipNetworkEventComponents =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<SendEventToUser>()),
-        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
         ComponentType.ReadOnly(Il2CppType.Of<EquipItemEvent>())
     ];
-
-    static readonly NetworkEventType EquipEventType = new()
-    {
-        IsAdminEvent = false,
-        EventId = NetworkEvents.EventId_EquipItemEvent,
-        IsDebugEvent = false
-    };
     public static bool ChooseStat(ulong steamId, WeaponType weaponType, WeaponStatType statType)
     {
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
@@ -193,11 +177,17 @@ internal static class WeaponManager
         Entity weaponEntity = equipment.WeaponSlot.SlotEntity.GetEntityOnServer();
         int slot = -1;
 
+        FromCharacter fromCharacter = new()
+        {
+            Character = character,
+            User = character.Read<PlayerCharacter>().UserEntity,
+        };
+
         EquipItemEvent equipItemEvent = new();
         UnequipItemEvent unequipItemEvent = new();
-        SendEventToUser sendEventToUser = new();
         Entity networkEntity = Entity.Null;
 
+        /*
         if (!weaponEntity.Exists() && ServerGameManager.TryGetBuffer<InventoryBuffer>(inventoryEntity, out var inventoryBuffer))
         {
             Core.Log.LogInfo("Handling unarmed");
@@ -218,14 +208,8 @@ internal static class WeaponManager
                 SlotIndex = slot,
             };
 
-            sendEventToUser = new()
-            {
-                UserIndex = userIndex
-            };
-
             networkEntity = EntityManager.CreateEntity(EquipNetworkEventComponents);
-            networkEntity.Write(sendEventToUser);
-            networkEntity.Write(EquipEventType);
+            networkEntity.Write(fromCharacter);
             networkEntity.Write(equipItemEvent);
 
             unequipItemEvent = new()
@@ -236,21 +220,18 @@ internal static class WeaponManager
             };
 
             networkEntity = EntityManager.CreateEntity(UnequipNetworkEventComponents);
-            networkEntity.Write(sendEventToUser);
-            networkEntity.Write(UnequipEventType);
+            networkEntity.Write(fromCharacter);
             networkEntity.Write(unequipItemEvent);
 
             return;
         }
-        else if (!InventoryUtilities.TryGetItemSlot(EntityManager, character, weaponEntity, out slot)) return;
+        */
+
+        if (!InventoryUtilities.TryGetItemSlot(EntityManager, character, weaponEntity, out slot)) return;
 
         Core.Log.LogInfo("Handling weapon");
 
-        sendEventToUser = new()
-        {
-            UserIndex = userIndex
-        };
-
+        
         unequipItemEvent = new()
         {
             EquipmentType = EquipmentType.Weapon,
@@ -259,20 +240,22 @@ internal static class WeaponManager
         };
 
         networkEntity = EntityManager.CreateEntity(UnequipNetworkEventComponents);
-        networkEntity.Write(sendEventToUser);
-        networkEntity.Write(UnequipEventType);
+        networkEntity.Write(fromCharacter);
         networkEntity.Write(unequipItemEvent);
-
+        
+        /*
         equipItemEvent = new()
         {
             IsCosmetic = false,
             SlotIndex = slot,
         };
+        
+        Core.Log.LogInfo(slot);
 
         networkEntity = EntityManager.CreateEntity(EquipNetworkEventComponents);
-        networkEntity.Write(sendEventToUser);
-        networkEntity.Write(EquipEventType);
+        networkEntity.Write(fromCharacter);
         networkEntity.Write(equipItemEvent);
+        */
     }
     public class WeaponStats
     {

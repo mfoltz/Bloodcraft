@@ -97,9 +97,10 @@ internal static class BloodCommands
             LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
             return;
         }
+
         var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "BloodLogging");
+
+        PlayerUtilities.TogglePlayerBool(SteamID, "BloodLogging");
         LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(PlayerUtilities.GetPlayerBool(SteamID, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 

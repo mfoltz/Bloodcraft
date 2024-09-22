@@ -5,7 +5,7 @@ using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
-/*
+#if DEV
 [HarmonyPatch]
 internal static class EquipItemPatches
 {
@@ -50,26 +50,5 @@ internal static class EquipItemPatches
             entities.Dispose();
         }
     }
-
-    [HarmonyPatch(typeof(EquipItemFromInventorySystem), nameof(EquipItemFromInventorySystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(EquipItemFromInventorySystem __instance)
-    {
-        if (!Core.hasInitialized) return;
-
-        NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                Core.Log.LogInfo("EquipItemFromInventorySystem");
-                entity.LogComponentTypes();
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
 }
-*/
+#endif

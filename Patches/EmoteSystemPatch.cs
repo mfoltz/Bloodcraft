@@ -37,7 +37,9 @@ internal static class EmoteSystemPatch
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
         { new(-26826346), BindPreset }, // clap
+#if DEV
         { new(-578764388), CycleCaptureTier } // shrug
+#endif
     };
 
     public static Dictionary<ulong, int> ActiveCaptureTier = [];
@@ -299,6 +301,7 @@ internal static class EmoteSystemPatch
             LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
         }
     }
+#if DEV
     public static void CycleCaptureTier(Entity userEntity, Entity character, ulong playerId)
     {
         if (!ActiveCaptureTier.ContainsKey(playerId))
@@ -322,7 +325,9 @@ internal static class EmoteSystemPatch
             if (captureTier == 2) colorTier = "<color=#008080>";
             else if (captureTier == 3) colorTier = "<color=#FFD700>";
 
+            ActiveCaptureTier[playerId] = captureTier;
             LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), $"Capture spell tier: {colorTier}{captureTier}</color>");
         }
     }
+#endif
 }

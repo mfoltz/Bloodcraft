@@ -196,34 +196,6 @@ internal static class MiscCommands
         ctx.Reply($"Combat music cleared~");
     }
 
-    //[Command(name: "servantfam", adminOnly: true, usage: ".servantfam", description: "Tired of remaking commands to test one thing at a time, just gonna leave this here and comment out in future releases :p")]
-    public static void ServantFamTesting(ChatCommandContext ctx)
-    {
-        Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
-        if (!familiar.Exists()) return;
-
-        //FamiliarPatches.PlayerEntities.Enqueue(character);
-
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-        SpawnDebugEvent spawnDebugEvent = new()
-        {
-            Control = false,
-            Position = familiar.Read<Translation>().Value,
-            Level = 1,
-            Team = SpawnDebugEvent.TeamEnum.Ally,
-            PrefabGuid = new(1649578802)
-        };
-
-        FromCharacter fromCharacter = new()
-        {
-            Character = character,
-            User = ctx.Event.SenderUserEntity
-        };
-
-        Core.SystemService.DebugEventsSystem.SpawnDebugEvent(ctx.Event.User.Index, ref spawnDebugEvent, entityCommandBuffer, ref fromCharacter);
-    }
-
     [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
     public static void CleanUpFams(ChatCommandContext ctx)
     {

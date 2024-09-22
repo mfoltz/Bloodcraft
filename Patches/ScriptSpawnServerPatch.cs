@@ -38,22 +38,13 @@ internal static class ScriptSpawnServerPatch
     const float CaptureTime = 6f; // 0.25f for timing on buffs though
     const float CaptureInterval = 1.5f;
     const int TicksRequired = (int)(CaptureTime / CaptureInterval);
-    const float BreakChanceMax = 0.50f;
-    const float BreakChanceMin = 0.10f;
+    const float BreakChanceMax = 0.25f;
+    const float BreakChanceMin = 0.05f;
 
     static readonly PrefabGUID CaptureBuff = new(1280015305);
     static readonly PrefabGUID ImmaterialBuff = new(-259674366);
     static readonly PrefabGUID BreakBuff = new(-1466712470);
     static readonly PrefabGUID SuccessBuff = new(-2124138742);
-    static readonly PrefabGUID AggroBuff = new(1489461671);
-
-    //static readonly PrefabGUID CaptureCostT01 = new(947998050); // tainted heart
-    //static readonly PrefabGUID CaptureCostT02 = new(-204051056); // unsullied heart
-    //static readonly PrefabGUID CaptureCostT03 = new(-1965958712); // exquisite heart
-
-    static readonly PrefabGUID CaptureT01 = new(-1763296393);
-    static readonly PrefabGUID CaptureT02 = new(1093914645);
-    static readonly PrefabGUID CaptureT03 = new(1504445802);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -90,26 +81,6 @@ internal static class ScriptSpawnServerPatch
 
                     float healthFactor = target.Read<Health>().Value / target.Read<Health>().MaxHealth._Value;
                     float adjustedBreakChance = Mathf.Lerp(BreakChanceMin, BreakChanceMax, healthFactor);
-
-                    ulong steamId = player.GetSteamId();
-                    int captureTier = EmoteSystemPatch.ActiveCaptureTier.TryGetValue(steamId, out captureTier) ? captureTier : 1;
-
-                    PrefabGUID tierPrefab = PrefabGUID.Empty;
-
-                    switch (captureTier)
-                    {
-                        case 1:
-                            tierPrefab = CaptureT01;
-                            break;
-                        case 2:
-                            tierPrefab = CaptureT02;
-                            break;
-                        case 3:
-                            tierPrefab = CaptureT03;
-                            break;
-                    }
-
-                    BuffUtilities.ApplyBuff(tierPrefab, target);
 
                     Core.StartCoroutine(CaptureRoutine(target, player, userEntity, targetPosition, adjustedBreakChance));
                     continue;
@@ -208,9 +179,5 @@ internal static class ScriptSpawnServerPatch
         }
 
         BuffUtilities.ApplyBuff(BreakBuff, target);
-        if (ServerGameManager.TryGetBuff(target, CaptureBuff, out Entity breakBuffEntity))
-        {
-            BuffUtilities.HandleBreakBuff(breakBuffEntity);
-        }
     }
 }

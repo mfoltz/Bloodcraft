@@ -7,10 +7,13 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Sequencer;
 using ProjectM.Shared;
+using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -33,6 +36,8 @@ internal static class Core
         if (hasInitialized) return;
 
         hasInitialized = true;
+
+        NetworkedSequences();
 
         _ = new PlayerService();
         _ = new LocalizationService();
@@ -99,30 +104,52 @@ internal static class Core
         }
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
-    static void CleanUpFams()
+
+    static readonly ComponentType[] NetworkedSequenceComponent =
+    {
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>())
+    };
+
+    static EntityQuery NetworkedSequenceQuery;
+
+    static readonly PrefabGUID unholySkeletonWarrior = new(1604500740);
+    static void NetworkedSequences()
     {
         // BlockFeedBuff, Disabled, TeamReference with UserTeam on entity, and see if name of prefab starts with CHAR?
-        EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        NetworkedSequenceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = Commands.MiscCommands.DisabledFamiliarComponents,
+            All = NetworkedSequenceComponent,
             Options = EntityQueryOptions.IncludeDisabled
         });
 
+        int primaryCounter = 0;
+        int secondaryCounter = 0;
         try
         {
-            IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
-            foreach (Entity entity in disabledFamiliars)
+            IEnumerable<Entity> networkedSequences = EntityUtilities.GetEntitiesEnumerable(NetworkedSequenceQuery); // need to filter for active/dismissed familiars and not destroy them
+            foreach (Entity entity in networkedSequences)
             {
-                if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
+                if (entity.TryGetComponent(out SpawnSequenceForEntity spawnSequenceForEntity))
                 {
-                    if (entity.Has<Disabled>()) entity.Remove<Disabled>();
-                    DestroyUtility.Destroy(EntityManager, entity);
+                    Entity secondaryTarget = spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer().Exists() ? spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer() : Entity.Null;
+
+                    if (secondaryTarget.TryGetComponent(out PrefabGUID secondaryTargetPrefabGUID) && secondaryTargetPrefabGUID.Equals(unholySkeletonWarrior))
+                    {
+                        DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
+                        primaryCounter++;
+                    }
+                }
+                else if (entity.TryGetComponent(out PrefabGUID targetPrefabGUID) && targetPrefabGUID.Equals(unholySkeletonWarrior))
+                {
+                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
+                    secondaryCounter++;
                 }
             }
         }
         finally
         {
-            familiarsQuery.Dispose();
+            NetworkedSequenceQuery.Dispose();
+            if (primaryCounter > 0 || secondaryCounter > 0) Core.Log.LogWarning($"Destroyed {primaryCounter} networked sequences with secondary targets of {unholySkeletonWarrior.LookupName()} and {secondaryCounter} entities with PrefabGUID {unholySkeletonWarrior.LookupName()}");
         }
     }
 }

@@ -16,10 +16,6 @@ internal static class ProjectileSystemPatch
     static readonly PrefabGUID ImmaterialBuff = new(-259674366);
     static readonly PrefabGUID BreakBuff = new(-1466712470);
 
-    static readonly PrefabGUID CaptureT01 = new(-1763296393);
-    static readonly PrefabGUID CaptureT02 = new(1093914645);
-    static readonly PrefabGUID CaptureT03 = new(1504445802);
-
     [HarmonyPatch(typeof(ProjectileSystem), nameof(ProjectileSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ProjectileSystem __instance)
@@ -37,7 +33,7 @@ internal static class ProjectileSystemPatch
                 else if (entity.TryGetComponent(out PrefabGUID projectilePrefab) && projectilePrefab.Equals(VampiricCurseProjectile))
                 {
                     var applyBuffBuffer = entity.ReadBuffer<ApplyBuffOnGameplayEvent>();
-                    Core.Log.LogInfo("Logging for DEV");
+
                     ApplyBuffOnGameplayEvent applyBuffOnGameplayEvent = applyBuffBuffer[0];
                     if (!applyBuffOnGameplayEvent.Buff0.Equals(CaptureBuff))
                     {

@@ -253,13 +253,4 @@ internal static class BuffUtilities
 
         if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
     }
-    public static void HandleCaptureTierBuff(Entity entity)
-    {
-        if (entity.Has<AbsorbBuff>()) entity.Remove<AbsorbBuff>();
-        if (entity.Has<AbsorbCapStackModifier>()) entity.Remove<AbsorbCapStackModifier>();
-        if (entity.Has<MultiplyAbsorbCapBySpellPower>()) entity.Remove<MultiplyAbsorbCapBySpellPower>();
-        if (entity.Has<SpellModSetComponent>()) entity.Remove<SpellModSetComponent>();
-        if (entity.Has<SpellModArithmetic>()) entity.Remove<SpellModArithmetic>();
-        if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = CaptureTime, EndAction = LifeTimeEndAction.Destroy });
-    }
 }

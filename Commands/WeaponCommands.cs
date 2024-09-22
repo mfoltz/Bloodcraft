@@ -97,8 +97,7 @@ internal static class WeaponCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "ExpertiseLogging");
+        PlayerUtilities.TogglePlayerBool(SteamID, "ExpertiseLogging");
         LocalizationService.HandleReply(ctx, $"Expertise logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 

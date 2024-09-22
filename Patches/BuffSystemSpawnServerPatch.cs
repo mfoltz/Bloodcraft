@@ -49,10 +49,6 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID ImmaterialBuff = new(-259674366);
     static readonly PrefabGUID BreakBuff = new(-1466712470);
 
-    static readonly PrefabGUID CaptureT01 = new(-1763296393);
-    static readonly PrefabGUID CaptureT02 = new(1093914645);
-    static readonly PrefabGUID CaptureT03 = new(1504445802);
-
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)
@@ -237,17 +233,9 @@ internal static class BuffSpawnSystemPatches
                 {
                     BuffUtilities.HandleImmaterialBuff(entity);
                 }
-                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureT01))
+                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(BreakBuff))
                 {
-                    BuffUtilities.HandleCaptureTierBuff(entity);
-                }
-                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureT02))
-                {
-                    BuffUtilities.HandleCaptureTierBuff(entity);
-                }
-                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureT03))
-                {
-                    BuffUtilities.HandleCaptureTierBuff(entity);
+                    BuffUtilities.HandleBreakBuff(entity);
                 }
 #endif
             }
