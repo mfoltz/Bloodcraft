@@ -297,7 +297,7 @@ internal static class WeaponSystem
     {
         return ConvertXpToLevel(GetXp(steamID, handler));
     }
-    public static WeaponType GetWeaponTypeFromSlotEntity(Entity weaponEntity)
+    public static WeaponType GetWeaponTypeFromWeaponEntity(Entity weaponEntity)
     {
         if (weaponEntity == Entity.Null) return WeaponType.Unarmed;
         string weaponCheck = weaponEntity.Read<PrefabGUID>().LookupName();

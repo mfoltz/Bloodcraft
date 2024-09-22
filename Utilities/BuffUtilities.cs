@@ -2,8 +2,10 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
@@ -12,9 +14,12 @@ using static Bloodcraft.Utilities.ClassUtilities;
 namespace Bloodcraft.Utilities;
 internal static class BuffUtilities
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+
+    const float CaptureTime = 6.25f; // with padding
     public static void ApplyBuff(PrefabGUID buffPrefab, Entity target)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -194,5 +199,67 @@ internal static class BuffUtilities
         {
             UpdateBuffsBufferDestroyPatch.PrestigeBuffPrefabs.Add(new PrefabGUID(buff));
         }
+    }
+    public static void HandleImmaterialBuff(Entity entity)
+    {
+        if (entity.GetBuffTarget().GetOwner().IsPlayer())
+        {
+            DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+            return;
+        }
+
+        if (entity.Has<ModifyMovementSpeedBuff>()) entity.Remove<ModifyMovementSpeedBuff>();
+        entity.With((ref LifeTime lifeTime) =>
+        {
+            lifeTime.Duration = CaptureTime;
+            lifeTime.EndAction = LifeTimeEndAction.Destroy;
+        });
+    }
+    public static void HandleCaptureBuff(Entity entity)
+    {
+        if (entity.GetBuffTarget().GetOwner().IsPlayer())
+        {
+            DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+            return;
+        }
+
+        if (entity.Has<AbilityProjectileFanOnGameplayEvent_DataServer>()) entity.Remove<AbilityProjectileFanOnGameplayEvent_DataServer>();
+        if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = CaptureTime, EndAction = LifeTimeEndAction.Destroy });
+
+        entity.With((ref AmplifyBuff amplifyBuff) =>
+        {
+            amplifyBuff.AmplifyModifier = -1f;
+        });
+
+        ModifyMovementSpeedBuff modifyMovementSpeedBuff = new()
+        {
+            MultiplyAdd = false,
+            MoveSpeed = 0f
+        };
+        entity.Add<ModifyMovementSpeedBuff>();
+        entity.Write(modifyMovementSpeedBuff);
+
+        entity.Add<HideTargetHUD>();
+    }
+    public static void HandleBreakBuff(Entity entity)
+    {
+        entity.With((ref LifeTime lifeTime) =>
+        {
+            lifeTime.Duration = 1.5f;
+            lifeTime.EndAction = LifeTimeEndAction.Destroy;
+        });
+
+        entity.Add<BlockFeedBuff>();
+
+        if (entity.Has<HealOnGameplayEvent>()) entity.Remove<HealOnGameplayEvent>();
+    }
+    public static void HandleCaptureTierBuff(Entity entity)
+    {
+        if (entity.Has<AbsorbBuff>()) entity.Remove<AbsorbBuff>();
+        if (entity.Has<AbsorbCapStackModifier>()) entity.Remove<AbsorbCapStackModifier>();
+        if (entity.Has<MultiplyAbsorbCapBySpellPower>()) entity.Remove<MultiplyAbsorbCapBySpellPower>();
+        if (entity.Has<SpellModSetComponent>()) entity.Remove<SpellModSetComponent>();
+        if (entity.Has<SpellModArithmetic>()) entity.Remove<SpellModArithmetic>();
+        if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = CaptureTime, EndAction = LifeTimeEndAction.Destroy });
     }
 }

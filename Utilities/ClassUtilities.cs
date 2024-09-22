@@ -147,7 +147,7 @@ internal static class ClassUtilities
             {
                 prefab = prefab[..prefabIndex].TrimEnd();
             }
-            if (prefab == "No Name") prefab = new PrefabGUID(perk).LookupName();
+            if (prefab.Contains("Name")) prefab = new PrefabGUID(perk).LookupName();
             return $"<color=white>{prefab}</color>";
         }).ToList();
 
@@ -294,9 +294,9 @@ internal static class ClassUtilities
                     }
                 }
 
-                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out inventoryEntity))
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out inventoryEntity) && AbilityJewelMap.TryGetValue(oldAbility, out List<Entity> jewelEntities))
                 {
-                    foreach (Entity jewel in AbilityJewelMap[oldAbility])
+                    foreach (Entity jewel in jewelEntities)
                     {
                         if (JewelEquipUtilitiesServer.TryGetEquippedJewel(EntityManager, character, jewel, out equippedJewelEntity) && equippedJewelEntity.Exists())
                         {

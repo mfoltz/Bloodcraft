@@ -93,6 +93,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                         durability.Value = durability.MaxDurability;
                                         itemEntity.Write(durability);
                                     }
+                                    //EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                                     break;
                                 case AlchemyHandler:
                                     break;
@@ -105,6 +106,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                         durability.Value = durability.MaxDurability;
                                         itemEntity.Write(durability);
                                     }
+                                    //EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                                     break;
                                 case TailoringHandler:
                                     if (itemEntity.Has<Durability>())
@@ -115,6 +117,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                         durability.Value = durability.MaxDurability;
                                         itemEntity.Write(durability);
                                     }
+                                    //EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                                     break;
                             }
                         }

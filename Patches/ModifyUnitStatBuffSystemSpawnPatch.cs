@@ -28,13 +28,29 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
 
                 if (entity.GetOwner().TryGetPlayer(out Entity player))
                 {
-                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(entity);
+                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
 
                     if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) continue; // handled in weapon level spawn since they shouldn't show up here but just incase
 
                     ulong steamId = player.GetSteamId();
+
+                    //if (ConfigService.ProfessionSystem) EquipmentManager.ApplyEquipmentStats(steamId, weaponEntity);
                     WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
                 }
+                /*
+                else if (ConfigService.ProfessionSystem && entity.Has<ArmorLevel>() && entity.GetOwner().TryGetPlayer(out player))
+                {
+                    Entity armorEntity = entity.Read<EquippableBuff>().ItemSource;
+                    if (!armorEntity.Has<BlockFeedBuff>()) continue;
+                    else EquipmentManager.ApplyEquipmentStats(player.GetSteamId(), armorEntity);
+                }
+                else if (ConfigService.ProfessionSystem && entity.Has<SpellLevel>() && entity.GetOwner().TryGetPlayer(out player))
+                {
+                    Entity sourceEntity = entity.Read<EquippableBuff>().ItemSource;
+                    if (!sourceEntity.Has<BlockFeedBuff>()) continue;
+                    else EquipmentManager.ApplyEquipmentStats(player.GetSteamId(), sourceEntity);
+                }
+                */
             }
         }
         finally

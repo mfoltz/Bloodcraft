@@ -101,6 +101,14 @@ public static class ConfigService
     public static bool ProfessionSystem { get; private set; }
     public static int MaxProfessionLevel { get; private set; }
     public static float ProfessionMultiplier { get; private set; }
+
+    /*
+    public static float DurabilityMultiplier { get; private set; }
+    public static float AlchemyStatMultiplier { get; private set; }
+    public static float BlacksmithingStatMultiplier { get; private set; }
+    public static float EnchantingStatMultiplier { get; private set; }
+    public static float TailoringStatMultiplier { get; private set; }
+    */
     public static bool ExtraRecipes { get; private set; }
     public static bool FamiliarSystem { get; private set; }
     public static bool ShareUnlocks { get; private set; }
@@ -284,6 +292,13 @@ public static class ConfigService
             new ConfigEntryDefinition("Professions", "MaxProfessionLevel", 100, "The maximum level a player can reach in professions"),
             new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained"),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes"),
+            /*
+            new ConfigEntryDefinition("Professions", "DurabilityMultiplier", 1f, "Extra durability percentage from blacksmithing, enchanting, and tailoring (1 is 100% extra, 0.5 is 50% extra, etc)."),
+            new ConfigEntryDefinition("Professions", "AlchemyStatMultiplier", 0.5f, "Extra stat/duration percentage gained on potions from alchemy at max level."),
+            new ConfigEntryDefinition("Professions", "BlacksmithingStatMultiplier", 0.10f, "Extra stat percentage for stats gained on armor from blacksmithing at max level."),
+            new ConfigEntryDefinition("Professions", "EnchantingStatMultiplier", 0.10f, "Extra stat percentage for stats gained on armor from enchanting at max level."),
+            new ConfigEntryDefinition("Professions", "TailoringStatMultiplier", 0.10f, "Extra stat percentage for stats gained on armor from tailoring at max level."),
+            */
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system"),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)"),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars"),

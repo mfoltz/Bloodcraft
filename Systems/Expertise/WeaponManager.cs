@@ -180,7 +180,7 @@ internal static class WeaponManager
     public static WeaponType GetCurrentWeaponType(Entity character)
     {
         Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-        return WeaponSystem.GetWeaponTypeFromSlotEntity(weapon);
+        return WeaponSystem.GetWeaponTypeFromWeaponEntity(weapon);
     }
     public static void UpdateWeaponStats(Entity character)
     {

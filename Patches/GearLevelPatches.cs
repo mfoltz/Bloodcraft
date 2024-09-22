@@ -59,7 +59,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                 {
                     ulong steamId = player.GetSteamId();
 
-                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(entity);
+                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
                     if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) // apply it here since it won't appear in the system naturally as they don't have the component till added
                     {
                         WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
@@ -102,7 +102,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                         unarmedLevel = weaponLevel;
                     }
 
-                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromSlotEntity(entity);
+                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
                     if (weaponType.Equals(WeaponType.Unarmed))
                     {
                         entity.Write(new WeaponLevel { Level = unarmedLevel });

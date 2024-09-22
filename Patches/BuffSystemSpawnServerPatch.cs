@@ -45,8 +45,13 @@ internal static class BuffSpawnSystemPatches
     static readonly PrefabGUID phasing = new(-79611032); // lol switch bodies with familiar? hmmm
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
-    static readonly PrefabGUID captureBuff = new(1280015305);
-    static readonly PrefabGUID immaterialBuff = new(-259674366);
+    static readonly PrefabGUID CaptureBuff = new(1280015305);
+    static readonly PrefabGUID ImmaterialBuff = new(-259674366);
+    static readonly PrefabGUID BreakBuff = new(-1466712470);
+
+    static readonly PrefabGUID CaptureT01 = new(-1763296393);
+    static readonly PrefabGUID CaptureT02 = new(1093914645);
+    static readonly PrefabGUID CaptureT03 = new(1504445802);
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -59,15 +64,17 @@ internal static class BuffSpawnSystemPatches
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<PrefabGUID>() || !entity.Has<Buff>()) continue;
-                if (!entity.GetBuffTarget().Exists()) continue;
+                if (!entity.Has<EntityOwner>()) continue;
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
-                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
+                Entity buffTarget = entity.GetBuffTarget();
+                if (!buffTarget.Exists()) continue;
+
                 string prefabName = prefabGUID.LookupName().ToLower();
 
                 if (ConfigService.EliteShardBearers && prefabName.Contains("holybubble")) // holy mortar effect for Solarus when eliteShardBearers active
                 {
-                    Entity character = entity.GetBuffTarget();
+                    Entity character = buffTarget;
 
                     if (character.Read<PrefabGUID>().Equals(Solarus) && !ServerGameManager.HasBuff(character, holyBeamPowerBuff))
                     {
@@ -95,7 +102,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && entity.GetBuffTarget().TryGetPlayer(out Entity player)) // teleport familiar to player after waygate
+                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && buffTarget.TryGetPlayer(out Entity player)) // teleport familiar to player after waygate
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists())
@@ -110,7 +117,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && prefabName.Contains("emote_onaggro") && entity.GetBuffTarget().TryGetFollowedPlayer(out player))
+                else if (ConfigService.FamiliarSystem && prefabName.Contains("emote_onaggro") && buffTarget.TryGetFollowedPlayer(out player))
                 {
                     ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     if (!PlayerUtilities.GetPlayerBool(steamId, "VBloodEmotes"))
@@ -120,7 +127,7 @@ internal static class BuffSpawnSystemPatches
                 }
                 else if (ConfigService.FamiliarSystem && (prefabGUID.Equals(combatStance) || prefabGUID.Equals(combatBuff))) // return familiar when entering combat if far enough away
                 {
-                    if (entity.GetBuffTarget().TryGetPlayer(out player))
+                    if (buffTarget.TryGetPlayer(out player))
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                         if (EntityManager.Exists(familiar))
@@ -129,7 +136,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                else if (prefabName.Contains("consumable") && entity.GetBuffTarget().TryGetPlayer(out player)) // alchemy bonuses/potion stacking/familiar sharing
+                else if (prefabName.Contains("consumable") && buffTarget.TryGetPlayer(out player)) // alchemy bonuses/potion stacking/familiar sharing
                 {
                     ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
@@ -183,7 +190,7 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out player)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end
+                else if (ConfigService.FamiliarSystem && buffTarget.TryGetFollowedPlayer(out player)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
@@ -221,6 +228,28 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
+                /*
+                else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureBuff))
+                {
+                    BuffUtilities.HandleCaptureBuff(entity);
+                }
+                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(ImmaterialBuff))
+                {
+                    BuffUtilities.HandleImmaterialBuff(entity);
+                }
+                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureT01))
+                {
+                    BuffUtilities.HandleCaptureTierBuff(entity);
+                }
+                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureT02))
+                {
+                    BuffUtilities.HandleCaptureTierBuff(entity);
+                }
+                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureT03))
+                {
+                    BuffUtilities.HandleCaptureTierBuff(entity);
+                }
+                */
             }
         }
         finally

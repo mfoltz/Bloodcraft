@@ -40,11 +40,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
-                    if (familiar.Has<Disabled>()) // for Kriig
-                    {
-                        DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
-                    }
-                    else if (familiar.Exists())
+                    if (familiar.Exists())
                     {
                         if (!FamiliarMinions.ContainsKey(familiar))
                         {
@@ -75,6 +71,10 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                             }
                         }
                     }
+                }
+                else if (entity.GetOwner().GetOwner().IsPlayer())
+                {
+                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
                 }
             }
         }
