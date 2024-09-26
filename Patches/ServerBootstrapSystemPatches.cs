@@ -46,7 +46,7 @@ internal static class ServerBootstrapSystemPatches
         { "FamiliarVisual", true},
         { "ShinyChoice", false },
         { "Reminders", true },
-        { "ScrollingText", false}
+        { "ScrollingText", true}
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]

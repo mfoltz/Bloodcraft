@@ -1,16 +1,14 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Sequencer;
 using ProjectM.Shared;
 using Stunlock.Core;
-using System.Text;
 using Unity.Entities;
-using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static VCF.Core.Basics.RoleCommands;
@@ -28,14 +26,21 @@ internal static class MiscCommands
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    public static readonly ComponentType[] DisabledFamiliarComponents =
+    static readonly ComponentType[] DisabledFamiliarComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
         ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
         ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
     ];
 
+    static readonly ComponentType[] SpawnSequenceComponent =
+[
+        ComponentType.ReadOnly(Il2CppType.Of<SpawnSequenceForEntity>()),
+    ];
+
     static readonly PrefabGUID combatBuff = new(581443919);
+    static readonly PrefabGUID NetworkedSequence = new(651179295);
+
     public static Dictionary<PrefabGUID, int> KitPrefabs = [];
 
     [Command(name: "reminders", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
@@ -130,7 +135,7 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Locks in second spell to shift on weapons.")]
+    [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Toggle shift spell.")]
     public static void ShiftPlayerSpells(ChatCommandContext ctx)
     {
         if (!Classes)
@@ -146,15 +151,25 @@ internal static class MiscCommands
         }
 
         User user = ctx.Event.User;
-        ulong SteamID = user.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "ShiftLock");
-        if (PlayerUtilities.GetPlayerBool(SteamID, "ShiftLock"))
+        ulong steamId = user.PlatformId;
+
+        PlayerUtilities.TogglePlayerBool(steamId, "ShiftLock");
+        if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"))
         {
+            if (steamId.TryGetPlayerSpells(out var spellsData))
+            {
+                PrefabGUID spellPrefabGUID = new(spellsData.ClassSpell);
+
+                if (spellPrefabGUID.HasValue())
+                {
+                    ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                }
+            }
             LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
         }
         else
         {
+            ClassUtilities.RemoveShift(ctx.Event.SenderCharacterEntity);
             LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
         }
     }
@@ -200,7 +215,6 @@ internal static class MiscCommands
     [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
     public static void CleanUpFams(ChatCommandContext ctx)
     {
-        // BlockFeedBuff, Disabled, TeamReference with UserTeam on entity, and see if name of prefab starts with CHAR?
         EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = DisabledFamiliarComponents,
@@ -239,7 +253,43 @@ internal static class MiscCommands
         finally
         {
             familiarsQuery.Dispose();
-            LocalizationService.HandleReply(ctx, $"Cleared <color=white>{counter}</color> disabled familiars");
+            LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> disabled familiars...");
+        }
+
+        EntityQuery networkedSequencesQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = SpawnSequenceComponent,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        counter = 0;
+        try
+        {
+            IEnumerable<Entity> networkedSequences = EntityUtilities.GetEntitiesEnumerable(networkedSequencesQuery);
+
+            foreach (Entity entity in networkedSequences)
+            {
+                if (entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(NetworkedSequence))
+                {
+                    SpawnSequenceForEntity spawnSequenceForEntity = entity.Read<SpawnSequenceForEntity>();
+
+                    Entity target = spawnSequenceForEntity.Target.GetEntityOnServer();
+                    Entity secondaryTarget = spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer();
+
+                    if (secondaryTarget.TryGetComponent(out PrefabGUID secondaryTargetPrefab) && secondaryTarget.Has<BlockFeedBuff>())
+                    {
+                        DestroyUtility.Destroy(EntityManager, secondaryTarget, DestroyDebugReason.None);
+                        counter++;
+                    }
+
+                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
+                }
+            }
+        }
+        finally
+        {
+            networkedSequencesQuery.Dispose();
+            LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> disabled summons...");
         }
     }
 }

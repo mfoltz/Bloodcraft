@@ -5,6 +5,7 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Sequencer;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;

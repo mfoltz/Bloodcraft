@@ -1,7 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
-using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -61,11 +60,11 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (ClassUtilities.HasClass(steamId))
+        if (ClassUtilities.HasClass(steamId) && PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"))
         {
             PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
 
-            if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
+            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
                 List<int> spells = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
 
@@ -85,17 +84,17 @@ internal static class ClassCommands
                 {
                     if (steamId.TryGetPlayerSpells(out var data))
                     {
-                        data.ClassSpell = ConfigService.DefaultClassSpell;
-                        steamId.SetPlayerSpells(data);
-
                         if (ConfigService.DefaultClassSpell == 0)
                         {
                             LocalizationService.HandleReply(ctx, "No default spell found for classes.");
                             return;
                         }
 
-                        ClassUtilities.UpdateShift(ctx.Event.SenderCharacterEntity, new(data.ClassSpell));
-                        LocalizationService.HandleReply(ctx, $"You have chosen <color=#CBC3E3>{new PrefabGUID(ConfigService.DefaultClassSpell).GetPrefabName()}</color>, it will be available on weapons and unarmed if .shift is enabled.");
+                        PrefabGUID spellPrefabGUID = new(ConfigService.DefaultClassSpell);
+                        data.ClassSpell = ConfigService.DefaultClassSpell;
+                        steamId.SetPlayerSpells(data);
+
+                        ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
                         return;
                     }
                 }
@@ -111,18 +110,56 @@ internal static class ClassCommands
                     spellsData.ClassSpell = spells[choice - 1];
                     steamId.SetPlayerSpells(spellsData);
 
-                    ClassUtilities.UpdateShift(ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
-                    LocalizationService.HandleReply(ctx, $"You have chosen <color=#CBC3E3>{new PrefabGUID(spells[choice - 1]).GetPrefabName()}</color> from <color=white>{playerClass}</color>, it will be available on weapons and unarmed if .shift is enabled.");
+                    ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "You haven't prestiged in leveling yet.");
+                List<int> spells = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
+
+                if (spells.Count == 0)
+                {
+                    LocalizationService.HandleReply(ctx, "No spells found for class.");
+                    return;
+                }
+
+                if (choice < 0 || choice > spells.Count)
+                {
+                    LocalizationService.HandleReply(ctx, $"Invalid spell choice. (Use 0-{spells.Count})");
+                    return;
+                }
+
+                if (choice == 0) // set default for all classes
+                {
+                    if (steamId.TryGetPlayerSpells(out var data))
+                    {
+                        if (ConfigService.DefaultClassSpell == 0)
+                        {
+                            LocalizationService.HandleReply(ctx, "No default spell found for classes.");
+                            return;
+                        }
+
+                        PrefabGUID spellPrefabGUID = new(ConfigService.DefaultClassSpell);
+                        data.ClassSpell = ConfigService.DefaultClassSpell;
+                        steamId.SetPlayerSpells(data);
+
+                        ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                        return;
+                    }
+                }
+
+                if (steamId.TryGetPlayerSpells(out var spellsData))
+                {
+                    spellsData.ClassSpell = spells[choice - 1];
+                    steamId.SetPlayerSpells(spellsData);
+
+                    ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
+                }
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
+            LocalizationService.HandleReply(ctx, "You haven't chosen a class yet or shift spell isn't enabled (<color=white>.shift</color>)");
         }
     }
 

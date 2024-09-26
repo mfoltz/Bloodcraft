@@ -1,9 +1,7 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -20,10 +18,10 @@ internal static class ClassUtilities
     static EntityManager EntityManagerRef = Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
+    static Update_ReplaceAbilityOnSlotSystem UpdateReplaceAbilityOnSlotSystem => SystemService.Update_ReplaceAbilityOnSlotSystem;
 
     static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
 
@@ -188,7 +186,71 @@ internal static class ClassUtilities
 
         BuffUtilities.ApplyClassBuffs(character, steamId);
     }
-    public static void UpdateShift(Entity character, PrefabGUID spellPrefabGUID)
+    public static void RemoveShift(Entity character)
+    {
+        Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+
+        if (abilityGroup.Exists() && abilityGroup.Has<VBloodAbilityData>())
+        {
+            Entity buffEntity = Entity.Null;
+
+            bool tryEquip = false;
+            Entity equippedJewelEntity = Entity.Null;
+
+            if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
+            {
+                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
+                int index = -1;
+
+                for (int i = 0; i < firstBuffer.Length; i++)
+                {
+                    VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];
+                    if (vBloodAbilityBuffEntry.SlotId == 3)
+                    {
+                        buffEntity = vBloodAbilityBuffEntry.ActiveBuff;
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && AbilityJewelMap.TryGetValue(oldAbility, out List<Entity> jewelEntities))
+                {
+                    foreach (Entity jewel in jewelEntities)
+                    {
+                        if (JewelEquipUtilitiesServer.TryGetEquippedJewel(EntityManager, character, jewel, out equippedJewelEntity) && equippedJewelEntity.Exists())
+                        {
+                            break;
+                        }
+                    }
+
+                    if (JewelEquipUtilitiesServer.TryUnequipJewel(EntityManager, ref itemLookup, inventoryEntity, abilityGroup))
+                    {
+                        tryEquip = true;
+                    }
+                }
+
+                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
+                {
+                    firstBuffer.RemoveAt(index);
+                    DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                }
+            }
+
+            ReplaceAbilityOnSlotSystem.OnUpdate();
+
+            if (tryEquip && InventoryUtilities.TryGetItemSlot(EntityManager, character, equippedJewelEntity, out int slot))
+            {
+                JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);
+            }
+
+            RemoveNPCSpell(character);
+        }
+        else
+        {
+            RemoveNPCSpell(character);
+        }
+    }
+    public static void UpdateShift(ChatCommandContext ctx, Entity character, PrefabGUID spellPrefabGUID)
     {
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.TryGetComponent(out VBloodAbilityData vBloodAbilityData))
         {
@@ -262,12 +324,16 @@ internal static class ClassUtilities
             {
                 JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);
             }
+
+            string spellName = spellPrefabGUID.GetPrefabName();
+            LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
         }
         else if (spellPrefabGUID.HasValue())
         {
             Entity inventoryEntity = Entity.Null;
             Entity equippedJewelEntity = Entity.Null;
             Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+            string spellName = spellPrefabGUID.LookupName();
 
             if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer)) // take care of spell if was normal
             {
@@ -317,12 +383,47 @@ internal static class ClassUtilities
                 {
                     JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);
                 }
+
+                LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
             }
             else
             {
                 HandleNPCSpell(character, spellPrefabGUID);
+                LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
             }
         }
+    }
+    static void RemoveNPCSpell(Entity character)
+    {
+        Entity buffEntity = Entity.Null;
+        var buffer = character.ReadBuffer<BuffBuffer>();
+
+        for (int i = 0; i < buffer.Length; i++)
+        {
+            BuffBuffer item = buffer[i];
+            if (item.PrefabGuid.LookupName().StartsWith("EquipBuff_Weapon"))
+            {
+                buffEntity = item.Entity;
+                break;
+            }
+        }
+
+        var replaceBuffer = buffEntity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
+        int toRemove = -1;
+
+        for (int i = 0; i < replaceBuffer.Length; i++)
+        {
+            ReplaceAbilityOnSlotBuff item = replaceBuffer[i];
+            if (item.Slot == 3)
+            {
+                toRemove = i;
+                break;
+            }
+        }
+
+        if (replaceBuffer.IsIndexWithinRange(toRemove)) replaceBuffer.RemoveAt(toRemove);
+
+        ServerGameManager.ModifyAbilityGroupOnSlot(buffEntity, character, 3, PrefabGUID.Empty);
     }
     static void HandleNPCSpell(Entity character, PrefabGUID spellPrefabGUID)
     {

@@ -1,9 +1,7 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;

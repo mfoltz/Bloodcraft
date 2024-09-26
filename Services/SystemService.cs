@@ -64,6 +64,9 @@ public class SystemService(World world)
     EquipItemSystem _equipItemSystem;
     public EquipItemSystem EquipItemSystem => _equipItemSystem ??= GetSystem<EquipItemSystem>();
 
+    Update_ReplaceAbilityOnSlotSystem _updateReplaceAbilityOnSlotSystem;
+    public Update_ReplaceAbilityOnSlotSystem Update_ReplaceAbilityOnSlotSystem => _updateReplaceAbilityOnSlotSystem ??= GetSystem<Update_ReplaceAbilityOnSlotSystem>();
+
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
     public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
     T GetSystem<T>() where T : ComponentSystemBase
