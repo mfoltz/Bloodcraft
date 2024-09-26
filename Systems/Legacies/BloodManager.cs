@@ -149,6 +149,9 @@ internal static class BloodManager
     }
     public static void UpdateBloodStats(Entity player, User user, BloodType bloodType)
     {
+        if (!BloodTypeToConsumeSourceMap.TryGetValue(bloodType, out var consumeSource)) return;
+        else if (bloodType.Equals(BloodType.None)) return;
+
         Blood blood = player.Read<Blood>();
         float quality = blood.Quality;
 
@@ -157,9 +160,10 @@ internal static class BloodManager
         {
             Amount = 0,
             Quality = quality,
-            Source = BloodTypeToConsumeSourceMap[bloodType]
+            Source = consumeSource
         };
 
+        Core.Log.LogInfo($"Consume Blood Event: {consumeBloodDebugEvent.Amount} {consumeBloodDebugEvent.Quality} {consumeBloodDebugEvent.Source.LookupName()}");
         DebugEventsSystem.ConsumeBloodEvent(user.Index, ref consumeBloodDebugEvent);
     }
     public static BloodType GetCurrentBloodType(Entity character)

@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -43,7 +44,7 @@ internal static class ClassUtilities
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return ConfigUtilities.ParseConfigString(ClassPrestigeBuffsMap[playerClass]);
+            return ConfigUtilities.ParseConfigString(ClassBuffMap[playerClass]);
         }
         return [];
     }
@@ -83,8 +84,6 @@ internal static class ClassUtilities
     public static void RemoveClassBuffs(ChatCommandContext ctx, ulong steamId)
     {
         List<int> buffs = GetClassBuffs(steamId);
-        var buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
-        var entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
         if (buffs.Count == 0) return;
 
@@ -92,15 +91,15 @@ internal static class ClassUtilities
         {
             if (buffs[i] == 0) continue;
             PrefabGUID buffPrefab = new(buffs[i]);
-            if (ServerGameManager.HasBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier()))
+            if (ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
-                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), ctx.Event.SenderCharacterEntity);
+                DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
             }
         }
     }
     public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClasses playerClass)
     {
-        List<int> perks = ConfigUtilities.ParseConfigString(ClassPrestigeBuffsMap[playerClass]);
+        List<int> perks = ConfigUtilities.ParseConfigString(ClassBuffMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -187,13 +186,7 @@ internal static class ClassUtilities
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
         steamId.SetPlayerClasses(classes);
 
-        FromCharacter fromCharacter = new()
-        {
-            Character = character,
-            User = character.Read<PlayerCharacter>().UserEntity,
-        };
-
-        BuffUtilities.ApplyClassBuffs(character, steamId, fromCharacter);
+        BuffUtilities.ApplyClassBuffs(character, steamId);
     }
     public static void UpdateShift(Entity character, PrefabGUID spellPrefabGUID)
     {
@@ -211,6 +204,7 @@ internal static class ClassUtilities
                 PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
+                if (spellPrefabGUID.Equals(oldAbility)) return;
                 for (int i = 0; i < firstBuffer.Length; i++)
                 {
                     VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];
@@ -283,6 +277,7 @@ internal static class ClassUtilities
                 PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
+                if (spellPrefabGUID.Equals(oldAbility)) return;
                 for (int i = 0; i < firstBuffer.Length; i++)
                 {
                     VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];

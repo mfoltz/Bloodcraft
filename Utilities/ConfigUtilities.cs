@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Commands;
+using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
@@ -36,7 +37,7 @@ internal static class ConfigUtilities
         List<int> kitAmounts = [.. ParseConfigString(ConfigService.KitQuantities)];
         MiscCommands.KitPrefabs = kitPrefabs.Zip(kitAmounts, (item, amount) => new { item, amount }).ToDictionary(x => x.item, x => x.amount);
     }
-    public static Dictionary<int, int> CreateClassSpellCooldowns()
+    public static Dictionary<int, int> ClassSpellCooldownMap()
     {
         Dictionary<int, int> spellPrefabs = [];
         foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
@@ -44,5 +45,13 @@ internal static class ConfigUtilities
             if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
         }
         return spellPrefabs;
+    }
+    public static void ClassBuffMap()
+    {
+        foreach (var kvp in LevelingSystem.ClassBuffMap)
+        {
+            List<PrefabGUID> buffPrefabs = ParseConfigString(kvp.Value).Select(x => new PrefabGUID(x)).ToList();
+            UpdateBuffsBufferDestroyPatch.ClassBuffs.TryAdd(kvp.Key, buffPrefabs);
+        }
     }
 }

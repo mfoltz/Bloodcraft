@@ -12,10 +12,12 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class UpdateBuffsBufferDestroyPatch
 {
-    static readonly PrefabGUID combatBuff = new(581443919);
-    static readonly PrefabGUID captureBuff = new(548966542);
+    static readonly PrefabGUID CombatBuff = new(581443919);
 
-    public static readonly List<PrefabGUID> PrestigeBuffPrefabs = [];
+    public static readonly List<PrefabGUID> PrestigeBuffs = [];
+    public static readonly Dictionary<LevelingSystem.PlayerClasses, List<PrefabGUID>> ClassBuffs = [];
+
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -29,31 +31,46 @@ internal static class UpdateBuffsBufferDestroyPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(combatBuff))
+                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(CombatBuff))
                 {
-                    if (entity.GetBuffTarget().TryGetPlayer(out Entity player))
+                    if (entity.GetBuffTarget().TryGetPlayer(out Entity character))
                     {
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
                         if (familiar.Exists())
                         {
-                            player.With((ref CombatMusicListener_Shared shared) =>
+                            character.With((ref CombatMusicListener_Shared shared) =>
                             {
                                 shared.UnitPrefabGuid = PrefabGUID.Empty;
                             });
                         }
                     }
                 }
-                else if (ConfigService.PrestigeSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player) && entity.TryGetComponent(out LifeTime lifeTime)) // check if need to reapply prestige buff
+                
+                if (ConfigService.PrestigeSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player)) // check if need to reapply prestige buff
                 {
-                    if (lifeTime.Duration != -1f) continue; // filter for not having infinite duration
-                    else if (PrestigeBuffPrefabs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
+                    if (PrestigeBuffs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
                     {
                         ulong steamId = player.GetSteamId();
 
                         if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                         {
-                            if (prestigeLevel > PrestigeBuffPrefabs.IndexOf(prefabGUID)) PrestigeSystem.HandlePrestigeBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                            //Core.Log.LogInfo($"UpdateBuffsBuffer_Destroy | {steamId} | {prestigeLevel} | {PrestigeBuffs.IndexOf(prefabGUID)} | {prefabGUID.LookupName()}");
+                            if (prestigeLevel > PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.HandlePermaBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
+                    }
+                }
+                
+                if (Classes && entity.GetBuffTarget().TryGetPlayer(out player))
+                {
+                    ulong steamId = player.GetSteamId();
+
+                    if (ClassUtilities.HasClass(steamId))
+                    {
+                        LevelingSystem.PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+                        List<PrefabGUID> classBuffs = ClassBuffs.ContainsKey(playerClass) ? ClassBuffs[playerClass] : [];
+
+                        //Core.Log.LogInfo($"UpdateBuffsBuffer_Destroy {steamId} | {playerClass} | {prefabGUID.LookupName()}");
+                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.HandlePermaBuff(player, prefabGUID);
                     }
                 }
             }

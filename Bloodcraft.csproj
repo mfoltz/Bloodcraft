@@ -75,4 +75,5 @@
 		<Exec Command="dotnet exec $(OutputPath)$(AssemblyName).dll $(ProjectDir)Commands $(ProjectDir)READMETEST.md" />
 	</Target>
 	-->
+	
 </Project>

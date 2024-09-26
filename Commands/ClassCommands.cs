@@ -184,13 +184,7 @@ internal static class ClassCommands
                 return;
             }
 
-            FromCharacter fromCharacter = new()
-            {
-                Character = ctx.Event.SenderCharacterEntity,
-                User = ctx.Event.SenderUserEntity
-            };
-            BuffUtilities.
-                        ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId, fromCharacter);
+            BuffUtilities.ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
             LocalizationService.HandleReply(ctx, $"Class buffs applied for <color=white>{playerClass}</color>");
         }
         else
@@ -232,8 +226,7 @@ internal static class ClassCommands
                 playerClass = requestedClass;
             }
 
-            ClassUtilities.
-                        ReplyClassBuffs(ctx, playerClass);
+            ClassUtilities.ReplyClassBuffs(ctx, playerClass);
         }
         else
         {

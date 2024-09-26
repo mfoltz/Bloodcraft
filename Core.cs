@@ -37,19 +37,18 @@ internal static class Core
 
         hasInitialized = true;
 
-        NetworkedSequences();
-
         _ = new PlayerService();
         _ = new LocalizationService();
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
-
+        
         if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
         if (ConfigService.StarterKit) ConfigUtilities.StarterKit();
         if (ConfigService.PrestigeSystem) BuffUtilities.PrestigeBuffs();
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
-            ConfigUtilities.CreateClassSpellCooldowns();
+            ConfigUtilities.ClassBuffMap();
+            ConfigUtilities.ClassSpellCooldownMap();
             ClassUtilities.GenerateAbilityJewelMap();
         }
 
@@ -62,7 +61,6 @@ internal static class Core
         }
         if (ConfigService.FamiliarSystem)
         {
-            //CleanUpFams();
             ConfigUtilities.FamiliarBans();
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
@@ -103,53 +101,5 @@ internal static class Core
             UnityEngine.Object.DontDestroyOnLoad(MonoBehaviour.gameObject);
         }
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
-    }
-
-    static readonly ComponentType[] NetworkedSequenceComponent =
-    {
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>())
-    };
-
-    static EntityQuery NetworkedSequenceQuery;
-
-    static readonly PrefabGUID unholySkeletonWarrior = new(1604500740);
-    static void NetworkedSequences()
-    {
-        // BlockFeedBuff, Disabled, TeamReference with UserTeam on entity, and see if name of prefab starts with CHAR?
-        NetworkedSequenceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = NetworkedSequenceComponent,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        int primaryCounter = 0;
-        int secondaryCounter = 0;
-        try
-        {
-            IEnumerable<Entity> networkedSequences = EntityUtilities.GetEntitiesEnumerable(NetworkedSequenceQuery); // need to filter for active/dismissed familiars and not destroy them
-            foreach (Entity entity in networkedSequences)
-            {
-                if (entity.TryGetComponent(out SpawnSequenceForEntity spawnSequenceForEntity))
-                {
-                    Entity secondaryTarget = spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer().Exists() ? spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer() : Entity.Null;
-
-                    if (secondaryTarget.TryGetComponent(out PrefabGUID secondaryTargetPrefabGUID) && secondaryTargetPrefabGUID.Equals(unholySkeletonWarrior))
-                    {
-                        DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
-                        primaryCounter++;
-                    }
-                }
-                else if (entity.TryGetComponent(out PrefabGUID targetPrefabGUID) && targetPrefabGUID.Equals(unholySkeletonWarrior))
-                {
-                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
-                    secondaryCounter++;
-                }
-            }
-        }
-        finally
-        {
-            NetworkedSequenceQuery.Dispose();
-            if (primaryCounter > 0 || secondaryCounter > 0) Core.Log.LogWarning($"Destroyed {primaryCounter} networked sequences with secondary targets of {unholySkeletonWarrior.LookupName()} and {secondaryCounter} entities with PrefabGUID {unholySkeletonWarrior.LookupName()}");
-        }
     }
 }

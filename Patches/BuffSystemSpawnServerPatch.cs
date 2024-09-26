@@ -224,20 +224,6 @@ internal static class BuffSpawnSystemPatches
                         }
                     }
                 }
-#if DEV
-                else if (ConfigService.FamiliarSystem && entity.GetOwner().IsPlayer() && prefabGUID.Equals(CaptureBuff))
-                {
-                    BuffUtilities.HandleCaptureBuff(entity);
-                }
-                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(ImmaterialBuff))
-                {
-                    BuffUtilities.HandleImmaterialBuff(entity);
-                }
-                else if (ConfigService.FamiliarSystem && !buffTarget.IsPlayer() && entity.GetOwner().IsPlayer() && prefabGUID.Equals(BreakBuff))
-                {
-                    BuffUtilities.HandleBreakBuff(entity);
-                }
-#endif
             }
         }
         finally

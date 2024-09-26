@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -7,6 +8,7 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Text;
 using Unity.Entities;
 using Unity.Transforms;
 using VampireCommandFramework;
@@ -29,7 +31,6 @@ internal static class MiscCommands
     public static readonly ComponentType[] DisabledFamiliarComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Disabled>()),
         ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
         ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
     ];
@@ -220,9 +221,17 @@ internal static class MiscCommands
                 {
                     if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
                     {
-                        if (entity.Has<Disabled>()) entity.Remove<Disabled>();
-                        DestroyUtility.Destroy(EntityManager, entity);
-                        counter++;
+                        if (entity.Has<Disabled>())
+                        {
+                            entity.Remove<Disabled>();
+                            DestroyUtility.Destroy(EntityManager, entity);
+                            counter++;
+                        }
+                        else if (entity.Has<DisabledDueToNoPlayersInRange>())
+                        {
+                            DestroyUtility.Destroy(EntityManager, entity);
+                            counter++;
+                        }
                     }
                 }
             }

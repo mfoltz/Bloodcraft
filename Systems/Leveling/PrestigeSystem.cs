@@ -3,6 +3,7 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -394,76 +395,6 @@ internal static class PrestigeSystem
             HandleOtherPrestige(ctx, steamId, parsedPrestigeType, updatedPrestigeLevel);
         }
     }
-    public static void HandlePrestigeBuff(Entity player, PrefabGUID buffPrefab)
-    {
-        ApplyBuffDebugEvent applyBuffDebugEvent = new()
-        {
-            BuffPrefabGUID = buffPrefab,
-        };
-
-        FromCharacter fromCharacter = new()
-        {
-            Character = player,
-            User = player.Read<PlayerCharacter>().UserEntity,
-        };
-
-        if (!ServerGameManager.HasBuff(player, buffPrefab.ToIdentifier()))
-        {
-            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
-            {
-                if (buffEntity.Has<BloodBuff>()) LevelingSystem.HandleBloodBuff(buffEntity); // don't do all those if checks unless actually a blood buff
-
-                if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
-                {
-                    buffEntity.Remove<RemoveBuffOnGameplayEvent>();
-                }
-
-                if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
-                {
-                    buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
-                }
-
-                if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
-                {
-                    buffEntity.Remove<CreateGameplayEventsOnSpawn>();
-                }
-
-                if (buffEntity.Has<GameplayEventListeners>())
-                {
-                    buffEntity.Remove<GameplayEventListeners>();
-                }
-
-                if (!buffEntity.Has<Buff_Persists_Through_Death>())
-                {
-                    buffEntity.Add<Buff_Persists_Through_Death>();
-                }
-
-                if (buffEntity.Has<DestroyOnGameplayEvent>())
-                {
-                    buffEntity.Remove<DestroyOnGameplayEvent>();
-                }
-
-                if (buffEntity.Has<LifeTime>()) // add LifeTime if doesn't have one to mark for checking the prestige buff list later? so can reference prestige buff list then see if the buff had an infinite lifetime to determine if should sync again or not
-                {
-                    LifeTime lifeTime = buffEntity.Read<LifeTime>();
-                    lifeTime.Duration = -1;
-                    lifeTime.EndAction = LifeTimeEndAction.None;
-                    buffEntity.Write(lifeTime);
-                }
-                else
-                {
-                    buffEntity.Add<LifeTime>();
-                    buffEntity.With((ref LifeTime lifeTime) =>
-                    {
-                        lifeTime.Duration = -1;
-                        lifeTime.EndAction = LifeTimeEndAction.None;
-                    });
-                    //Core.Log.LogInfo($"Added LifeTime to buff {buffPrefab.LookupName()} with duration {lifeTime.Duration} and endAction {lifeTime.EndAction.ToString()} (making sure With extension is working)");
-                }
-            }
-        }
-    }
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
     {
         LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
@@ -471,7 +402,7 @@ internal static class PrestigeSystem
 
         List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
         PrefabGUID buffPrefab = new(buffs[prestigeLevel - 1]);
-        if (!buffPrefab.GuidHash.Equals(0)) HandlePrestigeBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
+        if (!buffPrefab.GuidHash.Equals(0)) BuffUtilities.HandlePermaBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
 
         if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
 
@@ -505,12 +436,10 @@ internal static class PrestigeSystem
     public static void RemovePrestigeBuffs(Entity character, int prestigeLevel)
     {
         var buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
-        var buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
-        var entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
-        for (int i = 0; i < prestigeLevel; i++)
+        for (int i = 0; i < buffs.Count; i++)
         {
-            RemoveBuff(character, buffs[i], buffSpawner, entityCommandBuffer);
+            RemoveBuff(character, buffs[i]);
         }
     }
     public static void ApplyPrestigeBuffs(Entity character, int prestigeLevel)
@@ -521,7 +450,7 @@ internal static class PrestigeSystem
         {
             PrefabGUID buffPrefab = new(buffs[i]);
             if (buffPrefab.GuidHash == 0) continue;
-            HandlePrestigeBuff(character, buffPrefab);
+            BuffUtilities.HandlePermaBuff(character, buffPrefab);
         }
     }
     public static void ApplyExperiencePrestigeEffects(User user, int level)
@@ -552,12 +481,13 @@ internal static class PrestigeSystem
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
         LocalizationService.HandleServerReply(EntityManager, user, $"Player <color=green>{user.CharacterName.Value}</color> has prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{level}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }
-    static void RemoveBuff(Entity character, int buffId, BuffUtility.BuffSpawner buffSpawner, EntityCommandBuffer entityCommandBuffer)
+    static void RemoveBuff(Entity character, int buffId)
     {
         var buffPrefab = new PrefabGUID(buffId);
-        if (ServerGameManager.HasBuff(character, buffPrefab.ToIdentifier()))
+        if (ServerGameManager.TryGetBuff(character, buffPrefab.ToIdentifier(), out Entity buffEntity))
         {
-            BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, buffPrefab.ToIdentifier(), character);
+            Core.Log.LogInfo($"Removing buff {buffPrefab.LookupName()}...");
+            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
         }
     }
     public static int GetExperiencePrestigeLevel(ulong steamId)

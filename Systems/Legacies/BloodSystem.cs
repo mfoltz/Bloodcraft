@@ -284,7 +284,7 @@ internal static class BloodSystem
             }
             else
             {
-                UpdateBloodStats(player, user, bloodType);
+                //UpdateBloodStats(player, user, bloodType);
             }
         }
 
