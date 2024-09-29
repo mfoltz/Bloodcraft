@@ -455,20 +455,28 @@ public static class ConfigService
                             // Try to convert the string value to the expected type
                             try
                             {
+                                //initialValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 entry.Value = convertedValue;
-                                //Plugin.LogInstance.LogInfo(line);
-                                //Plugin.LogInstance.LogInfo($"Loaded existing config entry: {section} - {key} = {entry.Value} | {configKey}:{configValue}");
                             }
                             catch (Exception ex)
                             {
                                 Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
                             }
+
                             break; // Stop searching once the key is found
                         }
                     }
                 }
             }
+
+            // Create ConfigDefinition and ConfigDescription with the actual default value
+            //var configDef = new ConfigDefinition(section, key);
+            //var configDesc = new ConfigDescription(description, null, null, defaultValue);
+
+            // Add setting to config file with the initial value and the actual default value
+            //var configEntry = Plugin.Instance.Config.Bind(configDef, initialValue, configDesc);
+
             return entry;
         }
         static void CreateDirectory(string path)

@@ -1,5 +1,4 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
@@ -7,16 +6,10 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
-using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEngine;
-using Random = System.Random;
 
 namespace Bloodcraft.Patches;
 

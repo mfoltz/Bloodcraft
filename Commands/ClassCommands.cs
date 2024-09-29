@@ -82,6 +82,12 @@ internal static class ClassCommands
 
                 if (choice == 0) // set default for all classes
                 {
+                    if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
+                    {
+                        LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
+                        return;
+                    }
+
                     if (steamId.TryGetPlayerSpells(out var data))
                     {
                         if (ConfigService.DefaultClassSpell == 0)
@@ -99,7 +105,7 @@ internal static class ClassCommands
                     }
                 }
 
-                if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice - 1])
+                if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                 {
                     LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                     return;

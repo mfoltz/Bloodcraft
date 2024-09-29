@@ -4,7 +4,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -51,7 +50,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     }
                     else if (ConfigService.ShiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        //HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));
+                        HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));
                     }
                     else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
@@ -94,58 +93,14 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        //HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));    
+        HandleShiftSpell(entity, character, spells, PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"));    
     }
     static void HandleShiftSpell(Entity entity, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
     {
         PrefabGUID spellPrefabGUID = new(spells.ShiftSlot);
 
         if (!shiftLock) return;
-        else if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.TryGetComponent(out VBloodAbilityData vBloodAbilityData))
-        {
-            Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
-            if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
-            {
-                Entity buffEntity = Entity.Null;
-                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
-                int index = -1;
-
-                for (int i = 0; i < firstBuffer.Length; i++)
-                {
-                    VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];
-                    if (vBloodAbilityBuffEntry.ActiveAbility.Equals(oldAbility) && vBloodAbilityBuffEntry.SlotId == 3)
-                    {
-                        buffEntity = vBloodAbilityBuffEntry.ActiveBuff;
-                        index = i;
-                        //Core.Log.LogInfo("Found old shift ability...");
-                        break;
-                    }
-                }
-
-                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
-                {
-                    firstBuffer.RemoveAt(index);
-                    DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-                }
-            }
-            
-            VBloodAbilityUtilities.InstantiateBuff(EntityManager, ActivateVBloodAbilitySystem._BuffSpawnerSystemData, character, PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff], spellPrefabGUID, 3);
-            if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var secondBuffer))
-            {
-                foreach(VBloodAbilityBuffEntry abilityEntry in secondBuffer)
-                {
-                    if (abilityEntry.ActiveAbility.Equals(spellPrefabGUID))
-                    {
-                        //Core.Log.LogInfo("Set correct ability type for shift...");
-                        abilityEntry.ActiveBuff.With((ref VBloodAbilityReplaceBuff vBloodAbilityReplaceBuff) =>
-                        {
-                            vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType;
-                        });
-                        break;
-                    }
-                }
-            }       
-        }
+        else if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.Has<VBloodAbilityData>()) return;
         else if (spellPrefabGUID.HasValue())
         {
             var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();

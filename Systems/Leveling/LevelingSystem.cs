@@ -1,14 +1,12 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.PlayerService;

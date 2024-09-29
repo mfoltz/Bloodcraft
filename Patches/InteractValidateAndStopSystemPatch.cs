@@ -14,6 +14,7 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class InteractValidateAndStopSystemPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly PrefabGUID dominateBuff = new(-1447419822);
@@ -33,7 +34,7 @@ internal static class InteractValidateAndStopSystemPatch
             {
                 if (!entity.Has<EntityOwner>()) continue;
                 if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-
+                
                 if (entity.GetOwner().TryGetPlayer(out Entity player) && !ServerGameManager.HasBuff(player, dominateBuff.ToIdentifier()))
                 {
                     if (prefabGUID.GuidHash.Equals(-986064531) || prefabGUID.GuidHash.Equals(985937733)) // player using world or castle waygate

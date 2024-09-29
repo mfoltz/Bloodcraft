@@ -259,6 +259,7 @@ internal static class ClassUtilities
             Entity inventoryEntity = Entity.Null;
             Entity equippedJewelEntity = Entity.Null;
             Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+            string spellName = spellPrefabGUID.GetPrefabName();
 
             if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
             {
@@ -266,7 +267,11 @@ internal static class ClassUtilities
                 PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
-                if (spellPrefabGUID.Equals(oldAbility)) return;
+                if (spellPrefabGUID.Equals(oldAbility))
+                {
+                    LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+                    return; 
+                }
                 for (int i = 0; i < firstBuffer.Length; i++)
                 {
                     VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];
@@ -325,7 +330,6 @@ internal static class ClassUtilities
                 JewelEquipUtilitiesServer.TryEquipJewel(ref EntityManagerRef, ref PrefabLookupMap, character, slot);
             }
 
-            string spellName = spellPrefabGUID.GetPrefabName();
             LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
         }
         else if (spellPrefabGUID.HasValue())
@@ -343,7 +347,11 @@ internal static class ClassUtilities
                 PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
-                if (spellPrefabGUID.Equals(oldAbility)) return;
+                if (spellPrefabGUID.Equals(oldAbility))
+                {
+                    LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+                    return;
+                }
                 for (int i = 0; i < firstBuffer.Length; i++)
                 {
                     VBloodAbilityBuffEntry vBloodAbilityBuffEntry = firstBuffer[i];

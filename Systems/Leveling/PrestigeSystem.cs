@@ -14,8 +14,6 @@ internal static class PrestigeSystem
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -486,7 +484,7 @@ internal static class PrestigeSystem
         var buffPrefab = new PrefabGUID(buffId);
         if (ServerGameManager.TryGetBuff(character, buffPrefab.ToIdentifier(), out Entity buffEntity))
         {
-            Core.Log.LogInfo($"Removing buff {buffPrefab.LookupName()}...");
+            //Core.Log.LogInfo($"Removing buff {buffPrefab.LookupName()}...");
             DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
         }
     }

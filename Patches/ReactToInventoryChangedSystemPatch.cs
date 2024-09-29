@@ -45,6 +45,7 @@ internal static class ReactToInventoryChangedSystemPatch
                         else if (DealDamageSystemPatch.LastDamageTime.TryGetValue(steamId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
                         {
                             if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, user);
+                            
                             continue;
                         }
 

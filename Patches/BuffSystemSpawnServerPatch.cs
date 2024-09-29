@@ -13,7 +13,7 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class BuffSpawnSystemPatches
+internal static class BuffSystemSpawnPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;

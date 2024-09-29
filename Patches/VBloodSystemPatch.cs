@@ -32,7 +32,6 @@ internal static class VBloodSystemPatch
         {
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-
                 Entity player = vBloodConsumed.Target;
                 User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
                 ulong steamId = user.PlatformId;

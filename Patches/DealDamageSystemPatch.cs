@@ -44,9 +44,10 @@ internal static class DealDamageSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent)) continue;
-                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue;
+                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities in this system can reeeeally mess things up for a save so leaving them for safety >_>
                 else if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
                 else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
+                else if (!dealDamageEvent.SpellSource.Has<EntityOwner>()) continue; // not really sure why this would be the case but seems to be popping up in console so okay I guess
 
                 if (dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player))
                 {

@@ -66,7 +66,10 @@ internal static class EntityUtilities
         "GarlicResistance"
     ];
 
-    static readonly HashSet<string> FilteredResources = [];
+    static readonly HashSet<string> FilteredResources = 
+    [
+        "Item_Ingredient_Crystal",
+    ];
     public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1) // not sure if need to actually check for empty buff buffer for quest targets but don't really want to find out
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);
@@ -86,10 +89,18 @@ internal static class EntityUtilities
                 }
                 else if (targetType == 1)
                 {
-                    if (entity.TryGetComponent(out PrefabGUID unitPrefab))
+                    if (entity.TryGetComponent(out PrefabGUID craftPrefab))
                     {
-                        string prefabName = unitPrefab.LookupName();
+                        string prefabName = craftPrefab.LookupName();
                         if (!FilteredCrafts.Any(part => prefabName.Contains(part))) yield return entity;
+                    }
+                }
+                else if (targetType == 2)
+                {
+                    if (entity.TryGetComponent(out PrefabGUID resourcePrefab))
+                    {
+                        string prefabName = resourcePrefab.LookupName();
+                        if (!FilteredResources.Any(part => prefabName.Contains(part))) yield return entity;
                     }
                 }
                 else if (EntityManager.Exists(entity))

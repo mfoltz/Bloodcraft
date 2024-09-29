@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -12,7 +13,11 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class UpdateBuffsBufferDestroyPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
     static readonly PrefabGUID CombatBuff = new(581443919);
+    static readonly PrefabGUID ExternalInventory = new(1183666186);
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
     public static readonly Dictionary<LevelingSystem.PlayerClasses, List<PrefabGUID>> ClassBuffs = [];
@@ -30,8 +35,9 @@ internal static class UpdateBuffsBufferDestroyPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(CombatBuff))
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;           
+
+                if (ConfigService.FamiliarSystem && prefabGUID.Equals(CombatBuff))
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out Entity character))
                     {
@@ -69,7 +75,6 @@ internal static class UpdateBuffsBufferDestroyPatch
                         LevelingSystem.PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
                         List<PrefabGUID> classBuffs = ClassBuffs.ContainsKey(playerClass) ? ClassBuffs[playerClass] : [];
 
-                        //Core.Log.LogInfo($"UpdateBuffsBuffer_Destroy {steamId} | {playerClass} | {prefabGUID.LookupName()}");
                         if (classBuffs.Contains(prefabGUID)) BuffUtilities.HandlePermaBuff(player, prefabGUID);
                     }
                 }
