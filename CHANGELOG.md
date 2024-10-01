@@ -1,3 +1,8 @@
+`1.4.2`
+- fixed gathering/crafting quests unintentionally checking for professions being turned on
+- added check for full inventory before letting players enable or swap class spells to ensure safe handling of jewels
+- filtered out t01 bone weapons for crafting quests since can't be crafted at bench
+
 `1.4.1`
 - config entries are now in sections (please save a backup of your config just incase but seems to be handling migration well now)
 - .cleanupfams does a bit more cleaning but will take a few seconds at least, tried having that run on restarts but game wasn't a fan so leaving it on the command for now
