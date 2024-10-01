@@ -3,6 +3,7 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -35,7 +36,7 @@ internal static class ShapeshiftSystemPatch
                     Entity character = fromCharacter.Character;
                     Entity userEntity = fromCharacter.User;
                     ulong steamId = userEntity.Read<User>().PlatformId;
-
+                    
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
                     if (familiar.Exists() && !familiar.Disabled())
                     {

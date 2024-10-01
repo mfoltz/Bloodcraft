@@ -27,7 +27,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static void Prefix(ForgeSystem_Update __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ProfessionSystem) return;
+        if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
         try
@@ -58,9 +58,13 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                 if (forge_Shared.State == ForgeState.Finished)
                 {
+                    if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
+
+                    if (!ConfigService.ProfessionSystem) continue;
                     float ProfessionValue = 50f;
                     ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
+
                     if (handler != null)
                     {
                         if (itemEntity.Has<Durability>())
@@ -79,7 +83,6 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                             itemEntity.Write(durability);
 
                             ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler);
-                            if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
                         }
                     }
                 }
@@ -96,7 +99,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ProfessionSystem) return;
+        if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try

@@ -5,7 +5,6 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Sequencer;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
@@ -113,7 +112,7 @@ internal static class FamiliarCommands
         }
     }
 
-    //[Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
+    [Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
     public static void BindFamiliar(ChatCommandContext ctx, string name, string box, int choice)
     {
         if (!ConfigService.FamiliarSystem)
@@ -181,7 +180,7 @@ internal static class FamiliarCommands
         }
     }
 
-    //[Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
+    [Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
     public static void ListPlayerFamiliars(ChatCommandContext ctx, string name, string box = "")
     {
         if (!ConfigService.FamiliarSystem)

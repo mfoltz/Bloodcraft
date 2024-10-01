@@ -36,7 +36,6 @@ internal static class DealDamageSystemPatch
     static void OnUpdatePrefix(DealDamageSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ClassSpellSchoolOnHitEffects || !Classes) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
@@ -49,12 +48,12 @@ internal static class DealDamageSystemPatch
                 else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
                 else if (!dealDamageEvent.SpellSource.Has<EntityOwner>()) continue; // not really sure why this would be the case but seems to be popping up in console so okay I guess
 
-                if (dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player))
+                if (ConfigService.QuestSystem && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
                     LastDamageTime[steamId] = DateTime.UtcNow;
                 }
-                else if (dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
+                else if (ConfigService.ClassSpellSchoolOnHitEffects && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
                 {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;

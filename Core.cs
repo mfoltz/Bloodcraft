@@ -9,6 +9,7 @@ using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.UI;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -43,7 +44,7 @@ internal static class Core
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
             ConfigUtilities.ClassBuffMap();
-            ConfigUtilities.ClassSpellCooldownMap();
+            //ConfigUtilities.ClassSpellCooldownMap();
             ClassUtilities.GenerateAbilityJewelMap();
         }
 

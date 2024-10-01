@@ -21,7 +21,7 @@ internal static class ReactToInventoryChangedSystemPatch
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ProfessionSystem) return;
+        if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.Temp);
         try
@@ -36,7 +36,7 @@ internal static class ReactToInventoryChangedSystemPatch
                     User user;
                     ulong steamId;
 
-                    if (inventoryConnection.InventoryOwner.IsPlayer())
+                    if (ConfigService.QuestSystem && inventoryConnection.InventoryOwner.IsPlayer())
                     {
                         user = inventoryConnection.InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>();
                         steamId = user.PlatformId;
@@ -74,13 +74,16 @@ internal static class ReactToInventoryChangedSystemPatch
                         if (credits == 0) playerJobs.Remove(itemPrefab);
                         else playerJobs[itemPrefab] = credits;
 
+                        if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
+
+                        if (!ConfigService.ProfessionSystem) continue;
+
                         float professionXP = ProfessionBaseXP * ProfessionMappings.GetTierMultiplier(itemPrefab);
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
 
                         if (handler != null)
                         {
                             if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
-                            if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
 
                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler);
                             switch (handler)

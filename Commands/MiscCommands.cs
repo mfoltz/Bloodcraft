@@ -153,6 +153,13 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong steamId = user.PlatformId;
 
+        Entity character = ctx.Event.SenderCharacterEntity;
+        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
+        {
+            LocalizationService.HandleReply(ctx, "Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.");
+            return;
+        }
+
         PlayerUtilities.TogglePlayerBool(steamId, "ShiftLock");
         if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"))
         {

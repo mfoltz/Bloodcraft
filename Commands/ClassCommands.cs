@@ -1,6 +1,8 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
+using Epic.OnlineServices.RTCAudio;
+using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -13,6 +15,7 @@ namespace Bloodcraft.Commands;
 [CommandGroup("class")]
 internal static class ClassCommands
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
@@ -58,6 +61,13 @@ internal static class ClassCommands
             return;
         }
 
+        Entity character = ctx.Event.SenderCharacterEntity;
+        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
+        {
+            LocalizationService.HandleReply(ctx, "Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.");
+            return;
+        }
+
         ulong steamId = ctx.Event.User.PlatformId;
 
         if (ClassUtilities.HasClass(steamId) && PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"))
@@ -100,7 +110,7 @@ internal static class ClassCommands
                         data.ClassSpell = ConfigService.DefaultClassSpell;
                         steamId.SetPlayerSpells(data);
 
-                        ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                        ClassUtilities.UpdateShift(ctx, character, spellPrefabGUID);
                         return;
                     }
                 }

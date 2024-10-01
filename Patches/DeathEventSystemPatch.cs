@@ -47,8 +47,11 @@ internal static class DeathEventListenerSystemPatch
                             Source = deathSource,
                             Target = deathEvent.Died
                         };
-                        if (deathArgs.Source != deathArgs.Target) RaiseDeathEvent(deathArgs);
-                        if (deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11)) BloodSystem.ProcessLegacy(deathArgs.Source, deathArgs.Target);
+                        
+                        RaiseDeathEvent(deathArgs);
+
+                        if (!ConfigService.BloodSystem) continue;
+                        else if (deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11)) BloodSystem.ProcessLegacy(deathArgs.Source, deathArgs.Target);
                     }
                 }
                 else if (ConfigService.ProfessionSystem && deathEvent.Killer.IsPlayer())

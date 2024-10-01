@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Systems.Quests;
-using ProjectM;
+﻿using ProjectM;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -63,7 +62,8 @@ internal static class EntityUtilities
         "Irradiant",
         "Slashers_T01",
         "Reaper_T01",
-        "GarlicResistance"
+        "GarlicResistance",
+        "T01_Bone"
     ];
 
     static readonly HashSet<string> FilteredResources = 

@@ -37,14 +37,12 @@ internal static class ConfigUtilities
         List<int> kitAmounts = [.. ParseConfigString(ConfigService.KitQuantities)];
         MiscCommands.KitPrefabs = kitPrefabs.Zip(kitAmounts, (item, amount) => new { item, amount }).ToDictionary(x => x.item, x => x.amount);
     }
-    public static Dictionary<int, int> ClassSpellCooldownMap()
+    public static void ClassSpellCooldownMap()
     {
-        Dictionary<int, int> spellPrefabs = [];
         foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
         {
-            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => spellPrefabs.TryAdd(x.Hash, x.Index));
+            if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => AbilityRunScriptsSystemPatch.ClassSpells.TryAdd(x.Hash, x.Index));
         }
-        return spellPrefabs;
     }
     public static void ClassBuffMap()
     {
