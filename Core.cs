@@ -61,7 +61,7 @@ internal static class Core
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
-
+        
         /*
         foreach (var kvp in Server.m_SystemLookup)
         {

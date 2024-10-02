@@ -1,7 +1,8 @@
 `1.4.2`
-- fixed gathering/crafting quests unintentionally checking for professions being turned on
-- added check for full inventory before letting players enable or swap class spells to ensure safe handling of jewels
+- fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled
+- added check for full inventory before letting players enable or swap class spells to facilitate safe handling of jewels
 - filtered out t01 bone weapons for crafting quests since can't be crafted at bench
+- fixed erroneous temporary exp gain for legacies even when disabled
 
 `1.4.1`
 - config entries are now in sections (please save a backup of your config just incase but seems to be handling migration well now)

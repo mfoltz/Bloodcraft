@@ -30,7 +30,7 @@ internal static class ScriptSpawnServerPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.Has<EntityOwner>()) continue;
-
+                
                 if (ConfigService.FamiliarSystem && entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
                 {
                     if (entity.GetBuffTarget().TryGetFollowedPlayer(out Entity _))
@@ -49,8 +49,6 @@ internal static class ScriptSpawnServerPatch
                     ulong steamId = player.GetSteamId();
                     PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 
-                    //Core.Log.LogInfo($"ScriptSpawnServer: {prefabGUID.LookupName()} | current blood: {player.Read<Blood>().BloodType.LookupName()}");
-
                     if (ConfigService.LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
                     {
                         BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
@@ -61,7 +59,6 @@ internal static class ScriptSpawnServerPatch
                     if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
                         // only do this when matching blood type to ignore class buffs
-                        //Core.Log.LogInfo("Applying stat choices to matching blood type base buff...");
                         BloodManager.ApplyBloodStats(steamId, bloodType, entity);
                     }
 
