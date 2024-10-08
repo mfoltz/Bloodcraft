@@ -28,10 +28,7 @@ internal static class LevelingSystem
 
     static readonly PrefabGUID levelUpBuff = new(-1133938228);
     static readonly PrefabGUID warEventTrash = new(2090187901);
-
-    static readonly AssetGuid assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience
-    static readonly float3 color = new(1.0f, 0.7529f, 0.7961f);
-    public enum PlayerClasses
+    public enum PlayerClass
     {
         BloodKnight,
         DemonHunter,
@@ -41,65 +38,65 @@ internal static class LevelingSystem
         DeathMage
     }
 
-    public static readonly Dictionary<PlayerClasses, (string, string)> ClassWeaponBloodMap = new()
+    public static readonly Dictionary<PlayerClass, (string, string)> ClassWeaponBloodMap = new()
     {
-        { PlayerClasses.BloodKnight, (ConfigService.BloodKnightWeapon, ConfigService.BloodKnightBlood) },
-        { PlayerClasses.DemonHunter, (ConfigService.DemonHunterWeapon, ConfigService.DemonHunterBlood) },
-        { PlayerClasses.VampireLord, (ConfigService.VampireLordWeapon, ConfigService.VampireLordBlood) },
-        { PlayerClasses.ShadowBlade, (ConfigService.ShadowBladeWeapon, ConfigService.ShadowBladeBlood) },
-        { PlayerClasses.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeapon, ConfigService.ArcaneSorcererBlood) },
-        { PlayerClasses.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
+        { PlayerClass.BloodKnight, (ConfigService.BloodKnightWeapon, ConfigService.BloodKnightBlood) },
+        { PlayerClass.DemonHunter, (ConfigService.DemonHunterWeapon, ConfigService.DemonHunterBlood) },
+        { PlayerClass.VampireLord, (ConfigService.VampireLordWeapon, ConfigService.VampireLordBlood) },
+        { PlayerClass.ShadowBlade, (ConfigService.ShadowBladeWeapon, ConfigService.ShadowBladeBlood) },
+        { PlayerClass.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeapon, ConfigService.ArcaneSorcererBlood) },
+        { PlayerClass.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
     };
 
-    public static readonly Dictionary<PlayerClasses, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
+    public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
     {
-        { PlayerClasses.BloodKnight, (ConfigUtilities.ParseConfigString(ConfigService.BloodKnightWeapon), ConfigUtilities.ParseConfigString(ConfigService.BloodKnightBlood)) },
-        { PlayerClasses.DemonHunter, (ConfigUtilities.ParseConfigString(ConfigService.DemonHunterWeapon), ConfigUtilities.ParseConfigString(ConfigService.DemonHunterBlood)) },
-        { PlayerClasses.VampireLord, (ConfigUtilities.ParseConfigString(ConfigService.VampireLordWeapon), ConfigUtilities.ParseConfigString(ConfigService.VampireLordBlood)) },
-        { PlayerClasses.ShadowBlade, (ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeWeapon), ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeBlood)) },
-        { PlayerClasses.ArcaneSorcerer, (ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererWeapon), ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererBlood)) },
-        { PlayerClasses.DeathMage, (ConfigUtilities.ParseConfigString(ConfigService.DeathMageWeapon), ConfigUtilities.ParseConfigString(ConfigService.DeathMageBlood)) }
+        { PlayerClass.BloodKnight, (ConfigUtilities.ParseConfigString(ConfigService.BloodKnightWeapon), ConfigUtilities.ParseConfigString(ConfigService.BloodKnightBlood)) },
+        { PlayerClass.DemonHunter, (ConfigUtilities.ParseConfigString(ConfigService.DemonHunterWeapon), ConfigUtilities.ParseConfigString(ConfigService.DemonHunterBlood)) },
+        { PlayerClass.VampireLord, (ConfigUtilities.ParseConfigString(ConfigService.VampireLordWeapon), ConfigUtilities.ParseConfigString(ConfigService.VampireLordBlood)) },
+        { PlayerClass.ShadowBlade, (ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeWeapon), ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeBlood)) },
+        { PlayerClass.ArcaneSorcerer, (ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererWeapon), ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererBlood)) },
+        { PlayerClass.DeathMage, (ConfigUtilities.ParseConfigString(ConfigService.DeathMageWeapon), ConfigUtilities.ParseConfigString(ConfigService.DeathMageBlood)) }
     };
 
-    public static readonly Dictionary<PlayerClasses, string> ClassBuffMap = new()
+    public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
     {
-        { PlayerClasses.BloodKnight, ConfigService.BloodKnightBuffs },
-        { PlayerClasses.DemonHunter, ConfigService.DemonHunterBuffs },
-        { PlayerClasses.VampireLord, ConfigService.VampireLordBuffs },
-        { PlayerClasses.ShadowBlade, ConfigService.ShadowBladeBuffs },
-        { PlayerClasses.ArcaneSorcerer, ConfigService.ArcaneSorcererBuffs },
-        { PlayerClasses.DeathMage, ConfigService.DeathMageBuffs }
+        { PlayerClass.BloodKnight, ConfigService.BloodKnightBuffs },
+        { PlayerClass.DemonHunter, ConfigService.DemonHunterBuffs },
+        { PlayerClass.VampireLord, ConfigService.VampireLordBuffs },
+        { PlayerClass.ShadowBlade, ConfigService.ShadowBladeBuffs },
+        { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererBuffs },
+        { PlayerClass.DeathMage, ConfigService.DeathMageBuffs }
     };
 
-    public static readonly Dictionary<PlayerClasses, string> ClassSpellsMap = new()
+    public static readonly Dictionary<PlayerClass, string> ClassSpellsMap = new()
     {
-        { PlayerClasses.BloodKnight, ConfigService.BloodKnightSpells },
-        { PlayerClasses.DemonHunter, ConfigService.DemonHunterSpells },
-        { PlayerClasses.VampireLord, ConfigService.VampireLordSpells },
-        { PlayerClasses.ShadowBlade, ConfigService.ShadowBladeSpells },
-        { PlayerClasses.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
-        { PlayerClasses.DeathMage, ConfigService.DeathMageSpells }
+        { PlayerClass.BloodKnight, ConfigService.BloodKnightSpells },
+        { PlayerClass.DemonHunter, ConfigService.DemonHunterSpells },
+        { PlayerClass.VampireLord, ConfigService.VampireLordSpells },
+        { PlayerClass.ShadowBlade, ConfigService.ShadowBladeSpells },
+        { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
+        { PlayerClass.DeathMage, ConfigService.DeathMageSpells }
     };
 
-    public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassOnHitDebuffMap = new() // tier 1
+    public static readonly Dictionary<PlayerClass, PrefabGUID> ClassOnHitDebuffMap = new() // tier 1
     {
-        { PlayerClasses.BloodKnight, new(-1246704569) }, //leech
-        { PlayerClasses.DemonHunter, new(-1576512627) }, //static
-        { PlayerClasses.VampireLord, new(27300215) }, // chill
-        { PlayerClasses.ShadowBlade, new(348724578) }, // ignite
-        { PlayerClasses.ArcaneSorcerer, new(1723455773) }, // weaken
-        { PlayerClasses.DeathMage, new(-325758519) } // condemn
+        { PlayerClass.BloodKnight, new(-1246704569) }, //leech
+        { PlayerClass.DemonHunter, new(-1576512627) }, //static
+        { PlayerClass.VampireLord, new(27300215) }, // chill
+        { PlayerClass.ShadowBlade, new(348724578) }, // ignite
+        { PlayerClass.ArcaneSorcerer, new(1723455773) }, // weaken
+        { PlayerClass.DeathMage, new(-325758519) } // condemn
     };
 
-    public static readonly Dictionary<PlayerClasses, PrefabGUID> ClassOnHitEffectMap = new() // tier 2
+    public static readonly Dictionary<PlayerClass, PrefabGUID> ClassOnHitEffectMap = new() // tier 2
     {
 
-        { PlayerClasses.BloodKnight, new(2085766220) }, // lesser bloodrage
-        { PlayerClasses.DemonHunter, new(-737425100) }, // lesser stormshield
-        { PlayerClasses.VampireLord, new(620130895) }, // lesser frozenweapon
-        { PlayerClasses.ShadowBlade, new(763939566) }, // lesser powersurge
-        { PlayerClasses.ArcaneSorcerer, new(1433921398) }, // lesser aegis
-        { PlayerClasses.DeathMage, new(-2071441247) } // guardian block :p
+        { PlayerClass.BloodKnight, new(2085766220) }, // lesser bloodrage
+        { PlayerClass.DemonHunter, new(-737425100) }, // lesser stormshield
+        { PlayerClass.VampireLord, new(620130895) }, // lesser frozenweapon
+        { PlayerClass.ShadowBlade, new(763939566) }, // lesser powersurge
+        { PlayerClass.ArcaneSorcerer, new(1433921398) }, // lesser aegis
+        { PlayerClass.DeathMage, new(-2071441247) } // guardian block :p
     };
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
@@ -399,7 +396,7 @@ internal static class LevelingSystem
         float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
         return gainedXP * scalingFactor;
     }
-    public static bool TryParseClassName(string className, out PlayerClasses parsedClassType)
+    public static bool TryParseClassName(string className, out PlayerClass parsedClassType)
     {
         // Attempt to parse the className string to the PlayerClasses enum.
         if (Enum.TryParse(className, true, out parsedClassType))
@@ -408,12 +405,12 @@ internal static class LevelingSystem
         }
 
         // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
-        parsedClassType = Enum.GetValues(typeof(PlayerClasses))
-                             .Cast<PlayerClasses>()
+        parsedClassType = Enum.GetValues(typeof(PlayerClass))
+                             .Cast<PlayerClass>()
                              .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
 
         // Check if a valid enum value was found that contains the input string.
-        if (!parsedClassType.Equals(default(PlayerClasses)))
+        if (!parsedClassType.Equals(default(PlayerClass)))
         {
             return true; // Found a matching enum value
         }

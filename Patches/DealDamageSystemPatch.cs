@@ -59,7 +59,7 @@ internal static class DealDamageSystemPatch
                     ulong steamId = userEntity.Read<User>().PlatformId;
                     if (!ClassUtilities.HasClass(steamId)) continue;
 
-                    PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+                    PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
                     if (Random.NextDouble() <= ConfigService.OnHitProcChance)
                     {
                         PrefabGUID prefabGUID = ClassOnHitDebuffMap[playerClass];
@@ -80,7 +80,7 @@ internal static class DealDamageSystemPatch
                             applyBuffDebugEvent.BuffPrefabGUID = ClassOnHitEffectMap[playerClass];
                             fromCharacter.Character = player;
 
-                            if (playerClass.Equals(PlayerClasses.DemonHunter))
+                            if (playerClass.Equals(PlayerClass.DemonHunter))
                             {
                                 if (ServerGameManager.TryGetBuff(player, stormShield01.ToIdentifier(), out Entity firstBuff))
                                 {

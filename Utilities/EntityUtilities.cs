@@ -69,8 +69,9 @@ internal static class EntityUtilities
     static readonly HashSet<string> FilteredResources = 
     [
         "Item_Ingredient_Crystal",
+        "Item_Ingredient_Coal"
     ];
-    public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1) // not sure if need to actually check for empty buff buffer for quest targets but don't really want to find out
+    public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1) 
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);
         handle.Complete();

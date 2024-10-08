@@ -28,7 +28,7 @@ internal static class DataService
     {
         return playerBools.TryGetValue(steamID, out bools);
     }
-    public static bool TryGetPlayerClasses(this ulong steamID, out Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)> classes)
+    public static bool TryGetPlayerClasses(this ulong steamID, out Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> classes)
     {
         return playerClass.TryGetValue(steamID, out classes);
     }
@@ -220,7 +220,7 @@ internal static class DataService
         playerBools[steamID] = data;
         SavePlayerBools();
     }
-    public static void SetPlayerClasses(this ulong steamID, Dictionary<LevelingSystem.PlayerClasses, (List<int>, List<int>)> data)
+    public static void SetPlayerClasses(this ulong steamID, Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> data)
     {
         playerClass[steamID] = data;
         SavePlayerClasses();
@@ -446,7 +446,7 @@ internal static class DataService
         internal static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
 
         // classes
-        internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClasses, (List<int> WeaponStats, List<int> BloodStats)>> playerClass = [];
+        internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> playerClass = [];
 
         // prestiges
         internal static Dictionary<ulong, Dictionary<PrestigeType, int>> playerPrestiges = [];

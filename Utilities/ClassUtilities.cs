@@ -46,7 +46,7 @@ internal static class ClassUtilities
         }
         return [];
     }
-    public static PlayerClasses GetPlayerClass(ulong steamId)
+    public static PlayerClass GetPlayerClass(ulong steamId)
     {
         if (steamId.TryGetPlayerClasses(out var classes))
         {
@@ -95,7 +95,7 @@ internal static class ClassUtilities
             }
         }
     }
-    public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClasses playerClass)
+    public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClass playerClass)
     {
         List<int> perks = ConfigUtilities.ParseConfigString(ClassBuffMap[playerClass]);
 
@@ -126,7 +126,7 @@ internal static class ClassUtilities
             LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
         }
     }
-    public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClasses playerClass)
+    public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
         List<int> perks = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
 
@@ -155,18 +155,18 @@ internal static class ClassUtilities
             LocalizationService.HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
         }
     }
-    public static bool TryParseClass(string classType, out PlayerClasses parsedClassType)
+    public static bool TryParseClass(string classType, out PlayerClass parsedClassType)
     {
         if (Enum.TryParse(classType, true, out parsedClassType))
         {
             return true;
         }
 
-        parsedClassType = Enum.GetValues(typeof(PlayerClasses))
-                              .Cast<PlayerClasses>()
+        parsedClassType = Enum.GetValues(typeof(PlayerClass))
+                              .Cast<PlayerClass>()
                               .FirstOrDefault(pc => pc.ToString().Contains(classType, StringComparison.OrdinalIgnoreCase));
 
-        if (!parsedClassType.Equals(default(PlayerClasses)))
+        if (!parsedClassType.Equals(default(PlayerClass)))
         {
             return true;
         }
@@ -174,7 +174,7 @@ internal static class ClassUtilities
         parsedClassType = default;
         return false;
     }
-    public static void UpdateClassData(Entity character, PlayerClasses parsedClassType, Dictionary<PlayerClasses, (List<int>, List<int>)> classes, ulong steamId)
+    public static void UpdateClassData(Entity character, PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
     {
         var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
         var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;

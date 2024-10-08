@@ -39,7 +39,7 @@ internal static class ConfigUtilities
     }
     public static void ClassSpellCooldownMap()
     {
-        foreach (LevelingSystem.PlayerClasses playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClasses)))
+        foreach (LevelingSystem.PlayerClass playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClass)))
         {
             if (!string.IsNullOrEmpty(LevelingSystem.ClassSpellsMap[playerClass])) ParseConfigString(LevelingSystem.ClassSpellsMap[playerClass]).Select((x, index) => new { Hash = x, Index = index }).ToList().ForEach(x => AbilityRunScriptsSystemPatch.ClassSpells.TryAdd(x.Hash, x.Index));
         }

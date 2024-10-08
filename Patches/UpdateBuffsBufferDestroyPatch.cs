@@ -20,7 +20,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID ExternalInventory = new(1183666186);
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
-    public static readonly Dictionary<LevelingSystem.PlayerClasses, List<PrefabGUID>> ClassBuffs = [];
+    public static readonly Dictionary<LevelingSystem.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
@@ -72,7 +72,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (ClassUtilities.HasClass(steamId))
                     {
-                        LevelingSystem.PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+                        LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
                         List<PrefabGUID> classBuffs = ClassBuffs.ContainsKey(playerClass) ? ClassBuffs[playerClass] : [];
 
                         if (classBuffs.Contains(prefabGUID)) BuffUtilities.HandlePermaBuff(player, prefabGUID);

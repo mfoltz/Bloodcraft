@@ -76,7 +76,7 @@ internal static class ScriptSpawnServerPatch
 
                     if (Classes && ClassUtilities.HasClass(steamId))
                     {
-                        LevelingSystem.PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+                        LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
                         List<PrefabGUID> classBuffs = UpdateBuffsBufferDestroyPatch.ClassBuffs.ContainsKey(playerClass) ? UpdateBuffsBufferDestroyPatch.ClassBuffs[playerClass] : [];
 
                         //Core.Log.LogInfo($"{steamId} | {playerClass} | {prefabGUID.LookupName()}");

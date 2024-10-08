@@ -72,7 +72,7 @@ internal static class ClassCommands
 
         if (ClassUtilities.HasClass(steamId) && PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"))
         {
-            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+            PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
 
             if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
@@ -228,7 +228,7 @@ internal static class ClassCommands
 
         if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+            PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
             List<int> perks = ClassUtilities.GetClassBuffs(steamId);
 
             if (perks.Count == 0)
@@ -255,7 +255,7 @@ internal static class ClassCommands
             return;
         }
 
-        string classTypes = string.Join(", ", Enum.GetNames(typeof(PlayerClasses)));
+        string classTypes = string.Join(", ", Enum.GetNames(typeof(PlayerClass)));
         LocalizationService.HandleReply(ctx, $"Available Classes: <color=white>{classTypes}</color>");
     }
 
@@ -272,9 +272,9 @@ internal static class ClassCommands
 
         if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+            PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClass requestedClass))
             {
                 playerClass = requestedClass;
             }
@@ -283,7 +283,7 @@ internal static class ClassCommands
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClass requestedClass))
             {
                 ClassUtilities.ReplyClassBuffs(ctx, requestedClass);
             }
@@ -307,9 +307,9 @@ internal static class ClassCommands
 
         if (ClassUtilities.HasClass(steamId))
         {
-            PlayerClasses playerClass = ClassUtilities.GetPlayerClass(steamId);
+            PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClass requestedClass))
             {
                 playerClass = requestedClass;
             }
@@ -318,7 +318,7 @@ internal static class ClassCommands
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
+            if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClass requestedClass))
             {
                 ClassUtilities.ReplyClassSpells(ctx, requestedClass);
             }
@@ -332,7 +332,7 @@ internal static class ClassCommands
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".class lst [Class]", description: "Shows weapon and blood stat synergies for a class.")]
     public static void ListClassStats(ChatCommandContext ctx, string classType = "")
     {
-        if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClasses requestedClass))
+        if (!string.IsNullOrEmpty(classType) && ClassUtilities.TryParseClass(classType, out PlayerClass requestedClass))
         {
             if (ClassWeaponBloodMap.TryGetValue(requestedClass, out var weaponBloodStats))
             {

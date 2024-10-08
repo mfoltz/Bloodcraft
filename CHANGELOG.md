@@ -1,3 +1,7 @@
+`1.4.3`
+- filtered out crystal and coal from gathering quest prefab pool
+- WIP
+
 `1.4.2`
 - fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled
 - added check for full inventory before letting players enable or swap class spells to facilitate safe handling of jewels

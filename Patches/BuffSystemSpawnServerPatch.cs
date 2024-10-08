@@ -42,7 +42,7 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID holyBeamPowerBuff = new(-1584595113);
     static readonly PrefabGUID Solarus = new(-740796338);
 
-    static readonly PrefabGUID phasing = new(-79611032); // lol switch bodies with familiar? hmmm
+    static readonly PrefabGUID phasing = new(-79611032);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
     static readonly PrefabGUID CaptureBuff = new(1280015305);
