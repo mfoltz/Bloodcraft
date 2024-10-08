@@ -44,7 +44,7 @@ internal static class Core
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
             ConfigUtilities.ClassBuffMap();
-            //ConfigUtilities.ClassSpellCooldownMap();
+            ConfigUtilities.ClassSpellCooldownMap();
             ClassUtilities.GenerateAbilityJewelMap();
         }
 

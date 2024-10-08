@@ -31,9 +31,9 @@ internal static class AbilityRunScriptsSystemPatch
             {
                 AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
-                if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
 
-                if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab.GuidHash))
+                if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
+                else if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab.GuidHash))
                 {
                     float cooldown = ClassSpells[abilityGroupPrefab.GuidHash].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab.GuidHash] * 15f;
                     ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
