@@ -12,7 +12,7 @@
 
 ## Sponsors
 
-Jairon Orellana; Odjit; Jera; Eve winters;
+Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 
 ## Features
 
