@@ -222,7 +222,7 @@ internal static class LevelingSystem
 
         if (leveledUp)
         {
-            BuffUtilities.ApplyBuff(playerCharacter, LevelUpBuff);
+            BuffUtilities.TryApplyBuff(playerCharacter, LevelUpBuff);
             if (Classes) BuffUtilities.ApplyClassBuffs(playerCharacter, steamId);
         }
 

@@ -58,17 +58,25 @@ internal static class ScriptSpawnServerPatch
 
                     if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
-                        // only do this when matching blood type to ignore class buffs
-                        BloodManager.ApplyBloodStats(steamId, bloodType, entity);
+                        // only do this when matching blood type to ignore class buffs, skip if already has a stat buffer since that must be stacking here somehow?
+                        if (!entity.Has<ModifyUnitStatBuff_DOTS>())
+                        {
+                            Core.Log.LogInfo($"Applying blood stats for {steamId} | {bloodType} | {prefabGUID.LookupName()}, no stats buffer...");
+                            BloodManager.ApplyBloodStats(steamId, bloodType, entity);
+                        }
+                        else
+                        {
+                            Core.Log.LogInfo($"Skipping blood stats application for {steamId} | {bloodType} | {prefabGUID.LookupName()}, pre-existing stats buffer found...");
+                        }
                     }
 
+                    /*
                     if (ConfigService.PrestigeSystem)
                     {
                         if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
                         {
                             if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                             {
-                                //Core.Log.LogInfo($"{steamId} | {prestigeLevel} | {UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(prefabGUID)} | {prefabGUID.LookupName()}");
                                 if (prestigeLevel > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ModifyBloodBuff(entity); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                             }
                         }
@@ -79,9 +87,9 @@ internal static class ScriptSpawnServerPatch
                         LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
                         List<PrefabGUID> classBuffs = UpdateBuffsBufferDestroyPatch.ClassBuffs.ContainsKey(playerClass) ? UpdateBuffsBufferDestroyPatch.ClassBuffs[playerClass] : [];
 
-                        //Core.Log.LogInfo($"{steamId} | {playerClass} | {prefabGUID.LookupName()}");
                         if (classBuffs.Contains(prefabGUID)) BuffUtilities.ModifyBloodBuff(entity);
                     }
+                    */
                 }
             }
         }

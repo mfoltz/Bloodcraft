@@ -43,6 +43,7 @@ internal static class EntityUtilities
         "BloodKey_T01",
         "NewBag",
         "Miners",
+        "WoodCutter",
         "ShadowMatter",
         "T0X",
         "Heart_T",

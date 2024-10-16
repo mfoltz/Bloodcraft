@@ -15,8 +15,6 @@
 	<LangVersion>preview</LangVersion>
 	<EnablePreviewFeatures>true</EnablePreviewFeatures>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 	
 	<ItemGroup>
 		<EmbeddedResource Include="Localization\Prefabs.json" />

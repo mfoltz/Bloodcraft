@@ -16,7 +16,7 @@ internal static class BuffUtilities
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    public static void ApplyBuff(Entity target, PrefabGUID buffPrefab)
+    public static bool TryApplyBuff(Entity target, PrefabGUID buffPrefab)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
@@ -29,10 +29,19 @@ internal static class BuffUtilities
             User = target
         };
 
-        if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier())) DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+        if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier()))
+        {
+            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+
+            return true;
+        }
+
+        return false;
     }
     public static void ModifyBloodBuff(Entity buff)
     {
+        Core.Log.LogInfo("ModifyBloodBuff: " + buff.Read<PrefabGUID>().LookupName());
+
         if (buff.Has<BloodBuff_HealReceivedProc_DataShared>())
         {
             var healReceivedProc = buff.Read<BloodBuff_HealReceivedProc_DataShared>();
@@ -468,17 +477,17 @@ internal static class BuffUtilities
     }
     public static void ApplyPermanentBuff(Entity player, PrefabGUID buffPrefab)
     {
-        //Core.Log.LogInfo("Applying perma buff: " + buffPrefab.LookupName());
-        ApplyBuff(player, buffPrefab);
+        //Core.Log.LogInfo("ApplyPermanentBuff: " + buffPrefab.LookupName());
+        bool appliedBuff = TryApplyBuff(player, buffPrefab);
 
-        if (ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
+        if (appliedBuff && ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
         {
             ModifyPermanentBuff(buffEntity);
         }
     }
     static void ModifyPermanentBuff(Entity buffEntity)
     {
-        //if (buffEntity.Has<BloodBuff>()) ModifyBloodBuff(buffEntity);
+        if (buffEntity.Has<BloodBuff>()) ModifyBloodBuff(buffEntity);
 
         if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
         {

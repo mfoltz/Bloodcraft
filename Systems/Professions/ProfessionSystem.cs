@@ -22,7 +22,9 @@ internal static class ProfessionSystem
     static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     static readonly Random Random = new();
+
     static readonly WaitForSeconds SCTDelay = new(0.75f);
+    static readonly WaitForSeconds DestroyDelay = new(5f);
 
     const float ProfessionConstant = 0.1f; // constant for calculating level from xp
     const int ProfessionPower = 2; // power for calculating level from xp
@@ -217,21 +219,17 @@ internal static class ProfessionSystem
         
         if (PlayerUtilities.GetPlayerBool(steamID, "ScrollingText"))
         {
-            //float3 playerPosition = source.Read<Translation>().Value;
-            //float3 position = new(playerPosition.x + 1f, playerPosition.y, playerPosition.z);
-
             float3 targetPosition = target.Read<Translation>().Value;
             float3 professionColor = handler.GetProfessionColor();
 
-            //EntityCommandBuffer entityCommandBuffer = SystemService.EndSimulationEntityCommandBufferSystem.CreateCommandBuffer();
-            //Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, entityCommandBuffer, assetGuid, targetPosition, professionColor, user.LocalCharacter.GetEntityOnServer(), gainedXP, sctResourceGain, userEntity);
             Core.StartCoroutine(DelayedProfessionSCT(user.LocalCharacter.GetEntityOnServer(), userEntity, targetPosition, professionColor, gainedXP));
         }     
     }
     static IEnumerator DelayedProfessionSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
     {
         yield return SCTDelay;
-        Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), AssetGuid, position, color, character, gainedXP, ProfessionsSCT, userEntity);
+
+        Entity scrollingTextEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), AssetGuid, position, color, character, gainedXP, ProfessionsSCT, userEntity);
     }
     static int ConvertXpToLevel(float xp)
     {

@@ -137,6 +137,7 @@ internal static class BloodSystem
         { BloodType.Brute, PrestigeType.BruteLegacy }
     };
 
+    // stacking on the prestige & class perma buffs?
     public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new() // base buffs present regardless of blood quality indicating type consumed
     {
         { new PrefabGUID(-773025435), BloodType.Worker }, // yield bonus
@@ -146,7 +147,7 @@ internal static class BloodSystem
         { new PrefabGUID(-1266262267), BloodType.Mutant }, // drain bonus
         { new PrefabGUID(560247144), BloodType.VBlood }, // vblood_0
         { new PrefabGUID(1558171501), BloodType.Draculin }, // speed bonus
-        { new PrefabGUID(-488475343), BloodType.Immortal }, // phys/spell bonus
+        { new PrefabGUID(-488475343), BloodType.Immortal }, // phys & spell bonus
         { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
         { new PrefabGUID(1828387635), BloodType.Brute } // primary life leech
     };

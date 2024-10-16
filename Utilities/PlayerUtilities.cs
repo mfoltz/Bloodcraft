@@ -1,11 +1,12 @@
 ﻿using Bloodcraft.Services;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using ProjectM.Scripting;
-using static Bloodcraft.Services.PlayerService;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
+using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Utilities;
 internal static class PlayerUtilities
@@ -48,28 +49,18 @@ internal static class PlayerUtilities
             {
                 if (party.Contains(playerName)) // find party with death source player name
                 {
-                    foreach (string name in party)
+                    foreach (string partyMember in party)
                     {
-                        if (name.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.User.IsConnected)
+                        if (partyMember.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.User.IsConnected)
                         {
                             float distance = UnityEngine.Vector3.Distance(sourcePosition, playerInfo.CharEntity.Read<Translation>().Value);
 
                             if (distance > ConfigService.ExpShareDistance) continue;
                             else players.Add(playerInfo.CharEntity);
                         }
-
-                        /*
-                        if (name.TryGetPlayerInfo(out PlayerInfo playerInfo))
-                        {
-                            float distance = UnityEngine.Vector3.Distance(sourcePosition, playerInfo.CharEntity.Read<Translation>().Value);
-
-                            if (distance > ConfigService.ExpShareDistance) continue;
-                            else players.Add(playerInfo.CharEntity);
-                        }
-                        */
                     }
 
-                    break; // break to avoid cases where there might be more than one party with same character name although that shouldn't be able to happen in theory
+                    break; // break to avoid cases where there might be more than one party with same character name to account for checks that would prevent that happening failing
                 }
             }
         }
@@ -87,17 +78,6 @@ internal static class PlayerUtilities
                     if (distance > ConfigService.ExpShareDistance) continue;
                     else players.Add(player);
                 }
-
-                /*
-                if (clanUser.UserEntity.TryGetComponent(out User user)) // for testing general functionality of method alone
-                {
-                    Entity player = user.LocalCharacter._Entity;
-                    var distance = UnityEngine.Vector3.Distance(sourcePosition, player.Read<Translation>().Value);
-
-                    if (distance > ConfigService.ExpShareDistance) continue;
-                    else players.Add(player);
-                }
-                */
             }
         }
 
@@ -105,11 +85,11 @@ internal static class PlayerUtilities
     }
     public class PartyUtilities
     {
-        public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
+        public static void HandlePartyAdd(ChatCommandContext ctx, ulong ownerId, string playerName)
         {
-            string playerKey = PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
+            PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == playerName.ToLower()).Value;
 
-            if (!string.IsNullOrEmpty(playerKey) && playerKey.TryGetPlayerInfo(out PlayerInfo playerInfo))
+            if (playerInfo.UserEntity.Exists())
             {
                 if (playerInfo.User.PlatformId == ownerId)
                 {
@@ -117,37 +97,34 @@ internal static class PlayerUtilities
                     return;
                 }
 
-                string playerName = playerInfo.User.CharacterName.Value;
+                playerName = playerInfo.User.CharacterName.Value;
 
-                if (IsPlayerEligibleForParty(playerInfo.User.PlatformId, playerName))
+                if (InvitesEnabled(playerInfo.User.PlatformId))
                 {
                     AddPlayerToParty(ctx, ownerId, playerName);
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> does not have parties enabled or is already in a party.");
+                    LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> does not have party invites enabled.");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Player not found...");
+                LocalizationService.HandleReply(ctx, "Couldn't find player...");
             }
         }
-        public static bool IsPlayerEligibleForParty(ulong steamId, string playerName)
+        static bool InvitesEnabled(ulong steamId)
         {
             if (GetPlayerBool(steamId, "Grouping"))
             {
-                if (!steamId.TryGetPlayerParties(out var parties) && !DataService.PlayerDictionaries.playerParties.Values.Any(party => party.Equals(playerName)))
-                {
-                    SetPlayerBool(steamId, "Grouping", false);
+                SetPlayerBool(steamId, "Grouping", false);
 
-                    return true;
-                }
+                return true;
             }
 
             return false;
         }
-        public static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
+        static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
         {
             string ownerName = ctx.Event.User.CharacterName.Value;
 
@@ -168,11 +145,19 @@ internal static class PlayerUtilities
 
                 ownerId.SetPlayerParties(party);
 
-                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party!");
+            }
+            else if (party.Count == ConfigService.MaxPartySize)
+            {
+                LocalizationService.HandleReply(ctx, $"Party is full, can't add <color=green>{playerName}</color>.");
+            }
+            else if (party.Contains(playerName))
+            {
+                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> is already in the party.");
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Party is full or <color=green>{playerName}</color> is already in the party.");
+                LocalizationService.HandleReply(ctx, $"Couldn't add <color=green>{playerName}</color> to party...");
             }
         }
         static bool CanAddPlayerToParty(HashSet<string> party, string playerName)
@@ -182,18 +167,18 @@ internal static class PlayerUtilities
         public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
         {
             ulong steamId = ctx.Event.User.PlatformId;
-            string playerKey = PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
+            PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == playerName.ToLower()).Value;
+            if (playerInfo.UserEntity.Exists() && party.Contains(playerInfo.User.CharacterName.Value))
             {
-                party.Remove(playerKey);
+                party.Remove(playerInfo.User.CharacterName.Value);
                 steamId.SetPlayerParties(party);
 
-                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from party.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from party!");
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party to remove...");
             }
         }
         public static void ListPartyMembers(ChatCommandContext ctx, Dictionary<ulong, HashSet<string>> playerParties)
@@ -206,5 +191,10 @@ internal static class PlayerUtilities
 
             LocalizationService.HandleReply(ctx, replyMessage);
         }
+    }
+    public class PlayerSwapInfo(Entity originalUserEntity, Entity swappedUserEntity)
+    {
+        public Entity OriginalUserEntity { get; set; } = originalUserEntity;
+        public Entity SwappedUserEntity { get; set; } = swappedUserEntity;
     }
 }

@@ -1,10 +1,12 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -173,5 +175,41 @@ internal static class FamiliarUtilities
         }
 
         return false;
+    }
+    public static void ClearBuffers(Entity playerCharacter, ulong steamId)
+    {
+        if (playerCharacter.Has<FollowerBuffer>())
+        {
+            var buffer = playerCharacter.ReadBuffer<FollowerBuffer>();
+
+            foreach (FollowerBuffer follower in buffer)
+            {
+                Entity followerEntity = follower.Entity.GetEntityOnServer();
+
+                if (followerEntity.Exists())
+                {
+                    DestroyUtility.Destroy(EntityManager, followerEntity);
+                }
+            }
+
+            buffer.Clear();
+        }
+
+        if (playerCharacter.Has<MinionBuffer>())
+        {
+            var buffer = playerCharacter.ReadBuffer<MinionBuffer>();
+
+            foreach (MinionBuffer minion in buffer)
+            {
+                if (minion.Entity.Exists())
+                {
+                    DestroyUtility.Destroy(EntityManager, minion.Entity);
+                }
+            }
+
+            buffer.Clear();
+        }
+
+        ClearFamiliarActives(steamId);
     }
 }

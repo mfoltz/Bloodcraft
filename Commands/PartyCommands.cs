@@ -19,7 +19,6 @@ internal static class PartyCommands
             return;
         }
 
-        ulong SteamID = ctx.Event.User.PlatformId;
         string name = ctx.Event.User.CharacterName.Value;
 
         if (playerParties.Any(kvp => kvp.Value.Contains(name)))
@@ -27,6 +26,8 @@ internal static class PartyCommands
             LocalizationService.HandleReply(ctx, "You are already in a party. Leave or disband it before enabling invites.");
             return;
         }
+
+        ulong SteamID = ctx.Event.User.PlatformId;
 
         PlayerUtilities.TogglePlayerBool(SteamID, "Grouping");
         LocalizationService.HandleReply(ctx, $"Party invites {(PlayerUtilities.GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
@@ -42,7 +43,7 @@ internal static class PartyCommands
         }
 
         ulong ownerId = ctx.Event.User.PlatformId;
-        HandlePlayerParty(ctx, ownerId, name);
+        HandlePartyAdd(ctx, ownerId, name);
     }
 
     [Command(name: "remove", shortHand: "r", adminOnly: false, usage: ".party r [Player]", description: "Removes player from party.")]
@@ -118,7 +119,8 @@ internal static class PartyCommands
             return;
         }
 
-        var party = playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
+        HashSet<string> party = playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
+
         if (party != null)
         {
             RemovePlayerFromParty(ctx, party, playerName);

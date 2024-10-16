@@ -13,6 +13,7 @@ using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
+using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
@@ -24,9 +25,10 @@ internal static class ServerBootstrapSystemPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly PrefabGUID woodenCoffin = new(381160212);
-    static readonly PrefabGUID stoneCoffin = new(569692162);
-    static bool Classes => ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
+    static readonly PrefabGUID InsideStoneCoffin = new(569692162);
+
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly Dictionary<string, bool> DefaultBools = new()
     {
@@ -60,12 +62,11 @@ internal static class ServerBootstrapSystemPatches
         ulong steamId = user.PlatformId;
 
         bool exists = false;
-        Entity character = Entity.Null;
+        Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
 
-        if (user.LocalCharacter._Entity.Exists())
+        if (playerCharacter.Exists())
         {
             exists = true;
-            character = user.LocalCharacter._Entity;
         }
 
         if (!steamId.TryGetPlayerBools(out var bools))
@@ -81,6 +82,7 @@ internal static class ServerBootstrapSystemPatches
                     bools[key] = DefaultBools[key];
                 }
             }
+
             steamId.SetPlayerBools(bools);
         }
 
@@ -300,12 +302,12 @@ internal static class ServerBootstrapSystemPatches
                 {
                     steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, 0));
                 }
-                else if (character.Exists())
+                else if (exists)
                 {
                     float restedMultiplier = 0;
 
-                    if (ServerGameManager.HasBuff(character, woodenCoffin)) restedMultiplier = 0.5f;
-                    else if (ServerGameManager.HasBuff(character, stoneCoffin)) restedMultiplier = 1f;
+                    if (ServerGameManager.HasBuff(playerCharacter, InsideWoodenCoffin)) restedMultiplier = 0.5f;
+                    else if (ServerGameManager.HasBuff(playerCharacter, InsideStoneCoffin)) restedMultiplier = 1f;
 
                     DateTime lastLogout = restedData.Key;
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
@@ -332,7 +334,7 @@ internal static class ServerBootstrapSystemPatches
                 }
             }
 
-            if (exists) LevelingSystem.SetLevel(character);
+            if (exists) LevelingSystem.SetLevel(playerCharacter);
         }
 
         if (ConfigService.PrestigeSystem)
@@ -340,10 +342,12 @@ internal static class ServerBootstrapSystemPatches
             if (!steamId.TryGetPlayerPrestiges(out var prestiges))
             {
                 var prestigeDict = new Dictionary<PrestigeType, int>();
+
                 foreach (var prestigeType in Enum.GetValues<PrestigeType>())
                 {
                     prestigeDict.Add(prestigeType, 0);
                 }
+
                 steamId.SetPlayerPrestiges(prestigeDict);
             }
             else
@@ -355,7 +359,7 @@ internal static class ServerBootstrapSystemPatches
 
                 if (exists && prestiges.TryGetValue(PrestigeType.Experience, out int prestigeLevel) && prestigeLevel > 0)
                 {
-                    BuffUtilities.SanitizePrestigeBuffs(character);
+                    BuffUtilities.SanitizePrestigeBuffs(playerCharacter);
                 }
             }
         }
@@ -375,33 +379,7 @@ internal static class ServerBootstrapSystemPatches
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
 
-            if (character.Has<FollowerBuffer>())
-            {
-                var buffer = character.ReadBuffer<FollowerBuffer>();
-
-                foreach (var follower in buffer)
-                {
-                    if (follower.Entity._Entity.Exists())
-                    {
-                        DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
-                    }
-                }
-            }
-
-            if (character.Has<MinionBuffer>())
-            {
-                var buffer = character.ReadBuffer<MinionBuffer>();
-
-                foreach (var minion in buffer)
-                {
-                    if (minion.Entity.Exists())
-                    {
-                        DestroyUtility.Destroy(EntityManager, minion.Entity);
-                    }
-                }
-            }
-
-            FamiliarUtilities.ClearFamiliarActives(steamId);
+            if (exists) FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
         }
 
         if (Classes)
@@ -418,7 +396,7 @@ internal static class ServerBootstrapSystemPatches
 
             if (exists)
             {
-                if (ServerGameManager.TryGetBuffer<BuffBuffer>(character, out var buffBuffer))
+                if (ServerGameManager.TryGetBuffer<BuffBuffer>(playerCharacter, out var buffBuffer))
                 {
                     foreach (var buff in buffBuffer)
                     {
@@ -426,9 +404,10 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                if (character.Has<VBloodAbilityBuffEntry>())
+                if (playerCharacter.Has<VBloodAbilityBuffEntry>())
                 {
-                    var buffer = character.ReadBuffer<VBloodAbilityBuffEntry>();
+                    var buffer = playerCharacter.ReadBuffer<VBloodAbilityBuffEntry>();
+
                     Dictionary<int, Entity> abilityBuffEntities = [];
                     bool firstFound = false;
 
@@ -469,8 +448,6 @@ internal static class ServerBootstrapSystemPatches
                         }
                     }
                 }
-
-                BuffUtilities.ApplyClassBuffs(character, steamId);
             }
         }
 
@@ -478,7 +455,7 @@ internal static class ServerBootstrapSystemPatches
         {
             PlayerInfo playerInfo = new()
             {
-                CharEntity = character,
+                CharEntity = playerCharacter,
                 UserEntity = userEntity,
                 User = user
             };
@@ -493,40 +470,15 @@ internal static class ServerBootstrapSystemPatches
     {
         int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
         ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
+
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
-        Entity character = user.LocalCharacter._Entity;
+        Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         ulong steamId = user.PlatformId;
 
-        if (ConfigService.FamiliarSystem)
+        if (ConfigService.FamiliarSystem && playerCharacter.Exists())
         {
-            if (character.Has<FollowerBuffer>())
-            {
-                var buffer = character.ReadBuffer<FollowerBuffer>();
-
-                foreach (var follower in buffer)
-                {
-                    if (follower.Entity._Entity.Exists())
-                    {
-                        DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
-                    }
-                }
-            }
-
-            if (character.Has<MinionBuffer>())
-            {
-                var buffer = character.ReadBuffer<MinionBuffer>();
-
-                foreach (var minion in buffer)
-                {
-                    if (minion.Entity.Exists())
-                    {
-                        DestroyUtility.Destroy(EntityManager, minion.Entity);
-                    }
-                }
-            }
-
-            FamiliarUtilities.ClearFamiliarActives(steamId);
+            FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
         }
 
         if (ConfigService.LevelingSystem)
@@ -557,23 +509,13 @@ internal static class ServerBootstrapSystemPatches
                 {
                     ulong steamId = kickEvent.PlatformId;
 
-                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
                     {
                         Entity character = playerInfo.CharEntity;
 
-                        if (ConfigService.FamiliarSystem && character.Has<FollowerBuffer>())
+                        if (ConfigService.FamiliarSystem)
                         {
-                            var buffer = character.ReadBuffer<FollowerBuffer>();
-
-                            foreach (var follower in buffer)
-                            {
-                                if (follower.Entity._Entity.Exists())
-                                {
-                                    DestroyUtility.Destroy(EntityManager, follower.Entity._Entity);
-                                }
-                            }
-
-                            FamiliarUtilities.ClearFamiliarActives(steamId);
+                            FamiliarUtilities.ClearBuffers(character, steamId);
                         }
 
                         if (ConfigService.LevelingSystem)

@@ -98,7 +98,7 @@ internal static class FamiliarLevelingSystem
 
         if (leveledUp)
         {
-            BuffUtilities.ApplyBuff(familiar, LevelUpBuff);
+            BuffUtilities.TryApplyBuff(familiar, LevelUpBuff);
 
             UnitLevel unitLevel = familiar.Read<UnitLevel>();
             unitLevel.Level._Value = newLevel;

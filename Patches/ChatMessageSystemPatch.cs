@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Patches;
 
@@ -15,16 +17,17 @@ internal static class ChatMessageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly Regex regex = new(@"^\[\d+\]:");
-    static readonly Regex regexMAC = new(@";mac([^;]+)$");
+    static readonly Regex RegexSwapPlayers = new(@"Swapped (.+?) with (.+)");
+    static readonly Regex RegexMAC = new(@";mac([^;]+)$");
+
     static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ==");
 
+    [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ClientCompanion) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
@@ -34,7 +37,7 @@ internal static class ChatMessageSystemPatch
                 ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
 
-                if (VerifyMAC(message, out string originalMessage))
+                if (ConfigService.ClientCompanion && VerifyMAC(message, out string originalMessage))
                 {
                     EclipseService.HandleClientMessage(originalMessage);
                     EntityManager.DestroyEntity(entity);
@@ -49,13 +52,13 @@ internal static class ChatMessageSystemPatch
     public static bool VerifyMAC(string receivedMessage, out string originalMessage)
     {
         // Separate the original message and the MAC
-        Match match = regexMAC.Match(receivedMessage);
+        Match match = RegexMAC.Match(receivedMessage);
         originalMessage = "";
 
         if (match.Success)
         {
             string receivedMAC = match.Groups[1].Value;
-            string intermediateMessage = regexMAC.Replace(receivedMessage, "");
+            string intermediateMessage = RegexMAC.Replace(receivedMessage, "");
             string recalculatedMAC = GenerateMAC(intermediateMessage);
 
             // Compare the MACs

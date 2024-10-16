@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
+using Epic.OnlineServices.Achievements;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -11,6 +12,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
+using static Bloodcraft.Services.PlayerService;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -297,6 +299,66 @@ internal static class MiscCommands
         {
             networkedSequencesQuery.Dispose();
             LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> disabled summons...");
+        }
+
+        Dictionary<string, PlayerInfo> playerCache = new(PlayerCache);
+        counter = 0;
+
+        foreach (var keyValuePair in playerCache)
+        {
+            Entity playerCharacter = keyValuePair.Value.CharEntity;
+            User user = keyValuePair.Value.User;
+
+            if (!user.IsConnected && ServerGameManager.TryGetBuffer<FollowerBuffer>(playerCharacter, out var followerBuffer) && ServerGameManager.TryGetBuffer<MinionBuffer>(playerCharacter, out var minionBuffer))
+            {
+                foreach (FollowerBuffer follower in followerBuffer)
+                {
+                    Entity followerEntity = follower.Entity.GetEntityOnServer();
+
+                    if (followerEntity.Exists())
+                    {
+                        DestroyUtility.Destroy(EntityManager, followerEntity);
+                        counter++;
+                    }
+                }
+
+                followerBuffer.Clear();
+
+                foreach (MinionBuffer minion in minionBuffer)
+                {
+                    Entity minionEntity = minion.Entity;
+
+                    if (minionEntity.Exists())
+                    {
+                        DestroyUtility.Destroy(EntityManager, minionEntity);
+                        counter++;
+                    }
+                }
+
+                minionBuffer.Clear();
+            }
+        }
+
+        LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
+    }
+
+    //[Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")]
+    public static void SwitchPlayers(ChatCommandContext ctx, string originalPlayer, string newPlayer)
+    {
+        if (originalPlayer.TryGetPlayerInfo(out PlayerInfo originalPlayerInfo) && newPlayer.TryGetPlayerInfo(out PlayerInfo newPlayerInfo))
+        {
+            Entity originalUserEntity = originalPlayerInfo.UserEntity;
+            Entity newUserEntity = newPlayerInfo.UserEntity;
+
+            User originalUser = originalUserEntity.Read<User>();
+            User newUser = newUserEntity.Read<User>();
+
+            (originalUser.PlatformId, newUser.PlatformId) = (newUser.PlatformId, originalUser.PlatformId);
+
+            originalUserEntity.Write(originalUser);
+            newUserEntity.Write(newUser);
+
+            ctx.Reply($"Switched steamIds for {originalPlayerInfo.User.CharacterName} with {newPlayerInfo.User.CharacterName}!");
         }
     }
 }

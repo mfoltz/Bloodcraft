@@ -14,8 +14,6 @@ internal static class UnitSpawnerPatch
     static void OnUpdatePrefix(UnitSpawnerReactSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.LevelingSystem) return;
-        if (ConfigService.UnitSpawnerMultiplier >= 1f) return;
 
         NativeArray<Entity> entities = __instance.__query_2099432189_0.ToEntityArray(Allocator.Temp);
         try

@@ -71,6 +71,7 @@ internal static class BloodManager
     public static void ApplyBloodStats(ulong steamId, BloodType bloodType, Entity bloodBuff)
     {
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
+
         if (handler != null && steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
         {
             if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>()) // add bonuses if doesn't have buffer

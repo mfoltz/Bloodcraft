@@ -137,10 +137,10 @@ internal static class BloodCommands
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and has been applied if equipped.");
 
-            Entity player = ctx.Event.SenderCharacterEntity;
-            User user = ctx.Event.User;
-            BloodType bloodType = GetCurrentBloodType(player);
+            //Entity player = ctx.Event.SenderCharacterEntity;
+            //User user = ctx.Event.User;
 
+            //BloodType bloodType = GetCurrentBloodType(player);
             //UpdateBloodStats(player, user, bloodType);
         }
         else

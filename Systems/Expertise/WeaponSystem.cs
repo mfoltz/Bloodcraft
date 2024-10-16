@@ -152,7 +152,6 @@ internal static class WeaponSystem
         { WeaponType.Unarmed, (steamID, data) => steamID.SetPlayerUnarmedExpertise(data) },
         { WeaponType.FishingPole, (steamID, data) => steamID.SetPlayerFishingPoleExpertise(data) }
     };
-
     public static readonly Dictionary<WeaponType, PrestigeType> WeaponPrestigeMap = new()
     {
         { WeaponType.Sword, PrestigeType.SwordExpertise },
@@ -173,26 +172,24 @@ internal static class WeaponSystem
     {
         ProcessExpertise(deathEvent.Source, deathEvent.Target);
     }
-    public static void ProcessExpertise(Entity Killer, Entity Victim)
+    public static void ProcessExpertise(Entity source, Entity target)
     {
-        if (Killer == Victim || Victim.Has<Minion>()) return;
+        if (target.Has<Minion>()) return;
 
-        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
-        WeaponType weaponType = WeaponManager.GetCurrentWeaponType(Killer);
+        WeaponType weaponType = WeaponManager.GetCurrentWeaponType(source);
 
-
-
-        if (Victim.Has<UnitStats>())
+        if (target.Has<UnitStats>())
         {
-            var VictimStats = Victim.Read<UnitStats>();
-            float expertiseValue = CalculateExpertiseValue(VictimStats, Victim.Has<VBloodConsumeSource>());
+            var VictimStats = target.Read<UnitStats>();
+            float expertiseValue = CalculateExpertiseValue(VictimStats, target.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
 
-            if (ConfigService.UnitSpawnerExpertiseFactor < 1 && Victim.Has<IsMinion>() && Victim.Read<IsMinion>().Value)
+            if (ConfigService.UnitSpawnerExpertiseFactor < 1 && target.Has<IsMinion>() && target.Read<IsMinion>().Value)
             {
-                expertiseValue *= ConfigService.UnitSpawnerMultiplier;
+                expertiseValue *= ConfigService.UnitSpawnerExpertiseFactor;
                 if (expertiseValue == 0) return;
             }
 
