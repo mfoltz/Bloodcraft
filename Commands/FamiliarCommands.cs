@@ -32,21 +32,6 @@ internal static class FamiliarCommands
     static readonly PrefabGUID pvpCombatBuff = new(697095869);
     static readonly PrefabGUID dominateBuff = new(-1447419822);
 
-    static readonly ComponentType[] NetworkEventComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
-        ComponentType.ReadOnly(Il2CppType.Of<ReceiveNetworkEventTag>()),
-        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
-        ComponentType.ReadOnly(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
-    ];
-
-    static readonly NetworkEventType EventType = new()
-    {
-        IsAdminEvent = false,
-        EventId = NetworkEvents.EventId_RenameInteractable,
-        IsDebugEvent = false
-    };
-
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> FamiliarSettings = new()
     {
         {"VBloodEmotes", FamiliarUtilities.ToggleVBloodEmotes},
@@ -112,7 +97,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
+    //[Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
     public static void BindFamiliar(ChatCommandContext ctx, string name, string box, int choice)
     {
         if (!ConfigService.FamiliarSystem)
@@ -180,7 +165,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
+    //[Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
     public static void ListPlayerFamiliars(ChatCommandContext ctx, string name, string box = "")
     {
         if (!ConfigService.FamiliarSystem)
@@ -361,8 +346,21 @@ internal static class FamiliarCommands
             {
                 sets.Add(key);
             }
-            string fams = string.Join(", ", sets.Select(set => $"<color=white>{set}</color>"));
-            LocalizationService.HandleReply(ctx, $"Available Familiar Boxes: {fams}");
+
+            //string fams = string.Join(", ", sets.Select(set => $"<color=white>{set}</color>"));
+            //LocalizationService.HandleReply(ctx, $"Available Familiar Boxes: {fams}");
+
+            // Chunk the response into batches of 6
+            LocalizationService.HandleReply(ctx, $"Available Familiar Boxes:");
+
+            List<string> colorizedSets = sets.Select(set => $"<color=white>{set}</color>").ToList();
+            const int maxPerMessage = 6;
+            for (int i = 0; i < colorizedSets.Count; i += maxPerMessage)
+            {
+                var batch = colorizedSets.Skip(i).Take(maxPerMessage);
+                string fams = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, $"{fams}");
+            }
         }
         else
         {
@@ -1044,60 +1042,6 @@ internal static class FamiliarCommands
             string validOptions = string.Join(", ", FamiliarSettings.Keys.Select(kvp => $"<color=white>{kvp}</color>"));
             LocalizationService.HandleReply(ctx, $"Invalid option. Please choose from the following: {validOptions}");
         }
-    }
-
-    //[Command(name: "name", shortHand: "n", adminOnly: true, usage: ".fam n [Name]", description: "Names active familiar.")] for anyone curious no this doesn't work
-    public static void NameFamiliar(ChatCommandContext ctx, string newName) // All Components: ProjectM.Network.FromCharacter [ReadOnly], ProjectM.Network.InteractEvents_Client+RenameInteractable [ReadOnly]
-    {
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
-        if (!familiar.Exists() || !familiar.Has<NameableInteractable>())
-        {
-            LocalizationService.HandleReply(ctx, "Make sure familiar is active and present before naming it.");
-            return;
-        }
-
-        if (familiar.Has<FeedableInventory>())
-        {
-            FeedableInventory feedableInventory = familiar.Read<FeedableInventory>();
-            if (feedableInventory.FeedableInventoryEntity.TryGetSyncedEntity(out Entity feedableEntity))
-            {
-                if (feedableEntity.Has<SyncToUserBuffer>()) feedableEntity.ReadBuffer<SyncToUserBuffer>().Add(new SyncToUserBuffer { UserEntity = ctx.Event.SenderUserEntity });
-                else
-                {
-                    Core.Log.LogInfo($"FeedableEntity SyncToUserBuffer not found for familiar...");
-                }
-                feedableEntity.LogComponentTypes();
-            }
-            else
-            {
-                Core.Log.LogInfo($"FeedableInventoryEntity not found for familiar...");
-            }
-        }
-
-        BuffUtilities.ApplyBuff(new(-182838302), familiar); // hijacking this for the ModifyTargetHUD, handle in buffSpawn
-
-        FromCharacter fromCharacter = new()
-        {
-            Character = ctx.Event.SenderCharacterEntity,
-            User = ctx.Event.SenderUserEntity
-        };
-
-        InteractEvents_Client.RenameInteractable renameInteractable = new() // named means they show their nameplate?
-        {
-            InteractableId = familiar.Read<NetworkId>(),
-            NewName = new Unity.Collections.FixedString64Bytes(newName)
-        };
-
-        Entity networkEntity = EntityManager.CreateEntity(NetworkEventComponents);
-        networkEntity.Write(fromCharacter);
-        networkEntity.Write(EventType);
-        networkEntity.Write(renameInteractable);
     }
 }
 

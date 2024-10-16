@@ -51,10 +51,10 @@ internal class QuestService
     public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
     public static DateTime LastUpdate;
 
-    static readonly PrefabGUID manticore = new(-393555055);
-    static readonly PrefabGUID dracula = new(-327335305);
-    static readonly PrefabGUID monster = new(1233988687);
-    static readonly PrefabGUID solarus = new(-740796338);
+    static readonly PrefabGUID Manticore = new(-393555055);
+    static readonly PrefabGUID Dracula = new(-327335305);
+    static readonly PrefabGUID Monster = new(1233988687);
+    static readonly PrefabGUID Solarus = new(-740796338);
 
     static bool shardBearersReset = false;
     static bool craftAndGather = false;
@@ -80,7 +80,7 @@ internal class QuestService
             Options = EntityQueryOptions.IncludeAll
         });
 
-        ConfigUtilities.QuestRewards();
+        ConfigUtilities.QuestRewardItems();
         Core.StartCoroutine(QuestUpdateLoop());
     }
     static IEnumerator QuestUpdateLoop()
@@ -93,7 +93,7 @@ internal class QuestService
                 foreach (Entity entity in vBloods)
                 {
                     PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
-                    if (vBloodPrefab == manticore || vBloodPrefab == dracula || vBloodPrefab == monster || vBloodPrefab == solarus)
+                    if (vBloodPrefab == Manticore || vBloodPrefab == Dracula || vBloodPrefab == Monster || vBloodPrefab == Solarus)
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
                     }
@@ -109,15 +109,12 @@ internal class QuestService
                 {
                     if (entity.TryGetComponent(out PrefabGUID prefab))
                     {
-                        if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salveageable))
-                        {
-                            if (salveageable.RecipeGUID.HasValue()) CraftPrefabs.Add(prefab);
-                        }
-                        else if (entity.Has<ConsumableCondition>()) CraftPrefabs.Add(prefab);
+                        if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salveageable) && salveageable.RecipeGUID.HasValue()) CraftPrefabs.Add(prefab); // checking for non-empty salvage recipes for equipment craft targets
+                        else if (entity.Has<ConsumableCondition>()) CraftPrefabs.Add(prefab); // checking for consumableCondition for consumable craft targets
                     }
                 }
 
-                entities = EntityUtilities.GetEntitiesEnumerable(ResourceQuery);
+                entities = EntityUtilities.GetEntitiesEnumerable(ResourceQuery, (int)TargetType.Gather);
                 foreach (Entity entity in entities)
                 {
                     if (entity.TryGetComponent(out PrefabGUID prefab))
@@ -155,10 +152,10 @@ internal class QuestService
                     }
                 );
 
-            if (TargetCache.ContainsKey(manticore)) TargetCache.Remove(manticore);
-            if (TargetCache.ContainsKey(dracula)) TargetCache.Remove(dracula);
-            if (TargetCache.ContainsKey(monster)) TargetCache.Remove(monster);
-            if (TargetCache.ContainsKey(solarus)) TargetCache.Remove(solarus);
+            if (TargetCache.ContainsKey(Manticore)) TargetCache.Remove(Manticore);
+            if (TargetCache.ContainsKey(Dracula)) TargetCache.Remove(Dracula);
+            if (TargetCache.ContainsKey(Monster)) TargetCache.Remove(Monster);
+            if (TargetCache.ContainsKey(Solarus)) TargetCache.Remove(Solarus);
 
             Dictionary<string, PlayerInfo> players = new(PlayerCache); // Copy the player cache to make sure updates to that don't interfere with loop
             foreach (PlayerInfo playerInfo in players.Values)

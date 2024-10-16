@@ -3,7 +3,7 @@ using Bloodcraft.Utilities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
-using static Bloodcraft.Systems.Leveling.LevelingSystem.PartyUtilities;
+using static Bloodcraft.Utilities.PlayerUtilities.PartyUtilities;
 
 namespace Bloodcraft.Commands;
 
@@ -24,12 +24,11 @@ internal static class PartyCommands
 
         if (playerParties.Any(kvp => kvp.Value.Contains(name)))
         {
-            LocalizationService.HandleReply(ctx, "You are already in a party. Leave or disband if owned before enabling invites.");
+            LocalizationService.HandleReply(ctx, "You are already in a party. Leave or disband it before enabling invites.");
             return;
         }
 
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "Grouping");
+        PlayerUtilities.TogglePlayerBool(SteamID, "Grouping");
         LocalizationService.HandleReply(ctx, $"Party invites {(PlayerUtilities.GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 

@@ -13,7 +13,6 @@ internal static class PrestigeSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -398,9 +397,9 @@ internal static class PrestigeSystem
         LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
         ulong steamId = ctx.Event.User.PlatformId;
 
-        List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
+        List<int> buffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
         PrefabGUID buffPrefab = new(buffs[prestigeLevel - 1]);
-        if (!buffPrefab.GuidHash.Equals(0)) BuffUtilities.HandlePermaBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
+        if (!buffPrefab.GuidHash.Equals(0)) BuffUtilities.ApplyPermanentBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
 
         if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
 
@@ -433,7 +432,7 @@ internal static class PrestigeSystem
     }
     public static void RemovePrestigeBuffs(Entity character, int prestigeLevel)
     {
-        var buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
+        var buffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
 
         for (int i = 0; i < buffs.Count; i++)
         {
@@ -442,13 +441,13 @@ internal static class PrestigeSystem
     }
     public static void ApplyPrestigeBuffs(Entity character, int prestigeLevel)
     {
-        List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
+        List<int> buffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
         if (buffs.Count == 0) return;
         for (int i = 0; i < prestigeLevel; i++)
         {
             PrefabGUID buffPrefab = new(buffs[i]);
             if (buffPrefab.GuidHash == 0) continue;
-            BuffUtilities.HandlePermaBuff(character, buffPrefab);
+            BuffUtilities.ApplyPermanentBuff(character, buffPrefab);
         }
     }
     public static void ApplyExperiencePrestigeEffects(User user, int level)

@@ -5,7 +5,6 @@ using Unity.Entities;
 using Unity.Jobs;
 
 namespace Bloodcraft.Utilities;
-
 internal static class EntityUtilities
 {
     static EntityManager EntityManager => Core.EntityManager;
@@ -75,13 +74,14 @@ internal static class EntityUtilities
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);
         handle.Complete();
+
         try
         {
             foreach (Entity entity in entities)
             {
                 if (targetType == 0)
                 {
-                    if (entity.Has<DestroyOnSpawn>()) continue;
+                    if (entity.Has<DestroyOnSpawn>()) continue; // filter out locked bosses from KindredCommands
                     else if (entity.TryGetComponent(out PrefabGUID unitPrefab))
                     {
                         string prefabName = unitPrefab.LookupName();

@@ -13,16 +13,13 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class UpdateBuffsBufferDestroyPatch
 {
-    static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID CombatBuff = new(581443919);
     static readonly PrefabGUID ExternalInventory = new(1183666186);
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
     public static readonly Dictionary<LevelingSystem.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
-
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -61,7 +58,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                         {
                             //Core.Log.LogInfo($"UpdateBuffsBuffer_Destroy | {steamId} | {prestigeLevel} | {PrestigeBuffs.IndexOf(prefabGUID)} | {prefabGUID.LookupName()}");
-                            if (prestigeLevel > PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.HandlePermaBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                            if (prestigeLevel > PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
                 }
@@ -75,7 +72,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
                         List<PrefabGUID> classBuffs = ClassBuffs.ContainsKey(playerClass) ? ClassBuffs[playerClass] : [];
 
-                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.HandlePermaBuff(player, prefabGUID);
+                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID);
                     }
                 }
             }

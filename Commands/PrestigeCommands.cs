@@ -217,7 +217,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        List<int> buffs = ConfigUtilities.ParseConfigString(ConfigService.PrestigeBuffs);
+        List<int> buffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
 
         if (buffs.Count == 0)
         {

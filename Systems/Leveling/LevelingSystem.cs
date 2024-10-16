@@ -1,33 +1,23 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
-using ProjectM.Network;
-using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
-using VampireCommandFramework;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
-using static Bloodcraft.Services.PlayerService;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Systems.Leveling;
 internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     const float EXPConstant = 0.1f; // constant for calculating level from xp
     const float EXPPower = 2f; // power for calculating level from xp
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    static readonly PrefabGUID levelUpBuff = new(-1133938228);
-    static readonly PrefabGUID warEventTrash = new(2090187901);
+    static readonly PrefabGUID LevelUpBuff = new(-1133938228);
+    static readonly PrefabGUID WarEventTrash = new(2090187901);
     public enum PlayerClass
     {
         BloodKnight,
@@ -50,12 +40,12 @@ internal static class LevelingSystem
 
     public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
     {
-        { PlayerClass.BloodKnight, (ConfigUtilities.ParseConfigString(ConfigService.BloodKnightWeapon), ConfigUtilities.ParseConfigString(ConfigService.BloodKnightBlood)) },
-        { PlayerClass.DemonHunter, (ConfigUtilities.ParseConfigString(ConfigService.DemonHunterWeapon), ConfigUtilities.ParseConfigString(ConfigService.DemonHunterBlood)) },
-        { PlayerClass.VampireLord, (ConfigUtilities.ParseConfigString(ConfigService.VampireLordWeapon), ConfigUtilities.ParseConfigString(ConfigService.VampireLordBlood)) },
-        { PlayerClass.ShadowBlade, (ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeWeapon), ConfigUtilities.ParseConfigString(ConfigService.ShadowBladeBlood)) },
-        { PlayerClass.ArcaneSorcerer, (ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererWeapon), ConfigUtilities.ParseConfigString(ConfigService.ArcaneSorcererBlood)) },
-        { PlayerClass.DeathMage, (ConfigUtilities.ParseConfigString(ConfigService.DeathMageWeapon), ConfigUtilities.ParseConfigString(ConfigService.DeathMageBlood)) }
+        { PlayerClass.BloodKnight, (ConfigUtilities.ParseConfigIntegerString(ConfigService.BloodKnightWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.BloodKnightBlood)) },
+        { PlayerClass.DemonHunter, (ConfigUtilities.ParseConfigIntegerString(ConfigService.DemonHunterWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.DemonHunterBlood)) },
+        { PlayerClass.VampireLord, (ConfigUtilities.ParseConfigIntegerString(ConfigService.VampireLordWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.VampireLordBlood)) },
+        { PlayerClass.ShadowBlade, (ConfigUtilities.ParseConfigIntegerString(ConfigService.ShadowBladeWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.ShadowBladeBlood)) },
+        { PlayerClass.ArcaneSorcerer, (ConfigUtilities.ParseConfigIntegerString(ConfigService.ArcaneSorcererWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.ArcaneSorcererBlood)) },
+        { PlayerClass.DeathMage, (ConfigUtilities.ParseConfigIntegerString(ConfigService.DeathMageWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.DeathMageBlood)) }
     };
 
     public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
@@ -77,95 +67,39 @@ internal static class LevelingSystem
         { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
         { PlayerClass.DeathMage, ConfigService.DeathMageSpells }
     };
-
-    public static readonly Dictionary<PlayerClass, PrefabGUID> ClassOnHitDebuffMap = new() // tier 1
-    {
-        { PlayerClass.BloodKnight, new(-1246704569) }, //leech
-        { PlayerClass.DemonHunter, new(-1576512627) }, //static
-        { PlayerClass.VampireLord, new(27300215) }, // chill
-        { PlayerClass.ShadowBlade, new(348724578) }, // ignite
-        { PlayerClass.ArcaneSorcerer, new(1723455773) }, // weaken
-        { PlayerClass.DeathMage, new(-325758519) } // condemn
-    };
-
-    public static readonly Dictionary<PlayerClass, PrefabGUID> ClassOnHitEffectMap = new() // tier 2
-    {
-
-        { PlayerClass.BloodKnight, new(2085766220) }, // lesser bloodrage
-        { PlayerClass.DemonHunter, new(-737425100) }, // lesser stormshield
-        { PlayerClass.VampireLord, new(620130895) }, // lesser frozenweapon
-        { PlayerClass.ShadowBlade, new(763939566) }, // lesser powersurge
-        { PlayerClass.ArcaneSorcerer, new(1433921398) }, // lesser aegis
-        { PlayerClass.DeathMage, new(-2071441247) } // guardian block :p
-    };
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         ProcessExperience(deathEvent.Source, deathEvent.Target);
     }
-    public static void ProcessExperience(Entity killerEntity, Entity victimEntity)
+    public static void ProcessExperience(Entity source, Entity target)
     {
-        PlayerCharacter player = killerEntity.Read<PlayerCharacter>();
-        Entity userEntity = player.UserEntity;
-        float groupMultiplier = 1;
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        ulong steamId = userEntity.Read<User>().PlatformId;
 
-        if (IsVBlood(victimEntity))
+        if (IsVBlood(target))
         {
-            ProcessExperienceGain(killerEntity, victimEntity, userEntity.Read<User>().PlatformId, 1); // override multiplier since this should just be a solo kill and skip getting participants for vbloods since they're all in the event list from VBloodSystem if involved in same kill
+            ProcessExperienceGain(source, target, steamId, 1f); // override multiplier since this should just be a solo kill and skip getting participants for vbloods since they're all in the event list from VBloodSystem if involved in same kill
             return;
         }
 
-        HashSet<Entity> participants = GetParticipants(killerEntity, userEntity); // want list of participants to process experience for
-        if (participants.Count > 1) groupMultiplier = ConfigService.GroupLevelingMultiplier; // if more than 1 participant, apply group multiplier
-        foreach (Entity participant in participants)
+        HashSet<Entity> participants = PlayerUtilities.GetDeathParticipants(source, userEntity); // want list of participants to process experience gains when appropriate
+        int count = participants.Count;
+        
+        if (count > 1)
         {
-            ulong steamId = participant.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId; // participants are character entities
-            if (steamId.TryGetPlayerExperience(out var xpData) && xpData.Key >= ConfigService.MaxLevel) continue; // Check if already at max level
-            ProcessExperienceGain(participant, victimEntity, steamId, groupMultiplier);
-        }
-    }
-    public static HashSet<Entity> GetParticipants(Entity killer, Entity userEntity)
-    {
-        float3 killerPosition = killer.Read<Translation>().Value;
-        User killerUser = userEntity.Read<User>();
-        HashSet<Entity> players = [killer];
-
-        if (ConfigService.PlayerParties)
-        {
-            foreach (var groupEntry in DataService.PlayerDictionaries.playerParties)
+            foreach (Entity player in participants)
             {
-                if (groupEntry.Value.Contains(killerUser.CharacterName.Value))
-                {
-                    foreach (string name in groupEntry.Value)
-                    {
-                        if (name.TryGetPlayerInfo(out PlayerInfo playerInfo))
-                        {
-                            if (!playerInfo.User.IsConnected) continue;
-                            var distance = UnityEngine.Vector3.Distance(killerPosition, playerInfo.CharEntity.Read<Translation>().Value);
-                            if (distance > ConfigService.ExpShareDistance) continue;
-                            players.Add(playerInfo.CharEntity);
-                        }
-                    }
-                    break;
-                }
+                steamId = player.GetSteamId(); // participants are character entities
+
+                if (steamId.TryGetPlayerExperience(out var xpData) && xpData.Key >= ConfigService.MaxLevel) continue; // Check for max level before continuing
+                ProcessExperienceGain(source, target, steamId, ConfigService.GroupLevelingMultiplier);
             }
         }
-
-        if (killerUser.ClanEntity._Entity.Equals(Entity.Null)) return players;
-
-        Entity clanEntity = killerUser.ClanEntity._Entity;
-        var userBuffer = clanEntity.ReadBuffer<SyncToUserBuffer>();
-        for (int i = 0; i < userBuffer.Length; i++) // add clan members
+        else
         {
-            var users = userBuffer[i];
-            User user = users.UserEntity.Read<User>();
-            if (!user.IsConnected) continue;
-            Entity player = user.LocalCharacter._Entity;
-            var distance = UnityEngine.Vector3.Distance(killerPosition, player.Read<Translation>().Value);
-            if (distance > ConfigService.ExpShareDistance) continue;
-            players.Add(player);
+            if (steamId.TryGetPlayerExperience(out var xpData) && xpData.Key >= ConfigService.MaxLevel) return; // Check for max level before continuing
+            ProcessExperienceGain(source, target, steamId, 1f);
         }
-
-        return players;
     }
     static void ProcessExperienceGain(Entity killerEntity, Entity victimEntity, ulong SteamID, float groupMultiplier)
     {
@@ -204,7 +138,7 @@ internal static class LevelingSystem
             var spawnBuffElement = victimEntity.ReadBuffer<SpawnBuffElement>();
             for (int i = 0; i < spawnBuffElement.Length; i++)
             {
-                if (spawnBuffElement[i].Buff.Equals(warEventTrash))
+                if (spawnBuffElement[i].Buff.Equals(WarEventTrash))
                 {
                     gainedXP *= ConfigService.WarEventMultiplier;
                     break;
@@ -281,28 +215,18 @@ internal static class LevelingSystem
 
         SteamID.SetPlayerExperience(new KeyValuePair<int, float>(newLevel, newExperience));
     }
-    static void CheckAndHandleLevelUp(Entity characterEntity, Entity victim, ulong SteamID, float gainedXP, int currentLevel, int restedXP = 0)
+    static void CheckAndHandleLevelUp(Entity playerCharacter, Entity target, ulong steamId, float gainedXP, int currentLevel, int restedXP = 0)
     {
-        Entity userEntity = characterEntity.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = playerCharacter.Read<PlayerCharacter>().UserEntity;
+        bool leveledUp = CheckForLevelUp(steamId, currentLevel);
 
-        bool leveledUp = CheckForLevelUp(SteamID, currentLevel);
         if (leveledUp)
         {
-            ApplyBuffDebugEvent applyBuffDebugEvent = new()
-            {
-                BuffPrefabGUID = levelUpBuff,
-            };
-
-            FromCharacter fromCharacter = new()
-            {
-                Character = characterEntity,
-                User = userEntity,
-            };
-
-            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            if (Classes) ApplyClassBuffAtThresholds(characterEntity, SteamID, fromCharacter);
+            BuffUtilities.ApplyBuff(playerCharacter, LevelUpBuff);
+            if (Classes) BuffUtilities.ApplyClassBuffs(playerCharacter, steamId);
         }
-        NotifyPlayer(userEntity, victim, SteamID, (int)gainedXP, leveledUp, restedXP);
+
+        NotifyPlayer(userEntity, target, steamId, (int)gainedXP, leveledUp, restedXP);
     }
     static bool CheckForLevelUp(ulong SteamID, int currentLevel)
     {
@@ -433,158 +357,12 @@ internal static class LevelingSystem
             player.Write(equipment);
         }
     }
-    static void ApplyClassBuffAtThresholds(Entity characterEntity, ulong SteamID, FromCharacter fromCharacter)
-    {
-        var buffs = ClassUtilities.GetClassBuffs(SteamID);
-
-        if (buffs.Count == 0) return;
-
-        int levelStep = ConfigService.MaxLevel / buffs.Count;
-        int playerLevel = GetLevel(SteamID);
-
-        if (playerLevel % levelStep == 0 && playerLevel / levelStep <= buffs.Count)
-        {
-            int buffIndex = playerLevel / levelStep - 1;
-
-            ApplyBuffDebugEvent applyBuffDebugEvent = new()
-            {
-                BuffPrefabGUID = new(buffs[buffIndex])
-            };
-
-            if (ServerGameManager.HasBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier())) return;
-            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-
-            /*
-            if (ServerGameManager.TryGetBuff(characterEntity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
-            {
-                BuffUtilities.HandleBloodBuff(buff);
-
-                if (buff.Has<RemoveBuffOnGameplayEvent>())
-                {
-                    buff.Remove<RemoveBuffOnGameplayEvent>();
-                }
-                if (buff.Has<RemoveBuffOnGameplayEventEntry>())
-                {
-                    buff.Remove<RemoveBuffOnGameplayEventEntry>();
-                }
-                if (buff.Has<CreateGameplayEventsOnSpawn>())
-                {
-                    buff.Remove<CreateGameplayEventsOnSpawn>();
-                }
-                if (buff.Has<GameplayEventListeners>())
-                {
-                    buff.Remove<GameplayEventListeners>();
-                }
-                if (!buff.Has<Buff_Persists_Through_Death>())
-                {
-                    buff.Add<Buff_Persists_Through_Death>();
-                }
-                if (buff.Has<LifeTime>())
-                {
-                    LifeTime lifeTime = buff.Read<LifeTime>();
-                    lifeTime.Duration = -1;
-                    lifeTime.EndAction = LifeTimeEndAction.None;
-                    buff.Write(lifeTime);
-                }
-            }
-            */
-        }
-    }
     public static void ResetRestedXP(ulong steamId)
     {
         if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
             restedData = new KeyValuePair<DateTime, float>(restedData.Key, 0);
             steamId.SetPlayerRestedXP(restedData);
-        }
-    }
-    public class PartyUtilities
-    {
-        public static void HandlePlayerParty(ChatCommandContext ctx, ulong ownerId, string name)
-        {
-            string playerKey = PlayerCache.Keys.FirstOrDefault(key => key.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && playerKey.TryGetPlayerInfo(out PlayerInfo playerInfo))
-            {
-                if (playerInfo.User.PlatformId == ownerId)
-                {
-                    LocalizationService.HandleReply(ctx, "Can't add yourself to your own party.");
-                    return;
-                }
-
-                string playerName = playerInfo.User.CharacterName.Value;
-                if (IsPlayerEligibleForParty(playerInfo.User.PlatformId, playerName))
-                {
-                    AddPlayerToParty(ctx, ownerId, playerName);
-                }
-                else
-                {
-                    LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> does not have parties enabled or is already in a party.");
-                }
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, "Player not found...");
-            }
-        }
-        public static bool IsPlayerEligibleForParty(ulong steamId, string playerName)
-        {
-            if (PlayerUtilities.GetPlayerBool(steamId, "Grouping"))
-            {
-                if (!steamId.TryGetPlayerParties(out var parties) && !DataService.PlayerDictionaries.playerParties.Values.Any(party => party.Equals(playerName)))
-                {
-                    PlayerUtilities.SetPlayerBool(steamId, "Grouping", false);
-                    return true;
-                }
-            }
-            return false;
-        }
-        public static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
-        {
-            if (!ownerId.TryGetPlayerParties(out var _))
-            {
-                ownerId.SetPlayerParties([]);
-            }
-
-            string ownerName = ctx.Event.User.CharacterName.Value;
-            if (ownerId.TryGetPlayerParties(out var party) && party.Count < ConfigService.MaxPartySize && !party.Contains(playerName))
-            {
-                party.Add(playerName);
-
-                if (!party.Contains(ownerName)) // add owner to alliance for simplified processing elsewhere
-                {
-                    party.Add(ownerName);
-                }
-
-                ownerId.SetPlayerParties(party);
-                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party.");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"Party is full or <color=green>{playerName}</color> is already in the party.");
-            }
-        }
-        public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
-        {
-            ulong steamId = ctx.Event.User.PlatformId;
-            string playerKey = PlayerCache.Keys.FirstOrDefault(key => key.Equals(playerName, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(playerKey) && party.FirstOrDefault(n => n.Equals(playerKey)) != null)
-            {
-                party.Remove(playerKey);
-                steamId.SetPlayerParties(party);
-                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from party.");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party.");
-            }
-        }
-        public static void ListPartyMembers(ChatCommandContext ctx, Dictionary<ulong, HashSet<string>> playerParties)
-        {
-            ulong ownerId = ctx.Event.User.PlatformId;
-            string playerName = ctx.Event.User.CharacterName.Value;
-            HashSet<string> members = playerParties.ContainsKey(ownerId) ? playerParties[ownerId] : playerParties.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
-            string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in party.";
-            LocalizationService.HandleReply(ctx, replyMessage);
         }
     }
 }

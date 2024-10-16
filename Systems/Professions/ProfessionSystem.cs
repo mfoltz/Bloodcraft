@@ -27,8 +27,8 @@ internal static class ProfessionSystem
     const float ProfessionConstant = 0.1f; // constant for calculating level from xp
     const int ProfessionPower = 2; // power for calculating level from xp
 
-    static readonly AssetGuid assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
-    static readonly PrefabGUID sctResourceGain = new(1876501183); // SCT resource gain prefabguid
+    static readonly AssetGuid AssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
+    static readonly PrefabGUID ProfessionsSCT = new(1876501183); // SCT resource gain prefabguid
     public static void UpdateProfessions(Entity Killer, Entity Victim)
     {
         Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
@@ -231,7 +231,7 @@ internal static class ProfessionSystem
     static IEnumerator DelayedProfessionSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
     {
         yield return SCTDelay;
-        Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), assetGuid, position, color, character, gainedXP, sctResourceGain, userEntity);
+        Entity sctEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), AssetGuid, position, color, character, gainedXP, ProfessionsSCT, userEntity);
     }
     static int ConvertXpToLevel(float xp)
     {

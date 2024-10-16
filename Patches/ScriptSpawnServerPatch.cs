@@ -69,7 +69,7 @@ internal static class ScriptSpawnServerPatch
                             if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                             {
                                 //Core.Log.LogInfo($"{steamId} | {prestigeLevel} | {UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(prefabGUID)} | {prefabGUID.LookupName()}");
-                                if (prestigeLevel > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.HandleBloodBuff(entity); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                                if (prestigeLevel > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ModifyBloodBuff(entity); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                             }
                         }
                     }
@@ -80,7 +80,7 @@ internal static class ScriptSpawnServerPatch
                         List<PrefabGUID> classBuffs = UpdateBuffsBufferDestroyPatch.ClassBuffs.ContainsKey(playerClass) ? UpdateBuffsBufferDestroyPatch.ClassBuffs[playerClass] : [];
 
                         //Core.Log.LogInfo($"{steamId} | {playerClass} | {prefabGUID.LookupName()}");
-                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.HandleBloodBuff(entity);
+                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.ModifyBloodBuff(entity);
                     }
                 }
             }

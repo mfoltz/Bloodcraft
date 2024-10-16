@@ -1,6 +1,10 @@
 `1.4.3`
-- filtered out crystal and coal from gathering quest prefab pool
-- WIP
+- removed crystal and coal from gathering quest targets pool
+- added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none leave at 1 for no change)
+- removed auto rerolling for no targets found in favor of manual rerolling at user's discretion since the former was not as reliable as would've liked and sometimes forced rerolls inappropriately
+- target tracking will inform user to try again from a different location if closest target is imprisoned by a player or a player familiar
+- verifying kill target unit level against player level using base unit prefab instead of reading level directly from entity in cache to prevent assigning targets outside intended level range
+- changed some collections to readonly and added logging when configuration for item prefabs/quantity is not as expected instead of causing mod to fail to initialize entirely
 
 `1.4.2`
 - fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled

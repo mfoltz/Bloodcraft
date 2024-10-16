@@ -15,7 +15,7 @@ internal static class AbilityRunScriptsSystemPatch
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    public static Dictionary<int, int> ClassSpells = [];
+    public static readonly Dictionary<PrefabGUID, int> ClassSpells = [];
 
     [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -33,9 +33,9 @@ internal static class AbilityRunScriptsSystemPatch
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
 
                 if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
-                else if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab.GuidHash))
+                else if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab))
                 {
-                    float cooldown = ClassSpells[abilityGroupPrefab.GuidHash].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab.GuidHash] * 15f;
+                    float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab] * 15f;
                     ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
                 }
             }

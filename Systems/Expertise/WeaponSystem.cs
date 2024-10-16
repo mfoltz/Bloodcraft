@@ -182,11 +182,19 @@ internal static class WeaponSystem
         ulong steamID = user.PlatformId;
         WeaponType weaponType = WeaponManager.GetCurrentWeaponType(Killer);
 
+
+
         if (Victim.Has<UnitStats>())
         {
             var VictimStats = Victim.Read<UnitStats>();
-            float ExpertiseValue = CalculateExpertiseValue(VictimStats, Victim.Has<VBloodConsumeSource>());
+            float expertiseValue = CalculateExpertiseValue(VictimStats, Victim.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
+
+            if (ConfigService.UnitSpawnerExpertiseFactor < 1 && Victim.Has<IsMinion>() && Victim.Read<IsMinion>().Value)
+            {
+                expertiseValue *= ConfigService.UnitSpawnerMultiplier;
+                if (expertiseValue == 0) return;
+            }
 
             if (steamID.TryGetPlayerPrestiges(out var prestiges))
             {
@@ -201,7 +209,7 @@ internal static class WeaponSystem
                 }
             }
 
-            ExpertiseValue *= changeFactor;
+            expertiseValue *= changeFactor;
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
@@ -210,7 +218,7 @@ internal static class WeaponSystem
 
                 if (xpData.Key >= ConfigService.MaxExpertiseLevel) return;
 
-                float newExperience = xpData.Value + ExpertiseValue;
+                float newExperience = xpData.Value + expertiseValue;
                 int newLevel = ConvertXpToLevel(newExperience);
                 bool leveledUp = false;
 
@@ -226,7 +234,7 @@ internal static class WeaponSystem
 
                 var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
                 handler.SetExpertiseData(steamID, updatedXPData);
-                NotifyPlayer(user, weaponType, ExpertiseValue, leveledUp, newLevel, handler);
+                NotifyPlayer(user, weaponType, expertiseValue, leveledUp, newLevel, handler);
             }
         }
     }

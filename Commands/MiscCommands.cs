@@ -34,14 +34,14 @@ internal static class MiscCommands
     ];
 
     static readonly ComponentType[] SpawnSequenceComponent =
-[
+    [
         ComponentType.ReadOnly(Il2CppType.Of<SpawnSequenceForEntity>()),
     ];
 
-    static readonly PrefabGUID combatBuff = new(581443919);
+    static readonly PrefabGUID CombatBuff = new(581443919);
     static readonly PrefabGUID NetworkedSequence = new(651179295);
 
-    public static Dictionary<PrefabGUID, int> KitPrefabs = [];
+    public static readonly Dictionary<PrefabGUID, int> KitPrefabs = [];
 
     [Command(name: "reminders", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
@@ -205,7 +205,7 @@ internal static class MiscCommands
     {
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, CombatBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "This command should only be used as required and certainly not while in combat.");
             return;

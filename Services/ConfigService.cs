@@ -33,6 +33,7 @@ public static class ConfigService
     public static float DocileUnitMultiplier { get; private set; }
     public static float WarEventMultiplier { get; private set; }
     public static float UnitSpawnerMultiplier { get; private set; }
+    public static float UnitSpawnerExpertiseFactor { get; private set; }
     public static int ChangeClassItem { get; private set; }
     public static int ChangeClassQuantity { get; private set; }
     public static float GroupLevelingMultiplier { get; private set; }
@@ -243,6 +244,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Expertise", "MaxExpertiseLevel", 100, "The maximum level a player can reach in weapon expertise"),
             new ConfigEntryDefinition("Expertise", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units"),
             new ConfigEntryDefinition("Expertise", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods"),
+            new ConfigEntryDefinition("Expertise", "UnitSpawnerExpertiseFactor", 1f, "The multiplier for experience gained from unit spawners (vermin nests, tombs)."),
             new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItem", 576389135, "Item PrefabGUID cost for resetting weapon stats"),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItemQuantity", 500, "Quantity of item required for resetting stats"),

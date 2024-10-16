@@ -45,10 +45,6 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID phasing = new(-79611032);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
-    static readonly PrefabGUID CaptureBuff = new(1280015305);
-    static readonly PrefabGUID ImmaterialBuff = new(-259674366);
-    static readonly PrefabGUID BreakBuff = new(-1466712470);
-
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)

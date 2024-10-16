@@ -1,7 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
-using Epic.OnlineServices.RTCAudio;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
@@ -16,6 +15,7 @@ namespace Bloodcraft.Commands;
 internal static class ClassCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
+
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
@@ -76,7 +76,7 @@ internal static class ClassCommands
 
             if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
-                List<int> spells = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
+                List<int> spells = ConfigUtilities.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
 
                 if (spells.Count == 0)
                 {
@@ -92,7 +92,7 @@ internal static class ClassCommands
 
                 if (choice == 0) // set default for all classes
                 {
-                    if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
+                    if (prestigeLevel < ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                     {
                         LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                         return;
@@ -115,7 +115,7 @@ internal static class ClassCommands
                     }
                 }
 
-                if (prestigeLevel < ConfigUtilities.ParseConfigString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
+                if (prestigeLevel < ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                 {
                     LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                     return;
@@ -131,7 +131,7 @@ internal static class ClassCommands
             }
             else
             {
-                List<int> spells = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
+                List<int> spells = ConfigUtilities.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
 
                 if (spells.Count == 0)
                 {

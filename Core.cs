@@ -9,7 +9,6 @@ using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.UI;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -38,12 +37,12 @@ internal static class Core
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
         
-        if (ConfigService.ExtraRecipes) RecipeUtilities.ExtraRecipes();
-        if (ConfigService.StarterKit) ConfigUtilities.StarterKit();
+        if (ConfigService.ExtraRecipes) RecipeUtilities.AddExtraRecipes();
+        if (ConfigService.StarterKit) ConfigUtilities.StarterKitItems();
         if (ConfigService.PrestigeSystem) BuffUtilities.PrestigeBuffs();
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
-            ConfigUtilities.ClassBuffMap();
+            ConfigUtilities.ClassPassiveBuffsMap();
             ConfigUtilities.ClassSpellCooldownMap();
             ClassUtilities.GenerateAbilityJewelMap();
         }

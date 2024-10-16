@@ -11,12 +11,11 @@ namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarLevelingSystem
 {
     static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     const float EXPConstant = 0.1f;
     const int EXPPower = 2;
 
-    static readonly PrefabGUID levelUpBuff = new(-1133938228);
+    static readonly PrefabGUID LevelUpBuff = new(-1133938228);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         ProcessFamiliarExperience(deathEvent.Source, deathEvent.Target);
@@ -83,7 +82,7 @@ internal static class FamiliarLevelingSystem
             return new(0, 0);
         }
     }
-    static void CheckAndHandleLevelUp(Entity familiarEntity, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel)
+    static void CheckAndHandleLevelUp(Entity familiar, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel)
     {
         bool leveledUp = false;
         int newLevel = ConvertXpToLevel(familiarXP.Value);
@@ -92,31 +91,21 @@ internal static class FamiliarLevelingSystem
         {
             leveledUp = true;
             FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(steamID);
+
             data.FamiliarExperience[familiarId] = new(newLevel, familiarXP.Value);
             FamiliarExperienceManager.SaveFamiliarExperience(steamID, data);
         }
 
         if (leveledUp)
         {
-            ApplyBuffDebugEvent applyBuffDebugEvent = new()
-            {
-                BuffPrefabGUID = levelUpBuff,
-            };
+            BuffUtilities.ApplyBuff(familiar, LevelUpBuff);
 
-            FromCharacter fromCharacter = new()
-            {
-                Character = familiarEntity,
-                User = familiarEntity.TryGetFollowedPlayer(out var player) ? player.Read<PlayerCharacter>().UserEntity : familiarEntity
-            };
-
-            int famKey = familiarEntity.Read<PrefabGUID>().GuidHash;
-            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-            UnitLevel unitLevel = familiarEntity.Read<UnitLevel>();
+            UnitLevel unitLevel = familiar.Read<UnitLevel>();
             unitLevel.Level._Value = newLevel;
-            familiarEntity.Write(unitLevel);
+            familiar.Write(unitLevel);
 
-            FamiliarSummonSystem.ModifyDamageStats(familiarEntity, newLevel, steamID, famKey);
-            if (familiarEntity.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiarEntity, newLevel);
+            FamiliarSummonSystem.ModifyDamageStats(familiar, newLevel, steamID, familiarId);
+            if (familiar.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiar, newLevel);
         }
     }
     public static int ConvertXpToLevel(float xp)

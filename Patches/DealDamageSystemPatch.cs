@@ -22,14 +22,35 @@ internal static class DealDamageSystemPatch
 
     static readonly Random Random = new();
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     public static readonly Dictionary<ulong, DateTime> LastDamageTime = [];
+
+    static readonly Dictionary<PlayerClass, PrefabGUID> ClassOnHitDebuffMap = new() // tier 1
+    {
+        { PlayerClass.BloodKnight, new(-1246704569) }, //leech
+        { PlayerClass.DemonHunter, new(-1576512627) }, //static
+        { PlayerClass.VampireLord, new(27300215) }, // chill
+        { PlayerClass.ShadowBlade, new(348724578) }, // ignite
+        { PlayerClass.ArcaneSorcerer, new(1723455773) }, // weaken
+        { PlayerClass.DeathMage, new(-325758519) } // condemn
+    };
+
+    static readonly Dictionary<PlayerClass, PrefabGUID> ClassOnHitEffectMap = new() // tier 2
+    {
+        { PlayerClass.BloodKnight, new(2085766220) }, // lesser bloodrage
+        { PlayerClass.DemonHunter, new(-737425100) }, // lesser stormshield
+        { PlayerClass.VampireLord, new(620130895) }, // lesser frozenweapon
+        { PlayerClass.ShadowBlade, new(763939566) }, // lesser powersurge
+        { PlayerClass.ArcaneSorcerer, new(1433921398) }, // lesser aegis
+        { PlayerClass.DeathMage, new(-2071441247) } // guardian block :p
+    };
 
     static readonly PrefabGUID stormShield03 = new(1095865904);
     static readonly PrefabGUID stormShield02 = new(-1192885497);
     static readonly PrefabGUID stormShield01 = new(1044565673);
     static readonly PrefabGUID garlicDebuff = new(-1701323826);
     static readonly PrefabGUID silverDebuff = new(853298599);
+
+    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [HarmonyPatch(typeof(DealDamageSystem), nameof(DealDamageSystem.OnUpdate))]
     [HarmonyPrefix]

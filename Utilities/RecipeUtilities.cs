@@ -14,13 +14,11 @@ internal static class RecipeUtilities // would like to tie this into professions
     static readonly PrefabGUID advancedFurnace = new(-222851985); // silver ingot
     static readonly PrefabGUID fabricator = new(-465055967); // copper wires, iron body
 
-
     static readonly PrefabGUID ironBody = new(-1270503528);
     static readonly PrefabGUID vampiricDust = new(311920560);
     static readonly PrefabGUID copperWires = new(-2031309726);
     static readonly PrefabGUID silverIngot = new(-1633898285);
-
-    public static void ExtraRecipes()
+    public static void AddExtraRecipes()
     {
         var recipeMap = GameDataSystem.RecipeHashLookupMap;
 
@@ -88,7 +86,6 @@ internal static class RecipeUtilities // would like to tie this into professions
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = copperWires, Disabled = false, Unlocked = true });
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = ironBody, Disabled = false, Unlocked = true });
-        //refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = shadowGreatSword, Disabled = false, Unlocked = true });
 
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[advancedFurnace];
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();

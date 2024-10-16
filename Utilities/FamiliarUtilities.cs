@@ -41,6 +41,7 @@ internal static class FamiliarUtilities
             }
         }
         else if (HasDismissed(steamId, out Entity familiar)) return familiar;
+
         return Entity.Null;
     }
     public static void HandleFamiliarMinions(Entity familiar) //  need to see if game will handle familiar minions as player minions without extra effort, that would be neat
@@ -49,27 +50,29 @@ internal static class FamiliarUtilities
         {
             foreach (Entity minion in FamiliarMinions[familiar])
             {
-                DestroyUtility.CreateDestroyEvent(EntityManager, minion, DestroyReason.Default, DestroyDebugReason.None);
+                DestroyUtility.Destroy(EntityManager, minion);
             }
+
             FamiliarMinions.Remove(familiar);
         }
     }
     public static bool HasDismissed(ulong steamId, out Entity familiar)
     {
         familiar = Entity.Null;
+
         if (steamId.TryGetFamiliarActives(out var actives) && actives.Familiar.Exists())
         {
             familiar = actives.Familiar;
             return true;
         }
+
         return false;
     }
     public static void ParseAddedFamiliar(ChatCommandContext ctx, ulong steamId, string unit, string activeSet = "")
     {
         UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
-        Entity prefabEntity = Entity.Null;
 
-        if (int.TryParse(unit, out int prefab) && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(prefab), out prefabEntity))
+        if (int.TryParse(unit, out int prefabHash) && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(prefabHash), out Entity prefabEntity))
         {
             // Add to set if valid
             if (!prefabEntity.Read<PrefabGUID>().LookupName().StartsWith("CHAR"))
@@ -78,16 +81,15 @@ internal static class FamiliarUtilities
                 return;
             }
 
-            data.UnlockedFamiliars[activeSet].Add(prefab);
+            data.UnlockedFamiliars[activeSet].Add(prefabHash);
             SaveUnlockedFamiliars(steamId, data);
-            LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefab).GetPrefabName()}</color> added to <color=white>{activeSet}</color>.");
+
+            LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetPrefabName()}</color> added to <color=white>{activeSet}</color>.");
         }
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
-            PrefabGUID result = new(0);
-
             // Try using TryGetValue for an exact match (case-sensitive)
-            if (!PrefabCollectionSystem.NameToPrefabGuidDictionary.TryGetValue(unit, out result))
+            if (!PrefabCollectionSystem.NameToPrefabGuidDictionary.TryGetValue(unit, out PrefabGUID match))
             {
                 // If exact match is not found, do a case-insensitive search for full or partial matches
                 foreach (var kvp in PrefabCollectionSystem.NameToPrefabGuidDictionary)
@@ -95,14 +97,14 @@ internal static class FamiliarUtilities
                     // Check for a case-insensitive full match
                     if (kvp.Key.Equals(unit, StringComparison.OrdinalIgnoreCase))
                     {
-                        result = kvp.Value; // Full match found
+                        match = kvp.Value; // Full match found
                         break;
                     }
                 }
             }
 
             // verify prefab is a char unit
-            if (!result.GuidHash.Equals(0) && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(result, out prefabEntity))
+            if (!match.IsEmpty() && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(match, out prefabEntity))
             {
                 if (!prefabEntity.Read<PrefabGUID>().LookupName().StartsWith("CHAR"))
                 {
@@ -110,9 +112,10 @@ internal static class FamiliarUtilities
                     return;
                 }
 
-                data.UnlockedFamiliars[activeSet].Add(result.GuidHash);
+                data.UnlockedFamiliars[activeSet].Add(match.GuidHash);
                 SaveUnlockedFamiliars(steamId, data);
-                LocalizationService.HandleReply(ctx, $"<color=green>{result.GetPrefabName()}</color> (<color=yellow>{result.GuidHash}</color>) added to <color=white>{activeSet}</color>.");
+
+                LocalizationService.HandleReply(ctx, $"<color=green>{match.GetPrefabName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeSet}</color>.");
             }
             else
             {
@@ -150,22 +153,25 @@ internal static class FamiliarUtilities
         LocalizationService.HandleReply(ctx, PlayerUtilities.GetPlayerBool(steamId, "VBloodEmotes") ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
     }
     public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
-    {
+    { 
+        parsedStatType = default;
+
         if (Enum.TryParse(statType, true, out parsedStatType))
         {
             return true;
         }
-
-        parsedStatType = Enum.GetValues(typeof(FamiliarStatType))
-            .Cast<FamiliarStatType>()
-            .FirstOrDefault(pt => pt.ToString().Contains(statType, StringComparison.OrdinalIgnoreCase));
-
-        if (!parsedStatType.Equals(default(FamiliarStatType)))
+        else
         {
-            return true;
+            parsedStatType = Enum.GetValues(typeof(FamiliarStatType))
+                .Cast<FamiliarStatType>()
+                .FirstOrDefault(pt => pt.ToString().Contains(statType, StringComparison.OrdinalIgnoreCase));
+
+            if (!parsedStatType.Equals(default(FamiliarStatType)))
+            {
+                return true;
+            }
         }
 
-        parsedStatType = default;
         return false;
     }
 }

@@ -20,6 +20,8 @@ internal static class QuestCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
+    static readonly PrefabGUID ImprisonedBuff = new(1603329680);
+
     [Command(name: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
     public static void LogQuestCommand(ChatCommandContext ctx)
     {
@@ -160,7 +162,7 @@ internal static class QuestCommands
 
         if (QuestService.LastUpdate == default)
         {
-            LocalizationService.HandleReply(ctx, "Targets haven't been tracked yet, check back shortly.");
+            LocalizationService.HandleReply(ctx, "Target cache isn't ready yet, check back shortly!");
             return;
         }
 
@@ -173,11 +175,11 @@ internal static class QuestCommands
         {
             if (type.Equals(QuestType.Daily) && questData.TryGetValue(QuestType.Daily, out var dailyQuest) && dailyQuest.Objective.Goal.Equals(TargetType.Kill) && !dailyQuest.Objective.Complete)
             {
-                if (!QuestService.TargetCache.TryGetValue(dailyQuest.Objective.Target, out HashSet<Entity> entities)) // if no valid targest refresh quest
+                if (!QuestService.TargetCache.TryGetValue(dailyQuest.Objective.Target, out HashSet<Entity> entities))
                 {
-                    int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-                    ForceDaily(user, steamId, level);
-                    LocalizationService.HandleReply(ctx, $"No targets found, rerolling <color=#00FFFF>Daily Quest</color>...");
+                    //int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+                    //ForceDaily(user, steamId, level);
+                    LocalizationService.HandleReply(ctx, $"No targets found, if this doesn't seem right consider rerolling your <color=#00FFFF>Daily Quest</color>. (please let mod author know about this prefab!)");
                 }
                 else if (entities.Count > 0)
                 {
@@ -186,23 +188,37 @@ internal static class QuestCommands
                         .Where(entity => EntityManager.Exists(entity))
                         .OrderBy(entity => math.distance(userPosition, entity.Read<Translation>().Value))
                         .FirstOrDefault();
+
                     if (closest == Entity.Null)
                     {
                         LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
                         return;
                     }
+                    else if (ServerGameManager.HasBuff(closest, ImprisonedBuff.ToIdentifier()))
+                    {
+                        LocalizationService.HandleReply(ctx, "Closest target is imprisoned by a player, try again in a different location!");
+                        return;
+                    }
+                    else if (closest.Has<BlockFeedBuff>())
+                    {
+                        LocalizationService.HandleReply(ctx, "Closest target is a player familiar, try again in a different location!");
+                        return;
+                    }
+
                     float3 targetPosition = closest.Read<Translation>().Value;
                     if (closest.Has<VBloodConsumeSource>())
                     {
                         LocalizationService.HandleReply(ctx, "Use the VBlood menu to track boss units.");
                         return;
                     }
+
                     if (math.distance(userPosition, targetPosition) > 5000f) // usually means non-ideal CHAR prefab that spawns rarely or strangely for w/e reason
                     {
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-                        ForceDaily(user, steamId, level);
+                        ForceDaily(steamId, level);
                         return;
                     }
+
                     float distance = math.distance(userPosition, targetPosition);
                     float3 direction = math.normalize(targetPosition - userPosition);
                     string cardinalDirection = $"<color=white>{GetCardinalDirection(direction)}</color>";
@@ -216,11 +232,11 @@ internal static class QuestCommands
             }
             else if (type.Equals(QuestType.Weekly) && questData.TryGetValue(QuestType.Weekly, out var weeklyQuest) && weeklyQuest.Objective.Goal.Equals(TargetType.Kill) && !weeklyQuest.Objective.Complete)
             {
-                if (!QuestService.TargetCache.TryGetValue(weeklyQuest.Objective.Target, out HashSet<Entity> entities)) // if no valid targets refresh quest
+                if (!QuestService.TargetCache.TryGetValue(weeklyQuest.Objective.Target, out HashSet<Entity> entities))
                 {
-                    int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-                    ForceWeekly(user, steamId, level);
-                    LocalizationService.HandleReply(ctx, $"No targets found, rerolling <color=#BF40BF>Weekly Quest</color>...");
+                    //int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+                    //ForceWeekly(user, steamId, level);
+                    LocalizationService.HandleReply(ctx, $"No targets found, if this doesn't seem right consider rerolling your <color=#BF40BF>Weekly Quest</color>. (please let mod author know about this prefab!)");
                 }
                 else if (entities.Count > 0)
                 {
@@ -229,23 +245,37 @@ internal static class QuestCommands
                         .Where(entity => EntityManager.Exists(entity))
                         .OrderBy(entity => math.distance(userPosition, entity.Read<Translation>().Value))
                         .FirstOrDefault();
+
                     if (closest == Entity.Null)
                     {
                         LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
                         return;
                     }
+                    else if (ServerGameManager.HasBuff(closest, ImprisonedBuff.ToIdentifier()))
+                    {
+                        LocalizationService.HandleReply(ctx, "Closest target is imprisoned by a player, try again in a different location!");
+                        return;
+                    }
+                    else if (closest.Has<BlockFeedBuff>())
+                    {
+                        LocalizationService.HandleReply(ctx, "Closest target is a player familiar, try again in a different location!");
+                        return;
+                    }
+
                     float3 targetPosition = closest.Read<Translation>().Value;
                     if (closest.Has<VBloodConsumeSource>())
                     {
                         LocalizationService.HandleReply(ctx, "Use the VBlood menu to track boss units.");
                         return;
                     }
+
                     if (math.distance(userPosition, targetPosition) > 5000f) // usually means non-ideal CHAR prefab that spawns rarely or strangely for w/e reason, resetting with this should take precedence over prefab being seen probably
                     {
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-                        ForceWeekly(user, steamId, level);
+                        ForceWeekly(steamId, level);
                         return;
                     }
+
                     float distance = math.distance(userPosition, targetPosition);
                     float3 direction = math.normalize(targetPosition - userPosition);
                     string cardinalDirection = $"<color=white>{GetCardinalDirection(direction)}</color>";
@@ -336,7 +366,7 @@ internal static class QuestCommands
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
-                        ForceDaily(ctx.Event.User, ctx.Event.User.PlatformId, level);
+                        ForceDaily(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
                     }
@@ -368,7 +398,7 @@ internal static class QuestCommands
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
-                        ForceWeekly(ctx.Event.User, ctx.Event.User.PlatformId, level);
+                        ForceWeekly(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
                     }

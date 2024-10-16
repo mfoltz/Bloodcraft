@@ -21,7 +21,6 @@ internal static class ClassUtilities
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
-    static Update_ReplaceAbilityOnSlotSystem UpdateReplaceAbilityOnSlotSystem => SystemService.Update_ReplaceAbilityOnSlotSystem;
 
     static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
 
@@ -42,7 +41,7 @@ internal static class ClassUtilities
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return ConfigUtilities.ParseConfigString(ClassBuffMap[playerClass]);
+            return ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]);
         }
         return [];
     }
@@ -88,7 +87,9 @@ internal static class ClassUtilities
         for (int i = 0; i < buffs.Count; i++)
         {
             if (buffs[i] == 0) continue;
+
             PrefabGUID buffPrefab = new(buffs[i]);
+
             if (ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
                 DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
@@ -97,7 +98,7 @@ internal static class ClassUtilities
     }
     public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClass playerClass)
     {
-        List<int> perks = ConfigUtilities.ParseConfigString(ClassBuffMap[playerClass]);
+        List<int> perks = ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -128,7 +129,7 @@ internal static class ClassUtilities
     }
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
-        List<int> perks = ConfigUtilities.ParseConfigString(ClassSpellsMap[playerClass]);
+        List<int> perks = ConfigUtilities.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -178,8 +179,9 @@ internal static class ClassUtilities
     {
         var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
         var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
-        var classWeaponStats = ConfigUtilities.ParseConfigString(weaponConfigEntry);
-        var classBloodStats = ConfigUtilities.ParseConfigString(bloodConfigEntry);
+
+        var classWeaponStats = ConfigUtilities.ParseConfigIntegerString(weaponConfigEntry);
+        var classBloodStats = ConfigUtilities.ParseConfigIntegerString(bloodConfigEntry);
 
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
         steamId.SetPlayerClasses(classes);
