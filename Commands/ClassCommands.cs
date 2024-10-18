@@ -208,7 +208,6 @@ internal static class ClassCommands
             return;
         }
 
-        classes.Clear();
         ClassUtilities.RemoveClassBuffs(ctx, steamId);
         ClassUtilities.UpdateClassData(character, parsedClassType, classes, steamId);
 

@@ -37,21 +37,21 @@ internal static class FamiliarLevelingSystem
 
         PrefabGUID familiarUnit = familiar.Read<PrefabGUID>();
         int familiarId = familiarUnit.GuidHash;
+
         ProcessExperienceGain(familiar, victimEntity, steamId, familiarId);
     }
-    static void ProcessExperienceGain(Entity familiarEntity, Entity victimEntity, ulong steamID, int familiarId)
+    static void ProcessExperienceGain(Entity familiar, Entity target, ulong steamId, int familiarId)
     {
-        UnitLevel victimLevel = victimEntity.Read<UnitLevel>();
-        bool isVBlood = IsVBlood(victimEntity);
+        UnitLevel victimLevel = target.Read<UnitLevel>();
+        bool isVBlood = IsVBlood(target);
 
         float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
-        KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamID, familiarId);
+        KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamId, familiarId);
 
         if (familiarXP.Key >= ConfigService.MaxFamiliarLevel) return;
 
         int currentLevel = ConvertXpToLevel(familiarXP.Value);
-
-        UpdateFamiliarExperience(familiarEntity, familiarId, steamID, familiarXP, gainedXP, currentLevel);
+        UpdateFamiliarExperience(familiar, familiarId, steamId, familiarXP, gainedXP, currentLevel);
     }
     static bool IsVBlood(Entity victimEntity)
     {
@@ -67,6 +67,7 @@ internal static class FamiliarLevelingSystem
     {
         FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
         data.FamiliarExperience[familiarId] = new(familiarXP.Key, familiarXP.Value + gainedXP);
+
         FamiliarExperienceManager.SaveFamiliarExperience(playerId, data);
         CheckAndHandleLevelUp(familiarEntity, familiarId, playerId, data.FamiliarExperience[familiarId], currentLevel);
     }

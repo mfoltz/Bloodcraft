@@ -7,6 +7,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using ProjectM.Gameplay.Systems;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using System.Collections;

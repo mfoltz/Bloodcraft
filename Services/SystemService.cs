@@ -67,6 +67,9 @@ public class SystemService(World world)
     Update_ReplaceAbilityOnSlotSystem _updateReplaceAbilityOnSlotSystem;
     public Update_ReplaceAbilityOnSlotSystem Update_ReplaceAbilityOnSlotSystem => _updateReplaceAbilityOnSlotSystem ??= GetSystem<Update_ReplaceAbilityOnSlotSystem>();
 
+    StatChangeSystem _statChangeSystem;
+    public StatChangeSystem StatChangeSystem => _statChangeSystem ??= GetSystem<StatChangeSystem>();
+
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
     public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
     T GetSystem<T>() where T : ComponentSystemBase

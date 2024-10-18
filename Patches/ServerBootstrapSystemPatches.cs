@@ -4,16 +4,18 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Stunlock.Network;
+using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
-using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
@@ -24,6 +26,8 @@ internal static class ServerBootstrapSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
@@ -396,57 +400,83 @@ internal static class ServerBootstrapSystemPatches
 
             if (exists)
             {
-                if (ServerGameManager.TryGetBuffer<BuffBuffer>(playerCharacter, out var buffBuffer))
+                if (ClassUtilities.HasClass(steamId))
                 {
-                    foreach (var buff in buffBuffer)
+                    PrefabGUID bloodPrefab = playerCharacter.Read<Blood>().BloodType;
+                    BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter);
+                    string bloodTypeCheck = bloodType.ToString().ToLower();
+
+                    LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
+
+                    HashSet<PrefabGUID> classBuffsToRemove = [..UpdateBuffsBufferDestroyPatch.ClassBuffs.Where(keyValuePair => keyValuePair.Key != playerClass).SelectMany(keyValuePair => keyValuePair.Value)];
+                    HashSet<PrefabGUID> filteredClassBuffs = classBuffsToRemove.Where(buff => !UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(buff)).ToHashSet();
+
+                    foreach (PrefabGUID classBuff in filteredClassBuffs)
                     {
-                        //Core.Log.LogInfo($"{buff.PrefabGuid.LookupName()} | {buff.Entity}");
-                    }
-                }
-
-                if (playerCharacter.Has<VBloodAbilityBuffEntry>())
-                {
-                    var buffer = playerCharacter.ReadBuffer<VBloodAbilityBuffEntry>();
-
-                    Dictionary<int, Entity> abilityBuffEntities = [];
-                    bool firstFound = false;
-
-                    // Traverse the buffer to find the first occurrence of SlotId == 3 and track duplicates
-                    for (int i = 0; i < buffer.Length; i++)
-                    {
-                        VBloodAbilityBuffEntry item = buffer[i];
-
-                        if (item.SlotId == 3)
+                        if (ServerGameManager.TryGetBuff(playerCharacter, classBuff.ToIdentifier(), out Entity buffEntity))
                         {
-                            if (!firstFound)
-                            {
-                                firstFound = true; // Mark first occurrence
-                            }
+                            string buffPrefabName = buffEntity.Read<PrefabGUID>().LookupName().ToLower();
+
+                            if (buffPrefabName.Contains(bloodTypeCheck)) continue; // not fool-proof but good enough for validating bloodBuffs here
                             else
                             {
-                                abilityBuffEntities.Add(i, item.ActiveBuff); // Track duplicates for removal
+                                DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                             }
                         }
                     }
 
-                    // Reverse iterate and remove duplicates to avoid index shifting issues
-                    if (abilityBuffEntities.Count > 0)
+                    if (playerCharacter.Has<VBloodAbilityBuffEntry>())
                     {
-                        // Iterate over the abilityBuffEntities in reverse order of indexes
-                        foreach (var entry in abilityBuffEntities.OrderByDescending(e => e.Key))
+                        var buffer = playerCharacter.ReadBuffer<VBloodAbilityBuffEntry>();
+
+                        Dictionary<int, Entity> abilityBuffEntities = [];
+                        bool firstFound = false;
+
+                        // Traverse the buffer to find the first occurrence of SlotId == 3 and track duplicates
+                        for (int i = 0; i < buffer.Length; i++)
                         {
-                            var index = entry.Key;
-                            var entity = entry.Value;
+                            VBloodAbilityBuffEntry item = buffer[i];
 
-                            if (buffer.IsIndexWithinRange(index))
+                            if (item.SlotId == 3)
                             {
-                                //Core.Log.LogInfo($"Removing duplicate VBlood ability buff: {(entity.Has<PrefabGUID>() ? entity.Read<PrefabGUID>().LookupName() : "N/A")} | {entity} | {character}");
+                                if (!firstFound)
+                                {
+                                    firstFound = true; // Mark first occurrence
+                                }
+                                else
+                                {
+                                    abilityBuffEntities.Add(i, item.ActiveBuff); // Track duplicates for removal
+                                }
+                            }
+                        }
 
-                                buffer.RemoveAt(index);
-                                DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+                        // Reverse iterate and remove duplicates to avoid index shifting issues
+                        if (abilityBuffEntities.Count > 0)
+                        {
+                            // Iterate over the abilityBuffEntities in reverse order of indexes
+                            foreach (var entry in abilityBuffEntities.OrderByDescending(e => e.Key))
+                            {
+                                var index = entry.Key;
+                                var entity = entry.Value;
+
+                                if (buffer.IsIndexWithinRange(index))
+                                {
+                                    //Core.Log.LogInfo($"Removing duplicate VBlood ability buff: {(entity.Has<PrefabGUID>() ? entity.Read<PrefabGUID>().LookupName() : "N/A")} | {entity} | {character}");
+
+                                    buffer.RemoveAt(index);
+                                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+                                }
                             }
                         }
                     }
+
+                    ChangeBloodDebugEvent changeBloodDebugEvent = new()
+                    {
+                        Amount = 0
+                    };
+
+                    DebugEventsSystem.ChangeBloodEvent(userIndex, ref changeBloodDebugEvent); // should turn frailed immediately if this works
+                    //Core.StartCoroutine(ReturnBloodDelayed(playerCharacter, bloodPrefab));
                 }
             }
         }
@@ -462,6 +492,17 @@ internal static class ServerBootstrapSystemPatches
 
             if (!OnlineCache.ContainsKey(steamId.ToString())) OnlineCache.TryAdd(steamId.ToString(), playerInfo);
         }
+    }
+
+    static readonly WaitForSeconds BloodDelay = new(5f);
+    static IEnumerator ReturnBloodDelayed(Entity playerCharacter, PrefabGUID bloodType)
+    {
+        yield return BloodDelay;
+
+        Blood blood = playerCharacter.Read<Blood>();
+        blood.BloodType = bloodType;
+        blood.Quality = 100f;
+        blood.Value = blood.MaxBlood._Value;
     }
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]

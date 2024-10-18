@@ -542,7 +542,8 @@ internal static class QuestSystem
 
                         if (ConfigService.LevelingSystem)
                         {
-                            LevelingSystem.ProcessQuestExperienceGain(user, Entity.Null, QuestMultipliers[quest.Key]);
+                            LevelingSystem.ProcessQuestExperienceGain(user, QuestMultipliers[quest.Key]);
+
                             string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.025f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
                             LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
                         }

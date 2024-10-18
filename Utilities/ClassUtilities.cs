@@ -43,6 +43,7 @@ internal static class ClassUtilities
             var playerClass = classes.Keys.FirstOrDefault();
             return ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]);
         }
+
         return [];
     }
     public static PlayerClass GetPlayerClass(ulong steamId)
@@ -71,7 +72,6 @@ internal static class ClassUtilities
             return false;
         }
 
-        RemoveClassBuffs(ctx, steamId);
         return true;
     }
     public static bool HasClass(ulong steamId)
@@ -94,7 +94,7 @@ internal static class ClassUtilities
             {
                 DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
             }
-        }
+        }  
     }
     public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClass playerClass)
     {
@@ -177,6 +177,8 @@ internal static class ClassUtilities
     }
     public static void UpdateClassData(Entity character, PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
     {
+        classes.Clear();
+
         var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
         var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
 

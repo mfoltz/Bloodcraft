@@ -17,9 +17,7 @@ internal static class ChatMessageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly Regex RegexSwapPlayers = new(@"Swapped (.+?) with (.+)");
     static readonly Regex RegexMAC = new(@";mac([^;]+)$");
-
     static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ==");
 
     [HarmonyBefore("gg.deca.Bloodstone")]

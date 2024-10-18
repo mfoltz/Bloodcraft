@@ -16,7 +16,7 @@ internal static class BuffUtilities
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    public static bool TryApplyBuff(Entity target, PrefabGUID buffPrefab)
+    public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefab)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
@@ -25,14 +25,13 @@ internal static class BuffUtilities
 
         FromCharacter fromCharacter = new()
         {
-            Character = target,
-            User = target
+            Character = character,
+            User = character
         };
 
-        if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier()))
+        if (!ServerGameManager.HasBuff(character, buffPrefab.ToIdentifier()))
         {
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-
             return true;
         }
 
