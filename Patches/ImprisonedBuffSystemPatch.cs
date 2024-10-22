@@ -17,7 +17,7 @@ internal static class ImprisonedBuffSystemPatch
     static void OnUpdatePrefix(ImprisonedBuffSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.FamiliarSystem) return;
+        else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1231815368_0.ToEntityArray(Allocator.Temp);
         try

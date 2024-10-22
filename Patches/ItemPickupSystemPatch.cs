@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Bloodcraft.Services;
+using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
@@ -13,6 +14,7 @@ internal static class ItemPickupSystemPatch
     static void OnUpdatePrefix(ItemPickupSystem __instance)
     {
         if (!Core.hasInitialized) return;
+        else if (!ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try

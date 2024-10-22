@@ -25,12 +25,13 @@ internal static class EmoteSystemPatch
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly PrefabGUID dominateBuff = new(-1447419822);
-    static readonly PrefabGUID invulnerableBuff = new(-480024072);
-    static readonly PrefabGUID ignoredFaction = new(-1430861195);
-    static readonly PrefabGUID playerFaction = new(1106458752);
-    static readonly PrefabGUID combatBuff = new(581443919);
-    static readonly PrefabGUID pvpCombatBuff = new(697095869);
+    static readonly PrefabGUID DominateBuff = new(-1447419822);
+    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
+    static readonly PrefabGUID IgnoredFaction = new(-1430861195);
+    static readonly PrefabGUID PlayerFaction = new(1106458752);
+    static readonly PrefabGUID CombatBuff = new(581443919);
+    static readonly PrefabGUID PvPCombatBuff = new(697095869);
+    static readonly PrefabGUID TakeFlightBuff = new(1205505492);
 
     public static readonly Dictionary<PrefabGUID, Action<Entity, Entity, ulong>> actions = new()
     {
@@ -39,14 +40,12 @@ internal static class EmoteSystemPatch
         { new(-26826346), BindPreset } // clap
     };
 
-    public static Dictionary<ulong, int> ActiveCaptureTier = [];
-
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.FamiliarSystem) return;
+        else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
@@ -62,11 +61,15 @@ internal static class EmoteSystemPatch
 
                 if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
                 {
-                    if (actions.TryGetValue(useEmoteEvent.Action, out var action) && !ServerGameManager.TryGetBuff(character, dominateBuff.ToIdentifier(), out Entity _)) action.Invoke(userEntity, character, steamId);
-                    else if (ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
+                    if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
                     {
                         LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
                     }
+                    else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
+                    {
+                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
+                    }
+                    else if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(userEntity, character, steamId);
                 }
             }
         }
@@ -86,7 +89,7 @@ internal static class EmoteSystemPatch
         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
         User user = userEntity.Read<User>();
 
-        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, CombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, PvPCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You can't bind a familiar while in combat or dominating presence is active.");
             return;
@@ -126,9 +129,9 @@ internal static class EmoteSystemPatch
             LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find familiar or familiar already active.");
         }
     }
-    public static void CallDismiss(Entity userEntity, Entity character, ulong playerId)
+    public static void CallDismiss(Entity userEntity, Entity character, ulong steamId)
     {
-        if (playerId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
+        if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
@@ -169,7 +172,7 @@ internal static class EmoteSystemPatch
                 }
 
                 data = (familiar, data.FamKey); // entity stored when dismissed
-                playerId.SetFamiliarActives(data);
+                steamId.SetFamiliarActives(data);
 
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
             }
@@ -185,7 +188,6 @@ internal static class EmoteSystemPatch
                 follower.Followed._Value = character;
                 familiar.Write(follower);
 
-
                 if (ConfigService.FamiliarCombat)
                 {
                     AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
@@ -194,7 +196,7 @@ internal static class EmoteSystemPatch
                 }
 
                 data = (Entity.Null, data.FamKey);
-                playerId.SetFamiliarActives(data);
+                steamId.SetFamiliarActives(data);
 
                 LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
             }
@@ -227,14 +229,14 @@ internal static class EmoteSystemPatch
                 return;
             }
 
-            if (ServerGameManager.HasBuff(familiar, invulnerableBuff.ToIdentifier())) // remove and enable combat
+            if (ServerGameManager.HasBuff(familiar, InvulnerableBuff.ToIdentifier())) // remove and enable combat
             {
                 BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
                 EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, invulnerableBuff, familiar);
+                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, InvulnerableBuff, familiar);
 
                 FactionReference factionReference = familiar.Read<FactionReference>();
-                factionReference.FactionGuid._Value = playerFaction;
+                factionReference.FactionGuid._Value = PlayerFaction;
                 familiar.Write(factionReference);
 
                 AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
@@ -252,7 +254,7 @@ internal static class EmoteSystemPatch
             else // if not, disable combat
             {
                 FactionReference factionReference = familiar.Read<FactionReference>();
-                factionReference.FactionGuid._Value = ignoredFaction;
+                factionReference.FactionGuid._Value = IgnoredFaction;
                 familiar.Write(factionReference);
 
                 AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
@@ -269,7 +271,7 @@ internal static class EmoteSystemPatch
 
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
-                    BuffPrefabGUID = invulnerableBuff,
+                    BuffPrefabGUID = InvulnerableBuff,
                 };
 
                 FromCharacter fromCharacter = new()
@@ -279,7 +281,7 @@ internal static class EmoteSystemPatch
                 };
 
                 DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                if (ServerGameManager.TryGetBuff(familiar, invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
+                if (ServerGameManager.TryGetBuff(familiar, InvulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
                 {
                     if (invlunerableBuff.Has<LifeTime>())
                     {

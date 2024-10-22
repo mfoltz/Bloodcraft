@@ -10,10 +10,8 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarLevelingSystem
 {
-    static SystemService SystemService => Core.SystemService;
-
-    const float EXPConstant = 0.1f;
-    const int EXPPower = 2;
+    const float EXP_CONSTANT = 0.1f;
+    const int EXP_POWER = 2;
 
     static readonly PrefabGUID LevelUpBuff = new(-1133938228);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
@@ -112,12 +110,12 @@ internal static class FamiliarLevelingSystem
     public static int ConvertXpToLevel(float xp)
     {
         // Assuming a basic square root scaling for experience to level conversion
-        return (int)(EXPConstant * Math.Sqrt(xp));
+        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
         // Reversing the formula used in ConvertXpToLevel for consistency
-        return (int)Math.Pow(level / EXPConstant, EXPPower);
+        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
     }
     static float GetXp(ulong steamID, int familiarId)
     {

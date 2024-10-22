@@ -24,7 +24,6 @@ internal static class ProfessionSystem
     static readonly Random Random = new();
 
     static readonly WaitForSeconds SCTDelay = new(0.75f);
-    static readonly WaitForSeconds DestroyDelay = new(5f);
 
     const float ProfessionConstant = 0.1f; // constant for calculating level from xp
     const int ProfessionPower = 2; // power for calculating level from xp

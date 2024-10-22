@@ -49,10 +49,10 @@ internal static class PrestigeCommands
                     return;
                 }
 
+                if (ConfigService.RestedXPSystem) LevelingSystem.UpdateMaxRestedXP(steamId, expData);
+
                 expData = new KeyValuePair<int, float>(0, 0);
                 steamId.SetPlayerExperience(expData);
-
-                if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
 
                 LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
 
@@ -109,7 +109,7 @@ internal static class PrestigeCommands
         var xpData = handler.GetPrestigeTypeData(steamId);
         if (CanPrestige(steamId, parsedPrestigeType, xpData.Key))
         {
-            PerformPrestige(ctx, steamId, parsedPrestigeType, handler);
+            PerformPrestige(ctx, steamId, parsedPrestigeType, handler, xpData);
         }
         else
         {

@@ -377,7 +377,7 @@ internal static class PrestigeSystem
                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) &&
                prestigeLevel < PrestigeTypeToMaxPrestiges[parsedPrestigeType];
     }
-    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestigeHandler handler)
+    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestigeHandler handler, KeyValuePair<int, float> xpData)
     {
         handler.Prestige(steamId);
 
@@ -385,14 +385,14 @@ internal static class PrestigeSystem
         int updatedPrestigeLevel = prestigeData[parsedPrestigeType];
         if (parsedPrestigeType == PrestigeType.Experience)
         {
-            HandleExperiencePrestige(ctx, updatedPrestigeLevel);
+            HandleExperiencePrestige(ctx, updatedPrestigeLevel, xpData);
         }
         else
         {
             HandleOtherPrestige(ctx, steamId, parsedPrestigeType, updatedPrestigeLevel);
         }
     }
-    static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel)
+    static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel, KeyValuePair<int, float> xpData)
     {
         LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
         ulong steamId = ctx.Event.User.PlatformId;
@@ -401,7 +401,7 @@ internal static class PrestigeSystem
         PrefabGUID buffPrefab = new(buffs[prestigeLevel - 1]);
         if (!buffPrefab.GuidHash.Equals(0)) BuffUtilities.ApplyPermanentBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
 
-        if (ConfigService.RestedXPSystem) LevelingSystem.ResetRestedXP(steamId);
+        if (ConfigService.RestedXPSystem) LevelingSystem.UpdateMaxRestedXP(steamId, xpData);
 
         float levelingReducer = ConfigService.LevelingPrestigeReducer * prestigeLevel;
         string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";

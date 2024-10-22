@@ -1,12 +1,11 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -19,6 +18,10 @@ internal static class FamiliarUtilities
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+
+    public static readonly Dictionary<Entity, Entity> AutoCallMap = [];
+
+    static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
     public static void ClearFamiliarActives(ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var actives))
@@ -142,6 +145,9 @@ internal static class FamiliarUtilities
         {
             familiar.Write(new LastTranslation { Value = playerPos });
             familiar.Write(new Translation { Value = playerPos });
+
+            Core.Log.LogInfo($"Returning familiar, applying target switch buff...");
+            BuffUtilities.TryApplyBuff(familiar, SwitchTargetBuff);
         }
     }
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
@@ -211,5 +217,73 @@ internal static class FamiliarUtilities
         }
 
         ClearFamiliarActives(steamId);
+    }
+    public static void AutoDismiss(Entity player, Entity familiar)
+    {
+        User user = player.GetUser();
+        ulong steamId = user.PlatformId;
+
+        if (steamId.TryGetFamiliarActives(out var data)) 
+        {
+            if (FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
+
+            familiar.Add<Disabled>();
+
+            Follower follower = familiar.Read<Follower>();
+            follower.Followed._Value = Entity.Null;
+            familiar.Write(follower);
+
+            AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+            aggroConsumer.Active._Value = false;
+            aggroConsumer.AggroTarget._Entity = Entity.Null;
+            aggroConsumer.AlertTarget._Entity = Entity.Null;
+            familiar.Write(aggroConsumer);
+
+            var buffer = player.ReadBuffer<FollowerBuffer>();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (buffer[i].Entity._Entity.Equals(familiar))
+                {
+                    buffer.RemoveAt(i);
+                    break;
+                }
+            }
+
+            data = (familiar, data.FamKey); // entity stored when dismissed
+            steamId.SetFamiliarActives(data);
+
+            AutoCallMap.TryAdd(player, familiar);
+            LocalizationService.HandleServerReply(EntityManager, user, "Familiar <color=red>disabled</color>.");
+        }
+    }
+    public static void AutoCall(Entity player, Entity familiar)
+    {
+        User user = player.GetUser();
+        ulong steamId = user.PlatformId;
+
+        if (steamId.TryGetFamiliarActives(out var data))
+        {
+            float3 position = player.Read<Translation>().Value;
+            familiar.Remove<Disabled>();
+
+            familiar.Write(new Translation { Value = position });
+            familiar.Write(new LastTranslation { Value = position });
+
+            Follower follower = familiar.Read<Follower>();
+            follower.Followed._Value = player;
+            familiar.Write(follower);
+
+            if (ConfigService.FamiliarCombat)
+            {
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                aggroConsumer.Active._Value = true;
+                familiar.Write(aggroConsumer);
+            }
+
+            data = (Entity.Null, data.FamKey);
+            steamId.SetFamiliarActives(data);
+
+            LocalizationService.HandleServerReply(EntityManager, user, "Familiar <color=green>enabled</color>.");
+        }   
     }
 }

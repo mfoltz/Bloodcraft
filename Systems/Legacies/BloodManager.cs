@@ -153,19 +153,14 @@ internal static class BloodManager
         if (!BloodTypeToConsumeSourceMap.TryGetValue(bloodType, out var consumeSource)) return;
         else if (bloodType.Equals(BloodType.None)) return;
 
-        Blood blood = player.Read<Blood>();
-        float quality = blood.Quality;
-
         // applying same blood to player again and letting game handle the ModifyUnitStatDOTS is much easier than trying to handle it manually
-        ConsumeBloodDebugEvent consumeBloodDebugEvent = new()
+        ChangeBloodDebugEvent changeBloodDebugEvent = new()
         {
-            Amount = 0,
-            Quality = quality,
-            Source = consumeSource
+            Amount = 0
         };
 
-        Core.Log.LogInfo($"Consume Blood Event: {consumeBloodDebugEvent.Amount} {consumeBloodDebugEvent.Quality} {consumeBloodDebugEvent.Source.LookupName()}");
-        DebugEventsSystem.ConsumeBloodEvent(user.Index, ref consumeBloodDebugEvent);
+        // see if this works in place of old debug event after that hotfix
+        DebugEventsSystem.ChangeBloodEvent(user.Index, ref changeBloodDebugEvent);
     }
     public static BloodType GetCurrentBloodType(Entity character)
     {

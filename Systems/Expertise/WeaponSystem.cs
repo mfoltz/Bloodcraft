@@ -12,8 +12,8 @@ internal static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    const float ExpertiseConstant = 0.1f; // constant for calculating level from xp
-    const int ExpertisePower = 2; // power for calculating level from xp
+    const float EXP_CONSTANT = 0.1f; // constant for calculating level from xp
+    const int EXP_POWER = 2; // power for calculating level from xp
 
     public static readonly Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -282,11 +282,11 @@ internal static class WeaponSystem
     }
     static int ConvertXpToLevel(float xp)
     {
-        return (int)(ExpertiseConstant * Math.Sqrt(xp));
+        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
-        return (int)Math.Pow(level / ExpertiseConstant, ExpertisePower);
+        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
     }
     static float GetXp(ulong steamID, IExpertiseHandler handler)
     {

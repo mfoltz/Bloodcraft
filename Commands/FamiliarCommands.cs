@@ -1,7 +1,7 @@
-﻿using Bloodcraft.Patches;
+﻿using BepInEx;
+using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -27,10 +27,13 @@ internal static class FamiliarCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly PrefabGUID combatBuff = new(581443919);
-    static readonly PrefabGUID pvpCombatBuff = new(697095869);
-    static readonly PrefabGUID dominateBuff = new(-1447419822);
+    static readonly PrefabGUID CombatBuff = new(581443919);
+    static readonly PrefabGUID PvPCombatBuff = new(697095869);
+    static readonly PrefabGUID DominateBuff = new(-1447419822);
+    static readonly PrefabGUID TakeFlightBuff = new(1205505492);
 
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> FamiliarSettings = new()
     {
@@ -55,7 +58,7 @@ internal static class FamiliarCommands
 
         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
 
-        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, CombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, PvPCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't bind a familiar while in combat or dominating presence is active.");
             return;
@@ -552,7 +555,12 @@ internal static class FamiliarCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
 
-        if (ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
+        {
+            LocalizationService.HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
+            return;
+        }
+        else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
             return;
@@ -869,44 +877,86 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
+
         UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
         FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
+        int count = data.UnlockedFamiliars.Keys.Count;
 
-        if (data.UnlockedFamiliars.Keys.Count > 0)
+        if (count > 0)
         {
             List<string> foundBoxNames = [];
 
-            foreach (var box in data.UnlockedFamiliars)
+            if (name.Equals("vbloods", StringComparison.OrdinalIgnoreCase))
             {
-                var matchingFamiliars = box.Value.Where(famKey =>
+                foreach (var box in data.UnlockedFamiliars)
                 {
-                    PrefabGUID famPrefab = new(famKey);
-                    return famPrefab.GetPrefabName().ToLower().Contains(name.ToLower());
-                }).ToList();
+                    var matchingFamiliars = box.Value.Where(famKey =>
+                    {
+                        Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(famKey), out prefabEntity) ? prefabEntity : Entity.Null;
+                        return prefabEntity.Has<VBloodConsumeSource>();
+                    }).ToList();
 
-                if (matchingFamiliars.Count > 0)
-                {
-                    bool boxHasShiny = matchingFamiliars.Any(familiar => buffsData.FamiliarBuffs.ContainsKey(familiar));
-                    if (boxHasShiny)
+                    if (matchingFamiliars.Count > 0)
                     {
-                        foundBoxNames.Add($"<color=white>{box.Key}</color><color=#AA336A>*</color>");
-                    }
-                    else
-                    {
-                        foundBoxNames.Add($"<color=white>{box.Key}</color>");
+                        bool boxHasShiny = matchingFamiliars.Any(familiar => buffsData.FamiliarBuffs.ContainsKey(familiar));
+
+                        if (boxHasShiny)
+                        {
+                            foundBoxNames.Add($"<color=white>{box.Key}</color><color=#AA336A>*</color>");
+                        }
+                        else
+                        {
+                            foundBoxNames.Add($"<color=white>{box.Key}</color>");
+                        }
                     }
                 }
-            }
 
-            if (foundBoxNames.Count > 0)
-            {
-                string foundBoxes = string.Join(", ", foundBoxNames);
-                string message = $"Matching familiar(s) found in: {foundBoxes}";
-                LocalizationService.HandleReply(ctx, message);
+                if (foundBoxNames.Count > 0)
+                {
+                    string foundBoxes = string.Join(", ", foundBoxNames);
+                    string message = $"VBlood familiar(s) found in: {foundBoxes}";
+                    LocalizationService.HandleReply(ctx, message);
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"Couldn't find matching familiar in boxes.");
+                }
             }
-            else
+            else if (!name.IsNullOrWhiteSpace())
             {
-                LocalizationService.HandleReply(ctx, $"Couldn't find matching familiar in boxes.");
+                foreach (var box in data.UnlockedFamiliars)
+                {
+                    var matchingFamiliars = box.Value.Where(famKey =>
+                    {
+                        PrefabGUID famPrefab = new(famKey);
+                        return famPrefab.GetPrefabName().ToLower().Contains(name.ToLower());
+                    }).ToList();
+
+                    if (matchingFamiliars.Count > 0)
+                    {
+                        bool boxHasShiny = matchingFamiliars.Any(familiar => buffsData.FamiliarBuffs.ContainsKey(familiar));
+
+                        if (boxHasShiny)
+                        {
+                            foundBoxNames.Add($"<color=white>{box.Key}</color><color=#AA336A>*</color>");
+                        }
+                        else
+                        {
+                            foundBoxNames.Add($"<color=white>{box.Key}</color>");
+                        }
+                    }
+                }
+
+                if (foundBoxNames.Count > 0)
+                {
+                    string foundBoxes = string.Join(", ", foundBoxNames);
+                    string message = $"Matching familiar(s) found in: {foundBoxes}";
+                    LocalizationService.HandleReply(ctx, message);
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"Couldn't find matching familiar in boxes.");
+                }
             }
         }
         else

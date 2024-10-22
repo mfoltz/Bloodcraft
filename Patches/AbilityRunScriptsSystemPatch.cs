@@ -1,7 +1,10 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -22,27 +25,30 @@ internal static class AbilityRunScriptsSystemPatch
     static void OnUpdatePrefix(AbilityRunScriptsSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!Classes) return;
 
-        NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
-        try
+        if (Classes)
         {
-            foreach (Entity entity in entities)
-            {
-                AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
-                PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
+            NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
 
-                if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
-                else if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab))
+            try
+            {
+                foreach (Entity entity in entities)
                 {
-                    float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab] * 15f;
-                    ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                    AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
+                    PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
+
+                    if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
+                    else if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab))
+                    {
+                        float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : ClassSpells[abilityGroupPrefab] * 15f;
+                        ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                    }
                 }
             }
-        }
-        finally
-        {
-            entities.Dispose();
+            finally
+            {
+                entities.Dispose();
+            }
         }
     }
 }

@@ -192,19 +192,6 @@ internal static class DataService
     {
         return playerParties.TryGetValue(steamID, out parties);
     }
-    public static bool TryGetPlayerCraftingJobs(this ulong steamID, out Dictionary<PrefabGUID, int> craftingJobs)
-    {
-        craftingJobs = [];
-        if (steamID.TryGetPlayerInfo(out PlayerInfo playerInfo))
-        {
-            return playerCraftingJobs.TryGetValue(playerInfo.UserEntity, out craftingJobs);
-        }
-        return false;
-    }
-    public static bool TryGetPlayerMaxWeaponLevels(this ulong steamID, out int maxWeaponLevels)
-    {
-        return playerMaxWeaponLevels.TryGetValue(steamID, out maxWeaponLevels);
-    }
     public static void SetPlayerExperience(this ulong steamID, KeyValuePair<int, float> data)
     {
         playerExperience[steamID] = data;
@@ -425,17 +412,6 @@ internal static class DataService
         playerParties[steamID] = data;
         SavePlayerParties();
     }
-    public static void SetPlayerCraftingJobs(this ulong steamID, Dictionary<PrefabGUID, int> data)
-    {
-        if (steamID.TryGetPlayerInfo(out PlayerInfo playerInfo))
-        {
-            playerCraftingJobs[playerInfo.UserEntity] = data;
-        }
-    }
-    public static void SetPlayerMaxWeaponLevels(this ulong steamID, int data)
-    {
-        playerMaxWeaponLevels[steamID] = data;
-    }
     internal static class PlayerDictionaries
     {
         // leveling
@@ -503,8 +479,8 @@ internal static class DataService
         internal static Dictionary<ulong, HashSet<string>> playerParties = [];
 
         // cache-only
-        internal static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = []; // userEntities
-        internal static Dictionary<ulong, int> playerMaxWeaponLevels = [];
+        //internal static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = []; // userEntities
+        //internal static Dictionary<ulong, int> playerMaxWeaponLevels = [];
     }
     internal static class PlayerPersistence
     {

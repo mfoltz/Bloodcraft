@@ -1,9 +1,12 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
+using Engine.Console.GameEngineImplementation;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -17,17 +20,20 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    const float CraftThreshold = 0.995f;
+    const float CRAFT_THRESHOLD = 0.995f;
     static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem.Settings.CraftRateModifier;
 
-    static readonly Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
+    //static readonly Dictionary<Entity, Dictionary<PrefabGUID, DateTime>> CraftCooldowns = [];
+
+    static readonly Dictionary<ulong, Dictionary<PrefabGUID, int>> playerCraftingJobs = [];
+    public static readonly Dictionary<ulong, Dictionary<PrefabGUID, int>> ValidatedCraftingJobs = [];
 
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
     [HarmonyPrefix]
     static void Prefix(ForgeSystem_Update __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
         try
@@ -59,8 +65,8 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 if (forge_Shared.State == ForgeState.Finished)
                 {
                     if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
+                    else if (!ConfigService.ProfessionSystem) continue;
 
-                    if (!ConfigService.ProfessionSystem) continue;
                     float ProfessionValue = 50f;
                     ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
@@ -74,7 +80,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                             Durability durability = itemEntity.Read<Durability>();
                             Durability originalDurability = originalItem.Read<Durability>();
 
-                            if (durability.MaxDurability != originalDurability.MaxDurability) continue; // already handled
+                            if (durability.MaxDurability > originalDurability.MaxDurability) continue; // already handled
 
                             int level = handler.GetProfessionData(steamId).Key;
 
@@ -99,7 +105,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try
@@ -113,73 +119,23 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     for (int i = 0; i < buffer.Length; i++)
                     {
-                        var item = buffer[i];
+                        QueuedWorkstationCraftAction craftAction = buffer[i];
 
-                        Entity userEntity = item.InitiateUser;
-                        User user = userEntity.Read<User>();
-                        ulong steamId = user.PlatformId;
+                        Entity userEntity = craftAction.InitiateUser;
+                        ulong steamId = userEntity.GetSteamId();
 
-                        PrefabGUID recipePrefab = item.RecipeGuid;
-                        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipePrefab) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipePrefab] : Entity.Null;
-                        double totalTime = recipeEntity.Read<RecipeData>().CraftDuration * recipeReduction;
+                        PrefabGUID recipeGUID = craftAction.RecipeGuid;
+                        Entity recipePrefab = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipeGUID) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipeGUID] : Entity.Null;
+                        PrefabGUID itemPrefabGUID = GetItemFromRecipePrefab(recipePrefab);
 
-                        if (CraftRateModifier != 1f)
+                        if (recipePrefab.TryGetComponent(out RecipeData recipeData))
                         {
-                            totalTime /= CraftRateModifier;
-                        }
+                            float craftDuration = recipeData.CraftDuration;
+                            double totalTime = CraftRateModifier.Equals(1f) ? craftDuration * recipeReduction : craftDuration * recipeReduction / CraftRateModifier;
 
-                        float progress = item.ProgressTime;
-                        if (progress / (float)totalTime >= CraftThreshold)
-                        {
-                            DateTime now = DateTime.UtcNow;
-
-                            if (CraftCooldowns.TryGetValue(userEntity, out var cooldowns))
+                            if (craftAction.ProgressTime / totalTime >= CRAFT_THRESHOLD && playerCraftingJobs.TryGetValue(steamId, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
                             {
-                                if (cooldowns.TryGetValue(recipePrefab, out var lastCrafted))
-                                {
-                                    if ((now - lastCrafted).TotalSeconds < 5)
-                                    {
-                                        continue;
-                                    }
-                                }
-                                else
-                                {
-                                    cooldowns.TryAdd(recipePrefab, now);
-                                }
-                            }
-                            else
-                            {
-                                CraftCooldowns.TryAdd(userEntity, new Dictionary<PrefabGUID, DateTime> { { recipePrefab, now } });
-                            }
-
-                            var outputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-                            PrefabGUID itemPrefab = outputBuffer[0].Guid;
-
-                            if (steamId.TryGetPlayerCraftingJobs(out var playerJobs))
-                            {
-                                if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
-                                {
-                                    recipeJobs++;
-                                }
-                                else
-                                {
-                                    playerJobs.TryAdd(itemPrefab, 1);
-                                }
-                            }
-                            else
-                            {
-                                steamId.SetPlayerCraftingJobs([]);
-                                if (steamId.TryGetPlayerCraftingJobs(out playerJobs))
-                                {
-                                    if (playerJobs.TryGetValue(itemPrefab, out var recipeJobs))
-                                    {
-                                        recipeJobs++;
-                                    }
-                                    else
-                                    {
-                                        playerJobs.TryAdd(itemPrefab, 1);
-                                    }
-                                }
+                                ValidateCraftingJob(itemPrefabGUID, steamId);
                             }
                         }
                     }
@@ -189,6 +145,125 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         finally
         {
             entities.Dispose();
+        }
+    }
+
+    [HarmonyPatch(typeof(StartCraftingSystem), nameof(StartCraftingSystem.OnUpdate))]
+    [HarmonyPrefix]
+    public static void Prefix(StartCraftingSystem __instance)
+    {
+        if (!Core.hasInitialized) return;
+        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+
+        NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TryGetComponent(out StartCraftItemEvent startCraftEvent) && entity.TryGetComponent(out FromCharacter fromCharacter))
+                {
+                    PrefabGUID recipeGUID = startCraftEvent.RecipeId;
+                    Entity recipePrefab = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipeGUID) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipeGUID] : Entity.Null;
+                    PrefabGUID itemPrefabGUID = GetItemFromRecipePrefab(recipePrefab);
+
+                    ulong steamId = fromCharacter.User.GetSteamId();
+
+                    if (!playerCraftingJobs.ContainsKey(steamId))
+                    {
+                        playerCraftingJobs[steamId] = [];
+                    }
+
+                    Dictionary<PrefabGUID, int> craftingJobs = playerCraftingJobs[steamId];
+
+                    if (!craftingJobs.ContainsKey(itemPrefabGUID))
+                    {
+                        craftingJobs[itemPrefabGUID] = 1;
+                    }
+                    else
+                    {
+                        craftingJobs[itemPrefabGUID]++;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+
+    [HarmonyPatch(typeof(StopCraftingSystem), nameof(StopCraftingSystem.OnUpdate))]
+    [HarmonyPrefix]
+    public static void Prefix(StopCraftingSystem __instance)
+    {
+        if (!Core.hasInitialized) return;
+        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+
+        NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TryGetComponent(out StopCraftItemEvent startCraftEvent) && entity.TryGetComponent(out FromCharacter fromCharacter))
+                {
+                    PrefabGUID recipeGUID = startCraftEvent.RecipeGuid;
+                    Entity recipePrefab = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipeGUID) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipeGUID] : Entity.Null;
+                    PrefabGUID itemPrefabGUID = GetItemFromRecipePrefab(recipePrefab);
+
+                    ulong steamId = fromCharacter.User.GetSteamId();
+
+                    if (playerCraftingJobs.TryGetValue(steamId, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
+                    {
+                        craftingJobs[itemPrefabGUID]--;
+                        if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    static PrefabGUID GetItemFromRecipePrefab(Entity recipePrefab)
+    {
+        if (recipePrefab.Exists() && recipePrefab.Has<RecipeData>())
+        {
+            var outputBuffer = recipePrefab.ReadBuffer<RecipeOutputBuffer>();
+            return outputBuffer[0].Guid;
+        }
+
+        return PrefabGUID.Empty;
+    }
+    static void ValidateCraftingJob(PrefabGUID itemPrefabGUID, ulong steamId)
+    {
+        if (playerCraftingJobs.TryGetValue(steamId, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
+        {
+            if (craftingJobs[itemPrefabGUID] > 0)
+            {
+                if (!ValidatedCraftingJobs.ContainsKey(steamId))
+                {
+                    ValidatedCraftingJobs[steamId] = [];
+                }
+
+                Dictionary<PrefabGUID, int> validatedCraftingJobs = ValidatedCraftingJobs[steamId];
+
+                if (!validatedCraftingJobs.ContainsKey(itemPrefabGUID))
+                {
+                    validatedCraftingJobs[itemPrefabGUID] = 1;
+                }
+                else
+                {
+                    validatedCraftingJobs[itemPrefabGUID]++;
+                }
+
+                validatedCraftingJobs[itemPrefabGUID]--;
+                if (validatedCraftingJobs[itemPrefabGUID] <= 0) validatedCraftingJobs.Remove(itemPrefabGUID);
+            }
+            else if (craftingJobs[itemPrefabGUID] <= 0)
+            {
+                craftingJobs.Remove(itemPrefabGUID);
+            }
         }
     }
 }

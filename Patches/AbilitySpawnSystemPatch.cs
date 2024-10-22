@@ -8,18 +8,21 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static UnityEngine.UI.GridLayoutGroup;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class InteractValidateAndStopSystemPatch
+internal static class AbilitySpawnSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly PrefabGUID dominateBuff = new(-1447419822);
-    static readonly PrefabGUID pickupResource = new(165220777);
+    static readonly PrefabGUID UseWaypointCast = new(-402025199);
+    static readonly PrefabGUID UseCastleWaypointCast = new(-1252882299);
 
+    /*
     [HarmonyPatch(typeof(InteractValidateAndStopSystemServer), nameof(InteractValidateAndStopSystemServer.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(InteractValidateAndStopSystemServer __instance)
@@ -41,7 +44,7 @@ internal static class InteractValidateAndStopSystemPatch
                     {                        
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                         if (!familiar.Exists()) continue;
-
+                        
                         Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                         ulong steamID = userEntity.Read<User>().PlatformId;
 
@@ -53,6 +56,39 @@ internal static class InteractValidateAndStopSystemPatch
                         {
                             EmoteSystemPatch.CallDismiss(userEntity, player, steamID); // auto dismiss familiar 
                         }
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    */
+
+    [HarmonyPatch(typeof(AbilitySpawnSystem), nameof(AbilitySpawnSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(AbilitySpawnSystem __instance)
+    {
+        if (!Core.hasInitialized) return;
+        if (!ConfigService.FamiliarSystem) return;
+
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                else if ((prefabGUID.Equals(UseCastleWaypointCast) || prefabGUID.Equals(UseWaypointCast)) && entity.GetOwner().TryGetPlayer(out Entity player) && !ServerGameManager.HasBuff(player, dominateBuff.ToIdentifier()))
+                {         
+                    Core.Log.LogInfo("Waypoint cast detected, dismissing familiar if found...");
+
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
+                    if (familiar.Exists() && !familiar.IsDisabled())
+                    {
+                        FamiliarUtilities.AutoDismiss(player, familiar);
                     }
                 }
             }

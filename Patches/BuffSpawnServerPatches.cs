@@ -42,8 +42,11 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID holyBeamPowerBuff = new(-1584595113);
     static readonly PrefabGUID Solarus = new(-740796338);
 
+    static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
+    static readonly PrefabGUID BatLandingBuff = new(-2001733587);
     static readonly PrefabGUID phasing = new(-79611032);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
+
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -56,8 +59,7 @@ internal static class BuffSystemSpawnPatches
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.Has<EntityOwner>() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
                 if (!buffTarget.Exists()) continue;
@@ -94,13 +96,23 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && buffTarget.TryGetPlayer(out Entity player)) // teleport familiar to player after waygate
+                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && buffTarget.TryGetPlayer(out Entity player)) // teleport familiar to player after waygate and autoCall if was out before
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
                     if (familiar.Exists())
                     {
                         FamiliarUtilities.ReturnFamiliar(player, familiar);
+
+                        if (FamiliarUtilities.AutoCallMap.TryGetValue(player, out Entity dismissedFamiliar) && familiar.Equals(dismissedFamiliar))
+                        {
+                            Core.Log.LogInfo("Phasing detected, calling familiar...");
+                            FamiliarUtilities.AutoCall(player, familiar);
+                            FamiliarUtilities.AutoCallMap.Remove(player);
+                        }
                     }
+
+                    /*
                     else if (player.GetSteamId().TryGetFamiliarActives(out var data))
                     {
                         if (data.Familiar.Exists())
@@ -108,6 +120,7 @@ internal static class BuffSystemSpawnPatches
                             FamiliarUtilities.ReturnFamiliar(player, familiar);
                         }
                     }
+                    */
                 }
                 else if (ConfigService.FamiliarSystem && prefabName.Contains("emote_onaggro") && buffTarget.TryGetFollowedPlayer(out player))
                 {
@@ -219,6 +232,32 @@ internal static class BuffSystemSpawnPatches
                             if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 30f, EndAction = LifeTimeEndAction.Destroy });
                         }
                     }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+
+    [HarmonyPatch(typeof(Spawn_MoveSpeedBuffSystem), nameof(Spawn_MoveSpeedBuffSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(Spawn_MoveSpeedBuffSystem __instance)
+    {
+        if (!Core.hasInitialized) return;
+
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID) || !prefabGUID.Equals(BatLandingBuff)) continue;
+                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                {
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
+                    
                 }
             }
         }

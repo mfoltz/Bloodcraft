@@ -22,6 +22,8 @@ internal static class MiscCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
+
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static CombatMusicSystem_Server CombatMusicSystemServer => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
@@ -342,7 +344,7 @@ internal static class MiscCommands
         LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
     }
 
-    [Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3
+    //[Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3
     public static void SwitchPlayers(ChatCommandContext ctx, string originalPlayer, string newPlayer)
     {
         if (originalPlayer.TryGetPlayerInfo(out PlayerInfo originalPlayerInfo) && newPlayer.TryGetPlayerInfo(out PlayerInfo newPlayerInfo))
@@ -360,5 +362,65 @@ internal static class MiscCommands
 
             ctx.Reply($"Switched steamIds for {originalPlayerInfo.User.CharacterName} with {newPlayerInfo.User.CharacterName}!");
         }
+    }
+
+    [Command(name: "bloblog", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
+    public static void BlobStringLogCommand(ChatCommandContext ctx, int guidHash)
+    {
+        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(guidHash), out Entity prefabEntity))
+        {
+            ctx.Reply("Couldn't find prefab...");
+            return;
+        }
+        else if (prefabEntity.TryGetComponent(out AbilityCastCondition castCondition))
+        {
+            ConditionBlob conditionBlob = castCondition.Condition.Value;
+            ReadBlobString(ref conditionBlob.Info);
+        }
+        else
+        {
+            ctx.Reply("AbilityCastCondition not found on prefab entity...");
+        }
+    }
+    unsafe static void ReadBlobString(ref ConditionInfo conditionInfo)
+    {
+        // Get a pointer to the ConditionInfo structure
+        fixed (ConditionInfo* conditionInfoPtr = &conditionInfo)
+        {
+            // Get the pointer to the Prefab BlobString
+            BlobString* prefabBlobStringPtr = &conditionInfoPtr->Prefab;
+
+            // Read the Prefab string
+            string prefabName = ParseBlobString(prefabBlobStringPtr);
+
+            // Get the pointer to the Component BlobString
+            BlobString* componentBlobStringPtr = &conditionInfoPtr->Component;
+
+            // Read the Component string
+            string componentName = ParseBlobString(componentBlobStringPtr);
+
+            // Now you can log or use the strings as needed
+            Core.Log.LogInfo($"Prefab: {prefabName}");
+            Core.Log.LogInfo($"Component: {componentName}");
+        }
+    }
+    unsafe static string ParseBlobString(BlobString* blobStringPtr)
+    {
+        // Get a pointer to the BlobArray<byte> Data field
+        BlobArray<byte>* dataPtr = &blobStringPtr->Data;
+
+        // Get the base pointer, which is the address of the m_OffsetPtr field
+        byte* basePtr = (byte*)&dataPtr->m_OffsetPtr;
+
+        // Compute the data pointer using the offset
+        byte* bytes = basePtr + dataPtr->m_OffsetPtr;
+
+        // Read the length from the m_Length field
+        int length = dataPtr->m_Length;
+
+        // Convert the bytes to a string using UTF8 encoding
+        string result = System.Text.Encoding.UTF8.GetString(bytes, length);
+
+        return result;
     }
 }

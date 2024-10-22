@@ -28,7 +28,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
     static void OnUpdatePrefix(LinkMinionToOwnerOnSpawnSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.FamiliarSystem) return;
+        else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Minion [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
         try

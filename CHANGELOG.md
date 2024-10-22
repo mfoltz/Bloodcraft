@@ -1,5 +1,8 @@
 `1.4.3`
 - removed crystal and coal from gathering quest targets pool
+- RestedXP will be adjusted based on the player's new calculated cap instead of reset entirely after prestiging in leveling
+- can use 'vbloods' as the name with familiar search command to return all boxes with at least one VBlood in them (thank Odjit c:)
+- profession experience now granted to player even when using clan stations and not just stations the player has personally placed
 - cooldowns for NPC spells from classes working again, cooldown will be 8 seconds multiplied by the index of the class spell
 - added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none leave at 1 for no change)
 - removed auto rerolling for no targets found in favor of manual rerolling at user's discretion since the former was not as reliable as would've liked and sometimes forced rerolls inappropriately

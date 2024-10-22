@@ -6,15 +6,14 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Systems.Legacies.BloodManager;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    const float BloodConstant = 0.1f;
-    const int BloodPower = 2;
+    const float EXP_CONSTANT = 0.1f;
+    const int EXP_POWER = 2;
 
     public static readonly Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -308,12 +307,12 @@ internal static class BloodSystem
     public static int ConvertXpToLevel(float xp)
     {
         // Assuming a basic square root scaling for experience to level conversion
-        return (int)(BloodConstant * Math.Sqrt(xp));
+        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
         // Reversing the formula used in ConvertXpToLevel for consistency
-        return (int)Math.Pow(level / BloodConstant, BloodPower);
+        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
     }
     static float GetXp(ulong steamID, IBloodHandler handler)
     {

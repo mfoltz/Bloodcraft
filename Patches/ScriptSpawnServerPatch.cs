@@ -1,11 +1,11 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
@@ -16,7 +16,12 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ScriptSpawnServerPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+
+    static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -29,25 +34,53 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                
-                if (ConfigService.FamiliarSystem && entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
+                if (!entity.Has<EntityOwner>() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+
+                if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out Entity player))
                 {
-                    if (entity.GetBuffTarget().TryGetFollowedPlayer(out Entity _))
+                    if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
                     {
                         if (entity.Has<ScriptSpawn>()) entity.Remove<ScriptSpawn>();
                         if (entity.Has<ScriptUpdate>()) entity.Remove<ScriptUpdate>();
                         if (entity.Has<ScriptDestroy>()) entity.Remove<ScriptDestroy>();
                         if (entity.Has<Script_Buff_ModifyDynamicCollision_DataServer>()) entity.Remove<Script_Buff_ModifyDynamicCollision_DataServer>();
-                        entity.Remove<Script_Castleman_AdaptLevel_DataShared>();
+
+                        entity.Remove<Script_Castleman_AdaptLevel_DataShared>(); // need to remove script spawn, update etc first or throws
                     }
+                    else if (prefabGUID.Equals(SwitchTargetBuff) && ServerGameManager.TryGetBuffer<InverseAggroBufferElement>(player, out var buffer) && !buffer.IsEmpty) // switch to player target when returning in combat
+                    {
+                        Entity target = buffer[0].Entity;
+
+                        if (target.Exists())
+                        {
+                            Core.Log.LogInfo($"Switching familiar target to {target.Read<PrefabGUID>().LookupName()}...");
+                            entity.With((ref Buff buff) =>
+                            {
+                                buff.Target = target;
+                            });
+                        }
+                        else
+                        {
+                            Core.Log.LogInfo($"Entity from first element of inverseAggroBuffer doesn't exist...");
+                        }
+                    }
+                }
+                else if (ConfigService.FamiliarSystem && entity.GetBuffTarget().IsPlayer() && entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetFollowedPlayer(out player))
+                {
+                    Entity familiar = entityOwner.Owner;
+                    Buff buff = entity.Read<Buff>();
+
+                    if (buff.BuffEffectType == BuffEffectType.Debuff && ServerGameManager.IsAllies(player, familiar))
+                    {
+                        Core.Log.LogInfo($"Preventing friendly fire in ServerScriptSpawn...");
+                        DestroyUtility.Destroy(EntityManager, entity);
+                    }           
                 }
 
                 if (!entity.Has<BloodBuff>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (entity.GetOwner().TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
-                    PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
 
                     if (ConfigService.LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
                     {

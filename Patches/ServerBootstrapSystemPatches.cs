@@ -4,16 +4,13 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Stunlock.Network;
-using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
 using User = ProjectM.Network.User;
@@ -470,13 +467,7 @@ internal static class ServerBootstrapSystemPatches
                         }
                     }
 
-                    ChangeBloodDebugEvent changeBloodDebugEvent = new()
-                    {
-                        Amount = 0
-                    };
-
-                    DebugEventsSystem.ChangeBloodEvent(userIndex, ref changeBloodDebugEvent); // should turn frailed immediately if this works
-                    //Core.StartCoroutine(ReturnBloodDelayed(playerCharacter, bloodPrefab));
+                    BloodManager.UpdateBloodStats(playerCharacter, user, bloodType);
                 }
             }
         }
@@ -492,17 +483,6 @@ internal static class ServerBootstrapSystemPatches
 
             if (!OnlineCache.ContainsKey(steamId.ToString())) OnlineCache.TryAdd(steamId.ToString(), playerInfo);
         }
-    }
-
-    static readonly WaitForSeconds BloodDelay = new(5f);
-    static IEnumerator ReturnBloodDelayed(Entity playerCharacter, PrefabGUID bloodType)
-    {
-        yield return BloodDelay;
-
-        Blood blood = playerCharacter.Read<Blood>();
-        blood.BloodType = bloodType;
-        blood.Quality = 100f;
-        blood.Value = blood.MaxBlood._Value;
     }
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]

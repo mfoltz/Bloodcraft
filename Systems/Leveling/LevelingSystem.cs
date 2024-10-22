@@ -11,8 +11,8 @@ internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    const float EXPConstant = 0.1f; // constant for calculating level from xp
-    const float EXPPower = 2f; // power for calculating level from xp
+    const float EXP_CONSTANT = 0.1f; // constant for calculating level from xp
+    const float EXP_POWER = 2f; // power for calculating level from xp
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
@@ -263,11 +263,11 @@ internal static class LevelingSystem
     }
     public static int ConvertXpToLevel(float xp)
     {
-        return (int)(EXPConstant * Math.Sqrt(xp));
+        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
     }
     public static int ConvertLevelToXp(int level)
     {
-        return (int)Math.Pow(level / EXPConstant, EXPPower);
+        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
     }
     static float GetXp(ulong steamId)
     {
@@ -349,12 +349,18 @@ internal static class LevelingSystem
             player.Write(equipment);
         }
     }
-    public static void ResetRestedXP(ulong steamId)
+    public static void UpdateMaxRestedXP(ulong steamId, KeyValuePair<int, float> expData)
     {
         if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
-            restedData = new KeyValuePair<DateTime, float>(restedData.Key, 0);
-            steamId.SetPlayerRestedXP(restedData);
+            float currentRestedXP = restedData.Value;
+
+            int currentLevel = expData.Key;
+            int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxLevel);
+            float restedCap = ConvertLevelToXp(maxRestedLevel) - ConvertLevelToXp(currentLevel);
+
+            currentRestedXP = Math.Min(currentRestedXP, restedCap);
+            steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(restedData.Key, currentRestedXP));
         }
     }
 }

@@ -191,13 +191,26 @@ internal static class Extensions
     {
         return EntityManager.Exists(entity);
     }
+    public static bool IsDisabled(this Entity entity)
+    {
+        return entity.Has<Disabled>();
+    }
     public static bool Disabled(this Entity entity)
     {
         return entity.Has<Disabled>();
     }
     public static ulong GetSteamId(this Entity entity)
     {
-        return entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+        if (entity.TryGetComponent(out PlayerCharacter playerCharacter))
+        {
+            return playerCharacter.UserEntity.Read<User>().PlatformId;
+        }
+        else if (entity.TryGetComponent(out User user))
+        {
+            return user.PlatformId;
+        }
+
+        return 0;
     }
     public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
     {
@@ -216,4 +229,10 @@ internal static class Extensions
         if (PlayerCache.TryGetValue(playerName, out playerInfo)) return true;
         return false;
     }
+    public static User GetUser(this Entity character)
+    {
+        User user = User.Empty;
+        if (character.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
+        return user;
+    } 
 }

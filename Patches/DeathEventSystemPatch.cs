@@ -80,9 +80,11 @@ internal static class DeathEventListenerSystemPatch
         if (ConfigService.FamiliarSystem && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
         {
             ulong steamId = player.GetSteamId();
+
             if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
             {
                 FamiliarUtilities.ClearFamiliarActives(steamId);
+
                 return false;
             }
         }
