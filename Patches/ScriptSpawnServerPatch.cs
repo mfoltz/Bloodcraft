@@ -1,6 +1,5 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -22,6 +21,8 @@ internal static class ScriptSpawnServerPatch
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
+    static readonly PrefabGUID InCombatBuff = new(581443919);
+    static readonly PrefabGUID ClearAggroBuff = new(1793107442);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -47,23 +48,6 @@ internal static class ScriptSpawnServerPatch
 
                         entity.Remove<Script_Castleman_AdaptLevel_DataShared>(); // need to remove script spawn, update etc first or throws
                     }
-                    else if (prefabGUID.Equals(SwitchTargetBuff) && ServerGameManager.TryGetBuffer<InverseAggroBufferElement>(player, out var buffer) && !buffer.IsEmpty) // switch to player target when returning in combat
-                    {
-                        Entity target = buffer[0].Entity;
-
-                        if (target.Exists())
-                        {
-                            Core.Log.LogInfo($"Switching familiar target to {target.Read<PrefabGUID>().LookupName()}...");
-                            entity.With((ref Buff buff) =>
-                            {
-                                buff.Target = target;
-                            });
-                        }
-                        else
-                        {
-                            Core.Log.LogInfo($"Entity from first element of inverseAggroBuffer doesn't exist...");
-                        }
-                    }
                 }
                 else if (ConfigService.FamiliarSystem && entity.GetBuffTarget().IsPlayer() && entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetFollowedPlayer(out player))
                 {
@@ -72,7 +56,7 @@ internal static class ScriptSpawnServerPatch
 
                     if (buff.BuffEffectType == BuffEffectType.Debuff && ServerGameManager.IsAllies(player, familiar))
                     {
-                        Core.Log.LogInfo($"Preventing friendly fire in ServerScriptSpawn...");
+                        //Core.Log.LogInfo($"Preventing friendly fire from familiar in ServerScriptSpawn...");
                         DestroyUtility.Destroy(EntityManager, entity);
                     }           
                 }
@@ -91,15 +75,18 @@ internal static class ScriptSpawnServerPatch
 
                     if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
-                        // only do this when matching blood type to ignore class buffs, skip if already has a stat buffer since that must be stacking here somehow?
+                        // only do this when matching blood type to ignore class perma buffs, skip if already has a stat buffer since that must be stacking here somehow?
+                        // if in buffMap and matches blood type this should be the buff entity the game is replacing the class perma buff with
+
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
                         {
-                            Core.Log.LogInfo($"Applying blood stats for {steamId} | {bloodType} | {prefabGUID.LookupName()}, no stats buffer...");
+                            //Core.Log.LogInfo($"Applying blood stats for {steamId} | {bloodType} | {prefabGUID.LookupName()}, no stats buffer...");
+
                             BloodManager.ApplyBloodStats(steamId, bloodType, entity);
                         }
                         else
                         {
-                            Core.Log.LogInfo($"Skipping blood stats application for {steamId} | {bloodType} | {prefabGUID.LookupName()}, pre-existing stats buffer found...");
+                            //Core.Log.LogInfo($"Skipping blood stats application for {steamId} | {bloodType} | {prefabGUID.LookupName()}, pre-existing stats buffer found...");
                         }
                     }
 

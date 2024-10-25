@@ -360,7 +360,8 @@ internal static class QuestSystem
                 }
                 else if (refreshDaily)
                 {
-                    goal = GetRandomQuestType(questData, QuestType.Weekly);
+                    //goal = GetUniqueQuestType(questData, QuestType.Weekly);
+                    goal = GetRandomQuestType();
                     targets = GetGoalPrefabsForLevel(goal, level);
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
@@ -368,7 +369,7 @@ internal static class QuestSystem
                 }
                 else if (refreshWeekly)
                 {
-                    goal = GetRandomQuestType(questData, QuestType.Daily);
+                    goal = GetUniqueQuestType(questData, QuestType.Daily);
                     targets = GetGoalPrefabsForLevel(goal, level);
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
@@ -408,7 +409,8 @@ internal static class QuestSystem
     {
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            TargetType goal = GetRandomQuestType(questData, QuestType.Weekly); // get unique goal different from weekly
+            //TargetType goal = GetUniqueQuestType(questData, QuestType.Weekly); // get unique goal different from weekly
+            TargetType goal = GetRandomQuestType();
             HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
             questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
@@ -421,7 +423,7 @@ internal static class QuestSystem
     {
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            TargetType goal = GetRandomQuestType(questData, QuestType.Daily); // get unique goal different from daily
+            TargetType goal = GetUniqueQuestType(questData, QuestType.Daily); // get unique goal different from daily
             HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
             questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, DateTime.UtcNow);
@@ -430,7 +432,7 @@ internal static class QuestSystem
             //LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
         }
     }
-    static TargetType GetRandomQuestType(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
+    static TargetType GetUniqueQuestType(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
     {
         List<TargetType> targetTypes = new(TargetTypes);      
         if (questData.TryGetValue(questType, out var dailyData))
@@ -439,6 +441,13 @@ internal static class QuestSystem
         }
 
         return targetTypes[Random.Next(targetTypes.Count)];
+    }
+    static TargetType GetRandomQuestType()
+    {
+        List<TargetType> targetTypes = new(TargetTypes);
+        TargetType targetType = targetTypes[Random.Next(targetTypes.Count)];
+
+        return targetType;
     }
     static List<TargetType> GetRandomQuestTypes()
     {

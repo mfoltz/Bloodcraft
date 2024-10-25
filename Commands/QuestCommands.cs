@@ -145,19 +145,22 @@ internal static class QuestCommands
         }
 
         questType = questType.ToLower();
-        if (questType == "d")
-        {
-            questType = "Daily";
-        }
-        else if (questType == "w")
-        {
-            questType = "Weekly";
-        }
 
-        if (!Enum.TryParse(questType, true, out QuestType type))
+        if (!Enum.TryParse(questType, true, out QuestType typeEnum))
         {
-            LocalizationService.HandleReply(ctx, "Invalid quest type. (Daily/Weekly)");
-            return;
+            if (questType == "d")
+            {
+                typeEnum = QuestType.Daily;
+            }
+            else if (questType == "w")
+            {
+                typeEnum = QuestType.Weekly;
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, "Invalid quest type. (daily/weekly or d/w)");
+                return;
+            }
         }
 
         if (QuestService.LastUpdate == default)
@@ -167,19 +170,18 @@ internal static class QuestCommands
         }
 
         ulong steamId = ctx.Event.User.PlatformId;
-        User user = ctx.Event.User;
-        Entity character = ctx.Event.SenderCharacterEntity;
-        Entity userEntity = ctx.Event.SenderUserEntity;
 
         if (steamId.TryGetPlayerQuests(out var questData))
         {
+            QuestUtilities.TrackQuestReply(ctx, questData, typeEnum);
+            /*
             if (type.Equals(QuestType.Daily) && questData.TryGetValue(QuestType.Daily, out var dailyQuest) && dailyQuest.Objective.Goal.Equals(TargetType.Kill) && !dailyQuest.Objective.Complete)
             {
                 if (!QuestService.TargetCache.TryGetValue(dailyQuest.Objective.Target, out HashSet<Entity> entities))
                 {
                     //int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                     //ForceDaily(user, steamId, level);
-                    LocalizationService.HandleReply(ctx, $"No targets found, if this doesn't seem right consider rerolling your <color=#00FFFF>Daily Quest</color>. (please let mod author know about this prefab!)");
+                    LocalizationService.HandleReply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your <color=#00FFFF>Daily Quest</color>.");
                 }
                 else if (entities.Count > 0)
                 {
@@ -236,7 +238,7 @@ internal static class QuestCommands
                 {
                     //int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                     //ForceWeekly(user, steamId, level);
-                    LocalizationService.HandleReply(ctx, $"No targets found, if this doesn't seem right consider rerolling your <color=#BF40BF>Weekly Quest</color>. (please let mod author know about this prefab!)");
+                    LocalizationService.HandleReply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your <color=#BF40BF>Weekly Quest</color>.");
                 }
                 else if (entities.Count > 0)
                 {
@@ -248,7 +250,7 @@ internal static class QuestCommands
 
                     if (closest == Entity.Null)
                     {
-                        LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn and check back soon!");
+                        LocalizationService.HandleReply(ctx, "Targets have all been killed, give them a chance to respawn!");
                         return;
                     }
                     else if (ServerGameManager.HasBuff(closest, ImprisonedBuff.ToIdentifier()))
@@ -291,10 +293,11 @@ internal static class QuestCommands
             {
                 LocalizationService.HandleReply(ctx, "Tracking only works for incomplete kill quests.");
             }
+            */
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You don't have any quests yet, check back soon.");
+            LocalizationService.HandleReply(ctx, "You don't have any quests yet, check back soon!");
         }
     }
 
@@ -369,6 +372,7 @@ internal static class QuestCommands
                         ForceDaily(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                        DailyQuestProgressCommand(ctx);
                     }
                 }
                 else
@@ -401,6 +405,7 @@ internal static class QuestCommands
                         ForceWeekly(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                        WeeklyQuestProgressCommand(ctx);
                     }
                 }
                 else

@@ -4,8 +4,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
-using ProjectM.Scripting;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -14,16 +12,12 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class BehaviourStateChangedSystemPatch // stops familiars from trying to return to where they spawned at when coming out of combat
 {
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
-
-    static readonly PrefabGUID BreakBuff = new(-1466712470);
-
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.FamiliarSystem) return;
+        else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);
         try

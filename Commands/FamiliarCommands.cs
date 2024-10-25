@@ -557,12 +557,12 @@ internal static class FamiliarCommands
 
         if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
         {
-            LocalizationService.HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
+            LocalizationService.HandleReply(ctx, "You can't call a familiar when using dominating presence!");
             return;
         }
         else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
         {
-            LocalizationService.HandleReply(ctx, "You can't call a familiar while dominating presence is active.");
+            LocalizationService.HandleReply(ctx, "You can't call a familiar when using batform!");
             return;
         }
 
@@ -886,14 +886,14 @@ internal static class FamiliarCommands
         {
             List<string> foundBoxNames = [];
 
-            if (name.Equals("vbloods", StringComparison.OrdinalIgnoreCase))
+            if (name.Equals("vblood", StringComparison.OrdinalIgnoreCase))
             {
                 foreach (var box in data.UnlockedFamiliars)
                 {
                     var matchingFamiliars = box.Value.Where(famKey =>
                     {
                         Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(famKey), out prefabEntity) ? prefabEntity : Entity.Null;
-                        return prefabEntity.Has<VBloodConsumeSource>();
+                        return (prefabEntity.Has<VBloodConsumeSource>() || prefabEntity.Has<VBloodUnit>());
                     }).ToList();
 
                     if (matchingFamiliars.Count > 0)

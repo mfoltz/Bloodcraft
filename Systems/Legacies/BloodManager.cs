@@ -2,6 +2,7 @@
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.Shared;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
@@ -148,19 +149,36 @@ internal static class BloodManager
         }
         return 0; // Return 0 if no handler is found or other error
     }
-    public static void UpdateBloodStats(Entity player, User user, BloodType bloodType)
+    public static void UpdateBloodStats(Entity player, BloodType bloodType)
     {
-        if (!BloodTypeToConsumeSourceMap.TryGetValue(bloodType, out var consumeSource)) return;
+        if (!BloodTypeToBuffMap.TryGetValue(bloodType, out var buffPrefabGUID)) return;
         else if (bloodType.Equals(BloodType.None)) return;
 
-        // applying same blood to player again and letting game handle the ModifyUnitStatDOTS is much easier than trying to handle it manually
-        ChangeBloodDebugEvent changeBloodDebugEvent = new()
-        {
-            Amount = 0
-        };
+        Core.Log.LogInfo($"Updating blood stats, reapplying base blood buff for type...");
 
-        // see if this works in place of old debug event after that hotfix
-        DebugEventsSystem.ChangeBloodEvent(user.Index, ref changeBloodDebugEvent);
+        if (player.TryGetBuff(buffPrefabGUID, out Entity buffEntity))
+        {
+            /*
+            if ((ConfigService.SoftSynergies || ConfigService.HardSynergies) && ClassUtilities.HasClass(user.PlatformId)) // verify against class blood buffs, gross
+            {
+                PlayerClass playerClass = ClassUtilities.GetPlayerClass(user.PlatformId);
+
+                if (UpdateBuffsBufferDestroyPatch.ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGUID))
+                {
+                    // how to handle this for bloodknight etc which have perma buffs that are temporarily replaced by actual bloodbuffs then reapplied when
+                    // changing bloodtypes automatically by other patch? think that's already accounted for by checking bloodType against bloodBuff and class in ServerScriptSpawn
+                    // but worth keeping an eye on
+                }
+            }
+            else // if no classes just destroy and reapply so stats buffer gets refreshed actually just do that anyway since already accounting for this elsewhere?
+            {
+                DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                BuffUtilities.TryApplyBuff(player, buffPrefabGUID);
+            }
+            */
+            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+            BuffUtilities.TryApplyBuff(player, buffPrefabGUID);
+        }
     }
     public static BloodType GetCurrentBloodType(Entity character)
     {

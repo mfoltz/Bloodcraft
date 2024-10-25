@@ -234,5 +234,18 @@ internal static class Extensions
         User user = User.Empty;
         if (character.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
         return user;
-    } 
+    }
+    public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGUID)
+    {
+        return ServerGameManager.HasBuff(entity, buffPrefabGUID.ToIdentifier());
+    }
+    public static bool TryGetBuff(this Entity entity, PrefabGUID buffPrefabGUID, out Entity buffEntity)
+    {
+        if (ServerGameManager.TryGetBuff(entity, buffPrefabGUID.ToIdentifier(), out buffEntity))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

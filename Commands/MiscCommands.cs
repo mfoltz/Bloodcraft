@@ -1,6 +1,5 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
-using Epic.OnlineServices.Achievements;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -22,8 +21,6 @@ internal static class MiscCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static CombatMusicSystem_Server CombatMusicSystemServer => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
@@ -47,7 +44,7 @@ internal static class MiscCommands
 
     public static readonly Dictionary<PrefabGUID, int> KitPrefabs = [];
 
-    [Command(name: "reminders", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
+    [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
         var SteamID = ctx.Event.User.PlatformId;
@@ -92,7 +89,7 @@ internal static class MiscCommands
         }
         else
         {
-            ctx.Reply("You've already received your starting kit.");
+            ctx.Reply("You've already received your starting kit!");
         }
     }
 
@@ -344,7 +341,8 @@ internal static class MiscCommands
         LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
     }
 
-    //[Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3
+    /*
+    [Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3
     public static void SwitchPlayers(ChatCommandContext ctx, string originalPlayer, string newPlayer)
     {
         if (originalPlayer.TryGetPlayerInfo(out PlayerInfo originalPlayerInfo) && newPlayer.TryGetPlayerInfo(out PlayerInfo newPlayerInfo))
@@ -364,7 +362,8 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "bloblog", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
+    
+    [Command(name: "bloblog", shortHand:"blob", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
     public static void BlobStringLogCommand(ChatCommandContext ctx, int guidHash)
     {
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(guidHash), out Entity prefabEntity))
@@ -374,8 +373,14 @@ internal static class MiscCommands
         }
         else if (prefabEntity.TryGetComponent(out AbilityCastCondition castCondition))
         {
-            ConditionBlob conditionBlob = castCondition.Condition.Value;
-            ReadBlobString(ref conditionBlob.Info);
+            unsafe
+            {
+                BlobAssetReference<ConditionBlob> blobAssetReference = castCondition.Condition;
+                ConditionBlob* conditionBlob = (ConditionBlob*)blobAssetReference.GetUnsafePtr();
+                ConditionInfo conditionInfo = conditionBlob->Info;
+
+                ReadBlobString(ref conditionInfo);
+            }
         }
         else
         {
@@ -423,4 +428,5 @@ internal static class MiscCommands
 
         return result;
     }
+    */
 }

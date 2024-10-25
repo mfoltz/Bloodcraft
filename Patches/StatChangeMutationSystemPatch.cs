@@ -19,7 +19,7 @@ internal static class StatChangeMutationSystemPatch
     static void OnUpdatePrefix(StatChangeMutationSystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.BloodSystem || !ConfigService.BloodQualityBonus) return;
+        if (!(ConfigService.BloodSystem && ConfigService.BloodQualityBonus)) return;
 
         NativeArray<Entity> entities = __instance._StatChangeEventQuery.ToEntityArray(Allocator.Temp);
         try
@@ -34,14 +34,14 @@ internal static class StatChangeMutationSystemPatch
                     if (!statChangeEvent.Entity.Has<Blood>()) continue;
 
                     BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(bloodQualityChange.BloodType);
-                    ulong steamID = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    ulong steamId = statChangeEvent.Entity.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
 
                     IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
                     if (bloodHandler == null) continue;
 
-                    float quality = bloodHandler.GetLegacyData(steamID).Value;
+                    float quality = bloodHandler.GetLegacyData(steamId).Value;
 
-                    if (ConfigService.PrestigeSystem && steamID.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
+                    if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodSystem.BloodTypeToPrestigeMap[bloodType], out var bloodPrestige))
                     {
                         float qualityPercentBonus = ConfigService.PrestigeBloodQuality > 1f ? ConfigService.PrestigeBloodQuality : ConfigService.PrestigeBloodQuality * 100f;
 
@@ -63,7 +63,7 @@ internal static class StatChangeMutationSystemPatch
                         }
                     }
 
-                    RecentBloodChange[steamID] = true;
+                    RecentBloodChange[steamId] = true;
                 }
             }
         }

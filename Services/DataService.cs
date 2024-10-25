@@ -3,7 +3,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
-using Stunlock.Core;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using Unity.Entities;
 using static Bloodcraft.Services.ConfigService;
@@ -11,7 +11,6 @@ using static Bloodcraft.Services.ConfigService.ConfigInitialization;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
 using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
-using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Services;
 internal static class DataService
@@ -419,7 +418,7 @@ internal static class DataService
         internal static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
 
         // bools
-        internal static Dictionary<ulong, Dictionary<string, bool>> playerBools = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<string, bool>> playerBools = [];
 
         // classes
         internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> playerClass = [];
@@ -580,6 +579,55 @@ internal static class DataService
             internal static readonly string PlayerBloodStatsJson = Path.Combine(DirectoryPaths[4], "player_blood_stats.json");
             internal static readonly string PlayerFamiliarActivesJson = Path.Combine(DirectoryPaths[6], "player_familiar_actives.json");
             internal static readonly string PlayerFamiliarSetsJson = Path.Combine(DirectoryPaths[8], "player_familiar_sets.json");
+        }
+        static void LoadData<T>(ref ConcurrentDictionary<ulong, T> dataStructure, string key)
+        {
+            string path = filePaths[key];
+            if (!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+                dataStructure = [];
+                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                return;
+            }
+            try
+            {
+                string json = File.ReadAllText(path);
+
+                json = json.Replace("Sanguimancy", "UnarmedExpertise");
+
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    dataStructure = [];
+                }
+                else
+                {
+                    var data = JsonSerializer.Deserialize<ConcurrentDictionary<ulong, T>>(json, prettyJsonOptions);
+                    dataStructure = data ?? [];
+                }
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to read {key} data from file: {ex.Message}");
+            }
+        }
+        static void SaveData<T>(ConcurrentDictionary<ulong, T> data, string key)
+        {
+            string path = filePaths[key];
+            try
+            {
+                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                File.WriteAllText(path, json);
+                //Core.Log.LogInfo($"{key} data saved successfully.");
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to write {key} data to file: {ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
+            }
         }
         static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
         {

@@ -201,8 +201,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar togglecombat`
   - Enables/disables combat. Salute also does this if .fam e is toggled on.
   - Shortcut: *.fam c*
-- `.familiar add [CharPrefab]` 🔒
-  - Adds familiar to active list.
+- `.familiar add [Player] [CharPrefab]` 🔒
+  - Adds familiar to last list of player named.
   - Shortcut: *.fam a [CharPrefab]*
 - `.familiar remove [#]`
   - Removes familiar from unlocks.

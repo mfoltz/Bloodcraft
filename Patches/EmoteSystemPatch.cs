@@ -32,6 +32,7 @@ internal static class EmoteSystemPatch
     static readonly PrefabGUID CombatBuff = new(581443919);
     static readonly PrefabGUID PvPCombatBuff = new(697095869);
     static readonly PrefabGUID TakeFlightBuff = new(1205505492);
+    static readonly PrefabGUID ClearAggroBuff = new(1793107442);
 
     public static readonly Dictionary<PrefabGUID, Action<Entity, Entity, ulong>> actions = new()
     {
@@ -63,11 +64,11 @@ internal static class EmoteSystemPatch
                 {
                     if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
+                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar when using dominate form!");
                     }
                     else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar while dominating presence is active.");
+                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar when using bat form!");
                     }
                     else if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(userEntity, character, steamId);
                 }
@@ -149,17 +150,17 @@ internal static class EmoteSystemPatch
             if (!familiar.Has<Disabled>())
             {
                 if (FamiliarMinions.ContainsKey(data.Familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
-                EntityManager.AddComponent<Disabled>(familiar);
-
-                Follower follower = familiar.Read<Follower>();
-                follower.Followed._Value = Entity.Null;
-                familiar.Write(follower);
+                familiar.Add<Disabled>();
 
                 AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
                 aggroConsumer.Active._Value = false;
                 aggroConsumer.AggroTarget._Entity = Entity.Null;
                 aggroConsumer.AlertTarget._Entity = Entity.Null;
                 familiar.Write(aggroConsumer);
+
+                Follower follower = familiar.Read<Follower>();
+                follower.Followed._Value = Entity.Null;
+                familiar.Write(follower);
 
                 var buffer = character.ReadBuffer<FollowerBuffer>();
                 for (int i = 0; i < buffer.Length; i++)
@@ -297,7 +298,7 @@ internal static class EmoteSystemPatch
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable or disable combat mode for.");
+            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for...");
         }
     }
 }

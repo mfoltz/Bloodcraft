@@ -11,6 +11,7 @@ using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
+using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Utilities;
 internal static class FamiliarUtilities
@@ -22,6 +23,7 @@ internal static class FamiliarUtilities
     public static readonly Dictionary<Entity, Entity> AutoCallMap = [];
 
     static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
+    static readonly PrefabGUID InCombatBuff = new(581443919);
     public static void ClearFamiliarActives(ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var actives))
@@ -146,8 +148,8 @@ internal static class FamiliarUtilities
             familiar.Write(new LastTranslation { Value = playerPos });
             familiar.Write(new Translation { Value = playerPos });
 
-            Core.Log.LogInfo($"Returning familiar, applying target switch buff...");
-            BuffUtilities.TryApplyBuff(familiar, SwitchTargetBuff);
+            //Core.Log.LogInfo($"Returning familiar, applying target switch buff if in combat...");
+            //ClearTarget(familiar);
         }
     }
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
@@ -283,7 +285,15 @@ internal static class FamiliarUtilities
             data = (Entity.Null, data.FamKey);
             steamId.SetFamiliarActives(data);
 
+            AutoCallMap.Remove(player);
             LocalizationService.HandleServerReply(EntityManager, user, "Familiar <color=green>enabled</color>.");
         }   
+    }
+    public static void ClearTarget(Entity familiar)
+    {
+        AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+        Entity aggroTarget = aggroConsumer.AggroTarget.GetEntityOnServer();
+
+        if (aggroTarget.Exists()) BuffUtilities.TryApplyBuffWithOwner(aggroTarget, familiar, SwitchTargetBuff);
     }
 }

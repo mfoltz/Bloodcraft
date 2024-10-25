@@ -397,26 +397,35 @@ internal static class ServerBootstrapSystemPatches
 
             if (exists)
             {
-                if (ClassUtilities.HasClass(steamId))
+                if (ClassUtilities.HasClass(steamId) && playerCharacter.Has<BloodQualityBuff>())
                 {
                     PrefabGUID bloodPrefab = playerCharacter.Read<Blood>().BloodType;
                     BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter);
-                    string bloodTypeCheck = bloodType.ToString().ToLower();
+
+                    var bloodQualityBuffBuffer = playerCharacter.ReadBuffer<BloodQualityBuff>();
+                    List<PrefabGUID> bloodQualityBuffs = [];
+
+                    if (!bloodQualityBuffBuffer.IsEmpty)
+                    {
+                        foreach (BloodQualityBuff item in bloodQualityBuffBuffer)
+                        {
+                            bloodQualityBuffs.Add(item.BloodQualityBuffPrefabGuid);
+                        }
+                    }
 
                     LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
 
                     HashSet<PrefabGUID> classBuffsToRemove = [..UpdateBuffsBufferDestroyPatch.ClassBuffs.Where(keyValuePair => keyValuePair.Key != playerClass).SelectMany(keyValuePair => keyValuePair.Value)];
-                    HashSet<PrefabGUID> filteredClassBuffs = classBuffsToRemove.Where(buff => !UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(buff)).ToHashSet();
+                    //HashSet<PrefabGUID> filteredClassBuffs = classBuffsToRemove.Where(buff => !UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(buff)).ToHashSet();
 
-                    foreach (PrefabGUID classBuff in filteredClassBuffs)
+                    foreach (PrefabGUID classBuff in classBuffsToRemove)
                     {
                         if (ServerGameManager.TryGetBuff(playerCharacter, classBuff.ToIdentifier(), out Entity buffEntity))
                         {
-                            string buffPrefabName = buffEntity.Read<PrefabGUID>().LookupName().ToLower();
-
-                            if (buffPrefabName.Contains(bloodTypeCheck)) continue; // not fool-proof but good enough for validating bloodBuffs here
+                            if (bloodQualityBuffs.Contains(classBuff)) continue; // after filtering out class buffs the player should have, check against remaining buffs then see if they are supposed to have it based on blood type and destroy it if not?
                             else
                             {
+                                Core.Log.LogInfo($"{user.CharacterName.Value} class is {playerClass.ToString()} with blood type {bloodType.ToString()} and should not have {classBuff.LookupName()}, removing buff...");
                                 DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                             }
                         }
@@ -467,7 +476,7 @@ internal static class ServerBootstrapSystemPatches
                         }
                     }
 
-                    BloodManager.UpdateBloodStats(playerCharacter, user, bloodType);
+                    //BloodManager.UpdateBloodStats(playerCharacter, bloodType);
                 }
             }
         }

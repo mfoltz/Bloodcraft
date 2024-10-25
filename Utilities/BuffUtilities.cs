@@ -37,6 +37,28 @@ internal static class BuffUtilities
 
         return false;
     }
+    public static bool TryApplyBuffWithOwner(Entity target, Entity familiar, PrefabGUID buffPrefab)
+    {
+        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        {
+            BuffPrefabGUID = buffPrefab,
+            Who = target.Read<NetworkId>()
+        };
+
+        FromCharacter fromCharacter = new() // fam should be entityOwner
+        {
+            Character = familiar,
+            User = familiar
+        };
+
+        if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier()))
+        {
+            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+            return true;
+        }
+
+        return false;
+    }
     public static void ModifyBloodBuff(Entity buff)
     {
         Core.Log.LogInfo("ModifyBloodBuff: " + buff.Read<PrefabGUID>().LookupName());

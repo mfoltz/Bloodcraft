@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Services;
-using HarmonyLib;
+﻿using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;

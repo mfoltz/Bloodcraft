@@ -56,7 +56,7 @@ internal class EclipseService
     static void RegisterUser(ulong steamId)
     {
         if (RegisteredUsers.Contains(steamId)) return;
-        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
         {
             Core.Log.LogInfo($"User {steamId} registered for Eclipse updates from PlayerCache...");
             RegisteredUsers.Add(steamId);

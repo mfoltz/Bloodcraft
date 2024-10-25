@@ -1,14 +1,20 @@
 `1.4.3`
+- blood stats are now applied when chosen and update on legacy level up without needing to consume new blood of that type
+- fixed bug with crafting credit for professions and crafting quests
+- familiars should play nicer with others on PvE servers, have also added handling for some abilities that were ignoring allied status
+- using a waygate with a familiar out will dismiss it without player having to use waygate again as is currently the case, familiar will still be called after teleporting (only if one was present/active first)
+- using batform with a familiar out will dismiss it, landing will call it (only if one was present/active first)
 - removed crystal and coal from gathering quest targets pool
-- RestedXP will be adjusted based on the player's new calculated cap instead of reset entirely after prestiging in leveling
-- can use 'vbloods' as the name with familiar search command to return all boxes with at least one VBlood in them (thank Odjit c:)
-- profession experience now granted to player even when using clan stations and not just stations the player has personally placed
-- cooldowns for NPC spells from classes working again, cooldown will be 8 seconds multiplied by the index of the class spell
-- added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none leave at 1 for no change)
-- removed auto rerolling for no targets found in favor of manual rerolling at user's discretion since the former was not as reliable as would've liked and sometimes forced rerolls inappropriately
-- target tracking will inform user to try again from a different location if closest target is imprisoned by a player or a player familiar
-- verifying kill target unit level against player level using base unit prefab instead of reading level directly from entity in cache to prevent assigning targets outside intended level range
-- changed some collections to readonly and added logging/handling when configuration for item prefabs/quantity is not as expected instead of causing mod to fail to initialize entirely
+- RestedXP adjusted downwards based on the player's new calculated cap instead of being reset entirely after prestiging in experience/leveling
+- can use 'vblood' as the name with familiar search command to return all boxes with at least one vblood or blood soul (thank Odjit c:)
+- profession experience now granted to players when using clan/allied stations and not just stations the player has placed personally
+- NPC spell cooldowns for classes again functioning as they were previously, cooldown will be 8 seconds multiplied by the order of the class spell
+- added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none gained leave at 1 for no change)
+- removed auto rerolling quest targets, was trickier to get right than it was worth now that manual rerolling at player discretion is an option
+- target tracking will no longer direct towards closeset unit if it is imprisoned or a player familiar
+- checking unit level against player level using unit prefab instead of unit entity in target cache to help prevent assigning quest kill targets outside intended level range
+- added logging/handling when configurations for item prefabs/quantity is not as expected instead of mod failing to initialize entirely
+- changed playerBools data to use ConcurrentDictionary instead of Dictionary which may solve issues that only seem to occur on more populated servers (.kitme inconsistency, for example)
 
 `1.4.2`
 - fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled

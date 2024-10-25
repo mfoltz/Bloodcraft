@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Entities;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using Bloodcraft.Services;
 
 namespace Bloodcraft.Patches;
 
@@ -13,12 +14,16 @@ internal static class KnockbackSystemSpawnPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManger => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     [HarmonyPatch(typeof(KnockbackSystemSpawn), nameof(KnockbackSystemSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(KnockbackSystemSpawn __instance)
     {
         if (!Core.hasInitialized) return;
+        else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1729431709_0.ToEntityArray(Allocator.Temp);
         try
@@ -28,15 +33,17 @@ internal static class KnockbackSystemSpawnPatch
                 if (!entity.TryGetComponent(out EntityOwner entityOwner)) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
+                Entity owner = entityOwner.Owner;
 
-                if (buffTarget.IsPlayer() && ServerGameManger.IsAllies(buffTarget, entityOwner.Owner))
+                if (owner.IsFollowingPlayer() && buffTarget.IsPlayer())
                 {
-                    Core.Log.LogInfo($"Checking knockback on ally...");
-
-                    if (entity.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
+                    if (ServerGameManger.IsAllies(buffTarget, owner))
                     {
-                        Core.Log.LogInfo($"Protecting ally from knockback debuff...");
-                        DestroyUtility.Destroy(EntityManager, entity);
+                        PreventKnockback(entity);
+                    }
+                    else if (GameMode.Equals(GameModeType.PvE))
+                    {
+                        PreventKnockback(entity);
                     }
                 }
             }
@@ -44,6 +51,14 @@ internal static class KnockbackSystemSpawnPatch
         finally
         {
             entities.Dispose();
+        }
+    }
+    static void PreventKnockback(Entity knockbackBuff)
+    {
+        if (knockbackBuff.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
+        {
+            //Core.Log.LogInfo($"Protecting ally from knockback debuff...");
+            DestroyUtility.Destroy(EntityManager, knockbackBuff);
         }
     }
 }

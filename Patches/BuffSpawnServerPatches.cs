@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -47,6 +48,7 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID phasing = new(-79611032);
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
+    static readonly PrefabGUID GateBossFeedComplete = new(-354622715);
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -96,35 +98,39 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && buffTarget.TryGetPlayer(out Entity player)) // teleport familiar to player after waygate and autoCall if was out before
+                else if (ConfigService.BloodSystem && prefabGUID.Equals(GateBossFeedComplete) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                    Core.Log.LogInfo($"BuffSystem_Spawn_Server GateBossFeedComplete, modifying to consumable...");
 
-                    if (familiar.Exists())
+                    Blood blood = player.Read<Blood>();
+                    ulong steamId = player.GetSteamId();
+
+                    if (entity.Has<ChangeBloodOnGameplayEvent>())
                     {
-                        FamiliarUtilities.ReturnFamiliar(player, familiar);
+                        var buffer = entity.ReadBuffer<ChangeBloodOnGameplayEvent>();
 
-                        if (FamiliarUtilities.AutoCallMap.TryGetValue(player, out Entity dismissedFamiliar) && familiar.Equals(dismissedFamiliar))
-                        {
-                            Core.Log.LogInfo("Phasing detected, calling familiar...");
-                            FamiliarUtilities.AutoCall(player, familiar);
-                            FamiliarUtilities.AutoCallMap.Remove(player);
-                        }
+                        ChangeBloodOnGameplayEvent changeBlood = buffer[0];
+                        changeBlood.BloodValue = blood.Value + 50f;
+                        changeBlood.BloodQuality = Math.Min(blood.Quality, 100f);
+                        changeBlood.BloodType = blood.BloodType;
+                        changeBlood.GainBloodType = GainBloodType.Consumable;
+
+                        buffer[0] = changeBlood;
                     }
 
-                    /*
-                    else if (player.GetSteamId().TryGetFamiliarActives(out var data))
+                    BloodSystem.SkipBloodUpdate.Add(steamId);
+                }
+                else if (ConfigService.FamiliarSystem && prefabGUID.Equals(phasing) && buffTarget.TryGetPlayer(out player)) // teleport familiar to player after waygate and autoCall if was out before
+                {
+                    if (FamiliarUtilities.AutoCallMap.TryGetValue(player, out Entity familiar) && familiar.Exists())
                     {
-                        if (data.Familiar.Exists())
-                        {
-                            FamiliarUtilities.ReturnFamiliar(player, familiar);
-                        }
+                        FamiliarUtilities.AutoCall(player, familiar);
                     }
-                    */
                 }
                 else if (ConfigService.FamiliarSystem && prefabName.Contains("emote_onaggro") && buffTarget.TryGetFollowedPlayer(out player))
                 {
-                    ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    ulong steamId = player.GetSteamId();
+
                     if (!PlayerUtilities.GetPlayerBool(steamId, "VBloodEmotes"))
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
@@ -135,6 +141,7 @@ internal static class BuffSystemSpawnPatches
                     if (buffTarget.TryGetPlayer(out player))
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
                         if (EntityManager.Exists(familiar))
                         {
                             FamiliarUtilities.ReturnFamiliar(player, familiar);
@@ -205,21 +212,6 @@ internal static class BuffSystemSpawnPatches
                         {
                             DestroyUtility.CreateDestroyEvent(EntityManager, entity, DestroyReason.Default, DestroyDebugReason.None);
                         }
-                        else if (prefabGUID.Equals(draculaFinal)) // need to double check if this actually forces drac final phase or not
-                        {
-                            ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                            {
-                                BuffPrefabGUID = new(-31099041), // Buff_Vampire_Dracula_SpellPhase
-                            };
-
-                            FromCharacter fromCharacter = new()
-                            {
-                                Character = familiar,
-                                User = player.Read<PlayerCharacter>().UserEntity,
-                            };
-
-                            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                        }
                         else if (prefabGUID.Equals(swordBuff))
                         {
                             if (ServerGameManager.TryGetBuff(familiar, highlordSwordBuff.ToIdentifier(), out Entity swordPermabuff))
@@ -233,31 +225,11 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-
-    [HarmonyPatch(typeof(Spawn_MoveSpeedBuffSystem), nameof(Spawn_MoveSpeedBuffSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(Spawn_MoveSpeedBuffSystem __instance)
-    {
-        if (!Core.hasInitialized) return;
-
-        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!entity.TryGetComponent(out PrefabGUID prefabGUID) || !prefabGUID.Equals(BatLandingBuff)) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (ConfigService.FamiliarSystem && GameMode.Equals(GameModeType.PvE) && entity.GetOwner().IsFollowingPlayer() && buffTarget.IsPlayer())
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                    Buff buff = entity.Read<Buff>();
 
-                    
+                    if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                 }
             }
         }

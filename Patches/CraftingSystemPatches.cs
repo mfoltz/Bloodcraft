@@ -1,12 +1,10 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
-using Engine.Console.GameEngineImplementation;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -177,10 +175,12 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     if (!craftingJobs.ContainsKey(itemPrefabGUID))
                     {
+                        Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| 1");
                         craftingJobs[itemPrefabGUID] = 1;
                     }
                     else
                     {
+                        Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID] + 1}");
                         craftingJobs[itemPrefabGUID]++;
                     }
                 }
@@ -215,6 +215,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                     if (playerCraftingJobs.TryGetValue(steamId, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
                     {
                         craftingJobs[itemPrefabGUID]--;
+                        Core.Log.LogInfo($"Crafting job removed for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
                         if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
                     }
                 }
@@ -257,8 +258,8 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                     validatedCraftingJobs[itemPrefabGUID]++;
                 }
 
-                validatedCraftingJobs[itemPrefabGUID]--;
-                if (validatedCraftingJobs[itemPrefabGUID] <= 0) validatedCraftingJobs.Remove(itemPrefabGUID);
+                craftingJobs[itemPrefabGUID]--;
+                if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
             }
             else if (craftingJobs[itemPrefabGUID] <= 0)
             {

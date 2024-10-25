@@ -15,6 +15,8 @@ internal static class BloodSystem
     const float EXP_CONSTANT = 0.1f;
     const int EXP_POWER = 2;
 
+    public static readonly HashSet<ulong> SkipBloodUpdate = [];
+
     public static readonly Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
         { BloodType.Worker, steamID =>
@@ -278,14 +280,11 @@ internal static class BloodSystem
                 }
             }
 
-            if (StatChangeMutationSystemPatch.RecentBloodChange.TryGetValue(steamID, out bool recentChange) && recentChange)
+            if (SkipBloodUpdate.Contains(steamID))
             {
-                StatChangeMutationSystemPatch.RecentBloodChange.Remove(steamID);
+                SkipBloodUpdate.Remove(steamID);
             }
-            else
-            {
-                //UpdateBloodStats(player, user, bloodType);
-            }
+            else BloodManager.UpdateBloodStats(player, bloodType);
         }
 
         if (PlayerUtilities.GetPlayerBool(steamID, "BloodLogging"))

@@ -15,7 +15,6 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID CombatBuff = new(581443919);
-    static readonly PrefabGUID ExternalInventory = new(1183666186);
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
     public static readonly Dictionary<LevelingSystem.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
@@ -25,6 +24,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static void OnUpdatePostix(UpdateBuffsBuffer_Destroy __instance)
     {
         if (!Core.hasInitialized) return;
+        else if (!(ConfigService.FamiliarSystem || ConfigService.PrestigeSystem || Classes)) return;
 
         NativeArray<Entity> entities = __instance.__query_401358720_0.ToEntityArray(Allocator.Temp);
         try
@@ -57,6 +57,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                         {
                             //Core.Log.LogInfo($"UpdateBuffsBuffer_Destroy | {steamId} | {prestigeLevel} | {PrestigeBuffs.IndexOf(prefabGUID)} | {prefabGUID.LookupName()}");
+                            
                             if (prestigeLevel > PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
@@ -69,9 +70,8 @@ internal static class UpdateBuffsBufferDestroyPatch
                     if (ClassUtilities.HasClass(steamId))
                     {
                         LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
-                        List<PrefabGUID> classBuffs = ClassBuffs.ContainsKey(playerClass) ? ClassBuffs[playerClass] : [];
 
-                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID);
+                        if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID);
                     }
                 }
             }
