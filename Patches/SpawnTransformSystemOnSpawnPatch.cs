@@ -101,6 +101,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         {
                             DestroyUtility.Destroy(EntityManager, entity);
                             LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
+                            continue;
                         }
                     }
                 }

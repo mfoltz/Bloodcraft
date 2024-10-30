@@ -123,6 +123,7 @@ internal static class Core
         });
 
         NativeArray<Entity> entities = prefabGUIDQuery.ToEntityArray(Allocator.TempJob);
+        List<PrefabGUID> ownedPrefabGUIDs = [];
 
         int sctCounter = 0;
         int targetCounter = 0;
@@ -139,8 +140,9 @@ internal static class Core
 
                         if (targetEntity.Exists() && targetEntity.TryGetComponent(out PrefabGUID targetPrefabGUID) && targetEntity.TryGetComponent(out EntityOwner owner))
                         {
-                            if (owner.Owner.Exists() && owner.Owner.IsPlayer())
+                            if (owner.Owner.Exists() && owner.Owner.IsPlayer() && !ownedPrefabGUIDs.Contains(targetPrefabGUID))
                             {
+                                ownedPrefabGUIDs.Add(targetPrefabGUID);
                                 //Log.LogInfo($"{targetPrefabGUID.LookupName()} | {owner.Owner.Read<PlayerCharacter>().Name.Value}");
                             }
                             else if (owner.Owner.Exists() && owner.Owner.TryGetComponent(out PrefabGUID ownerPrefabGUID))
@@ -166,7 +168,7 @@ internal static class Core
                         {
                             entity.Remove<Disabled>();
                             DestroyUtility.Destroy(EntityManager, entity);
-                            Log.LogInfo("Destroyed Undead Leader...");
+                            //Log.LogInfo("Destroyed Undead Leader...");
                         }
                     }
                 }
@@ -177,6 +179,10 @@ internal static class Core
             entities.Dispose();
             prefabGUIDQuery.Dispose();
             Log.LogWarning($"Destroyed {sctCounter} | {targetCounter} SCT prefab entities and targets...");
+            foreach (PrefabGUID prefabGUID in ownedPrefabGUIDs)
+            {
+                Log.LogInfo(prefabGUID.LookupName());
+            }
         }
     }
 }
