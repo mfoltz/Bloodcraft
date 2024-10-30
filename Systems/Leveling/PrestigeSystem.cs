@@ -13,6 +13,11 @@ internal static class PrestigeSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
+    static ModifyUnitStatBuffSystem_Destroy ModifyUnitStatBuffSystemDestroy => SystemService.ModifyUnitStatBuffSystem_Destroy;
+
+    static readonly PrefabGUID ExoBuff = new(394886437); // AB_BloodBuff_Rogue_MountDamageBonus unused by game so sticking exo stat buffer on it
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -320,7 +325,7 @@ internal static class PrestigeSystem
     public static void DisplayPrestigeInfo(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel, int maxPrestigeLevel)
     {
         float reductionFactor = 1.0f;
-        float gainMultiplier = 1.0f;
+        float gainFactor = 1.0f;
 
         if (parsedPrestigeType == PrestigeType.Experience)
         {
@@ -331,11 +336,11 @@ internal static class PrestigeSystem
                 reductionFactor = ConfigService.LevelingPrestigeReducer * expPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
-                gainMultiplier = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
+                gainFactor = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
             }
 
             string reductionPercentage = (reductionFactor * 100).ToString("F2") + "%";
-            string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
+            string gainPercentage = (gainFactor * 100).ToString("F2") + "%";
 
             ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
             ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
@@ -351,10 +356,10 @@ internal static class PrestigeSystem
                 reductionFactor = ConfigService.LevelingPrestigeReducer * expPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
-                gainMultiplier = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
+                gainFactor = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
             }
 
-            float combinedFactor = gainMultiplier - reductionFactor;
+            float combinedFactor = gainFactor - reductionFactor;
             string percentageReductionString = (reductionFactor * 100).ToString("F2") + "%";
 
             // Fixed additive stat gain increase based on base value
@@ -409,7 +414,7 @@ internal static class PrestigeSystem
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * prestigeLevel;
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
-        LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
+        LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience from unit kills reduced by <color=yellow>{reductionPercentage}</color>");
     }
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel)
     {
@@ -443,14 +448,16 @@ internal static class PrestigeSystem
     {
         List<int> buffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
         if (buffs.Count == 0) return;
+
         for (int i = 0; i < prestigeLevel; i++)
         {
             PrefabGUID buffPrefab = new(buffs[i]);
+
             if (buffPrefab.GuidHash == 0) continue;
-            BuffUtilities.ApplyPermanentBuff(character, buffPrefab);
+            else BuffUtilities.ApplyPermanentBuff(character, buffPrefab);
         }
     }
-    public static void ApplyExperiencePrestigeEffects(User user, int level)
+    public static void ReplyExperiencePrestigeEffects(User user, int level)
     {
         float levelingReducer = ConfigService.LevelingPrestigeReducer * level;
 
@@ -461,7 +468,7 @@ internal static class PrestigeSystem
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
         LocalizationService.HandleServerReply(EntityManager, user, $"Player <color=green>{user.CharacterName.Value}</color> has prestiged in <color=#90EE90>Experience</color>[<color=white>{level}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience reduced by <color=yellow>{reductionPercentage}</color>");
     }
-    public static void ApplyOtherPrestigeEffects(User user, ulong playerId, PrestigeType parsedPrestigeType, int level)
+    public static void ReplyOtherPrestigeEffects(User user, ulong playerId, PrestigeType parsedPrestigeType, int level)
     {
         int expPrestige = playerId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
@@ -481,40 +488,31 @@ internal static class PrestigeSystem
     static void RemoveBuff(Entity character, int buffId)
     {
         var buffPrefab = new PrefabGUID(buffId);
+
         if (ServerGameManager.TryGetBuff(character, buffPrefab.ToIdentifier(), out Entity buffEntity))
         {
             //Core.Log.LogInfo($"Removing buff {buffPrefab.LookupName()}...");
             DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
         }
     }
-    public static int GetExperiencePrestigeLevel(ulong steamId)
-    {
-        return steamId.TryGetPlayerPrestiges(out var prestigeData) &&
-               prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel) &&
-               prestigeLevel > 0 ? prestigeLevel : 0;
-    }
     public static bool TryParsePrestigeType(string prestigeType, out PrestigeType parsedPrestigeType)
     {
-        // Attempt to parse the prestigeType string to the PrestigeType enum.
         if (Enum.TryParse(prestigeType, true, out parsedPrestigeType))
         {
             return true; // Successfully parsed
         }
 
-        // If the initial parse failed, try to find a matching PrestigeType enum value containing the input string.
         parsedPrestigeType = Enum.GetValues(typeof(PrestigeType))
                                  .Cast<PrestigeType>()
                                  .FirstOrDefault(pt => pt.ToString().Contains(prestigeType, StringComparison.OrdinalIgnoreCase));
 
-        // Check if a valid enum value was found that contains the input string.
         if (!parsedPrestigeType.Equals(default(PrestigeType)))
         {
             return true; // Found a matching enum value
         }
 
-        // If no match is found, return false and set the out parameter to default value.
         parsedPrestigeType = default;
-        return false; // Parsing failed
+        return false;
     }
     public static Dictionary<string, int> GetPrestigeForType(PrestigeType prestigeType)
     {
@@ -533,35 +531,136 @@ internal static class PrestigeSystem
             .Where(p => !string.IsNullOrEmpty(p.PlayerName))
             .ToDictionary(p => p.PlayerName, p => p.Prestige);
     }
-    public static void AdjustCharacterStats(Entity character, ulong platformId)
+    public static void UpdateExoStatBuff(Entity character, int exoPrestiges)
     {
-        if (!platformId.TryGetPlayerPrestiges(out var prestigeData)) return;
-        float damageTakenMultiplier = ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeType.Exo];
-        float damageDealtMultiplier = ConfigService.ExoPrestigeDamageDealtMultiplier * prestigeData[PrestigeType.Exo];
+        ulong steamId = character.GetSteamId();
 
-        AdjustResistStats(character, -damageTakenMultiplier);
-        AdjustDamageStats(character, damageDealtMultiplier);
+        if (exoPrestiges > 0 && !character.HasBuff(ExoBuff))
+        {
+            Core.Log.LogInfo($"Applying new exo stats...");
+
+            BuffUtilities.ApplyPermanentBuff(character, ExoBuff);
+
+            if (character.TryGetBuff(ExoBuff, out Entity exoBuff))
+            {
+                Core.Log.LogInfo($"Modifying buff entity for exo...");
+
+                ApplyExoStats(steamId, exoBuff);
+            }
+        }
+        else if (exoPrestiges > 0 && character.TryGetBuff(ExoBuff, out Entity exoBuff))
+        {
+            //DestroyUtility.Destroy(EntityManager, exoBuff, DestroyDebugReason.TryRemoveBuff);
+            DestroyUtility.CreateDestroyEvent(EntityManager, exoBuff, DestroyReason.ParentDestruction, DestroyDebugReason.TryRemoveBuff);
+            ModifyUnitStatBuffSystemDestroy.OnUpdate();
+
+            Core.Log.LogInfo($"Updating existing exo stats...");
+
+            BuffUtilities.ApplyPermanentBuff(character, ExoBuff);
+
+            if (character.TryGetBuff(ExoBuff, out exoBuff))
+            {
+                Core.Log.LogInfo($"Modifying buff entity for exo...");
+
+                ApplyExoStats(steamId, exoBuff);
+            }
+        }
+        else if (exoPrestiges == 0 && character.HasBuff(ExoBuff))
+        {
+            if (character.TryGetBuff(ExoBuff, out exoBuff))
+            {
+                Core.Log.LogInfo($"Removing exo stats...");
+
+                DestroyUtility.CreateDestroyEvent(EntityManager, exoBuff, DestroyReason.ParentDestruction, DestroyDebugReason.TryRemoveBuff);
+                ModifyUnitStatBuffSystemDestroy.OnUpdate();
+            }
+        }
     }
-    static void AdjustResistStats(Entity character, float multiplier)
+    public static void ApplyExoStats(ulong steamId, Entity exoBuff)
+    {
+        if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Exo, out var exoPrestiges))
+        {
+            float damageTakenFactor = ConfigService.ExoPrestigeDamageTakenMultiplier * exoPrestiges;
+            float damageDealtFactor = ConfigService.ExoPrestigePowerBonus * exoPrestiges;
+
+            if (!exoBuff.Has<ModifyUnitStatBuff_DOTS>()) // add bonuses if doesn't have buffer
+            {
+                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(exoBuff);
+            }
+
+            var buffer = exoBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+
+            UnitStatType statType = UnitStatType.PhysicalPower;
+            ModifyUnitStatBuff_DOTS unitStatBuff = new()
+            {
+                StatType = statType,
+                ModificationType = ModificationType.AddToBase,
+                Value = damageDealtFactor,
+                Modifier = 1,
+                IncreaseByStacks = false,
+                ValueByStacks = 0,
+                Priority = 0,
+                Id = ModificationId.Empty
+            };
+            buffer.Add(unitStatBuff);
+
+            statType = UnitStatType.SpellPower;
+            unitStatBuff = new()
+            {
+                StatType = statType,
+                ModificationType = ModificationType.AddToBase,
+                Value = damageDealtFactor,
+                Modifier = 1,
+                IncreaseByStacks = false,
+                ValueByStacks = 0,
+                Priority = 0,
+                Id = ModificationId.Empty
+            };
+            buffer.Add(unitStatBuff);
+
+            AmplifyBuff amplifyBuff = new()
+            {
+                AmplifyModifier = damageTakenFactor,
+            };
+
+            exoBuff.Add<AmplifyBuff>();
+            exoBuff.Write(amplifyBuff);
+
+            exoBuff.Add<SpawnTag>();
+
+            ModifyUnitStatBuffSystemSpawn.OnUpdate();
+            if (exoBuff.Has<SpawnTag>()) exoBuff.Remove<SpawnTag>();
+        }
+    }
+    public static void ResetDamageResistCategoryStats(Entity character)
+    {
+        AdjustResistStats(character);
+        AdjustDamageStats(character);
+    }
+    static void AdjustResistStats(Entity character)
     {
         ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
-        resistCategoryStats.ResistVsBeasts._Value = multiplier;
-        resistCategoryStats.ResistVsHumans._Value = multiplier;
-        resistCategoryStats.ResistVsUndeads._Value = multiplier;
-        resistCategoryStats.ResistVsDemons._Value = multiplier;
-        resistCategoryStats.ResistVsMechanical._Value = multiplier;
-        resistCategoryStats.ResistVsVampires._Value = multiplier;
+
+        resistCategoryStats.ResistVsBeasts._Value = 0;
+        resistCategoryStats.ResistVsHumans._Value = 0;
+        resistCategoryStats.ResistVsUndeads._Value = 0;
+        resistCategoryStats.ResistVsDemons._Value = 0;
+        resistCategoryStats.ResistVsMechanical._Value = 0;
+        resistCategoryStats.ResistVsVampires._Value = 0;
+
         character.Write(resistCategoryStats);
     }
-    static void AdjustDamageStats(Entity character, float multiplier)
+    static void AdjustDamageStats(Entity character)
     {
         DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
-        damageCategoryStats.DamageVsBeasts._Value = 1 + multiplier;
-        damageCategoryStats.DamageVsHumans._Value = 1 + multiplier;
-        damageCategoryStats.DamageVsUndeads._Value = 1 + multiplier;
-        damageCategoryStats.DamageVsDemons._Value = 1 + multiplier;
-        damageCategoryStats.DamageVsMechanical._Value = 1 + multiplier;
-        damageCategoryStats.DamageVsVampires._Value = 1 + multiplier;
+
+        damageCategoryStats.DamageVsBeasts._Value = 1;
+        damageCategoryStats.DamageVsHumans._Value = 1;
+        damageCategoryStats.DamageVsUndeads._Value = 1;
+        damageCategoryStats.DamageVsDemons._Value = 1;
+        damageCategoryStats.DamageVsMechanical._Value = 1;
+        damageCategoryStats.DamageVsVampires._Value = 1;
+
         character.Write(damageCategoryStats);
     }
 }

@@ -89,7 +89,8 @@ internal static class DeathEventListenerSystemPatch
             }
         }
         else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
-        else if (deathEvent.Died.Has<Minion>() || !deathEvent.Died.Has<UnitLevel>()) return false;
+        else if (deathEvent.Died.Has<Minion>() || deathEvent.Died.Has<Trader>()) return false;
+        else if (!deathEvent.Died.Has<UnitLevel>()) return false;
 
         return true;
     }

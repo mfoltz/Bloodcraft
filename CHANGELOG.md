@@ -1,20 +1,23 @@
 `1.4.3`
-- blood stats are now applied when chosen and update on legacy level up without needing to consume new blood of that type
-- fixed bug with crafting credit for professions and crafting quests
-- familiars should play nicer with others on PvE servers, have also added handling for some abilities that were ignoring allied status
-- using a waygate with a familiar out will dismiss it without player having to use waygate again as is currently the case, familiar will still be called after teleporting (only if one was present/active first)
-- using batform with a familiar out will dismiss it, landing will call it (only if one was present/active first)
-- removed crystal and coal from gathering quest targets pool
+- Legacy essence values gained from feed events are now multipled by x5 if consuming the same bloodType and/or then up to x2 if the player has 100% blood quality
+- Exo prestige is hard-disabled regardless of config and any current effects should be undone when players log in, will be reenabled in a future update after reworking
+- Traders no longer provide any progression to players when killed
+- Blood stats are now applied when chosen and update on legacy level up without needing to consume new blood of that type
+- Fixed bug with crafting credit for professions/crafting quests
+- Familiars should play nicer with others on PvE servers, have also added handling for some abilities that were ignoring allied status
+- Using a waygate with a familiar out will dismiss it without player having to use waygate again as is currently the case, after teleporting it will return (only if familiar was present/active first)
+- Using batform with a familiar out will dismiss it, after landing it will return (only if familiar was present/active first)
+- Removed crystal, thistle and coal from gathering quest prefab pool
 - RestedXP adjusted downwards based on the player's new calculated cap instead of being reset entirely after prestiging in experience/leveling
-- can use 'vblood' as the name with familiar search command to return all boxes with at least one vblood or blood soul (thank Odjit c:)
-- profession experience now granted to players when using clan/allied stations and not just stations the player has placed personally
-- NPC spell cooldowns for classes again functioning as they were previously, cooldown will be 8 seconds multiplied by the order of the class spell
-- added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none gained leave at 1 for no change)
-- removed auto rerolling quest targets, was trickier to get right than it was worth now that manual rerolling at player discretion is an option
-- target tracking will no longer direct towards closeset unit if it is imprisoned or a player familiar
-- checking unit level against player level using unit prefab instead of unit entity in target cache to help prevent assigning quest kill targets outside intended level range
-- added logging/handling when configurations for item prefabs/quantity is not as expected instead of mod failing to initialize entirely
-- changed playerBools data to use ConcurrentDictionary instead of Dictionary which may solve issues that only seem to occur on more populated servers (.kitme inconsistency, for example)
+- Can use 'vblood' as the name with familiar search command to return all boxes with at least one vblood or blood soul (ty Odjit c:)
+- Profession experience now granted to players when using clan/allied stations and not just stations placed by the player
+- NPC spell cooldowns for classes again functioning as they were previously, cooldown will be 8 seconds multiplied by the order of the spell in the class spells list
+- Added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none gained leave at 1 for no change)
+- Removed auto rerolling quest targets, was trickier to get right than it was worth now that manual rerolling is an option (please let me know of any quest prefabs that result in players being unable to complete a quest)
+- Target tracking will no longer detect imprisoned units or player familiars
+- Checking unit level against player level using unit prefab instead of unit entity in questTarget cache to prevent assigning quest kill targets outside intended level range
+- Added logging/handling when configurations for item prefabs/quantities are not as expected instead of failing to initialize entirely
+- Changed playerBools data to ConcurrentDictionary instead of Dictionary (hoping this resolves .kitme issues)
 
 `1.4.2`
 - fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled

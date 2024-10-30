@@ -7,11 +7,15 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Sequencer;
+using ProjectM.Shared;
+using Stunlock.Core;
 using System.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -62,7 +66,7 @@ internal static class Core
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
-        
+
         /*
         foreach (var kvp in Server.m_SystemLookup)
         {
@@ -82,8 +86,10 @@ internal static class Core
             }
             Core.Log.LogInfo("=============================");
         }
-        */    
-        
+        */
+
+        //CleanSCTPRefabs();
+
         hasInitialized = true;
     }
     static World GetServerWorld()
@@ -98,5 +104,79 @@ internal static class Core
             UnityEngine.Object.DontDestroyOnLoad(MonoBehaviour.gameObject);
         }
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    }
+
+    static readonly PrefabGUID SCTPrefab = new(-1661525964);
+
+    static readonly ComponentType[] PrefabGUIDComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+    ];
+
+    static readonly PrefabGUID UndeadLeader = new(-1365931036);
+    static void CleanSCTPRefabs()
+    {
+        EntityQuery prefabGUIDQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = PrefabGUIDComponent,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        NativeArray<Entity> entities = prefabGUIDQuery.ToEntityArray(Allocator.TempJob);
+
+        int sctCounter = 0;
+        int targetCounter = 0;
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (!entity.Has<SpawnTag>() && entity.TryGetComponent(out PrefabGUID prefabGUID))
+                {
+                    if (prefabGUID.Equals(SCTPrefab))
+                    {
+                        ScrollingCombatTextMessage scrollingCombatTextMessage = entity.Read<ScrollingCombatTextMessage>();
+                        Entity targetEntity = scrollingCombatTextMessage.Target.GetEntityOnServer();
+
+                        if (targetEntity.Exists() && targetEntity.TryGetComponent(out PrefabGUID targetPrefabGUID) && targetEntity.TryGetComponent(out EntityOwner owner))
+                        {
+                            if (owner.Owner.Exists() && owner.Owner.IsPlayer())
+                            {
+                                //Log.LogInfo($"{targetPrefabGUID.LookupName()} | {owner.Owner.Read<PlayerCharacter>().Name.Value}");
+                            }
+                            else if (owner.Owner.Exists() && owner.Owner.TryGetComponent(out PrefabGUID ownerPrefabGUID))
+                            {
+                                //Log.LogInfo($"{targetPrefabGUID.LookupName()} | {ownerPrefabGUID.LookupName()}");
+                            }
+
+                            if (targetEntity.Has<VampireTag>()) continue;
+
+                            DestroyUtility.Destroy(EntityManager, targetEntity);
+                            targetCounter++;
+                        }
+
+                        if (entity.Has<VampireTag>()) continue;
+
+                        DestroyUtility.Destroy(EntityManager, entity);
+                        sctCounter++;
+                    }
+                    else if (prefabGUID.Equals(UndeadLeader))
+                    {
+                        entity.LogComponentTypes();
+                        if (entity.Has<Disabled>() || entity.Has<BlockFeedBuff>())
+                        {
+                            entity.Remove<Disabled>();
+                            DestroyUtility.Destroy(EntityManager, entity);
+                            Log.LogInfo("Destroyed Undead Leader...");
+                        }
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+            prefabGUIDQuery.Dispose();
+            Log.LogWarning($"Destroyed {sctCounter} | {targetCounter} SCT prefab entities and targets...");
+        }
     }
 }

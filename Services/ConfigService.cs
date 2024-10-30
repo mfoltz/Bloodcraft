@@ -54,7 +54,7 @@ public static class ConfigService
     public static int ExoPrestigeReward { get; private set; }
     public static int ExoPrestigeRewardQuantity { get; private set; }
     public static float ExoPrestigeDamageTakenMultiplier { get; private set; }
-    public static float ExoPrestigeDamageDealtMultiplier { get; private set; }
+    public static float ExoPrestigePowerBonus { get; private set; }
     public static bool ExpertiseSystem { get; private set; }
     public static int MaxExpertisePrestiges { get; private set; }
     public static bool UnarmedSlots { get; private set; }
@@ -236,7 +236,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Prestige", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default)"),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging"),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeDamageTakenMultiplier", 0.05f, "The damage multiplier per exo prestige (applies to damage taken by the player)"),
-            new ConfigEntryDefinition("Prestige", "ExoPrestigeDamageDealtMultiplier", 0.025f, "The damage multiplier per exo prestige (applies to damage dealt by the player)"),
+            new ConfigEntryDefinition("Prestige", "ExoPrestigePowerBonus", 1f, "Amount of extra phys/spell power to give per exo prestige."),
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system"),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise"),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots"),

@@ -6,6 +6,7 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem
@@ -179,35 +180,41 @@ internal static class BloodSystem
         { BloodType.Immortal, new PrefabGUID(55100532) }, // CHAR_Dracula_BloodSoul_heart
         { BloodType.Brute, new PrefabGUID(2005508157) } // CHAR_Militia_Heavy
     };
-    /*
-    public static void OnUpdate(object sender, DeathEventArgs deathEvent)
+    public static void ProcessLegacy(Entity source, Entity target)
     {
-        ProcessLegacy(deathEvent.Source, deathEvent.Target);
-    }
-    */
-    public static void ProcessLegacy(Entity Killer, Entity Victim)
-    {
-        if (!Victim.Has<BloodConsumeSource>()) return;
-        BloodConsumeSource bloodConsumeSource = Victim.Read<BloodConsumeSource>();
+        if (!target.Has<BloodConsumeSource>()) return;
 
-        int unitLevel = Victim.Read<UnitLevel>().Level;
-        float BloodValue = 0;
+        BloodConsumeSource bloodConsumeSource = target.Read<BloodConsumeSource>();
+        BloodType targetBloodType = GetBloodTypeFromPrefab(bloodConsumeSource.UnitBloodType._Value);
 
-        if (Victim.Has<VBloodConsumeSource>())
+        int unitLevel = target.Read<UnitLevel>().Level;
+        float bloodValue = 0;
+
+        if (target.Has<VBloodConsumeSource>())
         {
-            BloodValue = 10 * unitLevel * ConfigService.VBloodLegacyMultiplier;
+            bloodValue = 10 * unitLevel * ConfigService.VBloodLegacyMultiplier;
         }
         else
         {
-            BloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * ConfigService.UnitLegacyMultiplier;
+            bloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * ConfigService.UnitLegacyMultiplier;
         }
 
-        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
 
-        BloodType bloodType = BloodManager.GetCurrentBloodType(Killer);
+        BloodType bloodType = BloodManager.GetCurrentBloodType(source);
+        float bloodQuality = source.Read<Blood>().Quality;
+
         if (bloodType.Equals(BloodType.None)) return;
+        else if (targetBloodType.Equals(bloodType))
+        {
+            bloodValue *= 5f; // same type multiplier
+        }
+
+        float qualityMultiplier = 1f + (bloodQuality / 100f);
+        qualityMultiplier = Mathf.Min(qualityMultiplier, 2f); // Cap the multiplier at 2
+        bloodValue *= qualityMultiplier;
 
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
         if (handler != null)
@@ -235,9 +242,9 @@ internal static class BloodSystem
                 }
             }
 
-            BloodValue *= changeFactor;
+            bloodValue *= changeFactor;
 
-            float newExperience = xpData.Value + BloodValue;
+            float newExperience = xpData.Value + bloodValue;
             int newLevel = ConvertXpToLevel(newExperience);
             bool leveledUp = false;
 
@@ -253,7 +260,7 @@ internal static class BloodSystem
 
             var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
             handler.SetLegacyData(steamID, updatedXPData);
-            NotifyPlayer(user, bloodType, BloodValue, leveledUp, newLevel, handler);
+            NotifyPlayer(user, bloodType, bloodValue, leveledUp, newLevel, handler);
         }
     }
     public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
@@ -330,6 +337,7 @@ internal static class BloodSystem
     public static BloodType GetBloodTypeFromPrefab(PrefabGUID bloodPrefab)
     {
         string bloodCheck = bloodPrefab.LookupName();
+
         return Enum.GetValues(typeof(BloodType))
             .Cast<BloodType>()
             .FirstOrDefault(type =>

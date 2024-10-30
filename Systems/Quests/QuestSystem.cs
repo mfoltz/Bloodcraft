@@ -122,14 +122,20 @@ internal static class QuestSystem
                 prefabs.Add(prefab);
             }
             */
-
+            
             if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
             {
-                if (!targetEntity.Has<VBloodUnit>() && Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // for non-vbloods make sure level difference between player and target is 10 or less
+                bool isVBlood = targetEntity.Has<VBloodUnit>();
+
+                if (!isVBlood && playerLevel == ConfigService.MaxLevel && unitLevel.Level._Value > 80) // for non-vbloods make sure level difference between player and target is 10 or less
                 {
                     prefabs.Add(prefab);
                 }
-                else if (targetEntity.Has<VBloodUnit>() && unitLevel.Level._Value > playerLevel) // higher level vbloods can be difficult depending on server settings and are a big vibe check when repeating dailies
+                else if (!isVBlood && Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // for non-vbloods make sure level difference between player and target is 10 or less
+                {
+                    prefabs.Add(prefab);
+                }
+                else if (isVBlood && unitLevel.Level._Value > playerLevel) // higher level vbloods can be difficult depending on server settings and are a big vibe check when repeating dailies
                 {
                     continue;
                 }

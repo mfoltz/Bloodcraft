@@ -61,7 +61,19 @@ internal static class BuffUtilities
     }
     public static void ModifyBloodBuff(Entity buff)
     {
-        Core.Log.LogInfo("ModifyBloodBuff: " + buff.Read<PrefabGUID>().LookupName());
+        //Core.Log.LogInfo("ModifyBloodBuff: " + buff.Read<PrefabGUID>().LookupName());
+
+        if (buff.Has<BloodBuffScript_Rogue_MountDamageBonus>())
+        {
+            var mountDamageBonus = buff.Read<BloodBuffScript_Rogue_MountDamageBonus>();
+
+            mountDamageBonus.RequiredBloodPercentage = 0f;
+            mountDamageBonus.MinMountDamageIncrease = 0;
+            mountDamageBonus.MaxMountDamageIncrease = 0;
+            buff.Write(mountDamageBonus);
+
+            return;
+        }
 
         if (buff.Has<BloodBuff_HealReceivedProc_DataShared>())
         {

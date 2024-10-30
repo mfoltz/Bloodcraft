@@ -6,7 +6,7 @@ using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Systems.Professions;
-internal static class EquipmentManager
+internal static class EquipmentManager // for potential professions expansion, no idea how to balance this out for existing server settings and still make it worthwhile to players though
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 

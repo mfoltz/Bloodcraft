@@ -358,9 +358,14 @@ internal static class ServerBootstrapSystemPatches
                     if (!prestiges.ContainsKey(prestigeType)) prestiges.Add(prestigeType, 0);
                 }
 
-                if (exists && prestiges.TryGetValue(PrestigeType.Experience, out int prestigeLevel) && prestigeLevel > 0)
+                if (exists && prestiges.TryGetValue(PrestigeType.Experience, out int experiencePrestiges) && experiencePrestiges > 0)
                 {
                     BuffUtilities.SanitizePrestigeBuffs(playerCharacter);
+                }
+
+                if (ConfigService.ExoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
+                {
+                    PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
                 }
             }
         }

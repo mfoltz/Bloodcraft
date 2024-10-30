@@ -147,13 +147,39 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static void HandleManticore(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
-        if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
+        //if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
+
+        var maxMinionsBuffer = entity.ReadBuffer<MaxMinionsPerPlayerElement>();
+        int value = maxMinionsBuffer[0].Value;
+
+        for (int i = 0; i < maxMinionsBuffer.Length; i++)
+        {
+            MaxMinionsPerPlayerElement maxMinions = maxMinionsBuffer[i];
+            if (maxMinions.Value != value)
+            {
+                maxMinions.Value = value;
+                maxMinionsBuffer[i] = maxMinions;
+            }
+        }
+
+        var crowdednessDropTableBuffer = entity.ReadBuffer<CrowdednessDropTableSettingsAsset.CrowdednessSetting>();
+        float dropChance = crowdednessDropTableBuffer[0].DropChance;
+
+        for (int i = 0; i < crowdednessDropTableBuffer.Length; i++)
+        {
+            CrowdednessDropTableSettingsAsset.CrowdednessSetting crowdednessSetting = crowdednessDropTableBuffer[i];
+            if (crowdednessSetting.DropChance != dropChance)
+            {
+                crowdednessSetting.DropChance = dropChance;
+                crowdednessDropTableBuffer[i] = crowdednessSetting;
+            }
+        }
 
         Health health = entity.Read<Health>();
         health.MaxHealth._Value *= 5;
         health.Value = health.MaxHealth._Value;
         entity.Write(health);
-
+        
         UnitStats unitStats = entity.Read<UnitStats>();
         unitStats.PhysicalPower._Value *= 1.5f;
         unitStats.SpellPower._Value *= 1.5f;

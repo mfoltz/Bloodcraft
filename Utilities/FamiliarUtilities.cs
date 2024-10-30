@@ -196,6 +196,7 @@ internal static class FamiliarUtilities
 
                 if (followerEntity.Exists())
                 {
+                    if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>();
                     DestroyUtility.Destroy(EntityManager, followerEntity);
                 }
             }
@@ -211,6 +212,7 @@ internal static class FamiliarUtilities
             {
                 if (minion.Entity.Exists())
                 {
+                    if (minion.Entity.Has<Disabled>()) minion.Entity.Remove<Disabled>();
                     DestroyUtility.Destroy(EntityManager, minion.Entity);
                 }
             }

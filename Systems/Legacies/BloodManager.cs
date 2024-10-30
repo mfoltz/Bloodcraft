@@ -1,7 +1,7 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Shared;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
@@ -13,9 +13,58 @@ internal static class BloodManager
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    public static class BloodStats
+    {
+        public enum BloodStatType
+        {
+            HealingReceived, // 0
+            DamageReduction, // 1
+            PhysicalResistance, // 2
+            SpellResistance, // 3
+            ResourceYield, // 4
+            CCReduction, // 5
+            SpellCooldownRecoveryRate, // 6
+            WeaponCooldownRecoveryRate, // 7
+            UltimateCooldownRecoveryRate, // 8
+            MinionDamage, // 9
+            ShieldAbsorb, // 10
+            BloodEfficiency // 11
+        }
+
+        public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatTypes = new()
+        {
+            { BloodStatType.HealingReceived, UnitStatType.HealingReceived },
+            { BloodStatType.DamageReduction, UnitStatType.DamageReduction },
+            { BloodStatType.PhysicalResistance, UnitStatType.PhysicalResistance },
+            { BloodStatType.SpellResistance, UnitStatType.SpellResistance },
+            { BloodStatType.ResourceYield, UnitStatType.ResourceYield },
+            { BloodStatType.CCReduction, UnitStatType.CCReduction },
+            { BloodStatType.SpellCooldownRecoveryRate, UnitStatType.SpellCooldownRecoveryRate },
+            { BloodStatType.WeaponCooldownRecoveryRate, UnitStatType.WeaponCooldownRecoveryRate },
+            { BloodStatType.UltimateCooldownRecoveryRate, UnitStatType.UltimateCooldownRecoveryRate },
+            { BloodStatType.MinionDamage, UnitStatType.MinionDamage },
+            { BloodStatType.ShieldAbsorb, UnitStatType.ShieldAbsorb },
+            { BloodStatType.BloodEfficiency, UnitStatType.BloodEfficiency }
+        };
+
+        public static readonly Dictionary<BloodStatType, float> BloodStatValues = new()
+        {
+            {BloodStatType.HealingReceived, ConfigService.HealingReceived},
+            {BloodStatType.DamageReduction, ConfigService.DamageReduction},
+            {BloodStatType.PhysicalResistance, ConfigService.PhysicalResistance},
+            {BloodStatType.SpellResistance, ConfigService.SpellResistance},
+            {BloodStatType.ResourceYield, ConfigService.ResourceYield},
+            {BloodStatType.CCReduction, ConfigService.CCReduction},
+            {BloodStatType.SpellCooldownRecoveryRate, ConfigService.SpellCooldownRecoveryRate},
+            {BloodStatType.WeaponCooldownRecoveryRate, ConfigService.WeaponCooldownRecoveryRate},
+            {BloodStatType.UltimateCooldownRecoveryRate, ConfigService.UltimateCooldownRecoveryRate},
+            {BloodStatType.MinionDamage, ConfigService.MinionDamage},
+            {BloodStatType.ShieldAbsorb, ConfigService.ShieldAbsorb},
+            {BloodStatType.BloodEfficiency, ConfigService.BloodEfficiency}
+        };
+    }
     public static bool ChooseStat(ulong steamId, BloodType BloodType, BloodStatType statType)
     {
         if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
@@ -79,7 +128,7 @@ internal static class BloodManager
             {
                 EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
             }
-
+            
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
             foreach (var bloodStatType in bonuses)
             {
@@ -102,6 +151,7 @@ internal static class BloodManager
                 {
                     // If not found, create a new stat modifier
                     UnitStatType statType = BloodStatTypes[bloodStatType];
+
                     ModifyUnitStatBuff_DOTS newStatBuff = new()
                     {
                         StatType = statType,
@@ -154,8 +204,7 @@ internal static class BloodManager
         if (!BloodTypeToBuffMap.TryGetValue(bloodType, out var buffPrefabGUID)) return;
         else if (bloodType.Equals(BloodType.None)) return;
 
-        Core.Log.LogInfo($"Updating blood stats, reapplying base blood buff for type...");
-
+        Core.Log.LogInfo($"Updating blood stats, reapplying first bloodQualityBuff for bloodType...");
         if (player.TryGetBuff(buffPrefabGUID, out Entity buffEntity))
         {
             /*
@@ -184,55 +233,5 @@ internal static class BloodManager
     {
         Blood blood = character.Read<Blood>();
         return GetBloodTypeFromPrefab(blood.BloodType);
-    }
-    public static class BloodStats
-    {
-        public enum BloodStatType
-        {
-            HealingReceived, // 0
-            DamageReduction, // 1
-            PhysicalResistance, // 2
-            SpellResistance, // 3
-            ResourceYield, // 4
-            CCReduction, // 5
-            SpellCooldownRecoveryRate, // 6
-            WeaponCooldownRecoveryRate, // 7
-            UltimateCooldownRecoveryRate, // 8
-            MinionDamage, // 9
-            ShieldAbsorb, // 10
-            BloodEfficiency // 11
-        }
-
-        public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatTypes = new()
-        {
-            { BloodStatType.HealingReceived, UnitStatType.HealingReceived },
-            { BloodStatType.DamageReduction, UnitStatType.DamageReduction },
-            { BloodStatType.PhysicalResistance, UnitStatType.PhysicalResistance },
-            { BloodStatType.SpellResistance, UnitStatType.SpellResistance },
-            { BloodStatType.ResourceYield, UnitStatType.ResourceYield },
-            { BloodStatType.CCReduction, UnitStatType.CCReduction },
-            { BloodStatType.SpellCooldownRecoveryRate, UnitStatType.SpellCooldownRecoveryRate },
-            { BloodStatType.WeaponCooldownRecoveryRate, UnitStatType.WeaponCooldownRecoveryRate },
-            { BloodStatType.UltimateCooldownRecoveryRate, UnitStatType.UltimateCooldownRecoveryRate },
-            { BloodStatType.MinionDamage, UnitStatType.MinionDamage },
-            { BloodStatType.ShieldAbsorb, UnitStatType.ShieldAbsorb },
-            { BloodStatType.BloodEfficiency, UnitStatType.BloodEfficiency }
-        };
-
-        public static readonly Dictionary<BloodStatType, float> BloodStatValues = new()
-        {
-            {BloodStatType.HealingReceived, ConfigService.HealingReceived},
-            {BloodStatType.DamageReduction, ConfigService.DamageReduction},
-            {BloodStatType.PhysicalResistance, ConfigService.PhysicalResistance},
-            {BloodStatType.SpellResistance, ConfigService.SpellResistance},
-            {BloodStatType.ResourceYield, ConfigService.ResourceYield},
-            {BloodStatType.CCReduction, ConfigService.CCReduction},
-            {BloodStatType.SpellCooldownRecoveryRate, ConfigService.SpellCooldownRecoveryRate},
-            {BloodStatType.WeaponCooldownRecoveryRate, ConfigService.WeaponCooldownRecoveryRate},
-            {BloodStatType.UltimateCooldownRecoveryRate, ConfigService.UltimateCooldownRecoveryRate},
-            {BloodStatType.MinionDamage, ConfigService.MinionDamage},
-            {BloodStatType.ShieldAbsorb, ConfigService.ShieldAbsorb},
-            {BloodStatType.BloodEfficiency, ConfigService.BloodEfficiency}
-        };
     }
 }

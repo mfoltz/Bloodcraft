@@ -2,6 +2,7 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -39,6 +40,21 @@ internal static class FamiliarCommands
     {
         {"VBloodEmotes", FamiliarUtilities.ToggleVBloodEmotes},
         {"Shiny", FamiliarUtilities.ToggleShinies}
+    };
+
+    static readonly ComponentType[] NetworkEventComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
+        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<SendNetworkEventTag>()),
+        ComponentType.ReadOnly(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
+    ];
+
+    static readonly NetworkEventType EventType = new()
+    {
+        IsAdminEvent = false,
+        EventId = NetworkEvents.EventId_RenameInteractable,
+        IsDebugEvent = false
     };
 
     [Command(name: "bind", shortHand: "b", adminOnly: false, usage: ".fam b [#]", description: "Activates specified familiar from current list.")]
@@ -1092,6 +1108,50 @@ internal static class FamiliarCommands
             string validOptions = string.Join(", ", FamiliarSettings.Keys.Select(kvp => $"<color=white>{kvp}</color>"));
             LocalizationService.HandleReply(ctx, $"Invalid option. Please choose from the following: {validOptions}");
         }
+    }
+
+    //[Command(name: "name", shortHand: "n", adminOnly: false, usage: ".fam n [Name]", description: "testing")]
+    public static void NameFamiliar(ChatCommandContext ctx, string name)
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
+        familiar.Add<NameableInteractable>();
+
+        if (!familiar.Exists() || !familiar.Has<NameableInteractable>())
+        {
+            LocalizationService.HandleReply(ctx, "Make sure familiar is active and present before naming it.");
+            return;
+        }
+
+        /*
+        SendEventToUser sendEventToUser = new()
+        {
+            UserIndex = ctx.Event.User.Index
+        };
+        networkEntity.Write(sendEventToUser);
+        */
+
+        FromCharacter fromCharacter = new()
+        {
+            Character = ctx.Event.SenderCharacterEntity,
+            User = ctx.Event.SenderUserEntity
+        };
+
+        InteractEvents_Client.RenameInteractable renameInteractable = new() // named means they show their nameplate?
+        {
+            InteractableId = familiar.Read<NetworkId>(),
+            NewName = new Unity.Collections.FixedString64Bytes(name)
+        };
+        
+        Entity networkEntity = EntityManager.CreateEntity(NetworkEventComponents);
+        networkEntity.Write(fromCharacter);
+        networkEntity.Write(EventType);
+        networkEntity.Write(renameInteractable);
     }
 }
 

@@ -150,12 +150,17 @@ internal static class EmoteSystemPatch
             if (!familiar.Has<Disabled>())
             {
                 if (FamiliarMinions.ContainsKey(data.Familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
-                familiar.Add<Disabled>();
+
+                if (ServerGameManager.TryGetBuffer<AlertBuffer>(familiar, out var alertBuffer)) alertBuffer.Clear();
+                if (ServerGameManager.TryGetBuffer<AggroDamageHistoryBufferElement>(familiar, out var damageHistoryBuffer)) damageHistoryBuffer.Clear();
+                if (ServerGameManager.TryGetBuffer<AggroCandidateBufferElement>(familiar, out var aggroCandidateBuffer)) aggroCandidateBuffer.Clear();
+                if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
+                if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
 
                 AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
                 aggroConsumer.Active._Value = false;
-                aggroConsumer.AggroTarget._Entity = Entity.Null;
-                aggroConsumer.AlertTarget._Entity = Entity.Null;
+                aggroConsumer.AggroTarget = NetworkedEntity.Empty;
+                aggroConsumer.AlertTarget = NetworkedEntity.Empty;
                 familiar.Write(aggroConsumer);
 
                 Follower follower = familiar.Read<Follower>();
@@ -171,6 +176,8 @@ internal static class EmoteSystemPatch
                         break;
                     }
                 }
+
+                familiar.Add<Disabled>();
 
                 data = (familiar, data.FamKey); // entity stored when dismissed
                 steamId.SetFamiliarActives(data);

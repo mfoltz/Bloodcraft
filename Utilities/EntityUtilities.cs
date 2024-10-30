@@ -69,7 +69,8 @@ internal static class EntityUtilities
     static readonly HashSet<string> FilteredResources = 
     [
         "Item_Ingredient_Crystal",
-        "Item_Ingredient_Coal"
+        "Item_Ingredient_Coal",
+        "Item_Ingredient_Plant_Thistle"
     ];
     public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1) 
     {

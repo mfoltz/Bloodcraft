@@ -1,6 +1,5 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
-using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -21,7 +20,14 @@ internal static class QuestUtilities
         { QuestType.Daily, "<color=#00FFFF>Daily Quest</color>" },
         { QuestType.Weekly, "<color=#BF40BF>Weekly Quest</color>" }
     };
-    public static void TrackQuestReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
+
+    static readonly Dictionary<TargetType, string> QuestTargetType = new()
+    {
+        { TargetType.Kill, "Unit" },
+        { TargetType.Craft, "Item" },
+        { TargetType.Gather, "Resource" }
+    };
+    public static void QuestTrackReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
     {
         Entity character = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
@@ -68,6 +74,44 @@ internal static class QuestUtilities
         else
         {
             LocalizationService.HandleReply(ctx, "Tracking is only available for incomplete kill quests.");
+        }
+    }
+    public static void QuestObjectiveReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
+    {
+        if (questData.TryGetValue(questType, out var questObjective) && !questObjective.Objective.Complete)
+        {
+            DateTime lastReset = questObjective.LastReset;
+            DateTime nextReset = questType.Equals(QuestType.Daily) ? lastReset.AddDays(1) : lastReset.AddDays(7);
+            DateTime now = DateTime.UtcNow;
+            TimeSpan untilReset = nextReset - now;
+
+            string timeLeft = "";
+            if (questType.Equals(QuestType.Daily))
+            {
+                timeLeft = string.Format("{0:D2}:{1:D2}:{2:D2}",
+                                untilReset.Hours,
+                                untilReset.Minutes,
+                                untilReset.Seconds);
+            }
+            else if (questType.Equals(QuestType.Weekly))
+            {
+                timeLeft = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}",
+                                untilReset.Days,
+                                untilReset.Hours,
+                                untilReset.Minutes,
+                                untilReset.Seconds);
+            }
+
+            LocalizationService.HandleReply(ctx, $"{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]");
+            LocalizationService.HandleReply(ctx, $"Time until {questType} reset: <color=yellow>{timeLeft}</color> | {QuestTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.LookupName()}</color>");
+        }
+        else if (questObjective.Objective.Complete)
+        {
+            LocalizationService.HandleReply(ctx, $"You've already completed your {QuestTypeColor[questType]}. Check back after reset!");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"You don't have a {QuestTypeColor[questType]}.");
         }
     }
 }

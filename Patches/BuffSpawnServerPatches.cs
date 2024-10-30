@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -7,6 +8,7 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -49,6 +51,7 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
     static readonly PrefabGUID GateBossFeedComplete = new(-354622715);
+    static readonly PrefabGUID ExoBuff = new(394886437); // AB_BloodBuff_Rogue_MountDamageBonus unused by game so sticking exo stat buffer on it
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -67,6 +70,7 @@ internal static class BuffSystemSpawnPatches
                 if (!buffTarget.Exists()) continue;
 
                 string prefabName = prefabGUID.LookupName().ToLower();
+                //Core.Log.LogInfo($"BuffSystem_Spawn_Server: {prefabName}");
 
                 if (ConfigService.EliteShardBearers && prefabName.Contains("holybubble")) // holy mortar effect for Solarus when eliteShardBearers active
                 {

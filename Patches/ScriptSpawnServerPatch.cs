@@ -22,7 +22,6 @@ internal static class ScriptSpawnServerPatch
 
     static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
     static readonly PrefabGUID InCombatBuff = new(581443919);
-    static readonly PrefabGUID ClearAggroBuff = new(1793107442);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -36,6 +35,8 @@ internal static class ScriptSpawnServerPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.Has<EntityOwner>() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+
+                //Core.Log.LogInfo($"ScriptSpawnServer: {prefabGUID.LookupName()}");
 
                 if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out Entity player))
                 {
@@ -75,18 +76,11 @@ internal static class ScriptSpawnServerPatch
 
                     if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
-                        // only do this when matching blood type to ignore class perma buffs, skip if already has a stat buffer since that must be stacking here somehow?
-                        // if in buffMap and matches blood type this should be the buff entity the game is replacing the class perma buff with
-
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
                         {
                             //Core.Log.LogInfo($"Applying blood stats for {steamId} | {bloodType} | {prefabGUID.LookupName()}, no stats buffer...");
 
                             BloodManager.ApplyBloodStats(steamId, bloodType, entity);
-                        }
-                        else
-                        {
-                            //Core.Log.LogInfo($"Skipping blood stats application for {steamId} | {bloodType} | {prefabGUID.LookupName()}, pre-existing stats buffer found...");
                         }
                     }
 
