@@ -204,7 +204,7 @@ internal static class BloodManager
         if (!BloodTypeToBuffMap.TryGetValue(bloodType, out var buffPrefabGUID)) return;
         else if (bloodType.Equals(BloodType.None)) return;
 
-        Core.Log.LogInfo($"Updating blood stats, reapplying first bloodQualityBuff for bloodType...");
+        //Core.Log.LogInfo($"Updating blood stats, reapplying first bloodQualityBuff for bloodType...");
         if (player.TryGetBuff(buffPrefabGUID, out Entity buffEntity))
         {
             /*

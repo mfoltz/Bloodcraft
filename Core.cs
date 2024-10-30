@@ -11,7 +11,6 @@ using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Sequencer;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
@@ -123,8 +122,8 @@ internal static class Core
         });
 
         NativeArray<Entity> entities = prefabGUIDQuery.ToEntityArray(Allocator.TempJob);
-        List<PrefabGUID> ownedPrefabGUIDs = [];
 
+        Entity Kriig = Entity.Null;
         int sctCounter = 0;
         int targetCounter = 0;
         try
@@ -140,9 +139,9 @@ internal static class Core
 
                         if (targetEntity.Exists() && targetEntity.TryGetComponent(out PrefabGUID targetPrefabGUID) && targetEntity.TryGetComponent(out EntityOwner owner))
                         {
-                            if (owner.Owner.Exists() && owner.Owner.IsPlayer() && !ownedPrefabGUIDs.Contains(targetPrefabGUID))
+                            if (owner.Owner.Exists() && owner.Owner.IsPlayer())
                             {
-                                ownedPrefabGUIDs.Add(targetPrefabGUID);
+                                //ownedPrefabGUIDs.Add(targetPrefabGUID);
                                 //Log.LogInfo($"{targetPrefabGUID.LookupName()} | {owner.Owner.Read<PlayerCharacter>().Name.Value}");
                             }
                             else if (owner.Owner.Exists() && owner.Owner.TryGetComponent(out PrefabGUID ownerPrefabGUID))
@@ -164,11 +163,15 @@ internal static class Core
                     else if (prefabGUID.Equals(UndeadLeader))
                     {
                         entity.LogComponentTypes();
-                        if (entity.Has<Disabled>() || entity.Has<BlockFeedBuff>())
+                        if (entity.Has<Disabled>())
                         {
                             entity.Remove<Disabled>();
+                            if (entity.Has<DisableWhenNoPlayersInRange>()) entity.Remove<DisableWhenNoPlayersInRange>();
+                            if (entity.Has<DisabledDueToNoPlayersInRange>()) entity.Remove<DisabledDueToNoPlayersInRange>();
+
+                            Kriig = entity;
                             DestroyUtility.Destroy(EntityManager, entity);
-                            //Log.LogInfo("Destroyed Undead Leader...");
+                            Log.LogInfo("Destroyed Undead Leader...");
                         }
                     }
                 }
@@ -179,9 +182,11 @@ internal static class Core
             entities.Dispose();
             prefabGUIDQuery.Dispose();
             Log.LogWarning($"Destroyed {sctCounter} | {targetCounter} SCT prefab entities and targets...");
-            foreach (PrefabGUID prefabGUID in ownedPrefabGUIDs)
+
+            if (Kriig.Exists())
             {
-                Log.LogInfo(prefabGUID.LookupName());
+                EntityManager.DestroyEntity(Kriig);
+                Log.LogInfo("Still exists, using alternate destroy method...");
             }
         }
     }

@@ -34,7 +34,7 @@ internal static class ShapeshiftSystemPatch
                 if (!entity.TryGetComponent(out FromCharacter fromCharacter)) continue;
                 EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
 
-                Core.Log.LogInfo($"EnterShapeShiftEvent: {enterShapeshiftEvent.Shapeshift.LookupName()}");
+                //Core.Log.LogInfo($"EnterShapeShiftEvent: {enterShapeshiftEvent.Shapeshift.LookupName()}");
 
                 if (enterShapeshiftEvent.Shapeshift.Equals(PsychicFormGroup))
                 {
