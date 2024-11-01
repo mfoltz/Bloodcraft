@@ -39,6 +39,8 @@ internal static class QuestSystem
 
     static readonly PrefabGUID ItemIngredientWood = new(-1593377811);
     static readonly PrefabGUID ItemIngredientStone = new(-1531666018);
+
+    const int DefaultMaxPlayerLevel = 90;
     public enum QuestType
     {
         Daily,
@@ -76,14 +78,14 @@ internal static class QuestSystem
     static readonly Dictionary<string, (int MinLevel, int MaxLevel)> EquipmentTierLevelRangeMap = new()
     {
         { "T01", (0, 15) },
-        { "T02", (10, 30) },
-        { "T03", (20, 45) },
-        { "T04", (30, 60) },
-        { "T05", (40, 75) },
-        { "T06", (50, 90) },
-        { "T07", (60, ConfigService.MaxLevel) },
-        { "T08", (70, ConfigService.MaxLevel) },
-        { "T09", (80, ConfigService.MaxLevel) }
+        { "T02", (20, 30) },
+        { "T03", (30, 45) },
+        { "T04", (40, 60) },
+        { "T05", (50, ConfigService.MaxLevel) },
+        { "T06", (60, ConfigService.MaxLevel) },
+        { "T07", (70, ConfigService.MaxLevel) }
+        //{ "T08", (70, ConfigService.MaxLevel) },
+        //{ "T09", (80, ConfigService.MaxLevel) }
     };
 
     static readonly Dictionary<string, (int MinLevel, int MaxLevel)> ConsumableTierLevelRangeMap = new()
@@ -127,17 +129,31 @@ internal static class QuestSystem
             {
                 bool isVBlood = targetEntity.Has<VBloodUnit>();
 
-                if (!isVBlood && playerLevel == ConfigService.MaxLevel && unitLevel.Level._Value > 80) // for non-vbloods make sure level difference between player and target is 10 or less
+                if (!isVBlood)
                 {
-                    prefabs.Add(prefab);
+                    if (playerLevel > DefaultMaxPlayerLevel && unitLevel.Level._Value > 80) // account for higher player level values than default
+                    {
+                        prefabs.Add(prefab);
+                    }
+                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // within 10 level difference check otherwise
+                    {
+                        prefabs.Add(prefab);
+                    }
                 }
-                else if (!isVBlood && Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // for non-vbloods make sure level difference between player and target is 10 or less
+                else if (isVBlood)
                 {
-                    prefabs.Add(prefab);
-                }
-                else if (isVBlood && unitLevel.Level._Value > playerLevel) // higher level vbloods can be difficult depending on server settings and are a big vibe check when repeating dailies
-                {
-                    continue;
+                    if (unitLevel.Level._Value > playerLevel) // skip vbloods higher than player
+                    {
+                        continue;
+                    }
+                    else if (playerLevel > DefaultMaxPlayerLevel && unitLevel.Level._Value > 80) // account for higher player level values than default
+                    {
+                        prefabs.Add(prefab);
+                    }
+                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // within 10 level difference check otherwise
+                    {
+                        prefabs.Add(prefab);
+                    }
                 }
             }
         }
@@ -182,6 +198,7 @@ internal static class QuestSystem
     static HashSet<PrefabGUID> GetGatherPrefabsForLevel(int playerLevel)
     {
         HashSet<PrefabGUID> prefabs = [];
+
         foreach (PrefabGUID prefab in ResourcePrefabs)
         {
             Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
@@ -255,14 +272,18 @@ internal static class QuestSystem
                 else if (questType.Equals(QuestType.Weekly)) target = ForestWolf;
 
                 requiredAmount = Random.Next(6, 8) * QuestMultipliers[questType];
+                string targetLower = target.LookupName().ToLower();
 
-                if ((target.LookupName().ToLower().Contains("vblood") || target.LookupName().ToLower().Contains("vhunter")) && !questType.Equals(QuestType.Weekly))
+                if ((targetLower.Contains("vblood") || targetLower.Contains("vhunter")))
                 {
-                    requiredAmount = 2;
-                }
-                else if ((target.LookupName().ToLower().Contains("vblood") || target.LookupName().ToLower().Contains("vhunter")) && questType.Equals(QuestType.Weekly))
-                {
-                    requiredAmount = 10;
+                    if (!questType.Equals(QuestType.Weekly))
+                    {
+                        requiredAmount = 2;
+                    }
+                    else if (questType.Equals(QuestType.Weekly))
+                    {
+                        requiredAmount = 10;
+                    }
                 }
 
                 break;
@@ -276,7 +297,7 @@ internal static class QuestSystem
                 else if (questType.Equals(QuestType.Daily)) target = ReinforcedBoneSword;
                 else if (questType.Equals(QuestType.Weekly)) target = ReinforcedBoneMace;
 
-                requiredAmount = Random.Next(6, 8) * QuestMultipliers[questType];
+                requiredAmount = Random.Next(2, 4) * QuestMultipliers[questType];
 
                 break;
             case TargetType.Gather:

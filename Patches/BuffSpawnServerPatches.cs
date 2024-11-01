@@ -51,7 +51,6 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID minionDeathBuff = new(2086395440);
 
     static readonly PrefabGUID GateBossFeedComplete = new(-354622715);
-    static readonly PrefabGUID ExoBuff = new(394886437); // AB_BloodBuff_Rogue_MountDamageBonus unused by game so sticking exo stat buffer on it
 
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
@@ -230,6 +229,12 @@ internal static class BuffSystemSpawnPatches
                     }
                 }
                 else if (ConfigService.FamiliarSystem && GameMode.Equals(GameModeType.PvE) && entity.GetOwner().IsFollowingPlayer() && buffTarget.IsPlayer())
+                {
+                    Buff buff = entity.Read<Buff>();
+
+                    if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                }
+                else if (ConfigService.FamiliarSystem && entity.GetOwner().IsFollowingPlayer() && buffTarget.TryGetPlayer(out player) && player.HasBuff(pvpProtBuff))
                 {
                     Buff buff = entity.Read<Buff>();
 
