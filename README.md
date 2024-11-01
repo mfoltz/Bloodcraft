@@ -203,7 +203,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Shortcut: *.fam c*
 - `.familiar add [Player] [CharPrefab]` 🔒
   - Adds familiar to last list of player named.
-  - Shortcut: *.fam a [CharPrefab]*
+  - Shortcut: *.fam a [Name] [CharPrefab]*
 - `.familiar remove [#]`
   - Removes familiar from unlocks.
   - Shortcut: *.fam r [#]*
