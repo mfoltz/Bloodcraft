@@ -3,7 +3,7 @@
 - Exo prestige is hard-disabled regardless of config and any current effects should be undone when players log in, will be reenabled in a future update after reworking
 - Traders no longer provide any progression to players when killed
 - Blood stats are now applied when chosen and update on legacy level up without needing to consume new blood of that type
-- Fixed bug with crafting credit for professions/crafting quests
+- Fixed bug with crafting credit for professions/crafting quests, removed crafting credit cooldown, balanced crafting quests and removed highest tiers of equipment from target pool
 - Familiars should play nicer with others on PvE servers, have also added handling for some abilities that were ignoring allied status and preventing some debuffs from being applied to players when they are PvP protected
 - Using a waygate with a familiar out will dismiss it without player having to use waygate again as is currently the case, after teleporting it will return (only if familiar was present/active first)
 - Using batform with a familiar out will dismiss it, after landing it will return (only if familiar was present/active first)
@@ -15,7 +15,7 @@
 - Added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none gained leave at 1 for no change)
 - Removed auto rerolling quest targets, was trickier to get right than it was worth now that manual rerolling is an option (please let me know of any unit prefabs that result in players being unable to complete a quest and they will be added to filter)
 - Target tracking will no longer detect imprisoned units or player familiars
-- Checking unit level against player level using unit prefab instead of unit entity in questTarget cache to prevent assigning quest kill targets outside intended level range
+- Checking unit level against player level using unit prefab instead of unit entity in questTarget cache to prevent assigning quest kill targets outside intended level range (added handling for player levels higher than max mod default to prevent repeated fallback target)
 - Added logging and handling when configurations for item prefabs/quantities are not as expected instead of failing to initialize entirely
 - Changed playerBools data to ConcurrentDictionary instead of Dictionary (hoping this resolves .kitme and other potential player bool-related issues)
 
