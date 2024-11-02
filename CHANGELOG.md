@@ -1,4 +1,4 @@
-`1.4.3`
+`1.5.3`
 - Legacy essence values gained from feed events are now multipled by x5 if consuming the same bloodType and/or then up to x2 if the player has 100% blood quality
 - Exo prestige is hard-disabled regardless of config and any current effects should be undone when players log in, will be reenabled in a future update after reworking
 - Traders no longer provide any progression to players when killed
