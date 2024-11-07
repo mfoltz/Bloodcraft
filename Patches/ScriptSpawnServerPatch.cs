@@ -1,5 +1,6 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -20,7 +21,7 @@ internal static class ScriptSpawnServerPatch
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    static readonly PrefabGUID SwitchTargetBuff = new(1489461671);
+    static readonly PrefabGUID ExoFormBuff = new(-31099041);
     static readonly PrefabGUID InCombatBuff = new(581443919);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
@@ -37,8 +38,13 @@ internal static class ScriptSpawnServerPatch
                 if (!entity.Has<EntityOwner>() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
                 //Core.Log.LogInfo($"ScriptSpawnServer: {prefabGUID.LookupName()}");
+                if (ConfigService.ExoPrestiging && prefabGUID.Equals(ExoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
+                {
+                    // need to decide the scaling with number of exo prestiges here, thinking blood mana or something which restores faster with more prestiges and need that to enter?
+                    BuffUtilities.HandleExoFormBuff(entity, player);
+                }
 
-                if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out Entity player))
+                if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out player))
                 {
                     if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
                     {
@@ -78,24 +84,11 @@ internal static class ScriptSpawnServerPatch
                     {
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
                         {
-                            //Core.Log.LogInfo($"Applying blood stats for {steamId} | {bloodType} | {prefabGUID.LookupName()}, no stats buffer...");
-
                             BloodManager.ApplyBloodStats(steamId, bloodType, entity);
                         }
                     }
 
                     /*
-                    if (ConfigService.PrestigeSystem)
-                    {
-                        if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
-                        {
-                            if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
-                            {
-                                if (prestigeLevel > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ModifyBloodBuff(entity); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
-                            }
-                        }
-                    }
-
                     if (Classes && ClassUtilities.HasClass(steamId))
                     {
                         LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);

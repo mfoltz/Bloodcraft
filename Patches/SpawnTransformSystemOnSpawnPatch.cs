@@ -87,20 +87,20 @@ internal static class SpawnTransformSystemOnSpawnPatch
                             if (buffsData.FamiliarBuffs.ContainsKey(famKey))
                             {
                                 // Look up the color from the RandomVisuals dictionary if it exists
-                                if (FamiliarUnlockSystem.RandomVisuals.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
+                                if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
                                 {
                                     colorCode = $"<color={hexColor}>";
                                 }
                             }
 
-                            string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>{colorCode}*</color>" : $"Familiar bound: <color=green>{prefabGUID.GetPrefabName()}</color>";
+                            string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"<color=green>{prefabGUID.GetPrefabName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{prefabGUID.GetPrefabName()}</color> <color=#00FFFF>bound</color>!";
                             LocalizationService.HandleServerReply(EntityManager, user, message);
                             summon = true;
                         }
                         else // if this fails for any reason destroy the entity and inform player
                         {
                             DestroyUtility.Destroy(EntityManager, entity);
-                            LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
+                            LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
                             continue;
                         }
                     }
@@ -195,12 +195,28 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 5f;
         aiMoveSpeeds.Run._Value = 6.5f;
         entity.Write(aiMoveSpeeds);
+
+        SetShardBearerLevel(entity);
+
         BuffUtilities.HandleVisual(entity, manticoreVisual);
     }
     static void HandleMonster(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
+
+        var crowdednessDropTableBuffer = entity.ReadBuffer<CrowdednessDropTableSettingsAsset.CrowdednessSetting>();
+        float dropChance = crowdednessDropTableBuffer[0].DropChance;
+
+        for (int i = 0; i < crowdednessDropTableBuffer.Length; i++)
+        {
+            CrowdednessDropTableSettingsAsset.CrowdednessSetting crowdednessSetting = crowdednessDropTableBuffer[i];
+            if (crowdednessSetting.DropChance != dropChance)
+            {
+                crowdednessSetting.DropChance = dropChance;
+                crowdednessDropTableBuffer[i] = crowdednessSetting;
+            }
+        }
 
         Health health = entity.Read<Health>();
         health.MaxHealth._Value *= 5;
@@ -221,12 +237,28 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 2.5f;
         aiMoveSpeeds.Run._Value = 5.5f;
         entity.Write(aiMoveSpeeds);
+
+        SetShardBearerLevel(entity);
+
         BuffUtilities.HandleVisual(entity, monsterVisual);
     }
     static void HandleSolarus(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
+
+        var crowdednessDropTableBuffer = entity.ReadBuffer<CrowdednessDropTableSettingsAsset.CrowdednessSetting>();
+        float dropChance = crowdednessDropTableBuffer[0].DropChance;
+
+        for (int i = 0; i < crowdednessDropTableBuffer.Length; i++)
+        {
+            CrowdednessDropTableSettingsAsset.CrowdednessSetting crowdednessSetting = crowdednessDropTableBuffer[i];
+            if (crowdednessSetting.DropChance != dropChance)
+            {
+                crowdednessSetting.DropChance = dropChance;
+                crowdednessDropTableBuffer[i] = crowdednessSetting;
+            }
+        }
 
         Health health = entity.Read<Health>();
         health.MaxHealth._Value *= 5;
@@ -246,6 +278,9 @@ internal static class SpawnTransformSystemOnSpawnPatch
         AiMoveSpeeds aiMoveSpeeds = entity.Read<AiMoveSpeeds>();
         aiMoveSpeeds.Walk._Value = 4f;
         entity.Write(aiMoveSpeeds);
+
+        SetShardBearerLevel(entity);
+
         BuffUtilities.HandleVisual(entity, solarusVisual);
     }
     static void HandleAngel(Entity entity)
@@ -283,6 +318,19 @@ internal static class SpawnTransformSystemOnSpawnPatch
         entity.Remove<DynamicallyWeakenAttackers>();
         if (entity.Has<MaxMinionsPerPlayerElement>()) entity.Remove<MaxMinionsPerPlayerElement>();
 
+        var crowdednessDropTableBuffer = entity.ReadBuffer<CrowdednessDropTableSettingsAsset.CrowdednessSetting>();
+        float dropChance = crowdednessDropTableBuffer[0].DropChance;
+
+        for (int i = 0; i < crowdednessDropTableBuffer.Length; i++)
+        {
+            CrowdednessDropTableSettingsAsset.CrowdednessSetting crowdednessSetting = crowdednessDropTableBuffer[i];
+            if (crowdednessSetting.DropChance != dropChance)
+            {
+                crowdednessSetting.DropChance = dropChance;
+                crowdednessDropTableBuffer[i] = crowdednessSetting;
+            }
+        }
+
         Health health = entity.Read<Health>();
         health.MaxHealth._Value *= 5;
         health.Value = health.MaxHealth._Value;
@@ -303,6 +351,19 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Run._Value = 3.5f;
         aiMoveSpeeds.Circle._Value = 3.5f;
         entity.Write(aiMoveSpeeds);
+
+        SetShardBearerLevel(entity);
+
         BuffUtilities.HandleVisual(entity, draculaVisual);
+    }
+    static void SetShardBearerLevel(Entity shardBearer)
+    {
+        if (ConfigService.ShardBearerLevel > 0)
+        {
+            shardBearer.With((ref UnitLevel unitLevel) =>
+            {
+                unitLevel.Level._Value = ConfigService.ShardBearerLevel;
+            });
+        }
     }
 }

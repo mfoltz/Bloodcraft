@@ -35,6 +35,10 @@ internal static class DataService
     {
         return playerPrestiges.TryGetValue(steamID, out prestiges);
     }
+    public static bool TryGetPlayerExoFormData(this ulong steamID, out KeyValuePair<DateTime, float> exoFormData)
+    {
+        return playerExoFormData.TryGetValue(steamID, out exoFormData);
+    }
     public static bool TryGetPlayerWoodcutting(this ulong steamID, out KeyValuePair<int, float> woodcutting)
     {
         return playerWoodcutting.TryGetValue(steamID, out woodcutting);
@@ -215,6 +219,11 @@ internal static class DataService
     {
         playerPrestiges[steamID] = data;
         SavePlayerPrestiges();
+    }
+    public static void SetPlayerExoFormData(this ulong steamID, KeyValuePair<DateTime, float> data)
+    {
+        playerExoFormData[steamID] = data;
+        SavePlayerExoFormData();
     }
     public static void SetPlayerWoodcutting(this ulong steamID, KeyValuePair<int, float> data)
     {
@@ -413,6 +422,9 @@ internal static class DataService
     }
     internal static class PlayerDictionaries
     {
+        // exoform timestamp & cooldown
+        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> playerExoFormData = [];
+
         // leveling
         internal static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
         internal static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
@@ -495,6 +507,7 @@ internal static class DataService
             {"Quests", PlayerQuestsJson },
             {"Classes", PlayerClassesJson },
             {"Prestiges", PlayerPrestigesJson },
+            {"ExoFormData", PlayerExoFormsJson },
             {"PlayerBools", PlayerBoolsJson},
             {"PlayerParties", PlayerPartiesJson},
             {"Woodcutting", PlayerWoodcuttingJson},
@@ -540,6 +553,7 @@ internal static class DataService
             internal static readonly string PlayerRestedXPJson = Path.Combine(DirectoryPaths[1], "player_rested_xp.json");
             internal static readonly string PlayerQuestsJson = Path.Combine(DirectoryPaths[2], "player_quests.json");
             internal static readonly string PlayerPrestigesJson = Path.Combine(DirectoryPaths[1], "player_prestiges.json");
+            internal static readonly string PlayerExoFormsJson = Path.Combine(DirectoryPaths[1], "player_exoforms.json");
             internal static readonly string PlayerClassesJson = Path.Combine(DirectoryPaths[0], "player_classes.json");
             internal static readonly string PlayerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
             internal static readonly string PlayerPartiesJson = Path.Combine(DirectoryPaths[0], "player_parties.json");
@@ -688,6 +702,8 @@ internal static class DataService
 
         public static void LoadPlayerPrestiges() => LoadData(ref playerPrestiges, "Prestiges");
 
+        public static void LoadPlayerExoFormData() => LoadData(ref playerExoFormData, "ExoFormData");
+
         public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
 
         public static void LoadPlayerParties() => LoadData(ref playerParties, "PlayerParties");
@@ -773,6 +789,8 @@ internal static class DataService
         public static void SavePlayerClasses() => SaveData(playerClass, "Classes");
 
         public static void SavePlayerPrestiges() => SaveData(playerPrestiges, "Prestiges");
+
+        public static void SavePlayerExoFormData() => SaveData(playerExoFormData, "ExoFormData");
 
         public static void SavePlayerBools() => SaveData(playerBools, "PlayerBools");
 
@@ -1054,7 +1072,8 @@ internal static class DataService
         static readonly Action[] loadLeveling =
         [
             LoadPlayerExperience,
-            LoadPlayerPrestiges
+            LoadPlayerPrestiges,
+            LoadPlayerExoFormData
         ];
 
         static readonly Action[] loadExpertises =

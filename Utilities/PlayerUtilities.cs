@@ -1,6 +1,9 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
+using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -12,6 +15,24 @@ namespace Bloodcraft.Utilities;
 internal static class PlayerUtilities
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+
+    static readonly Dictionary<int, string> PrestigeRankSymbols = new()
+    {
+        { 1, "♙" }, // White Pawn
+        { 2, "♟" }, // Black Pawn
+        { 3, "♘" }, // White Knight
+        { 4, "♞" }, // Black Knight
+        { 5, "♗" }, // White Bishop
+        { 6, "♝" }, // Black Bishop
+        { 7, "♖" }, // White Rook
+        { 8, "♜" }, // Black Rook
+        { 9, "♕" }, // White Queen
+        { 10, "♔" } // White King
+    };
+
+    static readonly PrefabGUID DraculaVBlood = new(-327335305);
     public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later
     {
         return steamId.TryGetPlayerBools(out var bools) && bools[boolKey];
@@ -83,6 +104,28 @@ internal static class PlayerUtilities
 
         return players;
     }
+    public static bool ConsumedDracula(Entity userEntity)
+    {
+        if (userEntity.TryGetComponent(out ProgressionMapper progressionMapper))
+        {
+            Entity progressionEntity = progressionMapper.ProgressionEntity.GetEntityOnServer();
+
+            if (progressionEntity.Has<UnlockedVBlood>())
+            {
+                var buffer = progressionEntity.ReadBuffer<UnlockedVBlood>();
+
+                foreach (UnlockedVBlood unlockedVBlood in buffer)
+                {
+                    if (unlockedVBlood.VBlood.Equals(DraculaVBlood))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
     public class PartyUtilities
     {
         public static void HandlePartyAdd(ChatCommandContext ctx, ulong ownerId, string playerName)
@@ -127,6 +170,15 @@ internal static class PlayerUtilities
         static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
         {
             string ownerName = ctx.Event.User.CharacterName.Value;
+
+            // Check if the player is already in a party
+            KeyValuePair<ulong, HashSet<string>> existingPartyEntry = DataService.PlayerDictionaries.playerParties.FirstOrDefault(entry => entry.Value.Contains(playerName));
+
+            if (existingPartyEntry.Value != null)
+            {
+                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> is already in another party.");
+                return;
+            }
 
             if (!ownerId.TryGetPlayerParties(out HashSet<string> party))
             {
@@ -191,10 +243,5 @@ internal static class PlayerUtilities
 
             LocalizationService.HandleReply(ctx, replyMessage);
         }
-    }
-    public class PlayerSwapInfo(Entity originalUserEntity, Entity swappedUserEntity)
-    {
-        public Entity OriginalUserEntity { get; set; } = originalUserEntity;
-        public Entity SwappedUserEntity { get; set; } = swappedUserEntity;
     }
 }

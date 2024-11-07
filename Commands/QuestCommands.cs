@@ -4,13 +4,10 @@ using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
 using static VCF.Core.Basics.RoleCommands;
-using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
 

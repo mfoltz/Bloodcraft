@@ -20,6 +20,7 @@ internal static class FamiliarSummonSystem
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static readonly GameDifficulty GameDifficulty = SystemService.ServerGameSettingsSystem.Settings.GameDifficulty;
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     static readonly PrefabGUID invulnerableBuff = new(-480024072);
     static readonly PrefabGUID ignoredFaction = new(-1430861195);
@@ -105,7 +106,7 @@ internal static class FamiliarSummonSystem
                     BuffUtilities.HandleVisual(familiar, visualBuff);
                 }
             }
-            
+
             /*
             if (!familiar.Has<NameableInteractable>()) familiar.Add<NameableInteractable>();
             
@@ -139,6 +140,10 @@ internal static class FamiliarSummonSystem
                 mountable.MountBuff = new(854656674);
             });  
             */
+
+            // make them blind and auto-target what player is attacking or what damages them? >_> sure why not
+
+            if (GameMode.Equals(GameModeType.PvP)) TestModifications(familiar);
 
             return true;
         }
@@ -192,7 +197,7 @@ internal static class FamiliarSummonSystem
         FactionReference factionReference = familiar.Read<FactionReference>();
         factionReference.FactionGuid._Value = playerFaction;
         familiar.Write(factionReference);
-
+        
         Follower follower = familiar.Read<Follower>();
         follower.Followed._Value = player;
         follower.ModeModifiable._Value = 0;
@@ -352,7 +357,9 @@ internal static class FamiliarSummonSystem
         if (familiar.Has<Immortal>())
         {
             familiar.Remove<Immortal>();
+
             if (!familiar.Has<ApplyBuffOnGameplayEvent>()) return;
+
             var buffer = familiar.ReadBuffer<ApplyBuffOnGameplayEvent>();
             for (int i = 0; i < buffer.Length; i++)
             {
@@ -403,5 +410,37 @@ internal static class FamiliarSummonSystem
             item.DropTrigger = DropTriggerType.OnSalvageDestroy;
             buffer[i] = item;
         }
+    }
+    static void TestModifications(Entity familiar)
+    {
+        if (familiar.Has<EntitiesInView_Server>()) familiar.Remove<EntitiesInView_Server>();
+
+        familiar.With((ref AggroConsumer aggroConsumer) =>
+        {
+            aggroConsumer.ProximityRadius = 0f;
+            aggroConsumer.ProximityWeight = 0f;
+        });
+
+        familiar.With((ref AlertModifiers alertModifiers) =>
+        {
+            alertModifiers.CircleRadiusFactor._Value = 0f;
+            alertModifiers.ConeRadiusFactor._Value = 0f;
+        });
+
+        familiar.With((ref AggroModifiers aggroModifiers) =>
+        {
+            aggroModifiers.CircleRadiusFactor._Value = 0f;
+            aggroModifiers.ConeRadiusFactor._Value = 0f;
+        });
+
+        familiar.With((ref GainAggroByVicinity gainAggroByVicinity) =>
+        {
+            gainAggroByVicinity.Value.AggroValue = 0f;
+        });
+
+        familiar.With((ref GainAlertByVicinity gainAlertByVicinity) =>
+        {
+            gainAlertByVicinity.Value.AggroValue = 0f;
+        });
     }
 }

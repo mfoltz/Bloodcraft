@@ -27,7 +27,7 @@ internal static class FamiliarUnlockSystem
         "tombsummon"
     ];
 
-    public static readonly Dictionary<PrefabGUID, string> RandomVisuals = new()
+    public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexMap = new()
     {
         { new PrefabGUID(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
         { new PrefabGUID(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
@@ -65,13 +65,13 @@ internal static class FamiliarUnlockSystem
     {
         return ExemptCategories.Contains(category.UnitCategory);
     }
-    static void HandleRoll(float dropChance, Entity died, Entity killer)
+    static void HandleRoll(float dropChance, Entity target, Entity source)
     {
-        if (!died.TryGetComponent(out PrefabGUID prefabGUID)) return;
+        if (!target.TryGetComponent(out PrefabGUID prefabGUID)) return;
 
-        if (ConfigService.ShareUnlocks && !died.Has<VBloodConsumeSource>()) // everyone in the vblood feed already gets their own roll, no double-dipping :p
+        if (ConfigService.ShareUnlocks && !target.Has<VBloodConsumeSource>()) // everyone in the vblood event system already gets their own roll, no double-dipping :p
         {
-            HashSet<Entity> players = PlayerUtilities.GetDeathParticipants(killer, killer.Read<PlayerCharacter>().UserEntity);
+            HashSet<Entity> players = PlayerUtilities.GetDeathParticipants(source, source.Read<PlayerCharacter>().UserEntity);
 
             foreach (Entity player in players)
             {
@@ -80,7 +80,7 @@ internal static class FamiliarUnlockSystem
         }
         else
         {
-            if (RollForChance(dropChance)) HandleUnlock(prefabGUID, killer);
+            if (RollForChance(dropChance)) HandleUnlock(prefabGUID, source);
         }
     }
     static void HandleUnlock(PrefabGUID famKey, Entity player)
@@ -96,6 +96,7 @@ internal static class FamiliarUnlockSystem
         {
             lastListName = $"box{data.UnlockedFamiliars.Count + 1}";
             data.UnlockedFamiliars[lastListName] = [];
+
             if (playerId.TryGetFamiliarBox(out var box) && string.IsNullOrEmpty(box))
             {
                 playerId.SetFamiliarBox(lastListName);
@@ -140,7 +141,7 @@ internal static class FamiliarUnlockSystem
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
-                famBuffs.Add(RandomVisuals.ElementAt(Random.Next(RandomVisuals.Count)).Key.GuidHash);
+                famBuffs.Add(ShinyBuffColorHexMap.ElementAt(Random.Next(ShinyBuffColorHexMap.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // only one per fam for now, keep first visual unlocked
@@ -156,7 +157,7 @@ internal static class FamiliarUnlockSystem
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
-                famBuffs.Add(RandomVisuals.ElementAt(Random.Next(RandomVisuals.Count)).Key.GuidHash);
+                famBuffs.Add(ShinyBuffColorHexMap.ElementAt(Random.Next(ShinyBuffColorHexMap.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // only one per fam for now, keep first visual unlocked

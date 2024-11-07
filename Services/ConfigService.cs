@@ -9,6 +9,7 @@ public static class ConfigService
     public static string LanguageLocalization { get; private set; }
     public static bool ClientCompanion { get; private set; }
     public static bool EliteShardBearers { get; private set; }
+    public static int ShardBearerLevel { get; private set; }
     public static bool PotionStacking { get; private set; }
     public static bool StarterKit { get; private set; }
     public static string KitPrefabs { get; private set; }
@@ -194,6 +195,7 @@ public static class ConfigService
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
+            new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", true, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit."),
@@ -389,7 +391,6 @@ public static class ConfigService
                         var convertedValue = Convert.ChangeType(oldValue, entryType);
                         var configEntry = generic.Invoke(null, [entry.Section, entry.Key, convertedValue, entry.Description]);
                         UpdateConfigProperty(entry.Key, configEntry);
-                        //Plugin.LogInstance.LogInfo($"Migrated key {entry.Key} from old config to section {entry.Section} with value {convertedValue}");
                     }
                     catch (Exception ex)
                     {

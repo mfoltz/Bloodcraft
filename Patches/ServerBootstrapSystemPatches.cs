@@ -49,7 +49,8 @@ internal static class ServerBootstrapSystemPatches
         { "FamiliarVisual", true},
         { "ShinyChoice", false },
         { "Reminders", true },
-        { "ScrollingText", true}
+        { "ScrollingText", true},
+        { "ExoForm", false}
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
@@ -366,6 +367,12 @@ internal static class ServerBootstrapSystemPatches
                 if (ConfigService.ExoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
                     PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
+                }
+
+                if (ConfigService.ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var exoFormData))
+                {
+                    KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MinValue, 0f);
+                    steamId.SetPlayerExoFormData(timeEnergyPair);
                 }
             }
         }

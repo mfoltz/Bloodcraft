@@ -171,7 +171,7 @@ internal static class Core
 
                             Kriig = entity;
                             DestroyUtility.Destroy(EntityManager, entity);
-                            Log.LogInfo("Destroyed Undead Leader...");
+                            //Log.LogInfo("Destroyed Undead Leader...");
                         }
                     }
                 }

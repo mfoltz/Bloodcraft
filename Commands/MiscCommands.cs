@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -220,6 +221,33 @@ internal static class MiscCommands
         ctx.Reply($"Combat music cleared~");
     }
 
+    [Command(name: "exoform", adminOnly: true, usage: ".exoform", description: "Toggles taunting to enter exo form.")]
+    public static void ToggleExoFormEmote(ChatCommandContext ctx)
+    {
+        if (!ConfigService.ExoPrestiging)
+        {
+            ctx.Reply("Exo prestiging is not enabled.");
+        }
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
+        {
+            if (!PlayerUtilities.ConsumedDracula(ctx.Event.SenderUserEntity))
+            {
+                ctx.Reply("You must consume Dracula's essence before manifesting this power...");
+                return;
+            }
+
+            PlayerUtilities.TogglePlayerBool(steamId, "ExoForm");
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(PlayerUtilities.GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}, the Immortal King's once formidable power is now yours...");
+        }
+        else
+        {
+            ctx.Reply("You are not yet worthy...");
+        }
+    }
+
     [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
     public static void CleanUpFams(ChatCommandContext ctx)
     {
@@ -246,12 +274,10 @@ internal static class MiscCommands
                         if (entity.Has<Disabled>())
                         {
                             entity.Remove<Disabled>();
-                            DestroyUtility.Destroy(EntityManager, entity);
-                            counter++;
-                        }
-                        else if (entity.Has<DisabledDueToNoPlayersInRange>())
-                        {
-                            DestroyUtility.Destroy(EntityManager, entity);
+                            if (entity.Has<DisableWhenNoPlayersInRange>()) entity.Remove<DisableWhenNoPlayersInRange>();
+                            if (entity.Has<DisabledDueToNoPlayersInRange>()) entity.Remove<DisabledDueToNoPlayersInRange>(); 
+                            
+                            EntityManager.DestroyEntity(entity);
                             counter++;
                         }
                     }
@@ -340,9 +366,8 @@ internal static class MiscCommands
 
         LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
     }
-
     /*
-    [Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3
+    [Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3 don't feel like finding out if it works like I think it will right now so commenting out >_>
     public static void SwitchPlayers(ChatCommandContext ctx, string originalPlayer, string newPlayer)
     {
         if (originalPlayer.TryGetPlayerInfo(out PlayerInfo originalPlayerInfo) && newPlayer.TryGetPlayerInfo(out PlayerInfo newPlayerInfo))

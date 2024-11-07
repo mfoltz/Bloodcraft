@@ -2,6 +2,7 @@
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
@@ -21,6 +22,17 @@ internal static class AbilityRunScriptsSystemPatch
     static readonly PrefabGUID DominateBuff = new(-1447419822);
     static readonly PrefabGUID UseWaypointAbilityGroup = new(695067846);
     static readonly PrefabGUID UseCastleWaypointAbilityGroup = new(893332545);
+    
+    static readonly Dictionary<int, float> ExoFormCooldownMap = new()
+    {
+        { 1, 8f },
+        { 2, 8f },
+        { 3, 8f },
+        { 4, 8f },
+        { 5, 10f },
+        { 6, 10f },
+        { 7, 50f }
+    };
 
     [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -38,10 +50,24 @@ internal static class AbilityRunScriptsSystemPatch
                 PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
 
                 if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
-                else if (postCast.Character.IsPlayer() && ClassSpells.ContainsKey(abilityGroupPrefab))
+                else if (postCast.Character.IsPlayer())
                 {
-                    float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : (ClassSpells[abilityGroupPrefab] + 1) * 8f;
-                    ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                    //Core.Log.LogInfo(postCast.AbilityGroup.GetPrefabGUID().LookupName());
+
+                    if (ClassSpells.ContainsKey(abilityGroupPrefab))
+                    {
+                        float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : (ClassSpells[abilityGroupPrefab] + 1) * 8f;
+                        ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                    }
+                    /*
+                    else if (ConfigService.ExoPrestiging && BuffUtilities.ExoFormAbilityMap.ContainsValue(abilityGroupPrefab))
+                    {
+                        if (postCast.AbilityGroup.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && ExoFormCooldownMap.TryGetValue(abilityGroupSlot.SlotId, out float cooldown))
+                        {
+                            ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                        }
+                    }
+                    */
                 }
             }
         }
@@ -49,37 +75,6 @@ internal static class AbilityRunScriptsSystemPatch
         {
             entities.Dispose();
         }
-        /*
-        if (ConfigService.FamiliarSystem)
-        {
-            NativeArray<Entity> entities = __instance._OnCastStartedQuery.ToEntityArray(Allocator.Temp);
-
-            try
-            {
-                foreach (Entity entity in entities)
-                {
-                    AbilityCastStartedEvent preCast = entity.Read<AbilityCastStartedEvent>();
-                    PrefabGUID prefabGUID = preCast.AbilityGroup.Read<PrefabGUID>();
-
-                    if ((prefabGUID.Equals(UseCastleWaypointCast) || prefabGUID.Equals(UseWaypointCast)) && entity.GetOwner().TryGetPlayer(out Entity player) && !ServerGameManager.HasBuff(player, DominateBuff.ToIdentifier()))
-                    {
-                        Core.Log.LogInfo("Waypoint cast detected, dismissing familiar if found...");
-
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
-
-                        if (familiar.Exists() && !familiar.IsDisabled())
-                        {
-                            FamiliarUtilities.AutoDismiss(player, familiar);
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                entities.Dispose();
-            }
-        }
-        */
     }
 
     [HarmonyPatch(typeof(AbilityCastStarted_SetupAbilityTargetSystem_Shared), nameof(AbilityCastStarted_SetupAbilityTargetSystem_Shared.OnUpdate))]
@@ -102,12 +97,16 @@ internal static class AbilityRunScriptsSystemPatch
                 if ((prefabGUID.Equals(UseCastleWaypointAbilityGroup) || prefabGUID.Equals(UseWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity player))
                 {
                     //Core.Log.LogInfo("Waypoint cast detected, dismissing familiar if found...");
+                    User user = player.GetUser();
+                    ulong steamId = user.PlatformId;
 
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
-
-                    if (familiar.Exists() && !familiar.IsDisabled())
+                    if (familiar.Exists() && !familiar.IsDisabled() && steamId.TryGetFamiliarActives(out var data))
                     {
-                        FamiliarUtilities.AutoDismiss(player, familiar);
+                        //FamiliarUtilities.AutoCallMap.TryAdd(player, familiar);
+                        
+                        FamiliarUtilities.AutoCallMap[player] = familiar;
+                        FamiliarUtilities.DismissFamiliar(player, familiar, user, steamId, data);
                     }
                 }
             }
@@ -117,4 +116,36 @@ internal static class AbilityRunScriptsSystemPatch
             entities.Dispose();
         }  
     }
+
+    /*
+    [HarmonyPatch(typeof(EvaluateCastOptionsSystem), nameof(EvaluateCastOptionsSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(EvaluateCastOptionsSystem __instance)
+    {
+        if (!Core.hasInitialized) return;
+
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.Exists() && entity.TryGetComponent(out EvaluateCastOptionsRequest castOptionsRequest))
+                {
+                    Core.Log.LogInfo("EvaluateCastOptionEntities[");
+                    //entity.LogComponentTypes();
+
+                    if (castOptionsRequest.InternalState.CandidateEntity.Exists()) castOptionsRequest.InternalState.CandidateEntity.LogComponentTypes();
+                    if (castOptionsRequest.InternalState.CandidateGroupEntity.Exists()) castOptionsRequest.InternalState.CandidateGroupEntity.LogComponentTypes();
+                    if (castOptionsRequest.InternalState.CastOptionsEntity.Exists()) castOptionsRequest.InternalState.CastOptionsEntity.LogComponentTypes();
+                    
+                    Core.Log.LogInfo("...]");
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    */
 }

@@ -1,6 +1,11 @@
-`1.4.3`
-- Legacy essence values gained from feed events are now multipled by x5 if consuming the same bloodType and/or then up to x2 if the player has 100% blood quality
-- Exo prestige is hard-disabled regardless of config and any current effects should be undone when players log in, will be reenabled in a future update after reworking
+`1.5.3`
+- familiar aggression is reset when returned to player from too far away or when calling/dismissing them
+- added config to set level for shard bearers if using elite option, can leave at 0 for no change
+- can add empty fam boxes, delete empty fam boxes via '.fam ab [BoxName]' and '.fam db [BoxName]' respectively
+- added minor visual effects when incrementing various prestiges
+- non-clanned familiars tolerable on PvP servers and generally extended handling for preventing negative effects for PvE servers and PvP protected players on PvP servers (witches can no longer pig VBloods)
+- Legacy essence values gained from feed events are now multipled by x3 if consuming the same bloodType and/or then up to x2 if the player has 100% blood quality (this is much slower to level at defaults than was intended)
+- Exo rework *UNDER CONSTRUCTION*
 - Traders no longer provide any progression to players when killed
 - Blood stats are now applied when chosen and update on legacy level up without needing to consume new blood of that type
 - Fixed bug with crafting credit for professions/crafting quests, removed crafting credit cooldown, balanced crafting quests and removed highest tiers of equipment from target pool
@@ -10,7 +15,7 @@
 - Removed crystal, thistle and coal from gathering quest prefab pool
 - RestedXP adjusted downwards based on the player's new calculated cap instead of being reset entirely after prestiging in experience/leveling
 - Can use 'vblood' as the name with familiar search command to return all boxes with at least one vblood or blood soul (ty Odjit c:)
-- Profession experience now granted to players when using clan/allied stations and not just stations placed by the player
+- Profession experience and quest progress now granted to players when using clan/allied stations and not just stations placed by the player
 - NPC spell cooldowns for classes again functioning as they were previously, cooldown will be 8 seconds multiplied by the order of the spell in the class spells list
 - Added config option to control expertise received from vermin nests, tombs etc (UnitSpawnerExpertiseFactor, set to 0 for none gained leave at 1 for no change)
 - Removed auto rerolling quest targets, was trickier to get right than it was worth now that manual rerolling is an option (please let me know of any unit prefabs that result in players being unable to complete a quest and they will be added to filter)

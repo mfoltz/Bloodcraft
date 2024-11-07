@@ -256,7 +256,7 @@ internal static class QuestSystem
     }
     static QuestObjective GenerateQuestObjective(TargetType goal, HashSet<PrefabGUID> targets, QuestType questType)
     {
-        PrefabGUID target = new(0);
+        PrefabGUID target = PrefabGUID.Empty;
         int requiredAmount;
 
         switch (goal)
@@ -400,7 +400,7 @@ internal static class QuestSystem
                     targets = GetGoalPrefabsForLevel(goal, level);
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
-                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed~");
+                    LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
                 }
 
                 steamId.SetPlayerQuests(questData);
@@ -592,9 +592,11 @@ internal static class QuestSystem
                     if (quest.Key == QuestType.Daily && ConfigService.InfiniteDailies)
                     {
                         int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
-                        TargetType goal = TargetType.Kill;
+                        TargetType goal = GetRandomQuestType();
+
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
+
                         var dailyQuest = questData[QuestType.Daily];
                         LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>Daily Quest</color> available: <color=green>{dailyQuest.Objective.Goal}</color> <color=white>{dailyQuest.Objective.Target.GetPrefabName()}</color>x<color=#FFC0CB>{dailyQuest.Objective.RequiredAmount}</color> [<color=white>{dailyQuest.Progress}</color>/<color=yellow>{dailyQuest.Objective.RequiredAmount}</color>]");
                     }

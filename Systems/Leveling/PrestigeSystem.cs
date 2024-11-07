@@ -1,4 +1,6 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -13,11 +15,10 @@ internal static class PrestigeSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
-    static ModifyUnitStatBuffSystem_Destroy ModifyUnitStatBuffSystemDestroy => SystemService.ModifyUnitStatBuffSystem_Destroy;
 
-    static readonly PrefabGUID ExoBuff = new(394886437); // AB_BloodBuff_Rogue_MountDamageBonus unused by game so sticking exo stat buffer on it
+    static readonly PrefabGUID ExperienceVisualBuff = new(104224016);
+    static readonly PrefabGUID ExpertiseVisualBuff = new(620130895);
+    static readonly PrefabGUID LegacyVisualBuff = new(-1381763893);
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -414,6 +415,19 @@ internal static class PrestigeSystem
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * prestigeLevel;
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
+        BuffUtilities.TryApplyBuff(ctx.Event.SenderCharacterEntity, ExperienceVisualBuff);
+        if (ctx.Event.SenderCharacterEntity.TryGetBuff(ExperienceVisualBuff, out Entity buffEntity))
+        {
+            if (!buffEntity.Has<LifeTime>())
+            {
+                buffEntity.Add<LifeTime>();
+                buffEntity.Write(new LifeTime { Duration = 3f, EndAction = LifeTimeEndAction.Destroy });
+            }
+            if (buffEntity.Has<ServerControlsPositionBuff>()) buffEntity.Remove<ServerControlsPositionBuff>();
+            if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
+            if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
+        }
+
         LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience from unit kills reduced by <color=yellow>{reductionPercentage}</color>");
     }
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel)
@@ -432,6 +446,15 @@ internal static class PrestigeSystem
         string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
+
+        if (BloodSystem.BloodTypeToPrestigeMap.ContainsValue(parsedPrestigeType))
+        {
+            BuffUtilities.TryApplyBuff(ctx.Event.SenderCharacterEntity, LegacyVisualBuff);
+        }
+        else if (WeaponSystem.WeaponPrestigeMap.ContainsValue(parsedPrestigeType))
+        {
+            BuffUtilities.TryApplyBuff(ctx.Event.SenderCharacterEntity, ExpertiseVisualBuff);
+        }
 
         LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }
@@ -530,107 +553,6 @@ internal static class PrestigeSystem
             })
             .Where(p => !string.IsNullOrEmpty(p.PlayerName))
             .ToDictionary(p => p.PlayerName, p => p.Prestige);
-    }
-    public static void UpdateExoStatBuff(Entity character, int exoPrestiges)
-    {
-        ulong steamId = character.GetSteamId();
-
-        if (exoPrestiges > 0 && !character.HasBuff(ExoBuff))
-        {
-            Core.Log.LogInfo($"Applying new exo stats...");
-
-            BuffUtilities.ApplyPermanentBuff(character, ExoBuff);
-
-            if (character.TryGetBuff(ExoBuff, out Entity exoBuff))
-            {
-                Core.Log.LogInfo($"Modifying buff entity for exo...");
-
-                ApplyExoStats(steamId, exoBuff);
-            }
-        }
-        else if (exoPrestiges > 0 && character.TryGetBuff(ExoBuff, out Entity exoBuff))
-        {
-            //DestroyUtility.Destroy(EntityManager, exoBuff, DestroyDebugReason.TryRemoveBuff);
-            DestroyUtility.CreateDestroyEvent(EntityManager, exoBuff, DestroyReason.ParentDestruction, DestroyDebugReason.TryRemoveBuff);
-            ModifyUnitStatBuffSystemDestroy.OnUpdate();
-
-            Core.Log.LogInfo($"Updating existing exo stats...");
-
-            BuffUtilities.ApplyPermanentBuff(character, ExoBuff);
-
-            if (character.TryGetBuff(ExoBuff, out exoBuff))
-            {
-                Core.Log.LogInfo($"Modifying buff entity for exo...");
-
-                ApplyExoStats(steamId, exoBuff);
-            }
-        }
-        else if (exoPrestiges == 0 && character.HasBuff(ExoBuff))
-        {
-            if (character.TryGetBuff(ExoBuff, out exoBuff))
-            {
-                Core.Log.LogInfo($"Removing exo stats...");
-
-                DestroyUtility.CreateDestroyEvent(EntityManager, exoBuff, DestroyReason.ParentDestruction, DestroyDebugReason.TryRemoveBuff);
-                ModifyUnitStatBuffSystemDestroy.OnUpdate();
-            }
-        }
-    }
-    public static void ApplyExoStats(ulong steamId, Entity exoBuff)
-    {
-        if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Exo, out var exoPrestiges))
-        {
-            float damageTakenFactor = ConfigService.ExoPrestigeDamageTakenMultiplier * exoPrestiges;
-            float damageDealtFactor = ConfigService.ExoPrestigePowerBonus * exoPrestiges;
-
-            if (!exoBuff.Has<ModifyUnitStatBuff_DOTS>()) // add bonuses if doesn't have buffer
-            {
-                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(exoBuff);
-            }
-
-            var buffer = exoBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-
-            UnitStatType statType = UnitStatType.PhysicalPower;
-            ModifyUnitStatBuff_DOTS unitStatBuff = new()
-            {
-                StatType = statType,
-                ModificationType = ModificationType.AddToBase,
-                Value = damageDealtFactor,
-                Modifier = 1,
-                IncreaseByStacks = false,
-                ValueByStacks = 0,
-                Priority = 0,
-                Id = ModificationId.Empty
-            };
-            buffer.Add(unitStatBuff);
-
-            statType = UnitStatType.SpellPower;
-            unitStatBuff = new()
-            {
-                StatType = statType,
-                ModificationType = ModificationType.AddToBase,
-                Value = damageDealtFactor,
-                Modifier = 1,
-                IncreaseByStacks = false,
-                ValueByStacks = 0,
-                Priority = 0,
-                Id = ModificationId.Empty
-            };
-            buffer.Add(unitStatBuff);
-
-            AmplifyBuff amplifyBuff = new()
-            {
-                AmplifyModifier = damageTakenFactor,
-            };
-
-            exoBuff.Add<AmplifyBuff>();
-            exoBuff.Write(amplifyBuff);
-
-            exoBuff.Add<SpawnTag>();
-
-            ModifyUnitStatBuffSystemSpawn.OnUpdate();
-            if (exoBuff.Has<SpawnTag>()) exoBuff.Remove<SpawnTag>();
-        }
     }
     public static void ResetDamageResistCategoryStats(Entity character)
     {

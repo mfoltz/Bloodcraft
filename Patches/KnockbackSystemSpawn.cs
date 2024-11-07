@@ -6,6 +6,7 @@ using Unity.Entities;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Bloodcraft.Services;
+using Stunlock.Core;
 
 namespace Bloodcraft.Patches;
 
@@ -17,6 +18,9 @@ internal static class KnockbackSystemSpawnPatch
     static SystemService SystemService => Core.SystemService;
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+
+    static readonly PrefabGUID PvPProtectionBuff = new(1111481396);
+    static readonly PrefabGUID AllyKnockbackBuff = new(-2099203048);
 
     [HarmonyPatch(typeof(KnockbackSystemSpawn), nameof(KnockbackSystemSpawn.OnUpdate))]
     [HarmonyPrefix]
@@ -30,14 +34,30 @@ internal static class KnockbackSystemSpawnPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out EntityOwner entityOwner)) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                else if (prefabGUID == AllyKnockbackBuff) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
                 Entity owner = entityOwner.Owner;
 
-                if (owner.IsFollowingPlayer() && buffTarget.IsPlayer())
+                if (owner.IsFollowingPlayer() && buffTarget.TryGetPlayer(out Entity player))
                 {
                     if (ServerGameManger.IsAllies(buffTarget, owner))
+                    {
+                        PreventKnockback(entity);
+                    }
+                    else if (GameMode.Equals(GameModeType.PvE))
+                    {
+                        PreventKnockback(entity);
+                    }
+                    else if (player.HasBuff(PvPProtectionBuff))
+                    {
+                        PreventKnockback(entity);
+                    }
+                }
+                else if (owner.IsPlayer() && buffTarget.TryGetPlayer(out player))
+                {
+                    if (GameMode.Equals(GameModeType.PvP) && player.HasBuff(PvPProtectionBuff))
                     {
                         PreventKnockback(entity);
                     }
@@ -57,7 +77,6 @@ internal static class KnockbackSystemSpawnPatch
     {
         if (knockbackBuff.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
         {
-            //Core.Log.LogInfo($"Protecting ally from knockback debuff...");
             DestroyUtility.Destroy(EntityManager, knockbackBuff);
         }
     }

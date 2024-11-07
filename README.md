@@ -189,6 +189,12 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar choosebox [Name]`
   - Choose active box of familiars to bind from.
   - Shortcut: *.fam cb [Name]*
+- `.familiar addbox [Name]`
+  - Adds box.
+  - Shortcut: *.fam ab [Name]*
+- `.familiar deletebox [Name]`
+  - Deletes box (if empty).
+  - Shortcut: *.fam db [Name]*
 - `.familiar renamebox [CurrentName] [NewName]`
   - Renames a box.
   - Shortcut: *.fam rb [CurrentName] [NewName]*

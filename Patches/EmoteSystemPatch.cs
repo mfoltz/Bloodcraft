@@ -1,17 +1,14 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
-using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
-using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -25,20 +22,28 @@ internal static class EmoteSystemPatch
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly PrefabGUID DominateBuff = new(-1447419822);
-    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
     static readonly PrefabGUID IgnoredFaction = new(-1430861195);
     static readonly PrefabGUID PlayerFaction = new(1106458752);
+
+    static readonly PrefabGUID DominateBuff = new(-1447419822);
+    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
     static readonly PrefabGUID CombatBuff = new(581443919);
     static readonly PrefabGUID PvPCombatBuff = new(697095869);
     static readonly PrefabGUID TakeFlightBuff = new(1205505492);
-    static readonly PrefabGUID ClearAggroBuff = new(1793107442);
+    static readonly PrefabGUID ExoFormBuff = new(-31099041);
+    static readonly PrefabGUID PhasingBuff = new(-79611032);
 
-    public static readonly Dictionary<PrefabGUID, Action<Entity, Entity, ulong>> actions = new()
+    static readonly PrefabGUID WaveEmote = new(1177797340);
+    static readonly PrefabGUID SaluteEmote = new(-370061286);
+    static readonly PrefabGUID ClapEmote = new(-26826346);
+    public static readonly PrefabGUID TauntEmote = new(-158502505);
+
+    public static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> actions = new()
     {
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
-        { new(-26826346), BindPreset } // clap
+        { new(-26826346), BindUnbind }, // clap
+        { new(-158502505), HandleExoForm} // taunt
     };
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
@@ -56,21 +61,34 @@ internal static class EmoteSystemPatch
                 UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
 
-                Entity userEntity = fromCharacter.User;
+                User user = fromCharacter.User.Read<User>();
                 Entity character = fromCharacter.Character;
-                ulong steamId = userEntity.Read<User>().PlatformId;
+                ulong steamId = user.PlatformId;
 
-                if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
+                if (useEmoteEvent.Action.Equals(TauntEmote) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
                 {
-                    if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
+                    if (!character.HasBuff(ExoFormBuff))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar when using dominate form!");
+                        BuffUtilities.TryApplyBuff(character, PhasingBuff);
                     }
-                    else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
+                    else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
                     {
-                        LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "You can't call a familiar when using bat form!");
+                        BuffUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+                        DestroyUtility.Destroy(EntityManager, buffEntity);
                     }
-                    else if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(userEntity, character, steamId);
+                    //HandleExoForm(user, character, steamId);
+                }
+                else if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
+                {
+                    if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()) && actions.ContainsKey(useEmoteEvent.Action))
+                    {
+                        LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using dominate form!");
+                    }
+                    else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()) && actions.ContainsKey(useEmoteEvent.Action))
+                    {
+                        LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
+                    }
+                    else if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, character, steamId);
                 }
             }
         }
@@ -79,150 +97,52 @@ internal static class EmoteSystemPatch
             entities.Dispose();
         }
     }
-    public static void BindPreset(Entity userEntity, Entity character, ulong steamId)
+    public static void BindUnbind(User user, Entity character, ulong steamId)
     {
-        if (!steamId.TryGetFamiliarDefault(out var preset))
-        {
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No familiar preset found to bind, use .fam bind # at least once first.");
-            return;
-        }
-
+        Entity userEntity = character.GetUserEntity();
         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
-        User user = userEntity.Read<User>();
-
-        if (ServerGameManager.HasBuff(character, CombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, PvPCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
-        {
-            LocalizationService.HandleServerReply(EntityManager, user, "You can't bind a familiar while in combat or dominating presence is active.");
-            return;
-        }
 
         if (familiar.Exists())
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You already have an active familiar.");
-            return;
-        }
-
-        string set = steamId.TryGetFamiliarBox(out set) ? set : "";
-
-        if (string.IsNullOrEmpty(set))
-        {
-            LocalizationService.HandleServerReply(EntityManager, user, "You don't have a box selected. Use .fam boxes to see available boxes then choose one with .fam cb [BoxName]");
-            return;
-        }
-        
-        if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
-        {
-            PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
-
-            if (preset < 1 || preset > famKeys.Count)
-            {
-                LocalizationService.HandleServerReply(EntityManager, user, $"Invalid choice, please use 1 to {famKeys.Count} (Current List:<color=white>{set}</color>) and make sure to update preset for new active boxes.");
-                return;
-            }
-
-            data = new(Entity.Null, famKeys[preset - 1]);
-            steamId.SetFamiliarActives(data);
-
-            FamiliarSummonSystem.SummonFamiliar(character, userEntity, famKeys[preset - 1]);
+            FamiliarUtilities.UnbindFamiliar(character, userEntity, steamId);
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find familiar or familiar already active.");
+            FamiliarUtilities.BindFamiliar(character, userEntity, steamId);
         }
     }
-    public static void CallDismiss(Entity userEntity, Entity character, ulong steamId)
+    public static void CallDismiss(User user, Entity character, ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
 
-            if (!data.Familiar.Equals(Entity.Null) && EntityManager.Exists(data.Familiar))
+            if (familiar.Exists())
             {
-                familiar = data.Familiar;
-            }
-
-            if (familiar == Entity.Null)
-            {
-                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable or disable.");
-                return;
-            }
-
-            if (!familiar.Has<Disabled>())
-            {
-                if (FamiliarMinions.ContainsKey(data.Familiar)) FamiliarUtilities.HandleFamiliarMinions(familiar);
-
-                if (ServerGameManager.TryGetBuffer<AlertBuffer>(familiar, out var alertBuffer)) alertBuffer.Clear();
-                if (ServerGameManager.TryGetBuffer<AggroDamageHistoryBufferElement>(familiar, out var damageHistoryBuffer)) damageHistoryBuffer.Clear();
-                if (ServerGameManager.TryGetBuffer<AggroCandidateBufferElement>(familiar, out var aggroCandidateBuffer)) aggroCandidateBuffer.Clear();
-                if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
-                if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
-
-                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-                aggroConsumer.Active._Value = false;
-                aggroConsumer.AggroTarget = NetworkedEntity.Empty;
-                aggroConsumer.AlertTarget = NetworkedEntity.Empty;
-                familiar.Write(aggroConsumer);
-
-                Follower follower = familiar.Read<Follower>();
-                follower.Followed._Value = Entity.Null;
-                familiar.Write(follower);
-
-                var buffer = character.ReadBuffer<FollowerBuffer>();
-                for (int i = 0; i < buffer.Length; i++)
+                if (familiar.IsDisabled())
                 {
-                    if (buffer[i].Entity._Entity.Equals(familiar))
-                    {
-                        buffer.RemoveAt(i);
-                        break;
-                    }
+                    FamiliarUtilities.CallFamiliar(character, familiar, user, steamId, data);
                 }
-
-                familiar.Add<Disabled>();
-
-                data = (familiar, data.FamKey); // entity stored when dismissed
-                steamId.SetFamiliarActives(data);
-
-                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=red>disabled</color>.");
-            }
-            else if (familiar.Has<Disabled>())
-            {
-                float3 position = character.Read<Translation>().Value;
-                familiar.Remove<Disabled>();
-
-                familiar.Write(new Translation { Value = position });
-                familiar.Write(new LastTranslation { Value = position });
-
-                Follower follower = familiar.Read<Follower>();
-                follower.Followed._Value = character;
-                familiar.Write(follower);
-
-                if (ConfigService.FamiliarCombat)
+                else
                 {
-                    AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-                    aggroConsumer.Active._Value = true;
-                    familiar.Write(aggroConsumer);
+                    FamiliarUtilities.DismissFamiliar(character, familiar, user, steamId, data);
                 }
-
-                data = (Entity.Null, data.FamKey);
-                steamId.SetFamiliarActives(data);
-
-                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar <color=green>enabled</color>.");
             }
-        }
-        else
-        {
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar to enable or disable.");
+            else
+            {
+                LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found...");
+            }
         }
     }
-    public static void CombatMode(Entity userEntity, Entity character, ulong playerId)
+    public static void CombatMode(User user, Entity character, ulong steamId)
     {
         if (!ConfigService.FamiliarCombat)
         {
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat is not enabled.");
+            LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat is not enabled.");
             return;
         }
 
-        if (playerId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
+        if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
@@ -233,7 +153,7 @@ internal static class EmoteSystemPatch
 
             if (familiar == Entity.Null)
             {
-                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for.");
+                LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for.");
                 return;
             }
 
@@ -257,7 +177,7 @@ internal static class EmoteSystemPatch
                 aggroable.AggroFactor._Value = 1f;
                 familiar.Write(aggroable);
 
-                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat <color=green>enabled</color>.");
+                LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat <color=green>enabled</color>.");
             }
             else // if not, disable combat
             {
@@ -285,7 +205,7 @@ internal static class EmoteSystemPatch
                 FromCharacter fromCharacter = new()
                 {
                     Character = familiar,
-                    User = userEntity,
+                    User = familiar,
                 };
 
                 DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
@@ -300,12 +220,58 @@ internal static class EmoteSystemPatch
                     }
                 }
 
-                LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "Familiar combat <color=red>disabled</color>.");
+                LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat <color=red>disabled</color>.");
             }
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, userEntity.Read<User>(), "No active familiar found to enable/disable combat mode for...");
+            LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for...");
+        }
+    }
+    static void HandleExoForm(User user, Entity character, ulong steamId)
+    {
+        // check for cooldown here and other such qualifiers before proceeding, also charge at 15 seconds of form time a day for level 1 up to maxDuration seconds of form time at max exo
+        BuffUtilities.UpdateExoFormChargeStored(steamId);
+
+        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BuffUtilities.BaseDuration)
+        {
+            int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
+            float totalDuration = BuffUtilities.CalculateFormDuration(exoLevel);
+
+            float chargeNeeded = BuffUtilities.BaseDuration - exoFormData.Value;
+            float ratioToTotal = chargeNeeded / totalDuration;
+            float secondsRequired = 86400f * ratioToTotal;
+
+            // Convert seconds to hours, minutes, and seconds
+            TimeSpan timeSpan = TimeSpan.FromSeconds(secondsRequired);
+            string timeRemaining;
+
+            // Format based on the amount of time left
+            if (timeSpan.TotalHours >= 1)
+            {
+                // Display hours, minutes, and seconds if more than an hour remains
+                timeRemaining = $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes}m {timeSpan.Seconds}s";
+            }
+            else
+            {
+                // Display only minutes and seconds if less than an hour remains
+                timeRemaining = $"{timeSpan.Minutes}m {timeSpan.Seconds}s";
+            }
+
+            LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color> remaining)");
+            return;
+        }
+
+        if (!character.HasBuff(ExoFormBuff))
+        {
+            BuffUtilities.TryApplyBuff(character, PhasingBuff);
+            BuffUtilities.TryApplyBuff(character, ExoFormBuff);
+            BuffUtilities.TryApplyBuff(character, PhasingBuff);
+        }
+        else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
+        {
+            BuffUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+            DestroyUtility.Destroy(EntityManager, buffEntity);
         }
     }
 }

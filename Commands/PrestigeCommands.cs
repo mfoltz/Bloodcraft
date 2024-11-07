@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -36,12 +35,6 @@ internal static class PrestigeCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (parsedPrestigeType.Equals(PrestigeType.Exo))
-        {
-            LocalizationService.HandleReply(ctx, "Exo prestige pending rework and hard-disabled for now.");
-            return;
-        }
-
         if (ConfigService.ExoPrestiging && parsedPrestigeType.Equals(PrestigeType.Exo))
         {
             if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var xpPrestige) && xpPrestige == ConfigService.MaxLevelingPrestiges)
@@ -65,7 +58,9 @@ internal static class PrestigeCommands
                 LevelingSystem.SetLevel(character);
 
                 int exoPrestiges = prestigeData[PrestigeType.Exo]++;
-                //UpdateExoStatBuff(character, exoPrestiges);
+
+                KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, BuffUtilities.CalculateFormDuration(exoPrestiges));
+                steamId.SetPlayerExoFormData(timeEnergyPair);
 
                 prestigeData[PrestigeType.Exo] = exoPrestiges;
                 steamId.SetPlayerPrestiges(prestigeData);
@@ -75,16 +70,14 @@ internal static class PrestigeCommands
                 if (ConfigService.ExoPrestigeReward != 0) exoReward = new(ConfigService.ExoPrestigeReward);
                 else if (ConfigService.ExoPrestigeReward == 0)
                 {
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige complete. Damage taken increased by: <color=red>{(ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(ConfigService.ExoPrestigePowerBonus * prestigeData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
-                    LocalizationService.HandleReply(ctx, "No prefab configured for <color=#90EE90>Exo</color> reward...");
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete!");
 
                     return;
                 }
 
                 if (ServerGameManager.TryAddInventoryItem(character, exoReward, ConfigService.ExoPrestigeRewardQuantity))
                 {
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige complete. Damage taken increased by: <color=red>{(ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(ConfigService.ExoPrestigePowerBonus * prestigeData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
-                    LocalizationService.HandleReply(ctx, $"You have also been awarded with <color=#ffd9eb>{exoReward.GetPrefabName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetPrefabName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
 
                     return;
                 }
@@ -92,8 +85,7 @@ internal static class PrestigeCommands
                 {
                     InventoryUtilitiesServer.CreateDropItem(EntityManager, character, exoReward, ConfigService.ExoPrestigeRewardQuantity, new Entity());
 
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige complete. Damage taken increased by: <color=red>{(ConfigService.ExoPrestigeDamageTakenMultiplier * prestigeData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(ConfigService.ExoPrestigePowerBonus * prestigeData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
-                    LocalizationService.HandleReply(ctx, $"You have also been awarded with <color=#ffd9eb>{exoReward.GetPrefabName()}</color>x<color=white>{ConfigService.ExoPrestigeReward}</color>! It dropped on the ground becuase your inventory was full though.");
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetPrefabName()}</color>x<color=white>{ConfigService.ExoPrestigeReward}</color>! It dropped on the ground becuase your inventory was full though.");
 
                     return;
                 }
@@ -125,7 +117,7 @@ internal static class PrestigeCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color>.");
+            LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.");
         }
     }
 
@@ -154,12 +146,6 @@ internal static class PrestigeCommands
         ulong steamId = playerInfo.User.PlatformId;
         Entity character = playerInfo.CharEntity;
 
-        if (parsedPrestigeType.Equals(PrestigeType.Exo))
-        {
-            LocalizationService.HandleReply(ctx, "Exo prestige pending rework and hard-disabled for now.");
-            return;
-        }
-
         if (parsedPrestigeType == PrestigeType.Exo)
         {
             if (!ConfigService.ExoPrestiging)
@@ -181,7 +167,9 @@ internal static class PrestigeCommands
                 exoData[PrestigeType.Exo] = exoPrestige;
                 steamId.SetPlayerPrestiges(exoData);
 
-                //UpdateExoStatBuff(character, level);
+                KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, BuffUtilities.CalculateFormDuration(exoPrestige));
+                steamId.SetPlayerExoFormData(timeEnergyPair);
+
                 LocalizationService.HandleReply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
                 return;
             }
@@ -280,12 +268,6 @@ internal static class PrestigeCommands
             return;
         }
 
-        if (parsedPrestigeType.Equals(PrestigeType.Exo))
-        {
-            LocalizationService.HandleReply(ctx, "Exo prestige pending rework and hard-disabled for now.");
-            return;
-        }
-
         if (!ConfigService.ExoPrestiging && parsedPrestigeType == PrestigeType.Exo)
         {
             LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
@@ -315,7 +297,13 @@ internal static class PrestigeCommands
 
             if (parsedPrestigeType == PrestigeType.Exo)
             {
-                //UpdateExoStatBuff(character, 0);
+                if (steamId.TryGetPlayerExoFormData(out var exoFormData))
+                {
+                    KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MinValue, 0f);
+                    steamId.SetPlayerExoFormData(timeEnergyPair);
+                }
+
+                if (PlayerUtilities.GetPlayerBool(steamId, "ExoForm")) PlayerUtilities.SetPlayerBool(steamId, "ExoForm", false);
             }
 
             LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.");
@@ -365,8 +353,7 @@ internal static class PrestigeCommands
 
         if (parsedPrestigeType == PrestigeType.Exo && steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]}");
-            LocalizationService.HandleReply(ctx, $"Damage taken increased by: <color=red>{(ConfigService.ExoPrestigeDamageTakenMultiplier * exoData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>, Damage dealt increased by <color=green>{(ConfigService.ExoPrestigePowerBonus * exoData[PrestigeType.Exo] * 100).ToString("F0") + "%"}</color>");
+            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Form Duration: {BuffUtilities.CalculateFormDuration(exoLevel)}");
             return;
         }
         else if (parsedPrestigeType == PrestigeType.Exo)

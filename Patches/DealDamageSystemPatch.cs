@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -16,9 +17,12 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DealDamageSystemPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     static readonly Random Random = new();
 
@@ -65,9 +69,20 @@ internal static class DealDamageSystemPatch
             {
                 if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent)) continue;
                 else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities in this system can reeeeally mess things up for a save so leaving them for safety >_>
-                else if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
+                //else if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
                 else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
                 else if (!dealDamageEvent.SpellSource.Has<EntityOwner>()) continue; // not really sure why this would be the case but seems to be popping up in console so okay I guess
+                
+                //Core.Log.LogInfo(dealDamageEvent.SpellSource.GetPrefabGUID().LookupName());
+                //Core.Log.LogInfo($"{dealDamageEvent.SpellSource.GetOwner().GetPrefabGUID().LookupName()} | {dealDamageEvent.Target.GetPrefabGUID().LookupName()}");
+                if (dealDamageEvent.SpellSource.GetOwner().IsFollowingPlayer() && dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(dealDamageEvent.SpellSource.GetOwner(), dealDamageEvent.Target))
+                {
+                    //Core.Log.LogInfo("Follower attacking ally, preventing...");
+                    //DestroyUtility.Destroy(EntityManager, entity);
+                    EntityManager.DestroyEntity(entity);
+                }
+
+                if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell at this point
 
                 if (ConfigService.QuestSystem && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player))
                 {
@@ -133,6 +148,15 @@ internal static class DealDamageSystemPatch
                                 buff.Write(new EntityOwner { Owner = player });
                             }
                         }
+                    }
+                }
+                else if (ConfigService.FamiliarSystem && GameMode.Equals(GameModeType.PvP) && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && dealDamageEvent.Target.IsPlayer())
+                {
+                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
+                    if (familiar.Exists() && !familiar.IsDisabled())
+                    {
+                        FamiliarUtilities.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
                     }
                 }
             }

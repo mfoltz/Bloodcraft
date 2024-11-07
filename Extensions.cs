@@ -229,6 +229,16 @@ internal static class Extensions
         if (PlayerCache.TryGetValue(playerName, out playerInfo)) return true;
         return false;
     }
+    public static PrefabGUID GetPrefabGUID(this Entity entity)
+    {
+        if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID;
+        return PrefabGUID.Empty;
+    }
+    public static Entity GetUserEntity(this Entity character)
+    {
+        if (character.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
+        return Entity.Null;
+    }
     public static User GetUser(this Entity character)
     {
         User user = User.Empty;

@@ -209,7 +209,7 @@ internal static class BloodSystem
         if (bloodType.Equals(BloodType.None)) return;
         else if (targetBloodType.Equals(bloodType))
         {
-            bloodValue *= 5f; // same type multiplier
+            bloodValue *= 3f; // same type multiplier
         }
 
         float qualityMultiplier = 1f + (bloodQuality / 100f);
