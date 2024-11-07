@@ -229,7 +229,7 @@ internal static class BuffSystemSpawnPatches
                     if (owner.IsPlayer())
                     {
                         Buff buff = entity.Read<Buff>();
-                        if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        //if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                     else if (ConfigService.FamiliarSystem)
                     {
@@ -253,7 +253,7 @@ internal static class BuffSystemSpawnPatches
                     if (owner.IsPlayer() && pvpProtected)
                     {
                         Buff buff = entity.Read<Buff>();
-                        if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        //if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                     else if (ConfigService.FamiliarSystem)
                     {
