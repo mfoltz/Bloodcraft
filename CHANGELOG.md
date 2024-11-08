@@ -1,4 +1,5 @@
 `1.5.3`
+- parties should work more consistently, previously a failed check allowed players to be in more than one party at once which the code was not designed to handle
 - familiar aggression is reset when returned to player from too far away or when calling/dismissing them
 - added config to set level for shard bearers if using elite option, can leave at 0 for no change
 - can add empty fam boxes, delete empty fam boxes via '.fam ab [BoxName]' and '.fam db [BoxName]' respectively
