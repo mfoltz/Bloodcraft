@@ -57,7 +57,7 @@ internal static class PrestigeCommands
 
                 LevelingSystem.SetLevel(character);
 
-                int exoPrestiges = prestigeData[PrestigeType.Exo]++;
+                int exoPrestiges = ++prestigeData[PrestigeType.Exo];
 
                 KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, BuffUtilities.CalculateFormDuration(exoPrestiges));
                 steamId.SetPlayerExoFormData(timeEnergyPair);

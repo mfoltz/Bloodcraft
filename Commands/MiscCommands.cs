@@ -221,7 +221,7 @@ internal static class MiscCommands
         ctx.Reply($"Combat music cleared~");
     }
 
-    [Command(name: "exoform", adminOnly: true, usage: ".exoform", description: "Toggles taunting to enter exo form.")]
+    [Command(name: "exoform", adminOnly: false, usage: ".exoform", description: "Toggles taunting to enter exo form.")]
     public static void ToggleExoFormEmote(ChatCommandContext ctx)
     {
         if (!ConfigService.ExoPrestiging)

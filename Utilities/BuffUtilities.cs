@@ -56,7 +56,7 @@ internal static class BuffUtilities
         { 7, 75 }
     };
 
-    static readonly PrefabGUID ExoFormExitBuff = new(958508368);
+    //static readonly PrefabGUID ExoFormExitBuff = new(958508368);
     public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefab)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()

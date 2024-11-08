@@ -37,8 +37,8 @@ internal static class CreateGameplayEventOnTickSpawnSystemPatch
 
                     if (buffTarget.IsPlayer())
                     {
-                        //if (GameMode.Equals(GameModeType.PvE)) DestroyUtility.Destroy(EntityManager, entity);
-                        //else if (GameMode.Equals(GameModeType.PvP) && buffTarget.HasBuff(PvPProtectedBuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        if (GameMode.Equals(GameModeType.PvE)) DestroyUtility.Destroy(EntityManager, entity);
+                        else if (GameMode.Equals(GameModeType.PvP) && buffTarget.HasBuff(PvPProtectedBuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                 }
             }
