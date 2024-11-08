@@ -56,6 +56,7 @@ internal static class BuffSystemSpawnPatches
                 if (!buffTarget.Exists()) continue;
 
                 string prefabName = prefabGUID.LookupName().ToLower();
+
                 //int guidHash = prefabGUID.GuidHash;
                 //Core.Log.LogInfo($"BuffSystem_Spawn_Server: {prefabName}");
 
@@ -228,7 +229,7 @@ internal static class BuffSystemSpawnPatches
 
                     if (owner.IsPlayer())
                     {
-                        Buff buff = entity.Read<Buff>();
+                        //Buff buff = entity.Read<Buff>();
                         //if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                     else if (ConfigService.FamiliarSystem)
@@ -250,9 +251,9 @@ internal static class BuffSystemSpawnPatches
                     Entity owner = entity.GetOwner();
                     bool pvpProtected = player.HasBuff(PvPProtectedBuff);
 
-                    if (owner.IsPlayer() && pvpProtected)
+                    if (owner.IsPlayer() && pvpProtected) 
                     {
-                        Buff buff = entity.Read<Buff>();
+                        //Buff buff = entity.Read<Buff>();
                         //if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                     else if (ConfigService.FamiliarSystem)

@@ -68,6 +68,12 @@ internal static class UpdateBuffsBufferDestroyPatch
                     }
                     else if (ConfigService.ExoPrestiging && prefabGUID.Equals(TauntEmoteBuff) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
                     {
+                        if (EmoteSystemPatch.ExitingForm.Contains(steamId))
+                        {
+                            EmoteSystemPatch.ExitingForm.Remove(steamId);
+                            continue;
+                        }
+
                         HandleExoForm(player.GetUser(), player, steamId); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder
                     }
                 }

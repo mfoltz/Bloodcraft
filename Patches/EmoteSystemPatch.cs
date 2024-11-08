@@ -42,9 +42,11 @@ internal static class EmoteSystemPatch
     {
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
-        { new(-26826346), BindUnbind }, // clap
-        { new(-158502505), HandleExoForm} // taunt
+        { new(-26826346), BindUnbind } // clap
+        //{ new(-158502505), HandleExoForm} // taunt
     };
+
+    public static readonly HashSet<ulong> ExitingForm = [];
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -73,6 +75,7 @@ internal static class EmoteSystemPatch
                     }
                     else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
                     {
+                        ExitingForm.Add(steamId);
                         BuffUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
                         DestroyUtility.Destroy(EntityManager, buffEntity);
                     }
@@ -228,7 +231,7 @@ internal static class EmoteSystemPatch
             LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for...");
         }
     }
-    static void HandleExoForm(User user, Entity character, ulong steamId)
+    static void HandleExoForm(User user, Entity character, ulong steamId) // moved this to after the taunt buff being destroyed so the visual before transforming looks nicer but leaving here for now >_>
     {
         // check for cooldown here and other such qualifiers before proceeding, also charge at 15 seconds of form time a day for level 1 up to maxDuration seconds of form time at max exo
         BuffUtilities.UpdateExoFormChargeStored(steamId);
