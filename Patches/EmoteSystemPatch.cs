@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
@@ -76,10 +75,9 @@ internal static class EmoteSystemPatch
                     else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
                     {
                         ExitingForm.Add(steamId);
-                        BuffUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+                        ExoFormUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
                         DestroyUtility.Destroy(EntityManager, buffEntity);
                     }
-                    //HandleExoForm(user, character, steamId);
                 }
                 else if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
                 {
@@ -231,17 +229,18 @@ internal static class EmoteSystemPatch
             LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for...");
         }
     }
+
+    /*
     static void HandleExoForm(User user, Entity character, ulong steamId) // moved this to after the taunt buff being destroyed so the visual before transforming looks nicer but leaving here for now >_>
     {
-        // check for cooldown here and other such qualifiers before proceeding, also charge at 15 seconds of form time a day for level 1 up to maxDuration seconds of form time at max exo
-        BuffUtilities.UpdateExoFormChargeStored(steamId);
+        ExoFormUtilities.UpdateExoFormChargeStored(steamId);
 
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BuffUtilities.BaseDuration)
+        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < ExoFormUtilities.BaseDuration)
         {
             int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
-            float totalDuration = BuffUtilities.CalculateFormDuration(exoLevel);
+            float totalDuration = ExoFormUtilities.CalculateFormDuration(exoLevel);
 
-            float chargeNeeded = BuffUtilities.BaseDuration - exoFormData.Value;
+            float chargeNeeded = ExoFormUtilities.BaseDuration - exoFormData.Value;
             float ratioToTotal = chargeNeeded / totalDuration;
             float secondsRequired = 86400f * ratioToTotal;
 
@@ -273,8 +272,9 @@ internal static class EmoteSystemPatch
         }
         else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
         {
-            BuffUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+            ExoFormUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
             DestroyUtility.Destroy(EntityManager, buffEntity);
         }
     }
+    */
 }

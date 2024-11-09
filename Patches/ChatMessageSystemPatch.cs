@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -8,7 +7,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft.Patches;
 

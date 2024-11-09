@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Microsoft.Extensions.Logging;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
@@ -22,17 +23,8 @@ internal static class BuffUtilities
     static SystemService SystemService => Core.SystemService;
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
-    
-    public const float BaseDuration = 15f;
-    public const float MaxDuration = 180f;
 
-    static readonly AssetGuid AssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
-    static readonly float3 Red = new(1f, 0f, 0f);
-
-    static readonly WaitForSeconds SecondDelay = new(1f);
-
-    public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
+    static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
     {
         { 0, new(-1473399128) }, // primary fast shockwaveslash
         { 1, new(841757706) }, // first weapon skill downswing detonate
@@ -56,7 +48,7 @@ internal static class BuffUtilities
         { 7, 75 }
     };
 
-    //static readonly PrefabGUID ExoFormExitBuff = new(958508368);
+    static readonly PrefabGUID ExoFormExitBuff = new(-1797102561);
     public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefab)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -749,8 +741,9 @@ internal static class BuffUtilities
         ulong steamId = user.PlatformId;
 
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int level) ? level : 0;
+        float duration = steamId.TryGetPlayerExoFormData(out var exoFormData) ? exoFormData.Value : 0f;
 
-        float duration = CalculateFormDuration(exoLevel);
+        //float duration = ExoFormUtilities.CalculateFormDuration(exoLevel);
         //Core.Log.LogInfo("HandleExoFormBuff...");
 
         if (!buffEntity.Has<ReplaceAbilityOnSlotData>()) buffEntity.Add<ReplaceAbilityOnSlotData>();
@@ -758,6 +751,38 @@ internal static class BuffUtilities
         if (!buffEntity.Has<Script_Buff_Shapeshift_DataShared>()) buffEntity.Add<Script_Buff_Shapeshift_DataShared>();
         if (!buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Add<ModifyTargetHUDBuff>();
         
+        /*
+        if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
+        {
+            CreateGameplayEventsOnSpawn createGameplayEventsOnSpawn = buffEntity.ReadBuffer<CreateGameplayEventsOnSpawn>()[0];
+            GameplayEventId eventId = createGameplayEventsOnSpawn.EventId;
+            GameplayEventTarget eventTarget = createGameplayEventsOnSpawn.Target;
+
+            buffEntity.Remove<CreateGameplayEventsOnSpawn>();
+            if (!buffEntity.Has<CreateGameplayEventsOnDestroy>())
+            {
+                var createGameplayEventsOnDestroyBuffer = EntityManager.AddBuffer<CreateGameplayEventsOnDestroy>(buffEntity);
+
+                CreateGameplayEventsOnDestroy createGameplayEventsOnDestroy = new()
+                {
+                    EventId = eventId,
+                    Target = eventTarget,
+                    SpecificDestroyReason = false,
+                    DestroyReason = DestroyReason.Default
+                };
+
+                createGameplayEventsOnDestroyBuffer.Add(createGameplayEventsOnDestroy);
+
+                var spawnPrefabOnGameplayEventBuffer = buffEntity.ReadBuffer<SpawnPrefabOnGameplayEvent>();
+
+                SpawnPrefabOnGameplayEvent spawnPrefabOnGameplayEvent = spawnPrefabOnGameplayEventBuffer[0];
+                spawnPrefabOnGameplayEvent.SpawnPrefab = ExoFormExitBuff;
+
+                spawnPrefabOnGameplayEventBuffer[0] = spawnPrefabOnGameplayEvent;
+            }
+        }
+        */
+
         ModifyTargetHUDBuff modifyTargetHUDBuff = new()
         {
             Height = 1.25f,
@@ -789,7 +814,7 @@ internal static class BuffUtilities
             EntityManager.AddBuffer<ReplaceAbilityOnSlotBuff>(buffEntity);
         }
 
-        var buffer = buffEntity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
+        var replaceAbilityOnSlotBuffer = buffEntity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
         foreach (var keyValuePair in ExoFormAbilityMap)
         {
             ReplaceAbilityOnSlotBuff replaceAbilityOnSlotBuff = new()
@@ -802,90 +827,14 @@ internal static class BuffUtilities
                 CastBlockType = GroupSlotModificationCastBlockType.WholeCast
             };
 
-            buffer.Add(replaceAbilityOnSlotBuff);
+            replaceAbilityOnSlotBuffer.Add(replaceAbilityOnSlotBuff);
         }
 
         ReplaceAbilityOnSlotSystem.OnUpdate();
 
-        string durationMessage = $"<color=red>Dracula's</color> latent power made manifest... (<color=white>{duration}</color>s)";
+        string durationMessage = $"<color=red>Dracula's</color> latent power made manifest... (<color=white>{(int)duration}</color>s)";
         LocalizationService.HandleServerReply(EntityManager, user, durationMessage);
 
-        Core.StartCoroutine(ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f)); // Start countdown messages 5 seconds before buff expires
-    }
-    public static float CalculateFormDuration(int prestigeLevel)
-    {
-        // Linear scaling from 15s to 120s over 1-100 prestige levels
-        return BaseDuration + (MaxDuration / ConfigService.ExoPrestiges) * (prestigeLevel - 1);
-    }
-    static IEnumerator ExoFormCountdown(Entity buffEntity, Entity playerEntity, Entity userEntity, float countdownDelay)
-    {
-        yield return new WaitForSeconds(countdownDelay);
-
-        float countdown = 5f;
-
-        // Wait until there are 5 seconds left
-        while (buffEntity.Exists() && countdown > 0f)
-        {
-            float3 targetPosition = playerEntity.Read<Translation>().Value;
-            targetPosition = new float3(targetPosition.x, targetPosition.y + 1.5f, targetPosition.z);
-
-            ScrollingCombatTextMessage.Create(
-                EntityManager,
-                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                AssetGuid,
-                targetPosition,
-                Red,
-                playerEntity,
-                countdown,
-                default,
-                userEntity
-            );
-
-            countdown--;
-            yield return SecondDelay;
-        }
-
-        UpdateFullExoFormChargeUsed(playerEntity.GetSteamId());
-    }
-    public static void UpdateExoFormChargeStored(ulong steamId)
-    {
-        // add energy based on last time form was exited till now
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData))
-        {
-            DateTime now = DateTime.UtcNow;
-
-            int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
-            float totalDuration = CalculateFormDuration(exoLevel);
-
-            // energy earned based on total duration from exo level times fraction of time passed in seconds per day?
-            float chargedEnergy = (float)(((now - exoFormData.Key).TotalSeconds / 86400) * totalDuration);
-            float chargeStored = Mathf.Min(exoFormData.Value + chargedEnergy, MaxDuration);
-
-            KeyValuePair<DateTime, float> timeEnergyPair = new(now, chargeStored);
-            steamId.SetPlayerExoFormData(timeEnergyPair);
-        }
-    }
-    public static void UpdatePartialExoFormChargeUsed(Entity buffEntity, ulong steamId)
-    {
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData))
-        {
-            int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
-
-            float totalDuration = CalculateFormDuration(exoLevel);
-            float remainingTime = buffEntity.Read<LifeTime>().Duration;
-            float timeInForm = totalDuration - remainingTime;
-
-            // set stamp to start 'charging' energy, subtract energy used based on duration and exo level
-            KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - timeInForm);
-            steamId.SetPlayerExoFormData(timeEnergyPair);
-        }
-    }
-    public static void UpdateFullExoFormChargeUsed(ulong steamId)
-    {
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData))
-        {
-            KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, 0f);
-            steamId.SetPlayerExoFormData(timeEnergyPair);
-        }
+        Core.StartCoroutine(ExoFormUtilities.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f)); // Start countdown messages 5 seconds before buff expires
     }
 }

@@ -75,11 +75,11 @@ internal static class DealDamageSystemPatch
                 
                 //Core.Log.LogInfo(dealDamageEvent.SpellSource.GetPrefabGUID().LookupName());
                 //Core.Log.LogInfo($"{dealDamageEvent.SpellSource.GetOwner().GetPrefabGUID().LookupName()} | {dealDamageEvent.Target.GetPrefabGUID().LookupName()}");
-                if (dealDamageEvent.SpellSource.GetOwner().IsFollowingPlayer() && dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(dealDamageEvent.SpellSource.GetOwner(), dealDamageEvent.Target))
+
+                if (dealDamageEvent.SpellSource.GetOwner().IsFollowingPlayer() && dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(dealDamageEvent.SpellSource.GetOwner(), dealDamageEvent.Target)) // not sure if any fam besides raziel does this
                 {
-                    //Core.Log.LogInfo("Follower attacking ally, preventing...");
                     //DestroyUtility.Destroy(EntityManager, entity);
-                    EntityManager.DestroyEntity(entity);
+                    EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroyEvent not sufficient to prevent damage
                 }
 
                 if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell at this point

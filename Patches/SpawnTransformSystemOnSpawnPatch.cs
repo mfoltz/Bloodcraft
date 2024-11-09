@@ -72,7 +72,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         .Select(f => f.Key)
                         .FirstOrDefault(id => PlayerUtilities.GetPlayerBool(id, "Binding"));
 
-                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && steamId != 0)
                     {
                         User user = playerInfo.User;
                         Entity character = playerInfo.CharEntity;

@@ -23,7 +23,7 @@ internal static class AbilityRunScriptsSystemPatch
     static readonly PrefabGUID UseWaypointAbilityGroup = new(695067846);
     static readonly PrefabGUID UseCastleWaypointAbilityGroup = new(893332545);
     
-    static readonly Dictionary<int, float> ExoFormCooldownMap = new()
+    static readonly Dictionary<int, float> ExoFormCooldownMap = new() // not currently setting cooldowns, will consider later
     {
         { 1, 8f },
         { 2, 8f },

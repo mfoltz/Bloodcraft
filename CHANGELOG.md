@@ -4,7 +4,7 @@
 - added config to set level for shard bearers if using elite option, can leave at 0 for no change
 - can add empty fam boxes, delete empty fam boxes via '.fam ab [BoxName]' and '.fam db [BoxName]' respectively
 - added minor visual effects when incrementing various prestiges
-- non-clanned familiars tolerable on PvP servers and generally extended handling for preventing negative effects for PvE servers and PvP protected players on PvP servers (witches can no longer pig VBloods)
+- non-clanned familiars tolerable on PvP servers and generally extended handling for preventing negative effects for PvE servers and PvP protected players on PvP servers (also witches can no longer pig VBloods)
 - Legacy essence values gained from feed events are now multipled by x3 if consuming the same bloodType and/or then up to x2 if the player has 100% blood quality (this is much slower to level at defaults than was intended)
 - Exo rework! Old effects are no longer applicable and are removed from players upon logging in if they have exo data. Instead, if Dracula has been defeated and have at least 1 exo prestige, unlock a powerful new form that will increase in duration and power as you gain exo prestiges! Use '.exoform' to enable taunting to active if requirements met
 - Traders no longer provide any progression to players when killed

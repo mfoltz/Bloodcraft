@@ -125,7 +125,7 @@ internal static class BuffSystemSpawnPatches
                         FamiliarUtilities.AutoCallMap.Remove(player);
                     }
                 }
-                else if (prefabGUID.Equals(PvECombatBuff) && ConfigService.FamiliarSystem) // return familiar when entering combat if far enough away
+                else if ((prefabGUID.Equals(PvECombatBuff) || prefabGUID.Equals(PvPCombatBuff)) && ConfigService.FamiliarSystem) // return familiar when entering combat if far enough away
                 {
                     if (buffTarget.TryGetPlayer(out player))
                     {
@@ -227,10 +227,10 @@ internal static class BuffSystemSpawnPatches
                 {
                     Entity owner = entity.GetOwner();
 
-                    if (owner.IsPlayer())
+                    if (owner.IsPlayer() && !owner.Equals(buffTarget))
                     {
-                        //Buff buff = entity.Read<Buff>();
-                        //if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        Buff buff = entity.Read<Buff>();
+                        if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                     else if (ConfigService.FamiliarSystem)
                     {
@@ -246,15 +246,15 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (GameMode.Equals(GameModeType.PvP) && buffTarget.TryGetPlayer(out player))
+                else if (GameMode.Equals(GameModeType.PvP) && buffTarget.IsPlayer())
                 {
                     Entity owner = entity.GetOwner();
-                    bool pvpProtected = player.HasBuff(PvPProtectedBuff);
+                    bool pvpProtected = buffTarget.HasBuff(PvPProtectedBuff);
 
-                    if (owner.IsPlayer() && pvpProtected) 
+                    if (owner.IsPlayer() && pvpProtected && !owner.Equals(buffTarget)) 
                     {
-                        //Buff buff = entity.Read<Buff>();
-                        //if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        Buff buff = entity.Read<Buff>();
+                        if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
                     else if (ConfigService.FamiliarSystem)
                     {

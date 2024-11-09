@@ -31,7 +31,7 @@ internal static class CreateGameplayEventOnTickSpawnSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.Has<SchoolDebuffData>() || !entity.TryGetComponent(out Buff buff)) continue;
-                else if (entity.TryGetComponent(out EntityOwner owner) && owner.Owner.IsPlayer())
+                else if (entity.TryGetComponent(out EntityOwner owner) && owner.Owner.IsPlayer()) // prevent chaos ignite etc from being applied to players with pvp prot or if pve 
                 {
                     Entity buffTarget = buff.Target;
 

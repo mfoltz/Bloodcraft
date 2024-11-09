@@ -55,7 +55,8 @@ internal static class UpdateBuffsBufferDestroyPatch
                 
                 if (ConfigService.PrestigeSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player)) // check if need to reapply prestige buff
                 {
-                    ulong steamId = player.GetSteamId();
+                    User user = player.GetUser();
+                    ulong steamId = user.PlatformId;
 
                     if (PrestigeBuffs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
                     {
@@ -73,8 +74,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                             EmoteSystemPatch.ExitingForm.Remove(steamId);
                             continue;
                         }
-
-                        HandleExoForm(player.GetUser(), player, steamId); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder
+                        else if (ExoFormUtilities.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(player); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder
                     }
                 }
                 
@@ -96,44 +96,10 @@ internal static class UpdateBuffsBufferDestroyPatch
             entities.Dispose();
         }
     }
-    static void HandleExoForm(User user, Entity character, ulong steamId)
+    static void ApplyExoFormBuff(Entity character)
     {
         // check for cooldown here and other such qualifiers before proceeding, also charge at 15 seconds of form time a day for level 1 up to maxDuration seconds of form time at max exo
-        BuffUtilities.UpdateExoFormChargeStored(steamId);
-
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BuffUtilities.BaseDuration)
-        {
-            int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
-            float totalDuration = BuffUtilities.CalculateFormDuration(exoLevel);
-
-            float chargeNeeded = BuffUtilities.BaseDuration - exoFormData.Value;
-            float ratioToTotal = chargeNeeded / totalDuration;
-            float secondsRequired = 86400f * ratioToTotal;
-
-            // Convert seconds to hours, minutes, and seconds
-            TimeSpan timeSpan = TimeSpan.FromSeconds(secondsRequired);
-            string timeRemaining;
-
-            // Format based on the amount of time left
-            if (timeSpan.TotalHours >= 1)
-            {
-                // Display hours, minutes, and seconds if more than an hour remains
-                timeRemaining = $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes}m {timeSpan.Seconds}s";
-            }
-            else
-            {
-                // Display only minutes and seconds if less than an hour remains
-                timeRemaining = $"{timeSpan.Minutes}m {timeSpan.Seconds}s";
-            }
-
-            LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color> remaining)");
-            return;
-        }
-
-        if (!character.HasBuff(ExoFormBuff))
-        {
-            BuffUtilities.TryApplyBuff(character, ExoFormBuff);
-            BuffUtilities.TryApplyBuff(character, PhasingBuff);
-        }
+        BuffUtilities.TryApplyBuff(character, ExoFormBuff);
+        BuffUtilities.TryApplyBuff(character, PhasingBuff);
     }
 }

@@ -40,7 +40,6 @@ internal static class ScriptSpawnServerPatch
                 //Core.Log.LogInfo($"ScriptSpawnServer: {prefabGUID.LookupName()}");
                 if (ConfigService.ExoPrestiging && prefabGUID.Equals(ExoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
                 {
-                    // need to decide the scaling with number of exo prestiges here, thinking blood mana or something which restores faster with more prestiges and need that to enter?
                     BuffUtilities.HandleExoFormBuff(entity, player);
                 }
 

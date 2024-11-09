@@ -217,7 +217,7 @@ internal static class FamiliarSummonSystem
 
         if (familiar.Has<EntityOwner>())
         {
-            familiar.Write(new EntityOwner { Owner = player }); //try taking this away? see if SCT persists and what else is affected, like if they now just die immediately when summoned -_-
+            familiar.Write(new EntityOwner { Owner = player }); //try taking this away? see if SCT persists and what else is affected, like if they now just die immediately when summoned -_- leaving that then
         }
 
         familiar.Add<BlockFeedBuff>();
@@ -254,27 +254,20 @@ internal static class FamiliarSummonSystem
     };
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
-        float scalingFactor = 0.1f + (level / (float)ConfigService.MaxFamiliarLevel) * 0.9f; // Calculate scaling factor
+        float scalingFactor = 0.1f + (level / (float)ConfigService.MaxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such
         float healthScalingFactor = 1.0f + (level / (float)ConfigService.MaxFamiliarLevel) * 4.0f; // Calculate scaling factor for max health
 
         int prestigeLevel = 0;
         List<FamiliarStatType> stats = [];
 
-        if (FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (ConfigService.FamiliarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
             prestigeLevel = prestigeData.Key;
             stats = prestigeData.Value;
         }
 
-        if (!ConfigService.FamiliarPrestige)
-        {
-            prestigeLevel = 0;
-            stats = [];
-        }
-
+        // get base stats from original unit prefab then apply scaling
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[familiar.Read<PrefabGUID>()];
-
-        // get stats from original
         UnitStats unitStats = original.Read<UnitStats>();
 
         UnitStats familiarStats = familiar.Read<UnitStats>();
@@ -308,6 +301,7 @@ internal static class FamiliarSummonSystem
                     break;
             }
         }
+
         familiar.Write(familiarStats);
 
         UnitLevel unitLevel = familiar.Read<UnitLevel>();
@@ -337,12 +331,12 @@ internal static class FamiliarSummonSystem
             }
         }
 
-        if (familiar.Has<MaxMinionsPerPlayerElement>()) // make vbloods summon?
+        if (familiar.Has<MaxMinionsPerPlayerElement>()) // make vbloods summon? hmm nope let's try not removing this
         {
-            familiar.Remove<MaxMinionsPerPlayerElement>();
+            //familiar.Remove<MaxMinionsPerPlayerElement>();
         }
 
-        if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from tanks
+        if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
         {
             var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
             for (int i = 0; i < buffer.Length; i++)
