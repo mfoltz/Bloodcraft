@@ -367,11 +367,17 @@ internal static class ServerBootstrapSystemPatches
                 if (ConfigService.ExoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
                     PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
+
+                    if (!steamId.TryGetPlayerExoFormData(out var exoFormData))
+                    {
+                        KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoFormUtilities.CalculateFormDuration(exoPrestiges));
+                        steamId.SetPlayerExoFormData(timeEnergyPair);
+                    }
                 }
 
-                if (ConfigService.ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var exoFormData))
+                if (ConfigService.ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var exoFormDataOther))
                 {
-                    KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MinValue, 0f);
+                    KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MaxValue, 0f);
                     steamId.SetPlayerExoFormData(timeEnergyPair);
                 }
             }

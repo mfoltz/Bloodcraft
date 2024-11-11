@@ -24,7 +24,7 @@ internal static class BuffUtilities
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
-    static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
+    public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
     {
         { 0, new(-1473399128) }, // primary fast shockwaveslash
         { 1, new(841757706) }, // first weapon skill downswing detonate
@@ -36,7 +36,7 @@ internal static class BuffUtilities
         { 7, new(-7407393) } // ring of blood
     };
 
-    static readonly Dictionary<int, int> ExoFormAbilityUnlockMap = new()
+    public static readonly Dictionary<int, int> ExoFormAbilityUnlockMap = new()
     {
         { 0, 0 },
         { 1, 15 },
@@ -742,6 +742,7 @@ internal static class BuffUtilities
 
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int level) ? level : 0;
         float duration = steamId.TryGetPlayerExoFormData(out var exoFormData) ? exoFormData.Value : 0f;
+        //float maxDuration = Mathf.Min(ExoFormUtilities.CalculateFormDuration(exoLevel), duration);
 
         //float duration = ExoFormUtilities.CalculateFormDuration(exoLevel);
         //Core.Log.LogInfo("HandleExoFormBuff...");

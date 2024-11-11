@@ -338,8 +338,10 @@ internal class EclipseService
                         Core.Log.LogError($"Error sending Eclipse progress to {playerInfo.User.PlatformId}: {e}");
                     }
                 }
+
                 yield return null;
             }
+
             yield return Delay;
         }
     }

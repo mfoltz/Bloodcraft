@@ -65,13 +65,6 @@ internal static class EntityUtilities
         "GarlicResistance",
         "T01_Bone"
     ];
-
-    static readonly HashSet<string> FilteredResources = 
-    [
-        "Item_Ingredient_Crystal",
-        "Item_Ingredient_Coal",
-        "Item_Ingredient_Plant_Thistle"
-    ];
     public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1) 
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);
@@ -102,8 +95,9 @@ internal static class EntityUtilities
                 {
                     if (entity.TryGetComponent(out PrefabGUID resourcePrefab))
                     {
-                        string prefabName = resourcePrefab.LookupName();
-                        if (!FilteredResources.Any(part => prefabName.Contains(part))) yield return entity;
+                        //string prefabName = resourcePrefab.LookupName();
+                        //if (!FilteredResources.Any(part => prefabName.Contains(part))) 
+                        yield return entity;
                     }
                 }
                 else if (EntityManager.Exists(entity))

@@ -41,6 +41,13 @@ internal static class QuestSystem
     static readonly PrefabGUID ItemIngredientStone = new(-1531666018);
 
     const int DefaultMaxPlayerLevel = 90;
+
+    static readonly HashSet<string> FilteredResources =
+    [
+        "Item_Ingredient_Crystal",
+        "Coal",
+        "Thistle"
+    ];
     public enum QuestType
     {
         Daily,
@@ -217,7 +224,9 @@ internal static class QuestSystem
                         var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                         foreach (DropTableDataBuffer dropTableData in dropTableDataBuffer)
                         {
-                            if (dropTableData.ItemGuid.LookupName().Contains("Item_Ingredient"))
+                            string prefabName = dropTableData.ItemGuid.LookupName();
+
+                            if (prefabName.Contains("Item_Ingredient") && !FilteredResources.Any(part => prefabName.Contains(part)))
                             {
                                 prefabs.Add(dropTableData.ItemGuid);
 

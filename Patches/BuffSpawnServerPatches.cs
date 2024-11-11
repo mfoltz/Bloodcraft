@@ -50,7 +50,7 @@ internal static class BuffSystemSpawnPatches
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
                 if (!buffTarget.Exists()) continue;
@@ -225,7 +225,7 @@ internal static class BuffSystemSpawnPatches
                 }
                 else if (GameMode.Equals(GameModeType.PvE) && buffTarget.IsPlayer())
                 {
-                    Entity owner = entity.GetOwner();
+                    Entity owner = entityOwner.Owner;
 
                     if (owner.IsPlayer() && !owner.Equals(buffTarget))
                     {
@@ -248,7 +248,7 @@ internal static class BuffSystemSpawnPatches
                 }
                 else if (GameMode.Equals(GameModeType.PvP) && buffTarget.IsPlayer())
                 {
-                    Entity owner = entity.GetOwner();
+                    Entity owner = entityOwner.Owner;
                     bool pvpProtected = buffTarget.HasBuff(PvPProtectedBuff);
 
                     if (owner.IsPlayer() && pvpProtected && !owner.Equals(buffTarget)) 

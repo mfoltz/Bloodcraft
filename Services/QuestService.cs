@@ -107,7 +107,7 @@ internal class QuestService
                 IEnumerable<Entity> entities = EntityUtilities.GetEntitiesEnumerable(ItemQuery, (int)TargetType.Craft);
                 foreach (Entity entity in entities)
                 {
-                    if (entity.TryGetComponent(out PrefabGUID prefab))
+                    if (entity.TryGetComponent(out PrefabGUID prefab) && !entity.Has<ShatteredItem>() && !entity.Has<UpgradeableLegendaryItem>())
                     {
                         if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salveageable) && salveageable.RecipeGUID.HasValue()) CraftPrefabs.Add(prefab); // checking for non-empty salvage recipes for equipment craft targets
                         else if (entity.Has<ConsumableCondition>()) CraftPrefabs.Add(prefab); // checking for consumableCondition for consumable craft targets

@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -365,6 +364,32 @@ internal static class PrestigeCommands
                 else if (exoFormData.Value >= ExoFormUtilities.BaseDuration)
                 {
                     LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
+                }
+
+                // Generate a list of ability unlock messages based on non-zero levels
+                var exoFormSkills = BuffUtilities.ExoFormAbilityUnlockMap
+                    .Where(pair => pair.Value != 0) // Filter out abilities unlocked at level 0
+                    .Select(pair =>
+                    {
+                        // Get the ability name from ExoFormAbilityMap and remove the "Prefab" suffix
+                        string abilityName = BuffUtilities.ExoFormAbilityMap[pair.Key].LookupName();
+                        int prefabIndex = abilityName.IndexOf("Prefab");
+                        if (prefabIndex != -1)
+                        {
+                            abilityName = abilityName[..prefabIndex].TrimEnd();
+                        }
+
+                        // Return formatted ability name with unlock level
+                        return $"<color=white>{abilityName}</color> at <color=#90EE90>Exo</color> level <color=yellow>{pair.Value}</color>";
+                    })
+                    .ToList();
+
+                // Group and send the messages in batches of 4
+                for (int i = 0; i < exoFormSkills.Count; i += 4)
+                {
+                    var batch = exoFormSkills.Skip(i).Take(4);
+                    string replyMessage = string.Join(", ", batch);
+                    LocalizationService.HandleReply(ctx, replyMessage);
                 }
             }
 
