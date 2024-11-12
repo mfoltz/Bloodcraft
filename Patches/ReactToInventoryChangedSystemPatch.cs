@@ -49,6 +49,7 @@ internal static class ReactToInventoryChangedSystemPatch
                     }
                     else if (inventoryConnection.InventoryOwner.TryGetComponent(out UserOwner userOwner) && userOwner.Owner.GetEntityOnServer().TryGetComponent(out User user))
                     {
+                        Entity craftingStation = inventoryConnection.InventoryOwner;
                         ulong steamId = user.PlatformId;
 
                         Dictionary<ulong, User> clanMembers = [];
@@ -80,7 +81,7 @@ internal static class ReactToInventoryChangedSystemPatch
                             steamId = keyValuePair.Key;
                             user = keyValuePair.Value;
 
-                            if (CraftingSystemPatches.ValidatedCraftingJobs.TryGetValue(steamId, out Dictionary<PrefabGUID, int> craftingJobs) && craftingJobs.TryGetValue(itemPrefabGUID, out int jobs) && jobs > 0)
+                            if (CraftingSystemPatches.ValidatedCraftingJobs.TryGetValue(steamId, out var craftingStationJobs) && craftingStationJobs.TryGetValue(craftingStation, out var craftingJobs) && craftingJobs.TryGetValue(itemPrefabGUID, out int jobs) && jobs > 0)
                             {
                                 jobs--;
 
