@@ -140,7 +140,7 @@ internal static class BloodCommands
             Entity player = ctx.Event.SenderCharacterEntity;
             BloodType bloodType = GetCurrentBloodType(player);
 
-            UpdateBloodStats(player, bloodType);
+            //UpdateBloodStats(player, bloodType);
         }
         else
         {
@@ -178,7 +178,7 @@ internal static class BloodCommands
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                 {
                     ResetStats(steamID, bloodType);
-                    UpdateBloodStats(character, bloodType);
+                    //UpdateBloodStats(character, bloodType);
 
                     LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
                 }
@@ -191,7 +191,7 @@ internal static class BloodCommands
         else
         {
             ResetStats(steamID, bloodType);
-            UpdateBloodStats(character, bloodType);
+            //UpdateBloodStats(character, bloodType);
 
             LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
         }

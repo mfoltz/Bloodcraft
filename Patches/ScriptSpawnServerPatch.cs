@@ -43,7 +43,7 @@ internal static class ScriptSpawnServerPatch
                     BuffUtilities.HandleExoFormBuff(entity, player);
                 }
 
-                if (ConfigService.FamiliarSystem && entity.GetBuffTarget().TryGetFollowedPlayer(out player))
+                if (ConfigService.FamiliarSystem && entity.GetBuffTarget().IsFollowingPlayer())
                 {
                     if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
                     {

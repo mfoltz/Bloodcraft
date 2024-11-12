@@ -55,7 +55,7 @@ internal static class KnockbackSystemSpawnPatch
                         PreventKnockback(entity);
                     }
                 }
-                else if (owner.IsPlayer() && buffTarget.TryGetPlayer(out player))
+                else if (owner.IsPlayer() && !owner.Equals(buffTarget) && buffTarget.TryGetPlayer(out player))
                 {
                     if (GameMode.Equals(GameModeType.PvP) && player.HasBuff(PvPProtectionBuff))
                     {

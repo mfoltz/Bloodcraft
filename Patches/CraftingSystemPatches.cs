@@ -185,13 +185,13 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     if (!RecipesCrafting.ContainsKey(itemPrefabGUID))
                     {
-                        //Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| 1, QueuedActions: {craftActions}");
+                        //Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| 1");
                         RecipesCrafting[itemPrefabGUID] = 1;
                     }
                     else
                     {
-                        //Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| {RecipesCrafting[itemPrefabGUID].ItemsCrafting + 1}, QueuedActions: {craftActions}");
-                        RecipesCrafting[itemPrefabGUID] = RecipesCrafting[itemPrefabGUID]++;
+                        //Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| {RecipesCrafting[itemPrefabGUID] + 1}");
+                        RecipesCrafting[itemPrefabGUID] = ++RecipesCrafting[itemPrefabGUID];
                     }
 
                     playerCraftingJobs[steamId][craftingStation] = RecipesCrafting;
@@ -231,9 +231,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         if (craftingJobs.ContainsKey(itemPrefabGUID))
                         {
                             int jobs = craftingJobs[itemPrefabGUID];
-                            craftingJobs[itemPrefabGUID] = jobs--;
+                            craftingJobs[itemPrefabGUID] = --jobs;
 
-                            //Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID].ItemsCrafting}");
+                            //Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
 
                             if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
                         }
@@ -260,7 +260,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     {
         if (playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(craftingStation, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
         {
-            if (craftingJobs[itemPrefabGUID] > 0) // if queued actions greater than they were during StartCraftEvent then valid? clicks fire the event no matter what but this should indicate actual processing...
+            if (craftingJobs[itemPrefabGUID] > 0) 
             {
                 if (!ValidatedCraftingJobs.ContainsKey(steamId))
                 {
@@ -281,16 +281,16 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 ValidatedCraftingJobs[steamId] = validatedCraftingJobs;
 
                 int jobs = craftingJobs[itemPrefabGUID];
-                craftingJobs[itemPrefabGUID] = jobs--;
+                craftingJobs[itemPrefabGUID] = --jobs;
 
-                //Core.Log.LogInfo($"Crafting job removed via CraftValidation for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID].ItemsCrafting}");
+                //Core.Log.LogInfo($"Crafting job removed via CraftValidation for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
 
                 if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
             }
             else if (craftingJobs[itemPrefabGUID] > 0) // if no change then just a click event with no materials used
             {
                 int jobs = craftingJobs[itemPrefabGUID];
-                craftingJobs[itemPrefabGUID] = jobs--;
+                craftingJobs[itemPrefabGUID] = --jobs;
 
                 if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
             }

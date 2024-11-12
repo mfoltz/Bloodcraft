@@ -258,12 +258,12 @@ internal static class BuffSystemSpawnPatches
                     }
                     else if (ConfigService.FamiliarSystem)
                     {
-                        if (owner.IsFollowingPlayer())
+                        if (owner.IsFollowingPlayer() && pvpProtected)
                         {
                             Buff buff = entity.Read<Buff>();
                             if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                         }
-                        else if (owner.GetOwner().IsFollowingPlayer())
+                        else if (owner.GetOwner().IsFollowingPlayer() && pvpProtected)
                         {
                             Buff buff = entity.Read<Buff>();
                             if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);

@@ -291,7 +291,7 @@ internal static class BloodSystem
             {
                 SkipBloodUpdate.Remove(steamID);
             }
-            else BloodManager.UpdateBloodStats(player, bloodType);
+            //else BloodManager.UpdateBloodStats(player, bloodType);
         }
 
         if (PlayerUtilities.GetPlayerBool(steamID, "BloodLogging"))

@@ -6,6 +6,7 @@ using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
@@ -751,7 +752,15 @@ internal static class BuffUtilities
         if (!buffEntity.Has<ScriptUpdate>()) buffEntity.Add<ScriptUpdate>();
         if (!buffEntity.Has<Script_Buff_Shapeshift_DataShared>()) buffEntity.Add<Script_Buff_Shapeshift_DataShared>();
         if (!buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Add<ModifyTargetHUDBuff>();
-        
+        if (!buffEntity.Has<AmplifyBuff>()) buffEntity.Add<AmplifyBuff>();
+
+        AmplifyBuff amplifyBuff = new()
+        {
+            AmplifyModifier = -0.25f
+        };
+
+        buffEntity.Write(amplifyBuff);
+
         /*
         if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
         {
