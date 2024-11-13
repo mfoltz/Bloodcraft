@@ -22,7 +22,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static NetworkIdSystem.Singleton NetworkIdSystem => SystemService.NetworkIdSystem;
 
-    const float CRAFT_THRESHOLD = 0.985f;
+    const float CRAFT_THRESHOLD = 0.995f;
     static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem.Settings.CraftRateModifier;
 
     static readonly Dictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> playerCraftingJobs = [];
@@ -128,11 +128,13 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                         ProcessQueuedCraftAction(entity, queuedWorkstationCraftAction, recipeReduction);
                     }
+
+                    /* maybe this part was doing that? hmm
                     else if (CraftFinished.ContainsKey(entity))
                     {
                         CraftFinished[entity] = false;
                     }
-
+                    */
                     /*
                     for (int i = 0; i < buffer.Length; i++) // need to log this out while a station is crafting and see what it looks like
                     {
@@ -280,16 +282,13 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
             if (!craftFinished && craftAction.ProgressTime / totalTime >= CRAFT_THRESHOLD)
             {
-                if (playerCraftingJobs.TryGetValue(steamId, out var stationJobs) 
-                    && stationJobs.TryGetValue(entity, out var craftingJobs) 
-                    && craftingJobs.ContainsKey(itemPrefabGUID))
-                {
-                    ValidateCraftingJob(entity, itemPrefabGUID, steamId);
-                    CraftFinished[entity] = true;
-                }
+                //Core.Log.LogInfo($"Crafting progress finished for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
+                CraftFinished[entity] = true;
+                ValidateCraftingJob(entity, itemPrefabGUID, steamId);
             }
             else if (craftFinished && craftAction.ProgressTime / totalTime < CRAFT_THRESHOLD)
             {
+                //Core.Log.LogInfo($"Crafting progress reset for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
                 CraftFinished[entity] = false;
             }
         }
@@ -336,17 +335,11 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 int jobs = craftingJobs[itemPrefabGUID];
                 craftingJobs[itemPrefabGUID] = --jobs;
 
-                //Core.Log.LogInfo($"Crafting job removed via CraftValidation for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
+                //Core.Log.LogInfo($"Crafting job handled via CraftValidation for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
 
                 if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
             }
-            else if (craftingJobs[itemPrefabGUID] > 0) // if no change then just a click event with no materials used
-            {
-                int jobs = craftingJobs[itemPrefabGUID];
-                craftingJobs[itemPrefabGUID] = --jobs;
-
-                if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
-            }
+            else if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
         }
     }
 }

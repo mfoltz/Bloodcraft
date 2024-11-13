@@ -83,7 +83,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                             if (CraftingSystemPatches.ValidatedCraftingJobs.TryGetValue(steamId, out var craftingStationJobs) && craftingStationJobs.TryGetValue(craftingStation, out var craftingJobs) && craftingJobs.TryGetValue(itemPrefabGUID, out int jobs) && jobs > 0)
                             {
-                                jobs--;
+                                --jobs;
 
                                 if (jobs == 0) craftingJobs.Remove(itemPrefabGUID);
                                 else craftingJobs[itemPrefabGUID] = jobs;
