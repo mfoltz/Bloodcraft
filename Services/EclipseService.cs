@@ -43,8 +43,13 @@ internal class EclipseService
     static readonly WaitForSeconds NewUserDelay = new(15f);
 
     const int MAX_RETRIES = 20;
-    //static readonly Regex regex = new(@"^\[(\d+)\]:");
-    static readonly Regex regex = new(@"^\[(\d+)\]:(?<payload>.+)$");
+    const string LEGACY_VERSION = "1.1.2"; // Default version for old messages
+
+    //static readonly Regex oldRegex = new(@"^\[(\d+)\]:");
+    static readonly Regex oldRegex = new(@"^\[(\d+)\]:(\d+)$");
+
+    //static readonly Regex regex = new(@"^\[(\d+)\]:(?<payload>.+)$");
+    static readonly Regex regex = new(@"^\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
 
     public static readonly Dictionary<ulong, string> RegisteredUsersAndClientVersions = [];
     public EclipseService()
@@ -71,43 +76,69 @@ internal class EclipseService
         */
 
         Match match = regex.Match(message);
-        if (!match.Success)
+        if (match.Success)
         {
-            Core.Log.LogWarning("Invalid message in HandleClientMessage!");
+            // Extract the event type
+            int eventType = int.Parse(match.Groups[1].Value);
+
+            // Extract the payload (modVersion and stringId)
+            //string payload = newMatch.Groups["payload"].Value;
+
+            string modVersion = match.Groups[2].Value;
+
+            if (!ulong.TryParse(match.Groups[3].Value, out ulong steamId))
+            {
+                Core.Log.LogWarning("Invalid steamId in new format message!");
+                return;
+            }
+
+            RegisterUser(steamId, modVersion);
+
+            switch (eventType)
+            {
+                case (int)NetworkEventSubType.RegisterUser:
+                    RegisterUser(steamId, modVersion);
+                    break;
+                default:
+                    Core.Log.LogError($"Unknown networkEventSubtype in Eclipse message: {eventType}");
+                    break;
+            }
+
             return;
         }
 
-        // Extract the event type
-        int eventType = int.Parse(match.Groups[1].Value);
-
-        // Extract the payload (modVersion and stringId)
-        string payload = match.Groups["payload"].Value;
-
-        switch (eventType)
+        // If new regex didn't match, try the old regex format
+        Match oldMatch = oldRegex.Match(message);
+        if (oldMatch.Success)
         {
-            case (int)NetworkEventSubType.RegisterUser:
-                // Parse modVersion and stringId from payload
-                string[] parts = payload.Split(';');
-                if (parts.Length != 2)
-                {
-                    Core.Log.LogWarning("Invalid payload in HandleClientMessage!");
-                    return;
-                }
+            // Extract the event type
+            //int eventType = int.Parse(oldMatch.Groups[1].Value);
 
-                string modVersion = parts[0];
-                if (!ulong.TryParse(parts[1], out ulong steamId))
-                {
-                    Core.Log.LogWarning("Invalid steamId in HandleClientMessage!");
-                    return;
-                }
+            int eventType = int.Parse(oldMatch.Groups[1].Value);
 
-                RegisterUser(steamId, modVersion);
-                break;
+            if (!ulong.TryParse(oldMatch.Groups[2].Value, out ulong steamId))
+            {
+                Core.Log.LogWarning("Invalid steamId in legacy Eclipse message!");
+                return;
+            }
 
-            default:
-                Core.Log.LogError($"Unknown networkEventSubtype: {eventType}");
-                break;
+            switch (eventType)
+            {
+                case (int)NetworkEventSubType.RegisterUser:
+                    //ulong steamId = ulong.Parse(oldRegex.Replace(message, ""));
+                    RegisterUser(steamId, LEGACY_VERSION);
+                    break;
+
+                default:
+                    Core.Log.LogError($"Unknown networkEventSubtype encountered while handling legacy version of Eclipse! {eventType}");
+                    break;
+            }
+
+            return;
         }
+
+        // If neither regex matches, log an error
+        Core.Log.LogWarning("Failed to parse client registration message from Eclipse!");
     }
     static void RegisterUser(ulong steamId, string version)
     {
@@ -136,20 +167,20 @@ internal class EclipseService
             {
                 switch (version)
                 {
-                    case "1.1.1":
-                        // Handle version 1.1.1
-                        IVersionHandler<ProgressDataV1_1_1> versionHandlerV1_1_1 = VersionHandler.GetHandler<ProgressDataV1_1_1>(version);
+                    case "1.1.2":
+                        // Handle version 1.1.2
+                        IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
 
-                        versionHandlerV1_1_1?.SendClientConfig(playerInfo.User);
-                        versionHandlerV1_1_1?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                        versionHandlerV1_1_2?.SendClientConfig(playerInfo.User);
+                        versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
                         return true;
-                    case "1.2.1":
-                        // Handle version 1.2.1
-                        IVersionHandler<ProgressDataV1_2_1> versionHandlerV1_2_1 = VersionHandler.GetHandler<ProgressDataV1_2_1>(version);
+                    case "1.2.2":
+                        // Handle version 1.2.2
+                        IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
 
-                        versionHandlerV1_2_1?.SendClientConfig(playerInfo.User);
-                        versionHandlerV1_2_1?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                        versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
+                        versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
                         return true;
                     default:
@@ -465,158 +496,6 @@ internal class EclipseService
 
         return (type, progress, goal, target, isVBlood);
     }
-
-    /*
-    static string BuildProgressMessageV1_1_1((int Percent, int Level, int Prestige, int Class) experienceData, //want to send bonuses as well
-    (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) legacyData,
-    (int Percent, int Level, int Prestige, int Enum, int ExpertiseBonusStats) expertiseData,
-    (int Type, int Progress, int Goal, string Target, string IsVBlood) dailyQuestData,
-    (int Type, int Progress, int Goal, string Target, string IsVBlood) weeklyQuestData)
-    {
-        var sb = new StringBuilder();
-        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3},", experienceData.Percent, experienceData.Level, experienceData.Prestige, experienceData.Class)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", legacyData.Percent, legacyData.Level, legacyData.Prestige, legacyData.Enum, legacyData.LegacyBonusStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", expertiseData.Percent, expertiseData.Level, expertiseData.Prestige, expertiseData.Enum, expertiseData.ExpertiseBonusStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4},", dailyQuestData.Type, dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target, dailyQuestData.IsVBlood)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4}", weeklyQuestData.Type, weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target, weeklyQuestData.IsVBlood);
-
-        return sb.ToString();
-    }
-    static string BuildProgressMessageV1_2_1((int Percent, int Level, int Prestige, int Class) experienceData, //want to send bonuses as well
-        (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) legacyData,
-        (int Percent, int Level, int Prestige, int Enum, int ExpertiseBonusStats) expertiseData,
-        (int Percent, int Level, int Prestige, string Name, string FamiliarStats) familiarData,
-        (int EnchantingProgress, int EnchantingLevel, int AlchemyProgress, int AlchemyLevel, 
-        int HarvestingProgress, int HarvestingLevel, int BlacksmithingProgress, int BlacksmithingLevel, 
-        int TailoringProgress, int TailoringLevel, int WoodcuttingProgress, int WoodcuttingLevel, 
-        int MiningProgress, int MiningLevel, int FishingProgress, int FishingLevel) professionData,
-        (int Type, int Progress, int Goal, string Target, string IsVBlood) dailyQuestData,
-        (int Type, int Progress, int Goal, string Target, string IsVBlood) weeklyQuestData)
-    {
-        var sb = new StringBuilder();
-        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3},", experienceData.Percent, experienceData.Level, experienceData.Prestige, experienceData.Class)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", legacyData.Percent, legacyData.Level, legacyData.Prestige, legacyData.Enum, legacyData.LegacyBonusStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D6},", expertiseData.Percent, expertiseData.Level, expertiseData.Prestige, expertiseData.Enum, expertiseData.ExpertiseBonusStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3},{4},", familiarData.Percent, familiarData.Level, familiarData.Prestige, familiarData.Name, familiarData.FamiliarStats)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:D2},{1:D2},{2:D2},{3:D2},{4:D2},{5:D2},{6:D2},{7:D2},{8:D2},{9:D2},{10:D2},{11:D2},{12:D2},{13:D2},{14:D2},{15:D2},", professionData.EnchantingProgress, professionData.EnchantingLevel, professionData.AlchemyProgress, professionData.AlchemyLevel, 
-            professionData.HarvestingProgress, professionData.HarvestingLevel, professionData.BlacksmithingProgress, professionData.BlacksmithingLevel, professionData.TailoringProgress, professionData.TailoringLevel, 
-            professionData.WoodcuttingProgress, professionData.WoodcuttingLevel, professionData.MiningProgress, professionData.MiningLevel, professionData.FishingProgress, professionData.FishingLevel)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4},", dailyQuestData.Type, dailyQuestData.Progress, dailyQuestData.Goal, dailyQuestData.Target, dailyQuestData.IsVBlood)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1:D2},{2:D2},{3},{4}", weeklyQuestData.Type, weeklyQuestData.Progress, weeklyQuestData.Goal, weeklyQuestData.Target, weeklyQuestData.IsVBlood);
-
-        return sb.ToString();
-    }
-    static string BuildConfigMessageV1_1_1()
-    {
-        // need prestige stat multipliers, class stat synergies, and bonus stat base values
-        List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
-        List<float> bloodStatValues = Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatValues[stat]).ToList();
-
-        float prestigeStatMultiplier = PrestigeStatMultiplier;
-        float statSynergyMultiplier = ClassStatMultiplier;
-
-        int maxPlayerLevel = MaxLevel;
-        int maxLegacyLevel = MaxLegacyLevel;
-        int maxExpertiseLevel = MaxExpertiseLevel;
-        int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MaxProfessionLevel;
-
-        var sb = new StringBuilder();
-        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel); // Add multipliers to the message
-
-        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
-            .Append(',');
-
-        // Append blood stat values as comma-separated string versions of their original values
-        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2"))))
-            .Append(',');
-
-        // Iterate over each class and its synergies
-        foreach (var classEntry in LevelingSystem.ClassWeaponBloodEnumMap)
-        {
-            var playerClass = classEntry.Key;
-            var (weaponSynergies, bloodSynergies) = classEntry.Value;
-
-            // Append class enum as an integer
-            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
-
-            // Append weapon synergies as a concatenated string of integers
-            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
-
-            // Add a separator between weapon and blood synergies
-            sb.Append(',');
-
-            // Append blood synergies as a concatenated string of integers
-            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2"))));
-
-            // Add a separator if there are more classes to handle
-            sb.Append(',');
-        }
-
-        // Remove the last unnecessary separator
-        if (sb[^1] == ',')
-            sb.Length--;
-
-        return sb.ToString();
-    }
-    static string BuildConfigMessageV1_2_1()
-    {
-        // need prestige stat multipliers, class stat synergies, and bonus stat base values
-        List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
-        List<float> bloodStatValues = Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatValues[stat]).ToList();
-
-        float prestigeStatMultiplier = PrestigeStatMultiplier;
-        float statSynergyMultiplier = ClassStatMultiplier;
-
-        int maxPlayerLevel = MaxLevel;
-        int maxLegacyLevel = MaxLegacyLevel;
-        int maxExpertiseLevel = MaxExpertiseLevel;
-        int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MaxProfessionLevel;
-
-        var sb = new StringBuilder();
-        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel); // Add multipliers to the message
-
-        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
-            .Append(',');
-
-        // Append blood stat values as comma-separated string versions of their original values
-        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2"))))
-            .Append(',');
-
-        // Iterate over each class and its synergies
-        foreach (var classEntry in LevelingSystem.ClassWeaponBloodEnumMap)
-        {
-            var playerClass = classEntry.Key;
-            var (weaponSynergies, bloodSynergies) = classEntry.Value;
-
-            // Append class enum as an integer
-            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
-
-            // Append weapon synergies as a concatenated string of integers
-            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
-
-            // Add a separator between weapon and blood synergies
-            sb.Append(',');
-
-            // Append blood synergies as a concatenated string of integers
-            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2"))));
-
-            // Add a separator if there are more classes to handle
-            sb.Append(',');
-        }
-
-        // Remove the last unnecessary separator
-        if (sb[^1] == ',')
-            sb.Length--;
-
-        return sb.ToString();
-    }
-    */
     static IEnumerator DelayedRegistration(ulong steamId, string version)
     {
         int tries = 0;
@@ -631,10 +510,6 @@ internal class EclipseService
                 {
                     Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache~ (DelayedRegistration)");
                 }
-
-                //RegisteredUsersAndClientVersions.TryAdd(steamId, version);
-                //SendClientConfigV1_2_1(playerInfo.User);
-                //SendClientProgressV1_2_1(playerInfo.CharEntity, steamId);
 
                 yield break;
             }
@@ -663,37 +538,30 @@ internal class EclipseService
                 {
                     string version = users[steamId];
 
-                    /*
-                    try
-                    {
-                        //Core.Log.LogInfo("Sending client progress (OnlineCache)...");
-                        SendClientProgressV1_2_1(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                    }
-                    catch (Exception e)
-                    {
-                        Core.Log.LogError($"Error sending Eclipse progress to {playerInfo.User.PlatformId}: {e}");
-                    }
-                    */
-
                     try
                     {
                         switch (version)
                         {
-                            case "1.1.1":
+                            case "1.1.2":
                                 // Handle version 1.1.1
-                                IVersionHandler<ProgressDataV1_1_1> versionHandlerV1_1_1 = VersionHandler.GetHandler<ProgressDataV1_1_1>(version);
-                                versionHandlerV1_1_1?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
+                                versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
                                 break;
-                            case "1.2.1":
+                            case "1.2.2":
                                 // Handle version 1.2.1
-                                IVersionHandler<ProgressDataV1_2_1> versionHandlerV1_2_1 = VersionHandler.GetHandler<ProgressDataV1_2_1>(version);
-                                versionHandlerV1_2_1?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
+                                versionHandlerV1_2_2.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
                                 break;
                             default:
                                 // Handle unsupported versions or fallback
-                                Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}");
+                                Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}, unregistering user to avoid console spam...");
+                                
+                                if (RegisteredUsersAndClientVersions.ContainsKey(steamId))
+                                {
+                                    RegisteredUsersAndClientVersions.Remove(steamId);
+                                }
 
                                 break;
                         }

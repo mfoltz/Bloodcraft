@@ -81,6 +81,9 @@ public class SystemService(World world)
 
     SpawnAbilityGroupSlotsSystem _spawnAbilityGroupSlotSystem;
     public SpawnAbilityGroupSlotsSystem SpawnAbilityGroupSlotSystem => _spawnAbilityGroupSlotSystem ??= GetSystem<SpawnAbilityGroupSlotsSystem>();
+
+    AttachParentIdSystem _attachParentIdSystem;
+    public AttachParentIdSystem AttachParentIdSystem => _attachParentIdSystem ??= GetSystem<AttachParentIdSystem>();
     T GetSystem<T>() where T : ComponentSystemBase
     {
         return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"Failed to get {Il2CppType.Of<T>().FullName} from the Server...");

@@ -647,7 +647,7 @@ internal static class ServerBootstrapSystemPatches
 
         if (ConfigService.ClientCompanion)
         {
-            if (EclipseService.RegisteredUsersAndClientVersions.Contains(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
+            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
         }
     }
 
@@ -684,7 +684,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (ConfigService.ClientCompanion)
                         {
-                            if (EclipseService.RegisteredUsersAndClientVersions.Contains(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
+                            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
                         }
                     }
                 }

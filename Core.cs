@@ -7,6 +7,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using System.Collections;
@@ -81,6 +82,17 @@ internal static class Core
         */
 
         //CleanSCTPRefabs();
+
+        //SystemService.ServerGameSettingsSystem._Settings;
+
+        try
+        {
+            LogCatcher._Options = LogCatcher.Options.All;
+        }
+        catch (Exception e)
+        {
+            Log.LogError(e);
+        }
 
         hasInitialized = true;
     }

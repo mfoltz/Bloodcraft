@@ -64,6 +64,7 @@ internal static class ChatMessageSystemPatch
                 return true;
             }
         }
+
         return false;
     }
     public static string GenerateMAC(string message)

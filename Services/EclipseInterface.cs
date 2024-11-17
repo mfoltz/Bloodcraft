@@ -22,8 +22,8 @@ public static class VersionHandler
     // Dictionary to store version handlers
     public static readonly Dictionary<string, object> VersionHandlers = new()
     {
-        { "1.1.1", new VersionHandler_1_1_1() },
-        { "1.2.1", new VersionHandler_1_2_1() }
+        { "1.1.2", new VersionHandler_1_1_2() }, // legacy version, took me too long to realize truly older versions won't send their version to the server :P
+        { "1.2.2", new VersionHandler_1_2_2() }
     };
 
     // Generic method to retrieve the handler for a specific version
@@ -40,7 +40,7 @@ public static class VersionHandler
 
 #nullable disable
 }
-public class VersionHandler_1_1_1 : IVersionHandler<ProgressDataV1_1_1>
+public class VersionHandler_1_1_2 : IVersionHandler<ProgressDataV1_1_2>
 {
     public void SendClientConfig(User user)
     {
@@ -54,7 +54,7 @@ public class VersionHandler_1_1_1 : IVersionHandler<ProgressDataV1_1_1>
         Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
-        ProgressDataV1_1_1 data = new()
+        ProgressDataV1_1_2 data = new()
         {
             ExperienceData = GetExperienceData(steamId),
             LegacyData = GetLegacyData(character, steamId),
@@ -81,12 +81,10 @@ public class VersionHandler_1_1_1 : IVersionHandler<ProgressDataV1_1_1>
         int maxPlayerLevel = MaxLevel;
         int maxLegacyLevel = MaxLegacyLevel;
         int maxExpertiseLevel = MaxExpertiseLevel;
-        int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MaxProfessionLevel;
 
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel); // Add multipliers to the message
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel); // Add multipliers to the message
 
         sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
             .Append(',');
@@ -123,7 +121,7 @@ public class VersionHandler_1_1_1 : IVersionHandler<ProgressDataV1_1_1>
 
         return sb.ToString();
     }
-    public string BuildProgressMessage(ProgressDataV1_1_1 data)
+    public string BuildProgressMessage(ProgressDataV1_1_2 data)
     {
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
@@ -136,7 +134,7 @@ public class VersionHandler_1_1_1 : IVersionHandler<ProgressDataV1_1_1>
         return sb.ToString();
     }
 }
-public class VersionHandler_1_2_1 : IVersionHandler<ProgressDataV1_2_1>
+public class VersionHandler_1_2_2 : IVersionHandler<ProgressDataV1_2_2>
 {
     public void SendClientConfig(User user)
     {
@@ -149,7 +147,7 @@ public class VersionHandler_1_2_1 : IVersionHandler<ProgressDataV1_2_1>
         Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
-        ProgressDataV1_2_1 data = new()
+        ProgressDataV1_2_2 data = new()
         {
             ExperienceData = GetExperienceData(steamId),
             LegacyData = GetLegacyData(character, steamId),
@@ -219,7 +217,7 @@ public class VersionHandler_1_2_1 : IVersionHandler<ProgressDataV1_2_1>
 
         return sb.ToString();
     }
-    public string BuildProgressMessage(ProgressDataV1_2_1 data)
+    public string BuildProgressMessage(ProgressDataV1_2_2 data)
     {
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
@@ -238,7 +236,7 @@ public class VersionHandler_1_2_1 : IVersionHandler<ProgressDataV1_2_1>
         return sb.ToString();
     }
 }
-public class ProgressDataV1_1_1
+public class ProgressDataV1_1_2
 {
     public (int Percent, int Level, int Prestige, int Class) ExperienceData { get; set; }
     public (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) LegacyData { get; set; }
@@ -246,7 +244,7 @@ public class ProgressDataV1_1_1
     public (int Type, int Progress, int Goal, string Target, string IsVBlood) DailyQuestData { get; set; }
     public (int Type, int Progress, int Goal, string Target, string IsVBlood) WeeklyQuestData { get; set; }
 }
-public class ProgressDataV1_2_1
+public class ProgressDataV1_2_2
 {
     public (int Percent, int Level, int Prestige, int Class) ExperienceData { get; set; }
     public (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) LegacyData { get; set; }
