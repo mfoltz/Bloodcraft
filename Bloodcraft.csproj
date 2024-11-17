@@ -43,7 +43,7 @@
 	<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
 	<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
 	<PackageReference Include="HarmonyX" Version="2.13.0" />
-	<PackageReference Include="VRising.Unhollowed" Version="1.0.10.1" />
+	<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.5.802790001" />
 	<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.0" />
 	</ItemGroup>
 	
