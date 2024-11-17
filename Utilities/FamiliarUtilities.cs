@@ -200,6 +200,8 @@ internal static class FamiliarUtilities
                 if (followerEntity.Exists())
                 {
                     if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>();
+                    if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>();
+                    if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>();
                     if (followerEntity.Has<Minion>()) followerEntity.Remove<Minion>();
                     if (followerEntity.Has<BlockFeedBuff>()) followerEntity.Remove<BlockFeedBuff>();
 
@@ -219,6 +221,8 @@ internal static class FamiliarUtilities
                 if (minion.Entity.Exists())
                 {
                     if (minion.Entity.Has<Disabled>()) minion.Entity.Remove<Disabled>();
+                    if (minion.Entity.Has<DisableWhenNoPlayersInRange>()) minion.Entity.Remove<DisableWhenNoPlayersInRange>();
+                    if (minion.Entity.Has<DisabledDueToNoPlayersInRange>()) minion.Entity.Remove<DisabledDueToNoPlayersInRange>();
                     if (minion.Entity.Has<Minion>()) minion.Entity.Remove<Minion>();
                     if (minion.Entity.Has<BlockFeedBuff>()) minion.Entity.Remove<BlockFeedBuff>();
 
@@ -278,7 +282,6 @@ internal static class FamiliarUtilities
 
         familiar.Add<Disabled>();
 
-        PrefabGUID prefabGUID = new(data.FamKey);
         data = (familiar, data.FamKey); // entity stored when dismissed
         steamId.SetFamiliarActives(data);
 

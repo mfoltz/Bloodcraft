@@ -138,10 +138,6 @@ internal class EclipseService
             {
                 Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache~ (RegisterUser)");
             }
-
-            //RegisteredUsersAndClientVersions.TryAdd(steamId, version);
-            //SendClientConfigV1_2_1(playerInfo.User);
-            //SendClientProgressV1_2_1(playerInfo.CharEntity, steamId);
         }
         else // delayed registration, wait for cache to update/player to make character...
         {

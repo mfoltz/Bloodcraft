@@ -240,7 +240,7 @@ internal static class MiscCommands
             }
 
             PlayerUtilities.TogglePlayerBool(steamId, "ExoForm");
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(PlayerUtilities.GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}, the Immortal King's once formidable power is now yours...");
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(PlayerUtilities.GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
         }
         else
         {

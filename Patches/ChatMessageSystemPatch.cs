@@ -19,8 +19,8 @@ internal static class ChatMessageSystemPatch
 
     static readonly Regex RegexMAC = new(@";mac([^;]+)$");
 
-    static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ==");
-    //static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLUNlY3JldC1rZLktaGVyZQ==");
+    static readonly byte[] oldSharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ=="); // used by Eclipse 1.1.2<=
+    static readonly byte[] newSharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZV9uZXc="); // used by Eclipse 1.2.2>=
 
     [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
@@ -51,7 +51,7 @@ internal static class ChatMessageSystemPatch
     }
     public static bool VerifyMAC(string receivedMessage, out string originalMessage)
     {
-        // Separate the original message and the MAC
+        // Match the MAC using RegexMAC
         Match match = RegexMAC.Match(receivedMessage);
         originalMessage = "";
 
@@ -59,10 +59,23 @@ internal static class ChatMessageSystemPatch
         {
             string receivedMAC = match.Groups[1].Value;
             string intermediateMessage = RegexMAC.Replace(receivedMessage, "");
-            string recalculatedMAC = GenerateMAC(intermediateMessage);
+
+            // Recalculate the MAC
+            //string recalculatedMAC = GenerateMAC(intermediateMessage);
 
             // Compare the MACs
-            if (CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(recalculatedMAC), Encoding.UTF8.GetBytes(receivedMAC)))
+            /*
+            if (CryptographicOperations.FixedTimeEquals(
+                    Encoding.UTF8.GetBytes(recalculatedMAC),
+                    Encoding.UTF8.GetBytes(receivedMAC)))
+            {
+                originalMessage = intermediateMessage;
+                return true;
+            }
+            */
+
+            if (CheckMAC(intermediateMessage, receivedMAC, oldSharedKey) ||
+                CheckMAC(intermediateMessage, receivedMAC, newSharedKey))
             {
                 originalMessage = intermediateMessage;
                 return true;
@@ -71,12 +84,29 @@ internal static class ChatMessageSystemPatch
 
         return false;
     }
-    public static string GenerateMAC(string message)
+    static bool CheckMAC(string message, string receivedMAC, byte[] key)
     {
-        using var hmac = new HMACSHA256(sharedKey);
+        using var hmac = new HMACSHA256(key);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
+        string recalculatedMAC = Convert.ToBase64String(hashBytes);
 
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(recalculatedMAC),
+            Encoding.UTF8.GetBytes(receivedMAC));
+    }
+    public static string GenerateMACV1_1_2(string message)
+    {
+        using var hmac = new HMACSHA256(oldSharedKey);
+        byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+        byte[] hashBytes = hmac.ComputeHash(messageBytes);
+        return Convert.ToBase64String(hashBytes);
+    }
+    public static string GenerateMACV1_2_2(string message)
+    {
+        using var hmac = new HMACSHA256(newSharedKey);
+        byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+        byte[] hashBytes = hmac.ComputeHash(messageBytes);
         return Convert.ToBase64String(hashBytes);
     }
 }
