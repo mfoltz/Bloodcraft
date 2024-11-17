@@ -35,22 +35,6 @@
 		<EmbeddedResource Include="Localization\Turkish.json" />
 		<EmbeddedResource Include="Localization\Spanish.json" />
 		<EmbeddedResource Include="Localization\Vietnamese.json" />
-		<EmbeddedResource Include="Localization\BrazilianStrings.json" />
-		<EmbeddedResource Include="Localization\FrenchStrings.json" />
-		<EmbeddedResource Include="Localization\GermanStrings.json" />
-		<EmbeddedResource Include="Localization\HungarianStrings.json" />
-		<EmbeddedResource Include="Localization\ItalianStrings.json" />
-		<EmbeddedResource Include="Localization\JapaneseStrings.json" />
-		<EmbeddedResource Include="Localization\KoreanaStrings.json" />
-		<EmbeddedResource Include="Localization\LatamStrings.json" />
-		<EmbeddedResource Include="Localization\PolishStrings.json" />
-		<EmbeddedResource Include="Localization\RussianStrings.json" />
-		<EmbeddedResource Include="Localization\SChineseStrings.json" />
-		<EmbeddedResource Include="Localization\TChineseStrings.json" />
-		<EmbeddedResource Include="Localization\ThaiStrings.json" />
-		<EmbeddedResource Include="Localization\TurkishStrings.json" />
-		<EmbeddedResource Include="Localization\SpanishStrings.json" />
-		<EmbeddedResource Include="Localization\VietnameseStrings.json" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -59,7 +43,7 @@
 	<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
 	<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
 	<PackageReference Include="HarmonyX" Version="2.13.0" />
-	<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.5.802790001" />
+	<PackageReference Include="VRising.Unhollowed" Version="1.0.10.1" />
 	<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.0" />
 	</ItemGroup>
 	

@@ -395,11 +395,12 @@ internal static class MiscCommands
             ctx.Reply($"Switched steamIds for {originalPlayerInfo.User.CharacterName} with {newPlayerInfo.User.CharacterName}!");
         }
     }
+    */
     
     [Command(name: "bloblog", shortHand:"blob", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
     public static void BlobStringLogCommand(ChatCommandContext ctx, int guidHash)
     {
-        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(guidHash), out Entity prefabEntity))
+        if (!Core.SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(guidHash), out Entity prefabEntity))
         {
             ctx.Reply("Couldn't find prefab...");
             return;
@@ -457,9 +458,9 @@ internal static class MiscCommands
         int length = dataPtr->m_Length;
 
         // Convert the bytes to a string using UTF8 encoding
-        string result = System.Text.Encoding.UTF8.GetString(bytes, length);
+        string result = BlobString.ToString(bytes, length);
 
         return result;
     }
-    */
+    
 }
