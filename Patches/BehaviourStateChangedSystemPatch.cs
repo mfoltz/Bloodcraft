@@ -24,10 +24,11 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
         {
             foreach (Entity entity in entities)
             {
-                BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = entity.Read<BehaviourTreeStateChangedEvent>();
-                if (behaviourTreeStateChangedEvent.Entity.TryGetFollowedPlayer(out Entity _))
+                if (!entity.TryGetComponent(out BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent)) continue;
+                else if (behaviourTreeStateChangedEvent.Entity.TryGetFollowedPlayer(out Entity player))
                 {
                     BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
+
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
                         Entity familiar = behaviourTreeStateChangedEvent.Entity;
@@ -39,6 +40,12 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
 
                         FamiliarUtilities.HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
+                    }
+                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Idle))
+                    {
+                        Entity familiar = behaviourTreeStateChangedEvent.Entity;
+
+                        FamiliarUtilities.ReturnFamiliar(player, familiar);
                     }
                 }
             }

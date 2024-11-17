@@ -3,7 +3,6 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -35,7 +34,7 @@ internal static class SpawnTravelBuffSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if (prefabGUID.Equals(BatLandingTravel) && entity.GetOwner().TryGetPlayer(out Entity player))
+                else if (prefabGUID.Equals(BatLandingTravel) && entityOwner.Owner.TryGetPlayer(out Entity player))
                 {         
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
@@ -46,6 +45,7 @@ internal static class SpawnTravelBuffSystemPatch
                         FamiliarUtilities.AutoCallMap.Remove(player);
                     }
                 }
+                
                 /*
                 else if (ConfigService.FamiliarSystem && entity.TryGetComponent(out Buff buff) && buff.Target.IsPlayer())
                 {

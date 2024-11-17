@@ -24,28 +24,27 @@ internal static class CreateGameplayEventOnDestroySystemPatch
     static void OnUpdatePrefix(CreateGameplayEventOnDestroySystem __instance)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.ProfessionSystem) return;
+        else if (!ConfigService.ProfessionSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1297357609_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
                 else if (prefabGUID.Equals(fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
                 {
-                    Entity character = entity.GetOwner();
+                    Entity character = entityOwner.Owner;
                     User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
                     ulong steamId = user.PlatformId;
 
-                    PrefabGUID toProcess = new(0);
+                    PrefabGUID toProcess = PrefabGUID.Empty;
                     Entity target = entity.GetBuffTarget();
 
                     if (target.Has<DropTableBuffer>())
                     {
                         var dropTableBuffer = target.ReadBuffer<DropTableBuffer>();
+
                         if (!dropTableBuffer.IsEmpty)
                         {
                             toProcess = dropTableBuffer[0].DropTableGuid;
@@ -58,6 +57,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     if (handler != null)
                     {
                         int multiplier = ProfessionMappings.GetFishingModifier(toProcess);
+
                         ProfessionSystem.SetProfession(target, character, steamId, BaseFishingXP * multiplier, handler);
                         ProfessionSystem.GiveProfessionBonus(toProcess, character, user, steamId, handler);
                     }

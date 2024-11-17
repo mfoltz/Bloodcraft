@@ -19,7 +19,11 @@ internal static class ScriptSpawnServerPatch
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
+    static readonly bool Leveling = ConfigService.LevelingSystem;
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+    static readonly bool Legacies = ConfigService.BloodSystem;
+    static readonly bool ExoPrestiging = ConfigService.ExoPrestiging;
 
     static readonly PrefabGUID ExoFormBuff = new(-31099041);
     static readonly PrefabGUID InCombatBuff = new(581443919);
@@ -35,15 +39,16 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
                 //Core.Log.LogInfo($"ScriptSpawnServer: {prefabGUID.LookupName()}");
-                if (ConfigService.ExoPrestiging && prefabGUID.Equals(ExoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
+
+                if (ExoPrestiging && prefabGUID.Equals(ExoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
                 {
                     BuffUtilities.HandleExoFormBuff(entity, player);
                 }
 
-                if (ConfigService.FamiliarSystem && entity.GetBuffTarget().IsFollowingPlayer())
+                if (Familiars && entity.GetBuffTarget().IsFollowingPlayer())
                 {
                     if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
                     {
@@ -55,7 +60,7 @@ internal static class ScriptSpawnServerPatch
                         entity.Remove<Script_Castleman_AdaptLevel_DataShared>(); // need to remove script spawn, update etc first or throws
                     }
                 }
-                else if (ConfigService.FamiliarSystem && entity.GetBuffTarget().IsPlayer() && entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.TryGetFollowedPlayer(out player))
+                else if (Familiars && entity.GetBuffTarget().IsPlayer() && entityOwner.Owner.TryGetFollowedPlayer(out player))
                 {
                     Entity familiar = entityOwner.Owner;
                     Buff buff = entity.Read<Buff>();
@@ -68,18 +73,18 @@ internal static class ScriptSpawnServerPatch
                 }
 
                 if (!entity.Has<BloodBuff>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out player))
+                else if (entityOwner.Owner.TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (ConfigService.LevelingSystem && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
+                    if (Leveling && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
                     {
                         BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
                         bloodBuff_Brute_ArmorLevelBonus_DataShared.GearLevel = 0;
                         entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
                     }
 
-                    if (ConfigService.BloodSystem && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
+                    if (Legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
                         {

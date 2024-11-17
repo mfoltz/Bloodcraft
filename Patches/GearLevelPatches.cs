@@ -31,8 +31,8 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -55,9 +55,9 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<WeaponLevel>() || !entity.Has<EntityOwner>()) continue;
+                if (!entity.Has<WeaponLevel>() || !entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
 
-                if (ConfigService.ExpertiseSystem && entity.GetOwner().TryGetPlayer(out Entity player))
+                if (ConfigService.ExpertiseSystem && entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
 
@@ -69,11 +69,11 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     }
                 }
 
-                if (ConfigService.LevelingSystem && entity.GetOwner().TryGetPlayer(out player))
+                if (ConfigService.LevelingSystem && entityOwner.Owner.TryGetPlayer(out player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
-                else if (!ConfigService.LevelingSystem && ConfigService.ExpertiseSystem && entity.GetOwner().TryGetPlayer(out player))
+                else if (!ConfigService.LevelingSystem && ConfigService.ExpertiseSystem && entityOwner.Owner.TryGetPlayer(out player))
                 {
                     ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int weaponLevel = (int)entity.Read<WeaponLevel>().Level;
@@ -127,8 +127,8 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -152,8 +152,8 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().IsPlayer())
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.IsPlayer())
                 {
                     if (entity.Has<ArmorLevel>()) entity.Write(new ArmorLevel { Level = 0f });
                 }
@@ -177,8 +177,8 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
@@ -202,8 +202,8 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }

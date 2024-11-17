@@ -34,8 +34,8 @@ internal static class ReplaceAbilityOnSlotSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity character))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetPlayer(out Entity character))
                 {
                     ulong steamId = character.GetSteamId();
                     string prefabName = entity.Read<PrefabGUID>().LookupName().ToLower();

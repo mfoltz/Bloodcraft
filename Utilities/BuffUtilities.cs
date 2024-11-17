@@ -71,7 +71,7 @@ internal static class BuffUtilities
 
         return false;
     }
-    public static bool TryApplyBuffWithOwner(Entity target, Entity familiar, PrefabGUID buffPrefab)
+    public static bool TryApplyBuffWithOwner(Entity target, Entity owner, PrefabGUID buffPrefab)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
@@ -81,8 +81,8 @@ internal static class BuffUtilities
 
         FromCharacter fromCharacter = new() // fam should be entityOwner
         {
-            Character = familiar,
-            User = familiar
+            Character = target,
+            User = owner
         };
 
         if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier()))
@@ -751,7 +751,7 @@ internal static class BuffUtilities
         if (!buffEntity.Has<ReplaceAbilityOnSlotData>()) buffEntity.Add<ReplaceAbilityOnSlotData>();
         if (!buffEntity.Has<ScriptUpdate>()) buffEntity.Add<ScriptUpdate>();
         if (!buffEntity.Has<Script_Buff_Shapeshift_DataShared>()) buffEntity.Add<Script_Buff_Shapeshift_DataShared>();
-        if (!buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Add<ModifyTargetHUDBuff>();
+        //if (!buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Add<ModifyTargetHUDBuff>();
         if (!buffEntity.Has<AmplifyBuff>()) buffEntity.Add<AmplifyBuff>();
 
         AmplifyBuff amplifyBuff = new()
@@ -791,7 +791,7 @@ internal static class BuffUtilities
                 spawnPrefabOnGameplayEventBuffer[0] = spawnPrefabOnGameplayEvent;
             }
         }
-        */
+        
 
         ModifyTargetHUDBuff modifyTargetHUDBuff = new()
         {
@@ -800,6 +800,7 @@ internal static class BuffUtilities
         };
 
         buffEntity.Write(modifyTargetHUDBuff);
+        */
 
         // change to block buff to prevent other replaceAbilityOnSlotBuffers from overriding for the duration?
         buffEntity.With((ref Buff buff) =>

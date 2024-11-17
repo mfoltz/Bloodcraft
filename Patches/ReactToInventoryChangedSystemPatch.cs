@@ -16,7 +16,7 @@ namespace Bloodcraft.Patches;
 internal static class ReactToInventoryChangedSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    const float ProfessionBaseXP = 50f;
+    const float PROFESSION_BASE_XP = 50f;
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -92,7 +92,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                                 if (ConfigService.ProfessionSystem)
                                 {
-                                    float professionXP = ProfessionBaseXP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
+                                    float professionXP = PROFESSION_BASE_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
                                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGUID, "");
 
                                     if (handler != null)

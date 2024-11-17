@@ -503,10 +503,10 @@ internal static class QuestSystem
         Entity source = deathEvent.Source;
         Entity died = deathEvent.Target;
 
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
         PrefabGUID target = died.Read<PrefabGUID>();
+        HashSet<Entity> participants = deathEvent.DeathParticipants;
 
-        HashSet<Entity> participants = PlayerUtilities.GetDeathParticipants(source, userEntity);
+        //HashSet<Entity> participants = PlayerUtilities.GetDeathParticipants(source, userEntity);
         foreach (Entity player in participants)
         {
             User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();

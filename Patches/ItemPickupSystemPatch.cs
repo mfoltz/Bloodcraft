@@ -21,8 +21,8 @@ internal static class ItemPickupSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<InteractPickup>() || !entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (!entity.Has<InteractPickup>() || !entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
 

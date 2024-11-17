@@ -5,7 +5,6 @@ using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -55,6 +54,11 @@ internal static class DealDamageSystemPatch
     static readonly PrefabGUID silverDebuff = new(853298599);
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool OnHitEffects = ConfigService.ClassSpellSchoolOnHitEffects;
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+    static readonly bool Quests = ConfigService.QuestSystem;
+
+    static readonly float OnHitProcChance = ConfigService.OnHitProcChance;
 
     [HarmonyPatch(typeof(DealDamageSystem), nameof(DealDamageSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -68,15 +72,15 @@ internal static class DealDamageSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent)) continue;
-                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities in this system can reeeeally mess things up for a save so leaving them for safety >_>
-                //else if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell
+                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities in this system can reeeeally mess things up for a save
                 else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
-                else if (!dealDamageEvent.SpellSource.Has<EntityOwner>()) continue; // not really sure why this would be the case but seems to be popping up in console so okay I guess
+                
+                if (!dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue; // not really sure why this would be the case but seems to be popping up in console so okay I guess
                 
                 //Core.Log.LogInfo(dealDamageEvent.SpellSource.GetPrefabGUID().LookupName());
                 //Core.Log.LogInfo($"{dealDamageEvent.SpellSource.GetOwner().GetPrefabGUID().LookupName()} | {dealDamageEvent.Target.GetPrefabGUID().LookupName()}");
 
-                if (dealDamageEvent.SpellSource.GetOwner().IsFollowingPlayer() && dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(dealDamageEvent.SpellSource.GetOwner(), dealDamageEvent.Target)) // not sure if any fam besides raziel does this
+                if (entityOwner.Owner.IsFollowingPlayer() && dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(entityOwner.Owner, dealDamageEvent.Target)) // not sure if any fam besides raziel does this
                 {
                     //DestroyUtility.Destroy(EntityManager, entity);
                     EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroyEvent not sufficient to prevent damage
@@ -84,73 +88,77 @@ internal static class DealDamageSystemPatch
 
                 if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell at this point
 
-                if (ConfigService.QuestSystem && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out Entity player))
+                if (Quests && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
                     LastDamageTime[steamId] = DateTime.UtcNow;
                 }
-                else if (ConfigService.ClassSpellSchoolOnHitEffects && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
+                else if (OnHitEffects && dealDamageEvent.Target.Has<Movement>() && entityOwner.Owner.TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
                 {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;
-                    if (!ClassUtilities.HasClass(steamId)) continue;
 
+                    if (!ClassUtilities.HasClass(steamId)) continue;
                     PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
-                    if (Random.NextDouble() <= ConfigService.OnHitProcChance)
+
+                    if (Random.NextDouble() <= OnHitProcChance)
                     {
                         PrefabGUID prefabGUID = ClassOnHitDebuffMap[playerClass];
 
-                        FromCharacter fromCharacter = new()
-                        {
-                            Character = dealDamageEvent.Target,
-                            User = userEntity
-                        };
-
-                        ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                        {
-                            BuffPrefabGUID = prefabGUID,
-                        };
-
                         if (ServerGameManager.HasBuff(dealDamageEvent.Target, prefabGUID.ToIdentifier()))
                         {
-                            applyBuffDebugEvent.BuffPrefabGUID = ClassOnHitEffectMap[playerClass];
-                            fromCharacter.Character = player;
+                            prefabGUID = ClassOnHitEffectMap[playerClass];
 
                             if (playerClass.Equals(PlayerClass.DemonHunter))
                             {
-                                if (ServerGameManager.TryGetBuff(player, stormShield01.ToIdentifier(), out Entity firstBuff))
+                                if (!player.HasBuff(stormShield03))
                                 {
-                                    firstBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
+                                    if (!player.HasBuff(stormShield02))
+                                    {
+                                        if (!player.HasBuff(stormShield01))
+                                        {
+                                            BuffUtilities.TryApplyBuffWithOwner(player, userEntity, stormShield01);
+                                        }
+                                        else if (player.TryGetBuff(stormShield01, out Entity stormShieldFirstBuff))
+                                        {
+                                            stormShieldFirstBuff.With((ref Age age) =>
+                                            {
+                                                age.Value = 0f;
+                                            });
+
+                                            BuffUtilities.TryApplyBuffWithOwner(player, userEntity, stormShield02);
+                                        }
+                                    }
+                                    else if (player.TryGetBuff(stormShield02, out Entity stormShieldSecondBuff))
+                                    {
+                                        stormShieldSecondBuff.With((ref Age age) =>
+                                        {
+                                            age.Value = 0f;
+                                        });
+
+                                        BuffUtilities.TryApplyBuffWithOwner(player, userEntity, stormShield03);
+                                    }
                                 }
-                                else if (ServerGameManager.TryGetBuff(player, stormShield02.ToIdentifier(), out Entity secondBuff))
+                                else if (player.TryGetBuff(stormShield03, out Entity stormShieldThirdBuff))
                                 {
-                                    secondBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
-                                }
-                                else if (ServerGameManager.TryGetBuff(player, stormShield03.ToIdentifier(), out Entity thirdBuff))
-                                {
-                                    thirdBuff.Write(new LifeTime { Duration = 5f, EndAction = LifeTimeEndAction.Destroy });
-                                }
-                                else
-                                {
-                                    DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                                    stormShieldThirdBuff.With((ref Age age) =>
+                                    {
+                                        age.Value = 0f;
+                                    });
                                 }
                             }
                             else
                             {
-                                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                                BuffUtilities.TryApplyBuffWithOwner(player, userEntity, prefabGUID);
                             }
                         }
                         else
                         {
-                            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                            if (ServerGameManager.TryGetBuff(dealDamageEvent.Target, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
-                            {
-                                buff.Write(new EntityOwner { Owner = player });
-                            }
+                            BuffUtilities.TryApplyBuffWithOwner(dealDamageEvent.Target, userEntity, prefabGUID);
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && GameMode.Equals(GameModeType.PvP) && dealDamageEvent.SpellSource.GetOwner().TryGetPlayer(out player) && dealDamageEvent.Target.IsPlayer())
+                else if (Familiars && GameMode.Equals(GameModeType.PvP) && entityOwner.Owner.TryGetPlayer(out player) && dealDamageEvent.Target.IsPlayer())
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 

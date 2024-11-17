@@ -23,6 +23,16 @@ internal static class BuffSystemSpawnPatches
 
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
+    static readonly bool EliteShardBearers = ConfigService.EliteShardBearers;
+    static readonly bool Legacies = ConfigService.BloodSystem;
+    static readonly bool Professions = ConfigService.ProfessionSystem;
+    static readonly bool PotionStacking = ConfigService.PotionStacking;
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+
+    static readonly bool FamiliarPvP = ConfigService.FamiliarPvP;
+
+    static readonly float MaxProfessionLevel = ConfigService.MaxProfessionLevel;
+
     static readonly PrefabGUID Solarus = new(-740796338);
 
     static readonly PrefabGUID DraculaReturnBuff = new(404387047);
@@ -60,7 +70,7 @@ internal static class BuffSystemSpawnPatches
                 //int guidHash = prefabGUID.GuidHash;
                 //Core.Log.LogInfo($"BuffSystem_Spawn_Server: {prefabName}");
 
-                if (prefabName.Contains("holybubble") && ConfigService.EliteShardBearers) // holy mortar effect for Solarus when eliteShardBearers active
+                if (prefabName.Contains("holybubble") && EliteShardBearers) // holy mortar effect for Solarus when eliteShardBearers active
                 {
                     Entity character = buffTarget;
 
@@ -90,11 +100,11 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (prefabGUID.Equals(WitchPigTransformationBuff) && ConfigService.FamiliarSystem && buffTarget.Has<VBloodUnit>())
+                else if (Familiars && prefabGUID.Equals(WitchPigTransformationBuff) && buffTarget.Has<VBloodUnit>())
                 {
                     DestroyUtility.Destroy(EntityManager, entity);
                 }
-                else if (prefabGUID.Equals(GateBossFeedComplete) && ConfigService.BloodSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player))
+                else if (Legacies && prefabGUID.Equals(GateBossFeedComplete) && buffTarget.TryGetPlayer(out Entity player))
                 {
                     Blood blood = player.Read<Blood>();
                     ulong steamId = player.GetSteamId();
@@ -114,7 +124,7 @@ internal static class BuffSystemSpawnPatches
 
                     BloodSystem.SkipBloodUpdate.Add(steamId);
                 }
-                else if (prefabGUID.Equals(PhasingBuff) && ConfigService.FamiliarSystem && buffTarget.TryGetPlayer(out player)) // teleport familiar to player after waygate and autoCall if was out before
+                else if (Familiars && prefabGUID.Equals(PhasingBuff) && buffTarget.TryGetPlayer(out player)) // teleport familiar to player after waygate and autoCall if was out before
                 {
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
@@ -125,19 +135,36 @@ internal static class BuffSystemSpawnPatches
                         FamiliarUtilities.AutoCallMap.Remove(player);
                     }
                 }
-                else if ((prefabGUID.Equals(PvECombatBuff) || prefabGUID.Equals(PvPCombatBuff)) && ConfigService.FamiliarSystem) // return familiar when entering combat if far enough away
+                else if (Familiars && prefabGUID.Equals(PvECombatBuff)) // return familiar when entering combat if far enough away
                 {
                     if (buffTarget.TryGetPlayer(out player))
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
-                        if (EntityManager.Exists(familiar))
+                        if (familiar.Exists())
                         {
                             FamiliarUtilities.ReturnFamiliar(player, familiar);
                         }
                     }
                 }
-                else if (prefabName.Contains("emote_onaggro") && ConfigService.FamiliarSystem && buffTarget.TryGetFollowedPlayer(out player))
+                else if (Familiars && prefabGUID.Equals(PvPCombatBuff))
+                {
+                    if (buffTarget.TryGetPlayer(out player))
+                    {
+                        Entity userEntity = player.GetUserEntity();
+                        ulong steamId = player.GetSteamId();
+
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
+                        if (familiar.Exists())
+                        {
+                            FamiliarUtilities.ReturnFamiliar(player, familiar);
+
+                            if (!FamiliarPvP) FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
+                        }
+                    }
+                }
+                else if (Familiars && prefabName.Contains("emote_onaggro") && buffTarget.TryGetFollowedPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
 
@@ -148,18 +175,19 @@ internal static class BuffSystemSpawnPatches
                 }
                 else if (prefabName.Contains("consumable") && buffTarget.TryGetPlayer(out player)) // alchemy bonuses/potion stacking/familiar sharing
                 {
-                    ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    ulong steamId = player.GetSteamId();
 
-                    if (ConfigService.PotionStacking) // stack t01/t02 potion effects
+                    if (PotionStacking) // stack t01/t02 potion effects
                     {
                         if (entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
                         if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
                     }
 
-                    if (ConfigService.FamiliarSystem) // player->familiar potion sharing
+                    if (Familiars) // player->familiar potion sharing
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
-                        if (familiar != Entity.Null)
+
+                        if (familiar.Exists())
                         {
                             ApplyBuffDebugEvent applyBuffDebugEvent = new()
                             {
@@ -176,7 +204,7 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
 
-                    if (ConfigService.ProfessionSystem) // apply alchemy bonuses
+                    if (Professions) // apply alchemy bonuses
                     {
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
                         int level = handler.GetProfessionData(steamId).Key;
@@ -184,7 +212,7 @@ internal static class BuffSystemSpawnPatches
                         if (entity.Has<LifeTime>())
                         {
                             LifeTime lifeTime = entity.Read<LifeTime>();
-                            if (lifeTime.Duration != -1) lifeTime.Duration *= (float)(1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                            if (lifeTime.Duration != -1) lifeTime.Duration *= (float)(1 + (float)level / (float)MaxProfessionLevel);
                             entity.Write(lifeTime);
                         }
 
@@ -194,13 +222,13 @@ internal static class BuffSystemSpawnPatches
                             for (int i = 0; i < buffer.Length; i++)
                             {
                                 ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                                statBuff.Value *= (float)(1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                                statBuff.Value *= (float)(1 + (float)level / (float)MaxProfessionLevel);
                                 buffer[i] = statBuff;
                             }
                         }
                     }
                 }
-                else if (ConfigService.FamiliarSystem && buffTarget.TryGetFollowedPlayer(out player)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end
+                else if (Familiars && buffTarget.TryGetFollowedPlayer(out player)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
@@ -208,7 +236,7 @@ internal static class BuffSystemSpawnPatches
                     {
                         if (prefabGUID.Equals(DraculaReturnBuff))
                         {
-                            DestroyUtility.CreateDestroyEvent(EntityManager, entity, DestroyReason.Default, DestroyDebugReason.None);
+                            DestroyUtility.Destroy(EntityManager, entity);
                         }
                         else if (prefabGUID.Equals(HighlordSwordSpawnBuff))
                         {
@@ -232,14 +260,14 @@ internal static class BuffSystemSpawnPatches
                         Buff buff = entity.Read<Buff>();
                         if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
-                    else if (ConfigService.FamiliarSystem)
+                    else if (Familiars)
                     {
                         if (owner.IsFollowingPlayer())
                         {
                             Buff buff = entity.Read<Buff>();
                             if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                         }
-                        else if (owner.GetOwner().IsFollowingPlayer())
+                        else if (owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsFollowingPlayer())
                         {
                             Buff buff = entity.Read<Buff>();
                             if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
@@ -251,19 +279,19 @@ internal static class BuffSystemSpawnPatches
                     Entity owner = entityOwner.Owner;
                     bool pvpProtected = buffTarget.HasBuff(PvPProtectedBuff);
 
-                    if (owner.IsPlayer() && pvpProtected && !owner.Equals(buffTarget)) 
+                    if (owner.IsPlayer() && !owner.Equals(buffTarget) && pvpProtected) 
                     {
                         Buff buff = entity.Read<Buff>();
                         if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                     }
-                    else if (ConfigService.FamiliarSystem)
+                    else if (Familiars && pvpProtected)
                     {
-                        if (owner.IsFollowingPlayer() && pvpProtected)
+                        if (owner.IsFollowingPlayer())
                         {
                             Buff buff = entity.Read<Buff>();
                             if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                         }
-                        else if (owner.GetOwner().IsFollowingPlayer() && pvpProtected)
+                        else if (owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsFollowingPlayer())
                         {
                             Buff buff = entity.Read<Buff>();
                             if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
@@ -278,7 +306,7 @@ internal static class BuffSystemSpawnPatches
         }
     }
 
-    // methods for refactoring since this patch is getting a bit heavy
+    // methods for refactoring since this patch is getting a bit heavy, #soonTM
     static void HandleGateBossFeed(Entity buffEntity)
     {
         if (buffEntity.GetBuffTarget().TryGetPlayer(out Entity player))

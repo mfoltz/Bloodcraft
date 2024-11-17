@@ -16,21 +16,8 @@ internal static class PlayerUtilities
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
-    static readonly Dictionary<int, string> PrestigeRankSymbols = new()
-    {
-        { 1, "♙" }, // White Pawn
-        { 2, "♟" }, // Black Pawn
-        { 3, "♘" }, // White Knight
-        { 4, "♞" }, // Black Knight
-        { 5, "♗" }, // White Bishop
-        { 6, "♝" }, // Black Bishop
-        { 7, "♖" }, // White Rook
-        { 8, "♜" }, // Black Rook
-        { 9, "♕" }, // White Queen
-        { 10, "♔" } // White King
-    };
+    static readonly float ShareDistance = ConfigService.ExpShareDistance;
 
     static readonly PrefabGUID DraculaVBlood = new(-327335305);
     public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later
@@ -53,10 +40,10 @@ internal static class PlayerUtilities
             steamId.SetPlayerBools(bools);
         }
     }
-    public static HashSet<Entity> GetDeathParticipants(Entity source, Entity userEntity)
+    public static HashSet<Entity> GetDeathParticipants(Entity source)
     {
         float3 sourcePosition = source.Read<Translation>().Value;
-        User sourceUser = userEntity.Read<User>();
+        User sourceUser = source.GetUser();
         string playerName = sourceUser.CharacterName.Value;
 
         Entity clanEntity = sourceUser.ClanEntity.GetEntityOnServer();
@@ -76,7 +63,7 @@ internal static class PlayerUtilities
                         {
                             float distance = UnityEngine.Vector3.Distance(sourcePosition, playerInfo.CharEntity.Read<Translation>().Value);
 
-                            if (distance > ConfigService.ExpShareDistance) continue;
+                            if (distance > ShareDistance) continue;
                             else players.Add(playerInfo.CharEntity);
                         }
                     }
@@ -96,7 +83,7 @@ internal static class PlayerUtilities
                     Entity player = user.LocalCharacter._Entity;
                     var distance = UnityEngine.Vector3.Distance(sourcePosition, player.Read<Translation>().Value);
 
-                    if (distance > ConfigService.ExpShareDistance) continue;
+                    if (distance > ShareDistance) continue;
                     else players.Add(player);
                 }
             }

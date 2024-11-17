@@ -919,6 +919,10 @@ internal static class DataService
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
             }
+            public static int GetFamiliarExperienceLevel(FamiliarExperienceData familiarExperienceData, int familiarId)
+            {
+                return familiarExperienceData.FamiliarExperience.TryGetValue(familiarId, out var experienceData) ? experienceData.Key : 0;
+            }
         }
         internal static class FamiliarPrestigeManager
         {
@@ -940,6 +944,10 @@ internal static class DataService
 
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarPrestigeData>(jsonString);
+            }
+            public static int GetFamiliarPrestigeLevel(FamiliarPrestigeData familiarPrestigeData, int familiarId)
+            {
+                return familiarPrestigeData.FamiliarPrestige.TryGetValue(familiarId, out var prestigeData) ? prestigeData.Key : 0;
             }
         }
         internal static class FamiliarBuffsManager

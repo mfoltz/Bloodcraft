@@ -1,4 +1,5 @@
 `1.5.3`
+- familiar receive shared experience when player should, refactored death event handling to facilitate this and improve general performance
 - parties should work more consistently, previously a failed check allowed players to be in more than one party at once which the code was not designed to handle
 - familiar aggression is reset when returned to player from too far away or when calling/dismissing them
 - added config to set level for shard bearers if using elite option, can leave at 0 for no change
@@ -8,7 +9,6 @@
 - Legacy essence values gained from feed events are now multipled by x3 if consuming the same bloodType and/or then up to x2 if the player has 100% blood quality (this is much slower to level at defaults than was intended)
 - Exo rework! Old effects are no longer applicable and are removed from players upon logging in if they have exo data. Instead, if Dracula has been defeated and have at least 1 exo prestige, unlock a powerful new form that will increase in duration and power as you gain exo prestiges! Use '.exoform' to enable taunting to active if requirements met
 - Traders no longer provide any progression to players when killed
-- Blood stats are now applied when chosen and update on legacy level up without needing to consume new blood of that type
 - Fixed bug with crafting credit for professions/crafting quests, removed crafting credit cooldown, balanced crafting quests and removed highest tiers of equipment from target pool
 - Familiars should play nicer with others on PvE servers, have also added handling for some abilities that were ignoring allied status and preventing some debuffs from being applied to players when they are PvP protected
 - Using a waygate with a familiar out will dismiss it without player having to use waygate again as is currently the case, after teleporting it will return (only if familiar was present/active first)

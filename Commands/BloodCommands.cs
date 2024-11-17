@@ -135,7 +135,7 @@ internal static class BloodCommands
 
         if (ChooseStat(steamID, BloodType, StatType))
         {
-            LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and has been applied if equipped.");
+            LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and will apply after refreshing blood.");
 
             Entity player = ctx.Event.SenderCharacterEntity;
             BloodType bloodType = GetCurrentBloodType(player);

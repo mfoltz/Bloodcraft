@@ -71,6 +71,7 @@ internal static class ChatMessageSystemPatch
         using var hmac = new HMACSHA256(sharedKey);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
+
         return Convert.ToBase64String(hashBytes);
     }
 }

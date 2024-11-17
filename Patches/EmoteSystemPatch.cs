@@ -71,6 +71,11 @@ internal static class EmoteSystemPatch
                     if (!character.HasBuff(ExoFormBuff))
                     {
                         BuffUtilities.TryApplyBuff(character, PhasingBuff);
+
+                        if (character.TryGetBuff(PhasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
+                        {
+                            buffEntity.Remove<BuffModificationFlagData>();
+                        }
                     }
                     else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
                     {

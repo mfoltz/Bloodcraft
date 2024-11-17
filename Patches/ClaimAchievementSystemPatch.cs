@@ -26,7 +26,7 @@ internal static class ClaimAchievementSystemPatch
         bool forceClaim)
     {
         if (!Core.hasInitialized) return;
-        if (!ConfigService.LevelingSystem) return;
+        else if (!ConfigService.LevelingSystem) return;
 
         if (claimAchievementGUID.Equals(BeforeTheHunt))
         {

@@ -42,12 +42,12 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (ConfigService.LevelingSystem) LevelingSystem.ProcessExperience(player, vBlood);
+                if (ConfigService.LevelingSystem) LevelingSystem.ProcessExperienceGain(player, vBlood, steamId, 1f);
                 if (ConfigService.ExpertiseSystem) WeaponSystem.ProcessExpertise(player, vBlood);
                 if (ConfigService.BloodSystem) BloodSystem.ProcessLegacy(player, vBlood);
                 if (ConfigService.FamiliarSystem)
                 {
-                    FamiliarLevelingSystem.ProcessFamiliarExperience(player, vBlood);
+                    FamiliarLevelingSystem.ProcessFamiliarExperience(player, vBlood, steamId, 1f);
                     FamiliarUnlockSystem.ProcessUnlock(player, vBlood);
                 }
                 if (ConfigService.QuestSystem && steamId.TryGetPlayerQuests(out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);

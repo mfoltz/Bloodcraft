@@ -46,19 +46,18 @@ internal static class AbilityRunScriptsSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                AbilityPostCastFinishedEvent postCast = entity.Read<AbilityPostCastFinishedEvent>();
-                PrefabGUID abilityGroupPrefab = postCast.AbilityGroup.Read<PrefabGUID>();
-
-                if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
+                if (!entity.TryGetComponent(out AbilityPostCastFinishedEvent postCast) || !postCast.AbilityGroup.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                else if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
                 else if (postCast.Character.IsPlayer())
                 {
                     //Core.Log.LogInfo(postCast.AbilityGroup.GetPrefabGUID().LookupName());
 
-                    if (ClassSpells.ContainsKey(abilityGroupPrefab))
+                    if (ClassSpells.ContainsKey(prefabGUID))
                     {
-                        float cooldown = ClassSpells[abilityGroupPrefab].Equals(0) ? 8f : (ClassSpells[abilityGroupPrefab] + 1) * 8f;
-                        ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                        float cooldown = ClassSpells[prefabGUID].Equals(0) ? 8f : (ClassSpells[prefabGUID] + 1) * 8f;
+                        ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGUID, cooldown);
                     }
+
                     /*
                     else if (ConfigService.ExoPrestiging && BuffUtilities.ExoFormAbilityMap.ContainsValue(abilityGroupPrefab))
                     {
@@ -89,22 +88,15 @@ internal static class AbilityRunScriptsSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                AbilityCastStartedEvent castStartedEvent = entity.Read<AbilityCastStartedEvent>();
-                PrefabGUID prefabGUID = castStartedEvent.AbilityGroup.Read<PrefabGUID>();
-
-                //Core.Log.LogInfo($"AbilityCastStarted_SetupAbilityTargetSystem_Shared: {prefabGUID.LookupName()}");
-
-                if ((prefabGUID.Equals(UseCastleWaypointAbilityGroup) || prefabGUID.Equals(UseWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity player))
+                if (!entity.TryGetComponent(out AbilityCastStartedEvent castStartedEvent) || !castStartedEvent.AbilityGroup.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                else if ((prefabGUID.Equals(UseCastleWaypointAbilityGroup) || prefabGUID.Equals(UseWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity player))
                 {
-                    //Core.Log.LogInfo("Waypoint cast detected, dismissing familiar if found...");
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
                     if (familiar.Exists() && !familiar.IsDisabled() && steamId.TryGetFamiliarActives(out var data))
-                    {
-                        //FamiliarUtilities.AutoCallMap.TryAdd(player, familiar);
-                        
+                    {                        
                         FamiliarUtilities.AutoCallMap[player] = familiar;
                         FamiliarUtilities.DismissFamiliar(player, familiar, user, steamId, data);
                     }

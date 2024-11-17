@@ -274,7 +274,7 @@ internal static class ClassUtilities
                 if (spellPrefabGUID.Equals(oldAbility))
                 {
                     LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
-                    return; 
+                    return;
                 }
                 for (int i = 0; i < firstBuffer.Length; i++)
                 {
@@ -311,7 +311,7 @@ internal static class ClassUtilities
             }
 
             VBloodAbilityUtilities.InstantiateBuff(EntityManager, ActivateVBloodAbilitySystem._BuffSpawnerSystemData, character, PrefabCollectionSystem._PrefabGuidToEntityMap[VBloodAbilityBuff], spellPrefabGUID, 3);
-            
+
             if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var secondBuffer))
             {
                 foreach (VBloodAbilityBuffEntry abilityEntry in secondBuffer)
@@ -322,6 +322,7 @@ internal static class ClassUtilities
                         {
                             vBloodAbilityReplaceBuff.AbilityType = vBloodAbilityData.AbilityType;
                         });
+
                         break;
                     }
                 }
@@ -335,6 +336,20 @@ internal static class ClassUtilities
             }
 
             LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
+
+            character.With((ref AbilityBarInitializationState abilityBarInitializationState) =>
+            {
+                abilityBarInitializationState.AbilityGroupSlotsInitialized = false;
+            });
+
+            if (AbilityUtilitiesServer.TryInstantiateAbilityGroup(EntityManager, ref PrefabLookupMap, character, spellPrefabGUID, true, out Entity abilityGroupEntity, 3))
+            {
+                Core.Log.LogInfo($"Successfully instantiated ability group for {spellName}");
+            }
+            else
+            {
+                Core.Log.LogError($"Failed to instantiate ability group for {spellName}");
+            }
         }
         else if (spellPrefabGUID.HasValue())
         {

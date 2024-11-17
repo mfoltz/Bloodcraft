@@ -7,14 +7,9 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
-using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared;
-using Stunlock.Core;
 using System.Collections;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -34,8 +29,6 @@ internal static class Core
     public static void Initialize()
     {
         if (hasInitialized) return;
-
-        hasInitialized = true;
 
         _ = new PlayerService();
         _ = new LocalizationService();
@@ -62,7 +55,7 @@ internal static class Core
         if (ConfigService.FamiliarSystem)
         {
             ConfigUtilities.FamiliarBans();
-            DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
+            //DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
 
@@ -105,6 +98,30 @@ internal static class Core
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
 
+    /*
+    static void OverrideVBloodMenuLevels()
+    {
+        Il2CppSystem.Collections.Generic.List<VBloodUnitSetting> vBloodUnitSettings = SystemService.ServerGameSettingsSystem._Settings.VBloodUnitSettings;
+        List<int> shardBearers = SpawnTransformSystemOnSpawnPatch.shardBearers.Select(x => x._Value).ToList();
+
+        foreach (VBloodUnitSetting vBloodUnitSetting in vBloodUnitSettings)
+        {
+            if (shardBearers.Contains(vBloodUnitSetting.UnitId))
+            {
+                vBloodUnitSetting.UnitLevel = (byte)ConfigService.ShardBearerLevel;
+            }
+        }
+
+        SystemService.ServerGameSettingsSystem._Settings.VBloodUnitSettings = vBloodUnitSettings;
+
+        SystemService.ServerBootstrapSystem._SteamPlatformSystem.SetServerSettings(SystemService.ServerGameSettingsSystem._Settings.ToStruct(true));
+        SystemService.ServerBootstrapSystem._SteamPlatformSystem.SetServerGameSettingsHash(SystemService.ServerGameSettingsSystem._Settings);
+
+        SystemService.ServerBootstrapSystem.ReloadSettings();
+    }
+    */
+
+    /*
     static readonly PrefabGUID SCTPrefab = new(-1661525964);
 
     static readonly ComponentType[] PrefabGUIDComponent =
@@ -190,4 +207,5 @@ internal static class Core
             }
         }
     }
+    */
 }

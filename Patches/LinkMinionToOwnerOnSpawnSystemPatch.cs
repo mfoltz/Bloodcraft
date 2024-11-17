@@ -35,8 +35,8 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
-                else if (entity.GetOwner().TryGetFollowedPlayer(out Entity player))
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
+                else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player))
                 {
                     Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
@@ -70,11 +70,13 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                                 buff.Write(new LifeTime { Duration = 30, EndAction = LifeTimeEndAction.Destroy }); // mark for destruction to make sure familiar minions don't linger if other handling fails
                             }
                         }
+
+                        entity.Write(new EntityOwner { Owner = player });
                     }
                 }
-                else if (entity.GetOwner().GetOwner().IsPlayer())
+                else if (entityOwner.Owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsPlayer())
                 {
-                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
+                    DestroyUtility.Destroy(EntityManager, entity);
                 }
             }
         }

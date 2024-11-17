@@ -76,11 +76,13 @@ internal static class Extensions
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
         componentData = default;
+
         if (entity.Has<T>())
         {
             componentData = entity.Read<T>();
             return true;
         }
+
         return false;
     }
     public static bool Has<T>(this Entity entity)
@@ -140,11 +142,13 @@ internal static class Extensions
     public static bool TryGetPlayer(this Entity entity, out Entity player)
     {
         player = Entity.Null;
+
         if (entity.Has<PlayerCharacter>())
         {
             player = entity;
             return true;
         }
+
         return false;
     }
     public static bool IsPlayer(this Entity entity)
@@ -195,9 +199,9 @@ internal static class Extensions
     {
         return entity.Has<Disabled>();
     }
-    public static bool Disabled(this Entity entity)
+    public static bool IsVBlood(this Entity entity)
     {
-        return entity.Has<Disabled>();
+        return entity.Has<VBloodUnit>();
     }
     public static ulong GetSteamId(this Entity entity)
     {

@@ -1,13 +1,13 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
-using Engine.Console.GameEngineImplementation;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -17,16 +17,17 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftingSystem
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static NetworkIdSystem.Singleton NetworkIdSystem => SystemService.NetworkIdSystem;
 
-    const float CRAFT_THRESHOLD = 0.995f;
-    static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem.Settings.CraftRateModifier;
+    const float CRAFT_THRESHOLD = 0.95f;
+    static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
-    static readonly Dictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> playerCraftingJobs = [];
-    public static readonly Dictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> ValidatedCraftingJobs = [];
+    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> playerCraftingJobs = []; // guess I'll just start using these if in doubt about the order of operations, so to speak >_>
+    public static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> ValidatedCraftingJobs = [];
 
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
     [HarmonyPrefix]
@@ -124,7 +125,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         }
 
                         QueuedWorkstationCraftAction queuedWorkstationCraftAction = buffer[0];
-                        double recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75 : 1;
+                        float recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75f : 1f;
 
                         ProcessQueuedCraftAction(entity, queuedWorkstationCraftAction, recipeReduction);
                     }
@@ -170,7 +171,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
     [HarmonyPatch(typeof(StartCraftingSystem), nameof(StartCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
-    public static void Prefix(StartCraftingSystem __instance)
+    public static void OnUpdatePrefix(StartCraftingSystem __instance)
     {
         if (!Core.hasInitialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
@@ -192,7 +193,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     if (!playerCraftingJobs.ContainsKey(steamId))
                     {
-                        playerCraftingJobs.Add(steamId, []);
+                        playerCraftingJobs.TryAdd(steamId, []);
                     }
 
                     if (!playerCraftingJobs[steamId].ContainsKey(craftingStation))
@@ -204,12 +205,12 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     if (!RecipesCrafting.ContainsKey(itemPrefabGUID))
                     {
-                        //Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| 1");
+                        //Core.Log.LogInfo($"Crafting job added via StartCraftEvent for {itemPrefabGUID.LookupName()}| 1");
                         RecipesCrafting[itemPrefabGUID] = 1;
                     }
                     else
                     {
-                        //Core.Log.LogInfo($"Crafting job added for {itemPrefabGUID.LookupName()}| {RecipesCrafting[itemPrefabGUID] + 1}");
+                        //Core.Log.LogInfo($"Crafting job added via StartCraftEvent for {itemPrefabGUID.LookupName()}| {RecipesCrafting[itemPrefabGUID] + 1}");
                         RecipesCrafting[itemPrefabGUID] = ++RecipesCrafting[itemPrefabGUID];
                     }
 
@@ -225,7 +226,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
     [HarmonyPatch(typeof(StopCraftingSystem), nameof(StopCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
-    public static void Prefix(StopCraftingSystem __instance)
+    public static void OnUpdatePrefix(StopCraftingSystem __instance)
     {
         if (!Core.hasInitialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
@@ -245,6 +246,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     ulong steamId = fromCharacter.User.GetSteamId();
 
+                    /*
                     if (playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(craftingStation, out var craftingJobs))
                     {
                         if (craftingJobs.ContainsKey(itemPrefabGUID))
@@ -252,8 +254,22 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                             int jobs = craftingJobs[itemPrefabGUID];
                             craftingJobs[itemPrefabGUID] = --jobs;
 
-                            //Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]}");
+                            Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]} in playerCraftingJobs");
                             if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
+                        }
+                    }
+                    */
+
+                    // this might work fine or not be worth it, will see
+                    if (ValidatedCraftingJobs.TryGetValue(steamId, out var validatedStationJobs) && validatedStationJobs.TryGetValue(craftingStation, out var validatedCraftingJobs))
+                    {
+                        if (validatedCraftingJobs.ContainsKey(itemPrefabGUID))
+                        {
+                            int jobs = validatedCraftingJobs[itemPrefabGUID];
+                            validatedCraftingJobs[itemPrefabGUID] = --jobs;
+
+                            //Core.Log.LogInfo($"Crafting job removed via StopCraftEvent for {itemPrefabGUID.LookupName()}| {validatedCraftingJobs[itemPrefabGUID]} in ValidatedCraftingJobs");
+                            if (validatedCraftingJobs[itemPrefabGUID] <= 0) validatedCraftingJobs.Remove(itemPrefabGUID);
                         }
                     }
                 }
@@ -265,7 +281,70 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         }
     }
 
-    static void ProcessQueuedCraftAction(Entity entity, QueuedWorkstationCraftAction craftAction, double recipeReduction)
+    /*
+    [HarmonyPatch(typeof(MoveItemBetweenInventoriesSystem), nameof(MoveItemBetweenInventoriesSystem.OnUpdate))]
+    [HarmonyPrefix]
+    public static void OnUpdatePrefix(MoveItemBetweenInventoriesSystem __instance)
+    {
+        if (!Core.hasInitialized) return;
+        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+
+        NativeArray<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TryGetComponent(out MoveItemBetweenInventoriesEvent moveItemBetweenInventoriesEvent) && entity.TryGetComponent(out FromCharacter fromCharacter))
+                {
+                    ulong steamId = fromCharacter.Character.GetSteamId();
+
+                    Entity receivingInventory = NetworkIdSystem._NetworkIdLookupMap.TryGetValue(moveItemBetweenInventoriesEvent.ToInventory, out Entity station) ? station : Entity.Null;
+                    //Entity inventoryOwner = receivingInventory.Has<InventoryConnection>() ? receivingInventory.Read<InventoryConnection>().InventoryOwner : Entity.Null;
+                    int fromSlot = moveItemBetweenInventoriesEvent.FromSlot;
+
+                    PrefabGUID itemPrefabGUID = InventoryUtilities.TryGetInventoryEntity(EntityManager, fromCharacter.Character, out Entity playerInventory) 
+                        && ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var inventoryBuffer) && inventoryBuffer.TryGetAtIndex(fromSlot, out InventoryBuffer item) ? item.ItemType : PrefabGUID.Empty;
+
+                    if (receivingInventory.Has<CastleWorkstation>())
+                    {
+                        if (playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(receivingInventory, out var craftingJobs))
+                        {
+                            if (craftingJobs.ContainsKey(itemPrefabGUID))
+                            {
+                                int jobs = craftingJobs[itemPrefabGUID];
+                                craftingJobs[itemPrefabGUID] = --jobs;
+
+                                Core.Log.LogInfo($"Crafting job removed via exploit prevention for {itemPrefabGUID.LookupName()}| {craftingJobs[itemPrefabGUID]} in playerCraftingJobs");
+                                if (craftingJobs[itemPrefabGUID] <= 0) craftingJobs.Remove(itemPrefabGUID);
+                            }
+                        }
+
+                        if (ValidatedCraftingJobs.TryGetValue(steamId, out var validatedStationJobs) && validatedStationJobs.TryGetValue(receivingInventory, out var validatedCraftingJobs))
+                        {
+                            if (validatedCraftingJobs.ContainsKey(itemPrefabGUID))
+                            {
+                                int jobs = validatedCraftingJobs[itemPrefabGUID];
+                                validatedCraftingJobs[itemPrefabGUID] = --jobs;
+
+                                Core.Log.LogInfo($"Crafting job removed via exploit prevention for {itemPrefabGUID.LookupName()}| {validatedCraftingJobs[itemPrefabGUID]} in ValidatedCraftingJobs");
+                                if (validatedCraftingJobs[itemPrefabGUID] <= 0) validatedCraftingJobs.Remove(itemPrefabGUID);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        receivingInventory.LogComponentTypes();
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+    }
+    */
+    static void ProcessQueuedCraftAction(Entity entity, QueuedWorkstationCraftAction craftAction, float recipeReduction)
     {
         Entity userEntity = craftAction.InitiateUser;
         ulong steamId = userEntity.GetSteamId();
@@ -278,7 +357,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         if (recipePrefab.TryGetComponent(out RecipeData recipeData))
         {
             float craftDuration = recipeData.CraftDuration;
-            double totalTime = CraftRateModifier.Equals(1f) ? craftDuration * recipeReduction : craftDuration * recipeReduction / CraftRateModifier;
+            float totalTime = (craftDuration * recipeReduction) / CraftRateModifier;
+
+            //if (!craftFinished) Core.Log.LogInfo($"Crafting progress for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime} | {craftAction.ProgressTime / totalTime}/{CRAFT_THRESHOLD} | {craftFinished}");
 
             if (!craftFinished && craftAction.ProgressTime / totalTime >= CRAFT_THRESHOLD)
             {

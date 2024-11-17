@@ -342,6 +342,10 @@ internal static class MiscCommands
 
                     if (followerEntity.Exists())
                     {
+                        if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>();
+                        if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>();
+                        if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>();
+
                         DestroyUtility.Destroy(EntityManager, followerEntity);
                         counter++;
                     }
@@ -355,6 +359,10 @@ internal static class MiscCommands
 
                     if (minionEntity.Exists())
                     {
+                        if (minionEntity.Has<Disabled>()) minionEntity.Remove<Disabled>();
+                        if (minionEntity.Has<DisableWhenNoPlayersInRange>()) minionEntity.Remove<DisableWhenNoPlayersInRange>();
+                        if (minionEntity.Has<DisabledDueToNoPlayersInRange>()) minionEntity.Remove<DisabledDueToNoPlayersInRange>();
+
                         DestroyUtility.Destroy(EntityManager, minionEntity);
                         counter++;
                     }
@@ -366,6 +374,7 @@ internal static class MiscCommands
 
         LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
     }
+
     /*
     [Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3 don't feel like finding out if it works like I think it will right now so commenting out >_>
     public static void SwitchPlayers(ChatCommandContext ctx, string originalPlayer, string newPlayer)
@@ -386,7 +395,6 @@ internal static class MiscCommands
             ctx.Reply($"Switched steamIds for {originalPlayerInfo.User.CharacterName} with {newPlayerInfo.User.CharacterName}!");
         }
     }
-
     
     [Command(name: "bloblog", shortHand:"blob", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
     public static void BlobStringLogCommand(ChatCommandContext ctx, int guidHash)

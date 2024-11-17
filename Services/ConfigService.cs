@@ -107,6 +107,7 @@ public static class ConfigService
     public static bool FamiliarSystem { get; private set; }
     public static bool ShareUnlocks { get; private set; }
     public static bool FamiliarCombat { get; private set; }
+    public static bool FamiliarPvP { get; private set; }
     public static bool FamiliarPrestige { get; private set; }
     public static int MaxFamiliarPrestiges { get; private set; }
     public static float FamiliarPrestigeStatMultiplier { get; private set; }
@@ -291,6 +292,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system"),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)"),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars"),
+            new ConfigEntryDefinition("Familiars", "FamiliarPvP", true, "Enable or disable PvP participation for familiars. (if set to false, familiars will be unbound when entering PvP combat)"),
             new ConfigEntryDefinition("Familiars", "FamiliarPrestige", false, "Enable or disable the prestige system for familiars"),
             new ConfigEntryDefinition("Familiars", "MaxFamiliarPrestiges", 10, "The maximum number of prestiges a familiar can reach"),
             new ConfigEntryDefinition("Familiars", "FamiliarPrestigeStatMultiplier", 0.10f, "The multiplier for stats gained from familiar prestiges"),

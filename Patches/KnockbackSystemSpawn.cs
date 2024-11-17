@@ -34,7 +34,7 @@ internal static class KnockbackSystemSpawnPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
                 else if (prefabGUID == AllyKnockbackBuff) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();

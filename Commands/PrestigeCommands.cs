@@ -431,12 +431,26 @@ internal static class PrestigeCommands
             return;
         }
 
+        /*
         string prestigeTypes = string.Join(", ",
             Enum.GetNames(typeof(PrestigeType))
                 .Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")
         );
+        */
 
-        LocalizationService.HandleReply(ctx, $"Available Prestiges: {prestigeTypes}");
+        List<string> prestigeTypes = Enum.GetNames(typeof(PrestigeType))
+                .Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")
+                .ToList();
+
+        const int maxPerMessage = 6;
+
+        LocalizationService.HandleReply(ctx, $"Available Prestiges:");
+        for (int i = 0; i < prestigeTypes.Count; i += maxPerMessage)
+        {
+            var batch = prestigeTypes.Skip(i).Take(maxPerMessage);
+            string prestiges = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, $"{prestiges}");
+        }
     }
 
     [Command(name: "leaderboard", shortHand: "lb", adminOnly: false, usage: ".prestige lb [PrestigeType]", description: "Lists prestige leaderboard for type.")]

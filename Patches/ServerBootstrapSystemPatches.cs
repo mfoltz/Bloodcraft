@@ -24,7 +24,7 @@ internal static class ServerBootstrapSystemPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
@@ -306,7 +306,7 @@ internal static class ServerBootstrapSystemPatches
                 }
                 else if (exists)
                 {
-                    float restedMultiplier = 0;
+                    float restedMultiplier = 0f;
 
                     if (ServerGameManager.HasBuff(playerCharacter, InsideWoodenCoffin)) restedMultiplier = 0.5f;
                     else if (ServerGameManager.HasBuff(playerCharacter, InsideStoneCoffin)) restedMultiplier = 1f;
@@ -314,7 +314,7 @@ internal static class ServerBootstrapSystemPatches
                     DateTime lastLogout = restedData.Key;
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
 
-                    if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0 && experience.Key < ConfigService.MaxLevel)
+                    if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0f && experience.Key < ConfigService.MaxLevel)
                     {
                         float currentRestedXP = restedData.Value;
 
@@ -443,7 +443,7 @@ internal static class ServerBootstrapSystemPatches
                             if (bloodQualityBuffs.Contains(classBuff)) continue; // after filtering out class buffs the player should have, check against remaining buffs then see if they are supposed to have it based on blood type and destroy it if not?
                             else
                             {
-                                Core.Log.LogInfo($"{user.CharacterName.Value} class is {playerClass.ToString()} with blood type {bloodType.ToString()} and should not have {classBuff.LookupName()}, removing buff...");
+                                //Core.Log.LogInfo($"{user.CharacterName.Value} class is {playerClass.ToString()} with blood type {bloodType.ToString()} and should not have {classBuff.LookupName()}, removing buff...");
                                 DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                             }
                         }
@@ -451,15 +451,15 @@ internal static class ServerBootstrapSystemPatches
 
                     if (playerCharacter.Has<VBloodAbilityBuffEntry>())
                     {
-                        var buffer = playerCharacter.ReadBuffer<VBloodAbilityBuffEntry>();
+                        var vBloodAbilityBuffer = playerCharacter.ReadBuffer<VBloodAbilityBuffEntry>();
 
                         Dictionary<int, Entity> abilityBuffEntities = [];
                         bool firstFound = false;
 
                         // Traverse the buffer to find the first occurrence of SlotId == 3 and track duplicates
-                        for (int i = 0; i < buffer.Length; i++)
+                        for (int i = 0; i < vBloodAbilityBuffer.Length; i++)
                         {
-                            VBloodAbilityBuffEntry item = buffer[i];
+                            VBloodAbilityBuffEntry item = vBloodAbilityBuffer[i];
 
                             if (item.SlotId == 3)
                             {
@@ -483,19 +483,126 @@ internal static class ServerBootstrapSystemPatches
                                 var index = entry.Key;
                                 var entity = entry.Value;
 
-                                if (buffer.IsIndexWithinRange(index))
+                                if (vBloodAbilityBuffer.IsIndexWithinRange(index))
                                 {
                                     //Core.Log.LogInfo($"Removing duplicate VBlood ability buff: {(entity.Has<PrefabGUID>() ? entity.Read<PrefabGUID>().LookupName() : "N/A")} | {entity} | {character}");
 
-                                    buffer.RemoveAt(index);
+                                    vBloodAbilityBuffer.RemoveAt(index);
                                     DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
                                 }
                             }
                         }
                     }
-
-                    //BloodManager.UpdateBloodStats(playerCharacter, bloodType);
                 }
+
+                /*
+                if (ServerGameManager.TryGetBuffer<AbilityGroupSlotBuffer>(playerCharacter, out var buffer) && !buffer.IsEmpty)
+                {
+                    
+                    var prefabEntityMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        AbilityGroupSlotBuffer abilityGroupSlotBuffer = buffer[i];
+                        AbilityGroupSlot
+                        if (prefabEntityMap.TryGetValue(abilityGroupSlotBuffer.BaseAbilityGroupOnSlot, out Entity abilityPrefabEntity) && abilityPrefabEntity.Has<VBloodAbilityData>())
+                        {
+                            abilityGroupSlotBuffer.ShowOnBar = true;
+                            buffer[i] = abilityGroupSlotBuffer;
+                        }
+                    }
+                    
+
+                    Dictionary<PrefabGUID, int> abilityGroupCount = [];
+                    Dictionary<PrefabGUID, int> spellModSources = [];
+
+                    int emptySpellModSource = 0;
+
+                    foreach (AbilityGroupSlotBuffer abilityGroupSlotBuffer in buffer)
+                    {
+                        PrefabGUID abilityGroupPrefabGUID = abilityGroupSlotBuffer.BaseAbilityGroupOnSlot;
+                        Entity abilityGroupSlotEntity = abilityGroupSlotBuffer.GroupSlotEntity.GetEntityOnServer();
+
+                        if (!abilityGroupCount.ContainsKey(abilityGroupPrefabGUID))
+                        {
+                            abilityGroupCount.TryAdd(abilityGroupPrefabGUID, 1);
+
+                            if (abilityGroupSlotEntity.Exists()) abilityGroupSlotEntity.LogComponentTypes();
+                        }
+                        else if (abilityGroupCount.ContainsKey(abilityGroupPrefabGUID))
+                        {
+                            abilityGroupCount[abilityGroupPrefabGUID]++;
+
+                            if (abilityGroupSlotEntity.Exists()) abilityGroupSlotEntity.LogComponentTypes();
+                        }
+                        else if (abilityGroupPrefabGUID.IsEmpty() && abilityGroupSlotEntity.Exists()) abilityGroupSlotEntity.LogComponentTypes();
+
+                        if (abilityGroupSlotEntity.TryGetComponent(out AbilityGroupSlot abilityGroupSlot))
+                        {
+                            Entity spellModsSource = abilityGroupSlot.SpellModsSource._Value;
+
+                            try
+                            {
+                                if (spellModsSource.TryGetComponent(out PrefabGUID prefabGUID))
+                                {
+                                    if (!spellModSources.ContainsKey(prefabGUID))
+                                    {
+                                        spellModSources.TryAdd(prefabGUID, 1);
+                                    }
+                                    else
+                                    {
+                                        spellModSources[prefabGUID]++;
+                                    }
+
+                                    spellModsSource.LogComponentTypes();
+                                }
+                                else if (spellModsSource.Exists())
+                                {
+                                    spellModsSource.LogComponentTypes();
+                                }
+                                else
+                                {
+                                    emptySpellModSource++;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Core.Log.LogError($"Error logging spellModsSource: {e}");
+                            }
+                        }
+                    }
+
+                    Core.Log.LogWarning("----- Ability Group Slot Buffer Analysis -----");
+
+                    Core.Log.LogWarning("AbilityGroup Counts:");
+                    foreach (var kvp in abilityGroupCount)
+                    {
+                        if (kvp.Key.IsEmpty())
+                        {
+                            Core.Log.LogInfo($"Empty AbilityGroups - {kvp.Key} | Count: {kvp.Value}");
+                        }
+                        else
+                        {
+                            Core.Log.LogInfo($"AbilityGroup: {kvp.Key.LookupName()} | Count: {kvp.Value}");
+                        }
+                    }
+
+                    Core.Log.LogWarning("Spell Mod Sources:");
+                    foreach (var kvp in spellModSources)
+                    {
+                        if (kvp.Key.IsEmpty())
+                        {
+                            Core.Log.LogInfo($"Empty SpellModSource - {kvp.Key} | Count: {kvp.Value}");
+                        }
+                        else
+                        {
+                            Core.Log.LogInfo($"SpellModSource: {kvp.Key.LookupName()} | Count: {kvp.Value}");
+                        }
+                    }
+
+                    Core.Log.LogWarning("---------------------------------------------");
+                }
+                */
             }
         }
 
@@ -540,7 +647,7 @@ internal static class ServerBootstrapSystemPatches
 
         if (ConfigService.ClientCompanion)
         {
-            if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
+            if (EclipseService.RegisteredUsersAndClientVersions.Contains(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
         }
     }
 
@@ -577,7 +684,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (ConfigService.ClientCompanion)
                         {
-                            if (EclipseService.RegisteredUsers.Contains(steamId)) EclipseService.RegisteredUsers.Remove(steamId);
+                            if (EclipseService.RegisteredUsersAndClientVersions.Contains(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
                         }
                     }
                 }

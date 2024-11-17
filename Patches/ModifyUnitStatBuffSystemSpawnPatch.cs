@@ -24,9 +24,9 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
         {
             foreach (var entity in entities)
             {
-                if (!entity.Has<WeaponLevel>() || !entity.Has<EntityOwner>()) continue;
+                if (!entity.Has<WeaponLevel>() || !entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
 
-                if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
 
@@ -71,9 +71,9 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
         {
             foreach (var entity in entities)
             {
-                if (!entity.Has<EntityOwner>()) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
 
-                if (entity.GetOwner().TryGetPlayer(out Entity player))
+                if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     LevelingSystem.SetLevel(player);
                 }

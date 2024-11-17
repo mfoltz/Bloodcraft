@@ -17,6 +17,7 @@ internal static class DeathEventListenerSystemPatch
     {
         public Entity Source { get; set; }
         public Entity Target { get; set; }
+        public HashSet<Entity> DeathParticipants { get; set; }
     }
 
     public static event EventHandler<DeathEventArgs> OnDeathEvent;
@@ -45,7 +46,8 @@ internal static class DeathEventListenerSystemPatch
                         DeathEventArgs deathArgs = new()
                         {
                             Source = deathSource,
-                            Target = deathEvent.Died
+                            Target = deathEvent.Died,
+                            DeathParticipants = PlayerUtilities.GetDeathParticipants(deathSource)
                         };
                         
                         RaiseDeathEvent(deathArgs);
@@ -65,19 +67,21 @@ internal static class DeathEventListenerSystemPatch
             deathEvents.Dispose();
         }
     }
-    static Entity ValidateSource(Entity killer)
+    static Entity ValidateSource(Entity source)
     {
+        if (!source.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) return Entity.Null;
+
         Entity deathSource = Entity.Null;
 
-        if (killer.IsPlayer()) deathSource = killer; // player kills
-        else if (killer.GetOwner().TryGetPlayer(out Entity player)) deathSource = player; // player familiar and player summon kills
-        else if (killer.GetOwner().TryGetFollowedPlayer(out Entity followedPlayer)) deathSource = followedPlayer; // player familiar summon kills
+        if (source.IsPlayer()) deathSource = source; // player kills
+        else if (entityOwner.Owner.TryGetPlayer(out Entity player)) deathSource = player; // player familiar and player summon kills
+        else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity followedPlayer)) deathSource = followedPlayer; // player familiar summon kills
 
         return deathSource;
     }
     static bool ValidateTarget(DeathEvent deathEvent)
     {
-        if (ConfigService.FamiliarSystem && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
+        if (ConfigService.FamiliarSystem && deathEvent.Died.TryGetFollowedPlayer(out Entity player)) // auto-clear active if familiar dies for easier rebinding
         {
             ulong steamId = player.GetSteamId();
 
@@ -90,6 +94,7 @@ internal static class DeathEventListenerSystemPatch
         }
         else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
         else if (deathEvent.Died.Has<Minion>() || deathEvent.Died.Has<Trader>()) return false;
+        //else if (!deathEvent.Died.Has<UnitLevel>() || deathEvent.Died.Has<Trader>()) return false;
         else if (!deathEvent.Died.Has<UnitLevel>()) return false;
 
         return true;

@@ -10,7 +10,6 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
@@ -735,7 +734,7 @@ internal static class FamiliarCommands
             xpData.FamiliarExperience[data.FamKey] = newXP;
             SaveFamiliarExperience(steamId, xpData);
 
-            if (HandleFamiliarModifications(user, steamId, famKey, player, familiar, level))
+            if (ModifyFamiliar(user, steamId, famKey, player, familiar, level))
             {
                 LocalizationService.HandleReply(ctx, $"Your familiar has been set to level <color=white>{level}</color>.");
             }
@@ -832,7 +831,7 @@ internal static class FamiliarCommands
                 Entity player = ctx.Event.SenderCharacterEntity;
                 Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
-                if (HandleFamiliarModifications(user, steamId, data.FamKey, player, familiar, newXP.Key))
+                if (ModifyFamiliar(user, steamId, data.FamKey, player, familiar, newXP.Key))
                 {
                     LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
                 }
