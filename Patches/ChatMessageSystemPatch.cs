@@ -16,7 +16,9 @@ internal static class ChatMessageSystemPatch
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly Regex RegexMAC = new(@";mac([^;]+)$");
-    static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ==");
+
+    //static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ==");
+    static readonly byte[] sharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLUNlY3JldC1rZLktaGVyZQ==");
 
     [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]

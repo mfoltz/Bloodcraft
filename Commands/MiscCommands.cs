@@ -395,7 +395,6 @@ internal static class MiscCommands
             ctx.Reply($"Switched steamIds for {originalPlayerInfo.User.CharacterName} with {newPlayerInfo.User.CharacterName}!");
         }
     }
-    */
     
     [Command(name: "bloblog", shortHand:"blob", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
     public static void BlobStringLogCommand(ChatCommandContext ctx, int guidHash)
@@ -462,5 +461,5 @@ internal static class MiscCommands
 
         return result;
     }
-    
+    */
 }
