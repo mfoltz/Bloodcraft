@@ -19,6 +19,8 @@ internal static class ExoFormUtilities
     public const float BaseDuration = 15f;
     public const float MaxAddedDuration = 165f;
 
+    static readonly int ExoPrestiges = ConfigService.ExoPrestiges;
+
     static readonly AssetGuid AssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
     static readonly float3 Red = new(1f, 0f, 0f);
 
@@ -49,7 +51,8 @@ internal static class ExoFormUtilities
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
         float totalDuration = CalculateFormDuration(exoLevel);
 
-        float chargeNeeded = BaseDuration - exoFormData.Value;
+        //float chargeNeeded = BaseDuration - exoFormData.Value; hmm this really shouldn't have been giving realistic values, need to check this out
+        float chargeNeeded = BaseDuration;
         float ratioToTotal = chargeNeeded / totalDuration;
         float secondsRequired = 86400f * ratioToTotal;
 
@@ -80,7 +83,7 @@ internal static class ExoFormUtilities
         }
         else if (prestigeLevel > 1)
         {
-            return 15f + (MaxAddedDuration / ConfigService.ExoPrestiges) * (prestigeLevel);
+            return 15f + (MaxAddedDuration / ExoPrestiges) * (prestigeLevel);
         }
 
         return 0f;

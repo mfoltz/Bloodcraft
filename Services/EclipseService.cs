@@ -48,8 +48,8 @@ internal class EclipseService
     //static readonly Regex oldRegex = new(@"^\[(\d+)\]:");
     static readonly Regex oldRegex = new(@"^\[(\d+)\]:(\d+)$");
 
-    //static readonly Regex regex = new(@"^\[(\d+)\]:(?<payload>.+)$");
-    static readonly Regex regex = new(@"^\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
+    //static readonly Regex regex = new(@"^\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
+    static readonly Regex regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
 
     public static readonly Dictionary<ulong, string> RegisteredUsersAndClientVersions = [];
     public EclipseService()
@@ -64,18 +64,8 @@ internal class EclipseService
     }
     public static void HandleClientMessage(string message)
     {
-        /*
-        int eventType = int.Parse(regex.Match(message).Groups[1].Value);
-        switch (eventType)
-        {
-            case (int)NetworkEventSubType.RegisterUser:
-                ulong steamId = ulong.Parse(regex.Replace(message, ""));
-                RegisterUser(steamId);
-                break;
-        }
-        */
-
         Match match = regex.Match(message);
+
         if (match.Success)
         {
             // Extract the event type
@@ -92,8 +82,6 @@ internal class EclipseService
                 return;
             }
 
-            RegisterUser(steamId, modVersion);
-
             switch (eventType)
             {
                 case (int)NetworkEventSubType.RegisterUser:
@@ -109,6 +97,7 @@ internal class EclipseService
 
         // If new regex didn't match, try the old regex format
         Match oldMatch = oldRegex.Match(message);
+
         if (oldMatch.Success)
         {
             // Extract the event type
