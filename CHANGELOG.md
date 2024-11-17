@@ -1,4 +1,5 @@
 `1.5.3`
+- '.quest d' and '.quest w' now under same command as '.quest progress/p d/w', familiar command for choosing/changing shiny buffs is now '.fam shiny [SpellSchool]'
 - going forward Bloodcraft will work with older versions of Eclipse from 1.1.2 onwards (will still need to update Eclipse for newer features)
 - added config option to unbind familiars when entering pvp combat
 - familiars receive shared experience when player should, refactored death event handling to facilitate this and improve general performance
