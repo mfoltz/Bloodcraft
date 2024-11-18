@@ -40,17 +40,14 @@ jobs:
 
       - name: Create secrets.json
         run: |
-          mkdir -p Bloodcraft/Bloodcraft/Resources
+          mkdir -p Bloodcraft/Resources
           echo '{
             "NEW_SHARED_KEY": "${{ secrets.NEW_SHARED_KEY }}",
             "OLD_SHARED_KEY": "${{ secrets.OLD_SHARED_KEY }}"
-          }' > Bloodcraft/Bloodcraft/Resources/secrets.json
+          }' > Bloodcraft/Resources/secrets.json
         
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=${{ env.version }}
-
-      - name: Clean Up
-        run: rm Bloodcraft/Resources/secrets.json
         
       - name: GH Release
         uses: softprops/action-gh-release@v1
@@ -66,3 +63,6 @@ jobs:
             CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean Up
+        run: rm Bloodcraft/Resources/secrets.json
