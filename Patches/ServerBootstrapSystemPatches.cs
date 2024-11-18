@@ -60,7 +60,7 @@ internal static class ServerBootstrapSystemPatches
         { "Grouping", false },
         { "Emotes", false },
         { "Binding", false },
-        { "Kit", true },
+        { "Kit", false },
         { "VBloodEmotes", true },
         { "FamiliarVisual", true},
         { "ShinyChoice", false },

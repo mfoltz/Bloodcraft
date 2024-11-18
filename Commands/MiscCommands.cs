@@ -74,9 +74,9 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (PlayerUtilities.GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
+        if (!PlayerUtilities.GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
         {
-            PlayerUtilities.SetPlayerBool(steamId, "Kit", false);
+            PlayerUtilities.SetPlayerBool(steamId, "Kit", true);
             Entity character = ctx.Event.SenderCharacterEntity;
 
             foreach (var item in KitPrefabs)
