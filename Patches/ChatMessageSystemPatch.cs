@@ -19,8 +19,11 @@ internal static class ChatMessageSystemPatch
 
     static readonly Regex RegexMAC = new(@";mac([^;]+)$");
 
-    static readonly byte[] oldSharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZQ=="); // used by Eclipse 1.1.2<=
-    static readonly byte[] newSharedKey = Convert.FromBase64String("c2VjdXJlLXN1cGVyLXNlY3JldC1rZXktaGVyZV9uZXc="); // used by Eclipse 1.2.2>=
+    static readonly string OLD_SHARED_KEY = Environment.GetEnvironmentVariable("OLD_SHARED_KEY");
+    static readonly string NEW_SHARED_KEY = Environment.GetEnvironmentVariable("NEW_SHARED_KEY");
+
+    static readonly byte[] oldSharedKey = Convert.FromBase64String(OLD_SHARED_KEY); // used by Eclipse 1.1.2<=
+    static readonly byte[] newSharedKey = Convert.FromBase64String(NEW_SHARED_KEY); // used by Eclipse 1.2.2>=
 
     [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
