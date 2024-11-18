@@ -64,27 +64,6 @@ internal class LocalizationService
         {"Vietnamese", "Bloodcraft.Localization.Vietnamese.json"},
         {"Brazilian", "Bloodcraft.Localization.Brazilian.json"}
     };
-
-    static readonly Dictionary<string, string> LanguageMapping = new()
-    {
-        {"German", "Bloodcraft.Localization.GermanStrings.json"},
-        {"French", "Bloodcraft.Localization.FrenchStrings.json"},
-        {"Spanish", "Bloodcraft.Localization.SpanishStrings.json"},
-        {"Italian", "Bloodcraft.Localization.ItalianStrings.json"},
-        //{"Japanese", "Bloodcraft.Localization.JapaneseStrings.json"},
-        //{"Koreana", "Bloodcraft.Localization.KoreanaStrings.json"},
-        {"Portuguese", "Bloodcraft.Localization.PortugueseStrings.json"},
-        {"Russian", "Bloodcraft.Localization.RussianStrings.json"},
-        //{"SimplifiedChinese", "Bloodcraft.Localization.SChineseStrings.json"},
-        //{"TraditionalChinese", "Bloodcraft.Localization.TChineseStrings.json"},
-        {"Hungarian", "Bloodcraft.Localization.HungarianStrings.json"},
-        {"Latam", "Bloodcraft.Localization.LatamStrings.json"},
-        {"Polish", "Bloodcraft.Localization.PolishStrings.json"},
-        //{"Thai", "Bloodcraft.Localization.ThaiStrings.json"},
-        {"Turkish", "Bloodcraft.Localization.TurkishStrings.json"},
-        //{"Vietnamese", "Bloodcraft.Localization.VietnameseStrings.json"},
-        //{"Brazilian", "Bloodcraft.Localization.BrazilianStrings.json"}
-    };
     public LocalizationService()
     {
         LoadLocalizations();
@@ -104,25 +83,6 @@ internal class LocalizationService
         localizationFile.Nodes
             .ToDictionary(x => x.Guid, x => x.Text)
             .ForEach(kvp => Localization[kvp.Key] = kvp.Value);
-
-        if (Language == "English")
-        {
-            return;
-        }
-
-        resourceName = LanguageMapping.ContainsKey(Language) ? LanguageMapping[Language] : "";
-
-        if (string.IsNullOrEmpty(resourceName)) return;
-
-        stream = assembly.GetManifestResourceStream(resourceName);
-
-        using StreamReader languageReader = new(stream);
-        jsonContent = languageReader.ReadToEnd();
-        localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-        localizationFile.Words
-            .OrderByDescending(x => x.Original.Length)
-            .ToDictionary(x => x.Original.ToLower(), x => x.Translation)
-            .ForEach(kvp => LocalizedWords[kvp.Key] = kvp.Value);
     }
     static void LoadPrefabNames()
     {
@@ -137,17 +97,25 @@ internal class LocalizationService
     }
     internal static void HandleReply(ChatCommandContext ctx, string message)
     {
+        ctx.Reply(message);
+
+        /*
         if (Language == "English")
         {
             ctx.Reply(message);
         }
         else
         {
-            ctx.Reply(GetLocalizedWords(message));
+            //ctx.Reply(GetLocalizedWords(message));
+            ctx.Reply(message);
         }
+        */
     }
     internal static void HandleServerReply(EntityManager entityManager, User user, string message)
     {
+        ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
+
+        /*
         if (Language == "English")
         {
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
@@ -156,6 +124,7 @@ internal class LocalizationService
         {
             ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
         }
+        */
     }
     static string GetLocalizationFromKey(LocalizationKey key)
     {
@@ -176,8 +145,11 @@ internal class LocalizationService
         {
             return Text;
         }
+
         return "Couldn't find key for localization...";
     }
+
+    /*
     static string GetLocalizedWords(string message)
     {
         StringBuilder result = new();
@@ -230,4 +202,5 @@ internal class LocalizationService
         string translatedMessage = result.ToString();
         return translatedMessage;
     }
+    */
 }

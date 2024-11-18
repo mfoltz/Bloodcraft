@@ -19,12 +19,6 @@ internal static class ChatMessageSystemPatch
 
     static readonly Regex RegexMAC = new(@";mac([^;]+)$");
 
-    static readonly string OLD_SHARED_KEY = Environment.GetEnvironmentVariable("OLD_SHARED_KEY");
-    static readonly string NEW_SHARED_KEY = Environment.GetEnvironmentVariable("NEW_SHARED_KEY");
-
-    static readonly byte[] oldSharedKey = Convert.FromBase64String(OLD_SHARED_KEY); // used by Eclipse 1.1.2<=
-    static readonly byte[] newSharedKey = Convert.FromBase64String(NEW_SHARED_KEY); // used by Eclipse 1.2.2>=
-
     [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -77,8 +71,8 @@ internal static class ChatMessageSystemPatch
             }
             */
 
-            if (CheckMAC(intermediateMessage, receivedMAC, oldSharedKey) ||
-                CheckMAC(intermediateMessage, receivedMAC, newSharedKey))
+            if (CheckMAC(intermediateMessage, receivedMAC, Core.OLD_SHARED_KEY) ||
+                CheckMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
             {
                 originalMessage = intermediateMessage;
                 return true;
@@ -100,14 +94,14 @@ internal static class ChatMessageSystemPatch
     }
     public static string GenerateMACV1_1_2(string message)
     {
-        using var hmac = new HMACSHA256(oldSharedKey);
+        using var hmac = new HMACSHA256(Core.OLD_SHARED_KEY);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
         return Convert.ToBase64String(hashBytes);
     }
     public static string GenerateMACV1_2_2(string message)
     {
-        using var hmac = new HMACSHA256(newSharedKey);
+        using var hmac = new HMACSHA256(Core.NEW_SHARED_KEY);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
         return Convert.ToBase64String(hashBytes);

@@ -139,7 +139,7 @@ public class VersionHandler_1_2_2 : IVersionHandler<ProgressDataV1_2_2>
     public void SendClientConfig(User user)
     {
         string message = BuildConfigMessage();
-        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_1_2(message)}";
+        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_2_2(message)}";
         LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
     }
     public void SendClientProgress(Entity character, ulong steamId)

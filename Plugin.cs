@@ -23,6 +23,7 @@ internal class Plugin : BasePlugin
         InitializeConfig();
         CommandRegistry.RegisterAll();
         LoadPlayerData();
+
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }
     public override bool Unload()

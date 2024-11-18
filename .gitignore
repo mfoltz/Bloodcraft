@@ -298,3 +298,4 @@ dist/
 /*.sln
 /TODO.txt
 *.env
+secrets.json

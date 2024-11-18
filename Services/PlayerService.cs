@@ -1,9 +1,7 @@
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
-using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -12,11 +10,8 @@ namespace Bloodcraft.Services;
 internal class PlayerService
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly WaitForSeconds Delay = new(60);
-
-    //static bool abilityGroupSlotBuffersCleared = false;
 
     static readonly ComponentType[] UserComponent =
     [

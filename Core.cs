@@ -1,13 +1,13 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Bloodcraft.Patches;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
-using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using System.Collections;
@@ -25,6 +25,8 @@ internal static class Core
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour MonoBehaviour;
+    public static byte[] OLD_SHARED_KEY { get; internal set; }
+    public static byte[] NEW_SHARED_KEY { get; internal set; }
 
     public static bool hasInitialized = false;
     public static void Initialize()
@@ -83,16 +85,8 @@ internal static class Core
 
         //CleanSCTPRefabs();
 
-        //SystemService.ServerGameSettingsSystem._Settings;
-
-        try
-        {
-            LogCatcher._Options = LogCatcher.Options.All;
-        }
-        catch (Exception e)
-        {
-            Log.LogError(e);
-        }
+        OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey());
+        NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         hasInitialized = true;
     }
@@ -107,6 +101,7 @@ internal static class Core
             MonoBehaviour = new GameObject("Bloodcraft").AddComponent<IgnorePhysicsDebugSystem>();
             UnityEngine.Object.DontDestroyOnLoad(MonoBehaviour.gameObject);
         }
+
         MonoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
 

@@ -35,6 +35,7 @@
 		<EmbeddedResource Include="Localization\Turkish.json" />
 		<EmbeddedResource Include="Localization\Spanish.json" />
 		<EmbeddedResource Include="Localization\Vietnamese.json" />
+		<EmbeddedResource Include="Resources\secrets.json" />
 	</ItemGroup>
 
 	<ItemGroup>

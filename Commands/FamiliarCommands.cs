@@ -354,7 +354,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
 
-        if (data.UnlockedFamiliars.TryGetValue(current, out var familiarSet))
+        if (!data.UnlockedFamiliars.ContainsKey(name) && data.UnlockedFamiliars.TryGetValue(current, out var familiarSet))
         {
             // Remove the old set
             data.UnlockedFamiliars.Remove(current);
@@ -373,7 +373,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find box to rename.");
+            LocalizationService.HandleReply(ctx, "Couldn't find box to rename or already an existing box with desired name.");
         }
     }
 

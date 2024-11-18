@@ -169,19 +169,12 @@ internal static class PlayerUtilities
 
             if (!ownerId.TryGetPlayerParties(out HashSet<string> party))
             {
-                party = [];
-                ownerId.SetPlayerParties(party);
+                ownerId.SetPlayerParties([ownerName]);
             }
 
             if (CanAddPlayerToParty(party, playerName))
             {
                 party.Add(playerName);
-
-                if (!party.Contains(ownerName)) // add owner to party for ease of processing party elsewhere
-                {
-                    party.Add(ownerName);
-                }
-
                 ownerId.SetPlayerParties(party);
 
                 LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party!");
