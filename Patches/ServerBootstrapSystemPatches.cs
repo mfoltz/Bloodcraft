@@ -30,6 +30,22 @@ internal static class ServerBootstrapSystemPatches
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool BloodSystem = ConfigService.BloodSystem;
+    static readonly bool Leveling = ConfigService.LevelingSystem;
+    static readonly bool Prestige = ConfigService.PrestigeSystem;
+    static readonly bool FamiliarSystem = ConfigService.FamiliarSystem;
+    static readonly bool ExpertiseSystem = ConfigService.ExpertiseSystem;
+    static readonly bool QuestSystem = ConfigService.QuestSystem;
+    static readonly bool ClientCompanion = ConfigService.ClientCompanion;
+    static readonly bool ExoPrestiging = ConfigService.ExoPrestiging;
+    static readonly bool RestedXPSystem = ConfigService.RestedXPSystem;
+    static readonly bool Professions = ConfigService.ProfessionSystem;
+
+    static readonly float RestedXPTickRate = ConfigService.RestedXPTickRate;
+    static readonly float RestedXPRate = ConfigService.RestedXPRate;
+    static readonly int RestedXPMax = ConfigService.RestedXPMax;
+    static readonly int StartingLevel = ConfigService.StartingLevel;
+    static readonly int MaxLevel = ConfigService.MaxLevel;
 
     static readonly Dictionary<string, bool> DefaultBools = new()
     {
@@ -88,7 +104,7 @@ internal static class ServerBootstrapSystemPatches
             steamId.SetPlayerBools(bools);
         }
 
-        if (ConfigService.ProfessionSystem)
+        if (Professions)
         {
             if (!steamId.TryGetPlayerWoodcutting(out var woodcutting))
             {
@@ -131,7 +147,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (ConfigService.ExpertiseSystem)
+        if (ExpertiseSystem)
         {
             if (!steamId.TryGetPlayerUnarmedExpertise(out var unarmed))
             {
@@ -221,7 +237,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (ConfigService.BloodSystem)
+        if (BloodSystem)
         {
             if (!steamId.TryGetPlayerWorkerLegacy(out var worker))
             {
@@ -291,14 +307,14 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (ConfigService.LevelingSystem)
+        if (Leveling)
         {
             if (!steamId.TryGetPlayerExperience(out var experience))
             {
-                steamId.SetPlayerExperience(new KeyValuePair<int, float>(ConfigService.StartingLevel, LevelingSystem.ConvertLevelToXp(ConfigService.StartingLevel)));
+                steamId.SetPlayerExperience(new KeyValuePair<int, float>(StartingLevel, LevelingSystem.ConvertLevelToXp(StartingLevel)));
             }
 
-            if (ConfigService.RestedXPSystem)
+            if (RestedXPSystem)
             {
                 if (!steamId.TryGetPlayerRestedXP(out var restedData))
                 {
@@ -314,16 +330,16 @@ internal static class ServerBootstrapSystemPatches
                     DateTime lastLogout = restedData.Key;
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
 
-                    if (timeOffline.TotalMinutes >= ConfigService.RestedXPTickRate && restedMultiplier != 0f && experience.Key < ConfigService.MaxLevel)
+                    if (timeOffline.TotalMinutes >= RestedXPTickRate && restedMultiplier != 0f && experience.Key < MaxLevel)
                     {
                         float currentRestedXP = restedData.Value;
 
                         int currentLevel = experience.Key;
-                        int maxRestedLevel = Math.Min(ConfigService.RestedXPMax + currentLevel, ConfigService.MaxLevel);
+                        int maxRestedLevel = Math.Min(RestedXPMax + currentLevel, MaxLevel);
                         float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
 
-                        float earnedPerTick = ConfigService.RestedXPRate * restedCap;
-                        float earnedRestedXP = (float)timeOffline.TotalMinutes / ConfigService.RestedXPTickRate * earnedPerTick * restedMultiplier;
+                        float earnedPerTick = RestedXPRate * restedCap;
+                        float earnedRestedXP = (float)timeOffline.TotalMinutes / RestedXPTickRate * earnedPerTick * restedMultiplier;
 
                         currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
                         int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
@@ -339,7 +355,7 @@ internal static class ServerBootstrapSystemPatches
             if (exists) LevelingSystem.SetLevel(playerCharacter);
         }
 
-        if (ConfigService.PrestigeSystem)
+        if (Prestige)
         {
             if (!steamId.TryGetPlayerPrestiges(out var prestiges))
             {
@@ -375,7 +391,7 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                if (ConfigService.ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var exoFormDataOther))
+                if (ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var exoFormDataOther))
                 {
                     KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MaxValue, 0f);
                     steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -383,7 +399,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (ConfigService.FamiliarSystem)
+        if (FamiliarSystem)
         {
             if (!steamId.TryGetFamiliarActives(out var actives))
             {
@@ -443,7 +459,6 @@ internal static class ServerBootstrapSystemPatches
                             if (bloodQualityBuffs.Contains(classBuff)) continue; // after filtering out class buffs the player should have, check against remaining buffs then see if they are supposed to have it based on blood type and destroy it if not?
                             else
                             {
-                                //Core.Log.LogInfo($"{user.CharacterName.Value} class is {playerClass.ToString()} with blood type {bloodType.ToString()} and should not have {classBuff.LookupName()}, removing buff...");
                                 DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                             }
                         }
@@ -485,8 +500,6 @@ internal static class ServerBootstrapSystemPatches
 
                                 if (vBloodAbilityBuffer.IsIndexWithinRange(index))
                                 {
-                                    //Core.Log.LogInfo($"Removing duplicate VBlood ability buff: {(entity.Has<PrefabGUID>() ? entity.Read<PrefabGUID>().LookupName() : "N/A")} | {entity} | {character}");
-
                                     vBloodAbilityBuffer.RemoveAt(index);
                                     DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
                                 }
@@ -494,119 +507,10 @@ internal static class ServerBootstrapSystemPatches
                         }
                     }
                 }
-
-                /*
-                if (ServerGameManager.TryGetBuffer<AbilityGroupSlotBuffer>(playerCharacter, out var buffer) && !buffer.IsEmpty)
-                {
-                    
-                    var prefabEntityMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
-
-                    for (int i = 0; i < buffer.Length; i++)
-                    {
-                        AbilityGroupSlotBuffer abilityGroupSlotBuffer = buffer[i];
-                        AbilityGroupSlot
-                        if (prefabEntityMap.TryGetValue(abilityGroupSlotBuffer.BaseAbilityGroupOnSlot, out Entity abilityPrefabEntity) && abilityPrefabEntity.Has<VBloodAbilityData>())
-                        {
-                            abilityGroupSlotBuffer.ShowOnBar = true;
-                            buffer[i] = abilityGroupSlotBuffer;
-                        }
-                    }
-                    
-
-                    Dictionary<PrefabGUID, int> abilityGroupCount = [];
-                    Dictionary<PrefabGUID, int> spellModSources = [];
-
-                    int emptySpellModSource = 0;
-
-                    foreach (AbilityGroupSlotBuffer abilityGroupSlotBuffer in buffer)
-                    {
-                        PrefabGUID abilityGroupPrefabGUID = abilityGroupSlotBuffer.BaseAbilityGroupOnSlot;
-                        Entity abilityGroupSlotEntity = abilityGroupSlotBuffer.GroupSlotEntity.GetEntityOnServer();
-
-                        if (!abilityGroupCount.ContainsKey(abilityGroupPrefabGUID))
-                        {
-                            abilityGroupCount.TryAdd(abilityGroupPrefabGUID, 1);
-
-                            if (abilityGroupSlotEntity.Exists()) abilityGroupSlotEntity.LogComponentTypes();
-                        }
-                        else if (abilityGroupCount.ContainsKey(abilityGroupPrefabGUID))
-                        {
-                            abilityGroupCount[abilityGroupPrefabGUID]++;
-
-                            if (abilityGroupSlotEntity.Exists()) abilityGroupSlotEntity.LogComponentTypes();
-                        }
-                        else if (abilityGroupPrefabGUID.IsEmpty() && abilityGroupSlotEntity.Exists()) abilityGroupSlotEntity.LogComponentTypes();
-
-                        if (abilityGroupSlotEntity.TryGetComponent(out AbilityGroupSlot abilityGroupSlot))
-                        {
-                            Entity spellModsSource = abilityGroupSlot.SpellModsSource._Value;
-
-                            try
-                            {
-                                if (spellModsSource.TryGetComponent(out PrefabGUID prefabGUID))
-                                {
-                                    if (!spellModSources.ContainsKey(prefabGUID))
-                                    {
-                                        spellModSources.TryAdd(prefabGUID, 1);
-                                    }
-                                    else
-                                    {
-                                        spellModSources[prefabGUID]++;
-                                    }
-
-                                    spellModsSource.LogComponentTypes();
-                                }
-                                else if (spellModsSource.Exists())
-                                {
-                                    spellModsSource.LogComponentTypes();
-                                }
-                                else
-                                {
-                                    emptySpellModSource++;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Core.Log.LogError($"Error logging spellModsSource: {e}");
-                            }
-                        }
-                    }
-
-                    Core.Log.LogWarning("----- Ability Group Slot Buffer Analysis -----");
-
-                    Core.Log.LogWarning("AbilityGroup Counts:");
-                    foreach (var kvp in abilityGroupCount)
-                    {
-                        if (kvp.Key.IsEmpty())
-                        {
-                            Core.Log.LogInfo($"Empty AbilityGroups - {kvp.Key} | Count: {kvp.Value}");
-                        }
-                        else
-                        {
-                            Core.Log.LogInfo($"AbilityGroup: {kvp.Key.LookupName()} | Count: {kvp.Value}");
-                        }
-                    }
-
-                    Core.Log.LogWarning("Spell Mod Sources:");
-                    foreach (var kvp in spellModSources)
-                    {
-                        if (kvp.Key.IsEmpty())
-                        {
-                            Core.Log.LogInfo($"Empty SpellModSource - {kvp.Key} | Count: {kvp.Value}");
-                        }
-                        else
-                        {
-                            Core.Log.LogInfo($"SpellModSource: {kvp.Key.LookupName()} | Count: {kvp.Value}");
-                        }
-                    }
-
-                    Core.Log.LogWarning("---------------------------------------------");
-                }
-                */
             }
         }
 
-        if (ConfigService.ClientCompanion && exists)
+        if (ClientCompanion && exists)
         {
             PlayerInfo playerInfo = new()
             {
@@ -631,21 +535,21 @@ internal static class ServerBootstrapSystemPatches
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         ulong steamId = user.PlatformId;
 
-        if (ConfigService.FamiliarSystem && playerCharacter.Exists())
+        if (FamiliarSystem && playerCharacter.Exists())
         {
             FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
         }
 
-        if (ConfigService.LevelingSystem)
+        if (Leveling)
         {
-            if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+            if (RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                 steamId.SetPlayerRestedXP(restedData);
             }
         }
 
-        if (ConfigService.ClientCompanion)
+        if (ClientCompanion)
         {
             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
         }
@@ -668,21 +572,21 @@ internal static class ServerBootstrapSystemPatches
                     {
                         Entity character = playerInfo.CharEntity;
 
-                        if (ConfigService.FamiliarSystem)
+                        if (FamiliarSystem)
                         {
                             FamiliarUtilities.ClearBuffers(character, steamId);
                         }
 
-                        if (ConfigService.LevelingSystem)
+                        if (Leveling)
                         {
-                            if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+                            if (RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
                             {
                                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                                 steamId.SetPlayerRestedXP(restedData);
                             }
                         }
 
-                        if (ConfigService.ClientCompanion)
+                        if (ClientCompanion)
                         {
                             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
                         }
