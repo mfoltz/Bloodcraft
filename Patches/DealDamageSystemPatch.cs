@@ -93,7 +93,7 @@ internal static class DealDamageSystemPatch
                     ulong steamId = player.GetSteamId();
                     LastDamageTime[steamId] = DateTime.UtcNow;
                 }
-                else if (OnHitEffects && dealDamageEvent.Target.Has<Movement>() && entityOwner.Owner.TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
+                else if (OnHitEffects && dealDamageEvent.Target.Has<Movement>() && dealDamageEvent.Target.Has<Health>() && entityOwner.Owner.TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
                 {
                     Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                     ulong steamId = userEntity.Read<User>().PlatformId;

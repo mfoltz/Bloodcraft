@@ -488,7 +488,7 @@ internal static class QuestSystem
     }
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        HashSet<ulong> processed = []; // may not need to check this with new event subscription stuff, will check later
+        //HashSet<ulong> processed = []; // may not need to check this with new event subscription stuff, will check later
 
         Entity source = deathEvent.Source;
         Entity died = deathEvent.Target;
@@ -499,13 +499,20 @@ internal static class QuestSystem
         //HashSet<Entity> participants = PlayerUtilities.GetDeathParticipants(source, userEntity);
         foreach (Entity player in participants)
         {
-            User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
-            ulong steamId = user.PlatformId; // participants are character entities
+            User user = player.GetUser();
+            ulong steamId = player.GetSteamId(); // participants are character entities
 
+            /*
             if (!processed.Contains(steamId) && steamId.TryGetPlayerQuests(out var questData))
             {
                 ProcessQuestProgress(questData, target, 1, user);
                 processed.Add(steamId);
+            }
+            */
+
+            if (steamId.TryGetPlayerQuests(out var questData))
+            {
+                ProcessQuestProgress(questData, target, 1, user);
             }
         }
     }

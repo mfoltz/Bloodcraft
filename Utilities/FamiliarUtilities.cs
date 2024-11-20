@@ -171,11 +171,6 @@ internal static class FamiliarUtilities
     }
     public static void ReturnFamiliar(float3 position, Entity familiar)
     {
-        familiar.With((ref Follower follower) =>
-        {
-            follower.ModeModifiable._Value = 1;
-        });
-
         familiar.With((ref LastTranslation lastTranslation) =>
         {
             lastTranslation.Value = position;
@@ -237,7 +232,7 @@ internal static class FamiliarUtilities
                     if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>(entityCommandBuffer);
                     if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>(entityCommandBuffer);
                     if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>(entityCommandBuffer);
-                    if (followerEntity.Has<Minion>()) followerEntity.Remove<Minion>(entityCommandBuffer);
+                    //if (followerEntity.Has<Minion>()) followerEntity.Remove<Minion>(entityCommandBuffer);
                     if (followerEntity.Has<BlockFeedBuff>()) followerEntity.Remove<BlockFeedBuff>(entityCommandBuffer);
 
                     //DestroyUtility.Destroy(EntityManager, followerEntity);
@@ -260,7 +255,7 @@ internal static class FamiliarUtilities
                     if (minion.Entity.Has<Disabled>()) minion.Entity.Remove<Disabled>(entityCommandBuffer);
                     if (minion.Entity.Has<DisableWhenNoPlayersInRange>()) minion.Entity.Remove<DisableWhenNoPlayersInRange>(entityCommandBuffer);
                     if (minion.Entity.Has<DisabledDueToNoPlayersInRange>()) minion.Entity.Remove<DisabledDueToNoPlayersInRange>(entityCommandBuffer);
-                    if (minion.Entity.Has<Minion>()) minion.Entity.Remove<Minion>(entityCommandBuffer);
+                    //if (minion.Entity.Has<Minion>()) minion.Entity.Remove<Minion>(entityCommandBuffer);
                     if (minion.Entity.Has<BlockFeedBuff>()) minion.Entity.Remove<BlockFeedBuff>(entityCommandBuffer);
 
                     //DestroyUtility.Destroy(EntityManager, minion.Entity);

@@ -141,16 +141,20 @@ internal static class Extensions
     public static bool TryGetFollowedPlayer(this Entity entity, out Entity player)
     {
         player = Entity.Null;
+
         if (entity.Has<Follower>())
         {
             Follower follower = entity.Read<Follower>();
             Entity followed = follower.Followed._Value;
+
             if (followed.IsPlayer())
             {
                 player = followed;
+
                 return true;
             }
         }
+
         return false;
     }
     public static bool TryGetPlayer(this Entity entity, out Entity player)
@@ -160,6 +164,7 @@ internal static class Extensions
         if (entity.Has<PlayerCharacter>())
         {
             player = entity;
+
             return true;
         }
 
@@ -261,6 +266,8 @@ internal static class Extensions
     public static bool TryGetPlayerInfo(this ulong steamId, out PlayerInfo playerInfo)
     {
         if (PlayerCache.TryGetValue(steamId.ToString(), out playerInfo)) return true;
+        else if (OnlineCache.TryGetValue(steamId.ToString(), out playerInfo)) return true;
+
         return false;
     }
     public static bool TryGetPlayerInfo(this string playerName, out PlayerInfo playerInfo)

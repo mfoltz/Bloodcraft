@@ -2,6 +2,7 @@
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Behaviours;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -34,6 +35,7 @@ internal static class FamiliarSummonSystem
     static readonly bool FamiliarPrestige = ConfigService.FamiliarPrestige;
 
     static readonly PrefabGUID InvulnerableBuff = new(-480024072);
+    static readonly PrefabGUID DivineAngel = new(-1737346940);
 
     static readonly PrefabGUID IgnoredFaction = new(-1430861195);
     static readonly PrefabGUID PlayerFaction = new(1106458752);
@@ -441,6 +443,12 @@ internal static class FamiliarSummonSystem
                     familiar.Remove<SpawnPrefabOnGameplayEvent>();
                 }
             }
+        }
+
+        if (prefabGUID.Equals(DivineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
+        {
+            script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
+            familiar.Write(script_ApplyBuffUnderHealthThreshold_DataServer);
         }
 
         if (familiar.Has<Immortal>())

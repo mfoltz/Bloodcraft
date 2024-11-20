@@ -336,20 +336,6 @@ internal static class ClassUtilities
             }
 
             LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
-
-            character.With((ref AbilityBarInitializationState abilityBarInitializationState) =>
-            {
-                abilityBarInitializationState.AbilityGroupSlotsInitialized = false;
-            });
-
-            if (AbilityUtilitiesServer.TryInstantiateAbilityGroup(EntityManager, ref PrefabLookupMap, character, spellPrefabGUID, true, out Entity abilityGroupEntity, 3))
-            {
-                Core.Log.LogInfo($"Successfully instantiated ability group for {spellName}");
-            }
-            else
-            {
-                Core.Log.LogError($"Failed to instantiate ability group for {spellName}");
-            }
         }
         else if (spellPrefabGUID.HasValue())
         {

@@ -8,8 +8,11 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using ProjectM;
+using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.UI;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -61,7 +64,7 @@ internal static class Core
             //DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
-        
+
         /*
         foreach (var kvp in Server.m_SystemLookup)
         {
@@ -82,10 +85,10 @@ internal static class Core
             Core.Log.LogInfo("=============================");
         }
         */
-
+        
         OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey());
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
-        
+               
         hasInitialized = true;
     }
     static World GetServerWorld()

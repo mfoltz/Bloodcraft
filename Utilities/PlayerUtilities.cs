@@ -19,6 +19,8 @@ internal static class PlayerUtilities
 
     static readonly float ShareDistance = ConfigService.ExpShareDistance;
 
+    static readonly bool Parties = ConfigService.PlayerParties;
+
     static readonly PrefabGUID DraculaVBlood = new(-327335305);
     public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later
     {
@@ -49,7 +51,7 @@ internal static class PlayerUtilities
         Entity clanEntity = sourceUser.ClanEntity.GetEntityOnServer();
         HashSet<Entity> players = [source]; // use hashset to prevent double gains processing
 
-        if (ConfigService.PlayerParties)
+        if (Parties)
         {
             List<HashSet<string>> playerParties = new([..DataService.PlayerDictionaries.playerParties.Values]);
 

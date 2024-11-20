@@ -1045,7 +1045,7 @@ internal static class FamiliarCommands
         }
     }
 
-    //[Command(name: "resetshiny", shortHand: "rs", adminOnly: true, usage: ".fam rs [Name]", description: "Allows player to choose another free visual, however, does not erase any visuals they have chosen previously. Mainly for testing.")] // only for testing so commenting out for now
+    [Command(name: "resetshiny", shortHand: "rs", adminOnly: true, usage: ".fam rs [Name]", description: "Allows player to choose another free visual, however, does not erase any visuals they have chosen previously. Mainly for testing.")] // only for testing so commenting out for now
     public static void ResetFamiliarVisualChoice(ChatCommandContext ctx, string name)
     {
         if (!ConfigService.FamiliarSystem)

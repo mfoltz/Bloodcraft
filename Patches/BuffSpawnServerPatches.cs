@@ -10,6 +10,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Patches;
 
@@ -145,6 +146,11 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
+                            familiar.With((ref Follower follower) =>
+                            {
+                                follower.ModeModifiable._Value = 1;
+                            });
+
                             FamiliarUtilities.TryReturnFamiliar(player, familiar);
                         }
                     }
@@ -160,8 +166,12 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
-                            FamiliarUtilities.TryReturnFamiliar(player, familiar);
+                            familiar.With((ref Follower follower) =>
+                            {
+                                follower.ModeModifiable._Value = 1;
+                            });
 
+                            FamiliarUtilities.TryReturnFamiliar(player, familiar);
                             if (!FamiliarPvP) FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
                         }
                     }
@@ -185,7 +195,7 @@ internal static class BuffSystemSpawnPatches
                         if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
                     }
 
-                    if (Familiars && !prefabGUID.Equals(WranglerPotionBuff)) // player->familiar potion sharing
+                    if (Familiars && !prefabGUID.Equals(WranglerPotionBuff))
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 

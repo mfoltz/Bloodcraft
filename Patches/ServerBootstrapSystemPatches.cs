@@ -4,9 +4,10 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
+using ProjectM.UI;
 using Stunlock.Core;
 using Stunlock.Network;
 using Unity.Collections;
@@ -26,6 +27,8 @@ internal static class ServerBootstrapSystemPatches
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
+
+    static PrefabLookupMap PrefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
@@ -420,6 +423,32 @@ internal static class ServerBootstrapSystemPatches
 
         if (Classes)
         {
+            /*
+            if (exists)
+            {
+                playerCharacter.With((ref AbilityBarInitializationState abilityBarInitializationState) =>
+                {
+                    abilityBarInitializationState.AbilityGroupSlotsInitialized = false;
+                });
+
+                Entity abilityGroup = ServerGameManager.GetAbilityGroup(playerCharacter, 3);
+
+                if (abilityGroup.Exists())
+                {
+                    PrefabGUID spellPrefabGUID = abilityGroup.GetPrefabGUID();
+
+                    if (AbilityUtilitiesServer.SpawnInitialAbilityGroupSlots(EntityManager, ref PrefabLookupMap, playerCharacter, spellPrefabGUID, true, out Entity abilityGroupEntity, 3))
+                    {
+                        Core.Log.LogInfo($"Successfully instantiated ability group for {steamId}! Spell: {spellPrefabGUID.LookupName()}");
+                    }
+                    else
+                    {
+                        Core.Log.LogWarning($"Failed to instantiate ability group for {steamId}...");
+                    }
+                }
+            }
+            */
+
             if (!steamId.TryGetPlayerClasses(out var classes))
             {
                 steamId.SetPlayerClasses([]);
@@ -429,7 +458,7 @@ internal static class ServerBootstrapSystemPatches
             {
                 steamId.SetPlayerSpells((0, 0, 0));
             }
-
+            
             if (exists)
             {
                 EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
@@ -554,7 +583,7 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetPlayerRestedXP(restedData);
             }
         }
-
+        
         if (ClientCompanion)
         {
             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);

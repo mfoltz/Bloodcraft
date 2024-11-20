@@ -13,6 +13,9 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+    static readonly bool Legacies = ConfigService.BloodSystem;
+    static readonly bool Professions = ConfigService.ProfessionSystem;
     public class DeathEventArgs : EventArgs
     {
         public Entity Source { get; set; }
@@ -41,6 +44,7 @@ internal static class DeathEventListenerSystemPatch
                 else if (deathEvent.Died.Has<Movement>())
                 {
                     Entity deathSource = ValidateSource(deathEvent.Killer);
+
                     if (deathSource.Exists())
                     {
                         DeathEventArgs deathArgs = new()
@@ -49,14 +53,14 @@ internal static class DeathEventListenerSystemPatch
                             Target = deathEvent.Died,
                             DeathParticipants = PlayerUtilities.GetDeathParticipants(deathSource)
                         };
-                        
+
                         RaiseDeathEvent(deathArgs);
 
-                        if (!ConfigService.BloodSystem) continue;
+                        if (!Legacies) continue;
                         else if (deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11)) BloodSystem.ProcessLegacy(deathArgs.Source, deathArgs.Target);
                     }
                 }
-                else if (ConfigService.ProfessionSystem && deathEvent.Killer.IsPlayer())
+                else if (Professions && deathEvent.Killer.IsPlayer())
                 {
                     ProfessionSystem.UpdateProfessions(deathEvent.Killer, deathEvent.Died);
                 }
@@ -69,11 +73,11 @@ internal static class DeathEventListenerSystemPatch
     }
     static Entity ValidateSource(Entity source)
     {
-        if (!source.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) return Entity.Null;
-
         Entity deathSource = Entity.Null;
 
-        if (source.IsPlayer()) deathSource = source; // player kills
+        if (source.IsPlayer()) return source; // player kills
+
+        if (!source.TryGetComponent(out EntityOwner entityOwner)) return deathSource;
         else if (entityOwner.Owner.TryGetPlayer(out Entity player)) deathSource = player; // player familiar and player summon kills
         else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity followedPlayer)) deathSource = followedPlayer; // player familiar summon kills
 
@@ -81,7 +85,7 @@ internal static class DeathEventListenerSystemPatch
     }
     static bool ValidateTarget(DeathEvent deathEvent)
     {
-        if (ConfigService.FamiliarSystem && deathEvent.Died.TryGetFollowedPlayer(out Entity player)) // auto-clear active if familiar dies for easier rebinding
+        if (Familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity player)) // auto-clear active if familiar dies for easier rebinding
         {
             ulong steamId = player.GetSteamId();
 
@@ -94,7 +98,6 @@ internal static class DeathEventListenerSystemPatch
         }
         else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
         else if (deathEvent.Died.Has<Minion>() || deathEvent.Died.Has<Trader>()) return false;
-        //else if (!deathEvent.Died.Has<UnitLevel>() || deathEvent.Died.Has<Trader>()) return false;
         else if (!deathEvent.Died.Has<UnitLevel>()) return false;
 
         return true;

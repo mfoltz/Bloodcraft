@@ -88,6 +88,7 @@ internal static class BuffUtilities
         if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier()))
         {
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+
             return true;
         }
 
@@ -666,7 +667,7 @@ internal static class BuffUtilities
             if (buff.Has<LifeTime>())
             {
                 LifeTime lifetime = buff.Read<LifeTime>();
-                lifetime.Duration = -1;
+                lifetime.Duration = -1; // need to try changing this to 9999 instead and maybe destroy it to let reapply by mod? could def be something problematic knowing this game so later
                 lifetime.EndAction = LifeTimeEndAction.None;
                 buff.Write(lifetime);
             }

@@ -20,6 +20,12 @@ internal static class VBloodSystemPatch
 
     static readonly Dictionary<ulong, DateTime> LastUpdateCache = [];
 
+    static readonly bool Leveling = ConfigService.LevelingSystem;
+    static readonly bool Expertise = ConfigService.ExpertiseSystem;
+    static readonly bool Legacies = ConfigService.BloodSystem;
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+    static readonly bool Quests = ConfigService.QuestSystem;
+
     [HarmonyPatch(typeof(VBloodSystem), nameof(VBloodSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(VBloodSystem __instance)
@@ -42,15 +48,15 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (ConfigService.LevelingSystem) LevelingSystem.ProcessExperienceGain(player, vBlood, steamId, 1f);
-                if (ConfigService.ExpertiseSystem) WeaponSystem.ProcessExpertise(player, vBlood);
-                if (ConfigService.BloodSystem) BloodSystem.ProcessLegacy(player, vBlood);
-                if (ConfigService.FamiliarSystem)
+                if (Leveling) LevelingSystem.ProcessExperienceGain(player, vBlood, steamId, 1f);
+                if (Expertise) WeaponSystem.ProcessExpertise(player, vBlood);
+                if (Legacies) BloodSystem.ProcessLegacy(player, vBlood);
+                if (Familiars)
                 {
                     FamiliarLevelingSystem.ProcessFamiliarExperience(player, vBlood, steamId, 1f);
                     FamiliarUnlockSystem.ProcessUnlock(player, vBlood);
                 }
-                if (ConfigService.QuestSystem && steamId.TryGetPlayerQuests(out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
+                if (Quests && steamId.TryGetPlayerQuests(out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)
