@@ -21,6 +21,10 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID PhasingBuff = new(-79611032);
     static readonly PrefabGUID ExoFormBuff = new(-31099041);
 
+    static readonly bool Prestige = ConfigService.PrestigeSystem;
+    static readonly bool ExoPrestige = ConfigService.ExoPrestiging;
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
     public static readonly Dictionary<LevelingSystem.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
 
@@ -29,7 +33,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static void OnUpdatePostix(UpdateBuffsBuffer_Destroy __instance)
     {
         if (!Core.hasInitialized) return;
-        else if (!(ConfigService.FamiliarSystem || ConfigService.PrestigeSystem || Classes)) return;
+        else if (!(Familiars || Prestige || Classes)) return;
 
         NativeArray<Entity> entities = __instance.__query_401358720_0.ToEntityArray(Allocator.Temp);
         try
@@ -38,22 +42,25 @@ internal static class UpdateBuffsBufferDestroyPatch
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;           
 
-                if (ConfigService.FamiliarSystem && prefabGUID.Equals(CombatBuff))
+                if (Familiars && prefabGUID.Equals(CombatBuff))
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out Entity character))
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+
                         if (familiar.Exists())
                         {
                             character.With((ref CombatMusicListener_Shared shared) =>
                             {
                                 shared.UnitPrefabGuid = PrefabGUID.Empty;
                             });
+
+                            FamiliarUtilities.TryReturnFamiliar(character, familiar);
                         }
                     }
                 }
                 
-                if (ConfigService.PrestigeSystem && entity.GetBuffTarget().TryGetPlayer(out Entity player)) // check if need to reapply prestige buff
+                if (Prestige && entity.GetBuffTarget().TryGetPlayer(out Entity player)) // check if need to reapply prestige buff
                 {
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
@@ -61,17 +68,16 @@ internal static class UpdateBuffsBufferDestroyPatch
                     if (PrestigeBuffs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
                     {
                         if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
-                        {
-                            //Core.Log.LogInfo($"UpdateBuffsBuffer_Destroy | {steamId} | {prestigeLevel} | {PrestigeBuffs.IndexOf(prefabGUID)} | {prefabGUID.LookupName()}");
-                            
+                        {                            
                             if (prestigeLevel > PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
-                    else if (ConfigService.ExoPrestiging && prefabGUID.Equals(TauntEmoteBuff) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
+                    else if (ExoPrestige && prefabGUID.Equals(TauntEmoteBuff) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
                     {
                         if (EmoteSystemPatch.ExitingForm.Contains(steamId))
                         {
                             EmoteSystemPatch.ExitingForm.Remove(steamId);
+
                             continue;
                         }
                         else if (ExoFormUtilities.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(player); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder

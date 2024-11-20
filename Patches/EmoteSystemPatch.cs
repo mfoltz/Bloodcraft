@@ -136,8 +136,12 @@ internal static class EmoteSystemPatch
             }
             else
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found...");
+                LocalizationService.HandleServerReply(EntityManager, user, "Active familiar doesn't exist! If this doesn't seem right try using '<color=white>.fam reset</color>'.");
             }
+        }
+        else
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found...");
         }
     }
     public static void CombatMode(User user, Entity character, ulong steamId)

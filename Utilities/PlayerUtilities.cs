@@ -167,7 +167,7 @@ internal static class PlayerUtilities
                 return;
             }
 
-            if (!ownerId.TryGetPlayerParties(out HashSet<string> party))
+            if (!ownerId.TryGetPlayerParties(out HashSet<string> party) || party == null)
             {
                 ownerId.SetPlayerParties([ownerName]);
             }

@@ -4,7 +4,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -14,9 +13,6 @@ namespace Bloodcraft.Patches;
 internal static class BehaviourStateChangedSystemPatch // stops familiars from trying to return to where they spawned at when coming out of combat
 {
     static EntityManager EntityManager => Core.EntityManager;
-
-    static readonly PrefabGUID TailorFleeBuff = new(-530519474);
-    static readonly PrefabGUID WandererFleeBuff = new(573463911);
 
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -51,7 +47,7 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                     {
                         Entity familiar = behaviourTreeStateChangedEvent.Entity;
 
-                        FamiliarUtilities.ReturnFamiliar(player, familiar);
+                        FamiliarUtilities.TryReturnFamiliar(player, familiar);
                     }
                 }
             }

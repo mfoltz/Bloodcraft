@@ -11,12 +11,12 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.PlayerService;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
+
 internal static class MiscCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
@@ -84,9 +84,18 @@ internal static class MiscCommands
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
             }
 
-            string kitItems = KitPrefabs.Select(x => $"<color=#ffd9eb>{x.Key.GetPrefabName()}</color>")
-                                        .Aggregate((x, y) => $"{x}, <color=#ffd9eb>{y}</color>");
-            LocalizationService.HandleReply(ctx, $"You've received a starting kit with {kitItems}!");
+            List<string> kitItems = KitPrefabs.Select(x => $"<color=white>{x.Key.GetPrefabName()}</color>").ToList();
+
+            LocalizationService.HandleReply(ctx, $"You've received a starting kit with:");
+
+            const int maxPerMessage = 6;
+            for (int i = 0; i < kitItems.Count; i += maxPerMessage)
+            {
+                var batch = kitItems.Skip(i).Take(maxPerMessage);
+                string items = string.Join(", ", batch);
+
+                LocalizationService.HandleReply(ctx, $"{items}");
+            }
         }
         else
         {
@@ -258,10 +267,11 @@ internal static class MiscCommands
         });
 
         int counter = 0;
+
         try
         {
-            Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(familiarActives);
-            List<Entity> dismissedFamiliars = familiarActives.Values.Select(x => x.Familiar).ToList();
+            Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(DataService.PlayerDictionaries.familiarActives);
+            List<Entity> dismissedFamiliars = FamiliarActives.Values.Select(x => x.Familiar).ToList();
 
             IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
             foreach (Entity entity in disabledFamiliars)
@@ -269,14 +279,14 @@ internal static class MiscCommands
                 if (dismissedFamiliars.Contains(entity)) continue;
                 else
                 {
-                    if (entity.GetTeamEntity().Has<UserTeam>() && entity.ReadBuffer<DropTableBuffer>()[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
+                    if (entity.TryGetTeamEntity(out Entity teamEntity) && teamEntity.Has<UserTeam>() && entity.TryGetBuffer<DropTableBuffer>(out var buffer) && buffer[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
                     {
                         if (entity.Has<Disabled>())
                         {
                             entity.Remove<Disabled>();
                             if (entity.Has<DisableWhenNoPlayersInRange>()) entity.Remove<DisableWhenNoPlayersInRange>();
-                            if (entity.Has<DisabledDueToNoPlayersInRange>()) entity.Remove<DisabledDueToNoPlayersInRange>(); 
-                            
+                            if (entity.Has<DisabledDueToNoPlayersInRange>()) entity.Remove<DisabledDueToNoPlayersInRange>();
+
                             EntityManager.DestroyEntity(entity);
                             counter++;
                         }
@@ -297,6 +307,7 @@ internal static class MiscCommands
         });
 
         counter = 0;
+
         try
         {
             IEnumerable<Entity> networkedSequences = EntityUtilities.GetEntitiesEnumerable(networkedSequencesQuery);
@@ -312,6 +323,10 @@ internal static class MiscCommands
 
                     if (secondaryTarget.TryGetComponent(out PrefabGUID secondaryTargetPrefab) && secondaryTarget.Has<BlockFeedBuff>())
                     {
+                        if (secondaryTarget.Has<Disabled>()) secondaryTarget.Remove<Disabled>();
+                        if (secondaryTarget.Has<DisableWhenNoPlayersInRange>()) secondaryTarget.Remove<DisableWhenNoPlayersInRange>();
+                        if (secondaryTarget.Has<DisabledDueToNoPlayersInRange>()) secondaryTarget.Remove<DisabledDueToNoPlayersInRange>();
+
                         DestroyUtility.Destroy(EntityManager, secondaryTarget, DestroyDebugReason.None);
                         counter++;
                     }
@@ -374,92 +389,4 @@ internal static class MiscCommands
 
         LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
     }
-
-    /*
-    [Command(name: "switcheroo", adminOnly: true, usage: ".switch [OriginalPlayer] [NewPlayer]", description: "Swaps the steamIDs of two players for testing.")] // this is just swapplayers without kicking people to use their mod data, ty Odjit <3 don't feel like finding out if it works like I think it will right now so commenting out >_>
-    public static void SwitchPlayers(ChatCommandContext ctx, string originalPlayer, string newPlayer)
-    {
-        if (originalPlayer.TryGetPlayerInfo(out PlayerInfo originalPlayerInfo) && newPlayer.TryGetPlayerInfo(out PlayerInfo newPlayerInfo))
-        {
-            Entity originalUserEntity = originalPlayerInfo.UserEntity;
-            Entity newUserEntity = newPlayerInfo.UserEntity;
-
-            User originalUser = originalUserEntity.Read<User>();
-            User newUser = newUserEntity.Read<User>();
-
-            (originalUser.PlatformId, newUser.PlatformId) = (newUser.PlatformId, originalUser.PlatformId);
-
-            originalUserEntity.Write(originalUser);
-            newUserEntity.Write(newUser);
-
-            ctx.Reply($"Switched steamIds for {originalPlayerInfo.User.CharacterName} with {newPlayerInfo.User.CharacterName}!");
-        }
-    }
-    
-    [Command(name: "bloblog", shortHand:"blob", adminOnly: true, usage: ".blob [PrefabGUID]", description: "BlobString testing.")]
-    public static void BlobStringLogCommand(ChatCommandContext ctx, int guidHash)
-    {
-        if (!Core.SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(guidHash), out Entity prefabEntity))
-        {
-            ctx.Reply("Couldn't find prefab...");
-            return;
-        }
-        else if (prefabEntity.TryGetComponent(out AbilityCastCondition castCondition))
-        {
-            unsafe
-            {
-                BlobAssetReference<ConditionBlob> blobAssetReference = castCondition.Condition;
-                ConditionBlob* conditionBlob = (ConditionBlob*)blobAssetReference.GetUnsafePtr();
-                ConditionInfo conditionInfo = conditionBlob->Info;
-
-                ReadBlobString(ref conditionInfo);
-            }
-        }
-        else
-        {
-            ctx.Reply("AbilityCastCondition not found on prefab entity...");
-        }
-    }
-    unsafe static void ReadBlobString(ref ConditionInfo conditionInfo)
-    {
-        // Get a pointer to the ConditionInfo structure
-        fixed (ConditionInfo* conditionInfoPtr = &conditionInfo)
-        {
-            // Get the pointer to the Prefab BlobString
-            BlobString* prefabBlobStringPtr = &conditionInfoPtr->Prefab;
-
-            // Read the Prefab string
-            string prefabName = ParseBlobString(prefabBlobStringPtr);
-
-            // Get the pointer to the Component BlobString
-            BlobString* componentBlobStringPtr = &conditionInfoPtr->Component;
-
-            // Read the Component string
-            string componentName = ParseBlobString(componentBlobStringPtr);
-
-            // Now you can log or use the strings as needed
-            Core.Log.LogInfo($"Prefab: {prefabName}");
-            Core.Log.LogInfo($"Component: {componentName}");
-        }
-    }
-    unsafe static string ParseBlobString(BlobString* blobStringPtr)
-    {
-        // Get a pointer to the BlobArray<byte> Data field
-        BlobArray<byte>* dataPtr = &blobStringPtr->Data;
-
-        // Get the base pointer, which is the address of the m_OffsetPtr field
-        byte* basePtr = (byte*)&dataPtr->m_OffsetPtr;
-
-        // Compute the data pointer using the offset
-        byte* bytes = basePtr + dataPtr->m_OffsetPtr;
-
-        // Read the length from the m_Length field
-        int length = dataPtr->m_Length;
-
-        // Convert the bytes to a string using UTF8 encoding
-        string result = BlobString.ToString(bytes, length);
-
-        return result;
-    }
-    */
 }

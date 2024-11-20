@@ -85,6 +85,17 @@ internal static class Extensions
 
         return false;
     }
+    public static bool TryRemoveComponent<T>(this Entity entity) where T : struct
+    {
+        if (entity.Has<T>())
+        {
+            entity.Remove<T>();
+
+            return true;
+        }
+
+        return false;
+    }
     public static bool Has<T>(this Entity entity)
     {
         var ct = new ComponentType(Il2CppType.Of<T>());
@@ -102,23 +113,26 @@ internal static class Extensions
     public static void LogComponentTypes(this Entity entity)
     {
         NativeArray<ComponentType>.Enumerator enumerator = EntityManager.GetComponentTypes(entity).GetEnumerator();
+
         Core.Log.LogInfo("===");
+
         while (enumerator.MoveNext())
         {
             ComponentType current = enumerator.Current;
             Core.Log.LogInfo($"{current}");
         }
+
         Core.Log.LogInfo("===");
+
+        enumerator.Dispose();
     }
     public static void Add<T>(this Entity entity)
     {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        EntityManager.AddComponent(entity, ct);
+        EntityManager.AddComponent(entity, new(Il2CppType.Of<T>()));
     }
     public static void Remove<T>(this Entity entity)
     {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        EntityManager.RemoveComponent(entity, ct);
+        EntityManager.RemoveComponent(entity, new(Il2CppType.Of<T>()));
     }
     public static Entity GetOwner(this Entity entity)
     {
@@ -157,6 +171,16 @@ internal static class Extensions
         {
             return true;
         }
+
+        return false;
+    }
+    public static bool IsDifferentPlayer(this Entity entity, Entity target)
+    {
+        if (entity.IsPlayer() && target.IsPlayer() && !entity.Equals(target))
+        {
+            return true;
+        }
+
         return false;
     }
     public static bool IsFollowingPlayer(this Entity entity)
@@ -169,6 +193,7 @@ internal static class Extensions
                 return true;
             }
         }
+
         return false;
     }
     public static Entity GetBuffTarget(this Entity entity)
@@ -183,13 +208,23 @@ internal static class Extensions
     {
         return CreateGameplayEventServerUtility.GetSpellTarget(EntityManager, entity);
     }
-    public static Entity GetTeamEntity(this Entity entity)
+    public static bool TryGetTeamEntity(this Entity entity, out Entity teamEntity)
     {
-        if (entity.Has<TeamReference>())
+        teamEntity = Entity.Null;
+
+        if (entity.TryGetComponent(out TeamReference teamReference))
         {
-            return entity.Read<TeamReference>().Value._Value;
+            Entity teamReferenceEntity = teamReference.Value._Value;
+            
+            if (teamReferenceEntity.Exists())
+            {
+                teamEntity = teamReferenceEntity;
+
+                return true;
+            }
         }
-        return Entity.Null;
+
+        return false;
     }
     public static bool Exists(this Entity entity)
     {
@@ -246,7 +281,9 @@ internal static class Extensions
     public static User GetUser(this Entity character)
     {
         User user = User.Empty;
+
         if (character.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
+        
         return user;
     }
     public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGUID)
@@ -261,5 +298,18 @@ internal static class Extensions
         }
 
         return false;
+    }
+    public static unsafe bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
+    {
+        if (ServerGameManager.TryGetBuffer(entity, out dynamicBuffer))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public static void Remove<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer)
+    {
+        entityCommandBuffer.RemoveComponent(entity, new(Il2CppType.Of<T>()));
     }
 }

@@ -4,8 +4,13 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
@@ -260,42 +265,87 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 
-    [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGUID]", description: "Manually sets spells for testing.")]
-    public static void SetSpellCommand(ChatCommandContext ctx, string name, int slot, int ability)
+    [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGUID] [Radius]", description: "Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).")]
+    public static void SetSpellCommand(ChatCommandContext ctx, string name, int slot, int ability, float radius = 0f)
     {
         if (!ConfigService.UnarmedSlots)
         {
             LocalizationService.HandleReply(ctx, "Extra spell slots are not enabled.");
             return;
         }
+
         if (slot < 1 || slot > 2)
         {
-            LocalizationService.HandleReply(ctx, "Invalid slot.");
+            LocalizationService.HandleReply(ctx, "Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)");
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!playerInfo.UserEntity.Exists())
+        if (radius > 0f)
         {
-            ctx.Reply($"Couldn't find player.");
+            Entity character = ctx.Event.SenderCharacterEntity;
+            float3 charPosition = character.Read<Translation>().Value;
+
+            HashSet<PlayerInfo> processed = [];
+            Dictionary<string, PlayerInfo> players = new(OnlineCache);
+
+            foreach (PlayerInfo playerInfo in players.Values)
+            {
+                if (processed.Contains(playerInfo)) continue;
+                else if (playerInfo.CharEntity.TryGetComponent(out Translation translation) && math.distance(charPosition, translation.Value) <= radius)
+                {
+                    ulong steamId = playerInfo.User.PlatformId;
+
+                    if (steamId.TryGetPlayerSpells(out var spells))
+                    {
+                        if (slot == 1)
+                        {
+                            spells.FirstUnarmed = ability;
+                            LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                        }
+                        else if (slot == 2)
+                        {
+                            spells.SecondUnarmed = ability;
+                            LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                        }
+
+                        steamId.SetPlayerSpells(spells);
+                    }
+
+                    processed.Add(playerInfo);
+                }
+            }
+        }
+        else if (radius < 0f)
+        {
+            LocalizationService.HandleReply(ctx, "Radius must be positive if entering a value!");
             return;
         }
-
-        ulong SteamID = playerInfo.User.PlatformId;
-
-        if (SteamID.TryGetPlayerSpells(out var spells))
+        else
         {
-            if (slot == 1)
+            PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+            if (!playerInfo.UserEntity.Exists())
             {
-                spells.FirstUnarmed = ability;
-                LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                ctx.Reply($"Couldn't find player.");
+                return;
             }
-            else
+
+            ulong steamId = playerInfo.User.PlatformId;
+
+            if (steamId.TryGetPlayerSpells(out var spells))
             {
-                spells.SecondUnarmed = ability;
-                LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                if (slot == 1)
+                {
+                    spells.FirstUnarmed = ability;
+                    LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                }
+                else if (slot == 2)
+                {
+                    spells.SecondUnarmed = ability;
+                    LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                }
+
+                steamId.SetPlayerSpells(spells);
             }
-            SteamID.SetPlayerSpells(spells);
         }
     }
 

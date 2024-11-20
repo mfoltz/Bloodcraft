@@ -122,16 +122,6 @@ internal static class QuestSystem
 
         foreach (PrefabGUID prefab in TargetPrefabs.Keys)
         {
-            /* betting this is what caused overleveled targets sometimes if familiars are present in the cache and filtering those out when doing query would be a possible performance hit
-            Entity targetEntity = TargetPrefabs[prefab].FirstOrDefault();
-            
-            if (targetEntity.TryGetComponent(out UnitLevel unitLevel) && Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
-            {
-                if (targetEntity.Has<VBloodUnit>() && unitLevel.Level._Value > playerLevel) continue;
-                prefabs.Add(prefab);
-            }
-            */
-            
             if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
             {
                 bool isVBlood = targetEntity.Has<VBloodUnit>();

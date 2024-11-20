@@ -75,20 +75,20 @@ internal static class DealDamageSystemPatch
                 else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities in this system can reeeeally mess things up for a save
                 else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
                 
-                if (!dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue; // not really sure why this would be the case but seems to be popping up in console so okay I guess
+                if (!dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
                 
-                //Core.Log.LogInfo(dealDamageEvent.SpellSource.GetPrefabGUID().LookupName());
-                //Core.Log.LogInfo($"{dealDamageEvent.SpellSource.GetOwner().GetPrefabGUID().LookupName()} | {dealDamageEvent.Target.GetPrefabGUID().LookupName()}");
-
-                if (entityOwner.Owner.IsFollowingPlayer() && dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(entityOwner.Owner, dealDamageEvent.Target)) // not sure if any fam besides raziel does this
+                if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player)) // not sure if any fam besides raziel does this
                 {
-                    //DestroyUtility.Destroy(EntityManager, entity);
-                    EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroyEvent not sufficient to prevent damage
+                    //if (dealDamageEvent.Target.IsPlayer() && ServerGameManager.IsAllies(entityOwner.Owner, dealDamageEvent.Target))
+                    if (dealDamageEvent.Target.IsPlayer() && player.Equals(dealDamageEvent.Target))
+                    {
+                        EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroyEvent not sufficient to prevent damage
+                    }
                 }
 
                 if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell at this point
 
-                if (Quests && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && entityOwner.Owner.TryGetPlayer(out Entity player))
+                if (Quests && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && entityOwner.Owner.TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
                     LastDamageTime[steamId] = DateTime.UtcNow;
@@ -158,13 +158,16 @@ internal static class DealDamageSystemPatch
                         }
                     }
                 }
-                else if (Familiars && GameMode.Equals(GameModeType.PvP) && entityOwner.Owner.TryGetPlayer(out player) && dealDamageEvent.Target.IsPlayer())
+                else if (Familiars)
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
-
-                    if (familiar.Exists() && !familiar.IsDisabled())
+                    if (entityOwner.Owner.TryGetPlayer(out player) && GameMode.Equals(GameModeType.PvP) && dealDamageEvent.Target.IsPlayer())
                     {
-                        FamiliarUtilities.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+
+                        if (familiar.Exists() && !familiar.IsDisabled())
+                        {
+                            FamiliarUtilities.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
+                        }
                     }
                 }
             }

@@ -49,6 +49,8 @@ internal static class BuffSystemSpawnPatches
 
     static readonly PrefabGUID WitchPigTransformationBuff = new(1356064917);
 
+    static readonly PrefabGUID WranglerPotionBuff = new(387154469);
+
     [HarmonyPatch(typeof(BuffSystem_Spawn_Server), nameof(BuffSystem_Spawn_Server.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)
@@ -143,7 +145,7 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
-                            FamiliarUtilities.ReturnFamiliar(player, familiar);
+                            FamiliarUtilities.TryReturnFamiliar(player, familiar);
                         }
                     }
                 }
@@ -158,7 +160,7 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
-                            FamiliarUtilities.ReturnFamiliar(player, familiar);
+                            FamiliarUtilities.TryReturnFamiliar(player, familiar);
 
                             if (!FamiliarPvP) FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
                         }
@@ -183,24 +185,13 @@ internal static class BuffSystemSpawnPatches
                         if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
                     }
 
-                    if (Familiars) // player->familiar potion sharing
+                    if (Familiars && !prefabGUID.Equals(WranglerPotionBuff)) // player->familiar potion sharing
                     {
                         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
 
                         if (familiar.Exists())
                         {
-                            ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                            {
-                                BuffPrefabGUID = prefabGUID,
-                            };
-
-                            FromCharacter fromCharacter = new()
-                            {
-                                Character = familiar,
-                                User = familiar
-                            };
-
-                            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+                            BuffUtilities.TryApplyBuff(familiar, prefabGUID);
                         }
                     }
 
@@ -380,7 +371,7 @@ internal static class BuffSystemSpawnPatches
 
             if (EntityManager.Exists(familiar))
             {
-                FamiliarUtilities.ReturnFamiliar(playerCharacter, familiar);
+                FamiliarUtilities.TryReturnFamiliar(playerCharacter, familiar);
             }
         }
     }

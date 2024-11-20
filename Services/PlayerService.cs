@@ -1,7 +1,6 @@
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM.Network;
-using ProjectM.Scripting;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -70,34 +69,6 @@ internal class PlayerService
                         OnlineCache[kvp.Key] = kvp.Value;
                     }
                 });
-
-            /*
-            if (!abilityGroupSlotBuffersCleared)
-            {
-                HashSet<Entity> processedPlayers = [];
-
-                foreach (PlayerInfo player in PlayerCache.Values)
-                {
-                    if (!processedPlayers.Contains(player.CharEntity) && player.CharEntity.Exists() && ServerGameManager.TryGetBuffer<AbilityGroupSlotBuffer>(player.CharEntity, out var buffer))
-                    {
-                        foreach (AbilityGroupSlotBuffer abilityGroupSlotBuffer in buffer)
-                        {
-                            Entity abilityGroupSlotEntity = abilityGroupSlotBuffer.GroupSlotEntity.GetEntityOnServer();
-
-                            if (abilityGroupSlotEntity.Exists() && abilityGroupSlotEntity.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && abilityGroupSlot.SlotId > 8)
-                            {
-                                DestroyUtility.Destroy(EntityManager, abilityGroupSlotEntity);
-                            }
-                        }
-
-                        buffer.RemoveRange(9, buffer.Length);
-                        processedPlayers.Add(player.CharEntity);
-                    }
-                }
-
-                abilityGroupSlotBuffersCleared = true;
-            }
-            */
 
             yield return Delay;
         }

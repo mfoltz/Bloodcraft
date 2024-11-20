@@ -21,6 +21,7 @@ internal static class FamiliarUtilities
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     public static readonly Dictionary<Entity, Entity> AutoCallMap = [];
 
@@ -138,6 +139,8 @@ internal static class FamiliarUtilities
             LocalizationService.HandleReply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
         }
     }
+
+    /*
     public static void ReturnFamiliar(Entity player, Entity familiar)
     {
         Follower following = familiar.Read<Follower>();
@@ -154,6 +157,36 @@ internal static class FamiliarUtilities
 
             ResetAggro(familiar);
         }
+    }
+    */
+    public static void TryReturnFamiliar(Entity player, Entity familiar)
+    {
+        float3 playerPos = player.Read<Translation>().Value;
+        float distance = UnityEngine.Vector3.Distance(familiar.Read<Translation>().Value, playerPos);
+
+        if (distance >= 25f)
+        {
+            ReturnFamiliar(playerPos, familiar);
+        }
+    }
+    public static void ReturnFamiliar(float3 position, Entity familiar)
+    {
+        familiar.With((ref Follower follower) =>
+        {
+            follower.ModeModifiable._Value = 1;
+        });
+
+        familiar.With((ref LastTranslation lastTranslation) =>
+        {
+            lastTranslation.Value = position;
+        });
+
+        familiar.With((ref Translation translation) =>
+        {
+            translation.Value = position;
+        });
+
+        ResetAggro(familiar);
     }
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
     {
@@ -189,27 +222,31 @@ internal static class FamiliarUtilities
     }
     public static void ClearBuffers(Entity playerCharacter, ulong steamId)
     {
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+
         if (playerCharacter.Has<FollowerBuffer>())
         {
             var buffer = playerCharacter.ReadBuffer<FollowerBuffer>();
-
+            
             foreach (FollowerBuffer follower in buffer)
             {
                 Entity followerEntity = follower.Entity.GetEntityOnServer();
 
                 if (followerEntity.Exists())
                 {
-                    if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>();
-                    if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>();
-                    if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>();
-                    if (followerEntity.Has<Minion>()) followerEntity.Remove<Minion>();
-                    if (followerEntity.Has<BlockFeedBuff>()) followerEntity.Remove<BlockFeedBuff>();
+                    if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>(entityCommandBuffer);
+                    if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>(entityCommandBuffer);
+                    if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>(entityCommandBuffer);
+                    if (followerEntity.Has<Minion>()) followerEntity.Remove<Minion>(entityCommandBuffer);
+                    if (followerEntity.Has<BlockFeedBuff>()) followerEntity.Remove<BlockFeedBuff>(entityCommandBuffer);
 
-                    DestroyUtility.Destroy(EntityManager, followerEntity);
+                    //DestroyUtility.Destroy(EntityManager, followerEntity);
+                    entityCommandBuffer.DestroyEntity(followerEntity);
                 }
             }
 
-            buffer.Clear();
+            //buffer.Clear();
+            entityCommandBuffer.SetBuffer<FollowerBuffer>(playerCharacter).Clear();
         }
 
         if (playerCharacter.Has<MinionBuffer>())
@@ -220,17 +257,19 @@ internal static class FamiliarUtilities
             {
                 if (minion.Entity.Exists())
                 {
-                    if (minion.Entity.Has<Disabled>()) minion.Entity.Remove<Disabled>();
-                    if (minion.Entity.Has<DisableWhenNoPlayersInRange>()) minion.Entity.Remove<DisableWhenNoPlayersInRange>();
-                    if (minion.Entity.Has<DisabledDueToNoPlayersInRange>()) minion.Entity.Remove<DisabledDueToNoPlayersInRange>();
-                    if (minion.Entity.Has<Minion>()) minion.Entity.Remove<Minion>();
-                    if (minion.Entity.Has<BlockFeedBuff>()) minion.Entity.Remove<BlockFeedBuff>();
+                    if (minion.Entity.Has<Disabled>()) minion.Entity.Remove<Disabled>(entityCommandBuffer);
+                    if (minion.Entity.Has<DisableWhenNoPlayersInRange>()) minion.Entity.Remove<DisableWhenNoPlayersInRange>(entityCommandBuffer);
+                    if (minion.Entity.Has<DisabledDueToNoPlayersInRange>()) minion.Entity.Remove<DisabledDueToNoPlayersInRange>(entityCommandBuffer);
+                    if (minion.Entity.Has<Minion>()) minion.Entity.Remove<Minion>(entityCommandBuffer);
+                    if (minion.Entity.Has<BlockFeedBuff>()) minion.Entity.Remove<BlockFeedBuff>(entityCommandBuffer);
 
-                    DestroyUtility.Destroy(EntityManager, minion.Entity);
+                    //DestroyUtility.Destroy(EntityManager, minion.Entity);
+                    entityCommandBuffer.DestroyEntity(minion.Entity);
                 }
             }
 
-            buffer.Clear();
+            //buffer.Clear();
+            entityCommandBuffer.SetBuffer<MinionBuffer>(playerCharacter).Clear();
         }
 
         ClearFamiliarActives(steamId);
@@ -290,11 +329,20 @@ internal static class FamiliarUtilities
     }
     public static void ResetAggro(Entity familiar)
     {
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+
+        if (familiar.Has<AlertBuffer>()) entityCommandBuffer.SetBuffer<AlertBuffer>(familiar).Clear();
+        if (familiar.Has<AggroDamageHistoryBufferElement>()) entityCommandBuffer.SetBuffer<AggroDamageHistoryBufferElement>(familiar).Clear();
+        if (familiar.Has<AggroCandidateBufferElement>()) entityCommandBuffer.SetBuffer<AggroCandidateBufferElement>(familiar).Clear();
+        if (familiar.Has<ExternalAggroBufferElement>()) entityCommandBuffer.SetBuffer<ExternalAggroBufferElement>(familiar).Clear();
+
+        /*
         if (ServerGameManager.TryGetBuffer<AlertBuffer>(familiar, out var alertBuffer)) alertBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroDamageHistoryBufferElement>(familiar, out var damageHistoryBuffer)) damageHistoryBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroCandidateBufferElement>(familiar, out var aggroCandidateBuffer)) aggroCandidateBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
+        */
 
         familiar.With((ref AggroConsumer aggroConsumer) =>
         {
@@ -304,11 +352,20 @@ internal static class FamiliarUtilities
     }
     public static void ResetAndDisableAggro(Entity familiar)
     {
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+
+        if (familiar.Has<AlertBuffer>()) entityCommandBuffer.SetBuffer<AlertBuffer>(familiar).Clear();
+        if (familiar.Has<AggroDamageHistoryBufferElement>()) entityCommandBuffer.SetBuffer<AggroDamageHistoryBufferElement>(familiar).Clear();
+        if (familiar.Has<AggroCandidateBufferElement>()) entityCommandBuffer.SetBuffer<AggroCandidateBufferElement>(familiar).Clear();
+        if (familiar.Has<ExternalAggroBufferElement>()) entityCommandBuffer.SetBuffer<ExternalAggroBufferElement>(familiar).Clear();
+
+        /*
         if (ServerGameManager.TryGetBuffer<AlertBuffer>(familiar, out var alertBuffer)) alertBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroDamageHistoryBufferElement>(familiar, out var damageHistoryBuffer)) damageHistoryBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroCandidateBufferElement>(familiar, out var aggroCandidateBuffer)) aggroCandidateBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
+        */
 
         familiar.With((ref AggroConsumer aggroConsumer) =>
         {

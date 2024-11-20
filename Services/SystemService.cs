@@ -84,6 +84,9 @@ public class SystemService(World world)
 
     AttachParentIdSystem _attachParentIdSystem;
     public AttachParentIdSystem AttachParentIdSystem => _attachParentIdSystem ??= GetSystem<AttachParentIdSystem>();
+
+    //ModificationSystem _modificationSystem;  
+    //public ModificationSystem ModificationSystem => _modificationSystem ??= GetSystem<ModificationSystem>();
     T GetSystem<T>() where T : ComponentSystemBase
     {
         return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"Failed to get {Il2CppType.Of<T>().FullName} from the Server...");

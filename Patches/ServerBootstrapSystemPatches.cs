@@ -25,6 +25,7 @@ internal static class ServerBootstrapSystemPatches
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
@@ -431,6 +432,8 @@ internal static class ServerBootstrapSystemPatches
 
             if (exists)
             {
+                EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+
                 if (ClassUtilities.HasClass(steamId) && playerCharacter.Has<BloodQualityBuff>())
                 {
                     PrefabGUID bloodPrefab = playerCharacter.Read<Blood>().BloodType;
@@ -459,7 +462,8 @@ internal static class ServerBootstrapSystemPatches
                             if (bloodQualityBuffs.Contains(classBuff)) continue; // after filtering out class buffs the player should have, check against remaining buffs then see if they are supposed to have it based on blood type and destroy it if not?
                             else
                             {
-                                DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                                //DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                                entityCommandBuffer.DestroyEntity(buffEntity);
                             }
                         }
                     }
@@ -501,7 +505,9 @@ internal static class ServerBootstrapSystemPatches
                                 if (vBloodAbilityBuffer.IsIndexWithinRange(index))
                                 {
                                     vBloodAbilityBuffer.RemoveAt(index);
-                                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+                                    
+                                    //DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
+                                    entityCommandBuffer.DestroyEntity(entity);
                                 }
                             }
                         }
@@ -599,4 +605,43 @@ internal static class ServerBootstrapSystemPatches
             entities.Dispose();
         }
     }
+
+    /*
+    static readonly HashSet<string> UserNetworkStateCleared = [];
+
+    [HarmonyPatch(typeof(SerializePersistenceSystemV2), nameof(SerializePersistenceSystemV2.CompleteAndFinalizeExistingSaveOperation))]
+    [HarmonyPostfix]
+    public static void CompleteAndFinalizeExistingSaveOperationPostfix()
+    {
+        Core.StartCoroutine(DelayedBufferClear());
+    }
+    static IEnumerator DelayedBufferClear()
+    {
+        yield return new WaitForSeconds(10f);
+
+        Dictionary<string, PlayerInfo> onlineCache = new(OnlineCache);
+        HashSet<PlayerInfo> playerInfos = [.. onlineCache.Values];
+
+        foreach (PlayerInfo playerInfo in playerInfos)
+        {
+            if (!UserNetworkStateCleared.Contains(playerInfo.User.CharacterName.Value) && playerInfo.UserEntity.Has<UserEntityNetworkState>())
+            {
+                
+                for (int i = buffer.Length - 1; i >= 0; i--)
+                {
+                    if (buffer[i].Generation == 0)
+                    {
+                        buffer.RemoveAt(i);
+                    }
+                }
+
+                ServerBootstrapSystem.ClearUserNetworkState(EntityManager, playerInfo.UserEntity, playerInfo.UserEntity.Read<ConnectedUser>(), true);
+                ServerBootstrapSystem.ClearUserNetworkState(EntityManager, playerInfo.UserEntity, playerInfo.UserEntity.Read<ConnectedUser>(), false);
+
+                UserNetworkStateCleared.Add(playerInfo.User.CharacterName.Value);
+                Core.Log.LogInfo($"Cleared {playerInfo.User.CharacterName.Value}'s UserEntityNetworkState buffer...");
+            }
+        }
+    }
+    */
 }

@@ -19,6 +19,8 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
+    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+
     static readonly PrefabGUID InkCrawlerDeathBuff = new(1273155981);
 
     public static readonly Dictionary<Entity, HashSet<Entity>> FamiliarMinions = [];
@@ -71,7 +73,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                             }
                         }
 
-                        entity.Write(new EntityOwner { Owner = player });
+                        if (!GameMode.Equals(GameModeType.PvE)) entity.Write(new EntityOwner { Owner = player });
                     }
                 }
                 else if (entityOwner.Owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsPlayer())

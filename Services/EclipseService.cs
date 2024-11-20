@@ -78,7 +78,7 @@ internal class EclipseService
 
             if (!ulong.TryParse(match.Groups[3].Value, out ulong steamId))
             {
-                Core.Log.LogWarning("Invalid steamId in new format message!");
+                Core.Log.LogWarning("Invalid steamId in new (>=1.2.2) format message!");
                 return;
             }
 
@@ -107,7 +107,7 @@ internal class EclipseService
 
             if (!ulong.TryParse(oldMatch.Groups[2].Value, out ulong steamId))
             {
-                Core.Log.LogWarning("Invalid steamId in legacy Eclipse message!");
+                Core.Log.LogWarning("Invalid steamId in legacy (<1.2.2) Eclipse message!");
                 return;
             }
 
@@ -119,7 +119,7 @@ internal class EclipseService
                     break;
 
                 default:
-                    Core.Log.LogError($"Unknown networkEventSubtype encountered while handling legacy version of Eclipse! {eventType}");
+                    Core.Log.LogError($"Unknown networkEventSubtype encountered while handling legacy version (<1.2.2) of Eclipse! {eventType}");
                     break;
             }
 
@@ -132,7 +132,7 @@ internal class EclipseService
     static void RegisterUser(ulong steamId, string version)
     {
         if (RegisteredUsersAndClientVersions.ContainsKey(steamId)) return;
-        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
+        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
         {
             if (HandleRegistration(playerInfo, steamId, version))
             {
@@ -187,57 +187,6 @@ internal class EclipseService
             return false;
         }
     }
-
-    /*
-    public static void SendClientConfigV1_1_1(User user)
-    {
-        string message = BuildConfigMessageV1_1_1();
-        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMAC(message)}";
-
-        LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
-    }
-    public static void SendClientConfigV1_2_1(User user)
-    {
-        string message = BuildConfigMessageV1_2_1();
-        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMAC(message)}";
-
-        LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
-    }
-    public static void SendClientProgressV1_1_1(Entity character, ulong steamId)
-    {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-
-        var experienceData = GetExperienceData(steamId);
-        var legacyData = GetLegacyData(character, steamId);
-        var expertiseData = GetExpertiseData(character, steamId);
-        var dailyQuestData = GetQuestData(steamId, Systems.Quests.QuestSystem.QuestType.Daily);
-        var weeklyQuestData = GetQuestData(steamId, Systems.Quests.QuestSystem.QuestType.Weekly);
-
-        string message = BuildProgressMessageV1_1_1(experienceData, legacyData, expertiseData, dailyQuestData, weeklyQuestData);
-        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMAC(message)}";
-
-        LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
-    }
-    public static void SendClientProgressV1_2_1(Entity character, ulong steamId)
-    {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-
-        var experienceData = GetExperienceData(steamId);
-        var legacyData = GetLegacyData(character, steamId);
-        var expertiseData = GetExpertiseData(character, steamId);
-        var familiarData = GetFamiliarData(character, steamId);
-        var professionData = GetProfessionData(steamId);
-        var dailyQuestData = GetQuestData(steamId, Systems.Quests.QuestSystem.QuestType.Daily);
-        var weeklyQuestData = GetQuestData(steamId, Systems.Quests.QuestSystem.QuestType.Weekly);
-
-        string message = BuildProgressMessageV1_2_1(experienceData, legacyData, expertiseData, familiarData, professionData, dailyQuestData, weeklyQuestData);
-        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMAC(message)}";
-
-        LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
-    }
-    */
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {
         int experiencePercent = 0;
@@ -489,7 +438,7 @@ internal class EclipseService
         {
             yield return NewUserDelay;
 
-            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
+            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
             {
                 if (HandleRegistration(playerInfo, steamId, version))
                 {
@@ -510,19 +459,19 @@ internal class EclipseService
         {
             if (RegisteredUsersAndClientVersions.Count == 0)
             {
-                yield return Delay; // Wait 30 seconds if no players
+                yield return Delay;
                 continue;
             }
 
-            Dictionary<string, PlayerInfo> players = new(OnlineCache); // Shallow copy of the player cache to make sure updates to that don't interfere with loop
-            Dictionary<ulong, string> users = new(RegisteredUsersAndClientVersions);
+            HashSet<PlayerInfo> playerInfos = [..OnlineCache.Values];
+            Dictionary<ulong, string> registeredUsers = new(RegisteredUsersAndClientVersions);
 
-            foreach (ulong steamId in users.Keys)
+            foreach (PlayerInfo playerInfo in playerInfos)
             {
-                if (players.TryGetValue(steamId.ToString(), out PlayerInfo playerInfo))
-                {
-                    string version = users[steamId];
+                ulong steamId = playerInfo.User.PlatformId;
 
+                if (registeredUsers.TryGetValue(steamId, out string version))
+                {
                     try
                     {
                         switch (version)
@@ -542,7 +491,7 @@ internal class EclipseService
                             default:
                                 // Handle unsupported versions or fallback
                                 Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}, unregistering user to avoid console spam...");
-                                
+
                                 if (RegisteredUsersAndClientVersions.ContainsKey(steamId))
                                 {
                                     RegisteredUsersAndClientVersions.Remove(steamId);
@@ -551,13 +500,13 @@ internal class EclipseService
                                 break;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        Core.Log.LogError($"Failed sending progress in EclipseService! {steamId}:Eclipse{version}, Error - {e}");
+                        Core.Log.LogWarning($"Failed sending progress in EclipseService! {steamId}:Eclipse{version}, Error - {ex}");
                     }
-                }
 
-                yield return null;
+                    yield return null;
+                }
             }
 
             yield return Delay;
