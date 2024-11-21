@@ -174,7 +174,7 @@ internal class EclipseService
 
                         versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                        SendClientAbilityData(playerInfo.CharEntity);
+                        //SendClientAbilityData(playerInfo.CharEntity);
 
                         return true;
                     default:

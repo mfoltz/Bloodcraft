@@ -254,7 +254,7 @@ internal static class ClassUtilities
             RemoveNPCSpell(character);
         }
 
-        EclipseService.SendClientAbilityData(character);
+        //EclipseService.SendClientAbilityData(character);
     }
     public static void UpdateShift(ChatCommandContext ctx, Entity character, PrefabGUID spellPrefabGUID)
     {
@@ -408,7 +408,7 @@ internal static class ClassUtilities
             }
         }
 
-        EclipseService.SendClientAbilityData(character);
+        //EclipseService.SendClientAbilityData(character);
     }
     static void RemoveNPCSpell(Entity character)
     {
