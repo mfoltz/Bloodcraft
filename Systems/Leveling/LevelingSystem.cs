@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -89,19 +90,11 @@ internal static class LevelingSystem
         ProcessExperience(deathEvent.Source, deathEvent.Target, deathEvent.DeathParticipants);
     }
     public static void ProcessExperience(Entity source, Entity target, HashSet<Entity> deathParticipants)
-    {
-        /*
-        if (IsVBlood(target))
-        {
-            ProcessExperienceGain(source, target, steamId, 1f); // override multiplier since this should just be a solo kill and skip getting participants for vbloods since they're all in the event list from VBloodSystem if involved in same kill
-            return;
-        }
-        */
-
-        //HashSet<Entity> participants = PlayerUtilities.GetDeathParticipants(source, userEntity); // want list of participants to process experience gains when appropriate
-        
+    {     
         float groupMultiplier = 1f;
-        if (deathParticipants.Count > 1) groupMultiplier = GroupMultiplier; // if more than 1 participant, apply group multiplier
+        bool inGroup = deathParticipants.Count > 1;
+
+        if (inGroup) groupMultiplier = GroupMultiplier; // if more than 1 participant, apply group multiplier
 
         foreach (Entity player in deathParticipants)
         {
@@ -109,23 +102,28 @@ internal static class LevelingSystem
 
             if (Familiars) FamiliarLevelingSystem.ProcessFamiliarExperience(player, target, steamId, groupMultiplier);
 
-            ProcessExperienceGain(player, target, steamId, groupMultiplier);
+            int currentLevel = steamId.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
+            bool maxLevel = currentLevel >= MaxPlayerLevel;
+
+            if (maxLevel && inGroup) // if at max level, prestige or no, and in a group (party or clan) get expertise exp instead
+            {
+                WeaponSystem.ProcessExpertise(player, target, groupMultiplier);
+            }
+            else if (maxLevel) return;
+            else ProcessExperienceGain(player, target, steamId, currentLevel, groupMultiplier);
         }
     }
-    public static void ProcessExperienceGain(Entity source, Entity target, ulong steamId, float groupMultiplier)
+    public static void ProcessExperienceGain(Entity source, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
     {
-        int currentLevel = steamId.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
-        if (currentLevel >= MaxPlayerLevel) return;
-
         UnitLevel victimLevel = target.Read<UnitLevel>();
         Health health = target.Read<Health>();
 
         bool isVBlood = IsVBlood(target);
+
         int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
         float gainedXP = GetBaseExperience(victimLevel.Level._Value, isVBlood);
 
         gainedXP += additionalXP;
-
         gainedXP = ApplyScalingFactor(gainedXP, currentLevel, victimLevel.Level._Value);
 
         if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
@@ -162,7 +160,7 @@ internal static class LevelingSystem
         {
             if (target.Read<AggroConsumer>().AlertDecayPerSecond == 99)
             {
-                gainedXP *= 0.2f;
+                gainedXP *= DocileUnitMultiplier;
             }
         }
 

@@ -181,13 +181,17 @@ internal static class MiscCommands
                 if (spellPrefabGUID.HasValue())
                 {
                     ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                    //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
                 }
             }
+
             LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
         }
         else
         {
             ClassUtilities.RemoveShift(ctx.Event.SenderCharacterEntity);
+            //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
+
             LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
         }
     }

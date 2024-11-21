@@ -1,12 +1,17 @@
-﻿using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using ProjectM;
+using ProjectM.Network;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
+using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using Unity.Entities;
 using UnityEngine;
@@ -17,6 +22,8 @@ using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 namespace Bloodcraft.Services;
 internal class EclipseService
 {
+    static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
@@ -60,7 +67,8 @@ internal class EclipseService
     {
         RegisterUser,
         ProgressToClient,
-        ConfigsToClient // need to send bonus stat base values and prestige multipliers for stats as well as class stat synergies, need another method for this
+        ConfigsToClient,
+        UpdateShiftSlot
     }
     public static void HandleClientMessage(string message)
     {
@@ -166,6 +174,7 @@ internal class EclipseService
 
                         versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                        SendClientAbilityData(playerInfo.CharEntity);
 
                         return true;
                     default:
@@ -186,6 +195,43 @@ internal class EclipseService
             Core.Log.LogWarning($"Failed to add {steamId}:Eclipse{version} to RegisteredUsersAndClientVersions dictionary!");
             return false;
         }
+    }
+    public static (int prefabHash, int cooldown, int charges, int chargesCooldown) GetAbilityData(Entity character)
+    {
+        int prefabHash = 0;
+        int cooldown = 0;
+        int charges = 0;
+        int chargesCooldown = 0;
+
+        Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
+
+        if (abilityGroup.Exists())
+        {
+            prefabHash = abilityGroup.GetPrefabGUID().GuidHash;
+            charges = ServerGameManager.GetAbilityGroupCharges(character, 3);
+            cooldown = (int)ServerGameManager.GetAbilityGroupCooldown(character, 3);
+            chargesCooldown = (int)ServerGameManager.GetAbilityGroupCharges(character, 3);
+        }
+
+        return (prefabHash, cooldown, charges, chargesCooldown);
+    }
+    public static void SendClientAbilityData(Entity character)
+    {
+        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
+
+        string message = BuildAbilityMessage(GetAbilityData(character));
+        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_2_2(message)}";
+
+        LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
+    }
+    public static string BuildAbilityMessage((int prefabHash, int cooldown, int charges, int chargesCooldown) data)
+    {
+        var sb = new StringBuilder();
+        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.UpdateShiftSlot)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", data.prefabHash, data.cooldown, data.charges, data.chargesCooldown);
+
+        return sb.ToString();
     }
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {

@@ -15,6 +15,14 @@ internal static class WeaponSystem
     const float EXP_CONSTANT = 0.1f; // constant for calculating level from xp
     const int EXP_POWER = 2; // power for calculating level from xp
 
+    static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
+    static readonly int ExpertiseStatChoices = ConfigService.ExpertiseStatChoices;
+    static readonly float UnitExpertiseMultiplier = ConfigService.UnitExpertiseMultiplier;
+    static readonly float VBloodExpertiseMultiplier = ConfigService.VBloodExpertiseMultiplier;
+    static readonly float PrestigeRatesReducer = ConfigService.PrestigeRatesReducer;
+    static readonly float PrestigeRateMultiplier = ConfigService.PrestigeRateMultiplier;
+    static readonly float UnitSpawnerExpertiseFactor = ConfigService.UnitSpawnerExpertiseFactor;
+
     public static readonly Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
         { WeaponType.Sword, steamID =>
@@ -172,7 +180,7 @@ internal static class WeaponSystem
     {
         ProcessExpertise(deathEvent.Source, deathEvent.Target);
     }
-    public static void ProcessExpertise(Entity source, Entity target)
+    public static void ProcessExpertise(Entity source, Entity target, float groupMultiplier = 1f)
     {
         if (target.Has<Minion>()) return;
 
@@ -187,9 +195,9 @@ internal static class WeaponSystem
             float expertiseValue = CalculateExpertiseValue(VictimStats, target.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
 
-            if (ConfigService.UnitSpawnerExpertiseFactor < 1 && target.Has<IsMinion>() && target.Read<IsMinion>().Value)
+            if (UnitSpawnerExpertiseFactor < 1 && target.Has<IsMinion>() && target.Read<IsMinion>().Value)
             {
-                expertiseValue *= ConfigService.UnitSpawnerExpertiseFactor;
+                expertiseValue *= UnitSpawnerExpertiseFactor;
                 if (expertiseValue == 0) return;
             }
 
@@ -197,23 +205,24 @@ internal static class WeaponSystem
             {
                 if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige))
                 {
-                    changeFactor -= (ConfigService.PrestigeRatesReducer * expertisePrestige);
+                    changeFactor -= (PrestigeRatesReducer * expertisePrestige);
                 }
 
                 if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige))
                 {
-                    changeFactor += (ConfigService.PrestigeRateMultiplier * xpPrestige);
+                    changeFactor += (PrestigeRateMultiplier * xpPrestige);
                 }
             }
 
-            expertiseValue *= changeFactor;
+            expertiseValue *= changeFactor * groupMultiplier;
+
             IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
                 // Check if the player leveled up
                 var xpData = handler.GetExpertiseData(steamID);
 
-                if (xpData.Key >= ConfigService.MaxExpertiseLevel) return;
+                if (xpData.Key >= MaxExpertiseLevel) return;
 
                 float newExperience = xpData.Value + expertiseValue;
                 int newLevel = ConvertXpToLevel(newExperience);
@@ -222,10 +231,10 @@ internal static class WeaponSystem
                 if (newLevel > xpData.Key)
                 {
                     leveledUp = true;
-                    if (newLevel > ConfigService.MaxExpertiseLevel)
+                    if (newLevel > MaxExpertiseLevel)
                     {
-                        newLevel = ConfigService.MaxExpertiseLevel;
-                        newExperience = ConvertLevelToXp(ConfigService.MaxExpertiseLevel);
+                        newLevel = MaxExpertiseLevel;
+                        newExperience = ConvertLevelToXp(MaxExpertiseLevel);
                     }
                 }
 
@@ -238,8 +247,8 @@ internal static class WeaponSystem
     static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
     {
         float ExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
-        if (isVBlood) return ExpertiseValue * ConfigService.VBloodExpertiseMultiplier;
-        return ExpertiseValue * ConfigService.UnitExpertiseMultiplier;
+        if (isVBlood) return ExpertiseValue * VBloodExpertiseMultiplier;
+        return ExpertiseValue * UnitExpertiseMultiplier;
     }
     static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
     {
@@ -249,14 +258,14 @@ internal static class WeaponSystem
 
         if (leveledUp)
         {
-            if (newLevel <= ConfigService.MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
+            if (newLevel <= MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
             if (PlayerUtilities.GetPlayerBool(steamID, "Reminders"))
             {
                 if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
                 {
-                    if (Stats.Count < ConfigService.ExpertiseStatChoices)
+                    if (Stats.Count < ExpertiseStatChoices)
                     {
-                        int choices = ConfigService.ExpertiseStatChoices - Stats.Count;
+                        int choices = ExpertiseStatChoices - Stats.Count;
                         string bonusString = choices > 1 ? "bonuses" : "bonus";
 
                         LocalizationService.HandleServerReply(EntityManager, user, $"{choices} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to make your choice and <color=white>'.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.remindme'</color>)");

@@ -48,7 +48,11 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
 
-                if (Leveling) LevelingSystem.ProcessExperienceGain(player, vBlood, steamId, 1f);
+                if (Leveling)
+                {
+                    int currentLevel = LevelingSystem.GetLevel(steamId);
+                    LevelingSystem.ProcessExperienceGain(player, vBlood, steamId, currentLevel);
+                }
                 if (Expertise) WeaponSystem.ProcessExpertise(player, vBlood);
                 if (Legacies) BloodSystem.ProcessLegacy(player, vBlood);
                 if (Familiars)

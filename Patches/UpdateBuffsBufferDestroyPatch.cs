@@ -67,9 +67,11 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (PrestigeBuffs.Contains(prefabGUID)) // check if the buff is for prestige and reapply if so
                     {
+                        int index = PrestigeBuffs.IndexOf(prefabGUID);
+
                         if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                         {                            
-                            if (prestigeLevel > PrestigeBuffs.IndexOf(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                            if (prestigeLevel > index) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
                     else if (ExoPrestige && prefabGUID.Equals(TauntEmoteBuff) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
@@ -77,7 +79,6 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (EmoteSystemPatch.ExitingForm.Contains(steamId))
                         {
                             EmoteSystemPatch.ExitingForm.Remove(steamId);
-
                             continue;
                         }
                         else if (ExoFormUtilities.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(player); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder

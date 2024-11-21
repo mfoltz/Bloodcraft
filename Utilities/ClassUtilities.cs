@@ -253,6 +253,8 @@ internal static class ClassUtilities
         {
             RemoveNPCSpell(character);
         }
+
+        EclipseService.SendClientAbilityData(character);
     }
     public static void UpdateShift(ChatCommandContext ctx, Entity character, PrefabGUID spellPrefabGUID)
     {
@@ -405,6 +407,8 @@ internal static class ClassUtilities
                 LocalizationService.HandleReply(ctx, $"Shift spell: <color=#CBC3E3>{spellName}</color>");
             }
         }
+
+        EclipseService.SendClientAbilityData(character);
     }
     static void RemoveNPCSpell(Entity character)
     {
@@ -437,6 +441,7 @@ internal static class ClassUtilities
         if (replaceBuffer.IsIndexWithinRange(toRemove)) replaceBuffer.RemoveAt(toRemove);
 
         ServerGameManager.ModifyAbilityGroupOnSlot(buffEntity, character, 3, PrefabGUID.Empty);
+
     }
     static void HandleNPCSpell(Entity character, PrefabGUID spellPrefabGUID)
     {

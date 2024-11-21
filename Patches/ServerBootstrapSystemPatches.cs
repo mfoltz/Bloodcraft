@@ -1,17 +1,18 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.UI;
 using Stunlock.Core;
 using Stunlock.Network;
+using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
 using User = ProjectM.Network.User;
@@ -29,6 +30,8 @@ internal static class ServerBootstrapSystemPatches
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static PrefabLookupMap PrefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
+
+    static readonly WaitForSeconds Delay = new(5f);
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
@@ -418,7 +421,15 @@ internal static class ServerBootstrapSystemPatches
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
 
-            if (exists) FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
+            //if (exists) FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
+
+            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(playerCharacter);
+
+            if (!familiar.Exists()) FamiliarUtilities.ClearFamiliarActives(steamId);
+            else
+            {
+                Core.StartCoroutine(UpdatePlayerFamiliar(playerCharacter, familiar));
+            }
         }
 
         if (Classes)
@@ -557,6 +568,12 @@ internal static class ServerBootstrapSystemPatches
             if (!OnlineCache.ContainsKey(steamId.ToString())) OnlineCache.TryAdd(steamId.ToString(), playerInfo);
         }
     }
+    static IEnumerator UpdatePlayerFamiliar(Entity playerCharacter, Entity familiar)
+    {
+        yield return Delay;
+
+        FamiliarSummonSystem.HandleFamiliar(playerCharacter, familiar);
+    }
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
     [HarmonyPrefix]
@@ -572,7 +589,8 @@ internal static class ServerBootstrapSystemPatches
 
         if (FamiliarSystem && playerCharacter.Exists())
         {
-            FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
+            //FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
+            // see what game does naturally and update player data instead?
         }
 
         if (Leveling)
@@ -609,7 +627,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (FamiliarSystem)
                         {
-                            FamiliarUtilities.ClearBuffers(character, steamId);
+                            //FamiliarUtilities.ClearBuffers(character, steamId);
                         }
 
                         if (Leveling)

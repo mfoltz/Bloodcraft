@@ -31,7 +31,8 @@ internal static class ExoFormUtilities
 
         if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BaseDuration)
         {
-            ReplyNotEnoughCharge(user, steamId, exoFormData);
+            ReplyNotEnoughCharge(user, steamId);
+
             return false;
         }
         else if (steamId.TryGetPlayerExoFormData(out exoFormData) && exoFormData.Value >= BaseDuration)
@@ -41,12 +42,13 @@ internal static class ExoFormUtilities
 
         return false;
     }
-    public static void ReplyNotEnoughCharge(User user, ulong steamId, KeyValuePair<DateTime, float> exoFormData) // this should be in BuffUtilities or something, need to organize later
+    public static void ReplyNotEnoughCharge(User user, ulong steamId) // this should be in BuffUtilities or something, need to organize later
     {
-        string timeRemaining = GetTimeUntilCharged(steamId, exoFormData);
+        string timeRemaining = GetTimeUntilCharged(steamId);
+
         if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color>)");
     }
-    static string GetTimeUntilCharged(ulong steamId, KeyValuePair<DateTime, float> exoFormData) // same as method above, need to organize later
+    static string GetTimeUntilCharged(ulong steamId) // same as method above, need to organize later
     {
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
         float totalDuration = CalculateFormDuration(exoLevel);
@@ -76,7 +78,6 @@ internal static class ExoFormUtilities
     }
     public static float CalculateFormDuration(int prestigeLevel)
     {
-        // Linear scaling from 15s to 120s over 1-100 prestige levels
         if (prestigeLevel == 1)
         {
             return 15f;
@@ -120,7 +121,6 @@ internal static class ExoFormUtilities
     }
     public static void UpdateExoFormChargeStored(ulong steamId)
     {
-        // add energy based on last time form was exited till now
         if (steamId.TryGetPlayerExoFormData(out var exoFormData))
         {
             DateTime now = DateTime.UtcNow;
@@ -128,9 +128,8 @@ internal static class ExoFormUtilities
             int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
             float totalDuration = CalculateFormDuration(exoLevel);
 
-            // energy earned based on total duration from exo level times fraction of time passed in seconds per day?
             float chargedEnergy = (float)(((now - exoFormData.Key).TotalSeconds / 86400) * totalDuration);
-            float chargeStored = Mathf.Min(exoFormData.Value + chargedEnergy, MaxAddedDuration + BaseDuration);
+            float chargeStored = Mathf.Min(exoFormData.Value + chargedEnergy, totalDuration);
 
             KeyValuePair<DateTime, float> timeEnergyPair = new(now, chargeStored);
             steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -140,11 +139,7 @@ internal static class ExoFormUtilities
     {
         if (steamId.TryGetPlayerExoFormData(out var exoFormData))
         {
-            int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
             float timeInForm = buffEntity.Read<Age>().Value;
-
-            // set stamp to start 'charging' energy, subtract energy used based on duration and exo level
-            //Core.Log.LogInfo($"Time spent in form: {timeInForm} ({totalDuration})");
 
             KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - timeInForm);
             steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -152,10 +147,7 @@ internal static class ExoFormUtilities
     }
     public static void UpdateFullExoFormChargeUsed(ulong steamId)
     {
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData))
-        {
-            KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, 0f);
-            steamId.SetPlayerExoFormData(timeEnergyPair);
-        }
+        KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, 0f);
+        steamId.SetPlayerExoFormData(timeEnergyPair);
     }
 }

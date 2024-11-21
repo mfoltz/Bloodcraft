@@ -66,6 +66,7 @@ internal static class BuffUtilities
         if (!ServerGameManager.HasBuff(character, buffPrefab.ToIdentifier()))
         {
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
+
             return true;
         }
 
@@ -96,8 +97,6 @@ internal static class BuffUtilities
     }
     public static void ModifyBloodBuff(Entity buff)
     {
-        //Core.Log.LogInfo("ModifyBloodBuff: " + buff.Read<PrefabGUID>().LookupName());
-
         if (buff.Has<BloodBuffScript_Rogue_MountDamageBonus>())
         {
             var mountDamageBonus = buff.Read<BloodBuffScript_Rogue_MountDamageBonus>();
@@ -545,7 +544,6 @@ internal static class BuffUtilities
     }
     public static void ApplyPermanentBuff(Entity player, PrefabGUID buffPrefab)
     {
-        //Core.Log.LogInfo("ApplyPermanentBuff: " + buffPrefab.LookupName());
         bool appliedBuff = TryApplyBuff(player, buffPrefab);
 
         if (appliedBuff && ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
@@ -587,10 +585,10 @@ internal static class BuffUtilities
             buffEntity.Remove<DestroyOnGameplayEvent>();
         }
 
-        if (buffEntity.Has<LifeTime>()) // add LifeTime if doesn't have one to mark for checking the prestige buff list later? so can reference prestige buff list then see if the buff had an infinite lifetime to determine if should sync again or not
+        if (buffEntity.Has<LifeTime>())
         {
             LifeTime lifeTime = buffEntity.Read<LifeTime>();
-            lifeTime.Duration = -1;
+            lifeTime.Duration = 9999f;
             lifeTime.EndAction = LifeTimeEndAction.None;
             buffEntity.Write(lifeTime);
         }
@@ -667,7 +665,7 @@ internal static class BuffUtilities
             if (buff.Has<LifeTime>())
             {
                 LifeTime lifetime = buff.Read<LifeTime>();
-                lifetime.Duration = -1; // need to try changing this to 9999 instead and maybe destroy it to let reapply by mod? could def be something problematic knowing this game so later
+                lifetime.Duration = 9999f; // need to try changing this to 9999 instead? death to console spam
                 lifetime.EndAction = LifeTimeEndAction.None;
                 buff.Write(lifetime);
             }

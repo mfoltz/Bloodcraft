@@ -73,6 +73,10 @@ internal static class Extensions
     {
         return EntityManager.GetBuffer<T>(entity);
     }
+    public static DynamicBuffer<T> AddBuffer<T>(this Entity entity) where T : struct
+    {
+        return EntityManager.AddBuffer<T>(entity);
+    }
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
         componentData = default;

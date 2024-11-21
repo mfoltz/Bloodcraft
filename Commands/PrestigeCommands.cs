@@ -359,7 +359,7 @@ internal static class PrestigeCommands
             {
                 if (exoFormData.Value < ExoFormUtilities.BaseDuration)
                 {
-                    ExoFormUtilities.ReplyNotEnoughCharge(user, steamId, exoFormData);
+                    ExoFormUtilities.ReplyNotEnoughCharge(user, steamId);
                 }
                 else if (exoFormData.Value >= ExoFormUtilities.BaseDuration)
                 {

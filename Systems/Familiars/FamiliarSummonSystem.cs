@@ -1,13 +1,12 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
-using ProjectM.Behaviours;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using ProjectM.UI;
 using Stunlock.Core;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -44,6 +43,8 @@ internal static class FamiliarSummonSystem
     static readonly PrefabGUID HideStaffBuff = new(2053361366);
 
     static readonly PrefabGUID AbilityGroupSlot = new(-633717863);
+
+    static readonly PrefabGUID InteractServantGroup = new(-1509344340);
 
     static readonly HashSet<PrefabGUID> DocileAbilityGroups = new()
     {
@@ -135,6 +136,7 @@ internal static class FamiliarSummonSystem
             if (GameMode.Equals(GameModeType.PvP)) ManualAggroHandling(familiar);
 
             //EnhanceDocileUnits(familiar);
+            //AddEquipment(familiar);
 
             return true;
         }
@@ -142,6 +144,61 @@ internal static class FamiliarSummonSystem
         {
             Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
             return false;
+        }
+    }
+    static void AddEquipment(Entity familiar)
+    {
+        if (ServerGameManager.TryGetBuffer<InteractAbilityBuffer>(familiar, out var buffer))
+        {
+            if (!buffer.IsCreated)
+            {
+                InteractAbilityBuffer interactAbilityBuffer = new()
+                {
+                    Ability = InteractServantGroup,
+                    Condition = BlobAssetReference<ConditionBlob>.Null,
+                    HideInteractHUDWhileCasting = false,
+                    Importance = 0
+                };
+
+                buffer.Add(interactAbilityBuffer);
+
+                if (familiar.Has<Interactable>())
+                {
+                    familiar.With((ref Interactable interactable) =>
+                    {
+                        interactable.Disabled = false;
+                        interactable.IgnoreBlockInteract = true;
+                        interactable.IgnoreLineOfSight = true;
+                        interactable.UseInteractAbilityName = true;
+                    });
+                }
+
+                familiar.Add<ServantEquipment>();
+            }
+            else if (!buffer.IsEmpty)
+            {
+                InteractAbilityBuffer interactAbilityBuffer = buffer[0];
+
+                interactAbilityBuffer.Ability = InteractServantGroup;
+                interactAbilityBuffer.Condition = BlobAssetReference<ConditionBlob>.Null;
+                interactAbilityBuffer.Importance = 0;
+                interactAbilityBuffer.HideInteractHUDWhileCasting = false;
+
+                buffer[0] = interactAbilityBuffer;
+
+                if (familiar.Has<Interactable>())
+                {
+                    familiar.With((ref Interactable interactable) =>
+                    {
+                        interactable.Disabled = false;
+                        interactable.IgnoreBlockInteract = false;
+                        interactable.IgnoreLineOfSight = true;
+                        interactable.UseInteractAbilityName = true;
+                    });
+                }
+
+                familiar.Add<ServantEquipment>();
+            }
         }
     }
     static void DisableCombat(Entity player, Entity familiar)
