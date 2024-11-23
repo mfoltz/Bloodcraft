@@ -351,10 +351,11 @@ internal static class PrestigeSystem
         else
         {
             if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
-                prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
+                prestigeData.TryGetValue(parsedPrestigeType, out var parsedPrestigeLevel) && parsedPrestigeLevel > 0 
+                && prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
-                reductionFactor = ConfigService.LevelingPrestigeReducer * expPrestigeLevel;
+                reductionFactor = ConfigService.PrestigeRatesReducer * parsedPrestigeLevel;
 
                 // Apply rate gain with linear increase for expertise/legacy
                 gainFactor = ConfigService.PrestigeRateMultiplier * expPrestigeLevel;
@@ -367,7 +368,7 @@ internal static class PrestigeSystem
             float statGainIncrease = ConfigService.PrestigeStatMultiplier * prestigeLevel;
             string statGainString = (statGainIncrease * 100).ToString("F2") + "%";
 
-            string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
+            string totalEffectString = (combinedFactor >= 0 ? "+" : "-") + (combinedFactor * 100).ToString("F2") + "%";
 
             LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
             LocalizationService.HandleReply(ctx, $"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");

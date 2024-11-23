@@ -5,7 +5,6 @@ using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Transforms;
@@ -27,6 +26,8 @@ internal static class FamiliarSummonSystem
     static readonly GameDifficulty GameDifficulty = SystemService.ServerGameSettingsSystem.Settings.GameDifficulty;
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
+    const float FAMILIAR_LIFETIME = 600f;
+
     static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float FamiliarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
     static readonly float VBloodDamageMultiplier = ConfigService.VBloodDamageMultiplier;
@@ -34,6 +35,8 @@ internal static class FamiliarSummonSystem
     static readonly bool FamiliarPrestige = ConfigService.FamiliarPrestige;
 
     static readonly PrefabGUID InvulnerableBuff = new(-480024072);
+    static readonly PrefabGUID InkCrawlerDeathBuff = new(1273155981);
+
     static readonly PrefabGUID DivineAngel = new(-1737346940);
 
     static readonly PrefabGUID IgnoredFaction = new(-1430861195);
@@ -120,6 +123,7 @@ internal static class FamiliarSummonSystem
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
+            NothingLivesForever(familiar);
 
             if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
 
@@ -146,6 +150,8 @@ internal static class FamiliarSummonSystem
             return false;
         }
     }
+
+    /*
     static void AddEquipment(Entity familiar)
     {
         if (ServerGameManager.TryGetBuffer<InteractAbilityBuffer>(familiar, out var buffer))
@@ -201,6 +207,7 @@ internal static class FamiliarSummonSystem
             }
         }
     }
+    */
     static void DisableCombat(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
@@ -396,6 +403,16 @@ internal static class FamiliarSummonSystem
         {FamiliarStatType.CCReduction, 0.5f},
         {FamiliarStatType.ShieldAbsorb, 1f}
     };
+    static void NothingLivesForever(Entity familiar)
+    {
+        if (BuffUtilities.TryApplyBuff(familiar, InkCrawlerDeathBuff) && familiar.TryGetBuff(InkCrawlerDeathBuff, out Entity buffEntity))
+        {
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = FAMILIAR_LIFETIME;
+            });
+        }
+    }
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
         float scalingFactor = 0.1f + (level / (float)MaxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such

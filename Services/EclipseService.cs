@@ -68,7 +68,7 @@ internal class EclipseService
         RegisterUser,
         ProgressToClient,
         ConfigsToClient,
-        UpdateShiftSlot
+        //UpdateShiftSlot
     }
     public static void HandleClientMessage(string message)
     {
@@ -220,11 +220,12 @@ internal class EclipseService
         Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
-        string message = BuildAbilityMessage(GetAbilityData(character));
-        string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_2_2(message)}";
+        //string message = BuildAbilityMessage(GetAbilityData(character));
+        //string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_2_2(message)}";
 
-        LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
+        //LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
     }
+    /*
     public static string BuildAbilityMessage((int prefabHash, int cooldown, int charges, int chargesCooldown) data)
     {
         var sb = new StringBuilder();
@@ -233,6 +234,7 @@ internal class EclipseService
 
         return sb.ToString();
     }
+    */
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {
         int experiencePercent = 0;

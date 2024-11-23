@@ -117,7 +117,7 @@ internal static class DealDamageSystemPatch
                                     {
                                         if (!player.HasBuff(stormShield01))
                                         {
-                                            BuffUtilities.TryApplyBuffWithOwner(player, userEntity, stormShield01);
+                                            BuffUtilities.TryApplyBuff(player, stormShield01);
                                         }
                                         else if (player.TryGetBuff(stormShield01, out Entity stormShieldFirstBuff))
                                         {
@@ -126,7 +126,7 @@ internal static class DealDamageSystemPatch
                                                 age.Value = 0f;
                                             });
 
-                                            BuffUtilities.TryApplyBuffWithOwner(player, userEntity, stormShield02);
+                                            BuffUtilities.TryApplyBuff(player, stormShield02);
                                         }
                                     }
                                     else if (player.TryGetBuff(stormShield02, out Entity stormShieldSecondBuff))
@@ -136,7 +136,7 @@ internal static class DealDamageSystemPatch
                                             age.Value = 0f;
                                         });
 
-                                        BuffUtilities.TryApplyBuffWithOwner(player, userEntity, stormShield03);
+                                        BuffUtilities.TryApplyBuff(player, stormShield03);
                                     }
                                 }
                                 else if (player.TryGetBuff(stormShield03, out Entity stormShieldThirdBuff))
@@ -149,12 +149,18 @@ internal static class DealDamageSystemPatch
                             }
                             else
                             {
-                                BuffUtilities.TryApplyBuffWithOwner(player, userEntity, prefabGUID);
+                                BuffUtilities.TryApplyBuff(player, prefabGUID);
                             }
                         }
                         else
                         {
-                            BuffUtilities.TryApplyBuffWithOwner(dealDamageEvent.Target, userEntity, prefabGUID);
+                            if (BuffUtilities.TryApplyBuff(dealDamageEvent.Target, prefabGUID) && dealDamageEvent.Target.TryGetBuff(prefabGUID, out Entity buffEntity))
+                            {
+                                buffEntity.With((ref EntityOwner entityOwner) => 
+                                {
+                                    entityOwner.Owner = player;
+                                });
+                            }
                         }
                     }
                 }

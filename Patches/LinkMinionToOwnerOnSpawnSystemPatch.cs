@@ -73,7 +73,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                             }
                         }
 
-                        if (!GameMode.Equals(GameModeType.PvE)) entity.Write(new EntityOwner { Owner = player });
+                        entity.Write(new EntityOwner { Owner = player });
                     }
                 }
                 else if (entityOwner.Owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsPlayer())
