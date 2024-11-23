@@ -123,7 +123,7 @@ internal static class FamiliarSummonSystem
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
-            NothingLivesForever(familiar);
+            //NothingLivesForever(familiar);
 
             if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
 
