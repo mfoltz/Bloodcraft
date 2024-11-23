@@ -434,32 +434,6 @@ internal static class ServerBootstrapSystemPatches
 
         if (Classes)
         {
-            /*
-            if (exists)
-            {
-                playerCharacter.With((ref AbilityBarInitializationState abilityBarInitializationState) =>
-                {
-                    abilityBarInitializationState.AbilityGroupSlotsInitialized = false;
-                });
-
-                Entity abilityGroup = ServerGameManager.GetAbilityGroup(playerCharacter, 3);
-
-                if (abilityGroup.Exists())
-                {
-                    PrefabGUID spellPrefabGUID = abilityGroup.GetPrefabGUID();
-
-                    if (AbilityUtilitiesServer.SpawnInitialAbilityGroupSlots(EntityManager, ref PrefabLookupMap, playerCharacter, spellPrefabGUID, true, out Entity abilityGroupEntity, 3))
-                    {
-                        Core.Log.LogInfo($"Successfully instantiated ability group for {steamId}! Spell: {spellPrefabGUID.LookupName()}");
-                    }
-                    else
-                    {
-                        Core.Log.LogWarning($"Failed to instantiate ability group for {steamId}...");
-                    }
-                }
-            }
-            */
-
             if (!steamId.TryGetPlayerClasses(out var classes))
             {
                 steamId.SetPlayerClasses([]);
@@ -472,6 +446,7 @@ internal static class ServerBootstrapSystemPatches
             
             if (exists)
             {
+                /*
                 EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
                 if (ClassUtilities.HasClass(steamId) && playerCharacter.Has<BloodQualityBuff>())
@@ -553,6 +528,7 @@ internal static class ServerBootstrapSystemPatches
                         }
                     }
                 }
+                */
             }
         }
 
