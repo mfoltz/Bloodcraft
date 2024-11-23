@@ -95,7 +95,6 @@ internal static class Core
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         ModifyReturnBuffPrefabs();
-        //LogSCTPRefabs();
 
         hasInitialized = true;
     }
@@ -134,93 +133,6 @@ internal static class Core
                 healOnGameplayEvent.showSCT = false;
 
                 buffer[0] = healOnGameplayEvent;
-            }
-        }
-    }
-
-    static readonly PrefabGUID SCTPrefab = new(-1661525964);
-
-    static readonly ComponentType[] PrefabGUIDComponent =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-    ];
-    static void LogSCTPRefabs()
-    {
-        EntityQuery prefabGUIDQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = PrefabGUIDComponent,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        //int counter = 0;
-
-        Dictionary<string, Dictionary<string, Dictionary<string, int>>> playerOwnedTargetCounts = new();
-
-        NativeArray<Entity> entities = prefabGUIDQuery.ToEntityArray(Allocator.TempJob);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!entity.Has<SpawnTag>() && entity.TryGetComponent(out PrefabGUID prefabGUID))
-                {
-                    if (prefabGUID.Equals(SCTPrefab) && entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatTextMessage))
-                    {
-                        Entity target = scrollingCombatTextMessage.Target.GetEntityOnServer();
-                        PrefabGUID prefabSCT = scrollingCombatTextMessage.Type; // SCT prefab type
-
-                        if (target.TryGetComponent(out EntityOwner entityOwner)
-                            && entityOwner.Owner.IsPlayer()
-                            && target.TryGetComponent(out PrefabGUID targetPrefabGUID))
-                        {
-                            User user = entityOwner.Owner.GetUser();
-                            string characterPrefabName = targetPrefabGUID.LookupName(); // Character prefab name
-                            string sctPrefabName = prefabSCT.LookupName(); // SCT prefab name
-
-                            // Initialize data structures if not present
-                            if (!playerOwnedTargetCounts.ContainsKey(user.CharacterName.Value))
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value] = new Dictionary<string, Dictionary<string, int>>();
-                            }
-
-                            if (!playerOwnedTargetCounts[user.CharacterName.Value].ContainsKey(characterPrefabName))
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName] = new Dictionary<string, int>();
-                            }
-
-                            if (!playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName].ContainsKey(sctPrefabName))
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName][sctPrefabName] = 1;
-                            }
-                            else
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName][sctPrefabName]++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-            prefabGUIDQuery.Dispose();
-
-            // Log the results
-            foreach (var playerEntry in playerOwnedTargetCounts)
-            {
-                Log.LogWarning($"Player: {playerEntry.Key}");
-                Log.LogWarning(new string('-', 20));
-
-                foreach (var characterPrefabEntry in playerEntry.Value)
-                {
-                    Log.LogInfo($"  CharacterPrefabGUID: {characterPrefabEntry.Key}");
-                    foreach (var sctEntry in characterPrefabEntry.Value)
-                    {
-                        Log.LogInfo($"    SCTPrefabName: {sctEntry.Key} | Count: {sctEntry.Value}");
-                    }
-                }
-
-                Log.LogInfo(""); // Blank line for better readability
             }
         }
     }
