@@ -588,8 +588,8 @@ internal static class BuffUtilities
         if (buffEntity.Has<LifeTime>())
         {
             LifeTime lifeTime = buffEntity.Read<LifeTime>();
-            lifeTime.Duration = 9999f;
-            lifeTime.EndAction = LifeTimeEndAction.None;
+            lifeTime.Duration = -1f;
+            lifeTime.EndAction = LifeTimeEndAction.Destroy;
             buffEntity.Write(lifeTime);
         }
     }
@@ -665,8 +665,8 @@ internal static class BuffUtilities
             if (buff.Has<LifeTime>())
             {
                 LifeTime lifetime = buff.Read<LifeTime>();
-                lifetime.Duration = 9999f; // need to try changing this to 9999 instead? death to console spam
-                lifetime.EndAction = LifeTimeEndAction.None;
+                lifetime.Duration = -1f; // need to try changing this to 9999 instead? death to console spam
+                lifetime.EndAction = LifeTimeEndAction.Destroy;
                 buff.Write(lifetime);
             }
             if (buff.Has<RemoveBuffOnGameplayEvent>())
