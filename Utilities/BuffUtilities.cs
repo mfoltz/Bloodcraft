@@ -666,7 +666,7 @@ internal static class BuffUtilities
             {
                 LifeTime lifetime = buff.Read<LifeTime>();
                 lifetime.Duration = -1f; // need to try changing this to 9999 instead? death to console spam
-                lifetime.EndAction = LifeTimeEndAction.Destroy;
+                lifetime.EndAction = LifeTimeEndAction.None;
                 buff.Write(lifetime);
             }
             if (buff.Has<RemoveBuffOnGameplayEvent>())
