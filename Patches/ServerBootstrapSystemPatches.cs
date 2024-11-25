@@ -10,6 +10,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Stunlock.Network;
 using System.Collections;
+using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -31,7 +32,7 @@ internal static class ServerBootstrapSystemPatches
 
     static PrefabLookupMap PrefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
-    static readonly WaitForSeconds Delay = new(5f);
+    static readonly WaitForSeconds Delay = new(2.5f);
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
@@ -54,26 +55,26 @@ internal static class ServerBootstrapSystemPatches
     static readonly int StartingLevel = ConfigService.StartingLevel;
     static readonly int MaxLevel = ConfigService.MaxLevel;
 
-    static readonly Dictionary<string, bool> DefaultBools = new()
+    static readonly ConcurrentDictionary<string, bool> DefaultBools = new()
     {
-        { "ExperienceLogging", false },
-        { "QuestLogging", false },
-        { "ProfessionLogging", false },
-        { "ExpertiseLogging", false },
-        { "BloodLogging", false },
-        { "FamiliarLogging", false },
-        { "SpellLock", false },
-        { "ShiftLock", false },
-        { "Grouping", false },
-        { "Emotes", false },
-        { "Binding", false },
-        { "Kit", false },
-        { "VBloodEmotes", true },
-        { "FamiliarVisual", true},
-        { "ShinyChoice", false },
-        { "Reminders", true },
-        { "ScrollingText", true},
-        { "ExoForm", false}
+        ["ExperienceLogging"] = false,
+        ["QuestLogging"] = false,
+        ["ProfessionLogging"] = false,
+        ["ExpertiseLogging"] = false,
+        ["BloodLogging"] = false,
+        ["FamiliarLogging"] = false,
+        ["SpellLock"] = false,
+        ["ShiftLock"] = false,
+        ["Grouping"] = false,
+        ["Emotes"] = false,
+        ["Binding"] = false,
+        ["Kit"] = false,
+        ["VBloodEmotes"] = true,
+        ["FamiliarVisual"] = true,
+        ["ShinyChoice"] = false,
+        ["Reminders"] = true,
+        ["ScrollingText"] = true,
+        ["ExoForm"] = false
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
@@ -85,14 +86,15 @@ internal static class ServerBootstrapSystemPatches
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
-
-        bool exists = false;
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
 
-        if (playerCharacter.Exists())
-        {
-            exists = true;
-        }
+        bool exists = playerCharacter.Exists();
+
+        Core.StartCoroutine(UpdatePlayerData(steamId, playerCharacter, userEntity, user, exists));
+    }
+    static IEnumerator UpdatePlayerData(ulong steamId, Entity playerCharacter, Entity userEntity, User user, bool exists)
+    {
+        yield return Delay;
 
         if (!steamId.TryGetPlayerBools(out var bools))
         {
@@ -113,42 +115,42 @@ internal static class ServerBootstrapSystemPatches
 
         if (Professions)
         {
-            if (!steamId.TryGetPlayerWoodcutting(out var woodcutting))
+            if (!steamId.TryGetPlayerWoodcutting(out var _))
             {
                 steamId.SetPlayerWoodcutting(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerMining(out var rmining))
+            if (!steamId.TryGetPlayerMining(out var _))
             {
                 steamId.SetPlayerMining(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerFishing(out var fishing))
+            if (!steamId.TryGetPlayerFishing(out var _))
             {
                 steamId.SetPlayerFishing(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerBlacksmithing(out var blacksmithing))
+            if (!steamId.TryGetPlayerBlacksmithing(out var _))
             {
                 steamId.SetPlayerBlacksmithing(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerTailoring(out var tailoring))
+            if (!steamId.TryGetPlayerTailoring(out var _))
             {
                 steamId.SetPlayerTailoring(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerAlchemy(out var alchemy))
+            if (!steamId.TryGetPlayerAlchemy(out var _))
             {
                 steamId.SetPlayerAlchemy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerHarvesting(out var harvesting))
+            if (!steamId.TryGetPlayerHarvesting(out var _))
             {
                 steamId.SetPlayerHarvesting(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerEnchanting(out var enchanting))
+            if (!steamId.TryGetPlayerEnchanting(out var _))
             {
                 steamId.SetPlayerEnchanting(new KeyValuePair<int, float>(0, 0f));
             }
@@ -156,72 +158,72 @@ internal static class ServerBootstrapSystemPatches
 
         if (ExpertiseSystem)
         {
-            if (!steamId.TryGetPlayerUnarmedExpertise(out var unarmed))
+            if (!steamId.TryGetPlayerUnarmedExpertise(out var _))
             {
                 steamId.SetPlayerUnarmedExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerSpells(out var spells))
+            if (!steamId.TryGetPlayerSpells(out var _))
             {
                 steamId.SetPlayerSpells((0, 0, 0));
             }
 
-            if (!steamId.TryGetPlayerSwordExpertise(out var sword))
+            if (!steamId.TryGetPlayerSwordExpertise(out var _))
             {
                 steamId.SetPlayerSwordExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerAxeExpertise(out var axe))
+            if (!steamId.TryGetPlayerAxeExpertise(out var _))
             {
                 steamId.SetPlayerAxeExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerMaceExpertise(out var mace))
+            if (!steamId.TryGetPlayerMaceExpertise(out var _))
             {
                 steamId.SetPlayerMaceExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerSpearExpertise(out var spear))
+            if (!steamId.TryGetPlayerSpearExpertise(out var _))
             {
                 steamId.SetPlayerSpearExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerCrossbowExpertise(out var crossbow))
+            if (!steamId.TryGetPlayerCrossbowExpertise(out var _))
             {
                 steamId.SetPlayerCrossbowExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerGreatSwordExpertise(out var greatSword))
+            if (!steamId.TryGetPlayerGreatSwordExpertise(out var _))
             {
                 steamId.SetPlayerGreatSwordExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerSlashersExpertise(out var slashers))
+            if (!steamId.TryGetPlayerSlashersExpertise(out var _))
             {
                 steamId.SetPlayerSlashersExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerPistolsExpertise(out var pistols))
+            if (!steamId.TryGetPlayerPistolsExpertise(out var _))
             {
                 steamId.SetPlayerPistolsExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerReaperExpertise(out var reaper))
+            if (!steamId.TryGetPlayerReaperExpertise(out var _))
             {
                 steamId.SetPlayerReaperExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerLongbowExpertise(out var longbow))
+            if (!steamId.TryGetPlayerLongbowExpertise(out var _))
             {
                 steamId.SetPlayerLongbowExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerWhipExpertise(out var whip))
+            if (!steamId.TryGetPlayerWhipExpertise(out var _))
             {
                 steamId.SetPlayerWhipExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerFishingPoleExpertise(out var fishingPole))
+            if (!steamId.TryGetPlayerFishingPoleExpertise(out var _))
             {
                 steamId.SetPlayerFishingPoleExpertise(new KeyValuePair<int, float>(0, 0f));
             }
@@ -246,52 +248,52 @@ internal static class ServerBootstrapSystemPatches
 
         if (BloodSystem)
         {
-            if (!steamId.TryGetPlayerWorkerLegacy(out var worker))
+            if (!steamId.TryGetPlayerWorkerLegacy(out var _))
             {
                 steamId.SetPlayerWorkerLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerWarriorLegacy(out var warrior))
+            if (!steamId.TryGetPlayerWarriorLegacy(out var _))
             {
                 steamId.SetPlayerWarriorLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerScholarLegacy(out var scholar))
+            if (!steamId.TryGetPlayerScholarLegacy(out var _))
             {
                 steamId.SetPlayerScholarLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerRogueLegacy(out var rogue))
+            if (!steamId.TryGetPlayerRogueLegacy(out var _))
             {
                 steamId.SetPlayerRogueLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerMutantLegacy(out var mutant))
+            if (!steamId.TryGetPlayerMutantLegacy(out var _))
             {
                 steamId.SetPlayerMutantLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerVBloodLegacy(out var vBlood))
+            if (!steamId.TryGetPlayerVBloodLegacy(out var _))
             {
                 steamId.SetPlayerVBloodLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerDraculinLegacy(out var draculin))
+            if (!steamId.TryGetPlayerDraculinLegacy(out var _))
             {
                 steamId.SetPlayerDraculinLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerImmortalLegacy(out var immortal))
+            if (!steamId.TryGetPlayerImmortalLegacy(out var _))
             {
                 steamId.SetPlayerImmortalLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerCreatureLegacy(out var creature))
+            if (!steamId.TryGetPlayerCreatureLegacy(out var _))
             {
                 steamId.SetPlayerCreatureLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerBruteLegacy(out var brute))
+            if (!steamId.TryGetPlayerBruteLegacy(out var _))
             {
                 steamId.SetPlayerBruteLegacy(new KeyValuePair<int, float>(0, 0f));
             }
@@ -382,23 +384,18 @@ internal static class ServerBootstrapSystemPatches
                     if (!prestiges.ContainsKey(prestigeType)) prestiges.Add(prestigeType, 0);
                 }
 
-                if (exists && prestiges.TryGetValue(PrestigeType.Experience, out int experiencePrestiges) && experiencePrestiges > 0)
-                {
-                    BuffUtilities.SanitizePrestigeBuffs(playerCharacter);
-                }
-
-                if (ConfigService.ExoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
+                if (ExoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
                     PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
 
-                    if (!steamId.TryGetPlayerExoFormData(out var exoFormData))
+                    if (!steamId.TryGetPlayerExoFormData(out var _))
                     {
                         KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoFormUtilities.CalculateFormDuration(exoPrestiges));
                         steamId.SetPlayerExoFormData(timeEnergyPair);
                     }
                 }
 
-                if (ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var exoFormDataOther))
+                if (ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var _))
                 {
                     KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MaxValue, 0f);
                     steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -408,12 +405,12 @@ internal static class ServerBootstrapSystemPatches
 
         if (FamiliarSystem)
         {
-            if (!steamId.TryGetFamiliarActives(out var actives))
+            if (!steamId.TryGetFamiliarActives(out var _))
             {
                 steamId.SetFamiliarActives(new(Entity.Null, 0));
             }
 
-            if (!steamId.TryGetFamiliarBox(out var box))
+            if (!steamId.TryGetFamiliarBox(out var _))
             {
                 steamId.SetFamiliarBox("");
             }
@@ -434,101 +431,14 @@ internal static class ServerBootstrapSystemPatches
 
         if (Classes)
         {
-            if (!steamId.TryGetPlayerClasses(out var classes))
+            if (!steamId.TryGetPlayerClasses(out var _))
             {
                 steamId.SetPlayerClasses([]);
             }
 
-            if (!steamId.TryGetPlayerSpells(out var spells))
+            if (!steamId.TryGetPlayerSpells(out var _))
             {
                 steamId.SetPlayerSpells((0, 0, 0));
-            }
-            
-            if (exists)
-            {
-                /*
-                EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
-                if (ClassUtilities.HasClass(steamId) && playerCharacter.Has<BloodQualityBuff>())
-                {
-                    PrefabGUID bloodPrefab = playerCharacter.Read<Blood>().BloodType;
-                    BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter);
-
-                    var bloodQualityBuffBuffer = playerCharacter.ReadBuffer<BloodQualityBuff>();
-                    List<PrefabGUID> bloodQualityBuffs = [];
-
-                    if (!bloodQualityBuffBuffer.IsEmpty)
-                    {
-                        foreach (BloodQualityBuff item in bloodQualityBuffBuffer)
-                        {
-                            bloodQualityBuffs.Add(item.BloodQualityBuffPrefabGuid);
-                        }
-                    }
-
-                    LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
-
-                    HashSet<PrefabGUID> classBuffsToRemove = [..UpdateBuffsBufferDestroyPatch.ClassBuffs.Where(keyValuePair => keyValuePair.Key != playerClass).SelectMany(keyValuePair => keyValuePair.Value)];
-                    //HashSet<PrefabGUID> filteredClassBuffs = classBuffsToRemove.Where(buff => !UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(buff)).ToHashSet();
-
-                    foreach (PrefabGUID classBuff in classBuffsToRemove)
-                    {
-                        if (ServerGameManager.TryGetBuff(playerCharacter, classBuff.ToIdentifier(), out Entity buffEntity))
-                        {
-                            if (bloodQualityBuffs.Contains(classBuff)) continue; // after filtering out class buffs the player should have, check against remaining buffs then see if they are supposed to have it based on blood type and destroy it if not?
-                            else
-                            {
-                                //DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-                                entityCommandBuffer.DestroyEntity(buffEntity);
-                            }
-                        }
-                    }
-
-                    if (playerCharacter.Has<VBloodAbilityBuffEntry>())
-                    {
-                        var vBloodAbilityBuffer = playerCharacter.ReadBuffer<VBloodAbilityBuffEntry>();
-
-                        Dictionary<int, Entity> abilityBuffEntities = [];
-                        bool firstFound = false;
-
-                        // Traverse the buffer to find the first occurrence of SlotId == 3 and track duplicates
-                        for (int i = 0; i < vBloodAbilityBuffer.Length; i++)
-                        {
-                            VBloodAbilityBuffEntry item = vBloodAbilityBuffer[i];
-
-                            if (item.SlotId == 3)
-                            {
-                                if (!firstFound)
-                                {
-                                    firstFound = true; // Mark first occurrence
-                                }
-                                else
-                                {
-                                    abilityBuffEntities.Add(i, item.ActiveBuff); // Track duplicates for removal
-                                }
-                            }
-                        }
-
-                        // Reverse iterate and remove duplicates to avoid index shifting issues
-                        if (abilityBuffEntities.Count > 0)
-                        {
-                            // Iterate over the abilityBuffEntities in reverse order of indexes
-                            foreach (var entry in abilityBuffEntities.OrderByDescending(e => e.Key))
-                            {
-                                var index = entry.Key;
-                                var entity = entry.Value;
-
-                                if (vBloodAbilityBuffer.IsIndexWithinRange(index))
-                                {
-                                    vBloodAbilityBuffer.RemoveAt(index);
-                                    
-                                    //DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
-                                    entityCommandBuffer.DestroyEntity(entity);
-                                }
-                            }
-                        }
-                    }
-                }
-                */
             }
         }
 
@@ -542,6 +452,7 @@ internal static class ServerBootstrapSystemPatches
             };
 
             if (!OnlineCache.ContainsKey(steamId.ToString())) OnlineCache.TryAdd(steamId.ToString(), playerInfo);
+            if (!PlayerCache.ContainsKey(steamId.ToString())) PlayerCache.TryAdd(steamId.ToString(), playerInfo);
         }
     }
     static IEnumerator UpdatePlayerFamiliar(Entity playerCharacter, Entity familiar)
@@ -560,14 +471,7 @@ internal static class ServerBootstrapSystemPatches
 
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
-        Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         ulong steamId = user.PlatformId;
-
-        if (FamiliarSystem && playerCharacter.Exists())
-        {
-            //FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
-            // see what game does naturally and update player data instead?
-        }
 
         if (Leveling)
         {
@@ -599,13 +503,6 @@ internal static class ServerBootstrapSystemPatches
 
                     if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
                     {
-                        Entity character = playerInfo.CharEntity;
-
-                        if (FamiliarSystem)
-                        {
-                            //FamiliarUtilities.ClearBuffers(character, steamId);
-                        }
-
                         if (Leveling)
                         {
                             if (RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
@@ -628,43 +525,4 @@ internal static class ServerBootstrapSystemPatches
             entities.Dispose();
         }
     }
-
-    /*
-    static readonly HashSet<string> UserNetworkStateCleared = [];
-
-    [HarmonyPatch(typeof(SerializePersistenceSystemV2), nameof(SerializePersistenceSystemV2.CompleteAndFinalizeExistingSaveOperation))]
-    [HarmonyPostfix]
-    public static void CompleteAndFinalizeExistingSaveOperationPostfix()
-    {
-        Core.StartCoroutine(DelayedBufferClear());
-    }
-    static IEnumerator DelayedBufferClear()
-    {
-        yield return new WaitForSeconds(10f);
-
-        Dictionary<string, PlayerInfo> onlineCache = new(OnlineCache);
-        HashSet<PlayerInfo> playerInfos = [.. onlineCache.Values];
-
-        foreach (PlayerInfo playerInfo in playerInfos)
-        {
-            if (!UserNetworkStateCleared.Contains(playerInfo.User.CharacterName.Value) && playerInfo.UserEntity.Has<UserEntityNetworkState>())
-            {
-                
-                for (int i = buffer.Length - 1; i >= 0; i--)
-                {
-                    if (buffer[i].Generation == 0)
-                    {
-                        buffer.RemoveAt(i);
-                    }
-                }
-
-                ServerBootstrapSystem.ClearUserNetworkState(EntityManager, playerInfo.UserEntity, playerInfo.UserEntity.Read<ConnectedUser>(), true);
-                ServerBootstrapSystem.ClearUserNetworkState(EntityManager, playerInfo.UserEntity, playerInfo.UserEntity.Read<ConnectedUser>(), false);
-
-                UserNetworkStateCleared.Add(playerInfo.User.CharacterName.Value);
-                Core.Log.LogInfo($"Cleared {playerInfo.User.CharacterName.Value}'s UserEntityNetworkState buffer...");
-            }
-        }
-    }
-    */
 }

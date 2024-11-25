@@ -47,7 +47,7 @@ internal static class ScriptSpawnServerPatch
                 {
                     BuffUtilities.HandleExoFormBuff(entity, player);
                 }
-
+                
                 if (Familiars && entity.GetBuffTarget().IsFollowingPlayer())
                 {
                     if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
@@ -67,7 +67,6 @@ internal static class ScriptSpawnServerPatch
 
                     if (buff.BuffEffectType == BuffEffectType.Debuff && ServerGameManager.IsAllies(player, familiar))
                     {
-                        //Core.Log.LogInfo($"Preventing friendly fire from familiar in ServerScriptSpawn...");
                         DestroyUtility.Destroy(EntityManager, entity);
                     }           
                 }
@@ -91,16 +90,6 @@ internal static class ScriptSpawnServerPatch
                             BloodManager.ApplyBloodStats(steamId, bloodType, entity);
                         }
                     }
-
-                    /*
-                    if (Classes && ClassUtilities.HasClass(steamId))
-                    {
-                        LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
-                        List<PrefabGUID> classBuffs = UpdateBuffsBufferDestroyPatch.ClassBuffs.ContainsKey(playerClass) ? UpdateBuffsBufferDestroyPatch.ClassBuffs[playerClass] : [];
-
-                        if (classBuffs.Contains(prefabGUID)) BuffUtilities.ModifyBloodBuff(entity);
-                    }
-                    */
                 }
             }
         }

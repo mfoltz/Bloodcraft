@@ -174,7 +174,6 @@ internal class EclipseService
 
                         versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                        //SendClientAbilityData(playerInfo.CharEntity);
 
                         return true;
                     default:
@@ -196,45 +195,6 @@ internal class EclipseService
             return false;
         }
     }
-    public static (int prefabHash, int cooldown, int charges, int chargesCooldown) GetAbilityData(Entity character)
-    {
-        int prefabHash = 0;
-        int cooldown = 0;
-        int charges = 0;
-        int chargesCooldown = 0;
-
-        Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
-
-        if (abilityGroup.Exists())
-        {
-            prefabHash = abilityGroup.GetPrefabGUID().GuidHash;
-            charges = ServerGameManager.GetAbilityGroupCharges(character, 3);
-            cooldown = (int)ServerGameManager.GetAbilityGroupCooldown(character, 3);
-            chargesCooldown = (int)ServerGameManager.GetAbilityGroupCharges(character, 3);
-        }
-
-        return (prefabHash, cooldown, charges, chargesCooldown);
-    }
-    public static void SendClientAbilityData(Entity character)
-    {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-
-        //string message = BuildAbilityMessage(GetAbilityData(character));
-        //string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_2_2(message)}";
-
-        //LocalizationService.HandleServerReply(EntityManager, user, messageWithMAC);
-    }
-    /*
-    public static string BuildAbilityMessage((int prefabHash, int cooldown, int charges, int chargesCooldown) data)
-    {
-        var sb = new StringBuilder();
-        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.UpdateShiftSlot)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", data.prefabHash, data.cooldown, data.charges, data.chargesCooldown);
-
-        return sb.ToString();
-    }
-    */
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {
         int experiencePercent = 0;

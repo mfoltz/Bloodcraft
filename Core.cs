@@ -8,14 +8,11 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -45,7 +42,7 @@ internal static class Core
         _ = new LocalizationService();
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
-
+        
         if (ConfigService.ExtraRecipes) RecipeUtilities.AddExtraRecipes();
         if (ConfigService.StarterKit) ConfigUtilities.StarterKitItems();
         if (ConfigService.PrestigeSystem) BuffUtilities.PrestigeBuffs();

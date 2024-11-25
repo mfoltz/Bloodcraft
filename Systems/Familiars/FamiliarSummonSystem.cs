@@ -42,7 +42,6 @@ internal static class FamiliarSummonSystem
     static readonly PrefabGUID IgnoredFaction = new(-1430861195);
     static readonly PrefabGUID PlayerFaction = new(1106458752);
 
-    static readonly PrefabGUID BEHBanditMugger = new(-1665557261);
     static readonly PrefabGUID HideStaffBuff = new(2053361366);
 
     static readonly PrefabGUID AbilityGroupSlot = new(-633717863);
@@ -139,7 +138,7 @@ internal static class FamiliarSummonSystem
 
             if (GameMode.Equals(GameModeType.PvP)) ManualAggroHandling(familiar);
 
-            //EnhanceDocileUnits(familiar);
+            //EnhanceDocileVBloods(familiar);
             //AddEquipment(familiar);
 
             return true;
@@ -150,8 +149,6 @@ internal static class FamiliarSummonSystem
             return false;
         }
     }
-
-    /*
     static void AddEquipment(Entity familiar)
     {
         if (ServerGameManager.TryGetBuffer<InteractAbilityBuffer>(familiar, out var buffer))
@@ -207,7 +204,6 @@ internal static class FamiliarSummonSystem
             }
         }
     }
-    */
     static void DisableCombat(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
@@ -249,10 +245,12 @@ internal static class FamiliarSummonSystem
     }
 
     /*
-    static void EnhanceDocileUnits(Entity familiar)
+    static void EnhanceDocileVBloods(Entity familiar)
     {
-        if (familiar.TryGetComponent(out AggroConsumer aggroConsumer) && aggroConsumer.AlertDecayPerSecond == 99f)
+        if (familiar.TryGetComponent(out AggroConsumer aggroConsumer) && aggroConsumer.AlertDecayPerSecond == 99f && familiar.IsVBlood())
         {
+            BuffUtilities.TryApplyBuff(familiar, VBloodBuff);
+            
             try
             {
                 familiar.With((ref BehaviourTreeBinding behaviourTreeBinding) =>
@@ -343,6 +341,7 @@ internal static class FamiliarSummonSystem
         }
     }
     */
+    
     static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
@@ -403,6 +402,7 @@ internal static class FamiliarSummonSystem
         {FamiliarStatType.CCReduction, 0.5f},
         {FamiliarStatType.ShieldAbsorb, 1f}
     };
+    /*
     static void NothingLivesForever(Entity familiar)
     {
         if (BuffUtilities.TryApplyBuff(familiar, InkCrawlerDeathBuff) && familiar.TryGetBuff(InkCrawlerDeathBuff, out Entity buffEntity))
@@ -413,6 +413,7 @@ internal static class FamiliarSummonSystem
             });
         }
     }
+    */
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
         float scalingFactor = 0.1f + (level / (float)MaxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such

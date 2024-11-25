@@ -23,7 +23,7 @@ internal static class DataService
     {
         return playerRestedXP.TryGetValue(steamID, out restedXP);
     }
-    public static bool TryGetPlayerBools(this ulong steamID, out Dictionary<string, bool> bools)
+    public static bool TryGetPlayerBools(this ulong steamID, out ConcurrentDictionary<string, bool> bools)
     {
         return playerBools.TryGetValue(steamID, out bools);
     }
@@ -205,7 +205,7 @@ internal static class DataService
         playerRestedXP[steamID] = data;
         SavePlayerRestedXP();
     }
-    public static void SetPlayerBools(this ulong steamID, Dictionary<string, bool> data)
+    public static void SetPlayerBools(this ulong steamID, ConcurrentDictionary<string, bool> data)
     {
         playerBools[steamID] = data;
         SavePlayerBools();
@@ -430,7 +430,7 @@ internal static class DataService
         internal static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
 
         // bools
-        internal static ConcurrentDictionary<ulong, Dictionary<string, bool>> playerBools = [];
+        internal static ConcurrentDictionary<ulong, ConcurrentDictionary<string, bool>> playerBools = [];
 
         // classes
         internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> playerClass = [];
