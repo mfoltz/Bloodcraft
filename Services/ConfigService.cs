@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -388,6 +389,37 @@ public static class ConfigService
                 if (oldConfigValues.TryGetValue(entry.Key, out var oldValue))
                 {
                     // Convert the old value to the correct type
+                    
+                    try
+                    {
+                        object convertedValue;
+
+                        if (entryType == typeof(float))
+                        {
+                            convertedValue = float.Parse(oldValue, CultureInfo.InvariantCulture);
+                        }
+                        else if (entryType == typeof(double))
+                        {
+                            convertedValue = double.Parse(oldValue, CultureInfo.InvariantCulture);
+                        }
+                        else if (entryType == typeof(decimal))
+                        {
+                            convertedValue = decimal.Parse(oldValue, CultureInfo.InvariantCulture);
+                        }
+                        else
+                        {
+                            convertedValue = Convert.ChangeType(oldValue, entryType);
+                        }
+
+                        var configEntry = generic.Invoke(null, [entry.Section, entry.Key, convertedValue, entry.Description]);
+                        UpdateConfigProperty(entry.Key, configEntry);
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.LogInstance.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
+                    }
+                    
+                    /*
                     try
                     {
                         var convertedValue = Convert.ChangeType(oldValue, entryType);
@@ -398,12 +430,12 @@ public static class ConfigService
                     {
                         Plugin.LogInstance.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
                     }
+                    */
                 }
                 else
                 {
                     // Use default value if key is not in the old config
                     var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
-
                     UpdateConfigProperty(entry.Key, configEntry);
                 }
             }
@@ -460,6 +492,108 @@ public static class ConfigService
                             // Try to convert the string value to the expected type
                             try
                             {
+                                object convertedValue;
+
+                                Type t = typeof(T);
+
+                                if (t == typeof(float))
+                                {
+                                    convertedValue = float.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(double))
+                                {
+                                    convertedValue = double.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(decimal))
+                                {
+                                    convertedValue = decimal.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(int))
+                                {
+                                    convertedValue = int.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(uint))
+                                {
+                                    convertedValue = uint.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(long))
+                                {
+                                    convertedValue = long.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(ulong))
+                                {
+                                    convertedValue = ulong.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(short))
+                                {
+                                    convertedValue = short.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(ushort))
+                                {
+                                    convertedValue = ushort.Parse(configValue, CultureInfo.InvariantCulture);
+                                }
+                                else if (t == typeof(bool))
+                                {
+                                    convertedValue = bool.Parse(configValue);
+                                }
+                                else if (t == typeof(string))
+                                {
+                                    convertedValue = configValue;
+                                }
+                                else
+                                {
+                                    // Handle other types or throw an exception
+                                    throw new NotSupportedException($"Type {t} is not supported");
+                                }
+
+                                entry.Value = (T)convertedValue;
+                            }
+                            catch (Exception ex)
+                            {
+                                Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
+                            }
+
+                            break; // Stop searching once the key is found
+                        }
+                    }
+                }
+            }
+
+            return entry;
+        }
+        /*
+        static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
+        {
+            // Bind the configuration entry with the default value in the new section
+            var entry = Plugin.Instance.Config.Bind(section, key, defaultValue, description);
+
+            // Define the path to the configuration file
+            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
+
+            // Ensure the configuration file is only loaded if it exists
+            if (File.Exists(configFile))
+            {
+                string[] configLines = File.ReadAllLines(configFile);
+                //Plugin.LogInstance.LogInfo(configLines);
+                foreach (var line in configLines)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+                    {
+                        continue;
+                    }
+
+                    var keyValue = line.Split('=');
+                    if (keyValue.Length == 2)
+                    {
+                        var configKey = keyValue[0].Trim();
+                        var configValue = keyValue[1].Trim();
+
+                        // Check if the key matches the provided key
+                        if (configKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Try to convert the string value to the expected type
+                            try
+                            {
                                 //initialValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
                                 entry.Value = convertedValue;
@@ -484,6 +618,7 @@ public static class ConfigService
 
             return entry;
         }
+        */
         static void CreateDirectory(string path)
         {
             if (!Directory.Exists(path))
