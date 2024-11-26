@@ -61,6 +61,10 @@ internal static class EntityUtilities
         "Eat_Rat",
         "Irradiant",
         "Slashers_T01",
+        "Slashers_T03",
+        "Slashers_T04",
+        "Reaper_T03",
+        "Reaper_T04",
         "Reaper_T01",
         "GarlicResistance",
         "T01_Bone"
