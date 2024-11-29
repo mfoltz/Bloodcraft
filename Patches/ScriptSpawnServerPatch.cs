@@ -1,4 +1,5 @@
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -10,6 +11,7 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Patches;
 
@@ -25,8 +27,16 @@ internal static class ScriptSpawnServerPatch
     static readonly bool Legacies = ConfigService.BloodSystem;
     static readonly bool ExoPrestiging = ConfigService.ExoPrestiging;
 
+    static readonly int MaxLevel = ConfigService.MaxLevel;
+
     static readonly PrefabGUID ExoFormBuff = new(-31099041);
     static readonly PrefabGUID InCombatBuff = new(581443919);
+    static readonly PrefabGUID MutantFromBiteBuff = new(-491525099);
+
+    static readonly PrefabGUID FallenAngelDeathBuff = new(-1934189109);
+    static readonly PrefabGUID FallenAngelDespawnBuff = new(1476380301);
+    static readonly PrefabGUID PlayerFaction = new(1106458752);
+    static readonly PrefabGUID FallenAngel = new(-76116724);
 
     [HarmonyPatch(typeof(ScriptSpawnServer), nameof(ScriptSpawnServer.OnUpdate))]
     [HarmonyPrefix]
@@ -75,6 +85,42 @@ internal static class ScriptSpawnServerPatch
                 else if (entityOwner.Owner.TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
+
+                    if (Classes && entity.Has<BloodBuff_BiteToMutant_DataShared>() && ClassUtilities.HasClass(steamId))
+                    {
+                        PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
+
+                        // testing
+                        if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out player))
+                        {
+                            List<PrefabGUID> perks = ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]).Select(x => new PrefabGUID(x)).ToList();
+                            int indexOfBuff = perks.IndexOf(MutantFromBiteBuff);
+                            
+                            if (indexOfBuff != -1)
+                            {
+                                int step = MaxLevel / perks.Count;
+                                int level = (Leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.Read<Equipment>().GetFullLevel();
+
+                                if (level >= step * (indexOfBuff + 1))
+                                {
+                                    Core.Log.LogInfo($"Modifying MutantFromBiteBuff...");
+                                    entity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff_BiteToMutant_DataShared) =>
+                                    {
+                                        //bloodBuff_BiteToMutant_DataShared.DeathBuff = FallenAngelDespawnBuff;
+                                        //bloodBuff_BiteToMutant_DataShared.MutantFaction = PlayerFaction;
+                                    });
+
+                                    var buffer = entity.ReadBuffer<RandomMutant>();
+
+                                    RandomMutant randomMutant = buffer[0];
+                                    randomMutant.Mutant = FallenAngel;
+                                    buffer[0] = randomMutant;
+
+                                    buffer.RemoveAt(1);
+                                }
+                            }
+                        }
+                    }
 
                     if (Leveling && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
                     {

@@ -11,9 +11,12 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Shared;
+using ProjectM.UI;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Bloodcraft;
@@ -30,6 +33,7 @@ internal static class Core
 
     static readonly PrefabGUID ReturnBuff = new(-560330878);
     static readonly PrefabGUID ReturnNoInvulnerableBuff = new(2086395440);
+    static readonly PrefabGUID SpawnMinionBiteBuff = new(-651661301);
     public static byte[] OLD_SHARED_KEY { get; internal set; }
     public static byte[] NEW_SHARED_KEY { get; internal set; }
 
@@ -67,6 +71,9 @@ internal static class Core
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
 
+        //JobsUtility.JobScheduleParameters
+        //PrefabLookupUtility.TryGetConvertedAssetDataForPrefab     
+
         /*
         foreach (var kvp in Server.m_SystemLookup)
         {
@@ -87,12 +94,12 @@ internal static class Core
             Core.Log.LogInfo("=============================");
         }
         */
-
+        
         OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey());
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         ModifyReturnBuffPrefabs();
-
+        
         hasInitialized = true;
     }
     static World GetServerWorld()
@@ -130,6 +137,15 @@ internal static class Core
                 healOnGameplayEvent.showSCT = false;
 
                 buffer[0] = healOnGameplayEvent;
+            }
+        }
+
+        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(SpawnMinionBiteBuff, out buffEntity))
+        {
+            if (buffEntity.TryGetComponent(out LifeTime lifeTime))
+            {
+                lifeTime.Duration = 10f;
+                buffEntity.Write(lifeTime);
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -22,6 +21,8 @@ internal static class PlayerUtilities
     static readonly bool Parties = ConfigService.PlayerParties;
 
     static readonly PrefabGUID DraculaVBlood = new(-327335305);
+
+    static readonly Dictionary<ulong, float> PlayerModifiers = []; // testing for luck modifiers earned through progression
     public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later
     {
         return steamId.TryGetPlayerBools(out var bools) && bools[boolKey];
@@ -114,6 +115,12 @@ internal static class PlayerUtilities
         }
 
         return false;
+    }
+    public static void HandleModifiers(ref float dropChance, Entity player)
+    {
+        ulong steamId = player.GetSteamId();
+
+        if (PlayerModifiers.ContainsKey(steamId)) dropChance *= PlayerModifiers[steamId];
     }
     public class PartyUtilities
     {

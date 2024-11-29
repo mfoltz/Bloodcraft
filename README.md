@@ -218,9 +218,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar emotes`
   - Toggles emote commands (only 1 right now) on.
   - Shortcut: *.fam e*
-- `.listEmoteActions`
+- `.familiar emoteactions`
   - Lists emote actions and what they do.
-  - Shortcut: *.fam le*
+  - Shortcut: *.fam actions*
 - `.familiar getlevel`
   - Display current familiar leveling progress.
   - Shortcut: *.fam gl*

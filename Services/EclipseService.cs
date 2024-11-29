@@ -1,17 +1,13 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
-using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using Unity.Entities;
 using UnityEngine;
@@ -68,7 +64,7 @@ internal class EclipseService
         RegisterUser,
         ProgressToClient,
         ConfigsToClient,
-        //UpdateShiftSlot
+        ClientDebug
     }
     public static void HandleClientMessage(string message)
     {

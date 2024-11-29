@@ -339,7 +339,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Classes", "ShadowBladeSpells", "1019568127,1575317901,1112116762,-358319417,1174831223", "Shadow Blade shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "ArcaneSorcererBuffs", "1614027598,884683323,-1576592687,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs"),
             new ConfigEntryDefinition("Classes", "ArcaneSorcererSpells", "247896794,268059675,-242769430,-2053450457,1650878435", "Arcane Sorcerer shift spells, granted at levels of prestige"),
-            new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-651661301,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
             new ConfigEntryDefinition("Classes", "DeathMageSpells", "-1204819086,481411985,1961570821,2138402840,-1781779733", "Death Mage shift spells, granted at levels of prestige")
         ];
         public static void InitializeConfig()

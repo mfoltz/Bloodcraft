@@ -74,7 +74,8 @@ internal static class ServerBootstrapSystemPatches
         ["ShinyChoice"] = false,
         ["Reminders"] = true,
         ["ScrollingText"] = true,
-        ["ExoForm"] = false
+        ["ExoForm"] = false,
+        ["Shroud"] = true
     };
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]

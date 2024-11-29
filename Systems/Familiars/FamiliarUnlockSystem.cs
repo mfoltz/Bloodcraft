@@ -1,12 +1,11 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Utilities.PlayerUtilities;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
 {
@@ -92,6 +91,8 @@ internal static class FamiliarUnlockSystem
     }
     static void HandleRoll(float dropChance, PrefabGUID targetPrefabGUID, Entity player, bool isVBlood)
     {
+        HandleModifiers(ref dropChance, player); // test feature
+
         if (!isVBlood && RollForChance(dropChance)) // everyone in the vblood event system already gets their own roll, no double-dipping :p
         {
             //HashSet<Entity> players = PlayerUtilities.GetDeathParticipants(source, source.Read<PlayerCharacter>().UserEntity);

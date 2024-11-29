@@ -20,6 +20,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID TauntEmoteBuff = new(-508293388);
     static readonly PrefabGUID PhasingBuff = new(-79611032);
     static readonly PrefabGUID ExoFormBuff = new(-31099041);
+    static readonly PrefabGUID ShroudBuff = new(1504279833);
 
     static readonly bool Prestige = ConfigService.PrestigeSystem;
     static readonly bool ExoPrestige = ConfigService.ExoPrestiging;
@@ -69,7 +70,11 @@ internal static class UpdateBuffsBufferDestroyPatch
                     {
                         int index = PrestigeBuffs.IndexOf(prefabGUID);
 
-                        if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
+                        if (prefabGUID.Equals(ShroudBuff) && !PlayerUtilities.GetPlayerBool(steamId, "Shroud")) // allow shroud buff destruction
+                        {
+                            continue;
+                        }
+                        else if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                         {                            
                             if (prestigeLevel > index) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }

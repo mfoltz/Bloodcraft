@@ -1,9 +1,11 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -17,6 +19,8 @@ internal static class PrestigeCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
+    static readonly PrefabGUID ShroudBuff = new(1504279833);
 
     [Command(name: "self", shortHand: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
     public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
@@ -499,6 +503,41 @@ internal static class PrestigeCommands
                 var batch = leaderboard.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
                 LocalizationService.HandleReply(ctx, replyMessage);
+            }
+        }
+    }
+
+    [Command(name: "shroud", shortHand: "shroud", adminOnly: false, usage: ".prestige shroud", description: "Toggles permashroud if applicable.")]
+    public static void PermaShroudToggle(ChatCommandContext ctx)
+    {
+        if (!ConfigService.PrestigeSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        Entity character = ctx.Event.SenderCharacterEntity;
+        User user = ctx.Event.User;
+        ulong steamId = user.PlatformId;
+
+        PlayerUtilities.TogglePlayerBool(steamId, "Shroud");
+        if (PlayerUtilities.GetPlayerBool(steamId, "Shroud"))
+        {
+            LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
+
+            if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(ShroudBuff) && !character.HasBuff(ShroudBuff) 
+                && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
+            {
+                BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
+            }
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Permashroud <color=red>disabled</color>!");
+
+            if (character.TryGetBuff(ShroudBuff, out Entity shroudBuff))
+            {
+                DestroyUtility.Destroy(EntityManager, shroudBuff, DestroyDebugReason.TryRemoveBuff);
             }
         }
     }
