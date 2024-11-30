@@ -186,6 +186,7 @@ internal static class LevelingSystem
 
             return totalXP;
         }
+
         return gainedXP;
     }
     public static void ProcessQuestExperienceGain(User user, int multiplier)

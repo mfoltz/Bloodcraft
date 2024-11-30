@@ -47,6 +47,7 @@ internal static class Core
     ];
 
     static readonly PrefabGUID SpawnMutantBiteBuff = new(-651661301);
+    static readonly PrefabGUID FallenAngel = new(-76116724);
     public static byte[] OLD_SHARED_KEY { get; internal set; }
     public static byte[] NEW_SHARED_KEY { get; internal set; }
 
@@ -134,9 +135,9 @@ internal static class Core
     {
         foreach (PrefabGUID prefabGUID in ReturnBuffs)
         {
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGUID, out Entity returnBuffEntity))
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGUID, out Entity returnBuffPrefab))
             {
-                if (returnBuffEntity.TryGetBuffer<HealOnGameplayEvent>(out var buffer))
+                if (returnBuffPrefab.TryGetBuffer<HealOnGameplayEvent>(out var buffer))
                 {
                     HealOnGameplayEvent healOnGameplayEvent = buffer[0];
                     healOnGameplayEvent.showSCT = false;
@@ -145,13 +146,17 @@ internal static class Core
             }
         }
 
-        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(SpawnMutantBiteBuff, out Entity buffEntity))
+        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(SpawnMutantBiteBuff, out Entity spawnMutantBiteBuffPrefab))
         {
-            if (buffEntity.TryGetComponent(out LifeTime lifeTime))
+            spawnMutantBiteBuffPrefab.With((ref LifeTime lifeTime) =>
             {
                 lifeTime.Duration = 10f;
-                buffEntity.Write(lifeTime);
-            }
+            });
+        }
+
+        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(FallenAngel, out Entity fallenAngelPrefab))
+        {
+            if (!fallenAngelPrefab.Has<BlockFeedBuff>()) fallenAngelPrefab.Add<BlockFeedBuff>();
         }
     }
 

@@ -1,5 +1,4 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -103,12 +102,15 @@ internal static class ScriptSpawnServerPatch
 
                                 if (level >= step * (indexOfBuff + 1))
                                 {
-                                    Core.Log.LogInfo($"Modifying MutantFromBiteBuff...");
+                                    //Core.Log.LogInfo($"Modifying MutantFromBiteBuff...");
+
+                                    /*
                                     entity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff_BiteToMutant_DataShared) =>
                                     {
                                         //bloodBuff_BiteToMutant_DataShared.DeathBuff = FallenAngelDespawnBuff;
                                         //bloodBuff_BiteToMutant_DataShared.MutantFaction = PlayerFaction;
                                     });
+                                    */
 
                                     var buffer = entity.ReadBuffer<RandomMutant>();
 
