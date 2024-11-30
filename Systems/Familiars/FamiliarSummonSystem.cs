@@ -149,6 +149,8 @@ internal static class FamiliarSummonSystem
             return false;
         }
     }
+
+    /*
     static void AddEquipment(Entity familiar)
     {
         if (ServerGameManager.TryGetBuffer<InteractAbilityBuffer>(familiar, out var buffer))
@@ -204,6 +206,7 @@ internal static class FamiliarSummonSystem
             }
         }
     }
+    */
     static void DisableCombat(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
@@ -370,7 +373,7 @@ internal static class FamiliarSummonSystem
             familiar.Write(new EntityOwner { Owner = player }); //try taking this away? see if SCT persists and what else is affected, like if they now just die immediately when summoned -_- leaving that then
         }
 
-        familiar.Add<BlockFeedBuff>();
+        if (!familiar.Has<BlockFeedBuff>()) familiar.Add<BlockFeedBuff>();
 
         var followerBuffer = player.ReadBuffer<FollowerBuffer>();
         followerBuffer.Add(new FollowerBuffer { Entity = NetworkedEntity.ServerEntity(familiar) });

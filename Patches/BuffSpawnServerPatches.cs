@@ -107,6 +107,7 @@ internal static class BuffSystemSpawnPatches
                 {
                     DestroyUtility.Destroy(EntityManager, entity);
                 }
+                /*
                 else if (Legacies && prefabGUID.Equals(GateBossFeedComplete) && buffTarget.TryGetPlayer(out Entity player))
                 {
                     Blood blood = player.Read<Blood>();
@@ -127,7 +128,8 @@ internal static class BuffSystemSpawnPatches
 
                     BloodSystem.SkipBloodUpdate.Add(steamId);
                 }
-                else if (Familiars && prefabGUID.Equals(PhasingBuff) && buffTarget.TryGetPlayer(out player)) // teleport familiar to player after waygate and autoCall if was out before
+                */
+                else if (Familiars && prefabGUID.Equals(PhasingBuff) && buffTarget.TryGetPlayer(out Entity player)) // teleport familiar to player after waygate and autoCall if was out before
                 {
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;

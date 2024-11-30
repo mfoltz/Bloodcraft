@@ -266,8 +266,6 @@ public static class ConfigService
             new ConfigEntryDefinition("Expertise", "SpellCritDamage", 0.50f, "The base cap for spell critical strike damage"),
             new ConfigEntryDefinition("Legacies", "BloodSystem", false, "Enable or disable the blood legacy system"),
             new ConfigEntryDefinition("Legacies", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies"),
-            new ConfigEntryDefinition("Legacies", "BloodQualityBonus", false, "Enable or disable blood quality bonus system (if using prestige, legacy level will be used with _prestigeBloodQuality multiplier below)"),
-            new ConfigEntryDefinition("Legacies", "PrestigeBloodQuality", 0.05f, "Blood quality bonus per prestige legacy level."),
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies"),
             new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units"),
             new ConfigEntryDefinition("Legacies", "VBloodLegacyMultiplier", 5f, "The multiplier for lineage gained from VBloods"),
