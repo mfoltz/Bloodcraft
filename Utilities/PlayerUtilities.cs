@@ -14,7 +14,6 @@ namespace Bloodcraft.Utilities;
 internal static class PlayerUtilities
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
 
     static readonly float ShareDistance = ConfigService.ExpShareDistance;
 
@@ -22,7 +21,7 @@ internal static class PlayerUtilities
 
     static readonly PrefabGUID DraculaVBlood = new(-327335305);
 
-    static readonly Dictionary<ulong, float> PlayerModifiers = []; // testing for luck modifiers earned through progression
+    //public static readonly Dictionary<ulong, float> PlayerModifiers = [];
     public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later
     {
         return steamId.TryGetPlayerBools(out var bools) && bools[boolKey];
@@ -116,12 +115,15 @@ internal static class PlayerUtilities
 
         return false;
     }
+
+    /*
     public static void HandleModifiers(ref float dropChance, Entity player)
     {
         ulong steamId = player.GetSteamId();
 
         if (PlayerModifiers.ContainsKey(steamId)) dropChance *= PlayerModifiers[steamId];
     }
+    */
     public class PartyUtilities
     {
         public static void HandlePartyAdd(ChatCommandContext ctx, ulong ownerId, string playerName)

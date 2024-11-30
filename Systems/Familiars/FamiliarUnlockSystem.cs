@@ -91,11 +91,10 @@ internal static class FamiliarUnlockSystem
     }
     static void HandleRoll(float dropChance, PrefabGUID targetPrefabGUID, Entity player, bool isVBlood)
     {
-        HandleModifiers(ref dropChance, player); // test feature
+        //HandleModifiers(ref dropChance, player);
 
         if (!isVBlood && RollForChance(dropChance)) // everyone in the vblood event system already gets their own roll, no double-dipping :p
         {
-            //HashSet<Entity> players = PlayerUtilities.GetDeathParticipants(source, source.Read<PlayerCharacter>().UserEntity);
             HandleUnlock(targetPrefabGUID, player);
         }
         else if (isVBlood && RollForChance(dropChance))

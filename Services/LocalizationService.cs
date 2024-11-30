@@ -3,18 +3,14 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Stunlock.Localization;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using Unity.Entities;
 using VampireCommandFramework;
-using Match = System.Text.RegularExpressions.Match;
-using Regex = System.Text.RegularExpressions.Regex;
-using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
 namespace Bloodcraft.Services;
 internal class LocalizationService
 {
-    static readonly Regex Regex = new(@"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    //static readonly Regex Regex = new(@"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     static readonly string Language = ConfigService.LanguageLocalization;
     struct Code
     {
@@ -41,7 +37,6 @@ internal class LocalizationService
 
     static readonly Dictionary<string, string> Localization = [];
     static readonly Dictionary<int, string> PrefabNames = [];
-    static readonly Dictionary<string, string> LocalizedWords = [];
 
     static readonly Dictionary<string, string> LocalizationMapping = new()
     {
@@ -98,33 +93,10 @@ internal class LocalizationService
     internal static void HandleReply(ChatCommandContext ctx, string message)
     {
         ctx.Reply(message);
-
-        /*
-        if (Language == "English")
-        {
-            ctx.Reply(message);
-        }
-        else
-        {
-            //ctx.Reply(GetLocalizedWords(message));
-            ctx.Reply(message);
-        }
-        */
     }
     internal static void HandleServerReply(EntityManager entityManager, User user, string message)
     {
         ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
-
-        /*
-        if (Language == "English")
-        {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
-        }
-        else
-        {
-            ServerChatUtils.SendSystemMessageToClient(entityManager, user, GetLocalizedWords(message));
-        }
-        */
     }
     static string GetLocalizationFromKey(LocalizationKey key)
     {

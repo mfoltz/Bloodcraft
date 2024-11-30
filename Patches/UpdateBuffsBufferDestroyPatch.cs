@@ -101,6 +101,8 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID);
                     }
                 }
+
+                // do log out stuff after travel into coffin buff is destroyed here?
             }
         }
         finally

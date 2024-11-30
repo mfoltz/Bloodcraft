@@ -13,6 +13,7 @@ using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.PlayerUtilities;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Services;
@@ -63,8 +64,8 @@ internal class EclipseService
     {
         RegisterUser,
         ProgressToClient,
-        ConfigsToClient,
-        ClientDebug
+        ConfigsToClient
+        //ClientDebug
     }
     public static void HandleClientMessage(string message)
     {
@@ -118,10 +119,13 @@ internal class EclipseService
             switch (eventType)
             {
                 case (int)NetworkEventSubType.RegisterUser:
-                    //ulong steamId = ulong.Parse(oldRegex.Replace(message, ""));
                     RegisterUser(steamId, LEGACY_VERSION);
                     break;
-
+                    /*
+                case (int)NetworkEventSubType.ClientDebug:
+                    RegisterUserTest(steamId, LEGACY_VERSION);
+                    break;
+                    */
                 default:
                     Core.Log.LogError($"Unknown networkEventSubtype encountered while handling legacy version (<1.2.2) of Eclipse! {eventType}");
                     break;
@@ -191,6 +195,14 @@ internal class EclipseService
             return false;
         }
     }
+
+    /*
+    static void RegisterUserTest(ulong steamId, string version)
+    {
+        if (PlayerModifiers.ContainsKey(steamId)) return;
+        else PlayerModifiers[steamId] = float.TryParse(version, out float result) ? result : 1f;
+    }
+    */
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {
         int experiencePercent = 0;

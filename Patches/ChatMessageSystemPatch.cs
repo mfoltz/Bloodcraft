@@ -57,20 +57,6 @@ internal static class ChatMessageSystemPatch
             string receivedMAC = match.Groups[1].Value;
             string intermediateMessage = RegexMAC.Replace(receivedMessage, "");
 
-            // Recalculate the MAC
-            //string recalculatedMAC = GenerateMAC(intermediateMessage);
-
-            // Compare the MACs
-            /*
-            if (CryptographicOperations.FixedTimeEquals(
-                    Encoding.UTF8.GetBytes(recalculatedMAC),
-                    Encoding.UTF8.GetBytes(receivedMAC)))
-            {
-                originalMessage = intermediateMessage;
-                return true;
-            }
-            */
-
             if (CheckMAC(intermediateMessage, receivedMAC, Core.OLD_SHARED_KEY) ||
                 CheckMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
             {
