@@ -384,6 +384,7 @@ internal static class ProfessionMappings
                 return tier.Value;
             }
         }
+
         return 1;
     }
 }

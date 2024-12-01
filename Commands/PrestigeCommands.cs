@@ -21,6 +21,7 @@ internal static class PrestigeCommands
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly PrefabGUID ShroudBuff = new(1504279833);
+    static readonly PrefabGUID ShroudCloak = new(1063517722);
 
     [Command(name: "self", shortHand: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
     public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
@@ -534,8 +535,9 @@ internal static class PrestigeCommands
         else
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=red>disabled</color>!");
+            Equipment equipment = character.Read<Equipment>();
 
-            if (character.TryGetBuff(ShroudBuff, out Entity shroudBuff))
+            if (!equipment.IsEquipped(ShroudCloak, out var _) && character.TryGetBuff(ShroudBuff, out Entity shroudBuff))
             {
                 DestroyUtility.Destroy(EntityManager, shroudBuff, DestroyDebugReason.TryRemoveBuff);
             }

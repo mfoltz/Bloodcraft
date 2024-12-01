@@ -252,6 +252,7 @@ internal static class FamiliarCommands
         if (data.UnlockedFamiliars.TryGetValue(set, out var famKeys))
         {
             int count = 1;
+
             foreach (var famKey in famKeys)
             {
                 PrefabGUID famPrefab = new(famKey);

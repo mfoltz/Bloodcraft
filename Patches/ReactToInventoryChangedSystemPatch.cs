@@ -25,13 +25,11 @@ internal static class ReactToInventoryChangedSystemPatch
         if (!Core.hasInitialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
-        //NativeArray<Entity> entities = __instance.__query_2096870024_0.ToEntityArray(Allocator.Temp);
         NativeArray<InventoryChangedEvent> inventoryChangedEvents = __instance.__query_2096870024_0.ToComponentDataArray<InventoryChangedEvent>(Allocator.Temp);
         try
         {
             foreach (InventoryChangedEvent inventoryChangedEvent in inventoryChangedEvents)
             {
-                //if (!entity.TryGetComponent(out InventoryChangedEvent inventoryChangedEvent)) continue;
                 Entity inventory = inventoryChangedEvent.InventoryEntity;
 
                 if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.TryGetComponent(out InventoryConnection inventoryConnection))
@@ -57,6 +55,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                         PrefabGUID itemPrefabGUID = inventoryChangedEvent.Item;
                         Entity itemPrefab = inventoryChangedEvent.ItemEntity;
+                        string itemName = itemPrefabGUID.LookupName();
 
                         if (itemPrefab.Has<UpgradeableLegendaryItem>())
                         {
@@ -98,6 +97,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                     if (handler != null)
                                     {
                                         if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
+                                        if (itemName.EndsWith("Bloodwine")) professionXP *= 2;
 
                                         ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler);
                                         switch (handler)

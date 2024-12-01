@@ -8,6 +8,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine.TextCore.Text;
 
 namespace Bloodcraft.Patches;
 
@@ -21,15 +22,15 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID TauntEmoteBuff = new(-508293388);
     static readonly PrefabGUID PhasingBuff = new(-79611032);
     static readonly PrefabGUID ExoFormBuff = new(-31099041);
+
     static readonly PrefabGUID ShroudBuff = new(1504279833);
+    static readonly PrefabGUID ShroudCloak = new(1063517722);
 
     static readonly PrefabGUID TravelStoneBuff = new(-342726392);
     static readonly PrefabGUID TravelWoodenBuff = new(-1194613929);
 
     static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
     static readonly PrefabGUID InsideStoneCoffin = new(569692162);
-
-    static readonly PrefabGUID ShroudCloak = new(1063517722);
 
     static readonly bool Prestige = ConfigService.PrestigeSystem;
     static readonly bool ExoPrestige = ConfigService.ExoPrestiging;
@@ -113,35 +114,50 @@ internal static class UpdateBuffsBufferDestroyPatch
                 }
 
                 // do log out stuff when travel into coffin buff is destroyed
-                /*
                 if ((prefabGUID.Equals(TravelStoneBuff) || prefabGUID.Equals(TravelWoodenBuff)) && entity.GetBuffTarget().TryGetPlayer(out player))
                 {
+                    Core.Log.LogInfo("Entering coffin...");
                     ulong steamId = player.GetSteamId();
-                    PlayerUtilities.SetPlayerBool(steamId, "Shroud", false);
 
-                    if (player.TryGetBuff(ShroudBuff, out Entity shroudBuff))
+                    if (Prestige)
                     {
-                        Equipment equipment = player.Read<Equipment>();
+                        PlayerUtilities.SetPlayerBool(steamId, "Shroud", false);
 
-                        if (!equipment.IsEquipped(ShroudCloak, out var _)) DestroyUtility.Destroy(EntityManager, shroudBuff);
+                        if (player.TryGetBuff(ShroudBuff, out Entity shroudBuff))
+                        {
+                            Equipment equipment = player.Read<Equipment>();
+
+                            if (!equipment.IsEquipped(ShroudCloak, out var _)) DestroyUtility.Destroy(EntityManager, shroudBuff, DestroyDebugReason.TryRemoveBuff);
+                        }
                     }
 
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
-                    if (familiar.Exists())
+                    if (Familiars)
                     {
-                        Entity userEntity = player.GetUserEntity();
+                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                        if (familiar.Exists())
+                        {
+                            Entity userEntity = player.GetUserEntity();
 
-                        FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
+                            FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
+                        }
                     }
                 }
                 else if ((prefabGUID.Equals(InsideStoneCoffin) || prefabGUID.Equals(InsideWoodenCoffin)) && entity.GetBuffTarget().TryGetPlayer(out player)) // do log in stuff when inside coffin buff is destroyed
                 {
+                    Core.Log.LogInfo("Leaving coffin...");
                     ulong steamId = player.GetSteamId();
-                    PlayerUtilities.SetPlayerBool(steamId, "Shroud", true);
 
-                    BuffUtilities.ApplyPermanentBuff(player, ShroudBuff);
+                    if (Prestige)
+                    {
+                        PlayerUtilities.SetPlayerBool(steamId, "Shroud", true);
+
+                        if (PrestigeBuffs.Contains(ShroudBuff) && !player.HasBuff(ShroudBuff)
+                            && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
+                        {
+                            BuffUtilities.ApplyPermanentBuff(player, ShroudBuff);
+                        }
+                    }
                 }
-                */
             }
         }
         finally

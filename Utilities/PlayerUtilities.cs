@@ -1,11 +1,15 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using User = ProjectM.Network.User;
@@ -115,6 +119,17 @@ internal static class PlayerUtilities
 
         return false;
     }
+
+    /*
+    public static bool EarnedPermaShroud()
+    {
+        if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(ShroudBuff) && !character.HasBuff(ShroudBuff)
+    && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
+        {
+            BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
+        }
+    }
+    */
 
     /*
     public static void HandleModifiers(ref float dropChance, Entity player)
