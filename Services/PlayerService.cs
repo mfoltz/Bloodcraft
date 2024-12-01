@@ -6,7 +6,7 @@ using Unity.Entities;
 using UnityEngine;
 
 namespace Bloodcraft.Services;
-internal class PlayerService
+internal class PlayerService // this is basically a worse version of the PlayerService from KindredCommands, if you're here looking for good examples to follow
 {
     static EntityManager EntityManager => Core.EntityManager;
 
