@@ -542,7 +542,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "toggle", shortHand: "t", usage: ".fam toggle", description: "Calls or dismisses familar.", adminOnly: false)]
+    [Command(name: "toggle", shortHand: "t", usage: ".fam t", description: "Calls or dismisses familar.", adminOnly: false)]
     public static void ToggleFamiliar(ChatCommandContext ctx)
     {
         if (!ConfigService.FamiliarSystem)
@@ -705,8 +705,8 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "setlevel", shortHand: "sl", adminOnly: true, usage: ".fam sl [Level]", description: "Set current familiar level.")]
-    public static void SetFamiliarLevel(ChatCommandContext ctx, int level)
+    [Command(name: "setlevel", shortHand: "sl", adminOnly: true, usage: ".fam sl [Player] [Level]", description: "Set current familiar level.")]
+    public static void SetFamiliarLevel(ChatCommandContext ctx, string name, int level)
     {
         if (!ConfigService.FamiliarSystem)
         {
@@ -720,7 +720,14 @@ internal static class FamiliarCommands
             return;
         }
 
-        User user = ctx.Event.User;
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        if (!playerInfo.UserEntity.Exists())
+        {
+            ctx.Reply($"Couldn't find player.");
+            return;
+        }
+
+        User user = playerInfo.User;
         ulong steamId = user.PlatformId;
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
@@ -736,7 +743,7 @@ internal static class FamiliarCommands
 
             if (ModifyFamiliar(user, steamId, famKey, player, familiar, level))
             {
-                LocalizationService.HandleReply(ctx, $"Your familiar has been set to level <color=white>{level}</color>.");
+                LocalizationService.HandleReply(ctx, $"Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.");
             }
         }
         else

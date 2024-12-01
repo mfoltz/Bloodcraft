@@ -205,7 +205,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Shortcut: *.fam mb [SetName]*
 - `.familiar toggle`
   - Calls or dismisses familar. Wave also does this if .fam e is toggled on.
-  - Shortcut: *.fam toggle*
+  - Shortcut: *.fam t*
 - `.familiar togglecombat`
   - Enables/disables combat. Salute also does this if .fam e is toggled on.
   - Shortcut: *.fam c*
@@ -227,9 +227,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar prestige [StatType]`
   - Prestiges familiar if at max level and valid stat is chosen.
   - Shortcut: *.fam pr [StatType]*
-- `.familiar setlevel [Level]` 🔒
-  - Set current familiar level. Rebind to force updating stats if that doesn't happen when this is used.
-  - Shortcut: *.fam sl [Level]*
+- `.familiar setlevel [Player] [Level]` 🔒
+  - Set level of current player familiar.
+  - Shortcut: *.fam sl [Player] [Level]*
 - `.familiar reset`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.fam reset*
@@ -239,12 +239,12 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar search [Name]`
   - Searches for familiars matching entered name in your boxes.
   - Shortcut: *.fam s [Name]*
-- `.familiar visual [SpellSchool]`
+- `.familiar shinybuff [SpellSchool]`
   - Assigns shiny visual to current active familiar. One freebie.
-  - Shortcut: *.fam v [SpellSchool]*
-- `.familiar resetvisualchoice [Name]` 🔒
+  - Shortcut: *.fam shiny [SpellSchool]*
+- `.familiar resetshiny [Name]` 🔒
   - Allows players to use '.fam v [SpellSchool]' again at admin discretion if so desired. Note that this will not remove visuals the player has chosen for a familiar with that command.
-  - Shortcut: *.fam rv [Name]*
+  - Shortcut: *.fam rs [Name]*
 - `.familiar option [setting]`
   - Controls various familiar settings (currently shiny/vbloodemotes).
   - Shortcut: *.fam option [Setting]*
@@ -254,18 +254,18 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Grants kit if configured.
   - Shortcut: *.kitme*
 - `.prepareforthehunt`
-  - Completes GettingReadyForTheHunt if not already completed. This shouldn't be needed anymore but leaving just incase.
+  - Completes GettingReadyForTheHunt if not already completed. This shouldn't be needed at this point but leaving just incase.
   - Shortcut: *.prepare*
-- `.lockSpell`
+- `.lockspell`
   - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.locksp*
 - `.lockshift`
   - Toggles set class spell on shift. Works for unarmed and weapons.
   - Shortcut: *.shift*
 - `.sct`
-  - Toggle scrolling text appearing when earning profession XP.
+  - Toggle scrolling text appearing when earning profession XP and for familiars earning XP.
   - Shortcut: *.sct*
-- `.remindme`
+- `.reminders`
   - Toggle reminders from mod for various features.
   - Shortcut: *.remindme*
 - `.userstats`
@@ -274,26 +274,26 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.silence`
   - Gets rid of combat music that gets bugged on player if needed.
   - Shortcut: *.silence*
+- `.exoform`
+  - Toggles taunt emote activating exo form if requirements met.
+  - Shortcut: *.exoform*
 - `.cleanupfams`
-  - Finds and destroys old familiars preventing from building in a location.
+  - Finds and destroys old familiars preventing from building in a location. Note: most likely deprecating this soon, leaving for now just incase but do consider usage may cause crashes.
   - Shortcut: *.cleanupfams*
 
 ### Quest Commands
 - `.quest log`
   - Enable/disable logging quest progress. 
   - Shortcut: *.quest log*
-- `.quest daily`
+- `.quest progress [Daily/Weekly/d/w]`
   - Displays daily quest details.
-  - Shortcut: *.quest d*
-- `.quest weekly`
-  - Displays weekly quest details.
-  - Shortcut: *.quest w*
-- `.quest track [Daily/Weekly]`
+  - Shortcut: *.quest p [Daily/Weekly/d/w]*
+- `.quest track [Daily/Weekly/d/w]`
   - Finds closest quest target or rerolls quest if none are found.
-  - Shortcut: *.quest t [Daily/Weekly]*
-- `.quest reroll [Daily/Weekly]`
+  - Shortcut: *.quest t [Daily/Weekly/d/w]*
+- `.quest reroll [Daily/Weekly/d/w]`
   - Rerolls quest for player if eligible at cost.
-  - Shortcut: *.quest r*
+  - Shortcut: *.quest r [Daily/Weekly/d/w]*
 - `.quest refresh [Name]` 🔒
   - Refreshes quests for player.
   - Shortcut: *.quest rf [Name]*
@@ -313,6 +313,10 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Enable or disable stacking T01/T02 potions.
 - **Client Companion**: `ClientCompanion` (bool, default: false)  
   Enable or disable allowing clients to register with server for UI updates.
+- **Elite Shard Bearers**: `EliteShardBearers` (bool, default: false)  
+  Enable or disable elite shard bearers (significant increases to health, damage, movement speed and attack speed but will no longer scale to number of players).
+- **Shard Bearer Level**: `EliteShardBearers` (bool, default: false)  
+  Sets level of shard bearers if elite shard bearers is enabled (will override game vblood settings for shard bearers as this is set when they spawn). Leave at 0 for no change.
 
 ### Leveling System
 - **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
@@ -347,16 +351,14 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
 - **Player Parties**: `PlayerParties` (bool, default: false)  
   Enable or disable player alliances.
-- **Prevent Friendly Fire**: `PreventFriendlyFire` (bool, default: false)  
-  True to prevent damage between players in same alliance, false to allow.
 - **Max Party Size**: `MaxPartySize` (int, default: 5)  
-  The maximum number of players that can form an alliance.
+  The maximum number of players that can form a party.
 
 ### Prestige System
-- **Enable Prestige System**: `PrestigeSystem` (bool, default: false)  
+- **Prestige System**: `PrestigeSystem` (bool, default: false)  
   Enable or disable the prestige system.
 - **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884")
-  The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list.
+  The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list. Should match number of times players can prestige in leveling.
 - **Prestige Levels to Unlock Class Spells:** `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3,4,5")
   The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
@@ -369,7 +371,15 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Factor by which rates are increased in expertise/legacy per increment of prestige in leveling.
 - **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
-  
+- **Exo Prestiging**: `ExoPrestiging` (bool, default: false)    
+  Enable or disable exo prestiging (need to max normal prestiges first). After defeating Dracula and exo prestiging at least once players unlock a powerful new form (see '.exoform' in misc for activating and other exo-related prestige commands for more info).
+- **Exo Prestiges**: `ExoPrestiges` (int, default: 100)  
+  The maximum number of prestiges a player can reach in exo.
+- **Exo Prestige Reward**: `ExoPrestigeReward` (int, default: 28358550)  
+  The item prefab reward for exo prestiging (tier 3 nether shards by default).
+- **Exo Prestige Reward Quantity**: `ExoPrestigeRewardQuantity` (int, default: 500)  
+  The quantity of item obtained per exo prestige.
+
 ### Quest System
 - **Enable Quest System**: `QuestSystem` (bool, default: false)  
   Enable or disable the quest system.
@@ -393,7 +403,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Enable or disable the expertise system.
 - **Unarmed Slots**: `UnarmedSlots` (bool, default: false)  
   Enables extra spell slots for unarmed.
-- **Second Slot Unlock**: `ShiftSlot` (bool, default: false)  
+- **Shift Slot**: `ShiftSlot` (bool, default: false)  
   Enables class spell on shift.
 - **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 99)  
   Maximum level in weapon expertise.
@@ -403,6 +413,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Multiplier for expertise gained from units.
 - **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (float, default: 5)  
   Multiplier for expertise gained from VBloods.
+- **Unit Spawner Expertise Factor**: `UnitSpawnerExpertiseFactor` (float, default: 1)  
+  The multiplier for experience gained from unit spawners (vermin nests, tombs), can be reduced or set to 0 for none.
 - **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 2)  
   The maximum number of stat choices a player can choose for weapon expertise per weapon.
 - **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)  
@@ -443,10 +455,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Maximum level in blood legacies.
 - **Max Legacy Prestiges**: `MaxLegacyPrestiges` (int, default: 10)  
   Maximum prestiges in legacies.
-- **Blood Quality Bonus**: `BloodQualityBonus` (bool, default: false)  
-  Enable or disable blood quality bonus (if using presige, legacy level will be used with PrestigeBloodQuality multiplier below)
-- **Prestige Blood Quality**: `PrestigeBloodQuality` (float, default: 5)  
-  Blood quality bonus per prestige legacy level.
 - **Unit Legacy Multiplier**: `UnitLegacyMultiplier` (float, default: 5)  
   Multiplier for essence gained from units.
 - **VBlood Legacy Multiplier**: `VBloodLegacyMultipler` (float, default: 15)  
@@ -531,6 +539,10 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Item PrefabGUID cost for choosing shiny visual if familiar already has one.
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)  
   Quantity of item cost required shiny cost item.
+- **Familiar Combat**: `FamiliarCombat` (bool, default: true)  
+  Enable or disable combat for familiars.
+- **Familiar PvP**: `FamiliarPvP` (bool, default: true)  
+  Enable or disable PvP participation for familiars. (if set to false, familiars will be unbound when the player enters PvP combat)
 
 ### Class System
 - **Soft Synergies**: `SoftSynergies` (bool, default: false)
@@ -539,6 +551,10 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Allow class synergies (turns on classes and restricts stat choices, do not use this and soft synergies at the same time).
 - **Stat Synergy Multiplier**: `StatSynergyMultiplier` (float, default: 2)
   Multiplier for class stat synergies to max stat bonus.
+- **Class Spell School OnHit Effects**: `ClassSpellSchoolOnHitEffects` (bool, default: false)  
+  Enable or disable class spell school on hit effects (respective debuff from spell school, leech chill condemn etc).
+- **On Hit Proc Chance**: `OnHitProcChance` (float, default: 0.075)  
+  The chance for a class effect to proc on hit (chance for every instance of physical or spell damage done by the player).
 - **Blood Knight Weapons:** `BloodKnightWeapon` (string, default: "0,3,5,6")
   Blood Knight weapon synergies.
 - **Blood Knight Blood:** `BloodKnightBlood` (string, default: "0,2,3,11")
@@ -563,6 +579,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Death Mage weapon synergies.
 - **Death Mage Blood:** `DeathMageBlood` (string, default: "2,6,9,10")
   Death Mage blood synergies.
+- **Default Class Spell**: `DefaultClassSpell` (int, default: -433204738)  
+  Default spell (veil of shadow) available to all classes from start, although will need to unlock another veil before using on shift as a second dash.
 - **Blood Knight Buffs:** `BloodKnightBuffs` (string, default: "1828387635,-534491790,-1055766373,-584203677")
   The PrefabGUID hashes for blood knight leveling blood buffs.
 - **Blood Knight Spells:** `BloodKnightSpells` (string, default: "-880131926,651613264,2067760264,189403977,375131842")
