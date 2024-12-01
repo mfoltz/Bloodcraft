@@ -1,6 +1,6 @@
 ## Table of Contents
 
-Commands are mostly good but the rest of the readme really needs touching up. I am sorry, and it is next on the list.
+Commands/config up to date, better feature summaries next on the list.
 
 - [Sponsors](#sponsors)
 - [Features](#features)
@@ -350,7 +350,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
 - **Player Parties**: `PlayerParties` (bool, default: false)  
-  Enable or disable player alliances.
+  Enable or disable player parties.
 - **Max Party Size**: `MaxPartySize` (int, default: 5)  
   The maximum number of players that can form a party.
 
