@@ -1,6 +1,6 @@
 ## Table of Contents
 
-Commands are mostly good but the rest of the readme really needs touching up. I am sorry, and it is next on the list.
+Commands/config up to date, better feature summaries next on the list.
 
 - [Sponsors](#sponsors)
 - [Features](#features)
