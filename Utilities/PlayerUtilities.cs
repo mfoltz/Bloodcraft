@@ -157,7 +157,7 @@ internal static class PlayerUtilities
 
                 if (InvitesEnabled(playerInfo.User.PlatformId))
                 {
-                    AddPlayerToParty(ctx, ownerId, playerName);
+                    AddPlayerToParty(ctx, ownerId, playerInfo);
                 }
                 else
                 {
@@ -180,16 +180,17 @@ internal static class PlayerUtilities
 
             return false;
         }
-        static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, string playerName)
+        static void AddPlayerToParty(ChatCommandContext ctx, ulong ownerId, PlayerInfo playerInfo)
         {
             string ownerName = ctx.Event.User.CharacterName.Value;
+            string playerName = playerInfo.User.CharacterName.Value;
 
-            // Check if the player is already in a party
+            // Check if the player is already in a party or owns a party
             KeyValuePair<ulong, HashSet<string>> existingPartyEntry = DataService.PlayerDictionaries.playerParties.FirstOrDefault(entry => entry.Value.Contains(playerName));
 
-            if (existingPartyEntry.Value != null)
+            if (existingPartyEntry.Value != null || DataService.PlayerDictionaries.playerParties.ContainsKey(playerInfo.User.PlatformId))
             {
-                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> is already in another party.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> is already in or leading another party!");
                 return;
             }
 
