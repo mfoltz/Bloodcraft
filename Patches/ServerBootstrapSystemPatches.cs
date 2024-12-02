@@ -426,7 +426,7 @@ internal static class ServerBootstrapSystemPatches
             if (!familiar.Exists()) FamiliarUtilities.ClearFamiliarActives(steamId);
             else
             {
-                Core.StartCoroutine(UpdatePlayerFamiliar(playerCharacter, familiar));
+                UpdatePlayerFamiliar(playerCharacter, familiar);
             }
         }
 

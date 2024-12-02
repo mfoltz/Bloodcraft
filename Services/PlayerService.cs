@@ -20,7 +20,6 @@ internal class PlayerService
     static EntityQuery UserQuery;
 
     public static readonly Dictionary<string, PlayerInfo> PlayerCache = [];
-
     public static readonly Dictionary<string, PlayerInfo> OnlineCache = [];
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {

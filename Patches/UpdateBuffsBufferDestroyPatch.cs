@@ -116,7 +116,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                 // do log out stuff when travel into coffin buff is destroyed
                 if ((prefabGUID.Equals(TravelStoneBuff) || prefabGUID.Equals(TravelWoodenBuff)) && entity.GetBuffTarget().TryGetPlayer(out player))
                 {
-                    Core.Log.LogInfo("Entering coffin...");
+                    //Core.Log.LogInfo("Entering coffin...");
                     ulong steamId = player.GetSteamId();
 
                     if (Prestige)
@@ -144,7 +144,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                 }
                 else if ((prefabGUID.Equals(InsideStoneCoffin) || prefabGUID.Equals(InsideWoodenCoffin)) && entity.GetBuffTarget().TryGetPlayer(out player)) // do log in stuff when inside coffin buff is destroyed
                 {
-                    Core.Log.LogInfo("Leaving coffin...");
+                    //Core.Log.LogInfo("Leaving coffin...");
                     ulong steamId = player.GetSteamId();
 
                     if (Prestige)

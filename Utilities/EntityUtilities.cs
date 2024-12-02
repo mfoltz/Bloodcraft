@@ -99,8 +99,6 @@ internal static class EntityUtilities
                 {
                     if (entity.TryGetComponent(out PrefabGUID resourcePrefab))
                     {
-                        //string prefabName = resourcePrefab.LookupName();
-                        //if (!FilteredResources.Any(part => prefabName.Contains(part))) 
                         yield return entity;
                     }
                 }
