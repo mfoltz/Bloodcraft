@@ -1,6 +1,14 @@
 `1.5.3`
+- added '.prestige shroud' command to toggle perma shroud from prestige if applicable
+- prestige buff will no longer cause players to appear on the boosted players list from KindredCommands (if they log out in their coffin, this will also unbind active familiars and recommend using rested XP to encourage this although people are usually pretty good about it already)
+- no more >100% blood quality from legacy prestiging, culprit of occasional stat stacking
+- modified return buff prefabs such that large amounts of SCT entities are no longer generated in some scenarios in which they previously would be
+- deathmage tier 2 passive default change to MutantBiteBuff, except it spawns a short-lived fallen angel instead :D (does not provide any progression or unlocks when killed)
+- config now handles different locales correctly in regards to decimals (period vs comma)
+- excluded holy pots from potion stacking as temporary bandaid for overall problem with holy resist/damage reduction stat interaction
+- taking a more delicate approach to some things that were causing crashes for various reasons (familiar destruction and various buff stuff no longer happens on log in or log out)
 - '.quest d' and '.quest w' now under same command as '.quest progress/p d/w', familiar command for choosing/changing shiny buffs is now '.fam shiny [SpellSchool]'
-- going forward Bloodcraft will work with older versions of Eclipse from 1.1.2 onwards (will still need to update Eclipse for newer features)
+- going forward Bloodcraft will work with older versions of Eclipse from 1.1.2 (usually >_> WIP) onwards (will still need to update Eclipse for newer features)
 - added config option to unbind familiars when entering pvp combat
 - familiars receive shared experience when player should, refactored death event handling to facilitate this and improve general performance
 - parties should work more consistently, previously a failed check allowed players to be in more than one party at once which the code was not designed to handle
@@ -26,7 +34,7 @@
 - Target tracking will no longer detect imprisoned units or player familiars
 - Checking unit level against player level using unit prefab instead of unit entity in questTarget cache to prevent assigning quest kill targets outside intended level range (added handling for player levels higher than max mod default to prevent repeated fallback target)
 - Added logging and handling when configurations for item prefabs/quantities are not as expected instead of failing to initialize entirely
-- Changed playerBools data to ConcurrentDictionary instead of Dictionary (hoping this resolves .kitme and other potential playerBool-related issues)
+- Changed playerBools data to ConcurrentDictionary instead of Dictionary (hoping this resolves .kitme and other potential playerBool-related issues, also remembered to change the inner dictionary this time <_<)
 
 `1.4.2`
 - fixed gathering/crafting quests unintentionally checking for professions/class on hit effects being enabled
