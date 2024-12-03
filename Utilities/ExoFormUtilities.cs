@@ -94,6 +94,7 @@ internal static class ExoFormUtilities
         yield return new WaitForSeconds(countdownDelay);
 
         float countdown = 5f;
+        bool fullDuration = false;
 
         // Wait until there are 5 seconds left
         while (buffEntity.Exists() && countdown > 0f)
@@ -115,9 +116,14 @@ internal static class ExoFormUtilities
 
             countdown--;
             yield return SecondDelay;
+
+            if (countdown == 0f)
+            {
+                fullDuration = true; // Mark as used full duration
+            }
         }
 
-        UpdateFullExoFormChargeUsed(playerEntity.GetSteamId());
+        if (fullDuration) UpdateFullExoFormChargeUsed(playerEntity.GetSteamId());
     }
     public static void UpdateExoFormChargeStored(ulong steamId)
     {

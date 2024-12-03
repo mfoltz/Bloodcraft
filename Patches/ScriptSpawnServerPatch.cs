@@ -30,7 +30,7 @@ internal static class ScriptSpawnServerPatch
 
     static readonly PrefabGUID ExoFormBuff = new(-31099041);
     static readonly PrefabGUID InCombatBuff = new(581443919);
-    static readonly PrefabGUID MutantFromBiteBuff = new(-491525099);
+    static readonly PrefabGUID MutantFromBiteBloodBuff = new(-491525099);
 
     static readonly PrefabGUID FallenAngelDeathBuff = new(-1934189109);
     static readonly PrefabGUID FallenAngelDespawnBuff = new(1476380301);
@@ -93,7 +93,7 @@ internal static class ScriptSpawnServerPatch
                         if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out player))
                         {
                             List<PrefabGUID> perks = ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]).Select(x => new PrefabGUID(x)).ToList();
-                            int indexOfBuff = perks.IndexOf(MutantFromBiteBuff);
+                            int indexOfBuff = perks.IndexOf(MutantFromBiteBloodBuff);
                             
                             if (indexOfBuff != -1)
                             {
