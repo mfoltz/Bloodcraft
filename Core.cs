@@ -84,7 +84,7 @@ internal static class Core
             //DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
-
+        AffectPrisonerWithToxic
         //JobsUtility.JobScheduleParameters
         //PrefabLookupUtility.TryGetConvertedAssetDataForPrefab     
 

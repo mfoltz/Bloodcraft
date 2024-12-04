@@ -733,7 +733,7 @@ internal static class FamiliarCommands
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
-            Entity player = ctx.Event.SenderCharacterEntity;
+            Entity player = playerInfo.CharEntity;
             Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
             int famKey = data.FamKey;
 
