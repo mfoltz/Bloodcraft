@@ -339,6 +339,8 @@ internal static class FamiliarUtilities
         if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
         */
 
+        if (!familiar.Has<AggroConsumer>()) return;
+
         familiar.With((ref AggroConsumer aggroConsumer) =>
         {
             aggroConsumer.AggroTarget = NetworkedEntity.Empty;
@@ -361,6 +363,8 @@ internal static class FamiliarUtilities
         if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
         if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
         */
+
+        if (!familiar.Has<AggroConsumer>()) return;
 
         familiar.With((ref AggroConsumer aggroConsumer) =>
         {

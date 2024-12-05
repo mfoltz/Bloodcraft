@@ -14,6 +14,7 @@ using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using ProjectM.Terrain;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Collections;
@@ -84,9 +85,8 @@ internal static class Core
             //DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
-        AffectPrisonerWithToxic
+
         //JobsUtility.JobScheduleParameters
-        //PrefabLookupUtility.TryGetConvertedAssetDataForPrefab     
 
         /*
         foreach (var kvp in Server.m_SystemLookup)
