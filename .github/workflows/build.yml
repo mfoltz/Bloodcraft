@@ -47,7 +47,7 @@ jobs:
           }' > /home/runner/work/Bloodcraft/Bloodcraft/Resources/secrets.json
         
       - name: Build (Release)
-        run: dotnet build . --configuration Release -p:Version=${{ env.version }}
+        run: dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
 
       - name: Clean Up
         run: rm /home/runner/work/Bloodcraft/Bloodcraft/Resources/secrets.json
