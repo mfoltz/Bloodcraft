@@ -256,7 +256,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed. This shouldn't be needed at this point but leaving just incase.
   - Shortcut: *.prepare*
-- `.lockspell`
+- `.lockspells`
   - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
   - Shortcut: *.locksp*
 - `.lockshift`
@@ -315,7 +315,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Enable or disable allowing clients to register with server for UI updates.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: false)  
   Enable or disable elite shard bearers (significant increases to health, damage, movement speed and attack speed but will no longer scale to number of players).
-- **Shard Bearer Level**: `EliteShardBearers` (bool, default: false)  
+- **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)  
   Sets level of shard bearers if elite shard bearers is enabled (will override game vblood settings for shard bearers as this is set when they spawn). Leave at 0 for no change.
 
 ### Leveling System

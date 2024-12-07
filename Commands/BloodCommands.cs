@@ -13,7 +13,7 @@ using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup("bloodlegacy", "bl")]
+[CommandGroup(name: "bloodlegacy", "bl")]
 internal static class BloodCommands
 {
     static EntityManager EntityManager => Core.EntityManager;

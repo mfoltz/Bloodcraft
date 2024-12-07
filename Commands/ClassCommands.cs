@@ -11,7 +11,7 @@ using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Commands;
 
-[CommandGroup("class")]
+[CommandGroup(name: "class")]
 internal static class ClassCommands
 {
     static EntityManager EntityManager => Core.EntityManager;

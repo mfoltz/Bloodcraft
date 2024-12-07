@@ -2,7 +2,6 @@
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -30,8 +29,6 @@ internal static class FamiliarCommands
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly PrefabGUID CombatBuff = new(581443919);
-    static readonly PrefabGUID PvPCombatBuff = new(697095869);
     static readonly PrefabGUID DominateBuff = new(-1447419822);
     static readonly PrefabGUID TakeFlightBuff = new(1205505492);
 
@@ -39,21 +36,6 @@ internal static class FamiliarCommands
     {
         {"VBloodEmotes", FamiliarUtilities.ToggleVBloodEmotes},
         {"Shiny", FamiliarUtilities.ToggleShinies}
-    };
-
-    static readonly ComponentType[] NetworkEventComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
-        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
-        ComponentType.ReadOnly(Il2CppType.Of<SendNetworkEventTag>()),
-        ComponentType.ReadOnly(Il2CppType.Of<InteractEvents_Client.RenameInteractable>())
-    ];
-
-    static readonly NetworkEventType EventType = new()
-    {
-        IsAdminEvent = false,
-        EventId = NetworkEvents.EventId_RenameInteractable,
-        IsDebugEvent = false
     };
 
     [Command(name: "bind", shortHand: "b", adminOnly: false, usage: ".fam b [#]", description: "Activates specified familiar from current list.")]
@@ -70,151 +52,6 @@ internal static class FamiliarCommands
         Entity userEntity = ctx.Event.SenderUserEntity;
 
         FamiliarUtilities.BindFamiliar(character, userEntity, steamId, boxIndex);
-    }
-
-    //[Command(name: "forcebind", shortHand: "fb", adminOnly: true, usage: ".fam fb [Name] [Box] [#]", description: "Activates specified familiar from entered player box.")]
-    public static void ForceBindFamiliar(ChatCommandContext ctx, string name, string box, int choice)
-    {
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!playerInfo.UserEntity.Exists())
-        {
-            ctx.Reply($"Couldn't find player.");
-            return;
-        }
-
-        Entity character = playerInfo.CharEntity;
-        Entity userEntity = playerInfo.UserEntity;
-        ulong steamId = playerInfo.User.PlatformId;
-
-        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
-
-        /* skip this for forcebind
-        if (ServerGameManager.HasBuff(character, combatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, pvpCombatBuff.ToIdentifier()) || ServerGameManager.HasBuff(character, dominateBuff.ToIdentifier()))
-        {
-            LocalizationService.HandleReply(ctx, "You can't bind a familiar while in combat or dominating presence is active.");
-            return;
-        }
-        */
-
-        // this is still a good check though
-        if (familiar.Exists())
-        {
-            LocalizationService.HandleReply(ctx, $"<color=white>{playerInfo.User.CharacterName.Value}</color> already has an active familiar.");
-            return;
-        }
-
-        UnlockedFamiliarData unlocksData = LoadUnlockedFamiliars(steamId);
-
-        string set = unlocksData.UnlockedFamiliars.ContainsKey(box) ? box : "";
-        if (string.IsNullOrEmpty(set))
-        {
-            LocalizationService.HandleReply(ctx, $"Couldn't find box for <color=white>{playerInfo.User.CharacterName.Value}</color>. List player boxes by entering '<color=white>.fam lpf [Name]</color>' without a following specific box.");
-            return;
-        }
-
-        if (steamId.TryGetFamiliarActives(out var data) && data.Familiar.Equals(Entity.Null) && data.FamKey.Equals(0) && unlocksData.UnlockedFamiliars.TryGetValue(set, out var famKeys))
-        {
-            if (choice < 1 || choice > famKeys.Count)
-            {
-                LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{famKeys.Count}</color> (Current List: <color=yellow>{set}</color>)");
-                return;
-            }
-
-            PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
-            steamId.SetFamiliarDefault(choice);
-
-            data = new(Entity.Null, famKeys[choice - 1]);
-            steamId.SetFamiliarActives(data);
-
-            SummonFamiliar(character, userEntity, famKeys[choice - 1]);
-        }
-        else
-        {
-            LocalizationService.HandleReply(ctx, "Couldn't find familiar or familiar already active.");
-        }
-    }
-
-    //[Command(name: "listplayerfams", shortHand: "lpf", adminOnly: true, usage: ".fam lpf [Name] [Box]", description: "Lists unlocked familiars from players active box if entered and found or list all player boxes if left blank.")]
-    public static void ListPlayerFamiliars(ChatCommandContext ctx, string name, string box = "")
-    {
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
-        if (!playerInfo.UserEntity.Exists())
-        {
-            ctx.Reply($"Couldn't find player.");
-            return;
-        }
-
-        ulong steamId = playerInfo.User.PlatformId;
-
-        if (string.IsNullOrEmpty(box))
-        {
-            UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
-
-            if (data.UnlockedFamiliars.Keys.Count > 0)
-            {
-                List<string> sets = [];
-                foreach (var key in data.UnlockedFamiliars.Keys)
-                {
-                    sets.Add(key);
-                }
-
-                string fams = string.Join(", ", sets.Select(set => $"<color=yellow>{set}</color>"));
-                LocalizationService.HandleReply(ctx, $"Familiar Boxes for <color=white>{playerInfo.User.CharacterName.Value}</color>: {fams}");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"<color=white>{playerInfo.User.CharacterName.Value}</color> doesn't have any unlocked familiars yet.");
-            }
-
-            return;
-        }
-        else
-        {
-            UnlockedFamiliarData unlocksData = LoadUnlockedFamiliars(steamId);
-            FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
-
-            string set = unlocksData.UnlockedFamiliars.ContainsKey(box) ? box : "";
-            if (unlocksData.UnlockedFamiliars.TryGetValue(set, out var famKeys))
-            {
-                int count = 1;
-
-                foreach (var famKey in famKeys)
-                {
-                    PrefabGUID famPrefab = new(famKey);
-                    string famName = famPrefab.GetPrefabName();
-                    string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
-
-                    // Check if the familiar has buffs and update the color based on RandomVisuals
-                    if (buffsData.FamiliarBuffs.ContainsKey(famKey))
-                    {
-                        // Look up the color from the RandomVisuals dictionary if it exists
-                        if (ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
-                        {
-                            colorCode = $"<color={hexColor}>";
-                        }
-                    }
-
-                    LocalizationService.HandleReply(ctx, $"<color=white>{count}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")}");
-                    count++;
-                }
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, "Couldn't locate player box.");
-            }
-        }
     }
 
     [Command(name: "unbind", shortHand: "ub", adminOnly: false, usage: ".fam ub", description: "Destroys active familiar.")]
@@ -1108,50 +945,6 @@ internal static class FamiliarCommands
             string validOptions = string.Join(", ", FamiliarSettings.Keys.Select(kvp => $"<color=white>{kvp}</color>"));
             LocalizationService.HandleReply(ctx, $"Invalid option. Please choose from the following: {validOptions}");
         }
-    }
-
-    //[Command(name: "name", shortHand: "n", adminOnly: false, usage: ".fam n [Name]", description: "testing")] does not work at all D:
-    public static void NameFamiliar(ChatCommandContext ctx, string name)
-    {
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
-        familiar.Add<NameableInteractable>();
-
-        if (!familiar.Exists() || !familiar.Has<NameableInteractable>())
-        {
-            LocalizationService.HandleReply(ctx, "Make sure familiar is active and present before naming it.");
-            return;
-        }
-
-        /*
-        SendEventToUser sendEventToUser = new()
-        {
-            UserIndex = ctx.Event.User.Index
-        };
-        networkEntity.Write(sendEventToUser);
-        */
-
-        FromCharacter fromCharacter = new()
-        {
-            Character = ctx.Event.SenderCharacterEntity,
-            User = ctx.Event.SenderUserEntity
-        };
-
-        InteractEvents_Client.RenameInteractable renameInteractable = new() // named means they show their nameplate?
-        {
-            InteractableId = familiar.Read<NetworkId>(),
-            NewName = new Unity.Collections.FixedString64Bytes(name)
-        };
-        
-        Entity networkEntity = EntityManager.CreateEntity(NetworkEventComponents);
-        networkEntity.Write(fromCharacter);
-        networkEntity.Write(EventType);
-        networkEntity.Write(renameInteractable);
     }
 }
 

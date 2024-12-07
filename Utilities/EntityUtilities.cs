@@ -84,7 +84,10 @@ internal static class EntityUtilities
                     else if (entity.TryGetComponent(out PrefabGUID unitPrefab))
                     {
                         string prefabName = unitPrefab.LookupName();
-                        if (!FilteredTargets.Any(part => prefabName.Contains(part))) yield return entity;
+                        bool customSpawned = entity.TryGetComponent(out IsMinion isMinion) && isMinion.Value;
+                        
+                        if (customSpawned) continue;
+                        else if (!FilteredTargets.Any(part => prefabName.Contains(part))) yield return entity;
                     }
                 }
                 else if (targetType == 1)

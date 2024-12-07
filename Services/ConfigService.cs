@@ -7,6 +7,7 @@ namespace Bloodcraft.Services;
 
 public static class ConfigService
 {
+    /*
     public static string LanguageLocalization { get; private set; }
     public static bool ClientCompanion { get; private set; }
     public static bool EliteShardBearers { get; private set; }
@@ -55,8 +56,6 @@ public static class ConfigService
     public static int ExoPrestiges { get; private set; }
     public static int ExoPrestigeReward { get; private set; }
     public static int ExoPrestigeRewardQuantity { get; private set; }
-    public static float ExoPrestigeDamageTakenMultiplier { get; private set; }
-    public static float ExoPrestigePowerBonus { get; private set; }
     public static bool ExpertiseSystem { get; private set; }
     public static int MaxExpertisePrestiges { get; private set; }
     public static bool UnarmedSlots { get; private set; }
@@ -154,10 +153,445 @@ public static class ConfigService
     public static string ArcaneSorcererSpells { get; private set; }
     public static string DeathMageBuffs { get; private set; }
     public static string DeathMageSpells { get; private set; }
+    */
+    static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
+    public static string LanguageLocalization => _languageLocalization.Value;
+
+    static readonly Lazy<bool> _clientCompanion = new(() => GetConfigValue<bool>("ClientCompanion"));
+    public static bool ClientCompanion => _clientCompanion.Value;
+
+    static readonly Lazy<bool> _eliteShardBearers = new(() => GetConfigValue<bool>("EliteShardBearers"));
+    public static bool EliteShardBearers => _eliteShardBearers.Value;
+
+    static readonly Lazy<int> _shardBearerLevel = new(() => GetConfigValue<int>("ShardBearerLevel"));
+    public static int ShardBearerLevel => _shardBearerLevel.Value;
+
+    static readonly Lazy<bool> _potionStacking = new(() => GetConfigValue<bool>("PotionStacking"));
+    public static bool PotionStacking => _potionStacking.Value;
+
+    static readonly Lazy<bool> _starterKit = new(() => GetConfigValue<bool>("StarterKit"));
+    public static bool StarterKit => _starterKit.Value;
+
+    static readonly Lazy<string> _kitPrefabs = new(() => GetConfigValue<string>("KitPrefabs"));
+    public static string KitPrefabs => _kitPrefabs.Value;
+
+    static readonly Lazy<string> _kitQuantities = new(() => GetConfigValue<string>("KitQuantities"));
+    public static string KitQuantities => _kitQuantities.Value;
+
+    static readonly Lazy<bool> _questSystem = new(() => GetConfigValue<bool>("QuestSystem"));
+    public static bool QuestSystem => _questSystem.Value;
+
+    static readonly Lazy<bool> _infiniteDailies = new(() => GetConfigValue<bool>("InfiniteDailies"));
+    public static bool InfiniteDailies => _infiniteDailies.Value;
+
+    static readonly Lazy<string> _questRewards = new(() => GetConfigValue<string>("QuestRewards"));
+    public static string QuestRewards => _questRewards.Value;
+
+    static readonly Lazy<string> _questRewardAmounts = new(() => GetConfigValue<string>("QuestRewardAmounts"));
+    public static string QuestRewardAmounts => _questRewardAmounts.Value;
+
+    static readonly Lazy<int> _rerollDailyPrefab = new(() => GetConfigValue<int>("RerollDailyPrefab"));
+    public static int RerollDailyPrefab => _rerollDailyPrefab.Value;
+
+    static readonly Lazy<int> _rerollDailyAmount = new(() => GetConfigValue<int>("RerollDailyAmount"));
+    public static int RerollDailyAmount => _rerollDailyAmount.Value;
+
+    static readonly Lazy<int> _rerollWeeklyPrefab = new(() => GetConfigValue<int>("RerollWeeklyPrefab"));
+    public static int RerollWeeklyPrefab => _rerollWeeklyPrefab.Value;
+
+    static readonly Lazy<int> _rerollWeeklyAmount = new(() => GetConfigValue<int>("RerollWeeklyAmount"));
+    public static int RerollWeeklyAmount => _rerollWeeklyAmount.Value;
+    static readonly Lazy<bool> _levelingSystem = new(() => GetConfigValue<bool>("LevelingSystem"));
+    public static bool LevelingSystem => _levelingSystem.Value;
+
+    static readonly Lazy<bool> _restedXPSystem = new(() => GetConfigValue<bool>("RestedXPSystem"));
+    public static bool RestedXPSystem => _restedXPSystem.Value;
+
+    static readonly Lazy<float> _restedXPRate = new(() => GetConfigValue<float>("RestedXPRate"));
+    public static float RestedXPRate => _restedXPRate.Value;
+
+    static readonly Lazy<int> _restedXPMax = new(() => GetConfigValue<int>("RestedXPMax"));
+    public static int RestedXPMax => _restedXPMax.Value;
+
+    static readonly Lazy<float> _restedXPTickRate = new(() => GetConfigValue<float>("RestedXPTickRate"));
+    public static float RestedXPTickRate => _restedXPTickRate.Value;
+
+    static readonly Lazy<int> _maxLevel = new(() => GetConfigValue<int>("MaxLevel"));
+    public static int MaxLevel => _maxLevel.Value;
+
+    static readonly Lazy<int> _startingLevel = new(() => GetConfigValue<int>("StartingLevel"));
+    public static int StartingLevel => _startingLevel.Value;
+
+    static readonly Lazy<float> _unitLevelingMultiplier = new(() => GetConfigValue<float>("UnitLevelingMultiplier"));
+    public static float UnitLevelingMultiplier => _unitLevelingMultiplier.Value;
+
+    static readonly Lazy<float> _vBloodLevelingMultiplier = new(() => GetConfigValue<float>("VBloodLevelingMultiplier"));
+    public static float VBloodLevelingMultiplier => _vBloodLevelingMultiplier.Value;
+
+    static readonly Lazy<float> _docileUnitMultiplier = new(() => GetConfigValue<float>("DocileUnitMultiplier"));
+    public static float DocileUnitMultiplier => _docileUnitMultiplier.Value;
+
+    static readonly Lazy<float> _warEventMultiplier = new(() => GetConfigValue<float>("WarEventMultiplier"));
+    public static float WarEventMultiplier => _warEventMultiplier.Value;
+
+    static readonly Lazy<float> _unitSpawnerMultiplier = new(() => GetConfigValue<float>("UnitSpawnerMultiplier"));
+    public static float UnitSpawnerMultiplier => _unitSpawnerMultiplier.Value;
+
+    static readonly Lazy<float> _unitSpawnerExpertiseFactor = new(() => GetConfigValue<float>("UnitSpawnerExpertiseFactor"));
+    public static float UnitSpawnerExpertiseFactor => _unitSpawnerExpertiseFactor.Value;
+
+    static readonly Lazy<int> _changeClassItem = new(() => GetConfigValue<int>("ChangeClassItem"));
+    public static int ChangeClassItem => _changeClassItem.Value;
+
+    static readonly Lazy<int> _changeClassQuantity = new(() => GetConfigValue<int>("ChangeClassQuantity"));
+    public static int ChangeClassQuantity => _changeClassQuantity.Value;
+
+    static readonly Lazy<float> _groupLevelingMultiplier = new(() => GetConfigValue<float>("GroupLevelingMultiplier"));
+    public static float GroupLevelingMultiplier => _groupLevelingMultiplier.Value;
+
+    static readonly Lazy<float> _levelScalingMultiplier = new(() => GetConfigValue<float>("LevelScalingMultiplier"));
+    public static float LevelScalingMultiplier => _levelScalingMultiplier.Value;
+
+    static readonly Lazy<bool> _playerParties = new(() => GetConfigValue<bool>("PlayerParties"));
+    public static bool PlayerParties => _playerParties.Value;
+
+    static readonly Lazy<int> _maxPartySize = new(() => GetConfigValue<int>("MaxPartySize"));
+    public static int MaxPartySize => _maxPartySize.Value;
+
+    static readonly Lazy<float> _expShareDistance = new(() => GetConfigValue<float>("ExpShareDistance"));
+    public static float ExpShareDistance => _expShareDistance.Value;
+
+    static readonly Lazy<bool> _prestigeSystem = new(() => GetConfigValue<bool>("PrestigeSystem"));
+    public static bool PrestigeSystem => _prestigeSystem.Value;
+
+    static readonly Lazy<string> _prestigeBuffs = new(() => GetConfigValue<string>("PrestigeBuffs"));
+    public static string PrestigeBuffs => _prestigeBuffs.Value;
+
+    static readonly Lazy<string> _prestigeLevelsToUnlockClassSpells = new(() => GetConfigValue<string>("PrestigeLevelsToUnlockClassSpells"));
+    public static string PrestigeLevelsToUnlockClassSpells => _prestigeLevelsToUnlockClassSpells.Value;
+
+    static readonly Lazy<int> _maxLevelingPrestiges = new(() => GetConfigValue<int>("MaxLevelingPrestiges"));
+    public static int MaxLevelingPrestiges => _maxLevelingPrestiges.Value;
+
+    static readonly Lazy<float> _levelingPrestigeReducer = new(() => GetConfigValue<float>("LevelingPrestigeReducer"));
+    public static float LevelingPrestigeReducer => _levelingPrestigeReducer.Value;
+
+    static readonly Lazy<float> _prestigeRatesReducer = new(() => GetConfigValue<float>("PrestigeRatesReducer"));
+    public static float PrestigeRatesReducer => _prestigeRatesReducer.Value;
+
+    static readonly Lazy<float> _prestigeStatMultiplier = new(() => GetConfigValue<float>("PrestigeStatMultiplier"));
+    public static float PrestigeStatMultiplier => _prestigeStatMultiplier.Value;
+
+    static readonly Lazy<float> _prestigeRateMultiplier = new(() => GetConfigValue<float>("PrestigeRateMultiplier"));
+    public static float PrestigeRateMultiplier => _prestigeRateMultiplier.Value;
+
+    static readonly Lazy<bool> _exoPrestiging = new(() => GetConfigValue<bool>("ExoPrestiging"));
+    public static bool ExoPrestiging => _exoPrestiging.Value;
+
+    static readonly Lazy<int> _exoPrestiges = new(() => GetConfigValue<int>("ExoPrestiges"));
+    public static int ExoPrestiges => _exoPrestiges.Value;
+
+    static readonly Lazy<int> _exoPrestigeReward = new(() => GetConfigValue<int>("ExoPrestigeReward"));
+    public static int ExoPrestigeReward => _exoPrestigeReward.Value;
+
+    static readonly Lazy<int> _exoPrestigeRewardQuantity = new(() => GetConfigValue<int>("ExoPrestigeRewardQuantity"));
+    public static int ExoPrestigeRewardQuantity => _exoPrestigeRewardQuantity.Value;
+
+    static readonly Lazy<bool> _expertiseSystem = new(() => GetConfigValue<bool>("ExpertiseSystem"));
+    public static bool ExpertiseSystem => _expertiseSystem.Value;
+
+    static readonly Lazy<int> _maxExpertisePrestiges = new(() => GetConfigValue<int>("MaxExpertisePrestiges"));
+    public static int MaxExpertisePrestiges => _maxExpertisePrestiges.Value;
+
+    static readonly Lazy<bool> _unarmedSlots = new(() => GetConfigValue<bool>("UnarmedSlots"));
+    public static bool UnarmedSlots => _unarmedSlots.Value;
+
+    static readonly Lazy<bool> _shiftSlot = new(() => GetConfigValue<bool>("ShiftSlot"));
+    public static bool ShiftSlot => _shiftSlot.Value;
+
+    static readonly Lazy<int> _maxExpertiseLevel = new(() => GetConfigValue<int>("MaxExpertiseLevel"));
+    public static int MaxExpertiseLevel => _maxExpertiseLevel.Value;
+
+    static readonly Lazy<float> _unitExpertiseMultiplier = new(() => GetConfigValue<float>("UnitExpertiseMultiplier"));
+    public static float UnitExpertiseMultiplier => _unitExpertiseMultiplier.Value;
+
+    static readonly Lazy<float> _vBloodExpertiseMultiplier = new(() => GetConfigValue<float>("VBloodExpertiseMultiplier"));
+    public static float VBloodExpertiseMultiplier => _vBloodExpertiseMultiplier.Value;
+
+    static readonly Lazy<int> _expertiseStatChoices = new(() => GetConfigValue<int>("ExpertiseStatChoices"));
+    public static int ExpertiseStatChoices => _expertiseStatChoices.Value;
+
+    static readonly Lazy<int> _resetExpertiseItem = new(() => GetConfigValue<int>("ResetExpertiseItem"));
+    public static int ResetExpertiseItem => _resetExpertiseItem.Value;
+
+    static readonly Lazy<int> _resetExpertiseItemQuantity = new(() => GetConfigValue<int>("ResetExpertiseItemQuantity"));
+    public static int ResetExpertiseItemQuantity => _resetExpertiseItemQuantity.Value;
+
+    static readonly Lazy<float> _maxHealth = new(() => GetConfigValue<float>("MaxHealth"));
+    public static float MaxHealth => _maxHealth.Value;
+
+    static readonly Lazy<float> _movementSpeed = new(() => GetConfigValue<float>("MovementSpeed"));
+    public static float MovementSpeed => _movementSpeed.Value;
+
+    static readonly Lazy<float> _primaryAttackSpeed = new(() => GetConfigValue<float>("PrimaryAttackSpeed"));
+    public static float PrimaryAttackSpeed => _primaryAttackSpeed.Value;
+
+    static readonly Lazy<float> _physicalLifeLeech = new(() => GetConfigValue<float>("PhysicalLifeLeech"));
+    public static float PhysicalLifeLeech => _physicalLifeLeech.Value;
+
+    static readonly Lazy<float> _spellLifeLeech = new(() => GetConfigValue<float>("SpellLifeLeech"));
+    public static float SpellLifeLeech => _spellLifeLeech.Value;
+
+    static readonly Lazy<float> _primaryLifeLeech = new(() => GetConfigValue<float>("PrimaryLifeLeech"));
+    public static float PrimaryLifeLeech => _primaryLifeLeech.Value;
+
+    static readonly Lazy<float> _physicalPower = new(() => GetConfigValue<float>("PhysicalPower"));
+    public static float PhysicalPower => _physicalPower.Value;
+
+    static readonly Lazy<float> _spellPower = new(() => GetConfigValue<float>("SpellPower"));
+    public static float SpellPower => _spellPower.Value;
+
+    static readonly Lazy<float> _physicalCritChance = new(() => GetConfigValue<float>("PhysicalCritChance"));
+    public static float PhysicalCritChance => _physicalCritChance.Value;
+
+    static readonly Lazy<float> _physicalCritDamage = new(() => GetConfigValue<float>("PhysicalCritDamage"));
+    public static float PhysicalCritDamage => _physicalCritDamage.Value;
+
+    static readonly Lazy<float> _spellCritChance = new(() => GetConfigValue<float>("SpellCritChance"));
+    public static float SpellCritChance => _spellCritChance.Value;
+
+    static readonly Lazy<float> _spellCritDamage = new(() => GetConfigValue<float>("SpellCritDamage"));
+    public static float SpellCritDamage => _spellCritDamage.Value;
+
+    static readonly Lazy<bool> _bloodSystem = new(() => GetConfigValue<bool>("BloodSystem"));
+    public static bool BloodSystem => _bloodSystem.Value;
+
+    static readonly Lazy<int> _maxLegacyPrestiges = new(() => GetConfigValue<int>("MaxLegacyPrestiges"));
+    public static int MaxLegacyPrestiges => _maxLegacyPrestiges.Value;
+
+    static readonly Lazy<bool> _bloodQualityBonus = new(() => GetConfigValue<bool>("BloodQualityBonus"));
+    public static bool BloodQualityBonus => _bloodQualityBonus.Value;
+
+    static readonly Lazy<float> _prestigeBloodQuality = new(() => GetConfigValue<float>("PrestigeBloodQuality"));
+    public static float PrestigeBloodQuality => _prestigeBloodQuality.Value;
+
+    static readonly Lazy<int> _maxBloodLevel = new(() => GetConfigValue<int>("MaxBloodLevel"));
+    public static int MaxBloodLevel => _maxBloodLevel.Value;
+
+    static readonly Lazy<float> _unitLegacyMultiplier = new(() => GetConfigValue<float>("UnitLegacyMultiplier"));
+    public static float UnitLegacyMultiplier => _unitLegacyMultiplier.Value;
+
+    static readonly Lazy<float> _vBloodLegacyMultiplier = new(() => GetConfigValue<float>("VBloodLegacyMultiplier"));
+    public static float VBloodLegacyMultiplier => _vBloodLegacyMultiplier.Value;
+
+    static readonly Lazy<int> _legacyStatChoices = new(() => GetConfigValue<int>("LegacyStatChoices"));
+    public static int LegacyStatChoices => _legacyStatChoices.Value;
+
+    static readonly Lazy<int> _resetLegacyItem = new(() => GetConfigValue<int>("ResetLegacyItem"));
+    public static int ResetLegacyItem => _resetLegacyItem.Value;
+
+    static readonly Lazy<int> _resetLegacyItemQuantity = new(() => GetConfigValue<int>("ResetLegacyItemQuantity"));
+    public static int ResetLegacyItemQuantity => _resetLegacyItemQuantity.Value;
+
+    static readonly Lazy<float> _healingReceived = new(() => GetConfigValue<float>("HealingReceived"));
+    public static float HealingReceived => _healingReceived.Value;
+
+    static readonly Lazy<float> _damageReduction = new(() => GetConfigValue<float>("DamageReduction"));
+    public static float DamageReduction => _damageReduction.Value;
+
+    static readonly Lazy<float> _physicalResistance = new(() => GetConfigValue<float>("PhysicalResistance"));
+    public static float PhysicalResistance => _physicalResistance.Value;
+
+    static readonly Lazy<float> _spellResistance = new(() => GetConfigValue<float>("SpellResistance"));
+    public static float SpellResistance => _spellResistance.Value;
+
+    static readonly Lazy<float> _resourceYield = new(() => GetConfigValue<float>("ResourceYield"));
+    public static float ResourceYield => _resourceYield.Value;
+
+    static readonly Lazy<float> _ccReduction = new(() => GetConfigValue<float>("CCReduction"));
+    public static float CCReduction => _ccReduction.Value;
+
+    static readonly Lazy<float> _spellCooldownRecoveryRate = new(() => GetConfigValue<float>("SpellCooldownRecoveryRate"));
+    public static float SpellCooldownRecoveryRate => _spellCooldownRecoveryRate.Value;
+
+    static readonly Lazy<float> _weaponCooldownRecoveryRate = new(() => GetConfigValue<float>("WeaponCooldownRecoveryRate"));
+    public static float WeaponCooldownRecoveryRate => _weaponCooldownRecoveryRate.Value;
+
+    static readonly Lazy<float> _ultimateCooldownRecoveryRate = new(() => GetConfigValue<float>("UltimateCooldownRecoveryRate"));
+    public static float UltimateCooldownRecoveryRate => _ultimateCooldownRecoveryRate.Value;
+
+    static readonly Lazy<float> _minionDamage = new(() => GetConfigValue<float>("MinionDamage"));
+    public static float MinionDamage => _minionDamage.Value;
+
+    static readonly Lazy<float> _shieldAbsorb = new(() => GetConfigValue<float>("ShieldAbsorb"));
+    public static float ShieldAbsorb => _shieldAbsorb.Value;
+
+    static readonly Lazy<float> _bloodEfficiency = new(() => GetConfigValue<float>("BloodEfficiency"));
+    public static float BloodEfficiency => _bloodEfficiency.Value;
+
+    static readonly Lazy<bool> _professionSystem = new(() => GetConfigValue<bool>("ProfessionSystem"));
+    public static bool ProfessionSystem => _professionSystem.Value;
+
+    static readonly Lazy<int> _maxProfessionLevel = new(() => GetConfigValue<int>("MaxProfessionLevel"));
+    public static int MaxProfessionLevel => _maxProfessionLevel.Value;
+
+    static readonly Lazy<float> _professionMultiplier = new(() => GetConfigValue<float>("ProfessionMultiplier"));
+    public static float ProfessionMultiplier => _professionMultiplier.Value;
+
+    static readonly Lazy<bool> _extraRecipes = new(() => GetConfigValue<bool>("ExtraRecipes"));
+    public static bool ExtraRecipes => _extraRecipes.Value;
+
+    static readonly Lazy<bool> _familiarSystem = new(() => GetConfigValue<bool>("FamiliarSystem"));
+    public static bool FamiliarSystem => _familiarSystem.Value;
+
+    static readonly Lazy<bool> _shareUnlocks = new(() => GetConfigValue<bool>("ShareUnlocks"));
+    public static bool ShareUnlocks => _shareUnlocks.Value;
+
+    static readonly Lazy<bool> _familiarCombat = new(() => GetConfigValue<bool>("FamiliarCombat"));
+    public static bool FamiliarCombat => _familiarCombat.Value;
+
+    static readonly Lazy<bool> _familiarPvP = new(() => GetConfigValue<bool>("FamiliarPvP"));
+    public static bool FamiliarPvP => _familiarPvP.Value;
+
+    static readonly Lazy<bool> _familiarPrestige = new(() => GetConfigValue<bool>("FamiliarPrestige"));
+    public static bool FamiliarPrestige => _familiarPrestige.Value;
+
+    static readonly Lazy<int> _maxFamiliarPrestiges = new(() => GetConfigValue<int>("MaxFamiliarPrestiges"));
+    public static int MaxFamiliarPrestiges => _maxFamiliarPrestiges.Value;
+
+    static readonly Lazy<float> _familiarPrestigeStatMultiplier = new(() => GetConfigValue<float>("FamiliarPrestigeStatMultiplier"));
+    public static float FamiliarPrestigeStatMultiplier => _familiarPrestigeStatMultiplier.Value;
+
+    static readonly Lazy<int> _maxFamiliarLevel = new(() => GetConfigValue<int>("MaxFamiliarLevel"));
+    public static int MaxFamiliarLevel => _maxFamiliarLevel.Value;
+
+    static readonly Lazy<bool> _allowVBloods = new(() => GetConfigValue<bool>("AllowVBloods"));
+    public static bool AllowVBloods => _allowVBloods.Value;
+
+    static readonly Lazy<string> _bannedUnits = new(() => GetConfigValue<string>("BannedUnits"));
+    public static string BannedUnits => _bannedUnits.Value;
+
+    static readonly Lazy<string> _bannedTypes = new(() => GetConfigValue<string>("BannedTypes"));
+    public static string BannedTypes => _bannedTypes.Value;
+
+    static readonly Lazy<float> _vBloodDamageMultiplier = new(() => GetConfigValue<float>("VBloodDamageMultiplier"));
+    public static float VBloodDamageMultiplier => _vBloodDamageMultiplier.Value;
+
+    static readonly Lazy<float> _unitFamiliarMultiplier = new(() => GetConfigValue<float>("UnitFamiliarMultiplier"));
+    public static float UnitFamiliarMultiplier => _unitFamiliarMultiplier.Value;
+
+    static readonly Lazy<float> _vBloodFamiliarMultiplier = new(() => GetConfigValue<float>("VBloodFamiliarMultiplier"));
+    public static float VBloodFamiliarMultiplier => _vBloodFamiliarMultiplier.Value;
+
+    static readonly Lazy<float> _unitUnlockChance = new(() => GetConfigValue<float>("UnitUnlockChance"));
+    public static float UnitUnlockChance => _unitUnlockChance.Value;
+
+    static readonly Lazy<float> _vBloodUnlockChance = new(() => GetConfigValue<float>("VBloodUnlockChance"));
+    public static float VBloodUnlockChance => _vBloodUnlockChance.Value;
+
+    static readonly Lazy<float> _shinyChance = new(() => GetConfigValue<float>("ShinyChance"));
+    public static float ShinyChance => _shinyChance.Value;
+
+    static readonly Lazy<int> _shinyCostItemPrefab = new(() => GetConfigValue<int>("ShinyCostItemPrefab"));
+    public static int ShinyCostItemPrefab => _shinyCostItemPrefab.Value;
+
+    static readonly Lazy<int> _shinyCostItemQuantity = new(() => GetConfigValue<int>("ShinyCostItemQuantity"));
+    public static int ShinyCostItemQuantity => _shinyCostItemQuantity.Value;
+
+    static readonly Lazy<bool> _softSynergies = new(() => GetConfigValue<bool>("SoftSynergies"));
+    public static bool SoftSynergies => _softSynergies.Value;
+
+    static readonly Lazy<bool> _hardSynergies = new(() => GetConfigValue<bool>("HardSynergies"));
+    public static bool HardSynergies => _hardSynergies.Value;
+
+    static readonly Lazy<bool> _classSpellSchoolOnHitEffects = new(() => GetConfigValue<bool>("ClassSpellSchoolOnHitEffects"));
+    public static bool ClassSpellSchoolOnHitEffects => _classSpellSchoolOnHitEffects.Value;
+
+    static readonly Lazy<float> _onHitProcChance = new(() => GetConfigValue<float>("OnHitProcChance"));
+    public static float OnHitProcChance => _onHitProcChance.Value;
+
+    static readonly Lazy<float> _statSynergyMultiplier = new(() => GetConfigValue<float>("StatSynergyMultiplier"));
+    public static float StatSynergyMultiplier => _statSynergyMultiplier.Value;
+
+    static readonly Lazy<string> _bloodKnightWeapon = new(() => GetConfigValue<string>("BloodKnightWeapon"));
+    public static string BloodKnightWeapon => _bloodKnightWeapon.Value;
+
+    static readonly Lazy<string> _bloodKnightBlood = new(() => GetConfigValue<string>("BloodKnightBlood"));
+    public static string BloodKnightBlood => _bloodKnightBlood.Value;
+
+    static readonly Lazy<string> _demonHunterWeapon = new(() => GetConfigValue<string>("DemonHunterWeapon"));
+    public static string DemonHunterWeapon => _demonHunterWeapon.Value;
+
+    static readonly Lazy<string> _demonHunterBlood = new(() => GetConfigValue<string>("DemonHunterBlood"));
+    public static string DemonHunterBlood => _demonHunterBlood.Value;
+
+    static readonly Lazy<string> _vampireLordWeapon = new(() => GetConfigValue<string>("VampireLordWeapon"));
+    public static string VampireLordWeapon => _vampireLordWeapon.Value;
+
+    static readonly Lazy<string> _vampireLordBlood = new(() => GetConfigValue<string>("VampireLordBlood"));
+    public static string VampireLordBlood => _vampireLordBlood.Value;
+
+    static readonly Lazy<string> _shadowBladeWeapon = new(() => GetConfigValue<string>("ShadowBladeWeapon"));
+    public static string ShadowBladeWeapon => _shadowBladeWeapon.Value;
+
+    static readonly Lazy<string> _shadowBladeBlood = new(() => GetConfigValue<string>("ShadowBladeBlood"));
+    public static string ShadowBladeBlood => _shadowBladeBlood.Value;
+
+    static readonly Lazy<string> _arcaneSorcererWeapon = new(() => GetConfigValue<string>("ArcaneSorcererWeapon"));
+    public static string ArcaneSorcererWeapon => _arcaneSorcererWeapon.Value;
+
+    static readonly Lazy<string> _arcaneSorcererBlood = new(() => GetConfigValue<string>("ArcaneSorcererBlood"));
+    public static string ArcaneSorcererBlood => _arcaneSorcererBlood.Value;
+
+    static readonly Lazy<string> _deathMageWeapon = new(() => GetConfigValue<string>("DeathMageWeapon"));
+    public static string DeathMageWeapon => _deathMageWeapon.Value;
+
+    static readonly Lazy<string> _deathMageBlood = new(() => GetConfigValue<string>("DeathMageBlood"));
+    public static string DeathMageBlood => _deathMageBlood.Value;
+
+    static readonly Lazy<int> _defaultClassSpell = new(() => GetConfigValue<int>("DefaultClassSpell"));
+    public static int DefaultClassSpell => _defaultClassSpell.Value;
+
+    static readonly Lazy<string> _bloodKnightBuffs = new(() => GetConfigValue<string>("BloodKnightBuffs"));
+    public static string BloodKnightBuffs => _bloodKnightBuffs.Value;
+
+    static readonly Lazy<string> _bloodKnightSpells = new(() => GetConfigValue<string>("BloodKnightSpells"));
+    public static string BloodKnightSpells => _bloodKnightSpells.Value;
+
+    static readonly Lazy<string> _demonHunterBuffs = new(() => GetConfigValue<string>("DemonHunterBuffs"));
+    public static string DemonHunterBuffs => _demonHunterBuffs.Value;
+
+    static readonly Lazy<string> _demonHunterSpells = new(() => GetConfigValue<string>("DemonHunterSpells"));
+    public static string DemonHunterSpells => _demonHunterSpells.Value;
+
+    static readonly Lazy<string> _vampireLordBuffs = new(() => GetConfigValue<string>("VampireLordBuffs"));
+    public static string VampireLordBuffs => _vampireLordBuffs.Value;
+
+    static readonly Lazy<string> _vampireLordSpells = new(() => GetConfigValue<string>("VampireLordSpells"));
+    public static string VampireLordSpells => _vampireLordSpells.Value;
+
+    static readonly Lazy<string> _shadowBladeBuffs = new(() => GetConfigValue<string>("ShadowBladeBuffs"));
+    public static string ShadowBladeBuffs => _shadowBladeBuffs.Value;
+
+    static readonly Lazy<string> _shadowBladeSpells = new(() => GetConfigValue<string>("ShadowBladeSpells"));
+    public static string ShadowBladeSpells => _shadowBladeSpells.Value;
+
+    static readonly Lazy<string> _arcaneSorcererBuffs = new(() => GetConfigValue<string>("ArcaneSorcererBuffs"));
+    public static string ArcaneSorcererBuffs => _arcaneSorcererBuffs.Value;
+
+    static readonly Lazy<string> _arcaneSorcererSpells = new(() => GetConfigValue<string>("ArcaneSorcererSpells"));
+    public static string ArcaneSorcererSpells => _arcaneSorcererSpells.Value;
+
+    static readonly Lazy<string> _deathMageBuffs = new(() => GetConfigValue<string>("DeathMageBuffs"));
+    public static string DeathMageBuffs => _deathMageBuffs.Value;
+
+    static readonly Lazy<string> _deathMageSpells = new(() => GetConfigValue<string>("DeathMageSpells"));
+    public static string DeathMageSpells => _deathMageSpells.Value;
     public static class ConfigInitialization
     {
         static readonly Regex regex = new(@"^\[(.+)\]$");
 
+        /*
         public static readonly List<string> DirectoryPaths =
         [
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME), // 0
@@ -170,8 +604,27 @@ public static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"), // 7
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks") // 8
         ];
+        */
 
-        static readonly List<string> SectionOrder =
+        // Lazy initialization for DirectoryPaths
+        static readonly Lazy<List<string>> _directoryPaths = new(() =>
+        {
+            return
+        [
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerLeveling"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Quests"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "WeaponExpertise"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "BloodLegacies"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Professions"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"),
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks")
+        ];
+        });
+        public static List<string> DirectoryPaths => _directoryPaths.Value;
+
+        public static readonly List<string> SectionOrder =
         [
             "General",
             "StarterKit",
@@ -191,8 +644,7 @@ public static class ConfigService
             public object DefaultValue { get; } = defaultValue;
             public string Description { get; } = description;
         }
-
-        static readonly List<ConfigEntryDefinition> ConfigEntries =
+        public static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
             new ConfigEntryDefinition("General", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config."),
@@ -668,5 +1120,10 @@ public static class ConfigService
                 }
             }
         }
+    }
+    static T GetConfigValue<T>(string key)
+    {
+        var entry = ConfigInitialization.ConfigEntries.FirstOrDefault(e => e.Key == key);
+        return entry == null ? throw new InvalidOperationException($"Config entry for key '{key}' not found.") : (T)entry.DefaultValue;
     }
 }

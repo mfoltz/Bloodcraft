@@ -22,7 +22,7 @@ public static class VersionHandler
     // Dictionary to store version handlers
     public static readonly Dictionary<string, object> VersionHandlers = new()
     {
-        { "1.1.2", new VersionHandler_1_1_2() }, // legacy version, took me too long to realize truly older versions won't send their version to the server :P
+        { "1.1.2", new VersionHandler_1_1_2() }, // legacy version, took me too long to realize true legacy versions won't send their version to the server :P
         { "1.2.2", new VersionHandler_1_2_2() }
     };
 

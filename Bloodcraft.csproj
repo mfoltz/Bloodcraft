@@ -1,19 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
-	<ImplicitUsings>enable</ImplicitUsings>
-	<AssemblyName>Bloodcraft</AssemblyName>
-	<Version>1.5.3</Version>
-	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	<RestoreSources>
-			https://api.nuget.org/v3/index.json;
-			https://nuget.bepinex.dev/v3/index.json;
-	</RestoreSources>
-	<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-	<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>
-	<LangVersion>preview</LangVersion>
-	<EnablePreviewFeatures>true</EnablePreviewFeatures>
+	<PropertyGroup>	
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>Bloodcraft</AssemblyName>
+		<Version>1.5.3</Version>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<RestoreSources>
+				https://api.nuget.org/v3/index.json;
+				https://nuget.bepinex.dev/v3/index.json;
+		</RestoreSources>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+		<BepInExPluginGuid>io.zfolmt.Bloodcraft</BepInExPluginGuid>
+		<LangVersion>preview</LangVersion>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<OutputType>Exe</OutputType>
+		<UseAppHost>false</UseAppHost>
+		<NuGetAudit>False</NuGetAudit>
 	</PropertyGroup>
 	
 	<ItemGroup>
@@ -39,13 +42,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	<PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" IncludeAssets="compile" />
-	<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-	<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
-	<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
-	<PackageReference Include="HarmonyX" Version="2.13.0" />
-	<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.5.802790001" />
-	<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.0" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
+		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.5.802790001" />
+		<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.0" />
 	</ItemGroup>
 	
 	<Target Name="BuildToServer" AfterTargets="Build">
@@ -53,10 +53,9 @@
 	</Target>
 	
 	<!-- Post-build event to call the README generator directly -->
-	<!--
-	<Target Name="PostBuild" AfterTargets="Build">
-		<Exec Command="dotnet exec $(OutputPath)$(AssemblyName).dll $(ProjectDir)Commands $(ProjectDir)READMETEST.md" />
+	<Target Name="GenerateReadMe" AfterTargets="Build">
+		<Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)READMETEST.md&quot;" />
 	</Target>
-	-->
+
 	
 </Project>

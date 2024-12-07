@@ -17,8 +17,6 @@ internal static class QuestCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly PrefabGUID ImprisonedBuff = new(1603329680);
-
     [Command(name: "log", adminOnly: false, usage: ".quest log", description: "Toggles quest progress logging.")]
     public static void LogQuestCommand(ChatCommandContext ctx)
     {

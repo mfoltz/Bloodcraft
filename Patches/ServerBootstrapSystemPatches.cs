@@ -422,7 +422,7 @@ internal static class ServerBootstrapSystemPatches
             //if (exists) FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
 
             Entity familiar = FamiliarUtilities.FindPlayerFamiliar(playerCharacter);
-
+            
             if (!familiar.Exists()) FamiliarUtilities.ClearFamiliarActives(steamId);
             else
             {
