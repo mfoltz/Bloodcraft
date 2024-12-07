@@ -29,152 +29,55 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 
 ## Commands
 
-### Blood Commands
-- `.bloodlegacy get [Blood]`
-  - Display progress and bonuses in entered blood legacy.
-  - Shortcut: *.bl get [Blood]*
+### Bloodlegacy Commands
+- `.bloodlegacy get [BloodType]`
+  - Display your current blood legacy progress.
+  - Shortcut: *.bl get [BloodType]*
 - `.bloodlegacy log`
-  - Enables or disables blood legacy logging.
+  - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
-- `.bloodlegacy choosestat [Blood] [Stat]`
-  - Chooses stat bonus to apply to a blood type that scales with that blood legacy level.
-  - Shortcut: *.bl cst [Blood] [Stat]*
-- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
-  - Sets player blood legacy level.
-  - Shorcut: *.bl set [Player] [Blood] [Level]*
-- `.bloodlegacy liststats`
-  - Lists blood stats available along with bonuses at max legacy.
-  - Shortcut: *.bl lst*
+- `.bloodlegacy choosestat [Blood] [BloodStat]`
+  - Choose a blood stat to enhance based on your legacy.
+  - Shortcut: *.bl cst [Blood] [BloodStat]*
 - `.bloodlegacy resetstats`
-  - Resets stat choices for currently equipped blood for configurable item cost/quanity.
+  - Reset stats for current blood.
   - Shortcut: *.bl rst*
+- `.bloodlegacy liststats`
+  - Lists blood stats available.
+  - Shortcut: *.bl lst*
+- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
+  - Sets player Blood Legacy level.
+  - Shortcut: *.bl set [Player] [Blood] [Level]*
 - `.bloodlegacy list`
   - Lists blood legacies available.
   - Shortcut: *.bl l*
 
 ### Class Commands
 - `.class choose [Class]`
-  - Chooses class (see options with .classes)
+  - Choose class.
   - Shortcut: *.class c [Class]*
 - `.class choosespell [#]`
-  - Choose class spell (see options with .class lsp)
+  - Sets shift spell for class if prestige level is high enough.
   - Shortcut: *.class csp [#]*
 - `.class change [Class]`
-  - Changes to specified class.
+  - Change classes.
   - Shortcut: *.class change [Class]*
-- `.class list`
-  - List classes.
-  - Shortcut: *.class l*
 - `.class syncbuffs`
-  - Applies class buffs appropriately if not present
+  - Applies class buffs appropriately if not present.
   - Shortcut: *.class sb*
-- `.class listbuffs [Class]`
-  - List class buffs.
-  - Shortcut: *.class lb [Class]*
-- `.class listspells [Class]`
-  - List class spells.
-  - Shortcut: *.class lsp [Class]*
+- `.class list`
+  - Lists classes.
+  - Shortcut: *.class l*
+- `.class listbuffs [ClassType]`
+  - Shows perks that can be gained from class.
+  - Shortcut: *.class lb [ClassType]*
+- `.class listspells [ClassType]`
+  - Shows spells that can be gained from class.
+  - Shortcut: *.class lsp [ClassType]*
 - `.class liststats [Class]`
-  - List class spells.
+  - Shows weapon and blood stat synergies for a class.
   - Shortcut: *.class lst [Class]*
- 
-### Leveling Commands
-- `.level get`
-  - Display current level progress.
-  - Shortcut: *.lvl get*
-- `.level log`
-  - Enables or disables leveling experience logging.
-  - Shortcut: *.lvl log*
-- `.level set [Player] [Level]` 🔒
-  - Sets player experience level.
-  - Shorcut: *.lvl set [Player] [Level]*
 
-### Prestige Commands
-- `.prestige me [PrestigeType]`
-  - Handles all player prestiging. Must be at max configured level for experience, expertise, or legacies to be eligible.
-  - Shortcut: *.prestige me [PrestigeType]*
-- `.prestige get [PrestigeType]`
-  - Shows information about player's prestige status and rates for entered type of prestige.
-  - Shortcut: *.prestige get [PrestigeType]*
-- `.prestige reset [Name] [PrestigeType]` 🔒
-  - Resets prestige type and removes buffs gained from prestiges in leveling if applicable.
-  - Shortcut: *.prestige r [Name] [PrestigeType]*
-- `.prestige set [Name] [PrestigeType] [Level]` 🔒
-  - Sets player prestige level.
-  - Shorcut: *.prestige spr [Name] [PrestigeType] [Level]*
-- `.prestige list`
-  - Lists prestiges available to the player.
-  - Shortcut: *.prestige l*
-- `.prestige listbuffs`
-  - Lists prestige buffs available.
-  - Shortcut: *.prestige lb*
-- `.prestige syncbuffs`
-  - Applies prestige buffs appropriately if not present.
-  - Shortcut: *.prestige sb*
-
-### Party Commands
-- `.party toggleinvites`
-  - Toggles party invites.
-  - Shortcut: *.party invites*
-- `.party add [Player]`
-  - Adds player to party.
-  - Shortcut: *.party a [Player]*
-- `.party remove [Player]`
-  - Removes player from party.
-  - Shortcut: *.party r [Player]*
-- `.party disband`
-  - Disbands party.
-  - Shortcut: *.party end*
-- `.party listmembers`
-  - Lists party members.
-  - Shortcut: *.party lm*
-- `.party leave`
-  - Leaves party.
-  - Shortcut: *.party drop*
-
-### Profession Commands
-- `.profession get [Profession]`
-  - Display progress in entered profession.
-  - Shortcut: *.prof get [Profession]*
-- `.profession log`
-  - Enables or disables profession progress logging (also controls if user is informed of bonus yields from profession levels).
-  - Shortcut: *.prof log*
-- `.profession set [Name] [Profession] [Level]` 🔒
-  - Sets player profession level.
-  - Shortcut: *.prof set [Name] [Profession] [Level]*
-- `.profession list`
-  - Lists available professions.
-  - Shortcut: *.prof l*
-    
-### Weapon Commands
-- `.weapon get`
-  - Display expertise progress for current weapon along with any bonus stats if applicable.
-  - Shortcut: *.wep get*
-- `.weapon log`
-  - Enables or disables expertise logging.
-  - Shortcut: *.wep log*
-- `.weapon choosestat [Weapon] [Stat]`
-  - Chooses stat bonus to apply to a weapon type that scales based on expertise level.
-  - Shortcut: *.wep cst [Weapon] [Stat]*
-- `.weapon setexpertise [Player] [Weapon] [Level]` 🔒
-  - Sets player weapon expertise level.
-  - Shorcut: *.wep set [Player] [Weapon] [Level]*
-- `.weapon liststats`
-  - Lists weapon stats available along with bonuses at max expertise.
-  - Shortcut: *.wep lst*
-- `.weapon list`
-  - Lists weapon types/expertises available.
-  - Shortcut: *.wep l*
-- `.weapon resetstats`
-  - Resets stat choices for currently equipped weapon for configurable item cost/quanity.
-  - Shortcut: *.wep rst*
-- `.weapon setspells [Slot] [AbilityGroupPrefab]` 🔒
-  - Manually set spells in unarmed slots. Useful for testing but do be mindful, some NPC spells are fairly dangerous- and not in an OP sort of way :P
-  - Shortcut: *.wep spell [Slot] [AbilityGroupPrefab]*
-- `.weapon restorelevels`
-  - Restores weapon levels in player inventory to what they should be if they had been modified via expertise level in earlier versions of the mod. Don't use unless needed.
-  - Shortcut: *.wep restore*
- 
 ### Familiar Commands
 - `.familiar bind [#]`
   - Activates specified familiar from current list.
@@ -187,428 +90,512 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Shortcut: *.fam l*
 - `.familiar boxes`
   - Shows the available familiar boxes.
-  - Shorcut: *.fam box*
+  - Shortcut: *.fam box*
 - `.familiar choosebox [Name]`
-  - Choose active box of familiars to bind from.
+  - Choose active box of familiars.
   - Shortcut: *.fam cb [Name]*
-- `.familiar addbox [Name]`
-  - Adds box.
-  - Shortcut: *.fam ab [Name]*
-- `.familiar deletebox [Name]`
-  - Deletes box (if empty).
-  - Shortcut: *.fam db [Name]*
 - `.familiar renamebox [CurrentName] [NewName]`
   - Renames a box.
   - Shortcut: *.fam rb [CurrentName] [NewName]*
 - `.familiar movebox [BoxName]`
-  - Move active familiar to specified box.
-  - Shortcut: *.fam mb [SetName]*
-- `.familiar toggle`
-  - Calls or dismisses familar. Wave also does this if .fam e is toggled on.
-  - Shortcut: *.fam t*
-- `.familiar togglecombat`
-  - Enables/disables combat. Salute also does this if .fam e is toggled on.
-  - Shortcut: *.fam c*
-- `.familiar add [Player] [CharPrefab]` 🔒
-  - Adds familiar to last list of player named.
-  - Shortcut: *.fam a [Name] [CharPrefab]*
+  - Moves active familiar to specified box.
+  - Shortcut: *.fam mb [BoxName]*
+- `.familiar deletebox [BoxName]`
+  - Deletes specified box if empty.
+  - Shortcut: *.fam db [BoxName]*
+- `.familiar addbox [BoxName]`
+  - Adds empty box with name.
+  - Shortcut: *.fam ab [BoxName]*
+- `.familiar add [Name] [PrefabGUID/CHAR_Unit_Name]` 🔒
+  - Unit testing.
+  - Shortcut: *.fam a [Name] [PrefabGUID/CHAR_Unit_Name]*
 - `.familiar remove [#]`
-  - Removes familiar from unlocks.
+  - Removes familiar from current set permanently.
   - Shortcut: *.fam r [#]*
-- `.familiar emotes`
-  - Toggles emote commands (only 1 right now) on.
-  - Shortcut: *.fam e*
-- `.familiar emoteactions`
-  - Lists emote actions and what they do.
-  - Shortcut: *.fam actions*
 - `.familiar getlevel`
   - Display current familiar leveling progress.
   - Shortcut: *.fam gl*
-- `.familiar prestige [StatType]`
-  - Prestiges familiar if at max level and valid stat is chosen.
-  - Shortcut: *.fam pr [StatType]*
 - `.familiar setlevel [Player] [Level]` 🔒
-  - Set level of current player familiar.
+  - Set current familiar level.
   - Shortcut: *.fam sl [Player] [Level]*
+- `.familiar prestige [BonusStat]`
+  - Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.
+  - Shortcut: *.fam pr [BonusStat]*
 - `.familiar reset`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.fam reset*
 - `.familiar search [Name]`
-  - Searches for familiars matching entered name in your boxes.
-  - Shortcut: *.fam s [Name]*
-- `.familiar search [Name]`
-  - Searches for familiars matching entered name in your boxes.
+  - Searches boxes for unit with entered name.
   - Shortcut: *.fam s [Name]*
 - `.familiar shinybuff [SpellSchool]`
-  - Assigns shiny visual to current active familiar. One freebie.
+  - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
   - Shortcut: *.fam shiny [SpellSchool]*
 - `.familiar resetshiny [Name]` 🔒
-  - Allows players to use '.fam v [SpellSchool]' again at admin discretion if so desired. Note that this will not remove visuals the player has chosen for a familiar with that command.
+  - Allows player to choose another free visual, however, does not erase any visuals they have chosen previously. Mainly for testing.
   - Shortcut: *.fam rs [Name]*
-- `.familiar option [setting]`
-  - Controls various familiar settings (currently shiny/vbloodemotes).
+- `.familiar toggleoption [Setting]`
+  - Toggles various familiar settings.
   - Shortcut: *.fam option [Setting]*
 
+### Level Commands
+- `.level log`
+  - Toggles leveling progress logging.
+  - Shortcut: *.lvl log*
+- `.level get`
+  - Display current leveling progress.
+  - Shortcut: *.lvl get*
+- `.level set [Player] [Level]` 🔒
+  - Sets player level.
+  - Shortcut: *.lvl set [Player] [Level]*
+
 ### Misc Commands
+- `.reminders`
+  - Toggles general reminders for various mod features.
+  - Shortcut: *.remindme*
+- `.sct`
+  - Toggles scrolling text.
+  - Shortcut: *.sct*
 - `.starterkit`
-  - Grants kit if configured.
+  - Provides starting kit.
   - Shortcut: *.kitme*
 - `.prepareforthehunt`
-  - Completes GettingReadyForTheHunt if not already completed. This shouldn't be needed at this point but leaving just incase.
+  - Completes GettingReadyForTheHunt if not already completed.
   - Shortcut: *.prepare*
 - `.lockspells`
-  - Enables registering spells to use in unarmed slots if extra slots for unarmed are enabled. Toggle, move spells to slots, then toggle again and switch to unarmed.
+  - Locks in the next spells equipped to use in your unarmed slots.
   - Shortcut: *.locksp*
 - `.lockshift`
-  - Toggles set class spell on shift. Works for unarmed and weapons.
+  - Toggle shift spell.
   - Shortcut: *.shift*
-- `.sct`
-  - Toggle scrolling text appearing when earning profession XP and for familiars earning XP.
-  - Shortcut: *.sct*
-- `.reminders`
-  - Toggle reminders from mod for various features.
-  - Shortcut: *.remindme*
 - `.userstats`
-  - Shows stats from credits on demand.
+  - Shows neat information about the player.
   - Shortcut: *.userstats*
 - `.silence`
-  - Gets rid of combat music that gets bugged on player if needed.
+  - Resets music for player.
   - Shortcut: *.silence*
 - `.exoform`
-  - Toggles taunt emote activating exo form if requirements met.
+  - Toggles taunting to enter exo form.
   - Shortcut: *.exoform*
-- `.cleanupfams`
-  - Finds and destroys old familiars preventing from building in a location. Note: most likely deprecating this soon, leaving for now just incase but do consider usage may cause crashes.
+- `.cleanupfams. 🔒`
+  - Removes disabled, invisible familiars on the map preventing building.
   - Shortcut: *.cleanupfams*
+
+### Party Commands
+- `.party toggleinvites`
+  - Toggles being able to be invited to parties, prevents damage and share exp.
+  - Shortcut: *.party inv*
+- `.party add [Player]`
+  - Adds player to party.
+  - Shortcut: *.party a [Player]*
+- `.party remove [Player]`
+  - Removes player from party.
+  - Shortcut: *.party r [Player]*
+- `.party listmembers`
+  - Lists party members of your active party.
+  - Shortcut: *.party lm*
+- `.party disband`
+  - Disbands party.
+  - Shortcut: *.party end*
+- `.party leave`
+  - Leaves party if in one.
+  - Shortcut: *.party drop*
+
+### Prestige Commands
+- `.prestige self [PrestigeType]`
+  - Handles player prestiging.
+  - Shortcut: *.prestige me [PrestigeType]*
+- `.prestige set [Name] [PrestigeType] [Level]` 🔒
+  - Sets the specified player to a certain level of prestige in a certain type of prestige.
+  - Shortcut: *.prestige set [Name] [PrestigeType] [Level]*
+- `.prestige listbuffs`
+  - Lists prestige buff names.
+  - Shortcut: *.prestige lb*
+- `.prestige reset [Name] [PrestigeType]` 🔒
+  - Handles resetting prestiging.
+  - Shortcut: *.prestige r [Name] [PrestigeType]*
+- `.prestige syncbuffs`
+  - Applies prestige buffs appropriately if not present.
+  - Shortcut: *.prestige sb*
+- `.prestige get [PrestigeType]`
+  - Shows information about player's prestige status.
+  - Shortcut: *.prestige get [PrestigeType]*
+- `.prestige list`
+  - Lists prestiges available.
+  - Shortcut: *.prestige l*
+- `.prestige leaderboard [PrestigeType]`
+  - Lists prestige leaderboard for type.
+  - Shortcut: *.prestige lb [PrestigeType]*
+- `.prestige shroud`
+  - Toggles permashroud if applicable.
+  - Shortcut: *.prestige shroud*
+
+### Profession Commands
+- `.profession log`
+  - Toggles profession progress logging.
+  - Shortcut: *.prof log*
+- `.profession get [Profession]`
+  - Display your current profession progress.
+  - Shortcut: *.prof get [Profession]*
+- `.profession set [Name] [Profession] [Level]` 🔒
+  - Sets player profession level.
+  - Shortcut: *.prof set [Name] [Profession] [Level]*
+- `.profession list`
+  - Lists professions available.
+  - Shortcut: *.prof l*
 
 ### Quest Commands
 - `.quest log`
-  - Enable/disable logging quest progress. 
+  - Toggles quest progress logging.
   - Shortcut: *.quest log*
-- `.quest progress [Daily/Weekly/d/w]`
-  - Displays daily quest details.
-  - Shortcut: *.quest p [Daily/Weekly/d/w]*
-- `.quest track [Daily/Weekly/d/w]`
-  - Finds closest quest target or rerolls quest if none are found.
-  - Shortcut: *.quest t [Daily/Weekly/d/w]*
-- `.quest reroll [Daily/Weekly/d/w]`
-  - Rerolls quest for player if eligible at cost.
-  - Shortcut: *.quest r [Daily/Weekly/d/w]*
+- `.quest progress [QuestType]`
+  - Display your current quest progress.
+  - Shortcut: *.quest p [QuestType]*
+- `.quest track [QuestType]`
+  - Locate and track quest target.
+  - Shortcut: *.quest t [QuestType]*
 - `.quest refresh [Name]` 🔒
-  - Refreshes quests for player.
+  - Refreshes daily and weekly quests for player.
   - Shortcut: *.quest rf [Name]*
- 
+- `.quest reroll [QuestType]`
+  - Reroll quest for cost (daily only currently).
+  - Shortcut: *.quest r [QuestType]*
+
+### Weapon Commands
+- `.weapon getexpertise`
+  - Displays your current expertise.
+  - Shortcut: *.wep get*
+- `.weapon logexpertise`
+  - Toggles expertise logging.
+  - Shortcut: *.wep log*
+- `.weapon choosestat [Weapon] [WeaponStat]`
+  - Choose a weapon stat to enhance based on your expertise.
+  - Shortcut: *.wep cst [Weapon] [WeaponStat]*
+- `.weapon resetwepstats`
+  - Reset the stats for current weapon.
+  - Shortcut: *.wep rst*
+- `.weapon setexpertise [Name] [Weapon] [Level]` 🔒
+  - Sets player weapon expertise level.
+  - Shortcut: *.wep set [Name] [Weapon] [Level]*
+- `.weapon liststats`
+  - Lists weapon stats available.
+  - Shortcut: *.wep lst*
+- `.weapon list`
+  - Lists weapon expertises available.
+  - Shortcut: *.wep l*
+- `.weapon setspells [Name] [Slot] [PrefabGUID] [Radius]` 🔒
+  - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
+  - Shortcut: *.wep spell [Name] [Slot] [PrefabGUID] [Radius]*
+- `.weapon restorelevels`
+  - Fixes weapon levels if they are not correct. Don't use this unless you need to.
+  - Shortcut: *.wep restore*
+
 ## Configuration
 
 ### General
-- **Language Localization**: `LanguageLocalization` (string, default: English)
-  The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, TraditionalChinese, Thai, Turkish, Vietnamese
-- **Starter Kit**: `StarterKit` (bool, default: false)  
+- **Language Localization**: `LanguageLocalization` (string, default: "English")
+  The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
+- **Client Companion**: `ClientCompanion` (bool, default: False)
+  Enable if using the client companion mod, can configure what's displayed in the client config.
+- **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
+  Enable or disable elite shard bearers.
+- **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
+  Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
+- **Potion Stacking**: `PotionStacking` (bool, default: True)
+  Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
+
+### StarterKit
+- **Starter Kit**: `StarterKit` (bool, default: False)
   Enable or disable the starter kit.
-- **KitPrefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")  
-  PrefabGUIDs for the starter kit.
-- **KitQuantities**: `KitQuantities` (string, default: "500,1000,1000,250")
-  Quantities for the starter kit.
-- **Potion Stacking**: `PotionStacking` (bool, default: false)  
-  Enable or disable stacking T01/T02 potions.
-- **Client Companion**: `ClientCompanion` (bool, default: false)  
-  Enable or disable allowing clients to register with server for UI updates.
-- **Elite Shard Bearers**: `EliteShardBearers` (bool, default: false)  
-  Enable or disable elite shard bearers (significant increases to health, damage, movement speed and attack speed but will no longer scale to number of players).
-- **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)  
-  Sets level of shard bearers if elite shard bearers is enabled (will override game vblood settings for shard bearers as this is set when they spawn). Leave at 0 for no change.
+- **Kit Prefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")
+  The PrefabGUID hashes for the starter kit.
+- **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
+  The quantity of each item in the starter kit.
 
-### Leveling System
-- **Enable Leveling System**: `LevelingSystem` (bool, default: false)  
-  Enable or disable the leveling system.
-- **Enable Rested XP**: `RestedXPSystem` (bool, default: false)  
-  Enable or disable rested XP (get bonus exp when killing if you log out in your coffin ala logging out in an inn from WoW).
-- **Rested XP Rate**: `RestedXPRate` (float, default: 0.05)  
-  Accumulation rate of rested XP per tick.
-- **Max Stored Rested XP**: `RestedXPMax` (int, default: 5)  
-  Maximum extra levels worth of rested XP that can be stored before capping.
-- **Rested XP Tick Rate**: `RestedXPTickRate` (float, default: 120)  
-  Minutes offline required per tick of earned rested XP.
-- **Max Player Level**: `MaxLevel` (int, default: 90)  
-  The maximum level a player can reach.
-- **Starting Player Level**: `StartingLevel` (int, default: 0)  
-  The starting level for players.
-- **Unit Leveling Multiplier**: `UnitLevelingMultiplier` (float, default: 7.5)  
-  Multiplier for experience gained from units.
-- **VBlood Leveling Multiplier**: `VBloodLevelingMultiplier` (float, default: 15)  
-  Multiplier for experience gained from VBloods.
-- **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)  
-  The multiplier for experience gained from war event trash spawns.
-- **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0)  
-  The multiplier for experience gained from unit spawners (vermin nest, graves).
-- **Docile Unit Multiplier**: `UnitSpawnerMultiplier` (float, default: 0.15)  
-  The multiplier for experience gained from non-aggressive units.
-- **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)  
-  Multiplier for experience gained from group kills.
-- **Experience Share Distance**: `ExpShareDistance` (float, default: 25)
-  Default is about 5 floor tile lengths.
-- **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
-  Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
-- **Player Parties**: `PlayerParties` (bool, default: false)  
-  Enable or disable player parties.
-- **Max Party Size**: `MaxPartySize` (int, default: 5)  
-  The maximum number of players that can form a party.
-
-### Prestige System
-- **Prestige System**: `PrestigeSystem` (bool, default: false)  
-  Enable or disable the prestige system.
-- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884")
-  The Prefabs for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level based on spot in the list. Should match number of times players can prestige in leveling.
-- **Prestige Levels to Unlock Class Spells:** `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3,4,5")
-  The prestige levels at which class spells are unlocked. This should match the number of spells per class. Can leave at 0 if you want them unlocked from the start.
-- **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)  
-  The maximum number of prestiges a player can reach in leveling.
-- **Prestige Rates Reducer**: `PrestigeRatesReducer` (float, default: 0.10)  
-  Factor by which rates are reduced in expertise/legacy/experience per increment of prestige in expertise, legacy or experience.
-- **Prestige Stat Multiplier**: `PrestigeStatMultiplier` (float, default: 0.10)  
-  Factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy.
-- **Prestige Rates Multiplier**: `PrestigeRatesMultiplier` (float, default: 0.10)  
-  Factor by which rates are increased in expertise/legacy per increment of prestige in leveling.
-- **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)  
-  Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
-- **Exo Prestiging**: `ExoPrestiging` (bool, default: false)    
-  Enable or disable exo prestiging (need to max normal prestiges first). After defeating Dracula and exo prestiging at least once players unlock a powerful new form (see '.exoform' in misc for activating and other exo-related prestige commands for more info).
-- **Exo Prestiges**: `ExoPrestiges` (int, default: 100)  
-  The maximum number of prestiges a player can reach in exo.
-- **Exo Prestige Reward**: `ExoPrestigeReward` (int, default: 28358550)  
-  The item prefab reward for exo prestiging (tier 3 nether shards by default).
-- **Exo Prestige Reward Quantity**: `ExoPrestigeRewardQuantity` (int, default: 500)  
-  The quantity of item obtained per exo prestige.
-
-### Quest System
-- **Enable Quest System**: `QuestSystem` (bool, default: false)  
-  Enable or disable the quest system.
-- **Infinite Dailies**: `InfiniteDailies` (bool, default: false)  
-  Enable or disable infinite dailies (will grant new daily upon completion of current).
-- **Quest Rewards**: `QuestRewards` (string, default: "2103989354,576389135,28358550")  
-  Prefab pool for quest rewards.
-- **Quest Reward Amounts**: `QuestRewardAmounts` (string, default: "250,100,50")  
-  Amounts for quest rewards. Must match the number of rewards in the pool.
-- **Daily Reroll Prefab**: `RerollDailyPrefab` (int, default: -949672483)  
-  Prefab item required for rerolling daily.
-- **Daily Reroll Cost**: `RerollDailyAmount` (int, default: 50)  
+### Quests
+- **Quest System**: `QuestSystem` (bool, default: False)
+  Enable or disable quests (currently only kill quests).
+- **Infinite Dailies**: `InfiniteDailies` (bool, default: False)
+  Enable or disable infinite dailies.
+- **Quest Rewards**: `QuestRewards` (string, default: "28358550,576389135,-257494203")
+  The PrefabGUID hashes for quest reward pool.
+- **Quest Reward Amounts**: `QuestRewardAmounts` (string, default: "50,250,50")
+  The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3).
+- **Reroll Daily Prefab**: `RerollDailyPrefab` (int, default: -949672483)
+  Prefab item for rerolling daily.
+- **Reroll Daily Amount**: `RerollDailyAmount` (int, default: 50)
   Cost of prefab for rerolling daily.
-- **Weekly Reroll Prefab**: `RerollWeeklyPrefab` (int, default: -949672483)  
+- **Reroll Weekly Prefab**: `RerollWeeklyPrefab` (int, default: -949672483)
   Prefab item for rerolling weekly.
-- **Weekly Reroll Cost**: `RerollWeeklyAmount` (int, default: 50)  
-  Cost of prefab for rerolling weekly.
- 
-### Expertise System
-- **Enable Expertise System**: `ExpertiseSystem` (bool, default: false)  
-  Enable or disable the expertise system.
-- **Unarmed Slots**: `UnarmedSlots` (bool, default: false)  
-  Enables extra spell slots for unarmed.
-- **Shift Slot**: `ShiftSlot` (bool, default: false)  
-  Enables class spell on shift.
-- **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 99)  
-  Maximum level in weapon expertise.
-- **Max Expertise Prestiges**: `MaxExpertisePrestiges` (int, default: 10)  
-  Maximum prestiges for weapon expertise.
-- **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (float, default: 2)  
-  Multiplier for expertise gained from units.
-- **VBlood Expertise Multiplier**: `VBloodExpertiseMultiplier` (float, default: 5)  
-  Multiplier for expertise gained from VBloods.
-- **Unit Spawner Expertise Factor**: `UnitSpawnerExpertiseFactor` (float, default: 1)  
-  The multiplier for experience gained from unit spawners (vermin nests, tombs), can be reduced or set to 0 for none.
-- **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 2)  
-  The maximum number of stat choices a player can choose for weapon expertise per weapon.
-- **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)  
-  Item PrefabGUID cost for resetting expertise stats.
-- **Reset Expertise Item Quantity**: `ResetExpertiseItemQuantity` (int, default: 500)  
-  Quantity of item cost required for resetting expertise stats.
+- **Reroll Weekly Amount**: `RerollWeeklyAmount` (int, default: 50)
+  Cost of prefab for rerolling weekly. Won't work if already completed for the week.
 
-### Expertise Stats
-- **Max Health**: `MaxHealth` (float, default: 250.0)  
-  Base cap for max health.
-- **Movement Speed**: `MovementSpeed` (float, default: 0.25)  
-  Base cap for movement speed.
-- **Primary Attack Speed**: `PrimaryAttackSpeed` (float, default: 0.10)  
-  Base cap for primary attack speed.
-- **Physical Lifeleech**: `PhysicalLifeLeech` (float, default: 0.10)  
-  Base cap for physical lifeleech.
-- **Spell Lifeleech**: `SpellLifeLeech` (float, default: 0.10)  
-  Base cap for spell lifeleech.
-- **Primary Lifeleech**: `PrimaryLifeleech` (float, default: 0.15)  
-  Base cap for primary lifeleech.
-- **Physical Power**: `PhysicalPower` (float, default: 20)  
-  Base cap for physical power.
-- **Spell Power**: `SpellPower` (float, default: 10)  
-  Base cap for spell power.
-- **Physical Crit Chance**: `PhysicalCritChance` (float, default: 0.10)  
-  Base cap for physical critical strike chance.
-- **Physical Crit Damage**: `PhysicalCritDamage` (float, default: 0.50)  
-  Base cap for physical critical strike damage.
-- **Spell Crit Chance**: `SpellCritChance` (float, default: 0.10)  
-  Base cap for spell critical strike chance.
-- **Spell Crit Damage**: `SpellCritDamage` (float, default: 0.50)  
-  Base cap for spell critical strike damage.
+### Leveling
+- **Leveling System**: `LevelingSystem` (bool, default: False)
+  Enable or disable the leveling system.
+- **Rested XP System**: `RestedXPSystem` (bool, default: False)
+  Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp.
+- **Rested XP Rate**: `RestedXPRate` (float, default: 0.05)
+  Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffin will provide maximum current rested XP).
+- **Rested XP Max**: `RestedXPMax` (int, default: 5)
+  Maximum extra levels worth of rested XP a player can accumulate.
+- **Rested XP Tick Rate**: `RestedXPTickRate` (float, default: 120)
+  Minutes required to accumulate one tick of Rested XP.
+- **Max Level**: `MaxLevel` (int, default: 90)
+  The maximum level a player can reach.
+- **Starting Level**: `StartingLevel` (int, default: 0)
+  Starting level for players if no data is found.
+- **Unit Leveling Multiplier**: `UnitLevelingMultiplier` (float, default: 7.5)
+  The multiplier for experience gained from units.
+- **V Blood Leveling Multiplier**: `VBloodLevelingMultiplier` (float, default: 15)
+  The multiplier for experience gained from VBloods.
+- **Docile Unit Multiplier**: `DocileUnitMultiplier` (float, default: 0.15)
+  The multiplier for experience gained from docile units.
+- **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)
+  The multiplier for experience gained from war event trash spawns.
+- **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0)
+  The multiplier for experience gained from unit spawners (vermin nests, tombs).
+- **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)
+  The multiplier for experience gained from group kills.
+- **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)
+  Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
+- **Player Parties**: `PlayerParties` (bool, default: False)
+  Enable or disable the ability to group with players not in your clan for experience/familiar unlock sharing.
+- **Max Party Size**: `MaxPartySize` (int, default: 5)
+  The maximum number of players that can share experience in a group.
+- **Exp Share Distance**: `ExpShareDistance` (float, default: 25)
+  Default is ~5 floor tile lengths.
 
-### Blood System
-- **Enable Blood System**: `BloodSystem` (bool, default: false)  
-  Enable or disable the blood legacy system.
-- **Max Blood Level**: `MaxBloodLevel` (int, default: 99)  
-  Maximum level in blood legacies.
-- **Max Legacy Prestiges**: `MaxLegacyPrestiges` (int, default: 10)  
-  Maximum prestiges in legacies.
-- **Unit Legacy Multiplier**: `UnitLegacyMultiplier` (float, default: 5)  
-  Multiplier for essence gained from units.
-- **VBlood Legacy Multiplier**: `VBloodLegacyMultipler` (float, default: 15)  
-  Multiplier for essence gained from VBloods.
-- **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 2)  
-  The maximum number of stat choices a player can choose for weapon expertise per weapon.
-- **Reset Legacy Item**: `ResetLegacyItem` (int, default: 576389135)  
-  Item PrefabGUID cost for resetting legacy stats.
-- **Reset Legacy Item Quantity**: `ResetLegacyItemQuantity` (int, default: 500)  
-  Quantity of item cost required for resetting legacy stats.
+### Prestige
+- **Prestige System**: `PrestigeSystem` (bool, default: False)
+  Enable or disable the prestige system (requires leveling to be enabled)
+- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884")
+  The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level
+- **Prestige Levels To Unlock Class Spells**: `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3,4,5")
+  The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 if you want them unlocked from the start.
+- **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)
+  The maximum number of prestiges a player can reach in leveling
+- **Leveling Prestige Reducer**: `LevelingPrestigeReducer` (float, default: 0.05)
+  Flat factor by which experience is reduced per increment of prestige in leveling
+- **Prestige Rates Reducer**: `PrestigeRatesReducer` (float, default: 0.1)
+  Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy
+- **Prestige Stat Multiplier**: `PrestigeStatMultiplier` (float, default: 0.1)
+  Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy
+- **Prestige Rate Multiplier**: `PrestigeRateMultiplier` (float, default: 0.1)
+  Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling
+- **Exo Prestiging**: `ExoPrestiging` (bool, default: False)
+  Enable or disable exo prestiges (need to max normal prestiges first).
+- **Exo Prestiges**: `ExoPrestiges` (int, default: 100)
+  The number of exo prestiges available
+- **Exo Prestige Reward**: `ExoPrestigeReward` (int, default: 28358550)
+  The reward for exo prestiging (tier 3 nether shards by default).
+- **Exo Prestige Reward Quantity**: `ExoPrestigeRewardQuantity` (int, default: 500)
+  The quantity of the reward for exo prestiging.
 
-### Legacy Stats
-- **Healing Received**: `HealingReceived` (float, default: 0.15)  
-  The base cap for healing received.
-- **Damage Reduction**: `DamageReduction` (float, default: 0.05)  
-  The base cap for damage reduction.
-- **Physical Resistance**: `PhysicalResistance` (float, default: 0.10)  
-  The base cap for physical resistance.
-- **Spell Resistance**: `SpellResistance` (float, default: 0.10)  
-  The base cap for spell resistance.
-- **Resource Yield**: `ResourceYield` (float, default: 0.25)  
-  The base cap for blood drain.
-- **Crowd Control Reduction**: `CCReduction` (float, default: 0.20)  
-  The base cap for crowd control reduction.
-- **Spell Cooldown Recovery Rate**: `SpellCooldownRecoveryRate` (float, default: 0.10)  
-  The base cap for spell cooldown recovery rate.
-- **Weapon Cooldown Recovery Rate**: `WeaponCooldownRecoveryRate` (float, default: 0.10)  
-  The base cap for weapon cooldown recovery rate.
-- **Ultimate Cooldown Recovery Rate**: `UltimateCooldownRecoveryRate` (float, default: 0.20)  
-  The base cap for ultimate cooldown recovery rate.
-- **Minion Damage**: `MinionDamage` (float, default: 0.25)  
-  The base cap for minion damage.
-- **Shield Absorb**: `ShieldAbsorb` (float, default: 0.50)  
-  The base cap for shield absorb.
-- **Blood Efficiency**: `BloodEfficiency` (float, default: 0.10)  
-  The base cap for blood efficiency.
+### Expertise
+- **Expertise System**: `ExpertiseSystem` (bool, default: False)
+  Enable or disable the expertise system
+- **Max Expertise Prestiges**: `MaxExpertisePrestiges` (int, default: 10)
+  The maximum number of prestiges a player can reach in expertise
+- **Unarmed Slots**: `UnarmedSlots` (bool, default: False)
+  Enable or disable the ability to use extra unarmed spell slots
+- **Shift Slot**: `ShiftSlot` (bool, default: False)
+  Enable or disable using class spell on shift
+- **Max Expertise Level**: `MaxExpertiseLevel` (int, default: 100)
+  The maximum level a player can reach in weapon expertise
+- **Unit Expertise Multiplier**: `UnitExpertiseMultiplier` (float, default: 2)
+  The multiplier for expertise gained from units
+- **V Blood Expertise Multiplier**: `VBloodExpertiseMultiplier` (float, default: 5)
+  The multiplier for expertise gained from VBloods
+- **Unit Spawner Expertise Factor**: `UnitSpawnerExpertiseFactor` (float, default: 1)
+  The multiplier for experience gained from unit spawners (vermin nests, tombs).
+- **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 2)
+  The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display.
+- **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)
+  Item PrefabGUID cost for resetting weapon stats
+- **Reset Expertise Item Quantity**: `ResetExpertiseItemQuantity` (int, default: 500)
+  Quantity of item required for resetting stats
+- **Max Health**: `MaxHealth` (float, default: 250)
+  The base cap for maximum health
+- **Movement Speed**: `MovementSpeed` (float, default: 0.25)
+  The base cap for movement speed
+- **Primary Attack Speed**: `PrimaryAttackSpeed` (float, default: 0.1)
+  The base cap for primary attack speed
+- **Physical Life Leech**: `PhysicalLifeLeech` (float, default: 0.1)
+  The base cap for physical life leech
+- **Spell Life Leech**: `SpellLifeLeech` (float, default: 0.1)
+  The base cap for spell life leech
+- **Primary Life Leech**: `PrimaryLifeLeech` (float, default: 0.15)
+  The base cap for primary life leech
+- **Physical Power**: `PhysicalPower` (float, default: 20)
+  The base cap for physical power
+- **Spell Power**: `SpellPower` (float, default: 10)
+  The base cap for spell power
+- **Physical Crit Chance**: `PhysicalCritChance` (float, default: 0.1)
+  The base cap for physical critical strike chance
+- **Physical Crit Damage**: `PhysicalCritDamage` (float, default: 0.5)
+  The base cap for physical critical strike damage
+- **Spell Crit Chance**: `SpellCritChance` (float, default: 0.1)
+  The base cap for spell critical strike chance
+- **Spell Crit Damage**: `SpellCritDamage` (float, default: 0.5)
+  The base cap for spell critical strike damage
 
-### Profession System
-- **Enable Profession System**: `ProfessionSystem` (bool, default: false)  
-  Enable or disable the profession system.
-- **Max Profession Level**: `MaxProfessionLevel` (int, default: 99)  
-  Maximum level in professions.
-- **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)  
-  Multiplier for proficiency gained per action.
-- **Extra Recipes**: `ExtraRecipes` (bool, default: false)  
-  Adds copper wires to fabricator, vampiric dust to advanced grinder, and silver ingots to basic furnace.
+### Legacies
+- **Blood System**: `BloodSystem` (bool, default: False)
+  Enable or disable the blood legacy system
+- **Max Legacy Prestiges**: `MaxLegacyPrestiges` (int, default: 10)
+  The maximum number of prestiges a player can reach in blood legacies
+- **Max Blood Level**: `MaxBloodLevel` (int, default: 100)
+  The maximum level a player can reach in blood legacies
+- **Unit Legacy Multiplier**: `UnitLegacyMultiplier` (float, default: 1)
+  The multiplier for lineage gained from units
+- **V Blood Legacy Multiplier**: `VBloodLegacyMultiplier` (float, default: 5)
+  The multiplier for lineage gained from VBloods
+- **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 2)
+  The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display.
+- **Reset Legacy Item**: `ResetLegacyItem` (int, default: 576389135)
+  Item PrefabGUID cost for resetting blood stats
+- **Reset Legacy Item Quantity**: `ResetLegacyItemQuantity` (int, default: 500)
+  Quantity of item required for resetting blood stats
+- **Healing Received**: `HealingReceived` (float, default: 0.15)
+  The base cap for healing received
+- **Damage Reduction**: `DamageReduction` (float, default: 0.05)
+  The base cap for damage reduction
+- **Physical Resistance**: `PhysicalResistance` (float, default: 0.1)
+  The base cap for physical resistance
+- **Spell Resistance**: `SpellResistance` (float, default: 0.1)
+  The base cap for spell resistance
+- **Resource Yield**: `ResourceYield` (float, default: 0.25)
+  The base cap for resource yield
+- **CC Reduction**: `CCReduction` (float, default: 0.2)
+  The base cap for crowd control reduction
+- **Spell Cooldown Recovery Rate**: `SpellCooldownRecoveryRate` (float, default: 0.1)
+  The base cap for spell cooldown recovery rate
+- **Weapon Cooldown Recovery Rate**: `WeaponCooldownRecoveryRate` (float, default: 0.1)
+  The base cap for weapon cooldown recovery rate
+- **Ultimate Cooldown Recovery Rate**: `UltimateCooldownRecoveryRate` (float, default: 0.2)
+  The base cap for ultimate cooldown recovery rate
+- **Minion Damage**: `MinionDamage` (float, default: 0.25)
+  The base cap for minion damage
+- **Shield Absorb**: `ShieldAbsorb` (float, default: 0.5)
+  The base cap for shield absorb
+- **Blood Efficiency**: `BloodEfficiency` (float, default: 0.1)
+  The base cap for blood efficiency
 
-### Familiar System
-- **Enable Familiar System**: `FamiliarSystem` (bool, default: false)  
-  Enable or disable the familiar system.
-- **Share Unlocks**: `ShareUnlocks` (bool, default: false)  
-  Enable or disable sharing unlocks between players in clans or parties (uses exp share distance).
-- **Allow VBloods**: `AllowVBloods` (bool, default: false)  
-  Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).
-- **Banned Units**: `BannedUnits` (string, default: "")  
-  Prefabs for banned units go here.
-- **Banned Types**: `BannedTypes` (string, default: "")  
-  The types of units that cannot be used as familiars go here. (Human, Undead, Demon, Mechanical, Beast)
-- **Max Familiar Level**: `MaxFamiliarLevel` (int, default: 90)  
-  Maximum level familiars can reach.
-- **Familiar Prestiges**: `FamiliarPrestiges` (bool, default: false)  
-  Enables prestiging for familiars.
-- **Max Familiar Prestiges**: `MaxFamiliarPrestiges` (int, default: 10)  
-  Maximum prestiges for familiars.
-- **Familiar Prestige Stat Multiplier**: `FamiliarPrestigeStatMultiplier` (float, default: 0.10)  
-  Factor by which stats are increased in for prestiged familiars.
-- **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 5)  
-  Multiplier for experience gained from units.
-- **VBlood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)  
-  Multiplier for experience gained from VBloods.
-- **VBlood Damage Multiplier**: `VBloodDamageMultiplier` (float, default: 1)  
-  Controls damage to VBloods by familiars.
-- **Player Damage Multiplier**: `PlayerDamageMultiplier` (float, default: 1)  
-  Controls damage to players by familiars.
-- **Unit Unlock Chance**: `UnitUnlockChance` (float, default: 0.05)  
-  The chance for a unit to unlock a familiar when killed.
-- **VBlood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)  
-  The chance for a VBlood to unlock a familiar when killed.
-- **Shiny Chance**: `ShinyChance` (float, default: 0.2)  
-  The chance to unlock a visual for a familiar when first unlocking unit.
-- **Shiny Cost Item**: `ShinyCostItemPrefab` (int, default: -77477508)  
-  Item PrefabGUID cost for choosing shiny visual if familiar already has one.
-- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)  
-  Quantity of item cost required shiny cost item.
-- **Familiar Combat**: `FamiliarCombat` (bool, default: true)  
+### Professions
+- **Profession System**: `ProfessionSystem` (bool, default: False)
+  Enable or disable the profession system
+- **Max Profession Level**: `MaxProfessionLevel` (int, default: 100)
+  The maximum level a player can reach in professions
+- **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)
+  The multiplier for profession experience gained
+- **Extra Recipes**: `ExtraRecipes` (bool, default: False)
+  Enable or disable extra recipes
+
+### Familiars
+- **Familiar System**: `FamiliarSystem` (bool, default: False)
+  Enable or disable the familiar system
+- **Share Unlocks**: `ShareUnlocks` (bool, default: False)
+  Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)
+- **Familiar Combat**: `FamiliarCombat` (bool, default: True)
   Enable or disable combat for familiars.
-- **Familiar PvP**: `FamiliarPvP` (bool, default: true)  
-  Enable or disable PvP participation for familiars. (if set to false, familiars will be unbound when the player enters PvP combat)
+- **Familiar Pv P**: `FamiliarPvP` (bool, default: True)
+  Enable or disable PvP participation for familiars. (if set to false, familiars will be unbound when entering PvP combat)
+- **Familiar Prestige**: `FamiliarPrestige` (bool, default: False)
+  Enable or disable the prestige system for familiars
+- **Max Familiar Prestiges**: `MaxFamiliarPrestiges` (int, default: 10)
+  The maximum number of prestiges a familiar can reach
+- **Familiar Prestige Stat Multiplier**: `FamiliarPrestigeStatMultiplier` (float, default: 0.1)
+  The multiplier for stats gained from familiar prestiges
+- **Max Familiar Level**: `MaxFamiliarLevel` (int, default: 90)
+  The maximum level a familiar can reach
+- **Allow V Bloods**: `AllowVBloods` (bool, default: False)
+  Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list)
+- **Banned Units**: `BannedUnits` (string, default: "")
+  The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs
+- **Banned Types**: `BannedTypes` (string, default: "")
+  The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast)
+- **V Blood Damage Multiplier**: `VBloodDamageMultiplier` (float, default: 1)
+  Leave at 1 for no change (controls damage familiars do to VBloods)
+- **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 7.5)
+  The multiplier for experience gained from units
+- **V Blood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)
+  The multiplier for experience gained from VBloods
+- **Unit Unlock Chance**: `UnitUnlockChance` (float, default: 0.05)
+  The chance for a unit to unlock a familiar
+- **V Blood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)
+  The chance for a VBlood to unlock a familiar
+- **Shiny Chance**: `ShinyChance` (float, default: 0.2)
+  The chance for a visual when unlocking a familiar
+- **Shiny Cost Item Prefab**: `ShinyCostItemPrefab` (int, default: -77477508)
+  Item PrefabGUID cost for changing shiny visual if one is already unlocked (currently demon fragment by default)
+- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)
+  Quantity of item required for changing shiny visual
 
-### Class System
-- **Soft Synergies**: `SoftSynergies` (bool, default: false)
-  Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard synergies at the same time).
-- **Hard Synergies**: `HardSynergies` (bool, default: false)
-  Allow class synergies (turns on classes and restricts stat choices, do not use this and soft synergies at the same time).
-- **Stat Synergy Multiplier**: `StatSynergyMultiplier` (float, default: 2)
-  Multiplier for class stat synergies to max stat bonus.
-- **Class Spell School OnHit Effects**: `ClassSpellSchoolOnHitEffects` (bool, default: false)  
+### Classes
+- **Soft Synergies**: `SoftSynergies` (bool, default: False)
+  Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)
+- **Hard Synergies**: `HardSynergies` (bool, default: False)
+  Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)
+- **Change Class Item**: `ChangeClassItem` (int, default: 576389135)
+  Item PrefabGUID cost for changing class.
+- **Change Class Quantity**: `ChangeClassQuantity` (int, default: 750)
+  Quantity of item required for changing class.
+- **Class Spell School On Hit Effects**: `ClassSpellSchoolOnHitEffects` (bool, default: False)
   Enable or disable class spell school on hit effects (respective debuff from spell school, leech chill condemn etc).
-- **On Hit Proc Chance**: `OnHitProcChance` (float, default: 0.075)  
-  The chance for a class effect to proc on hit (chance for every instance of physical or spell damage done by the player).
-- **Blood Knight Weapons:** `BloodKnightWeapon` (string, default: "0,3,5,6")
-  Blood Knight weapon synergies.
-- **Blood Knight Blood:** `BloodKnightBlood` (string, default: "0,2,3,11")
-  Blood Knight blood synergies.
-- **Demon Hunter Weapons:** `DemonHunterWeapon` (string, default: "1,2,8,9")
-  Demon Hunter weapon synergies.
-- **Demon Hunter Blood:** `DemonHunterBlood` (string, default: "2,5,7,9")
-  Demon Hunter blood synergies.
-- **Vampire Lord Weapons:** `VampireLordWeapon` (string, default: "0,5,6,7")
-  Vampire Lord weapon synergies.
-- **Vampire Lord Blood:** `VampireLordBlood` (string, default: "1,4,8,11")
-  Blood Knight blood synergies.
-- **Shadow Blade Weapons:** `ShadowBladeWeapon` (string, default: "1,2,3,4")
-  Shadow Blade weapon synergies.
-- **Shadow Blade Blood:** `ShadowBladeBlood` (string, default: "3,7,8,10")
-  Shadow Blade blood synergies.
-- **Arcane Sorcerer Weapons:** `ArcaneSorcererWeapon` (string, default: "4,7,10,11")
-  Arcane Sorcerer weapon synergies.
-- **Arcane Sorcerer Blood:** `ArcaneSorcererBlood` (string, default: "0,6,8,10")
-  Arcane Sorcerer blood synergies.
-- **Death Mage Weapons:** `DeathMageWeapon` (string, default: "0,3,4,7")
-  Death Mage weapon synergies.
-- **Death Mage Blood:** `DeathMageBlood` (string, default: "2,6,9,10")
-  Death Mage blood synergies.
-- **Default Class Spell**: `DefaultClassSpell` (int, default: -433204738)  
-  Default spell (veil of shadow) available to all classes from start, although will need to unlock another veil before using on shift as a second dash.
-- **Blood Knight Buffs:** `BloodKnightBuffs` (string, default: "1828387635,-534491790,-1055766373,-584203677")
-  The PrefabGUID hashes for blood knight leveling blood buffs.
-- **Blood Knight Spells:** `BloodKnightSpells` (string, default: "-880131926,651613264,2067760264,189403977,375131842")
-  Blood Knight shift spells, granted at levels of prestige.
-- **Demon Hunter Buffs:** `DemonHunterBuffs` (string, default: "-154702686,-285745649,-1510965956,-397097531")
-  The PrefabGUID hashes for demon hunter leveling blood buffs.
-- **Demon Hunter Spells:** `DemonHunterSpells` (string, default: "-356990326,-987810170,1071205195,1249925269,-914344112")
-  Demon Hunter shift spells, granted at levels of prestige.
-- **Vampire Lord Buffs:** `VampireLordBuffs` (string, default: "1558171501,997154800,-1413561088,1103099361")
-  The PrefabGUID hashes for vampire lord leveling blood buffs.
-- **Vampire Lord Spells:** `VampireLordSpells` (string, default: "78384915,295045820,-1000260252,91249849,1966330719")
-  Vampire Lord shift spells, granted at levels of prestige.
-- **Shadow Blade Buffs:** `ShadowBladeBuffs` (string, default: "894725875,-1596803256,-993492354,210193036")
-  The PrefabGUID hashes for shadow blade leveling blood buffs.
-- **Shadow Blade Spells:** `ShadowBladeSpells` (string, default: "1019568127,1575317901,1112116762,-358319417,1174831223")
-  Shadow Blade shift spells, granted at levels of prestige.
-- **Arcane Sorcerer Buffs:** `ArcaneSorcererBuffs` (string, default: "1614027598,884683323,-1576592687,-1859298707")
-  The PrefabGUID hashes for arcane sorcerer leveling blood buffs.
-- **Arcane Sorcerer Spells:** `ArcaneSorcererSpells` (string, default: "247896794,268059675,-242769430,-2053450457,1650878435")
-  Arcane Sorcerer shift spells, granted at levels of prestige.
-- **Death Mage Buffs:** `DeathMageBuffs` (string, default: "-901503997,-804597757,1934870645,1201299233")
-  The PrefabGUID hashes for death mage leveling blood buffs.
-- **Death Mage Spells:** `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
-  Demon Hunter shift spells, granted at levels of prestige.
-- **Change Class Item**: `ChangeClassItem` (int, default: 576389135)  
-  Item PrefabGUID for changing classes.
-- **Change Class Item Quantity**: `ChangeClassQuantity` (int, default: 1000)  
-  Quantity of item cost required to change class.
+- **On Hit Proc Chance**: `OnHitProcChance` (float, default: 0.075)
+  The chance for a class effect to proc on hit.
+- **Stat Synergy Multiplier**: `StatSynergyMultiplier` (float, default: 1.5)
+  Multiplier for class stat synergies to base stat cap
+- **Blood Knight Weapon**: `BloodKnightWeapon` (string, default: "0,3,5,6")
+  Blood Knight weapon synergies
+- **Blood Knight Blood**: `BloodKnightBlood` (string, default: "1,5,7,10")
+  Blood Knight blood synergies
+- **Demon Hunter Weapon**: `DemonHunterWeapon` (string, default: "1,2,8,9")
+  Demon Hunter weapon synergies
+- **Demon Hunter Blood**: `DemonHunterBlood` (string, default: "2,5,7,9")
+  Demon Hunter blood synergies
+- **Vampire Lord Weapon**: `VampireLordWeapon` (string, default: "0,4,6,7")
+  Vampire Lord weapon synergies
+- **Vampire Lord Blood**: `VampireLordBlood` (string, default: "1,3,8,11")
+  Vampire Lord blood synergies
+- **Shadow Blade Weapon**: `ShadowBladeWeapon` (string, default: "1,2,6,9")
+  Shadow Blade weapon synergies
+- **Shadow Blade Blood**: `ShadowBladeBlood` (string, default: "3,5,7,10")
+  Shadow Blade blood synergies
+- **Arcane Sorcerer Weapon**: `ArcaneSorcererWeapon` (string, default: "4,7,10,11")
+  Arcane Sorcerer weapon synergies
+- **Arcane Sorcerer Blood**: `ArcaneSorcererBlood` (string, default: "0,6,8,10")
+  Arcane Sorcerer blood synergies
+- **Death Mage Weapon**: `DeathMageWeapon` (string, default: "0,4,7,11")
+  Death Mage weapon synergies
+- **Death Mage Blood**: `DeathMageBlood` (string, default: "2,3,6,9")
+  Death Mage blood synergies
+- **Default Class Spell**: `DefaultClassSpell` (int, default: -433204738)
+  Default spell (veil of shadow) available to all classes.
+- **Blood Knight Buffs**: `BloodKnightBuffs` (string, default: "1828387635,-534491790,-1055766373,-584203677")
+  The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs)
+- **Blood Knight Spells**: `BloodKnightSpells` (string, default: "-880131926,651613264,2067760264,189403977,375131842")
+  Blood Knight shift spells, granted at levels of prestige
+- **Demon Hunter Buffs**: `DemonHunterBuffs` (string, default: "-154702686,-285745649,-1510965956,-397097531")
+  The PrefabGUID hashes for demon hunter leveling blood buffs
+- **Demon Hunter Spells**: `DemonHunterSpells` (string, default: "-356990326,-987810170,1071205195,1249925269,-914344112")
+  Demon Hunter shift spells, granted at levels of prestige
+- **Vampire Lord Buffs**: `VampireLordBuffs` (string, default: "1558171501,997154800,-1413561088,1103099361")
+  The PrefabGUID hashes for vampire lord leveling blood buffs
+- **Vampire Lord Spells**: `VampireLordSpells` (string, default: "78384915,295045820,-1000260252,91249849,1966330719")
+  Vampire Lord shift spells, granted at levels of prestige
+- **Shadow Blade Buffs**: `ShadowBladeBuffs` (string, default: "894725875,-1596803256,-993492354,210193036")
+  The PrefabGUID hashes for shadow blade leveling blood buffs
+- **Shadow Blade Spells**: `ShadowBladeSpells` (string, default: "1019568127,1575317901,1112116762,-358319417,1174831223")
+  Shadow Blade shift spells, granted at levels of prestige
+- **Arcane Sorcerer Buffs**: `ArcaneSorcererBuffs` (string, default: "1614027598,884683323,-1576592687,-1859298707")
+  The PrefabGUID hashes for arcane leveling blood buffs
+- **Arcane Sorcerer Spells**: `ArcaneSorcererSpells` (string, default: "247896794,268059675,-242769430,-2053450457,1650878435")
+  Arcane Sorcerer shift spells, granted at levels of prestige
+- **Death Mage Buffs**: `DeathMageBuffs` (string, default: "-901503997,-651661301,1934870645,1201299233")
+  The PrefabGUID hashes for death mage leveling blood buffs
+- **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
+  Death Mage shift spells, granted at levels of prestige
 
 ## Recommended
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 

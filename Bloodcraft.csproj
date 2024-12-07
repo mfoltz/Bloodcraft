@@ -17,6 +17,7 @@
 		<OutputType>Exe</OutputType>
 		<UseAppHost>false</UseAppHost>
 		<NuGetAudit>False</NuGetAudit>
+		<RunGenerateREADME>true</RunGenerateREADME>
 	</PropertyGroup>
 	
 	<ItemGroup>
@@ -52,10 +53,8 @@
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\VRising_Server\BepInEx\plugins" />
 	</Target>
 	
-	<!-- Post-build event to call the README generator directly -->
-	<Target Name="GenerateReadMe" AfterTargets="Build">
-		<Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)READMETEST.md&quot;" />
+	<Target Name="GenerateReadMe" Condition="'$(RunGenerateREADME)' == 'true'" AfterTargets="Build">
+		<Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)README.md&quot;" />
 	</Target>
-
 	
 </Project>
