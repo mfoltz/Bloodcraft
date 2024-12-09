@@ -7,6 +7,7 @@ using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 
@@ -19,14 +20,11 @@ internal static class FamiliarSummonSystem
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
-    static BehaviourTreeBindingSystem_Spawn BehaviourTreeBindingSystem => SystemService.BehaviourTreeBindingSystem_Spawn;
-    static SpawnAbilityGroupSlotsSystem SpawnAbilityGroupSlotsSystem => SystemService.SpawnAbilityGroupSlotSystem;
-    static AttachParentIdSystem AttachParentIdSystem => SystemService.AttachParentIdSystem;
 
     static readonly GameDifficulty GameDifficulty = SystemService.ServerGameSettingsSystem.Settings.GameDifficulty;
     static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
-    const float FAMILIAR_LIFETIME = 600f;
+    const float FAMILIAR_LIFETIME = 180f;
 
     static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float FamiliarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
@@ -43,17 +41,6 @@ internal static class FamiliarSummonSystem
     static readonly PrefabGUID PlayerFaction = new(1106458752);
 
     static readonly PrefabGUID HideStaffBuff = new(2053361366);
-
-    static readonly PrefabGUID AbilityGroupSlot = new(-633717863);
-
-    static readonly PrefabGUID InteractServantGroup = new(-1509344340);
-
-    static readonly HashSet<PrefabGUID> DocileAbilityGroups = new()
-    {
-        { new(-1059091794) }, // Piranha_Bite
-        { new(556902791) }, // Wolf_MeleeAttack
-        { new(-744145902) } // Wolf_DashAttack
-    };
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
     {
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
@@ -71,6 +58,28 @@ internal static class FamiliarSummonSystem
             Team = SpawnDebugEvent.TeamEnum.Ally,
             Level = 1,
             Position = character.Read<LocalToWorld>().Position,
+            DyeIndex = 0
+        };
+
+        DebugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
+    }
+    public static void SummonFamiliarForBoxBattle(Entity character, Entity userEntity, int famKey, float3 position)
+    {
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+
+        User user = userEntity.Read<User>();
+        int index = user.Index;
+
+        FromCharacter fromCharacter = new() { Character = character, User = userEntity };
+
+        SpawnDebugEvent debugEvent = new()
+        {
+            PrefabGuid = new(famKey),
+            Control = false,
+            Roam = false,
+            Team = SpawnDebugEvent.TeamEnum.Ally,
+            Level = 1,
+            Position = position,
             DyeIndex = 0
         };
 
@@ -107,6 +116,42 @@ internal static class FamiliarSummonSystem
         catch (Exception ex)
         {
             Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
+            
+            return false;
+        }
+    }
+    public static bool HandleFamiliarForBoxBattle(Entity player, Entity familiar)
+    {
+        User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
+
+        try
+        {
+            UnitLevel unitLevel = familiar.Read<UnitLevel>();
+            int level = unitLevel.Level._Value;
+            int famKey = familiar.Read<PrefabGUID>().GuidHash;
+            ulong steamId = user.PlatformId;
+
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 1;
+
+            if (level == 0)
+            {
+                KeyValuePair<int, float> newXP = new(1, FamiliarLevelingSystem.ConvertLevelToXp(1));
+                famData.FamiliarExperience[famKey] = newXP;
+
+                FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+            }
+
+            if (ModifyFamiliarForBoxBattle(user, steamId, famKey, player, familiar, level)) return true;
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
+            
             return false;
         }
     }
@@ -122,7 +167,6 @@ internal static class FamiliarSummonSystem
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
-            //NothingLivesForever(familiar);
 
             if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
 
@@ -138,75 +182,48 @@ internal static class FamiliarSummonSystem
 
             if (GameMode.Equals(GameModeType.PvP)) ManualAggroHandling(familiar);
 
-            //EnhanceDocileVBloods(familiar);
-            //AddEquipment(familiar);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
+            
+            return false;
+        }
+    }
+    public static bool ModifyFamiliarForBoxBattle(User user, ulong steamId, int famKey, Entity player, Entity familiar, int level)
+    {
+        try
+        {
+            if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
+
+            ModifyFactionAndAggro(familiar);
+            ModifyDamageStats(familiar, level, steamId, famKey);
+            ModifyConvertable(familiar);
+            ModifyCollision(familiar);
+            ModifyDropTable(familiar);
+            PreventDisableFamiliar(familiar);
+            NothingLivesForever(familiar);
+
+            if (PlayerUtilities.GetPlayerBool(steamId, "FamiliarVisual"))
+            {
+                FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+                if (data.FamiliarBuffs.ContainsKey(famKey))
+                {
+                    PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
+                    BuffUtilities.HandleVisual(familiar, visualBuff);
+                }
+            }
 
             return true;
         }
         catch (Exception ex)
         {
             Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
+
             return false;
         }
     }
-
-    /*
-    static void AddEquipment(Entity familiar)
-    {
-        if (ServerGameManager.TryGetBuffer<InteractAbilityBuffer>(familiar, out var buffer))
-        {
-            if (!buffer.IsCreated)
-            {
-                InteractAbilityBuffer interactAbilityBuffer = new()
-                {
-                    Ability = InteractServantGroup,
-                    Condition = BlobAssetReference<ConditionBlob>.Null,
-                    HideInteractHUDWhileCasting = false,
-                    Importance = 0
-                };
-
-                buffer.Add(interactAbilityBuffer);
-
-                if (familiar.Has<Interactable>())
-                {
-                    familiar.With((ref Interactable interactable) =>
-                    {
-                        interactable.Disabled = false;
-                        interactable.IgnoreBlockInteract = true;
-                        interactable.IgnoreLineOfSight = true;
-                        interactable.UseInteractAbilityName = true;
-                    });
-                }
-
-                familiar.Add<ServantEquipment>();
-            }
-            else if (!buffer.IsEmpty)
-            {
-                InteractAbilityBuffer interactAbilityBuffer = buffer[0];
-
-                interactAbilityBuffer.Ability = InteractServantGroup;
-                interactAbilityBuffer.Condition = BlobAssetReference<ConditionBlob>.Null;
-                interactAbilityBuffer.Importance = 0;
-                interactAbilityBuffer.HideInteractHUDWhileCasting = false;
-
-                buffer[0] = interactAbilityBuffer;
-
-                if (familiar.Has<Interactable>())
-                {
-                    familiar.With((ref Interactable interactable) =>
-                    {
-                        interactable.Disabled = false;
-                        interactable.IgnoreBlockInteract = false;
-                        interactable.IgnoreLineOfSight = true;
-                        interactable.UseInteractAbilityName = true;
-                    });
-                }
-
-                familiar.Add<ServantEquipment>();
-            }
-        }
-    }
-    */
     static void DisableCombat(Entity player, Entity familiar)
     {
         FactionReference factionReference = familiar.Read<FactionReference>();
@@ -246,115 +263,44 @@ internal static class FamiliarSummonSystem
             }
         }
     }
-
-    /*
-    static void EnhanceDocileVBloods(Entity familiar)
+    static void ModifyFactionAndAggro(Entity familiar)
     {
-        if (familiar.TryGetComponent(out AggroConsumer aggroConsumer) && aggroConsumer.AlertDecayPerSecond == 99f && familiar.IsVBlood())
+        if (familiar.Has<FactionReference>())
         {
-            BuffUtilities.TryApplyBuff(familiar, VBloodBuff);
-            
-            try
+            familiar.With((ref FactionReference factionReference) =>
             {
-                familiar.With((ref BehaviourTreeBinding behaviourTreeBinding) =>
-                {
-                    behaviourTreeBinding.PrefabGUID = BEHBanditMugger; // as it turns out, this will brick a save (sometimes? rarely? doesn't seem a problem with merchant behaviour from previous efforts) if the entity gets written to persistence >_> so let's not do that and use modifybehaviorbuff but later
-                });
-
-                BehaviourTreeBindingSystem.OnUpdate();
-
-                familiar.With((ref AggroConsumer aggroConsumer) =>
-                {
-                    aggroConsumer.AlertDecayPerSecond = 0.5f;
-                });
-
-                familiar.With((ref MiscAiGameplayData miscAiGameplayData) =>
-                {
-                    miscAiGameplayData.IsFleeing = false;
-                });
-
-                if (!familiar.IsVBlood() && !familiar.Has<AttachedBuffer>() && !familiar.Has<AttachParentId>() && ServerGameManager.TryGetBuffer<AbilityGroupSlotBuffer>(familiar, out var buffer))
-                {
-                    Entity abilityGroupSlotPrefab = PrefabCollectionSystem._PrefabGuidToEntityMap[AbilityGroupSlot];
-                    int slotIndex = 0;
-
-                    AttachParentId attachParentId = new()
-                    {
-                        Index = AttachParentIdSystem.GetFreeParentIndex()
-                    };
-
-                    familiar.Add<AttachParentId>();
-                    familiar.Write(attachParentId);
-
-                    AttachParentIdSystem.OnUpdate();
-
-                    var attachedBuffer = EntityManager.AddBuffer<AttachedBuffer>(familiar);
-                    attachedBuffer.Resize(DocileAbilityGroups.Count, NativeArrayOptions.ClearMemory);
-
-                    Attach attach = new(familiar);
-
-                    AttachedBuffer attachedEntry = new()
-                    {
-                        Entity = Entity.Null,
-                        PrefabGuid = AbilityGroupSlot
-                    };
-
-                    AbilityGroupSlotBuffer abilityGroupSlotBuffer = new()
-                    {
-                        BaseAbilityGroupOnSlot = PrefabGUID.Empty,
-                        GroupSlotEntity = Entity.Null
-                    };
-
-                    familiar.With((ref AbilityBarInitializationState abilityBarInitializationState) =>
-                    {
-                        abilityBarInitializationState.AbilityGroupSlotsInitialized = false;
-                    });
-
-                    foreach (PrefabGUID abilityGroupPrefabGUID in DocileAbilityGroups)
-                    {
-                        Entity abilityGroupSlotEntity = EntityManager.Instantiate(abilityGroupSlotPrefab);
-
-                        abilityGroupSlotEntity.With((ref AbilityGroupSlot abilityGroupSlot) =>
-                        {
-                            abilityGroupSlot.GroupGuid = new(abilityGroupPrefabGUID);
-                            abilityGroupSlot.AbilityBar = NetworkedEntity.ServerEntity(familiar);
-                            abilityGroupSlot.SlotId = slotIndex;
-                            abilityGroupSlot.CopyCooldown = new(true);
-                        });
-
-                        attachedEntry.Entity = abilityGroupSlotEntity;
-                        attachedBuffer.Add(attachedEntry);
-
-                        abilityGroupSlotEntity.Write(attach);
-
-                        abilityGroupSlotBuffer.BaseAbilityGroupOnSlot = abilityGroupPrefabGUID;
-                        abilityGroupSlotBuffer.GroupSlotEntity = abilityGroupSlotEntity;
-
-                        buffer.Add(abilityGroupSlotBuffer);
-
-                        SpawnAbilityGroupSlotsSystem.OnUpdate();
-                        ++slotIndex;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError($"Error enhancing docile units, continuing... Error - {ex}");
-            }
+                factionReference.FactionGuid._Value = PlayerFaction;
+            });
         }
+
+        if (familiar.Has<AggroConsumer>())
+        {
+            familiar.With((ref AggroConsumer aggroConsumer) =>
+            {
+                aggroConsumer.Active._Value = false;
+            });
+        }
+
+        if (!familiar.Has<BlockFeedBuff>()) familiar.Add<BlockFeedBuff>(); // general marker for fams
     }
-    */
-    
     static void ModifyFollowerAndTeam(Entity player, Entity familiar)
     {
-        FactionReference factionReference = familiar.Read<FactionReference>();
-        factionReference.FactionGuid._Value = PlayerFaction;
-        familiar.Write(factionReference);
-        
-        Follower follower = familiar.Read<Follower>();
-        follower.Followed._Value = player;
-        follower.ModeModifiable._Value = 0;
-        familiar.Write(follower);
+        if (familiar.Has<FactionReference>())
+        {
+            familiar.With((ref FactionReference factionReference) =>
+            {
+                factionReference.FactionGuid._Value = PlayerFaction;
+            });
+        }
+
+        if (familiar.Has<Follower>())
+        {
+            familiar.With((ref Follower follower) =>
+            {
+                follower.Followed._Value = player;
+                follower.ModeModifiable._Value = 0;
+            });
+        }
 
         if (familiar.Has<IsMinion>())
         {
@@ -405,18 +351,22 @@ internal static class FamiliarSummonSystem
         {FamiliarStatType.CCReduction, 0.5f},
         {FamiliarStatType.ShieldAbsorb, 1f}
     };
-    /*
     static void NothingLivesForever(Entity familiar)
     {
         if (BuffUtilities.TryApplyBuff(familiar, InkCrawlerDeathBuff) && familiar.TryGetBuff(InkCrawlerDeathBuff, out Entity buffEntity))
         {
+            Core.Log.LogInfo("InkCrawlerDeathBuff applied to familiar and modified timer!");
+
             buffEntity.With((ref LifeTime lifeTime) =>
             {
                 lifeTime.Duration = FAMILIAR_LIFETIME;
             });
         }
+        else
+        {
+            Core.Log.LogWarning("InkCrawlerDeathBuff failed to apply to familiar!");
+        }
     }
-    */
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
         float scalingFactor = 0.1f + (level / (float)MaxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such

@@ -8,6 +8,7 @@ using Stunlock.Core;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
@@ -322,5 +323,14 @@ internal static class Extensions
     public static void Remove<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer)
     {
         entityCommandBuffer.RemoveComponent(entity, new(Il2CppType.Of<T>()));
+    }
+    public static float3 GetAimPosition(this Entity entity)
+    {
+        if (entity.TryGetComponent(out EntityInput entityInput))
+        {
+            return entityInput.AimPosition;
+        }
+
+        return float3.zero;
     }
 }

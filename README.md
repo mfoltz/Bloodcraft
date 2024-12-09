@@ -300,7 +300,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
-- **Potion Stacking**: `PotionStacking` (bool, default: True)
+- **Potion Stacking**: `PotionStacking` (bool, default: False)
   Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
 
 ### StarterKit

@@ -299,3 +299,4 @@ dist/
 /TODO.txt
 *.env
 secrets.json
+TestCommands.cs

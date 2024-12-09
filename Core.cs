@@ -38,8 +38,8 @@ internal static class Core
         new PrefabGUID(-560330878),  // ReturnBuff
         new PrefabGUID(2086395440),  // ReturnNoInvulnerableBuff
         new PrefabGUID(-1049988817), // ValenciaReturnBuff
-        //new PrefabGUID(-1377587236), // DraculaReturnBuff
-        //new PrefabGUID(-1448806401), // OtherDraculaReturnBuff
+        new PrefabGUID(-1377587236), // DraculaReturnBuff
+        new PrefabGUID(-1448806401), // OtherDraculaReturnBuff
         new PrefabGUID(-1511222240), // WerewolfChieftainReturnBuff
         new PrefabGUID(-1773136595), // DominaReturnBuff
         new PrefabGUID(-1983671299), // AngramReturnBuff
@@ -82,11 +82,9 @@ internal static class Core
         if (ConfigService.FamiliarSystem)
         {
             ConfigUtilities.FamiliarBans();
-            //DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
+            if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
-
-        //JobsUtility.JobScheduleParameters
 
         /*
         foreach (var kvp in Server.m_SystemLookup)

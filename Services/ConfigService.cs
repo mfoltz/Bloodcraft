@@ -591,6 +591,8 @@ public static class ConfigService
     {
         static readonly Regex regex = new(@"^\[(.+)\]$");
 
+        public static readonly Dictionary<string, object> FinalConfigValues = [];
+
         /*
         public static readonly List<string> DirectoryPaths =
         [
@@ -622,6 +624,7 @@ public static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks")
         ];
         });
+        
         public static List<string> DirectoryPaths => _directoryPaths.Value;
 
         public static readonly List<string> SectionOrder =
@@ -650,7 +653,7 @@ public static class ConfigService
             new ConfigEntryDefinition("General", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
-            new ConfigEntryDefinition("General", "PotionStacking", true, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
+            new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
@@ -837,7 +840,7 @@ public static class ConfigService
                 if (oldConfigValues.TryGetValue(entry.Key, out var oldValue))
                 {
                     // Convert the old value to the correct type
-                    
+
                     try
                     {
                         object convertedValue;
@@ -861,30 +864,41 @@ public static class ConfigService
 
                         var configEntry = generic.Invoke(null, [entry.Section, entry.Key, convertedValue, entry.Description]);
                         UpdateConfigProperty(entry.Key, configEntry);
+
+                        object valueProp = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
+                        if (valueProp != null)
+                        {
+                            //Core.Log.LogInfo($"Adding {valueProp} to dictionary!");
+                            //var finalVal = valueProp.GetValue(configEntry);
+                            FinalConfigValues[entry.Key] = valueProp;
+                        }
+                        else
+                        {
+                            Core.Log.LogError($"Failed to get value property for {entry.Key}");
+                        }
                     }
                     catch (Exception ex)
                     {
                         Plugin.LogInstance.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
                     }
-                    
-                    /*
-                    try
-                    {
-                        var convertedValue = Convert.ChangeType(oldValue, entryType);
-                        var configEntry = generic.Invoke(null, [entry.Section, entry.Key, convertedValue, entry.Description]);
-                        UpdateConfigProperty(entry.Key, configEntry);
-                    }
-                    catch (Exception ex)
-                    {
-                        Plugin.LogInstance.LogError($"Failed to convert old config value for {entry.Key}: {ex.Message}");
-                    }
-                    */
                 }
                 else
                 {
                     // Use default value if key is not in the old config
                     var configEntry = generic.Invoke(null, [entry.Section, entry.Key, entry.DefaultValue, entry.Description]);
                     UpdateConfigProperty(entry.Key, configEntry);
+
+                    object valueProp = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
+                    if (valueProp != null)
+                    {
+                        //Core.Log.LogInfo($"Adding {valueProp} to dictionary!");
+                        //var finalVal = valueProp.GetValue(configEntry);
+                        FinalConfigValues[entry.Key] = valueProp;
+                    }
+                    else
+                    {
+                        Core.Log.LogError($"Failed to get value property for {entry.Key}");
+                    }
                 }
             }
 
@@ -1009,64 +1023,6 @@ public static class ConfigService
 
             return entry;
         }
-        /*
-        static ConfigEntry<T> InitConfigEntry<T>(string section, string key, T defaultValue, string description)
-        {
-            // Bind the configuration entry with the default value in the new section
-            var entry = Plugin.Instance.Config.Bind(section, key, defaultValue, description);
-
-            // Define the path to the configuration file
-            var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
-
-            // Ensure the configuration file is only loaded if it exists
-            if (File.Exists(configFile))
-            {
-                string[] configLines = File.ReadAllLines(configFile);
-                //Plugin.LogInstance.LogInfo(configLines);
-                foreach (var line in configLines)
-                {
-                    if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
-                    {
-                        continue;
-                    }
-
-                    var keyValue = line.Split('=');
-                    if (keyValue.Length == 2)
-                    {
-                        var configKey = keyValue[0].Trim();
-                        var configValue = keyValue[1].Trim();
-
-                        // Check if the key matches the provided key
-                        if (configKey.Equals(key, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // Try to convert the string value to the expected type
-                            try
-                            {
-                                //initialValue = (T)Convert.ChangeType(configValue, typeof(T));
-                                var convertedValue = (T)Convert.ChangeType(configValue, typeof(T));
-                                entry.Value = convertedValue;
-                            }
-                            catch (Exception ex)
-                            {
-                                Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
-                            }
-
-                            break; // Stop searching once the key is found
-                        }
-                    }
-                }
-            }
-
-            // Create ConfigDefinition and ConfigDescription with the actual default value
-            //var configDef = new ConfigDefinition(section, key);
-            //var configDesc = new ConfigDescription(description, null, null, defaultValue);
-
-            // Add setting to config file with the initial value and the actual default value
-            //var configEntry = Plugin.Instance.Config.Bind(configDef, initialValue, configDesc);
-
-            return entry;
-        }
-        */
         static void CreateDirectory(string path)
         {
             if (!Directory.Exists(path))
@@ -1123,7 +1079,27 @@ public static class ConfigService
     }
     static T GetConfigValue<T>(string key)
     {
+        // If runtime-initialized values are available, use them
+        if (ConfigInitialization.FinalConfigValues.TryGetValue(key, out var val))
+        {
+            //Core.Log.LogInfo($"Getting {key} from dictionary!");
+            return (T)Convert.ChangeType(val, typeof(T));
+        }
+        else
+        {
+            Core.Log.LogInfo($"Using default config value...");
+        }
+
+        // Otherwise, return the default value from the entries
         var entry = ConfigInitialization.ConfigEntries.FirstOrDefault(e => e.Key == key);
         return entry == null ? throw new InvalidOperationException($"Config entry for key '{key}' not found.") : (T)entry.DefaultValue;
     }
+
+    /*
+    static T GetConfigValue<T>(string key)
+    {
+        var entry = ConfigInitialization.ConfigEntries.FirstOrDefault(e => e.Key == key);
+        return entry == null ? throw new InvalidOperationException($"Config entry for key '{key}' not found.") : (T)entry.DefaultValue;
+    }
+    */
 }

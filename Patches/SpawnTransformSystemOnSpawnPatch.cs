@@ -7,6 +7,7 @@ using ProjectM.Scripting;
 using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
+using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -45,6 +46,10 @@ internal static class SpawnTransformSystemOnSpawnPatch
         new PrefabGUID(-259591573) // tomb skeleton
     ];
 
+    public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerFamiliarBattleGroups = [];
+    public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = [];
+    static readonly ConcurrentDictionary<ulong, HashSet<Entity>> PlayerBattleFamiliars = [];
+
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
@@ -57,9 +62,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out UnitLevel unitLevel)) continue;
+                if (!entity.TryGetComponent(out UnitLevel unitLevel) || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
-                PrefabGUID prefabGUID = entity.Read<PrefabGUID>();
                 int level = unitLevel.Level._Value;
                 int famKey = prefabGUID.GuidHash;
                 bool summon = false;
@@ -72,7 +76,45 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         .Select(f => f.Key)
                         .FirstOrDefault(id => PlayerUtilities.GetPlayerBool(id, "Binding"));
 
-                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && steamId != 0)
+                    if (steamId == 0)
+                    {
+                        steamId = PlayerFamiliarBattleGroups
+                            .FirstOrDefault(kvp => kvp.Value.Contains(prefabGUID)).Key;
+
+                        if (PlayerSummoningForBattle.TryGetValue(steamId, out bool isSummoning) && isSummoning)
+                        {
+                            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                            {
+                                User user = playerInfo.User;
+                                Entity character = playerInfo.CharEntity;
+
+                                if (FamiliarSummonSystem.HandleFamiliarForBoxBattle(character, entity))
+                                {
+                                    summon = true;
+
+                                    if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
+
+                                    PlayerFamiliarBattleGroups[steamId].Remove(prefabGUID);
+                                    PlayerBattleFamiliars[steamId].Add(entity);
+
+                                    if (PlayerFamiliarBattleGroups[steamId].Count == 0)
+                                    {
+                                        PlayerSummoningForBattle[steamId] = false;
+                                        EnableAggro(PlayerBattleFamiliars[steamId]);
+                                        PlayerBattleFamiliars[steamId].Clear();
+                                    }
+                                }
+                                else // if this fails for any reason destroy the entity and inform player
+                                {
+                                    DestroyUtility.Destroy(EntityManager, entity);
+                                    LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
+
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                     {
                         User user = playerInfo.User;
                         Entity character = playerInfo.CharEntity;
@@ -363,6 +405,16 @@ internal static class SpawnTransformSystemOnSpawnPatch
             shardBearer.With((ref UnitLevel unitLevel) =>
             {
                 unitLevel.Level._Value = ConfigService.ShardBearerLevel;
+            });
+        }
+    }
+    static void EnableAggro(HashSet<Entity> familiars)
+    {
+        foreach (Entity familiar in familiars)
+        {
+            familiar.With((ref AggroConsumer aggroConsumer) =>
+            {
+                aggroConsumer.Active._Value = true;
             });
         }
     }

@@ -65,7 +65,8 @@ namespace Bloodcraft
         // Collect commands from all files into the dictionary
         static void CollectCommands()
         {
-            var files = Directory.GetFiles(CommandsPath, "*.cs");
+            var files = Directory.GetFiles(CommandsPath, "*.cs")
+                                 .Where(file => !Path.GetFileName(file).Equals("TestCommands.cs", StringComparison.OrdinalIgnoreCase));
 
             foreach (var file in files)
             {

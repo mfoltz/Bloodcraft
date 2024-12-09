@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -7,6 +8,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 
 namespace Bloodcraft.Systems.Familiars;
@@ -32,12 +34,17 @@ internal static class FamiliarLevelingSystem
     static readonly AssetGuid AssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
     static readonly PrefabGUID FamiliarSCT = new(1876501183); // SCT resource gain prefabguid
 
-    /* probably makes more sense to do this in the player leveling system if familiars are enabled
+    // probably makes more sense to do this in the player leveling system if familiars are enabled, although that does tie it to player leveling so use this if that isn't enabled
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        ProcessFamiliarExperience(deathEvent.Source, deathEvent.Target);
+        foreach (Entity player in deathEvent.DeathParticipants)
+        {
+            ulong steamId = player.GetSteamId();
+
+            ProcessFamiliarExperience(player, deathEvent.Target, steamId, 1f);
+        }
     }
-    */
+    
     public static void ProcessFamiliarExperience(Entity source, Entity target, ulong steamId, float groupMultiplier)
     {
         Entity familiar = FamiliarUtilities.FindPlayerFamiliar(source);
@@ -49,7 +56,7 @@ internal static class FamiliarLevelingSystem
 
         ProcessExperienceGain(source, familiar, target, steamId, familiarId, groupMultiplier);
     }
-    static void ProcessExperienceGain(Entity player,Entity familiar, Entity target, ulong steamId, int familiarId, float groupMultiplier)
+    static void ProcessExperienceGain(Entity player, Entity familiar, Entity target, ulong steamId, int familiarId, float groupMultiplier)
     {
         UnitLevel victimLevel = target.Read<UnitLevel>();
         bool isVBlood = IsVBlood(target);
