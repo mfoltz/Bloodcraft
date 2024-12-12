@@ -17,7 +17,7 @@ public enum WeaponType
     Unarmed,
     FishingPole
 }
-public interface IExpertiseHandler
+public interface IWeaponHandler
 {
     KeyValuePair<int, float> GetExpertiseData(ulong steamID);
     void SetExpertiseData(ulong steamID, KeyValuePair<int, float> xpData);
@@ -25,7 +25,7 @@ public interface IExpertiseHandler
 }
 public static class ExpertiseHandlerFactory
 {
-    public static IExpertiseHandler GetExpertiseHandler(WeaponType weaponType)
+    public static IWeaponHandler GetExpertiseHandler(WeaponType weaponType)
     {
         return weaponType switch
         {
@@ -46,7 +46,7 @@ public static class ExpertiseHandlerFactory
         };
     }
 }
-public abstract class BaseExpertiseHandler : IExpertiseHandler
+public abstract class BaseExpertiseHandler : IWeaponHandler
 {
     public abstract KeyValuePair<int, float> GetExpertiseData(ulong steamID);
     public abstract void SetExpertiseData(ulong steamID, KeyValuePair<int, float> data);

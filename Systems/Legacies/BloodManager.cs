@@ -70,7 +70,7 @@ internal static class BloodManager
         {
             if (ConfigService.HardSynergies)
             {
-                if (!ClassUtilities.HasClass(steamId))
+                if (!Utilities.Classes.HasClass(steamId))
                 {
                     return false;
                 }
@@ -225,7 +225,7 @@ internal static class BloodManager
             }
             */
             DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-            BuffUtilities.TryApplyBuff(player, buffPrefabGUID);
+            Buffs.TryApplyBuff(player, buffPrefabGUID);
         }
     }
     public static BloodType GetCurrentBloodType(Entity character)

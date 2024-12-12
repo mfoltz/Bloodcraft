@@ -26,11 +26,11 @@ internal static class PlayerTeleportSystemPatch
             {
                 if (entity.TryGetComponent(out PlayerTeleportDebugEvent playerTeleportDebugEvent) && entity.TryGetComponent(out FromCharacter fromCharacter))
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(fromCharacter.Character);
+                    Entity familiar = Familiars.FindPlayerFamiliar(fromCharacter.Character);
 
                     if (familiar.Exists())
                     {
-                        FamiliarUtilities.TryReturnFamiliar(familiar, fromCharacter.Character);
+                        Familiars.TryReturnFamiliar(familiar, fromCharacter.Character);
                     }
                 }
             }

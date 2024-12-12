@@ -14,7 +14,6 @@ using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using ProjectM.Terrain;
 using Stunlock.Core;
 using System.Collections;
 using Unity.Collections;
@@ -61,15 +60,15 @@ internal static class Core
         _ = new LocalizationService();
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
-        
-        if (ConfigService.ExtraRecipes) RecipeUtilities.AddExtraRecipes();
-        if (ConfigService.StarterKit) ConfigUtilities.StarterKitItems();
-        if (ConfigService.PrestigeSystem) BuffUtilities.PrestigeBuffs();
+
+        if (ConfigService.ExtraRecipes) Recipes.AddExtraRecipes();
+        if (ConfigService.StarterKit) Configuration.StarterKitItems();
+        if (ConfigService.PrestigeSystem) Buffs.PrestigeBuffs();
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
-            ConfigUtilities.ClassPassiveBuffsMap();
-            ConfigUtilities.ClassSpellCooldownMap();
-            ClassUtilities.GenerateAbilityJewelMap();
+            Configuration.ClassPassiveBuffsMap();
+            Configuration.ClassSpellCooldownMap();
+            Classes.GenerateAbilityJewelMap();
         }
 
         if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEvent += LevelingSystem.OnUpdate;
@@ -81,7 +80,8 @@ internal static class Core
         }
         if (ConfigService.FamiliarSystem)
         {
-            ConfigUtilities.FamiliarBans();
+            _ = new BattleService();
+            Configuration.FamiliarBans();
             if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEvent += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEvent += FamiliarUnlockSystem.OnUpdate;
         }
@@ -106,12 +106,13 @@ internal static class Core
             Core.Log.LogInfo("=============================");
         }
         */
-        
+
         OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey());
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         ModifyBuffPrefabs();
         //LogSCTPRefabs();
+        //LogDealDamageOnGameplayEvents();
 
         hasInitialized = true;
     }
@@ -163,6 +164,11 @@ internal static class Core
     static readonly ComponentType[] PrefabGUIDComponent =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+    ];
+
+    static readonly ComponentType[] DealDamageOnGameplayEventComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<DealDamageOnGameplayEvent>()),
     ];
     static void LogSCTPRefabs()
     {
@@ -243,6 +249,37 @@ internal static class Core
 
                 Log.LogInfo(""); // Blank line for better readability
             }
+        }
+    }
+    static void LogDealDamageOnGameplayEvents()
+    {
+        EntityQuery dealDamageOnGameplayEventQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = DealDamageOnGameplayEventComponent,
+            Options = EntityQueryOptions.IncludeAll
+        });
+
+        NativeArray<Entity> entities = dealDamageOnGameplayEventQuery.ToEntityArray(Allocator.TempJob);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TryGetBuffer<DealDamageOnGameplayEvent>(out var buffer))
+                {
+                    Log.LogInfo(entity.GetPrefabGUID().LookupName());
+
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        DealDamageOnGameplayEvent dealDamageOnGameplayEvent = buffer[i];
+                        Log.LogInfo($"  DealDamageOnGameplayEvent - MainType: {dealDamageOnGameplayEvent.Parameters.MainType} | MainFactor: {dealDamageOnGameplayEvent.Parameters.MainFactor} | RawDamagePercent: {dealDamageOnGameplayEvent.Parameters.RawDamagePercent} | RawDamageValue: {dealDamageOnGameplayEvent.Parameters.RawDamageValue}");
+                    }
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+            dealDamageOnGameplayEventQuery.Dispose();
         }
     }
 }

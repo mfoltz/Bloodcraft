@@ -5,7 +5,6 @@ using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
-using static Bloodcraft.Utilities.PlayerUtilities;
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
 {
@@ -142,7 +141,7 @@ internal static class FamiliarUnlockSystem
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
 
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
-            famData.FamiliarExperience[famKey] = new(1, FamiliarLevelingSystem.ConvertLevelToXp(1));
+            famData.FamiliarExperience[famKey] = new(1, Utilities.Progression.ConvertLevelToXp(1));
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
 
             isShiny = HandleShiny(famKey, steamId, ShinyChance);

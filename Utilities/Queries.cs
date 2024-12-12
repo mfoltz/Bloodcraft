@@ -5,7 +5,7 @@ using Unity.Entities;
 using Unity.Jobs;
 
 namespace Bloodcraft.Utilities;
-internal static class EntityUtilities
+internal static class Queries
 {
     static EntityManager EntityManager => Core.EntityManager;
 

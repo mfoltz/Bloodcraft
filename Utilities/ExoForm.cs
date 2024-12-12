@@ -10,7 +10,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 namespace Bloodcraft.Utilities;
-internal static class ExoFormUtilities
+internal static class ExoForm
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;

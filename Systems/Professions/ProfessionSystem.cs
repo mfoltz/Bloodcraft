@@ -32,7 +32,7 @@ internal static class ProfessionSystem
     static readonly PrefabGUID ProfessionsSCT = new(1876501183); // SCT resource gain prefabguid
     public static void UpdateProfessions(Entity Killer, Entity Victim)
     {
-        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = Killer.Read<ProjectM.PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
         ulong SteamID = user.PlatformId;
 
@@ -99,12 +99,12 @@ internal static class ProfessionSystem
             PrefabGUID fish = fishDrops[index];
             if (ServerGameManager.TryAddInventoryItem(Killer, fish, bonus))
             {
-                if (PlayerUtilities.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
             }
             else
             {
                 InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, fish, bonus, new Entity());
-                if (PlayerUtilities.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
             }
         }
         else if (prefabEntity.Has<DropTableBuffer>())
@@ -133,13 +133,13 @@ internal static class ProfessionSystem
                                 if (bonus.Equals(0)) return;
                                 if (ServerGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                 {
-                                    if (PlayerUtilities.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                                    if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
                                     break;
                                 }
                                 else
                                 {
                                     InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, dropTableData.ItemGuid, bonus, new Entity());
-                                    if (PlayerUtilities.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                                    if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetPrefabName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
                                     break;
                                 }
                             }
@@ -199,7 +199,7 @@ internal static class ProfessionSystem
     }
     static void NotifyPlayer(Entity target, Entity source, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
     {
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = source.Read<ProjectM.PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
         string professionName = handler.GetProfessionName();
@@ -210,13 +210,13 @@ internal static class ProfessionSystem
             if (newLevel < ConfigService.MaxProfessionLevel) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
         }
 
-        if (PlayerUtilities.GetPlayerBool(steamID, "ProfessionLogging"))
+        if (Misc.GetPlayerBool(steamID, "ProfessionLogging"))
         {
             int levelProgress = GetLevelProgress(steamID, handler);
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
         }
         
-        if (PlayerUtilities.GetPlayerBool(steamID, "ScrollingText"))
+        if (Misc.GetPlayerBool(steamID, "ScrollingText"))
         {
             float3 targetPosition = target.Read<Translation>().Value;
             float3 professionColor = handler.GetProfessionColor();

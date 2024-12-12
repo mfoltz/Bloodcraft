@@ -134,17 +134,17 @@ internal static class BuffSystemSpawnPatches
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
-                    if (steamId.TryGetFamiliarActives(out var data) && FamiliarUtilities.AutoCallMap.TryGetValue(player, out Entity familiar) && familiar.Exists())
+                    if (steamId.TryGetFamiliarActives(out var data) && Utilities.Familiars.AutoCallMap.TryGetValue(player, out Entity familiar) && familiar.Exists())
                     {
-                        FamiliarUtilities.CallFamiliar(player, familiar, user, steamId, data);
-                        FamiliarUtilities.AutoCallMap.Remove(player);
+                        Utilities.Familiars.CallFamiliar(player, familiar, user, steamId, data);
+                        Utilities.Familiars.AutoCallMap.Remove(player);
                     }
                 }
                 else if (Familiars && prefabGUID.Equals(PvECombatBuff)) // return familiar when entering combat if far enough away
                 {
                     if (buffTarget.TryGetPlayer(out player))
                     {
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(player);
 
                         if (familiar.Exists())
                         {
@@ -153,7 +153,7 @@ internal static class BuffSystemSpawnPatches
                                 follower.ModeModifiable._Value = 1;
                             });
 
-                            FamiliarUtilities.TryReturnFamiliar(player, familiar);
+                            Utilities.Familiars.TryReturnFamiliar(player, familiar);
                         }
                     }
                 }
@@ -164,7 +164,7 @@ internal static class BuffSystemSpawnPatches
                         Entity userEntity = player.GetUserEntity();
                         ulong steamId = player.GetSteamId();
 
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(player);
 
                         if (familiar.Exists())
                         {
@@ -173,8 +173,8 @@ internal static class BuffSystemSpawnPatches
                                 follower.ModeModifiable._Value = 1;
                             });
 
-                            FamiliarUtilities.TryReturnFamiliar(player, familiar);
-                            if (!FamiliarPvP) FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
+                            Utilities.Familiars.TryReturnFamiliar(player, familiar);
+                            if (!FamiliarPvP) Utilities.Familiars.UnbindFamiliar(player, userEntity, steamId);
                         }
                     }
                 }
@@ -182,7 +182,7 @@ internal static class BuffSystemSpawnPatches
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (!PlayerUtilities.GetPlayerBool(steamId, "VBloodEmotes"))
+                    if (!Misc.GetPlayerBool(steamId, "VBloodEmotes"))
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
                     }
@@ -199,11 +199,11 @@ internal static class BuffSystemSpawnPatches
 
                     if (Familiars && !prefabGUID.Equals(WranglerPotionBuff))
                     {
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(player);
 
                         if (familiar.Exists())
                         {
-                            BuffUtilities.TryApplyBuff(familiar, prefabGUID);
+                            Buffs.TryApplyBuff(familiar, prefabGUID);
                         }
                     }
 
@@ -233,7 +233,7 @@ internal static class BuffSystemSpawnPatches
                 }
                 else if (Familiars && buffTarget.TryGetFollowedPlayer(out player)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = Utilities.Familiars.FindPlayerFamiliar(player);
 
                     if (familiar.Exists())
                     {
@@ -309,30 +309,7 @@ internal static class BuffSystemSpawnPatches
         }
     }
 
-    // methods for refactoring since this patch is getting a bit heavy, #soonTM
-    static void HandleGateBossFeed(Entity buffEntity)
-    {
-        if (buffEntity.GetBuffTarget().TryGetPlayer(out Entity player))
-        {
-            Blood blood = player.Read<Blood>();
-            ulong steamId = player.GetSteamId();
-
-            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
-            {
-                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
-
-                ChangeBloodOnGameplayEvent changeBlood = buffer[0];
-                changeBlood.BloodValue = blood.Value + 50f;
-                changeBlood.BloodQuality = Math.Min(blood.Quality, 100f);
-                changeBlood.BloodType = blood.BloodType;
-                changeBlood.GainBloodType = GainBloodType.Consumable;
-
-                buffer[0] = changeBlood;
-            }
-
-            BloodSystem.SkipBloodUpdate.Add(steamId);
-        }
-    }
+    // Methods for refactoring eventually
     static void HandleEliteSolarusFinalPhase(Entity character)
     {
         if (character.Read<PrefabGUID>().Equals(Solarus) && !ServerGameManager.HasBuff(character, HolyBeamPowerBuff))
@@ -368,10 +345,10 @@ internal static class BuffSystemSpawnPatches
             User user = playerCharacter.GetUser();
             ulong steamId = user.PlatformId;
 
-            if (steamId.TryGetFamiliarActives(out var data) && FamiliarUtilities.AutoCallMap.TryGetValue(playerCharacter, out Entity familiar) && familiar.Exists())
+            if (steamId.TryGetFamiliarActives(out var data) && Utilities.Familiars.AutoCallMap.TryGetValue(playerCharacter, out Entity familiar) && familiar.Exists())
             {
-                FamiliarUtilities.CallFamiliar(playerCharacter, familiar, user, steamId, data);
-                FamiliarUtilities.AutoCallMap.Remove(playerCharacter);
+                Utilities.Familiars.CallFamiliar(playerCharacter, familiar, user, steamId, data);
+                Utilities.Familiars.AutoCallMap.Remove(playerCharacter);
             }
         }
     }
@@ -379,11 +356,11 @@ internal static class BuffSystemSpawnPatches
     {
         if (buffTarget.TryGetPlayer(out Entity playerCharacter))
         {
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(playerCharacter);
+            Entity familiar = Utilities.Familiars.FindPlayerFamiliar(playerCharacter);
 
             if (EntityManager.Exists(familiar))
             {
-                FamiliarUtilities.TryReturnFamiliar(playerCharacter, familiar);
+                Utilities.Familiars.TryReturnFamiliar(playerCharacter, familiar);
             }
         }
     }

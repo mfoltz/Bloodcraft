@@ -38,10 +38,10 @@ internal static class ShapeshiftSystemPatch
                     User user = fromCharacter.User.Read<User>();
                     ulong steamId = user.PlatformId;
                     
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+                    Entity familiar = Familiars.FindPlayerFamiliar(character);
                     if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
                     {
-                        FamiliarUtilities.DismissFamiliar(character, familiar, user, steamId, data);
+                        Familiars.DismissFamiliar(character, familiar, user, steamId, data);
                     }
                 }
                 else if (enterShapeshiftEvent.Shapeshift.Equals(BatFormGroup))
@@ -50,13 +50,13 @@ internal static class ShapeshiftSystemPatch
                     User user = fromCharacter.User.Read<User>();
                     ulong steamId = user.PlatformId;
 
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+                    Entity familiar = Familiars.FindPlayerFamiliar(character);
                     if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
                     {
                         //FamiliarUtilities.AutoCallMap.TryAdd(fromCharacter.Character, familiar);
 
-                        FamiliarUtilities.AutoCallMap[fromCharacter.Character] = familiar;
-                        FamiliarUtilities.DismissFamiliar(character, familiar, user, steamId, data);
+                        Familiars.AutoCallMap[fromCharacter.Character] = familiar;
+                        Familiars.DismissFamiliar(character, familiar, user, steamId, data);
                     }
                 }
             }

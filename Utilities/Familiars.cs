@@ -4,6 +4,7 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -11,11 +12,15 @@ using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
+using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
+using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
 
 namespace Bloodcraft.Utilities;
-internal static class FamiliarUtilities
+internal static class Familiars
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -49,7 +54,13 @@ internal static class FamiliarUtilities
             foreach (FollowerBuffer follower in followers)
             {
                 Entity familiar = follower.Entity._Entity;
-                if (familiar.Has<BlockFeedBuff>() && familiar.Exists()) return familiar;
+                if (familiar.Has<BlockFeedBuff>()) return familiar;
+                else if (steamId.TryGetFamiliarActives(out var actives))
+                {
+                    PrefabGUID prefabGUID = familiar.GetPrefabGUID();
+
+                    if (actives.FamKey == prefabGUID.GuidHash) return familiar;
+                }
             }
         }
         else if (HasDismissed(steamId, out Entity familiar)) return familiar;
@@ -185,13 +196,13 @@ internal static class FamiliarUtilities
     }
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
     {
-        PlayerUtilities.TogglePlayerBool(steamId, "FamiliarVisual");
-        LocalizationService.HandleReply(ctx, PlayerUtilities.GetPlayerBool(steamId, "FamiliarVisual") ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
+        Misc.TogglePlayerBool(steamId, "FamiliarVisual");
+        LocalizationService.HandleReply(ctx, Misc.GetPlayerBool(steamId, "FamiliarVisual") ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
     }
     public static void ToggleVBloodEmotes(ChatCommandContext ctx, ulong steamId)
     {
-        PlayerUtilities.TogglePlayerBool(steamId, "VBloodEmotes");
-        LocalizationService.HandleReply(ctx, PlayerUtilities.GetPlayerBool(steamId, "VBloodEmotes") ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
+        Misc.TogglePlayerBool(steamId, "VBloodEmotes");
+        LocalizationService.HandleReply(ctx, Misc.GetPlayerBool(steamId, "VBloodEmotes") ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
     }
     public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
     { 
@@ -399,7 +410,13 @@ internal static class FamiliarUtilities
         {
             if (boxIndex == -1 && steamId.TryGetFamiliarDefault(out boxIndex)) // use preset when invoked without index parameter
             {
-                PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
+                if (boxIndex < 1 || boxIndex > famKeys.Count) // validate index from default option
+                {
+                    LocalizationService.HandleServerReply(EntityManager, user, $"Invalid box index for current box, try binding manually again first.");
+                    return;
+                }
+
+                Misc.SetPlayerBool(steamId, "Binding", true);
 
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
@@ -418,7 +435,7 @@ internal static class FamiliarUtilities
             }
             else
             {
-                PlayerUtilities.SetPlayerBool(steamId, "Binding", true);
+                Misc.SetPlayerBool(steamId, "Binding", true);
                 steamId.SetFamiliarDefault(boxIndex);
 
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
@@ -498,5 +515,112 @@ internal static class FamiliarUtilities
         };
 
         aggroBuffer.Add(aggroBufferElement);
+    }
+    public static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData prestigeData, List<int> battleGroup, ref List<string> familiars)
+    {
+        foreach (int famKey in battleGroup)
+        {
+            if (famKey == 0) continue;
+
+            PrefabGUID famPrefab = new(famKey);
+            string famName = famPrefab.GetPrefabName();
+            string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+
+            int level = GetFamiliarExperience(steamId, famKey).Key;
+            int prestiges = 0;
+
+            // Check if the familiar has buffs and update the color based on RandomVisuals
+            if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+            {
+                // Look up the color from the RandomVisuals dictionary if it exists
+                if (ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
+                {
+                    colorCode = $"<color={hexColor}>";
+                }
+            }
+
+            if (!prestigeData.FamiliarPrestige.ContainsKey(famKey))
+            {
+                prestigeData.FamiliarPrestige[famKey] = new(0, []);
+                SaveFamiliarPrestige(steamId, prestigeData);
+            }
+            else
+            {
+                prestiges = prestigeData.FamiliarPrestige[famKey].Key;
+            }
+
+            familiars.Add($"<color=white>{battleGroup.IndexOf(famKey) + 1}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]");
+        }
+    }
+
+    public static string BuildBattleGroupAddReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData prestigeData, List<int> battleGroup)
+    {
+        string reply = string.Empty;
+
+        return reply;
+    }
+    public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, List<int> battleGroup)
+    {
+        if (battleGroup.Any())
+        {
+            FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
+            FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
+            List<string> familiars = [];
+
+            BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup, ref familiars);
+
+            string familiarReply = string.Join(", ", familiars);
+            LocalizationService.HandleReply(ctx, $"Battle Group - {familiarReply}");
+            return;
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "No familiars in battle group yet!");
+            return;
+        }
+    }
+    public static void HandleBattleGroupAddAndReply(ChatCommandContext ctx, ulong steamId, List<int> battleGroup, (Entity familiar, int famKey) actives, int slotIndex)
+    {
+        if (battleGroup.Contains(actives.famKey))
+        {
+            ctx.Reply("Familiar already in battle group!");
+            return;
+        }
+
+        battleGroup[slotIndex] = (actives.famKey);
+        steamId.SetFamiliarBattleGroup(battleGroup);
+
+        FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
+        FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
+
+        int level = GetFamiliarExperience(steamId, actives.famKey).Key;
+        if (level == 0) level = 1;
+        int prestiges = 0;
+
+        PrefabGUID famPrefab = new(actives.famKey);
+        string famName = famPrefab.GetPrefabName();
+        string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+
+        // Check if the familiar has buffs and update the color based on RandomVisuals
+        if (buffsData.FamiliarBuffs.ContainsKey(actives.famKey))
+        {
+            // Look up the color from the RandomVisuals dictionary if it exists
+            if (ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[actives.famKey][0]), out var hexColor))
+            {
+                colorCode = $"<color={hexColor}>";
+            }
+        }
+
+        if (!prestigeData.FamiliarPrestige.ContainsKey(actives.famKey))
+        {
+            prestigeData.FamiliarPrestige[actives.famKey] = new(0, []);
+            SaveFamiliarPrestige(steamId, prestigeData);
+        }
+        else
+        {
+            prestiges = prestigeData.FamiliarPrestige[actives.famKey].Key;
+        }
+
+        LocalizationService.HandleReply(ctx, $"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(actives.famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to battle group (<color=white>{slotIndex + 1}</color>)!");
     }
 }

@@ -6,15 +6,13 @@ using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Systems.Leveling;
 internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-
-    const float EXP_CONSTANT = 0.1f; // constant for calculating level from xp
-    const float EXP_POWER = 2f; // power for calculating level from xp
 
     static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool Familiars = ConfigService.FamiliarSystem;
@@ -58,12 +56,12 @@ internal static class LevelingSystem
 
     public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
     {
-        { PlayerClass.BloodKnight, (ConfigUtilities.ParseConfigIntegerString(ConfigService.BloodKnightWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.BloodKnightBlood)) },
-        { PlayerClass.DemonHunter, (ConfigUtilities.ParseConfigIntegerString(ConfigService.DemonHunterWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.DemonHunterBlood)) },
-        { PlayerClass.VampireLord, (ConfigUtilities.ParseConfigIntegerString(ConfigService.VampireLordWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.VampireLordBlood)) },
-        { PlayerClass.ShadowBlade, (ConfigUtilities.ParseConfigIntegerString(ConfigService.ShadowBladeWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.ShadowBladeBlood)) },
-        { PlayerClass.ArcaneSorcerer, (ConfigUtilities.ParseConfigIntegerString(ConfigService.ArcaneSorcererWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.ArcaneSorcererBlood)) },
-        { PlayerClass.DeathMage, (ConfigUtilities.ParseConfigIntegerString(ConfigService.DeathMageWeapon), ConfigUtilities.ParseConfigIntegerString(ConfigService.DeathMageBlood)) }
+        { PlayerClass.BloodKnight, (Configuration.ParseConfigIntegerString(ConfigService.BloodKnightWeapon), Configuration.ParseConfigIntegerString(ConfigService.BloodKnightBlood)) },
+        { PlayerClass.DemonHunter, (Configuration.ParseConfigIntegerString(ConfigService.DemonHunterWeapon), Configuration.ParseConfigIntegerString(ConfigService.DemonHunterBlood)) },
+        { PlayerClass.VampireLord, (Configuration.ParseConfigIntegerString(ConfigService.VampireLordWeapon), Configuration.ParseConfigIntegerString(ConfigService.VampireLordBlood)) },
+        { PlayerClass.ShadowBlade, (Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeWeapon), Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeBlood)) },
+        { PlayerClass.ArcaneSorcerer, (Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererWeapon), Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererBlood)) },
+        { PlayerClass.DeathMage, (Configuration.ParseConfigIntegerString(ConfigService.DeathMageWeapon), Configuration.ParseConfigIntegerString(ConfigService.DeathMageBlood)) }
     };
 
     public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
@@ -113,12 +111,12 @@ internal static class LevelingSystem
             else ProcessExperienceGain(player, target, steamId, currentLevel, groupMultiplier);
         }
     }
-    public static void ProcessExperienceGain(Entity source, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
+    public static void ProcessExperienceGain(Entity player, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
     {
         UnitLevel victimLevel = target.Read<UnitLevel>();
         Health health = target.Read<Health>();
 
-        bool isVBlood = IsVBlood(target);
+        bool isVBlood = target.IsVBlood();
 
         int additionalXP = (int)(health.MaxHealth._Value / 2.5f);
         float gainedXP = GetBaseExperience(victimLevel.Level._Value, isVBlood);
@@ -169,8 +167,10 @@ internal static class LevelingSystem
 
         if (RestedXPSystem) gainedXP = AddRestedXP(steamId, gainedXP, ref rested);
 
-        SaveExperience(steamId, gainedXP);
-        CheckAndHandleLevelUp(source, steamId, gainedXP, currentLevel, rested);
+        SaveLevelingExperience(steamId, gainedXP, out bool leveledUp, out int newLevel);
+        //CheckAndHandleLevelUp(source, steamId, gainedXP, currentLevel, rested);
+        if (leveledUp) HandlePlayerLevelUpEffects(player, steamId);
+        NotifyPlayer(player, steamId, (int)gainedXP, leveledUp, rested);
     }
     static float AddRestedXP(ulong steamId, float gainedXP, ref int rested)
     {
@@ -189,21 +189,6 @@ internal static class LevelingSystem
 
         return gainedXP;
     }
-    public static void ProcessQuestExperienceGain(User user, int multiplier)
-    {
-        ulong steamId = user.PlatformId;
-        Entity character = user.LocalCharacter._Entity;
-
-        int currentLevel = steamId.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
-        float gainedXP = ConvertLevelToXp(currentLevel) * 0.03f * multiplier;
-
-        SaveExperience(steamId, gainedXP);
-        CheckAndHandleLevelUp(character, steamId, gainedXP, currentLevel);
-    }
-    static bool IsVBlood(Entity target)
-    {
-        return target.Has<VBloodConsumeSource>();
-    }
     static float GetBaseExperience(int targetLevel, bool isVBlood)
     {
         int baseXP = targetLevel;
@@ -211,7 +196,46 @@ internal static class LevelingSystem
         if (isVBlood) return baseXP * VBloodLevelingMultiplier;
         return baseXP * UnitLevelingMultiplier;
     }
-    static void SaveExperience(ulong steamId, float gainedXP)
+    public static void SaveLevelingExperience(ulong steamId, float gainedXP, out bool leveledUp, out int newLevel)
+    {
+        if (!steamId.TryGetPlayerExperience(out var xpData))
+        {
+            // Initialize if not present
+            xpData = new KeyValuePair<int, float>(0, 0);
+        }
+
+        int oldLevel = xpData.Key;
+        float currentXP = xpData.Value;
+        float newExperience = currentXP + gainedXP;
+        newLevel = ConvertXpToLevel(newExperience);
+        leveledUp = false;
+
+        if (newLevel > MaxPlayerLevel)
+        {
+            // Cap the level at the maximum
+            newLevel = MaxPlayerLevel;
+            newExperience = ConvertLevelToXp(MaxPlayerLevel);
+        }
+
+        if (newLevel > oldLevel)
+        {
+            leveledUp = true;
+        }
+
+        steamId.SetPlayerExperience(new KeyValuePair<int, float>(newLevel, newExperience));
+    }
+    static void HandlePlayerLevelUpEffects(Entity playerCharacter, ulong steamId)
+    {
+        Buffs.TryApplyBuff(playerCharacter, LevelUpBuff);
+
+        if (Classes)
+        {
+            Buffs.ApplyClassBuffs(playerCharacter, steamId);
+        }
+    }
+
+    /*
+    public static void SaveExperience(ulong steamId, float gainedXP)
     {
         if (!steamId.TryGetPlayerExperience(out var xpData))
         {
@@ -229,18 +253,18 @@ internal static class LevelingSystem
 
         steamId.SetPlayerExperience(new KeyValuePair<int, float>(newLevel, newExperience));
     }
-    static void CheckAndHandleLevelUp(Entity playerCharacter, ulong steamId, float gainedXP, int currentLevel, int restedXP = 0)
+    
+    public static void CheckAndHandleLevelUp(Entity player, ulong steamId, float gainedXP, int currentLevel, int restedXP = 0)
     {
-        Entity userEntity = playerCharacter.Read<PlayerCharacter>().UserEntity;
         bool leveledUp = CheckForLevelUp(steamId, currentLevel);
 
         if (leveledUp)
         {
-            BuffUtilities.TryApplyBuff(playerCharacter, LevelUpBuff);
-            if (Classes) BuffUtilities.ApplyClassBuffs(playerCharacter, steamId);
+            Buffs.TryApplyBuff(player, LevelUpBuff);
+            if (Classes) Buffs.ApplyClassBuffs(player, steamId);
         }
 
-        NotifyPlayer(userEntity, steamId, (int)gainedXP, leveledUp, restedXP);
+        NotifyPlayer(player, steamId, (int)gainedXP, leveledUp, restedXP);
     }
     static bool CheckForLevelUp(ulong SteamID, int currentLevel)
     {
@@ -252,7 +276,7 @@ internal static class LevelingSystem
         }
 
         return false;
-    }
+    }   
     static void NotifyPlayer(Entity userEntity, ulong steamId, int gainedXP, bool leveledUp, int restedXP)
     {
         User user = userEntity.Read<User>();
@@ -264,27 +288,53 @@ internal static class LevelingSystem
             SetLevel(character);
 
             if (newLevel <= MaxPlayerLevel) LocalizationService.HandleServerReply(EntityManager, user, $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
-            if (PlayerUtilities.GetPlayerBool(steamId, "Reminders") && Classes && !ClassUtilities.HasClass(steamId))
+            if (Misc.GetPlayerBool(steamId, "Reminders") && Classes && !Utilities.Classes.HasClass(steamId))
             {
                 LocalizationService.HandleServerReply(EntityManager, user, $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
             }
         }
 
-        if (PlayerUtilities.GetPlayerBool(steamId, "ExperienceLogging"))
+        if (Misc.GetPlayerBool(steamId, "ExperienceLogging"))
         {
             //Core.Log.LogInfo($"Player {user.CharacterName.Value} gained {gainedXP} rested {restedXP} leveled up {leveledUp} progress {GetLevelProgress(SteamID)}");
             int levelProgress = GetLevelProgress(steamId);
             string message = restedXP > 0 ? $"+<color=yellow>{gainedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)" : $"+<color=yellow>{gainedXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
-    }
-    public static int ConvertXpToLevel(float xp)
+    } 
+    */
+    public static void NotifyPlayer(Entity player, ulong steamId, float gainedXP, bool leveledUp, int newLevel, int restedXP = 0)
     {
-        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
-    }
-    public static int ConvertLevelToXp(int level)
-    {
-        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
+        int gainedIntXP = (int)gainedXP;
+        User user = player.GetUser();
+        Entity character = user.LocalCharacter.GetEntityOnServer();
+
+        if (leveledUp)
+        {
+            SetLevel(character);
+
+            if (newLevel <= MaxPlayerLevel)
+            {
+                LocalizationService.HandleServerReply(EntityManager, user,
+                    $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
+            }
+
+            if (Misc.GetPlayerBool(steamId, "Reminders") && Classes && !Utilities.Classes.HasClass(steamId))
+            {
+                LocalizationService.HandleServerReply(EntityManager, user,
+                    $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
+            }
+        }
+
+        if (Misc.GetPlayerBool(steamId, "ExperienceLogging"))
+        {
+            int levelProgress = GetLevelProgress(steamId);
+            string message = restedXP > 0
+                ? $"+<color=yellow>{gainedIntXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)"
+                : $"+<color=yellow>{gainedIntXP}</color> <color=#FFC0CB>experience</color> (<color=white>{levelProgress}%</color>)";
+
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
     }
     static float GetXp(ulong steamId)
     {
@@ -327,29 +377,6 @@ internal static class LevelingSystem
         if (k <= 0) return gainedXP;
         float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
         return gainedXP * scalingFactor;
-    }
-    public static bool TryParseClassName(string className, out PlayerClass parsedClassType)
-    {
-        // Attempt to parse the className string to the PlayerClasses enum.
-        if (Enum.TryParse(className, true, out parsedClassType))
-        {
-            return true; // Successfully parsed
-        }
-
-        // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
-        parsedClassType = Enum.GetValues(typeof(PlayerClass))
-                             .Cast<PlayerClass>()
-                             .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
-
-        // Check if a valid enum value was found that contains the input string.
-        if (!parsedClassType.Equals(default(PlayerClass)))
-        {
-            return true; // Found a matching enum value
-        }
-
-        // If no match is found, return false and set the out parameter to default value.
-        parsedClassType = default;
-        return false; // Parsing failed
     }
     public static void SetLevel(Entity player)
     {

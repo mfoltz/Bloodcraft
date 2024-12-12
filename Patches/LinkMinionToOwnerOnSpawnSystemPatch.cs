@@ -40,7 +40,7 @@ internal static class LinkMinionToOwnerOnSpawnSystemPatch
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
                 else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player))
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = Familiars.FindPlayerFamiliar(player);
 
                     if (familiar.Exists())
                     {

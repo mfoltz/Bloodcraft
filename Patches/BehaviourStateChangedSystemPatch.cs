@@ -41,13 +41,13 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
 
-                        FamiliarUtilities.HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
+                        Familiars.HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
                     }
                     else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Idle))
                     {
                         Entity familiar = behaviourTreeStateChangedEvent.Entity;
 
-                        FamiliarUtilities.TryReturnFamiliar(player, familiar);
+                        Familiars.TryReturnFamiliar(player, familiar);
                     }
                 }
             }

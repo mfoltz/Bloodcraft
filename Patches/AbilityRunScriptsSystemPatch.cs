@@ -94,11 +94,11 @@ internal static class AbilityRunScriptsSystemPatch
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                    Entity familiar = Familiars.FindPlayerFamiliar(player);
                     if (familiar.Exists() && !familiar.IsDisabled() && steamId.TryGetFamiliarActives(out var data))
                     {                        
-                        FamiliarUtilities.AutoCallMap[player] = familiar;
-                        FamiliarUtilities.DismissFamiliar(player, familiar, user, steamId, data);
+                        Familiars.AutoCallMap[player] = familiar;
+                        Familiars.DismissFamiliar(player, familiar, user, steamId, data);
                     }
                 }
             }

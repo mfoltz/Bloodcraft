@@ -1,23 +1,17 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
-using Microsoft.Extensions.Logging;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
-using System.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEngine;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
-using static Bloodcraft.Utilities.ClassUtilities;
+using static Bloodcraft.Utilities.Classes;
 
 namespace Bloodcraft.Utilities;
-internal static class BuffUtilities
+internal static class Buffs
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -717,7 +711,7 @@ internal static class BuffUtilities
     }
     public static void PrestigeBuffs()
     {
-        List<int> prestigeBuffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
+        List<int> prestigeBuffs = Configuration.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
 
         foreach (int buff in prestigeBuffs)
         {
@@ -845,6 +839,6 @@ internal static class BuffUtilities
         string durationMessage = $"<color=red>Dracula's</color> latent power made manifest... (<color=white>{(int)duration}</color>s)";
         LocalizationService.HandleServerReply(EntityManager, user, durationMessage);
 
-        Core.StartCoroutine(ExoFormUtilities.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f)); // Start countdown messages 5 seconds before buff expires
+        Core.StartCoroutine(ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f)); // Start countdown messages 5 seconds before buff expires
     }
 }

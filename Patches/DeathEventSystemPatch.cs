@@ -4,9 +4,11 @@ using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Patches.SpawnTransformSystemOnSpawnPatch;
 
 namespace Bloodcraft.Patches;
 
@@ -51,7 +53,7 @@ internal static class DeathEventListenerSystemPatch
                         {
                             Source = deathSource,
                             Target = deathEvent.Died,
-                            DeathParticipants = PlayerUtilities.GetDeathParticipants(deathSource)
+                            DeathParticipants = Misc.GetDeathParticipants(deathSource)
                         };
 
                         RaiseDeathEvent(deathArgs);
@@ -91,10 +93,34 @@ internal static class DeathEventListenerSystemPatch
 
             if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
             {
-                FamiliarUtilities.ClearFamiliarActives(steamId);
+                Utilities.Familiars.ClearFamiliarActives(steamId);
 
                 return false;
             }
+        }
+        else if (PlayerBattleFamiliars.FirstOrDefault(kvp => kvp.Value.Contains(deathEvent.Died)) is var match && match.Key != default)
+        {
+            ulong ownerId = match.Key;
+            PlayerBattleFamiliars[ownerId].Remove(deathEvent.Died);
+
+            if (!PlayerBattleFamiliars[ownerId].Any() && BattleService.Matchmaker.MatchPairs.TryGetMatch(ownerId, out var matchPair))
+            {
+                ulong pairedId = matchPair.Item1 == ownerId ? matchPair.Item2 : matchPair.Item1;
+
+                if (PlayerBattleFamiliars[pairedId].Any())
+                {
+                    // logic for winner here after cleanup?
+                    foreach (Entity familiar in PlayerBattleFamiliars[pairedId])
+                    {
+                        familiar.Destroy();
+                    }
+
+                    PlayerBattleFamiliars[pairedId].Clear();
+                    BattleService.Matchmaker.HandleMatchCompletion(matchPair, pairedId);
+                }
+            }
+
+            return false;
         }
         else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
         else if (deathEvent.Died.Has<Minion>() || deathEvent.Died.Has<Trader>() || deathEvent.Died.Has<BlockFeedBuff>()) return false;

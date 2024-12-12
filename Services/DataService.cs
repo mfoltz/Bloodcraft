@@ -6,6 +6,7 @@ using Bloodcraft.Systems.Quests;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Unity.Entities;
+using static Bloodcraft.Services.BattleService;
 using static Bloodcraft.Services.ConfigService;
 using static Bloodcraft.Services.ConfigService.ConfigInitialization;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
@@ -186,6 +187,10 @@ internal static class DataService
     public static bool TryGetFamiliarDefault(this ulong steamID, out int defaultFamiliar)
     {
         return familiarDefault.TryGetValue(steamID, out defaultFamiliar);
+    }
+    public static bool TryGetFamiliarBattleGroup(this ulong steamID, out List<int> battleGroup)
+    {
+        return playerBattleGroups.TryGetValue(steamID, out battleGroup);
     }
     public static bool TryGetPlayerQuests(this ulong steamID, out Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> quests)
     {
@@ -410,6 +415,11 @@ internal static class DataService
         familiarDefault[steamID] = data;
         SavePlayerFamiliarSets();
     }
+    public static void SetFamiliarBattleGroup(this ulong steamID, List<int> data)
+    {
+        playerBattleGroups[steamID] = data;
+        SaveFamiliarBattleGroups();
+    }
     public static void SetPlayerQuests(this ulong steamID, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> data)
     {
         playerQuests[steamID] = data;
@@ -482,6 +492,8 @@ internal static class DataService
         internal static Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = [];
         internal static Dictionary<ulong, string> familiarBox = [];
         internal static Dictionary<ulong, int> familiarDefault = [];
+        internal static Dictionary<ulong, List<int>> playerBattleGroups = [];
+        internal static List<List<float>> familiarBattleCoords = [];
 
         // quest data
         internal static Dictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> playerQuests = [];
@@ -545,7 +557,10 @@ internal static class DataService
             {"BruteLegacy", PlayerBruteLegacyJson},
             {"BloodStats", PlayerBloodStatsJson},
             {"FamiliarActives", PlayerFamiliarActivesJson},
-            {"FamiliarSets", PlayerFamiliarSetsJson }
+            {"FamiliarSets", PlayerFamiliarSetsJson },
+            {"FamiliarBattleCoords", FamiliarBattleCoordsJson },
+            {"FamiliarBattleGroups", PlayerFamiliarBattleGroupsJson }
+
         };
         internal static class JsonFilePaths
         {
@@ -593,6 +608,8 @@ internal static class DataService
             internal static readonly string PlayerBloodStatsJson = Path.Combine(DirectoryPaths[4], "player_blood_stats.json");
             internal static readonly string PlayerFamiliarActivesJson = Path.Combine(DirectoryPaths[6], "player_familiar_actives.json");
             internal static readonly string PlayerFamiliarSetsJson = Path.Combine(DirectoryPaths[8], "player_familiar_sets.json");
+            internal static readonly string FamiliarBattleCoordsJson = Path.Combine(DirectoryPaths[6], "familiar_battle_coords.json");
+            internal static readonly string PlayerFamiliarBattleGroupsJson = Path.Combine(DirectoryPaths[6], "player_familiar_battle_groups.json");
         }
         static void LoadData<T>(ref ConcurrentDictionary<ulong, T> dataStructure, string key)
         {
@@ -623,24 +640,6 @@ internal static class DataService
             catch (IOException ex)
             {
                 Core.Log.LogInfo($"Failed to read {key} data from file: {ex.Message}");
-            }
-        }
-        static void SaveData<T>(ConcurrentDictionary<ulong, T> data, string key)
-        {
-            string path = filePaths[key];
-            try
-            {
-                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
-                File.WriteAllText(path, json);
-                //Core.Log.LogInfo($"{key} data saved successfully.");
-            }
-            catch (IOException ex)
-            {
-                Core.Log.LogInfo($"Failed to write {key} data to file: {ex.Message}");
-            }
-            catch (JsonException ex)
-            {
-                Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
         static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
@@ -674,6 +673,55 @@ internal static class DataService
                 Core.Log.LogInfo($"Failed to read {key} data from file: {ex.Message}");
             }
         }
+        static void LoadData<T>(ref List<List<float>> dataStructure, string key)
+        {
+            string path = filePaths[key];
+            if (!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+                dataStructure = [];
+                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                return;
+            }
+            try
+            {
+                string json = File.ReadAllText(path);
+
+                json = json.Replace("Sanguimancy", "UnarmedExpertise");
+
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    dataStructure = [];
+                }
+                else
+                {
+                    var data = JsonSerializer.Deserialize<List<List<float>>>(json, prettyJsonOptions);
+                    dataStructure = data ?? [];
+                }
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to read {key} data from file: {ex.Message}");
+            }
+        }
+        static void SaveData<T>(ConcurrentDictionary<ulong, T> data, string key)
+        {
+            string path = filePaths[key];
+            try
+            {
+                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                File.WriteAllText(path, json);
+                //Core.Log.LogInfo($"{key} data saved successfully.");
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to write {key} data to file: {ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
+            }
+        }
         static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
             string path = filePaths[key];
@@ -682,6 +730,24 @@ internal static class DataService
                 string json = JsonSerializer.Serialize(data, prettyJsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to write {key} data to file: {ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
+            }
+        }
+        static void SaveData<T>(List<List<float>> data, string key)
+        {
+            string path = filePaths[key];
+
+            try
+            {
+                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                File.WriteAllText(path, json);
             }
             catch (IOException ex)
             {
@@ -780,6 +846,10 @@ internal static class DataService
 
         public static void LoadPlayerFamiliarSets() => LoadData(ref familiarBox, "FamiliarSets");
 
+        public static void LoadFamiliarBattleCoords() => LoadData<List<float>>(ref familiarBattleCoords, "FamiliarBattleCoords");
+
+        public static void LoadFamiliarBattleGroups() => LoadData(ref playerBattleGroups, "FamiliarBattleGroups");
+
         public static void SavePlayerExperience() => SaveData(playerExperience, "Experience");
 
         public static void SavePlayerRestedXP() => SaveData(playerRestedXP, "RestedXP");
@@ -867,6 +937,10 @@ internal static class DataService
         public static void SavePlayerFamiliarActives() => SaveData(familiarActives, "FamiliarActives");
 
         public static void SavePlayerFamiliarSets() => SaveData(familiarBox, "FamiliarSets");
+
+        public static void SaveFamiliarBattleCoords() => SaveData<List<float>>(familiarBattleCoords, "FamiliarBattleCoords");
+
+        public static void SaveFamiliarBattleGroups() => SaveData(playerBattleGroups, "FamiliarBattleGroups");
     }
     internal static class FamiliarPersistence
     {
@@ -901,7 +975,6 @@ internal static class DataService
         internal static class FamiliarExperienceManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_experience.json");
-
             public static void SaveFamiliarExperience(ulong playerId, FamiliarExperienceData data)
             {
                 string filePath = GetFilePath(playerId);
@@ -909,7 +982,6 @@ internal static class DataService
                 string jsonString = JsonSerializer.Serialize(data, options);
                 File.WriteAllText(filePath, jsonString);
             }
-
             public static FamiliarExperienceData LoadFamiliarExperience(ulong playerId)
             {
                 string filePath = GetFilePath(playerId);
@@ -927,7 +999,6 @@ internal static class DataService
         internal static class FamiliarPrestigeManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_prestige.json");
-
             public static void SaveFamiliarPrestige(ulong playerId, FamiliarPrestigeData data)
             {
                 string filePath = GetFilePath(playerId);
@@ -953,7 +1024,6 @@ internal static class DataService
         internal static class FamiliarBuffsManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_buffs.json");
-
             public static void SaveFamiliarBuffs(ulong playerId, FamiliarBuffsData data)
             {
                 string filePath = GetFilePath(playerId);
@@ -961,7 +1031,6 @@ internal static class DataService
                 string jsonString = JsonSerializer.Serialize(data, options);
                 File.WriteAllText(filePath, jsonString);
             }
-
             public static FamiliarBuffsData LoadFamiliarBuffs(ulong playerId)
             {
                 string filePath = GetFilePath(playerId);
@@ -1133,7 +1202,9 @@ internal static class DataService
         static readonly Action[] loadFamiliars =
         [
             LoadPlayerFamiliarActives,
-            LoadPlayerFamiliarSets
+            LoadPlayerFamiliarSets,
+            LoadFamiliarBattleCoords,
+            LoadFamiliarBattleGroups
         ];
     }
 }

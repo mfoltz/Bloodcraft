@@ -176,7 +176,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.exoform`
   - Toggles taunting to enter exo form.
   - Shortcut: *.exoform*
-- `.cleanupfams. 🔒`
+- `.cleanupfams.` 🔒
   - Removes disabled, invisible familiars on the map preventing building.
   - Shortcut: *.cleanupfams*
 
@@ -199,6 +199,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.party leave`
   - Leaves party if in one.
   - Shortcut: *.party drop*
+- `.party reset`
+  - Removes a player from all parties they are in and disbands any party they own.
+  - Shortcut: *.party r*
 
 ### Prestige Commands
 - `.prestige self [PrestigeType]`
@@ -225,7 +228,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.prestige leaderboard [PrestigeType]`
   - Lists prestige leaderboard for type.
   - Shortcut: *.prestige lb [PrestigeType]*
-- `.prestige shroud`
+- `.prestige permashroud`
   - Toggles permashroud if applicable.
   - Shortcut: *.prestige shroud*
 

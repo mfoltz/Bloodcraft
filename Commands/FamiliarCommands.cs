@@ -18,6 +18,7 @@ using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Commands;
 
@@ -34,8 +35,8 @@ internal static class FamiliarCommands
 
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> FamiliarSettings = new()
     {
-        {"VBloodEmotes", FamiliarUtilities.ToggleVBloodEmotes},
-        {"Shiny", FamiliarUtilities.ToggleShinies}
+        {"VBloodEmotes", Familiars.ToggleVBloodEmotes},
+        {"Shiny", Familiars.ToggleShinies}
     };
 
     [Command(name: "bind", shortHand: "b", adminOnly: false, usage: ".fam b [#]", description: "Activates specified familiar from current list.")]
@@ -51,7 +52,7 @@ internal static class FamiliarCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
 
-        FamiliarUtilities.BindFamiliar(character, userEntity, steamId, boxIndex);
+        Familiars.BindFamiliar(character, userEntity, steamId, boxIndex);
     }
 
     [Command(name: "unbind", shortHand: "ub", adminOnly: false, usage: ".fam ub", description: "Destroys active familiar.")]
@@ -67,7 +68,7 @@ internal static class FamiliarCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity userEntity = ctx.Event.SenderUserEntity;
 
-        FamiliarUtilities.UnbindFamiliar(character, userEntity, steamId);
+        Familiars.UnbindFamiliar(character, userEntity, steamId);
     }
 
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".fam l", description: "Lists unlocked familiars from current box.")]
@@ -326,7 +327,7 @@ internal static class FamiliarCommands
 
         if (steamId.TryGetFamiliarBox(out string activeSet)) // add to active box if one exists
         {
-            FamiliarUtilities.ParseAddedFamiliar(ctx, steamId, unit, activeSet);
+            Familiars.ParseAddedFamiliar(ctx, steamId, unit, activeSet);
         }
         else // add to last existing box if one exists or add a new box
         {
@@ -338,11 +339,11 @@ internal static class FamiliarCommands
                 lastListName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
                 unlocksData.UnlockedFamiliars[lastListName] = [];
                 SaveUnlockedFamiliars(steamId, unlocksData);
-                FamiliarUtilities.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
+                Familiars.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
             }
             else
             {
-                FamiliarUtilities.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
+                Familiars.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
             }
         }
     }
@@ -442,9 +443,9 @@ internal static class FamiliarCommands
         }
 
         ulong platformId = ctx.User.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(platformId, "Emotes");
-        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(PlayerUtilities.GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
+        Misc.TogglePlayerBool(platformId, "Emotes");
+
+        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(Misc.GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
     }
 
     [Command(name: "emoteactions", shortHand: "actions", usage: ".fam actions", description: "Shows available emote actions.", adminOnly: false)]
@@ -487,7 +488,7 @@ internal static class FamiliarCommands
             int progress = (int)(xpData.Value - ConvertLevelToXp(xpData.Key));
             int percent = GetLevelProgress(steamId, data.FamKey);
 
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
+            Entity familiar = Familiars.FindPlayerFamiliar(ctx.Event.SenderCharacterEntity);
 
             int prestigeLevel = 0;
 
@@ -571,7 +572,7 @@ internal static class FamiliarCommands
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
             Entity player = playerInfo.CharEntity;
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+            Entity familiar = Familiars.FindPlayerFamiliar(player);
             int famKey = data.FamKey;
 
             KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
@@ -631,7 +632,7 @@ internal static class FamiliarCommands
 
                 if (stats.Count < FamiliarStatValues.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
-                    if (!FamiliarUtilities.TryParseFamiliarStat(bonusStat, out var stat))
+                    if (!Familiars.TryParseFamiliarStat(bonusStat, out var stat))
                     {
                         var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarStatType))
                         .Cast<FamiliarStatType>()
@@ -674,7 +675,7 @@ internal static class FamiliarCommands
                 SaveFamiliarPrestige(steamId, prestigeData);
 
                 Entity player = ctx.Event.SenderCharacterEntity;
-                Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                Entity familiar = Familiars.FindPlayerFamiliar(player);
 
                 if (ModifyFamiliar(user, steamId, data.FamKey, player, familiar, newXP.Key))
                 {
@@ -714,8 +715,8 @@ internal static class FamiliarCommands
             }
         }
 
-        FamiliarUtilities.ClearFamiliarActives(steamId);
-        if (FamiliarUtilities.AutoCallMap.ContainsKey(character)) FamiliarUtilities.AutoCallMap.Remove(character); 
+        Familiars.ClearFamiliarActives(steamId);
+        if (Familiars.AutoCallMap.ContainsKey(character)) Familiars.AutoCallMap.Remove(character);
 
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
@@ -839,7 +840,7 @@ internal static class FamiliarCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = Familiars.FindPlayerFamiliar(character);
         int famKey = familiar.Read<PrefabGUID>().GuidHash;
 
         if (familiar != Entity.Null)
@@ -847,11 +848,11 @@ internal static class FamiliarCommands
             FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // if no shiny unlocked already use the freebie
             {
-                bool madeShinyChoice = PlayerUtilities.GetPlayerBool(steamId, "ShinyChoice");
+                bool madeShinyChoice = Misc.GetPlayerBool(steamId, "ShinyChoice");
 
                 if (!madeShinyChoice && HandleShiny(famKey, steamId, 1f, visual.GuidHash)) // if false use free visual then set to true
                 {
-                    PlayerUtilities.SetPlayerBool(steamId, "ShinyChoice", true);
+                    Misc.SetPlayerBool(steamId, "ShinyChoice", true);
                     LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
                 }
                 else if (madeShinyChoice)
@@ -908,11 +909,11 @@ internal static class FamiliarCommands
 
         ulong steamId = playerInfo.User.PlatformId;
         string playerName = playerInfo.User.CharacterName.Value;
-        bool madeShinyChoice = PlayerUtilities.GetPlayerBool(steamId, "ShinyChoice");
+        bool madeShinyChoice = Misc.GetPlayerBool(steamId, "ShinyChoice");
 
         if (madeShinyChoice)
         {
-            PlayerUtilities.SetPlayerBool(steamId, "ShinyChoice", false);
+            Misc.SetPlayerBool(steamId, "ShinyChoice", false);
             LocalizationService.HandleReply(ctx, $"Visual choice reset for <color=white>{playerName}</color>. (does not remove previously chosen visuals from player data)");
         }
         else if (!madeShinyChoice)

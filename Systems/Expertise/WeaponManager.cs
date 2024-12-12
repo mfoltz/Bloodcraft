@@ -34,7 +34,7 @@ internal static class WeaponManager
         {
             if (ConfigService.HardSynergies)
             {
-                if (!ClassUtilities.HasClass(steamId))
+                if (!Utilities.Classes.HasClass(steamId))
                 {
                     return false;
                 }
@@ -83,7 +83,7 @@ internal static class WeaponManager
     }
     public static void ApplyWeaponStats(ulong steamId, WeaponType weaponType, Entity weaponEntity)
     {
-        IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+        IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
         {
             if (!weaponEntity.Has<ModifyUnitStatBuff_DOTS>())
@@ -132,7 +132,7 @@ internal static class WeaponManager
             }
         }
     }
-    public static float CalculateScaledWeaponBonus(IExpertiseHandler handler, ulong steamId, WeaponType weaponType, WeaponStatType statType)
+    public static float CalculateScaledWeaponBonus(IWeaponHandler handler, ulong steamId, WeaponType weaponType, WeaponStatType statType)
     {
         if (handler != null)
         {

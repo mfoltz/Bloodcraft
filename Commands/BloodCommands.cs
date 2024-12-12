@@ -9,6 +9,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodManager;
 using static VCF.Core.Basics.RoleCommands;
+using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
@@ -52,7 +53,7 @@ internal static class BloodCommands
         }
 
         var data = bloodHandler.GetLegacyData(steamID);
-        int progress = (int)(data.Value - BloodSystem.ConvertLevelToXp(data.Key));
+        int progress = (int)(data.Value - ConvertLevelToXp(data.Key));
 
         int prestigeLevel = steamID.TryGetPlayerPrestiges(out var prestiges) ? prestiges[BloodSystem.BloodTypeToPrestigeMap[bloodType]] : 0;
 
@@ -100,8 +101,8 @@ internal static class BloodCommands
 
         var SteamID = ctx.Event.User.PlatformId;
 
-        PlayerUtilities.TogglePlayerBool(SteamID, "BloodLogging");
-        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(PlayerUtilities.GetPlayerBool(SteamID, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(SteamID, "BloodLogging");
+        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(Misc.GetPlayerBool(SteamID, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]
@@ -258,7 +259,7 @@ internal static class BloodCommands
         }
 
         ulong steamId = foundUser.PlatformId;
-        var xpData = new KeyValuePair<int, float>(level, BloodSystem.ConvertLevelToXp(level));
+        var xpData = new KeyValuePair<int, float>(level, ConvertLevelToXp(level));
         BloodHandler.SetLegacyData(steamId, xpData);
 
         LocalizationService.HandleReply(ctx, $"<color=red>{BloodHandler.GetBloodType()}</color> legacy set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName}</color>");

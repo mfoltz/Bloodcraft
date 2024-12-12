@@ -4,7 +4,7 @@ using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
-internal static class RecipeUtilities // would like to tie this into professions eventuallyyyyy - for now only useful as custom merchant currencies and such
+internal static class Recipes // would like to tie this into professions eventuallyyyyy - for now only useful as custom merchant currencies and such
 {
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;

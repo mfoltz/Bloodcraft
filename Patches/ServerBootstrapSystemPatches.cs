@@ -16,6 +16,7 @@ using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
@@ -321,7 +322,7 @@ internal static class ServerBootstrapSystemPatches
         {
             if (!steamId.TryGetPlayerExperience(out var experience))
             {
-                steamId.SetPlayerExperience(new KeyValuePair<int, float>(StartingLevel, LevelingSystem.ConvertLevelToXp(StartingLevel)));
+                steamId.SetPlayerExperience(new KeyValuePair<int, float>(StartingLevel, ConvertLevelToXp(StartingLevel)));
             }
 
             if (RestedXPSystem)
@@ -346,7 +347,7 @@ internal static class ServerBootstrapSystemPatches
 
                         int currentLevel = experience.Key;
                         int maxRestedLevel = Math.Min(RestedXPMax + currentLevel, MaxLevel);
-                        float restedCap = LevelingSystem.ConvertLevelToXp(maxRestedLevel) - LevelingSystem.ConvertLevelToXp(currentLevel);
+                        float restedCap = ConvertLevelToXp(maxRestedLevel) - ConvertLevelToXp(currentLevel);
 
                         float earnedPerTick = RestedXPRate * restedCap;
                         float earnedRestedXP = (float)timeOffline.TotalMinutes / RestedXPTickRate * earnedPerTick * restedMultiplier;
@@ -354,7 +355,6 @@ internal static class ServerBootstrapSystemPatches
                         currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
                         int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
 
-                        //Core.Log.LogInfo($"Rested XP: {currentRestedXP} | Earned: {earnedRestedXP} | Rounded: {roundedXP} | Rested Cap: {restedCap} | Max Rested Level: {maxRestedLevel}");
                         steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, currentRestedXP));
                         string message = $"+<color=#FFD700>{roundedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> earned from being logged out in your coffin!";
                         LocalizationService.HandleServerReply(EntityManager, user, message);
@@ -391,7 +391,7 @@ internal static class ServerBootstrapSystemPatches
 
                     if (!steamId.TryGetPlayerExoFormData(out var _))
                     {
-                        KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoFormUtilities.CalculateFormDuration(exoPrestiges));
+                        KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoForm.CalculateFormDuration(exoPrestiges));
                         steamId.SetPlayerExoFormData(timeEnergyPair);
                     }
                 }
@@ -416,17 +416,23 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetFamiliarBox("");
             }
 
+            if (!steamId.TryGetFamiliarBattleGroup(out var _))
+            {
+                steamId.SetFamiliarBattleGroup([0,0,0]);
+            }
+
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
 
-            //if (exists) FamiliarUtilities.ClearBuffers(playerCharacter, steamId);
+            Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(playerCharacter);
-            
-            if (!familiar.Exists()) FamiliarUtilities.ClearFamiliarActives(steamId);
+            if (!familiar.Exists())
+            {
+                Familiars.ClearFamiliarActives(steamId);
+            }
             else
             {
-                UpdatePlayerFamiliar(playerCharacter, familiar);
+                Core.StartCoroutine(UpdatePlayerFamiliar(playerCharacter, familiar));
             }
         }
 

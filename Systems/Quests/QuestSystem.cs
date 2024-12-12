@@ -1,4 +1,7 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -11,6 +14,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Utilities.Progression;
 using Match = System.Text.RegularExpressions.Match;
 using Random = System.Random;
 using Regex = System.Text.RegularExpressions.Regex;
@@ -23,6 +27,18 @@ internal static class QuestSystem
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
+    static readonly bool Leveling = ConfigService.LevelingSystem;
+    static readonly bool Expertise = ConfigService.ExpertiseSystem;
+    static readonly bool Legacy = ConfigService.BloodSystem;
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+    static readonly bool WeaponBloodSystems = Expertise && Legacy;
+    static readonly bool InfiniteDailies = ConfigService.InfiniteDailies;
+
+    static readonly int MaxPlayerLevel = ConfigService.MaxLevel;
+    static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
+    static readonly int MaxLegacyLevel = ConfigService.MaxBloodLevel;
+    static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
+
     static readonly float ResourceYieldModifier = SystemService.ServerGameSettingsSystem._Settings.MaterialYieldModifier_Global;
 
     static readonly Random Random = new();
@@ -30,6 +46,8 @@ internal static class QuestSystem
 
     public static readonly HashSet<PrefabGUID> CraftPrefabs = [];
     public static readonly HashSet<PrefabGUID> ResourcePrefabs = [];
+
+    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
 
     static readonly PrefabGUID GraveyardSkeleton = new(1395549638);
     static readonly PrefabGUID ForestWolf = new(-1418430647);
@@ -40,7 +58,9 @@ internal static class QuestSystem
     static readonly PrefabGUID ItemIngredientWood = new(-1593377811);
     static readonly PrefabGUID ItemIngredientStone = new(-1531666018);
 
-    const int DefaultMaxPlayerLevel = 90;
+    const int DEFAULT_MAX_LEVEL = 90;
+    const float XP_PERCENTAGE = 0.03f;
+    const int VBLOOD_FACTOR = 3;
 
     static readonly HashSet<string> FilteredResources =
     [
@@ -128,7 +148,7 @@ internal static class QuestSystem
 
                 if (!isVBlood)
                 {
-                    if (playerLevel > DefaultMaxPlayerLevel && unitLevel.Level._Value > 80) // account for higher player level values than default
+                    if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80) // account for higher player level values than default
                     {
                         prefabs.Add(prefab);
                     }
@@ -143,7 +163,7 @@ internal static class QuestSystem
                     {
                         continue;
                     }
-                    else if (playerLevel > DefaultMaxPlayerLevel && unitLevel.Level._Value > 80) // account for higher player level values than default
+                    else if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80) // account for higher player level values than default
                     {
                         prefabs.Add(prefab);
                     }
@@ -314,7 +334,7 @@ internal static class QuestSystem
 
                 break;
             default:
-                throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest target type encountered when generating quest objective...");
+                throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest goal type encountered when generating quest objective!");
         }
         return new QuestObjective { Goal = goal, Target = target, RequiredAmount = requiredAmount };
     }
@@ -325,7 +345,7 @@ internal static class QuestSystem
             TargetType.Kill => GetKillPrefabsForLevel(level),
             TargetType.Craft => GetCraftPrefabsForLevel(level),
             TargetType.Gather => GetGatherPrefabsForLevel(level),
-            _ => throw new ArgumentOutOfRangeException(),
+            _ => throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest goal type encountered when generating quest objective!")
         };
 
         return prefabs;
@@ -386,7 +406,6 @@ internal static class QuestSystem
                 }
                 else if (refreshDaily)
                 {
-                    //goal = GetUniqueQuestType(questData, QuestType.Weekly);
                     goal = GetRandomQuestType();
                     targets = GetGoalPrefabsForLevel(goal, level);
 
@@ -435,14 +454,11 @@ internal static class QuestSystem
     {
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            //TargetType goal = GetUniqueQuestType(questData, QuestType.Weekly); // get unique goal different from weekly
             TargetType goal = GetRandomQuestType();
             HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
 
             questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
             steamId.SetPlayerQuests(questData);
-
-            //LocalizationService.HandleServerReply(EntityManager, user, "<color=#00FFFF>Daily Quest</color> has been rerolled~");
         }
     }
     public static void ForceWeekly(ulong steamId, int level)
@@ -454,8 +470,6 @@ internal static class QuestSystem
 
             questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, DateTime.UtcNow);
             steamId.SetPlayerQuests(questData);
-
-            //LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been rerolled~");
         }
     }
     static TargetType GetUniqueQuestType(Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
@@ -488,27 +502,14 @@ internal static class QuestSystem
     }
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        //HashSet<ulong> processed = []; // may not need to check this with new event subscription stuff, will check later
-
-        Entity source = deathEvent.Source;
         Entity died = deathEvent.Target;
-
         PrefabGUID target = died.Read<PrefabGUID>();
         HashSet<Entity> participants = deathEvent.DeathParticipants;
 
-        //HashSet<Entity> participants = PlayerUtilities.GetDeathParticipants(source, userEntity);
         foreach (Entity player in participants)
         {
             User user = player.GetUser();
             ulong steamId = player.GetSteamId(); // participants are character entities
-
-            /*
-            if (!processed.Contains(steamId) && steamId.TryGetPlayerQuests(out var questData))
-            {
-                ProcessQuestProgress(questData, target, 1, user);
-                processed.Add(steamId);
-            }
-            */
 
             if (steamId.TryGetPlayerQuests(out var questData))
             {
@@ -548,21 +549,14 @@ internal static class QuestSystem
                     QuestCoroutines[steamId][quest.Key] = (questData[quest.Key].Progress, true);
                 }
 
-                /*
-                if (PlayerUtilities.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
-                {
-                    string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> <color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> [<color=white>{questData[quest.Key].Progress}</color>/<color=yellow>{quest.Value.Objective.RequiredAmount}</color>]";
-                    LocalizationService.HandleServerReply(EntityManager, user, message);
-                }
-                */
-
                 if (quest.Value.Objective.RequiredAmount <= questData[quest.Key].Progress && !quest.Value.Objective.Complete)
                 {
                     quest.Value.Objective.Complete = true;
 
                     LocalizationService.HandleServerReply(EntityManager, user, $"{colorType} complete!");
-                    if (QuestRewards.Count > 0)
+                    if (QuestRewards.Any())
                     {
+                        /*
                         PrefabGUID reward = QuestRewards.Keys.ElementAt(Random.Next(QuestRewards.Count));
                         int quantity = QuestRewards[reward];
 
@@ -582,22 +576,26 @@ internal static class QuestSystem
                             LocalizationService.HandleServerReply(EntityManager, user, message);
                         }
 
-                        if (ConfigService.LevelingSystem)
+                                                if (Leveling)
                         {
                             LevelingSystem.ProcessQuestExperienceGain(user, QuestMultipliers[quest.Key]);
 
                             string xpMessage = $"Additionally, you've been awarded <color=yellow>{(0.025f * QuestMultipliers[quest.Key] * 100).ToString("F0") + "%"}</color> of your total <color=#FFC0CB>experience</color>.";
                             LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
                         }
+                        */
+
+                        HandleItemReward(user, quest.Key, quest.Value.Objective, colorType);
+                        HandleExperienceReward(user, quest.Key);
                     }
                     else
                     {
-                        LocalizationService.HandleServerReply(EntityManager, user, $"Couldn't find any valid reward prefabs...");
+                        HandleExperienceReward(user, quest.Key);
                     }
 
-                    if (quest.Key == QuestType.Daily && ConfigService.InfiniteDailies)
+                    if (quest.Key == QuestType.Daily && InfiniteDailies)
                     {
-                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
+                        int level = (Leveling && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                         TargetType goal = GetRandomQuestType();
 
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
@@ -611,6 +609,222 @@ internal static class QuestSystem
         }
 
         if (updated) steamId.SetPlayerQuests(questData);
+    }
+    static void HandleItemReward(User user, QuestType questType, QuestObjective objective, string colorType)
+    {
+        PrefabGUID reward = QuestRewards.Keys.ElementAt(Random.Next(QuestRewards.Count));
+        int quantity = QuestRewards[reward];
+
+        if (questType == QuestType.Weekly) quantity *= QuestMultipliers[questType];
+
+        if (objective.Target.LookupName().ToLower().Contains("vblood")) quantity *= VBLOOD_FACTOR;
+
+        if (ServerGameManager.TryAddInventoryItem(user.LocalCharacter._Entity, reward, quantity))
+        {
+            string message = $"You've received <color=#ffd9eb>{reward.GetPrefabName()}</color>x<color=white>{quantity}</color> for completing your {colorType}!";
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+        else
+        {
+            InventoryUtilitiesServer.CreateDropItem(EntityManager, user.LocalCharacter._Entity, reward, quantity, new Entity());
+            string message = $"You've received <color=#ffd9eb>{reward.GetPrefabName()}</color>x<color=white>{quantity}</color> for completing your {colorType}! It dropped on the ground because your inventory was full.";
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+    }
+    static void HandleExperienceReward(User user, QuestType questType)
+    {
+        string progressType = ProcessQuestExperienceGain(user, QuestMultipliers[questType], XP_PERCENTAGE);
+
+        if (string.IsNullOrEmpty(progressType)) return;
+        else
+        {
+            float xpPercentage = XP_PERCENTAGE * QuestMultipliers[questType] * 100;
+            string xpMessage = $"You've been awarded <color=yellow>{xpPercentage:F0}%</color> of your total {progressType}!";
+
+            LocalizationService.HandleServerReply(EntityManager, user, xpMessage);
+        }
+    }
+    static string ProcessQuestExperienceGain(User user, int multiplier, float percentOfTotalXP)
+    {
+        string progressString = string.Empty;
+        float gainedXP = 0f;
+
+        ulong steamId = user.PlatformId;
+        Entity character = user.LocalCharacter.GetEntityOnServer();
+
+        int currentLevel = steamId.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
+
+        // If not at max player level, just give player XP
+        if (currentLevel < MaxPlayerLevel)
+        {
+            gainedXP = ConvertLevelToXp(currentLevel) * percentOfTotalXP * multiplier;
+            progressString = GainPlayerExperience(character, steamId, gainedXP);
+            return progressString;
+        }
+
+        // If at max player level, we start distributing XP to other systems
+        // depending on which systems are enabled and which ones are at max.
+        KeyValuePair<int, float> expertiseData = new(0, 0);
+        int expertiseLevel = 0;
+
+        KeyValuePair<int, float> legacyData = new(0, 0);
+        int legacyLevel = 0;
+
+        if (WeaponBloodSystems)
+        {
+            // Get current weapon and blood handlers
+            Expertise.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(character);
+            IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+
+            BloodType bloodType = BloodManager.GetCurrentBloodType(character);
+            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+
+            if (expertiseHandler != null)
+            {
+                expertiseData = expertiseHandler.GetExpertiseData(steamId);
+                expertiseLevel = expertiseData.Key;
+            }
+
+            if (bloodHandler != null)
+            {
+                legacyData = bloodHandler.GetLegacyData(steamId);
+                legacyLevel = legacyData.Key;
+            }
+
+            bool maxExpertise = expertiseLevel >= MaxExpertiseLevel;
+            bool maxLegacy = legacyLevel >= MaxLegacyLevel;
+
+            // If both expertise and legacy are maxed and familiars are enabled
+            if (maxExpertise && maxLegacy && Familiars)
+            {
+                progressString = TryGainFamiliarExperience(character, steamId, percentOfTotalXP, multiplier);
+                return progressString;
+            }
+
+            // If expertise is maxed but legacy is not, give legacy XP
+            if (maxExpertise && !maxLegacy && bloodHandler != null)
+            {
+                gainedXP = ConvertLevelToXp(legacyLevel) * percentOfTotalXP * multiplier;
+                progressString = GainLegacyExperience(user, steamId, bloodType, bloodHandler, gainedXP);
+                return progressString;
+            }
+
+            // If legacy is maxed but expertise is not, give expertise XP
+            if (!maxExpertise && maxLegacy && expertiseHandler != null)
+            {
+                gainedXP = ConvertLevelToXp(expertiseLevel) * percentOfTotalXP * multiplier;
+                progressString = GainWeaponExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
+                return progressString;
+            }
+
+            // If neither are maxed, give half XP to both
+            if (!maxExpertise && !maxLegacy)
+            {
+                percentOfTotalXP *= 0.5f;
+                string expertiseString = string.Empty;
+                string legacyString = string.Empty;
+
+                if (expertiseHandler != null)
+                {
+                    gainedXP = ConvertLevelToXp(expertiseLevel) * percentOfTotalXP * multiplier;
+                    expertiseString = GainWeaponExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
+                }
+
+                if (bloodHandler != null)
+                {
+                    gainedXP = ConvertLevelToXp(legacyLevel) * percentOfTotalXP * multiplier;
+                    legacyString = GainLegacyExperience(user, steamId, bloodType, bloodHandler, gainedXP);
+                }
+
+                // Combine strings if both exist
+                if (!string.IsNullOrEmpty(expertiseString) && !string.IsNullOrEmpty(legacyString))
+                {
+                    progressString = expertiseString + " & " + legacyString;
+                }
+                else
+                {
+                    progressString = expertiseString + legacyString;
+                }
+
+                return progressString;
+            }
+        }
+        else if (Expertise)
+        {
+            // If only Expertise is enabled
+            Expertise.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(character);
+            IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+
+            if (expertiseHandler != null)
+            {
+                expertiseData = expertiseHandler.GetExpertiseData(steamId);
+                expertiseLevel = expertiseData.Key;
+
+                gainedXP = ConvertLevelToXp(expertiseLevel) * percentOfTotalXP * multiplier;
+                progressString = GainWeaponExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
+                return progressString;
+            }
+        }
+        else if (Legacy)
+        {
+            // If only Legacy is enabled
+            BloodType bloodType = BloodManager.GetCurrentBloodType(character);
+            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+
+            if (bloodHandler != null)
+            {
+                legacyData = bloodHandler.GetLegacyData(steamId);
+                legacyLevel = legacyData.Key;
+
+                gainedXP = ConvertLevelToXp(legacyLevel) * percentOfTotalXP * multiplier;
+                progressString = GainLegacyExperience(user, steamId, bloodType, bloodHandler, gainedXP);
+                return progressString;
+            }
+        }
+
+        return progressString;
+    }
+    static string GainPlayerExperience(Entity character, ulong steamId, float gainedXP)
+    {
+        LevelingSystem.SaveLevelingExperience(steamId, gainedXP, out bool leveledUp, out int newLevel);
+        LevelingSystem.NotifyPlayer(character, steamId, gainedXP, leveledUp, newLevel);
+        return "<color=#FFC0CB>experience</color>";
+    }
+    static string GainWeaponExperience(User user, ulong steamId, Expertise.WeaponType weaponType, IWeaponHandler handler, float gainedXP)
+    {
+        WeaponSystem.SaveWeaponExperience(steamId, handler, gainedXP, out bool leveledUp, out int newLevel);
+        WeaponSystem.NotifyPlayer(user, weaponType, gainedXP, leveledUp, newLevel, handler);
+        return "<color=#FFC0CB>expertise</color>";
+    }
+    static string GainLegacyExperience(User user, ulong steamId, BloodType bloodType, IBloodHandler handler, float gainedXP)
+    {
+        BloodSystem.SaveBloodExperience(steamId, handler, gainedXP, out bool leveledUp, out int newLevel);
+        BloodSystem.NotifyPlayer(user, bloodType, gainedXP, leveledUp, newLevel, handler);
+        return "<color=#FFC0CB>essence</color>";
+    }
+    static string GainFamiliarExperience(Entity character, Entity familiar, int familiarId, ulong steamId, float gainedXP)
+    {
+        FamiliarLevelingSystem.UpdateFamiliarExperience(character, familiar, familiarId, steamId, FamiliarLevelingSystem.GetFamiliarExperience(steamId, familiarId), gainedXP, 0);
+        return "<color=#FFC0CB>familiar experience</color>";
+    }
+    static string TryGainFamiliarExperience(Entity character, ulong steamId, float percentOfTotalXP, int multiplier)
+    {
+        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(character);
+
+        if (familiar.TryGetComponent(out PrefabGUID prefabGUID) && !familiar.IsDisabled() && !familiar.HasBuff(InvulnerableBuff))
+        {
+            int familiarId = prefabGUID.GuidHash;
+
+            var familiarXP = FamiliarLevelingSystem.GetFamiliarExperience(steamId, familiarId);
+            int familiarLevel = familiarXP.Key;
+
+            if (familiarLevel >= MaxFamiliarLevel) return string.Empty;
+
+            float gainedXP = ConvertLevelToXp(familiarLevel) * percentOfTotalXP * multiplier;
+            return GainFamiliarExperience(character, familiar, familiarId, steamId, gainedXP);
+        }
+
+        return string.Empty;
     }
     static IEnumerator DelayedProgressUpdate(
     Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData,
@@ -626,7 +840,7 @@ internal static class QuestSystem
 
         yield return QuestMessageDelay;
 
-        if (PlayerUtilities.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
+        if (Misc.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
         {
             string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> " +
                              $"<color=white>{quest.Value.Objective.Target.GetPrefabName()}</color> " +

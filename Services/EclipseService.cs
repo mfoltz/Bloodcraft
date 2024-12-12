@@ -13,7 +13,6 @@ using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities.PlayerUtilities;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Services;
@@ -121,11 +120,6 @@ internal class EclipseService
                 case (int)NetworkEventSubType.RegisterUser:
                     RegisterUser(steamId, LEGACY_VERSION);
                     break;
-                    /*
-                case (int)NetworkEventSubType.ClientDebug:
-                    RegisterUserTest(steamId, LEGACY_VERSION);
-                    break;
-                    */
                 default:
                     Core.Log.LogError($"Unknown networkEventSubtype encountered while handling legacy version (<1.2.2) of Eclipse! {eventType}");
                     break;
@@ -140,11 +134,12 @@ internal class EclipseService
     static void RegisterUser(ulong steamId, string version)
     {
         if (RegisteredUsersAndClientVersions.ContainsKey(steamId)) return;
-        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
+        //else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
+        else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
         {
             if (HandleRegistration(playerInfo, steamId, version))
             {
-                Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache~ (RegisterUser)");
+                Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (RegisterUser)");
             }
         }
         else // delayed registration, wait for cache to update/player to make character...
@@ -195,14 +190,6 @@ internal class EclipseService
             return false;
         }
     }
-
-    /*
-    static void RegisterUserTest(ulong steamId, string version)
-    {
-        if (PlayerModifiers.ContainsKey(steamId)) return;
-        else PlayerModifiers[steamId] = float.TryParse(version, out float result) ? result : 1f;
-    }
-    */
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {
         int experiencePercent = 0;
@@ -222,9 +209,9 @@ internal class EclipseService
             }
         }
 
-        if (Classes && ClassUtilities.HasClass(steamId))
+        if (Classes && Utilities.Classes.HasClass(steamId))
         {
-            classEnum = (int)ClassUtilities.GetPlayerClass(steamId) + 1; // 0 for no class on client
+            classEnum = (int)Utilities.Classes.GetPlayerClass(steamId) + 1; // 0 for no class on client
         }
 
         return (experiencePercent, experienceLevel, experiencePrestige, classEnum);
@@ -283,7 +270,7 @@ internal class EclipseService
         if (Expertise)
         {
             WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
-            IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
             if (expertiseHandler != null)
             {
@@ -321,7 +308,7 @@ internal class EclipseService
 
         if (Familiars)
         {
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+            Entity familiar = Utilities.Familiars.FindPlayerFamiliar(character);
 
             if (!familiar.Exists())
             {
@@ -458,7 +445,7 @@ internal class EclipseService
             {
                 if (HandleRegistration(playerInfo, steamId, version))
                 {
-                    Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache~ (DelayedRegistration)");
+                    Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (DelayedRegistration)");
                 }
 
                 yield break;

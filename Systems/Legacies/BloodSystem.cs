@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -7,16 +6,20 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using UnityEngine;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    const float EXP_CONSTANT = 0.1f;
-    const int EXP_POWER = 2;
+    static readonly int MaxBloodLevel = ConfigService.MaxBloodLevel;
+    static readonly int LegacyStatChoices = ConfigService.LegacyStatChoices;
+    static readonly float VBloodLegacyMultiplier = ConfigService.VBloodLegacyMultiplier;
+    static readonly float UnitLegacyMultiplier = ConfigService.UnitLegacyMultiplier;
 
-    public static readonly HashSet<ulong> SkipBloodUpdate = [];
+    const int BASE_BLOOD_FACTOR = 10;
+    const float BLOOD_TYPE_FACTOR = 3f;
 
     public static readonly Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -139,7 +142,6 @@ internal static class BloodSystem
         { BloodType.Brute, PrestigeType.BruteLegacy }
     };
 
-    // stacking on the prestige & class perma buffs?
     public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new() // base buffs present regardless of blood quality indicating type consumed
     {
         { new PrefabGUID(-773025435), BloodType.Worker }, // yield bonus
@@ -192,11 +194,11 @@ internal static class BloodSystem
 
         if (target.Has<VBloodConsumeSource>())
         {
-            bloodValue = 10 * unitLevel * ConfigService.VBloodLegacyMultiplier;
+            bloodValue = BASE_BLOOD_FACTOR * unitLevel * VBloodLegacyMultiplier;
         }
         else
         {
-            bloodValue = bloodConsumeSource.BloodQuality / 10 * unitLevel * ConfigService.UnitLegacyMultiplier;
+            bloodValue = bloodConsumeSource.BloodQuality / BASE_BLOOD_FACTOR * unitLevel * UnitLegacyMultiplier;
         }
 
         Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
@@ -209,7 +211,7 @@ internal static class BloodSystem
         if (bloodType.Equals(BloodType.None)) return;
         else if (targetBloodType.Equals(bloodType))
         {
-            bloodValue *= 3f; // same type multiplier
+            bloodValue *= BLOOD_TYPE_FACTOR; // same type multiplier
         }
 
         float qualityMultiplier = 1f + (bloodQuality / 100f);
@@ -219,6 +221,7 @@ internal static class BloodSystem
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
         if (handler != null)
         {
+            /*
             // Check if the player leveled up
             var xpData = handler.GetLegacyData(steamID);
 
@@ -260,65 +263,129 @@ internal static class BloodSystem
 
             var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
             handler.SetLegacyData(steamID, updatedXPData);
+            */
+
+            SaveBloodExperience(steamID, handler, bloodValue, out bool leveledUp, out int newLevel);
             NotifyPlayer(user, bloodType, bloodValue, leveledUp, newLevel, handler);
+        }
+    }
+    public static void SaveBloodExperience(ulong steamID, IBloodHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
+    {
+        var xpData = handler.GetLegacyData(steamID);
+        int currentLevel = xpData.Key;
+        float currentXP = xpData.Value;
+
+        if (currentLevel >= MaxBloodLevel)
+        {
+            // Already at max level, no changes
+            leveledUp = false;
+            newLevel = currentLevel;
+            return;
+        }
+
+        float newExperience = currentXP + gainedXP;
+        newLevel = ConvertXpToLevel(newExperience);
+        leveledUp = false;
+
+        // Check level-up and cap at max
+        if (newLevel > currentLevel)
+        {
+            leveledUp = true;
+            if (newLevel > MaxBloodLevel)
+            {
+                newLevel = MaxBloodLevel;
+                newExperience = ConvertLevelToXp(MaxBloodLevel);
+            }
+        }
+
+        handler.SetLegacyData(steamID, new KeyValuePair<int, float>(newLevel, newExperience));
+    }
+    static void HandleBloodLevelUp(User user, BloodType bloodType, int newLevel, ulong steamID)
+    {
+        if (newLevel <= MaxBloodLevel)
+        {
+            LocalizationService.HandleServerReply(EntityManager, user,
+                $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+        }
+
+        // Reminders and stat choices
+        if (Misc.GetPlayerBool(steamID, "Reminders"))
+        {
+            if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
+            {
+                int currentStatCount = stats.Count;
+                if (currentStatCount < LegacyStatChoices)
+                {
+                    int choicesLeft = LegacyStatChoices - currentStatCount;
+                    string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
+                    LocalizationService.HandleServerReply(EntityManager, user,
+                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to choose and '<color=white>.bl lst</color>' to view legacy stat options. (toggle reminders with <color=white>'.remindme'</color>)");
+                }
+            }
         }
     }
     public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
     {
-        Entity player = user.LocalCharacter.GetEntityOnServer();
+        ulong steamID = user.PlatformId;
+
+        int gainedIntXP = (int)gainedXP;
+        int levelProgress = GetLevelProgress(steamID, handler);
+
+        if (leveledUp)
+        {
+            HandleBloodLevelUp(user, bloodType, newLevel, steamID);
+        }
+
+        if (Misc.GetPlayerBool(steamID, "BloodLogging"))
+        {
+            LocalizationService.HandleServerReply(EntityManager, user,
+                $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
+        }
+    }
+
+    /*
+    public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
+    {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP; // Convert to integer if necessary
         int levelProgress = GetLevelProgress(steamID, handler); // Calculate the current progress to the next level
 
         if (leveledUp)
         {
-            if (newLevel <= ConfigService.MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+            if (newLevel <= MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
 
-            if (PlayerUtilities.GetPlayerBool(steamID, "Reminders"))
+            if (Misc.GetPlayerBool(steamID, "Reminders"))
             {
                 if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
                 {
-                    if (Stats.Count < ConfigService.LegacyStatChoices)
+                    if (Stats.Count < LegacyStatChoices)
                     {
-                        int choices = ConfigService.LegacyStatChoices - Stats.Count;
+                        int choices = LegacyStatChoices - Stats.Count;
                         string bonusString = choices > 1 ? "bonuses" : "bonus";
                         LocalizationService.HandleServerReply(EntityManager, user, $"{choices} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to make your choice and '<color=white>.bl lst</color>' to view legacy stat options. (toggle reminders with <color=white>'.remindme'</color>)");
                     }
                 }
             }
-
-            if (SkipBloodUpdate.Contains(steamID))
-            {
-                SkipBloodUpdate.Remove(steamID);
-            }
-            //else BloodManager.UpdateBloodStats(player, bloodType);
         }
 
-        if (PlayerUtilities.GetPlayerBool(steamID, "BloodLogging"))
+        if (Misc.GetPlayerBool(steamID, "BloodLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }
     }
+    */
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
     {
+        int currentLevel = GetLevel(SteamID, handler);
         float currentXP = GetXp(SteamID, handler);
-        int currentLevelXP = ConvertLevelToXp(GetLevelFromXp(SteamID, handler));
-        int nextLevelXP = ConvertLevelToXp(GetLevelFromXp(SteamID, handler) + 1);
+
+        int currentLevelXP = ConvertLevelToXp(currentLevel);
+        int nextLevelXP = ConvertLevelToXp(++currentLevel);
 
         double neededXP = nextLevelXP - currentLevelXP;
         double earnedXP = nextLevelXP - currentXP;
 
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
-    }
-    public static int ConvertXpToLevel(float xp)
-    {
-        // Assuming a basic square root scaling for experience to level conversion
-        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
-    }
-    public static int ConvertLevelToXp(int level)
-    {
-        // Reversing the formula used in ConvertXpToLevel for consistency
-        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
     }
     static float GetXp(ulong steamID, IBloodHandler handler)
     {
@@ -329,10 +396,6 @@ internal static class BloodSystem
     {
         var xpData = handler.GetLegacyData(steamID);
         return xpData.Key;
-    }
-    static int GetLevelFromXp(ulong steamID, IBloodHandler handler)
-    {
-        return ConvertXpToLevel(GetXp(steamID, handler));
     }
     public static BloodType GetBloodTypeFromPrefab(PrefabGUID bloodPrefab)
     {

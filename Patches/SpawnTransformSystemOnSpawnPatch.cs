@@ -6,10 +6,15 @@ using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using ProjectM.Shared.Systems;
+using Steamworks;
 using Stunlock.Core;
+using System.Collections;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.PlayerService;
@@ -24,6 +29,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     static readonly PrefabGUID manticore = new(-393555055);
     static readonly PrefabGUID dracula = new(-327335305);
@@ -48,7 +54,19 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
     public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerFamiliarBattleGroups = [];
     public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = [];
-    static readonly ConcurrentDictionary<ulong, HashSet<Entity>> PlayerBattleFamiliars = [];
+    public static readonly ConcurrentDictionary<ulong, HashSet<Entity>> PlayerBattleFamiliars = [];
+    public static readonly List<ulong> SetRotation = [];
+
+    static readonly WaitForSeconds SecondDelay = new(1f);
+
+    static readonly AssetGuid AssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
+    static readonly PrefabGUID BattleSCT = new(1876501183);
+    static readonly float3 Green = new(0f, 1f, 0f);
+
+    public static float3 BattlePosition = float3.zero;
+    public static float3 SCTPosition = float3.zero;
+
+    const float MATCH_START_COUNTDOWN = 5f;
 
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
@@ -74,7 +92,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                     ulong steamId = FamiliarActives
                         .Where(f => f.Value.FamKey == famKey)
                         .Select(f => f.Key)
-                        .FirstOrDefault(id => PlayerUtilities.GetPlayerBool(id, "Binding"));
+                        .FirstOrDefault(id => Misc.GetPlayerBool(id, "Binding"));
 
                     if (steamId == 0)
                     {
@@ -88,11 +106,18 @@ internal static class SpawnTransformSystemOnSpawnPatch
                                 User user = playerInfo.User;
                                 Entity character = playerInfo.CharEntity;
 
-                                if (FamiliarSummonSystem.HandleFamiliarForBoxBattle(character, entity))
+                                if (FamiliarSummonSystem.HandleFamiliarForBattle(character, entity))
                                 {
                                     summon = true;
 
                                     if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
+                                    if (SetRotation.Contains(steamId) && entity.Has<TargetDirection>())
+                                    {
+                                        entity.With((ref TargetDirection targetDirection) =>
+                                        {
+                                            targetDirection.AimDirection = new float3(0f, 0f, -1f);
+                                        });
+                                    }
 
                                     PlayerFamiliarBattleGroups[steamId].Remove(prefabGUID);
                                     PlayerBattleFamiliars[steamId].Add(entity);
@@ -100,11 +125,20 @@ internal static class SpawnTransformSystemOnSpawnPatch
                                     if (PlayerFamiliarBattleGroups[steamId].Count == 0)
                                     {
                                         PlayerSummoningForBattle[steamId] = false;
-                                        EnableAggro(PlayerBattleFamiliars[steamId]);
-                                        PlayerBattleFamiliars[steamId].Clear();
+                                        if (SetRotation.Contains(steamId)) SetRotation.Remove(steamId);
+
+                                        if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
+                                        {
+                                            ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
+
+                                            if (PlayerSummoningForBattle.TryGetValue(pairedId, out bool summoning) && !summoning)
+                                            {
+                                                Core.StartCoroutine(BattleStartCountdown((steamId, pairedId)));
+                                            }
+                                        }
                                     }
                                 }
-                                else // if this fails for any reason destroy the entity and inform player
+                                else
                                 {
                                     DestroyUtility.Destroy(EntityManager, entity);
                                     LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
@@ -121,14 +155,12 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
                         if (FamiliarSummonSystem.HandleFamiliar(character, entity))
                         {
-                            PlayerUtilities.SetPlayerBool(steamId, "Binding", false);
-                            string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
+                            Misc.SetPlayerBool(steamId, "Binding", false);
+                            string colorCode = "<color=#FF69B4>";
                             FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
 
-                            // Check if the familiar has buffs and update the color based on RandomVisuals
                             if (buffsData.FamiliarBuffs.ContainsKey(famKey))
                             {
-                                // Look up the color from the RandomVisuals dictionary if it exists
                                 if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
                                 {
                                     colorCode = $"<color={hexColor}>";
@@ -139,10 +171,11 @@ internal static class SpawnTransformSystemOnSpawnPatch
                             LocalizationService.HandleServerReply(EntityManager, user, message);
                             summon = true;
                         }
-                        else // if this fails for any reason destroy the entity and inform player
+                        else
                         {
                             DestroyUtility.Destroy(EntityManager, entity);
                             LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
+
                             continue;
                         }
                     }
@@ -240,7 +273,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
         SetShardBearerLevel(entity);
 
-        BuffUtilities.HandleVisual(entity, manticoreVisual);
+        Buffs.HandleVisual(entity, manticoreVisual);
     }
     static void HandleMonster(Entity entity)
     {
@@ -282,7 +315,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
         SetShardBearerLevel(entity);
 
-        BuffUtilities.HandleVisual(entity, monsterVisual);
+        Buffs.HandleVisual(entity, monsterVisual);
     }
     static void HandleSolarus(Entity entity)
     {
@@ -323,7 +356,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
         SetShardBearerLevel(entity);
 
-        BuffUtilities.HandleVisual(entity, solarusVisual);
+        Buffs.HandleVisual(entity, solarusVisual);
     }
     static void HandleAngel(Entity entity)
     {
@@ -346,7 +379,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         aiMoveSpeeds.Walk._Value = 5f;
         aiMoveSpeeds.Run._Value = 7.5f;
         entity.Write(aiMoveSpeeds);
-        BuffUtilities.HandleVisual(entity, solarusVisual);
+        Buffs.HandleVisual(entity, solarusVisual);
     }
     static void HandleFallenAngel(Entity entity)
     {
@@ -396,7 +429,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
         SetShardBearerLevel(entity);
 
-        BuffUtilities.HandleVisual(entity, draculaVisual);
+        Buffs.HandleVisual(entity, draculaVisual);
     }
     static void SetShardBearerLevel(Entity shardBearer)
     {
@@ -412,10 +445,84 @@ internal static class SpawnTransformSystemOnSpawnPatch
     {
         foreach (Entity familiar in familiars)
         {
-            familiar.With((ref AggroConsumer aggroConsumer) =>
+            if (familiar.Has<AggroConsumer>())
             {
-                aggroConsumer.Active._Value = true;
-            });
+                familiar.With((ref AggroConsumer aggroConsumer) =>
+                {
+                    aggroConsumer.Active._Value = true;
+                });
+            }
+
+            if (familiar.Has<Aggroable>())
+            {
+                familiar.With((ref Aggroable aggroable) =>
+                {
+                    aggroable.Value._Value = true;
+                });
+            }
         }
+    }
+    static IEnumerator BattleStartCountdown((ulong playerOne, ulong playerTwo) matchPair)
+    {
+        if (!matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
+        {
+            Core.Log.LogWarning("Failed to get match pair info during battle start countdown...");
+
+            yield break;
+        }
+
+        float countdown = MATCH_START_COUNTDOWN; // maybe send messages as well, see about the spectator stuff too
+
+        ulong steamIdOne = matchPairInfo.Item1.User.PlatformId;
+        ulong steamIdTwo = matchPairInfo.Item2.User.PlatformId;
+
+        Entity playerOne = matchPairInfo.Item1.CharEntity;
+        Entity playerTwo = matchPairInfo.Item2.CharEntity;
+
+        Entity playerUserOne = matchPairInfo.Item1.UserEntity;
+        Entity playerUserTwo = matchPairInfo.Item2.UserEntity;
+
+        while (countdown > 0f)
+        {
+            User userOne = playerOne.GetUser();
+            User userTwo = playerTwo.GetUser();
+
+            if (userOne.IsConnected)
+            {
+                ScrollingCombatTextMessage.Create(
+                EntityManager,
+                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                AssetGuid,
+                BattlePosition, // arena center or w/e calling it
+                Green,
+                playerOne,
+                countdown,
+                default,
+                playerUserOne
+                );
+            }
+
+            if (userTwo.IsConnected)
+            {
+
+                ScrollingCombatTextMessage.Create(
+                EntityManager,
+                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                AssetGuid,
+                BattlePosition, // arena center or w/e calling it
+                Green,
+                playerTwo,
+                countdown,
+                default,
+                playerUserTwo
+                );
+            }
+
+            countdown--;
+            yield return SecondDelay;
+        }
+
+        EnableAggro(PlayerBattleFamiliars[steamIdOne]);
+        EnableAggro(PlayerBattleFamiliars[steamIdTwo]);
     }
 }

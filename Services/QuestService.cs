@@ -80,7 +80,7 @@ internal class QuestService
             Options = EntityQueryOptions.IncludeAll
         });
 
-        ConfigUtilities.QuestRewardItems();
+        Configuration.QuestRewardItems();
         Core.StartCoroutine(QuestUpdateLoop());
     }
     static IEnumerator QuestUpdateLoop()
@@ -89,7 +89,7 @@ internal class QuestService
         {
             if (ConfigService.EliteShardBearers && !shardBearersReset) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
             {
-                IEnumerable<Entity> vBloods = EntityUtilities.GetEntitiesEnumerable(UnitQuery);
+                IEnumerable<Entity> vBloods = Queries.GetEntitiesEnumerable(UnitQuery);
                 foreach (Entity entity in vBloods)
                 {
                     PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
@@ -104,7 +104,7 @@ internal class QuestService
 
             if (!craftAndGather)
             {
-                IEnumerable<Entity> entities = EntityUtilities.GetEntitiesEnumerable(ItemQuery, (int)TargetType.Craft);
+                IEnumerable<Entity> entities = Queries.GetEntitiesEnumerable(ItemQuery, (int)TargetType.Craft);
                 foreach (Entity entity in entities)
                 {
                     if (entity.TryGetComponent(out PrefabGUID prefab) && !entity.Has<ShatteredItem>() && !entity.Has<UpgradeableLegendaryItem>())
@@ -114,7 +114,7 @@ internal class QuestService
                     }
                 }
 
-                entities = EntityUtilities.GetEntitiesEnumerable(ResourceQuery, (int)TargetType.Gather);
+                entities = Queries.GetEntitiesEnumerable(ResourceQuery, (int)TargetType.Gather);
                 foreach (Entity entity in entities)
                 {
                     if (entity.TryGetComponent(out PrefabGUID prefab))
@@ -133,7 +133,7 @@ internal class QuestService
                 ResourceQuery.Dispose();
             }
 
-            TargetCache = EntityUtilities.GetEntitiesEnumerable(UnitQuery, (int)TargetType.Kill)
+            TargetCache = Queries.GetEntitiesEnumerable(UnitQuery, (int)TargetType.Kill)
                 .GroupBy(entity => entity.Read<PrefabGUID>())
                 .ToDictionary(
                     group => group.Key,

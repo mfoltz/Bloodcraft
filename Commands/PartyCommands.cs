@@ -3,7 +3,7 @@ using Bloodcraft.Utilities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
-using static Bloodcraft.Utilities.PlayerUtilities.PartyUtilities;
+using static Bloodcraft.Utilities.PartyUtilities;
 
 namespace Bloodcraft.Commands;
 
@@ -29,8 +29,8 @@ internal static class PartyCommands
 
         ulong SteamID = ctx.Event.User.PlatformId;
 
-        PlayerUtilities.TogglePlayerBool(SteamID, "Grouping");
-        LocalizationService.HandleReply(ctx, $"Party invites {(PlayerUtilities.GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(SteamID, "Grouping");
+        LocalizationService.HandleReply(ctx, $"Party invites {(Misc.GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]
@@ -128,6 +128,61 @@ internal static class PartyCommands
         else
         {
             LocalizationService.HandleReply(ctx, "You're not in a party.");
+        }
+    }
+
+    [Command(name: "reset", shortHand: "r", adminOnly: false, usage: ".party r", description: "Removes a player from all parties they are in and disbands any party they own.")]
+    public static void ResetPartyCommand(ChatCommandContext ctx)
+    {
+        if (!ConfigService.PlayerParties)
+        {
+            LocalizationService.HandleReply(ctx, "Parties are not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.User.PlatformId;
+        string playerName = ctx.User.CharacterName.Value;
+
+        bool ownedParty = false;
+
+        // Check if the player owns a party and disband it
+        if (playerParties.ContainsKey(steamId))
+        {
+            playerParties.Remove(steamId);
+            SavePlayerParties();
+            ownedParty = true;
+        }
+
+        // Remove the player from all parties they might be a member of
+        List<ulong> owners = [..playerParties.Keys];
+        bool removedFromParties = false;
+
+        foreach (var ownerId in owners)
+        {
+            HashSet<string> party = playerParties[ownerId];
+            if (party.Contains(playerName))
+            {
+                party.Remove(playerName);
+                ownerId.SetPlayerParties(party);
+                removedFromParties = true;
+            }
+        }
+
+        if (removedFromParties && ownedParty)
+        {
+            LocalizationService.HandleReply(ctx, $"Removed from all parties and disbanded owned party.");
+        }
+        else if (removedFromParties)
+        {
+            LocalizationService.HandleReply(ctx, $"Removed from all parties.");
+        }
+        else if (ownedParty)
+        {
+            LocalizationService.HandleReply(ctx, $"Disbanded owned party.");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"No parties found that you own or are a member in.");
         }
     }
 }

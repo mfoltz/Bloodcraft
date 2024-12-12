@@ -57,7 +57,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                 {
                     if (entity.GetBuffTarget().TryGetPlayer(out Entity character))
                     {
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+                        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(character);
 
                         if (familiar.Exists())
                         {
@@ -66,7 +66,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                                 shared.UnitPrefabGuid = PrefabGUID.Empty;
                             });
 
-                            FamiliarUtilities.TryReturnFamiliar(character, familiar);
+                            Utilities.Familiars.TryReturnFamiliar(character, familiar);
                         }
                     }
                 }
@@ -80,16 +80,16 @@ internal static class UpdateBuffsBufferDestroyPatch
                     {
                         int index = PrestigeBuffs.IndexOf(prefabGUID);
 
-                        if (prefabGUID.Equals(ShroudBuff) && !PlayerUtilities.GetPlayerBool(steamId, "Shroud")) // allow shroud buff destruction
+                        if (prefabGUID.Equals(ShroudBuff) && !Misc.GetPlayerBool(steamId, "Shroud")) // allow shroud buff destruction
                         {
                             continue;
                         }
                         else if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                         {                            
-                            if (prestigeLevel > index) BuffUtilities.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                            if (prestigeLevel > index) Buffs.ApplyPermanentBuff(player, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
-                    else if (ExoPrestige && prefabGUID.Equals(TauntEmoteBuff) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
+                    else if (ExoPrestige && prefabGUID.Equals(TauntEmoteBuff) && Misc.GetPlayerBool(steamId, "ExoForm"))
                     {
                         if (EmoteSystemPatch.ExitingForm.Contains(steamId))
                         {
@@ -97,7 +97,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                             continue;
                         }
-                        else if (ExoFormUtilities.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(player); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder
+                        else if (ExoForm.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(player); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder
                     }
                 }
                 
@@ -105,11 +105,11 @@ internal static class UpdateBuffsBufferDestroyPatch
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (ClassUtilities.HasClass(steamId))
+                    if (Utilities.Classes.HasClass(steamId))
                     {
-                        LevelingSystem.PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
+                        LevelingSystem.PlayerClass playerClass = Utilities.Classes.GetPlayerClass(steamId);
 
-                        if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGUID)) BuffUtilities.ApplyPermanentBuff(player, prefabGUID);
+                        if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGUID)) Buffs.ApplyPermanentBuff(player, prefabGUID);
                     }
                 }
 
@@ -121,7 +121,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (Prestige)
                     {
-                        PlayerUtilities.SetPlayerBool(steamId, "Shroud", false);
+                        Misc.SetPlayerBool(steamId, "Shroud", false);
 
                         if (player.TryGetBuff(ShroudBuff, out Entity shroudBuff))
                         {
@@ -133,12 +133,12 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (Familiars)
                     {
-                        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(player);
                         if (familiar.Exists())
                         {
                             Entity userEntity = player.GetUserEntity();
 
-                            FamiliarUtilities.UnbindFamiliar(player, userEntity, steamId);
+                            Utilities.Familiars.UnbindFamiliar(player, userEntity, steamId);
                         }
                     }
                 }
@@ -149,12 +149,12 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (Prestige)
                     {
-                        PlayerUtilities.SetPlayerBool(steamId, "Shroud", true);
+                        Misc.SetPlayerBool(steamId, "Shroud", true);
 
                         if (PrestigeBuffs.Contains(ShroudBuff) && !player.HasBuff(ShroudBuff)
                             && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
                         {
-                            BuffUtilities.ApplyPermanentBuff(player, ShroudBuff);
+                            Buffs.ApplyPermanentBuff(player, ShroudBuff);
                         }
                     }
                 }
@@ -168,7 +168,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static void ApplyExoFormBuff(Entity character)
     {
         // check for cooldown here and other such qualifiers before proceeding, also charge at 15 seconds of form time a day for level 1 up to maxDuration seconds of form time at max exo
-        BuffUtilities.TryApplyBuff(character, ExoFormBuff);
-        BuffUtilities.TryApplyBuff(character, PhasingBuff);
+        Buffs.TryApplyBuff(character, ExoFormBuff);
+        Buffs.TryApplyBuff(character, PhasingBuff);
     }
 }

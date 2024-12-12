@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
@@ -8,6 +9,7 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Sequencer;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -50,8 +52,8 @@ internal static class MiscCommands
     {
         var SteamID = ctx.Event.User.PlatformId;
 
-        PlayerUtilities.TogglePlayerBool(SteamID, "Reminders");
-        LocalizationService.HandleReply(ctx, $"Reminders {(PlayerUtilities.GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(SteamID, "Reminders");
+        LocalizationService.HandleReply(ctx, $"Reminders {(Misc.GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "sct", adminOnly: false, usage: ".sct", description: "Toggles scrolling text.")]
@@ -59,8 +61,8 @@ internal static class MiscCommands
     {
         var SteamID = ctx.Event.User.PlatformId;
 
-        PlayerUtilities.TogglePlayerBool(SteamID, "ScrollingText");
-        LocalizationService.HandleReply(ctx, $"ScrollingText {(PlayerUtilities.GetPlayerBool(SteamID, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(SteamID, "ScrollingText");
+        LocalizationService.HandleReply(ctx, $"ScrollingText {(Misc.GetPlayerBool(SteamID, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -74,9 +76,9 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!PlayerUtilities.GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
+        if (!Misc.GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
         {
-            PlayerUtilities.SetPlayerBool(steamId, "Kit", true);
+            Misc.SetPlayerBool(steamId, "Kit", true);
             Entity character = ctx.Event.SenderCharacterEntity;
 
             foreach (var item in KitPrefabs)
@@ -134,9 +136,9 @@ internal static class MiscCommands
 
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "SpellLock");
-        if (PlayerUtilities.GetPlayerBool(SteamID, "SpellLock"))
+        Misc.TogglePlayerBool(SteamID, "SpellLock");
+            
+        if (Misc.GetPlayerBool(SteamID, "SpellLock"))
         {
             LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
         }
@@ -171,8 +173,8 @@ internal static class MiscCommands
             return;
         }
 
-        PlayerUtilities.TogglePlayerBool(steamId, "ShiftLock");
-        if (PlayerUtilities.GetPlayerBool(steamId, "ShiftLock"))
+        Misc.TogglePlayerBool(steamId, "ShiftLock");
+        if (Misc.GetPlayerBool(steamId, "ShiftLock"))
         {
             if (steamId.TryGetPlayerSpells(out var spellsData))
             {
@@ -180,7 +182,7 @@ internal static class MiscCommands
 
                 if (spellPrefabGUID.HasValue())
                 {
-                    ClassUtilities.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                    Utilities.Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
                     //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
                 }
             }
@@ -189,7 +191,7 @@ internal static class MiscCommands
         }
         else
         {
-            ClassUtilities.RemoveShift(ctx.Event.SenderCharacterEntity);
+            Utilities.Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
             //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
 
             LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
@@ -246,14 +248,14 @@ internal static class MiscCommands
 
         if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
         {
-            if (!PlayerUtilities.ConsumedDracula(ctx.Event.SenderUserEntity))
+            if (!Misc.ConsumedDracula(ctx.Event.SenderUserEntity))
             {
                 ctx.Reply("You must consume Dracula's essence before manifesting this power...");
                 return;
             }
 
-            PlayerUtilities.TogglePlayerBool(steamId, "ExoForm");
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(PlayerUtilities.GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
+            Misc.TogglePlayerBool(steamId, "ExoForm");
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(Misc.GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
         }
         else
         {
@@ -277,7 +279,7 @@ internal static class MiscCommands
             Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(DataService.PlayerDictionaries.familiarActives);
             List<Entity> dismissedFamiliars = FamiliarActives.Values.Select(x => x.Familiar).ToList();
 
-            IEnumerable<Entity> disabledFamiliars = EntityUtilities.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
+            IEnumerable<Entity> disabledFamiliars = Queries.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
             foreach (Entity entity in disabledFamiliars)
             {
                 if (dismissedFamiliars.Contains(entity)) continue;
@@ -314,7 +316,7 @@ internal static class MiscCommands
 
         try
         {
-            IEnumerable<Entity> networkedSequences = EntityUtilities.GetEntitiesEnumerable(networkedSequencesQuery);
+            IEnumerable<Entity> networkedSequences = Queries.GetEntitiesEnumerable(networkedSequencesQuery);
 
             foreach (Entity entity in networkedSequences)
             {

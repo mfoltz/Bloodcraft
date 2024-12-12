@@ -31,11 +31,11 @@ internal static class PlayerCombatBuffSystemPatch
                 if (!entity.TryGetComponent(out InverseAggroEvents.Added inverseAggroEvent)) continue;
                 else if (inverseAggroEvent.Producer.TryGetPlayer(out Entity playerCharacter))
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(playerCharacter);
+                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
                     
                     if (familiar.Exists() && !familiar.IsDisabled())
                     {
-                        FamiliarUtilities.AddToFamiliarAggroBuffer(familiar, inverseAggroEvent.Consumer);
+                        Familiars.AddToFamiliarAggroBuffer(familiar, inverseAggroEvent.Consumer);
                     }
                 }
             }
@@ -60,13 +60,13 @@ internal static class PlayerCombatBuffSystemPatch
             {
                 if (ServerGameManager.TryGetBuffer<InverseAggroBufferElement>(entity, out var buffer))
                 {
-                    Entity familiar = FamiliarUtilities.FindPlayerFamiliar(entity);
+                    Entity familiar = Familiars.FindPlayerFamiliar(entity);
 
                     if (familiar.Exists() && !familiar.IsDisabled())
                     {
                         foreach (InverseAggroBufferElement element in buffer)
                         {
-                            FamiliarUtilities.AddToFamiliarAggroBuffer(familiar, element.Entity);
+                            Familiars.AddToFamiliarAggroBuffer(familiar, element.Entity);
                         }
                     }
                 }

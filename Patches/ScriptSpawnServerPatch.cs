@@ -54,7 +54,7 @@ internal static class ScriptSpawnServerPatch
 
                 if (ExoPrestiging && prefabGUID.Equals(ExoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
                 {
-                    BuffUtilities.HandleExoFormBuff(entity, player);
+                    Buffs.HandleExoFormBuff(entity, player);
                 }
                 
                 if (Familiars && entity.GetBuffTarget().IsFollowingPlayer())
@@ -85,14 +85,14 @@ internal static class ScriptSpawnServerPatch
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (Classes && entity.Has<BloodBuff_BiteToMutant_DataShared>() && ClassUtilities.HasClass(steamId))
+                    if (Classes && entity.Has<BloodBuff_BiteToMutant_DataShared>() && Utilities.Classes.HasClass(steamId))
                     {
-                        PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
+                        PlayerClass playerClass = Utilities.Classes.GetPlayerClass(steamId);
 
                         // testing
                         if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out player))
                         {
-                            List<PrefabGUID> perks = ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]).Select(x => new PrefabGUID(x)).ToList();
+                            List<PrefabGUID> perks = Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]).Select(x => new PrefabGUID(x)).ToList();
                             int indexOfBuff = perks.IndexOf(MutantFromBiteBloodBuff);
                             
                             if (indexOfBuff != -1)

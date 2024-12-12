@@ -36,16 +36,24 @@ internal static class EmoteSystemPatch
     static readonly PrefabGUID SaluteEmote = new(-370061286);
     static readonly PrefabGUID ClapEmote = new(-26826346);
     public static readonly PrefabGUID TauntEmote = new(-158502505);
+    static readonly PrefabGUID YesEmote = new(-1525577000);
+    static readonly PrefabGUID NoEmote = new(-53273186);
 
     public static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> actions = new()
     {
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
         { new(-26826346), BindUnbind } // clap
-        //{ new(-158502505), HandleExoForm} // taunt
+    };
+
+    static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> matchActions = new()
+    {
+        { new(-1525577000), AcceptBattle }, // Yes
+        { new(-53273186), DeclineBattle }  // No
     };
 
     public static readonly HashSet<ulong> ExitingForm = [];
+    public static readonly HashSet<(ulong, ulong)> BattleChallenges = [];
 
     [HarmonyPatch(typeof(EmoteSystem), nameof(EmoteSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -66,11 +74,11 @@ internal static class EmoteSystemPatch
                 Entity character = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
-                if (useEmoteEvent.Action.Equals(TauntEmote) && PlayerUtilities.GetPlayerBool(steamId, "ExoForm"))
+                if (useEmoteEvent.Action.Equals(TauntEmote) && Misc.GetPlayerBool(steamId, "ExoForm"))
                 {
                     if (!character.HasBuff(ExoFormBuff))
                     {
-                        BuffUtilities.TryApplyBuff(character, PhasingBuff);
+                        Buffs.TryApplyBuff(character, PhasingBuff);
 
                         if (character.TryGetBuff(PhasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
                         {
@@ -80,11 +88,15 @@ internal static class EmoteSystemPatch
                     else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
                     {
                         ExitingForm.Add(steamId);
-                        ExoFormUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+                        ExoForm.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
                         DestroyUtility.Destroy(EntityManager, buffEntity);
                     }
                 }
-                else if (PlayerUtilities.GetPlayerBool(steamId, "Emotes"))
+                else if (BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(YesEmote) || useEmoteEvent.Action.Equals(NoEmote)))
+                {
+                    if (matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
+                }
+                else if (Misc.GetPlayerBool(steamId, "Emotes"))
                 {
                     if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()) && actions.ContainsKey(useEmoteEvent.Action))
                     {
@@ -103,35 +115,45 @@ internal static class EmoteSystemPatch
             entities.Dispose();
         }
     }
+    static void AcceptBattle((ulong, ulong) match)
+    {
+        BattleService.Matchmaker.QueueMatch(match);
+        BattleChallenges.Remove(match);
+    }
+    static void DeclineBattle((ulong, ulong) match)
+    {
+        BattleService.NotifyBothPlayers(match.Item1, match.Item2, "The challenge has been declined.");
+        BattleChallenges.Remove(match);
+    }
     public static void BindUnbind(User user, Entity character, ulong steamId)
     {
         Entity userEntity = character.GetUserEntity();
-        Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+        Entity familiar = Familiars.FindPlayerFamiliar(character);
 
         if (familiar.Exists())
         {
-            FamiliarUtilities.UnbindFamiliar(character, userEntity, steamId);
+            Familiars.UnbindFamiliar(character, userEntity, steamId);
         }
         else
         {
-            FamiliarUtilities.BindFamiliar(character, userEntity, steamId);
+            Familiars.BindFamiliar(character, userEntity, steamId);
         }
     }
     public static void CallDismiss(User user, Entity character, ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character);
+            Entity familiar = Familiars.FindPlayerFamiliar(character);
 
             if (familiar.Exists())
             {
                 if (familiar.IsDisabled())
                 {
-                    FamiliarUtilities.CallFamiliar(character, familiar, user, steamId, data);
+                    Familiars.CallFamiliar(character, familiar, user, steamId, data);
                 }
                 else
                 {
-                    FamiliarUtilities.DismissFamiliar(character, familiar, user, steamId, data);
+                    Familiars.DismissFamiliar(character, familiar, user, steamId, data);
                 }
             }
             else
@@ -154,7 +176,7 @@ internal static class EmoteSystemPatch
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = Familiars.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
             if (!familiar.Exists() && data.Familiar.Exists())
             {

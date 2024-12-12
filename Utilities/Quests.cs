@@ -8,8 +8,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Systems.Quests.QuestSystem;
 
 namespace Bloodcraft.Utilities;
-
-internal static class QuestUtilities
+internal static class Quests
 {
     static EntityManager EntityManager => Core.EntityManager;
 

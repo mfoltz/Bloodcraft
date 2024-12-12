@@ -8,7 +8,7 @@ using ProjectM;
 using Stunlock.Core;
 
 namespace Bloodcraft.Utilities;
-internal static class ConfigUtilities
+internal static class Configuration
 {
     public static void FamiliarBans()
     {

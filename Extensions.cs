@@ -4,6 +4,7 @@ using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using System.Runtime.InteropServices;
 using Unity.Collections;
@@ -290,12 +291,13 @@ internal static class Extensions
         if (character.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
         return Entity.Null;
     }
-    public static User GetUser(this Entity character)
+    public static User GetUser(this Entity entity)
     {
         User user = User.Empty;
 
-        if (character.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
-        
+        if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
+        else if (entity.TryGetComponent(out user)) return user;
+
         return user;
     }
     public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGUID)
@@ -332,5 +334,41 @@ internal static class Extensions
         }
 
         return float3.zero;
+    }
+    public static bool TryGetMatch(this HashSet<(ulong, ulong)> hashSet, ulong value, out (ulong, ulong) matchingPair)
+    {
+        matchingPair = default;
+
+        foreach (var pair in hashSet)
+        {
+            if (pair.Item1 == value || pair.Item2 == value)
+            {
+                matchingPair = pair;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+    public static bool TryGetMatchPairInfo(this (ulong, ulong) matchPair, out (PlayerInfo, PlayerInfo) matchPairInfo)
+    {
+        matchPairInfo = default;
+
+        ulong playerOne = matchPair.Item1;
+        ulong playerTwo = matchPair.Item2;
+
+        if (playerOne.TryGetPlayerInfo(out PlayerInfo playerOneInfo) && playerTwo.TryGetPlayerInfo(out PlayerInfo playerTwoInfo))
+        {
+            matchPairInfo = (playerOneInfo, playerTwoInfo);
+
+            return true;
+        }
+
+        return false;
+    }
+    public static void Destroy(this Entity entity)
+    {
+        if (entity.Exists()) DestroyUtility.Destroy(EntityManager, entity);
     }
 }

@@ -161,7 +161,7 @@ namespace Bloodcraft
                     {
                         commandLine = commandLine.Replace("misc ", "");
                         int adjustmentLength = adminOnly ? usage.Length + 3 : usage.Length + 1; // +3 for " 🔒"
-                        commandLine = commandLine[..^adjustmentLength] + (adminOnly ? " 🔒`" : "`");
+                        commandLine = commandLine[..^adjustmentLength] + (adminOnly ? "` 🔒" : "`");
                     }
 
                     sb.AppendLine(commandLine);

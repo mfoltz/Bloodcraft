@@ -6,14 +6,12 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
-
-    const float EXP_CONSTANT = 0.1f; // constant for calculating level from xp
-    const int EXP_POWER = 2; // power for calculating level from xp
 
     static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
     static readonly int ExpertiseStatChoices = ConfigService.ExpertiseStatChoices;
@@ -143,7 +141,6 @@ internal static class WeaponSystem
             }
         }
     };
-
     public static readonly Dictionary<WeaponType, Action<ulong, KeyValuePair<int, float>>> SetExtensionMap = new()
     {
         { WeaponType.Sword, (steamID, data) => steamID.SetPlayerSwordExpertise(data) },
@@ -189,13 +186,12 @@ internal static class WeaponSystem
         ulong steamID = user.PlatformId;
         WeaponType weaponType = WeaponManager.GetCurrentWeaponType(source);
 
-        if (target.Has<UnitStats>())
+        if (target.TryGetComponent(out UnitStats unitStats))
         {
-            var VictimStats = target.Read<UnitStats>();
-            float expertiseValue = CalculateExpertiseValue(VictimStats, target.Has<VBloodConsumeSource>());
+            float expertiseValue = CalculateExpertiseValue(unitStats, target.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
 
-            if (UnitSpawnerExpertiseFactor < 1 && target.Has<IsMinion>() && target.Read<IsMinion>().Value)
+            if (UnitSpawnerExpertiseFactor < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
             {
                 expertiseValue *= UnitSpawnerExpertiseFactor;
                 if (expertiseValue == 0) return;
@@ -216,9 +212,10 @@ internal static class WeaponSystem
 
             expertiseValue *= changeFactor * groupMultiplier;
 
-            IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
+                /*
                 // Check if the player leveled up
                 var xpData = handler.GetExpertiseData(steamID);
 
@@ -240,17 +237,70 @@ internal static class WeaponSystem
 
                 var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
                 handler.SetExpertiseData(steamID, updatedXPData);
+                */
+                SaveWeaponExperience(steamID, handler, expertiseValue, out bool leveledUp, out int newLevel);
                 NotifyPlayer(user, weaponType, expertiseValue, leveledUp, newLevel, handler);
             }
         }
     }
-    static float CalculateExpertiseValue(UnitStats VictimStats, bool isVBlood)
+    static float CalculateExpertiseValue(UnitStats unitStats, bool isVBlood)
     {
-        float ExpertiseValue = VictimStats.SpellPower + VictimStats.PhysicalPower;
+        float ExpertiseValue = unitStats.SpellPower + unitStats.PhysicalPower;
+
         if (isVBlood) return ExpertiseValue * VBloodExpertiseMultiplier;
-        return ExpertiseValue * UnitExpertiseMultiplier;
+        else return ExpertiseValue * UnitExpertiseMultiplier;
     }
-    static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IExpertiseHandler handler)
+    public static void SaveWeaponExperience(ulong steamID, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
+    {
+        var xpData = handler.GetExpertiseData(steamID);
+        int currentLevel = xpData.Key;
+        float currentXP = xpData.Value;
+
+        if (currentLevel >= MaxExpertiseLevel)
+        {
+            // Already at max level
+            leveledUp = false;
+            newLevel = currentLevel;
+            return;
+        }
+
+        float newExperience = currentXP + gainedXP;
+        newLevel = ConvertXpToLevel(newExperience);
+        leveledUp = false;
+
+        if (newLevel > currentLevel)
+        {
+            leveledUp = true;
+            if (newLevel > MaxExpertiseLevel)
+            {
+                newLevel = MaxExpertiseLevel;
+                newExperience = ConvertLevelToXp(MaxExpertiseLevel);
+            }
+        }
+
+        handler.SetExpertiseData(steamID, new KeyValuePair<int, float>(newLevel, newExperience));
+    }
+    public static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponHandler handler)
+    {
+        ulong steamID = user.PlatformId;
+
+        int gainedIntXP = (int)gainedXP;
+        int levelProgress = GetLevelProgress(steamID, handler);
+
+        if (leveledUp)
+        {
+            HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
+        }
+
+        if (Misc.GetPlayerBool(steamID, "ExpertiseLogging"))
+        {
+            LocalizationService.HandleServerReply(EntityManager, user,
+                $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
+        }
+    }
+
+    /*
+    static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponHandler handler)
     {
         ulong steamID = user.PlatformId;
         gainedXP = (int)gainedXP;
@@ -259,7 +309,7 @@ internal static class WeaponSystem
         if (leveledUp)
         {
             if (newLevel <= MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
-            if (PlayerUtilities.GetPlayerBool(steamID, "Reminders"))
+            if (Misc.GetPlayerBool(steamID, "Reminders"))
             {
                 if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
                 {
@@ -274,42 +324,58 @@ internal static class WeaponSystem
             }
         }
 
-        if (PlayerUtilities.GetPlayerBool(steamID, "ExpertiseLogging"))
+        if (Misc.GetPlayerBool(steamID, "ExpertiseLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }
     }
-    public static int GetLevelProgress(ulong steamID, IExpertiseHandler handler)
+    */
+    static void HandleWeaponLevelUp(User user, WeaponType weaponType, int newLevel, ulong steamID)
     {
+        if (newLevel <= MaxExpertiseLevel)
+        {
+            LocalizationService.HandleServerReply(EntityManager, user,
+                $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
+        }
+
+        if (Misc.GetPlayerBool(steamID, "Reminders"))
+        {
+            if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
+            {
+                int currentStatCount = stats.Count;
+                if (currentStatCount < ExpertiseStatChoices)
+                {
+                    int choicesLeft = ExpertiseStatChoices - currentStatCount;
+                    string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
+
+                    LocalizationService.HandleServerReply(EntityManager, user,
+                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to choose and '<color=white>.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.remindme'</color>)");
+                }
+            }
+        }
+    }
+    public static int GetLevelProgress(ulong steamID, IWeaponHandler handler)
+    {
+        int currentLevel = GetLevel(steamID, handler);
         float currentXP = GetXp(steamID, handler);
-        int currentLevelXP = ConvertLevelToXp(GetLevelFromXp(steamID, handler));
-        int nextLevelXP = ConvertLevelToXp(GetLevelFromXp(steamID, handler) + 1);
+
+        int currentLevelXP = ConvertLevelToXp(currentLevel);
+        int nextLevelXP = ConvertLevelToXp(++currentLevel);
 
         double neededXP = nextLevelXP - currentLevelXP;
         double earnedXP = nextLevelXP - currentXP;
+
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
     }
-    static int ConvertXpToLevel(float xp)
-    {
-        return (int)(EXP_CONSTANT * Math.Sqrt(xp));
-    }
-    public static int ConvertLevelToXp(int level)
-    {
-        return (int)Math.Pow(level / EXP_CONSTANT, EXP_POWER);
-    }
-    static float GetXp(ulong steamID, IExpertiseHandler handler)
+    static float GetXp(ulong steamID, IWeaponHandler handler)
     {
         var xpData = handler.GetExpertiseData(steamID);
         return xpData.Value;
     }
-    public static int GetLevel(ulong steamID, IExpertiseHandler handler)
+    public static int GetLevel(ulong steamID, IWeaponHandler handler)
     {
         var xpData = handler.GetExpertiseData(steamID);
         return xpData.Key;
-    }
-    static int GetLevelFromXp(ulong steamID, IExpertiseHandler handler)
-    {
-        return ConvertXpToLevel(GetXp(steamID, handler));
     }
     public static WeaponType GetWeaponTypeFromWeaponEntity(Entity weaponEntity)
     {

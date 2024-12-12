@@ -4,6 +4,7 @@ using ProjectM.Network;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
 
 namespace Bloodcraft.Services;
 internal class PlayerService // this is basically a worse version of the PlayerService from KindredCommands, if you're here looking for good examples to follow :p
@@ -11,6 +12,9 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly WaitForSeconds Delay = new(60);
+    static readonly bool Familiars = ConfigService.FamiliarSystem;
+
+    static bool _setMinimumFamiliarLevel = false;
 
     static readonly ComponentType[] UserComponent =
     [
@@ -39,7 +43,7 @@ internal class PlayerService // this is basically a worse version of the PlayerS
             PlayerCache.Clear();
             OnlineCache.Clear();
 
-            var players = EntityUtilities.GetEntitiesEnumerable(UserQuery);
+            var players = Queries.GetEntitiesEnumerable(UserQuery);
             players
                 .Select(userEntity =>
                 {

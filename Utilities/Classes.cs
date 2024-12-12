@@ -11,7 +11,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Utilities;
-internal static class ClassUtilities
+internal static class Classes
 {
     static EntityManager EntityManager => Core.EntityManager;
 
@@ -41,7 +41,7 @@ internal static class ClassUtilities
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
-            return ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]);
+            return Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]);
         }
 
         return [];
@@ -98,7 +98,7 @@ internal static class ClassUtilities
     }
     public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClass playerClass)
     {
-        List<int> perks = ConfigUtilities.ParseConfigIntegerString(ClassBuffMap[playerClass]);
+        List<int> perks = Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -129,7 +129,7 @@ internal static class ClassUtilities
     }
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
-        List<int> perks = ConfigUtilities.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
+        List<int> perks = Configuration.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
 
         if (perks.Count == 0)
         {
@@ -182,13 +182,13 @@ internal static class ClassUtilities
         var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
         var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
 
-        var classWeaponStats = ConfigUtilities.ParseConfigIntegerString(weaponConfigEntry);
-        var classBloodStats = ConfigUtilities.ParseConfigIntegerString(bloodConfigEntry);
+        var classWeaponStats = Configuration.ParseConfigIntegerString(weaponConfigEntry);
+        var classBloodStats = Configuration.ParseConfigIntegerString(bloodConfigEntry);
 
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
         steamId.SetPlayerClasses(classes);
 
-        BuffUtilities.ApplyClassBuffs(character, steamId);
+        Buffs.ApplyClassBuffs(character, steamId);
     }
     public static void RemoveShift(Entity character)
     {
@@ -494,7 +494,7 @@ internal static class ClassUtilities
 
         try
         {
-            IEnumerable<Entity> jewelEntities = EntityUtilities.GetEntitiesEnumerable(JewelQuery);
+            IEnumerable<Entity> jewelEntities = Queries.GetEntitiesEnumerable(JewelQuery);
             foreach (Entity entity in jewelEntities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefab)) continue;
@@ -516,5 +516,28 @@ internal static class ClassUtilities
         {
             JewelQuery.Dispose();
         }
+    }
+    public static bool TryParseClassName(string className, out PlayerClass parsedClassType)
+    {
+        // Attempt to parse the className string to the PlayerClasses enum.
+        if (Enum.TryParse(className, true, out parsedClassType))
+        {
+            return true; // Successfully parsed
+        }
+
+        // If the initial parse failed, try to find a matching PlayerClasses enum value containing the input string.
+        parsedClassType = Enum.GetValues(typeof(PlayerClass))
+                             .Cast<PlayerClass>()
+                             .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
+
+        // Check if a valid enum value was found that contains the input string.
+        if (!parsedClassType.Equals(default(PlayerClass)))
+        {
+            return true; // Found a matching enum value
+        }
+
+        // If no match is found, return false and set the out parameter to default value.
+        parsedClassType = default;
+        return false; // Parsing failed
     }
 }

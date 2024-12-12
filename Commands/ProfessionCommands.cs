@@ -20,9 +20,9 @@ internal static class ProfessionCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.TogglePlayerBool(SteamID, "ProfessionLogging");
+        Misc.TogglePlayerBool(SteamID, "ProfessionLogging");
 
-        LocalizationService.HandleReply(ctx, $"Profession logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Profession logging is now {(Misc.GetPlayerBool(SteamID, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]

@@ -4,6 +4,7 @@ using Bloodcraft.Utilities;
 using ProjectM.Network;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Commands;
 
@@ -19,10 +20,9 @@ internal static class LevelingCommands
             return;
         }
         var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "ExperienceLogging");
+        Misc.TogglePlayerBool(SteamID, "ExperienceLogging");
 
-        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(PlayerUtilities.GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(Misc.GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
@@ -40,7 +40,7 @@ internal static class LevelingCommands
         {
             int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[PrestigeType.Experience] : 0;
             int level = xpData.Key;
-            int progress = (int)(xpData.Value - LevelingSystem.ConvertLevelToXp(level));
+            int progress = (int)(xpData.Value - ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
             if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
@@ -83,7 +83,7 @@ internal static class LevelingCommands
 
         if (steamId.TryGetPlayerExperience(out var xpData))
         {
-            xpData = new KeyValuePair<int, float>(level, LevelingSystem.ConvertLevelToXp(level));
+            xpData = new KeyValuePair<int, float>(level, ConvertLevelToXp(level));
             steamId.SetPlayerExperience(xpData);
 
             LevelingSystem.SetLevel(playerInfo.CharEntity);

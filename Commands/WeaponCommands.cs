@@ -12,6 +12,7 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
+using static Bloodcraft.Utilities.Progression;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Commands;
@@ -36,29 +37,29 @@ internal static class WeaponCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         WeaponType weaponType = GetCurrentWeaponType(character);
 
-        IExpertiseHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+        IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (handler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon.");
             return;
         }
 
-        ulong steamID = ctx.Event.User.PlatformId;
-        var ExpertiseData = handler.GetExpertiseData(steamID);
-        int progress = (int)(ExpertiseData.Value - WeaponSystem.ConvertLevelToXp(ExpertiseData.Key));
+        ulong steamId = ctx.Event.User.PlatformId;
+        var ExpertiseData = handler.GetExpertiseData(steamId);
+        int progress = (int)(ExpertiseData.Value - ConvertLevelToXp(ExpertiseData.Key));
 
-        int prestigeLevel = steamID.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
+        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{WeaponSystem.GetLevelProgress(steamID, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
+            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{WeaponSystem.GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
 
-            if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
+            if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {
                 List<KeyValuePair<WeaponStats.WeaponStatType, string>> bonusWeaponStats = [];
                 foreach (var stat in stats)
                 {
-                    float bonus = CalculateScaledWeaponBonus(handler, steamID, weaponType, stat);
+                    float bonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, stat);
                     string formattedBonus = WeaponStats.WeaponStatFormats[stat] switch
                     {
                         "integer" => ((int)bonus).ToString(),
@@ -96,9 +97,10 @@ internal static class WeaponCommands
             return;
         }
 
-        var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.TogglePlayerBool(SteamID, "ExpertiseLogging");
-        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        var steamId = ctx.Event.User.PlatformId;
+        Misc.TogglePlayerBool(steamId, "ExpertiseLogging");
+
+        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(Misc.GetPlayerBool(steamId, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
@@ -122,9 +124,9 @@ internal static class WeaponCommands
             return;
         }
 
-        ulong steamID = ctx.Event.User.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
 
-        if (ChooseStat(steamID, WeaponType, StatType))
+        if (ChooseStat(steamId, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
             //WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
@@ -145,7 +147,7 @@ internal static class WeaponCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        ulong steamID = ctx.Event.User.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
         WeaponType weaponType = GetCurrentWeaponType(character);
 
         if (!ConfigService.ResetExpertiseItem.Equals(0))
@@ -157,7 +159,7 @@ internal static class WeaponCommands
             {
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                 {
-                    ResetStats(steamID, weaponType);
+                    ResetStats(steamId, weaponType);
                     LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
                     return;
                 }
@@ -170,7 +172,7 @@ internal static class WeaponCommands
 
         }
 
-        ResetStats(steamID, weaponType);
+        ResetStats(steamId, weaponType);
         LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
     }
 
@@ -203,7 +205,7 @@ internal static class WeaponCommands
             return;
         }
 
-        IExpertiseHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+        IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
         if (expertiseHandler == null)
         {
@@ -213,7 +215,7 @@ internal static class WeaponCommands
 
         ulong steamId = playerInfo.User.PlatformId;
 
-        var xpData = new KeyValuePair<int, float>(level, WeaponSystem.ConvertLevelToXp(level));
+        var xpData = new KeyValuePair<int, float>(level, ConvertLevelToXp(level));
         if (SetExtensionMap.TryGetValue(weaponType, out var setFunc))
         {
             setFunc(steamId, xpData);

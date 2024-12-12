@@ -27,9 +27,9 @@ internal static class QuestCommands
         }
 
         var SteamID = ctx.Event.User.PlatformId;
-        PlayerUtilities.
-                TogglePlayerBool(SteamID, "QuestLogging");
-        LocalizationService.HandleReply(ctx, $"Quest logging is now {(PlayerUtilities.GetPlayerBool(SteamID, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(SteamID, "QuestLogging");
+
+        LocalizationService.HandleReply(ctx, $"Quest logging is now {(Misc.GetPlayerBool(SteamID, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "progress", shortHand: "p", adminOnly: false, usage: ".quest p [QuestType]", description: "Display your current quest progress.")]
@@ -63,7 +63,7 @@ internal static class QuestCommands
         ulong steamID = ctx.Event.User.PlatformId;
         if (steamID.TryGetPlayerQuests(out var questData))
         {
-            QuestUtilities.QuestObjectiveReply(ctx, questData, typeEnum);
+            Quests.QuestObjectiveReply(ctx, questData, typeEnum);
         }
         else
         {
@@ -109,7 +109,7 @@ internal static class QuestCommands
 
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            QuestUtilities.QuestTrackReply(ctx, questData, typeEnum);
+            Quests.QuestTrackReply(ctx, questData, typeEnum);
         }
         else
         {
@@ -188,7 +188,7 @@ internal static class QuestCommands
                         ForceDaily(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
-                        QuestUtilities.QuestObjectiveReply(ctx, questData, type);
+                        Quests.QuestObjectiveReply(ctx, questData, type);
                     }
                 }
                 else
@@ -221,7 +221,7 @@ internal static class QuestCommands
                         ForceWeekly(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
-                        QuestUtilities.QuestObjectiveReply(ctx, questData, type);
+                        Quests.QuestObjectiveReply(ctx, questData, type);
                     }
                 }
                 else

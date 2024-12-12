@@ -101,9 +101,9 @@ internal static class DealDamageSystemPatch
                     {
                         Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
                         ulong steamId = userEntity.Read<User>().PlatformId;
-
-                        if (!ClassUtilities.HasClass(steamId)) continue;
-                        PlayerClass playerClass = ClassUtilities.GetPlayerClass(steamId);
+                        
+                        if (!Utilities.Classes.HasClass(steamId)) continue;
+                        PlayerClass playerClass = Utilities.Classes.GetPlayerClass(steamId);
 
                         if (Random.NextDouble() <= OnHitProcChance)
                         {
@@ -121,7 +121,7 @@ internal static class DealDamageSystemPatch
                                         {
                                             if (!player.HasBuff(stormShield01))
                                             {
-                                                BuffUtilities.TryApplyBuff(player, stormShield01);
+                                                Buffs.TryApplyBuff(player, stormShield01);
                                             }
                                             else if (player.TryGetBuff(stormShield01, out Entity stormShieldFirstBuff))
                                             {
@@ -130,7 +130,7 @@ internal static class DealDamageSystemPatch
                                                     age.Value = 0f;
                                                 });
 
-                                                BuffUtilities.TryApplyBuff(player, stormShield02);
+                                                Buffs.TryApplyBuff(player, stormShield02);
                                             }
                                         }
                                         else if (player.TryGetBuff(stormShield02, out Entity stormShieldSecondBuff))
@@ -140,7 +140,7 @@ internal static class DealDamageSystemPatch
                                                 age.Value = 0f;
                                             });
 
-                                            BuffUtilities.TryApplyBuff(player, stormShield03);
+                                            Buffs.TryApplyBuff(player, stormShield03);
                                         }
                                     }
                                     else if (player.TryGetBuff(stormShield03, out Entity stormShieldThirdBuff))
@@ -153,12 +153,12 @@ internal static class DealDamageSystemPatch
                                 }
                                 else
                                 {
-                                    BuffUtilities.TryApplyBuff(player, prefabGUID);
+                                    Buffs.TryApplyBuff(player, prefabGUID);
                                 }
                             }
                             else
                             {
-                                if (BuffUtilities.TryApplyBuff(dealDamageEvent.Target, prefabGUID) && dealDamageEvent.Target.TryGetBuff(prefabGUID, out Entity buffEntity))
+                                if (Buffs.TryApplyBuff(dealDamageEvent.Target, prefabGUID) && dealDamageEvent.Target.TryGetBuff(prefabGUID, out Entity buffEntity))
                                 {
                                     buffEntity.With((ref EntityOwner entityOwner) =>
                                     {
@@ -172,11 +172,11 @@ internal static class DealDamageSystemPatch
                     {
                         if (entityOwner.Owner.TryGetPlayer(out player) && GameMode.Equals(GameModeType.PvP) && dealDamageEvent.Target.IsPlayer())
                         {
-                            Entity familiar = FamiliarUtilities.FindPlayerFamiliar(player);
+                            Entity familiar = Utilities.Familiars.FindPlayerFamiliar(player);
 
                             if (familiar.Exists() && !familiar.IsDisabled())
                             {
-                                FamiliarUtilities.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
+                                Utilities.Familiars.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
                             }
                         }
                     }

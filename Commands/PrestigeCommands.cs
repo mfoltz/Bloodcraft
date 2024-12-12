@@ -65,7 +65,7 @@ internal static class PrestigeCommands
 
                 int exoPrestiges = ++prestigeData[PrestigeType.Exo];
 
-                KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoFormUtilities.CalculateFormDuration(exoPrestiges));
+                KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoForm.CalculateFormDuration(exoPrestiges));
                 steamId.SetPlayerExoFormData(timeEnergyPair);
 
                 prestigeData[PrestigeType.Exo] = exoPrestiges;
@@ -169,7 +169,7 @@ internal static class PrestigeCommands
                 exoData[PrestigeType.Exo] = exoPrestige;
                 steamId.SetPlayerPrestiges(exoData);
 
-                KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoFormUtilities.CalculateFormDuration(exoPrestige));
+                KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoForm.CalculateFormDuration(exoPrestige));
                 steamId.SetPlayerExoFormData(timeEnergyPair);
 
                 LocalizationService.HandleReply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
@@ -228,7 +228,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        List<int> buffs = ConfigUtilities.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
+        List<int> buffs = Configuration.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
 
         if (buffs.Count == 0)
         {
@@ -306,7 +306,7 @@ internal static class PrestigeCommands
                     steamId.SetPlayerExoFormData(timeEnergyPair);
                 }
 
-                if (PlayerUtilities.GetPlayerBool(steamId, "ExoForm")) PlayerUtilities.SetPlayerBool(steamId, "ExoForm", false);
+                if (Misc.GetPlayerBool(steamId, "ExoForm")) Misc.SetPlayerBool(steamId, "ExoForm", false);
             }
 
             LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.");
@@ -357,27 +357,27 @@ internal static class PrestigeCommands
 
         if (parsedPrestigeType == PrestigeType.Exo && steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)ExoFormUtilities.CalculateFormDuration(exoLevel)}</color>s");
-            ExoFormUtilities.UpdateExoFormChargeStored(steamId);
+            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)ExoForm.CalculateFormDuration(exoLevel)}</color>s");
+            ExoForm.UpdateExoFormChargeStored(steamId);
 
             if (steamId.TryGetPlayerExoFormData(out var exoFormData))
             {
-                if (exoFormData.Value < ExoFormUtilities.BaseDuration)
+                if (exoFormData.Value < ExoForm.BaseDuration)
                 {
-                    ExoFormUtilities.ReplyNotEnoughCharge(user, steamId);
+                    ExoForm.ReplyNotEnoughCharge(user, steamId);
                 }
-                else if (exoFormData.Value >= ExoFormUtilities.BaseDuration)
+                else if (exoFormData.Value >= ExoForm.BaseDuration)
                 {
                     LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
                 }
 
                 // Generate a list of ability unlock messages based on non-zero levels
-                var exoFormSkills = BuffUtilities.ExoFormAbilityUnlockMap
+                var exoFormSkills = Buffs.ExoFormAbilityUnlockMap
                     .Where(pair => pair.Value != 0) // Filter out abilities unlocked at level 0
                     .Select(pair =>
                     {
                         // Get the ability name from ExoFormAbilityMap and remove the "Prefab" suffix
-                        string abilityName = BuffUtilities.ExoFormAbilityMap[pair.Key].LookupName();
+                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].LookupName();
                         int prefabIndex = abilityName.IndexOf("Prefab");
                         if (prefabIndex != -1)
                         {
@@ -508,7 +508,7 @@ internal static class PrestigeCommands
         }
     }
 
-    [Command(name: "shroud", shortHand: "shroud", adminOnly: false, usage: ".prestige shroud", description: "Toggles permashroud if applicable.")]
+    [Command(name: "permashroud", shortHand: "shroud", adminOnly: false, usage: ".prestige shroud", description: "Toggles permashroud if applicable.")]
     public static void PermaShroudToggle(ChatCommandContext ctx)
     {
         if (!ConfigService.PrestigeSystem)
@@ -521,15 +521,15 @@ internal static class PrestigeCommands
         User user = ctx.Event.User;
         ulong steamId = user.PlatformId;
 
-        PlayerUtilities.TogglePlayerBool(steamId, "Shroud");
-        if (PlayerUtilities.GetPlayerBool(steamId, "Shroud"))
+        Misc.TogglePlayerBool(steamId, "Shroud");
+        if (Misc.GetPlayerBool(steamId, "Shroud"))
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
 
             if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(ShroudBuff) && !character.HasBuff(ShroudBuff) 
                 && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
             {
-                BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
+                Buffs.ApplyPermanentBuff(character, ShroudBuff);
             }
         }
         else
