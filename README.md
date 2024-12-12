@@ -176,8 +176,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.exoform`
   - Toggles taunting to enter exo form.
   - Shortcut: *.exoform*
-- `.cleanupfams.` 🔒
-  - Removes disabled, invisible familiars on the map preventing building.
+- `.cleanupfams` 🔒
+  - Removes disabled, invisible familiars on the map preventing building. Pending deprecation.
   - Shortcut: *.cleanupfams*
 
 ### Party Commands
