@@ -30,7 +30,7 @@ internal static class VBloodSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(VBloodSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeList<VBloodConsumed> events = __instance.EventList;
         DateTime now = DateTime.UtcNow;

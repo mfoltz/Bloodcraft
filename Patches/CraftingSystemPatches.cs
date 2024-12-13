@@ -33,7 +33,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     static void Prefix(ForgeSystem_Update __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
@@ -107,7 +107,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
@@ -142,7 +142,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdatePrisonSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -176,7 +176,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     public static void OnUpdatePrefix(StartCraftingSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
@@ -231,7 +231,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     public static void OnUpdatePrefix(StopCraftingSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
@@ -273,7 +273,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     [HarmonyPrefix]
     public static void OnUpdatePrefix(MoveItemBetweenInventoriesSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArray(Allocator.Temp);

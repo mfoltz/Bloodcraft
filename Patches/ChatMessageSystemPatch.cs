@@ -24,7 +24,7 @@ internal static class ChatMessageSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ChatMessageSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try

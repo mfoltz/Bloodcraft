@@ -59,7 +59,7 @@ internal static class EmoteSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);

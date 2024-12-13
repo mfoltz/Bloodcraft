@@ -12,9 +12,6 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly WaitForSeconds Delay = new(60);
-    static readonly bool Familiars = ConfigService.FamiliarSystem;
-
-    static bool _setMinimumFamiliarLevel = false;
 
     static readonly ComponentType[] UserComponent =
     [
@@ -23,8 +20,8 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 
     static EntityQuery UserQuery;
 
-    public static readonly Dictionary<string, PlayerInfo> PlayerCache = [];
-    public static readonly Dictionary<string, PlayerInfo> OnlineCache = [];
+    public static readonly Dictionary<ulong, PlayerInfo> PlayerCache = [];
+    public static readonly Dictionary<ulong, PlayerInfo> OnlineCache = [];
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -34,9 +31,9 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     public PlayerService()
     {
         UserQuery = EntityManager.CreateEntityQuery(UserComponent);
-        Core.StartCoroutine(PlayerUpdateLoop());
+        Core.StartCoroutine(PlayerCacheRoutine());
     }
-    static IEnumerator PlayerUpdateLoop()
+    static IEnumerator PlayerCacheRoutine()
     {
         while (true)
         {
@@ -44,23 +41,22 @@ internal class PlayerService // this is basically a worse version of the PlayerS
             OnlineCache.Clear();
 
             var players = Queries.GetEntitiesEnumerable(UserQuery);
+
             players
                 .Select(userEntity =>
                 {
-                    var user = userEntity.Read<User>();
-                    var playerName = user.CharacterName.Value;
-                    var steamId = user.PlatformId.ToString(); // Assuming User has a SteamId property
-                    var characterEntity = user.LocalCharacter._Entity;
+                    User user = userEntity.Read<User>();
+                    string playerName = user.CharacterName.Value;
+                    ulong steamId = user.PlatformId;
+                    Entity character = user.LocalCharacter.GetEntityOnServer();
 
                     return new
                     {
-                        PlayerNameEntry = new KeyValuePair<string, PlayerInfo>(
-                            playerName, new PlayerInfo(userEntity, characterEntity, user)),
-                        SteamIdEntry = new KeyValuePair<string, PlayerInfo>(
-                            steamId, new PlayerInfo(userEntity, characterEntity, user))
+                        SteamIdEntry = new KeyValuePair<ulong, PlayerInfo>(
+                            steamId, new PlayerInfo(userEntity, character, user))
                     };
                 })
-                .SelectMany(entry => new[] { entry.PlayerNameEntry, entry.SteamIdEntry })
+                .SelectMany(entry => new[] { entry.SteamIdEntry })
                 .GroupBy(entry => entry.Key)
                 .ToDictionary(group => group.Key, group => group.First().Value)
                 .ForEach(kvp =>
@@ -75,5 +71,10 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 
             yield return Delay;
         }
+    }
+    public static PlayerInfo GetPlayerInfo(string playerName)
+    {
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == playerName.ToLower()).Value;
+        return playerInfo;
     }
 }

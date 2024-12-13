@@ -51,10 +51,10 @@ internal static class Core
     public static byte[] OLD_SHARED_KEY { get; internal set; }
     public static byte[] NEW_SHARED_KEY { get; internal set; }
 
-    public static bool hasInitialized = false;
+    public static bool _initialized = false;
     public static void Initialize()
     {
-        if (hasInitialized) return;
+        if (_initialized) return;
 
         _ = new PlayerService();
         _ = new LocalizationService();
@@ -114,7 +114,7 @@ internal static class Core
         //LogSCTPRefabs();
         //LogDealDamageOnGameplayEvents();
 
-        hasInitialized = true;
+        _initialized = true;
     }
     static World GetServerWorld()
     {

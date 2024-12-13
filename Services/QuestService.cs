@@ -157,7 +157,7 @@ internal class QuestService
             if (TargetCache.ContainsKey(Monster)) TargetCache.Remove(Monster);
             if (TargetCache.ContainsKey(Solarus)) TargetCache.Remove(Solarus);
 
-            Dictionary<string, PlayerInfo> players = new(PlayerCache); // Copy the player cache to make sure updates to that don't interfere with loop
+            Dictionary<ulong, PlayerInfo> players = new(PlayerCache);
             foreach (PlayerInfo playerInfo in players.Values)
             {
                 User user = playerInfo.User;
@@ -166,8 +166,7 @@ internal class QuestService
                 if (!ConfigService.LevelingSystem)
                 {
                     Entity character = playerInfo.CharEntity.Has<Equipment>() ? playerInfo.CharEntity : Entity.Null;
-                    if (character == Entity.Null) continue; // just incase players dont have equipment or something until getting out of the first coffin, best guess at a bug without leveling atm
-                    // should just have to check when first giving a player quests since if this is called otherwise player should definitely have this component at that point
+                    if (!character.Exists()) continue;
 
                     RefreshQuests(user, steamId, (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel());
                 }

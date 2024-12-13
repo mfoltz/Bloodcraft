@@ -62,7 +62,7 @@ internal static class ProfessionCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == name.ToLower()).Value;
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");

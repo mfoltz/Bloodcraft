@@ -99,10 +99,10 @@ internal static class BloodCommands
             return;
         }
 
-        var SteamID = ctx.Event.User.PlatformId;
+        var steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(SteamID, "BloodLogging");
-        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(Misc.GetPlayerBool(SteamID, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(steamId, "BloodLogging");
+        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(Misc.GetPlayerBool(steamId, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]
@@ -126,7 +126,7 @@ internal static class BloodCommands
             return;
         }
 
-        ulong steamID = ctx.Event.User.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
 
         if (BloodType.Equals(BloodType.GateBoss) || BloodType.Equals(BloodType.None) || BloodType.Equals(BloodType.VBlood))
         {
@@ -134,14 +134,12 @@ internal static class BloodCommands
             return;
         }
 
-        if (ChooseStat(steamID, BloodType, StatType))
+        if (ChooseStat(steamId, BloodType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and will apply after refreshing blood.");
 
             Entity player = ctx.Event.SenderCharacterEntity;
             BloodType bloodType = GetCurrentBloodType(player);
-
-            //UpdateBloodStats(player, bloodType);
         }
         else
         {
@@ -160,7 +158,7 @@ internal static class BloodCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         User user = ctx.Event.User;
-        ulong steamID = user.PlatformId;
+        ulong steamId = user.PlatformId;
         BloodType bloodType = GetCurrentBloodType(character);
 
         if (bloodType.Equals(BloodType.GateBoss) || bloodType.Equals(BloodType.None) || bloodType.Equals(BloodType.VBlood))
@@ -178,7 +176,7 @@ internal static class BloodCommands
             {
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                 {
-                    ResetStats(steamID, bloodType);
+                    ResetStats(steamId, bloodType);
                     //UpdateBloodStats(character, bloodType);
 
                     LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
@@ -191,7 +189,7 @@ internal static class BloodCommands
         }
         else
         {
-            ResetStats(steamID, bloodType);
+            ResetStats(steamId, bloodType);
             //UpdateBloodStats(character, bloodType);
 
             LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
@@ -231,7 +229,7 @@ internal static class BloodCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");

@@ -56,7 +56,7 @@ internal static class BuffSystemSpawnPatches
     [HarmonyPrefix]
     static void OnUpdatePrefix(BuffSystem_Spawn_Server __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try

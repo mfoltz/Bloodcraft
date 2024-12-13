@@ -13,7 +13,7 @@ internal static class ItemPickupSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ItemPickupSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.QuestSystem) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);

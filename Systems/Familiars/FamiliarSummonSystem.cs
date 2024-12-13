@@ -34,7 +34,6 @@ internal static class FamiliarSummonSystem
     static readonly bool FamiliarPrestige = ConfigService.FamiliarPrestige;
 
     static readonly PrefabGUID InvulnerableBuff = new(-480024072);
-    static readonly PrefabGUID InkCrawlerDeathBuff = new(1273155981);
 
     static readonly PrefabGUID DivineAngel = new(-1737346940);
 
@@ -202,12 +201,12 @@ internal static class FamiliarSummonSystem
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
 
             ModifyFactionAndAggro(familiar);
-            ModifyDamageStats(familiar, level, steamId, famKey);
+            ModifyDamageStatsForBattle(familiar, level, steamId, famKey);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
-            NothingLivesForever(familiar);
+            Utilities.Familiars.NothingLivesForever(familiar);
 
             if (Misc.GetPlayerBool(steamId, "FamiliarVisual"))
             {
@@ -364,22 +363,12 @@ internal static class FamiliarSummonSystem
         {FamiliarStatType.CCReduction, 0.5f},
         {FamiliarStatType.ShieldAbsorb, 1f}
     };
-    static void NothingLivesForever(Entity familiar)
-    {
-        if (Buffs.TryApplyBuff(familiar, InkCrawlerDeathBuff) && familiar.TryGetBuff(InkCrawlerDeathBuff, out Entity buffEntity))
-        {
-            buffEntity.With((ref LifeTime lifeTime) =>
-            {
-                lifeTime.Duration = FAMILIAR_LIFETIME;
-            });
-        }
-    }
     public static void ModifyDamageStatsForBattle(Entity familiar, int level, ulong steamId, int famKey)
     {
-        float scalingFactor = 0.2f + (level / (float)MaxFamiliarLevel) * 0.8f; // Calculate scaling factor for power and such
-        float healthScalingFactor = 1.0f + ((level - 1) / (float)MaxFamiliarLevel) * 2.0f; // Calculate scaling factor for max health
+        float scalingFactor = 0.25f + (level / (float)MaxFamiliarLevel) * 0.75f; // Calculate scaling factor for power and such
+        float healthScalingFactor = 1.0f + ((level - 1) / (float)MaxFamiliarLevel) * 1.5f; // Calculate scaling factor for max health
 
-        if (level == MaxFamiliarLevel) healthScalingFactor = 3.0f;
+        if (level == MaxFamiliarLevel) healthScalingFactor = 2.5f;
 
         int prestigeLevel = 0;
         List<FamiliarStatType> stats = [];

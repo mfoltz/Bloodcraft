@@ -25,7 +25,7 @@ internal static class SpawnTravelBuffSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(Spawn_TravelBuffSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);

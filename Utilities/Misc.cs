@@ -58,9 +58,11 @@ internal static class Misc
                 {
                     foreach (string partyMember in party)
                     {
-                        if (partyMember.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.User.IsConnected)
+                        PlayerInfo playerInfo = GetPlayerInfo(partyMember);
+
+                        if (playerInfo.User.IsConnected && playerInfo.CharEntity.TryGetPosition(out float3 targetPosition))
                         {
-                            float distance = UnityEngine.Vector3.Distance(sourcePosition, playerInfo.CharEntity.Read<Translation>().Value);
+                            float distance = UnityEngine.Vector3.Distance(sourcePosition, targetPosition);
 
                             if (distance > ShareDistance) continue;
                             else players.Add(playerInfo.CharEntity);
@@ -77,13 +79,17 @@ internal static class Misc
         {        
             foreach (SyncToUserBuffer clanUser in clanUserBuffer)
             {
-                if (clanUser.UserEntity.TryGetComponent(out User user) && user.IsConnected)
+                if (clanUser.UserEntity.TryGetComponent(out User user))
                 {
-                    Entity player = user.LocalCharacter._Entity;
-                    var distance = UnityEngine.Vector3.Distance(sourcePosition, player.Read<Translation>().Value);
+                    Entity player = user.LocalCharacter.GetEntityOnServer();
 
-                    if (distance > ShareDistance) continue;
-                    else players.Add(player);
+                    if (user.IsConnected && player.TryGetPosition(out float3 targetPosition))
+                    {
+                        float distance = UnityEngine.Vector3.Distance(sourcePosition, targetPosition);
+
+                        if (distance > ShareDistance) continue;
+                        else players.Add(player);
+                    }
                 }
             }
         }
@@ -96,10 +102,8 @@ internal static class Misc
         {
             Entity progressionEntity = progressionMapper.ProgressionEntity.GetEntityOnServer();
 
-            if (progressionEntity.Has<UnlockedVBlood>())
+            if (progressionEntity.TryGetBuffer<UnlockedVBlood>(out var buffer))
             {
-                var buffer = progressionEntity.ReadBuffer<UnlockedVBlood>();
-
                 foreach (UnlockedVBlood unlockedVBlood in buffer)
                 {
                     if (unlockedVBlood.VBlood.Equals(DraculaVBlood))
@@ -126,15 +130,6 @@ internal static class Misc
         {
             BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
         }
-    }
-    */
-
-    /*
-    public static void HandleModifiers(ref float dropChance, Entity player)
-    {
-        ulong steamId = player.GetSteamId();
-
-        if (PlayerModifiers.ContainsKey(steamId)) dropChance *= PlayerModifiers[steamId];
     }
     */
 }

@@ -12,7 +12,7 @@ internal static class UnitSpawnerPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(UnitSpawnerReactSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.__query_2099432189_0.ToEntityArray(Allocator.Temp);
         try

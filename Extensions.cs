@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
@@ -271,14 +272,9 @@ internal static class Extensions
     }
     public static bool TryGetPlayerInfo(this ulong steamId, out PlayerInfo playerInfo)
     {
-        if (PlayerCache.TryGetValue(steamId.ToString(), out playerInfo)) return true;
-        else if (OnlineCache.TryGetValue(steamId.ToString(), out playerInfo)) return true;
+        if (PlayerCache.TryGetValue(steamId, out playerInfo)) return true;
+        else if (OnlineCache.TryGetValue(steamId, out playerInfo)) return true;
 
-        return false;
-    }
-    public static bool TryGetPlayerInfo(this string playerName, out PlayerInfo playerInfo)
-    {
-        if (PlayerCache.TryGetValue(playerName, out playerInfo)) return true;
         return false;
     }
     public static PrefabGUID GetPrefabGUID(this Entity entity)
@@ -331,6 +327,28 @@ internal static class Extensions
         if (entity.TryGetComponent(out EntityInput entityInput))
         {
             return entityInput.AimPosition;
+        }
+
+        return float3.zero;
+    }
+    public static bool TryGetPosition(this Entity entity, out float3 position)
+    {
+        position = float3.zero;
+
+        if (entity.TryGetComponent(out Translation translation))
+        {
+            position = translation.Value;
+
+            return true;
+        }
+
+        return false;
+    }
+    public static float3 GetPosition(this Entity entity)
+    {
+        if (entity.TryGetComponent(out Translation translation))
+        {
+            return translation.Value;
         }
 
         return float3.zero;

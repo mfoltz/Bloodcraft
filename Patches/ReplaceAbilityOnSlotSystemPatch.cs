@@ -27,7 +27,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReplaceAbilityOnSlotSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Buff [ReadOnly], ProjectM.ReplaceAbilityOnSlotData [ReadOnly], ProjectM.ReplaceAbilityOnSlotBuff [Buffer] [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
         try

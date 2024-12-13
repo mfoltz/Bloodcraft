@@ -20,7 +20,7 @@ internal static class PlayerCombatBuffSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(PlayerCombatBuffSystem_OnAggro __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!GameMode.Equals(GameModeType.PvP) || !ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
@@ -50,7 +50,7 @@ internal static class PlayerCombatBuffSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(PlayerCombatBuffSystem_Reapplication __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!GameMode.Equals(GameModeType.PvP) || !ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);

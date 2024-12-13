@@ -549,7 +549,7 @@ internal static class PrestigeSystem
             })
             .Select(p => new
             {
-                PlayerName = PlayerService.PlayerCache.FirstOrDefault(pc => pc.Value.User.PlatformId == p.SteamId).Key,
+                PlayerName = PlayerService.PlayerCache.FirstOrDefault(pc => pc.Key == p.SteamId).Value.User.CharacterName.Value,
                 p.Prestige
             })
             .Where(p => !string.IsNullOrEmpty(p.PlayerName))

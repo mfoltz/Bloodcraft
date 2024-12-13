@@ -458,8 +458,8 @@ internal static class ServerBootstrapSystemPatches
                 User = user
             };
 
-            if (!OnlineCache.ContainsKey(steamId.ToString())) OnlineCache.TryAdd(steamId.ToString(), playerInfo);
-            if (!PlayerCache.ContainsKey(steamId.ToString())) PlayerCache.TryAdd(steamId.ToString(), playerInfo);
+            if (!OnlineCache.ContainsKey(steamId)) OnlineCache.TryAdd(steamId, playerInfo);
+            if (!PlayerCache.ContainsKey(steamId)) PlayerCache.TryAdd(steamId, playerInfo);
         }
     }
     static IEnumerator UpdatePlayerFamiliar(Entity playerCharacter, Entity familiar)

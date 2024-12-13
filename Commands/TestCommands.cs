@@ -33,7 +33,7 @@ internal static class TestCommands
         {
             var (position, timeRemaining) = GetQueuePositionAndTime(steamId);
 
-            LocalizationService.HandleReply(ctx, $"You can't make changes to your battle group while in queue! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)");
+            LocalizationService.HandleReply(ctx, $"You can't make changes to your battle group while queued! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)");
             Familiars.HandleBattleGroupDetailsReply(ctx, steamId, battleGroup);
 
             return;
@@ -46,7 +46,7 @@ internal static class TestCommands
         }
         else if (slot < 1 || slot > 3)
         {
-            LocalizationService.HandleReply(ctx, $"Please choose from 1-{BATTLE_SIZE}.");
+            LocalizationService.HandleReply(ctx, $"Please choose from 1-{TEAM_SIZE}.");
 
             return;
         }
@@ -72,21 +72,21 @@ internal static class TestCommands
             return;
         }
 
-        PlayerInfo playerOneInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == playerOne.ToLower()).Value;
+        PlayerInfo playerOneInfo = GetPlayerInfo(playerOne);
         if (!playerOneInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player one...");
             return;
         }
 
-        PlayerInfo playerTwoInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == playerTwo.ToLower()).Value;
+        PlayerInfo playerTwoInfo = GetPlayerInfo(playerTwo);
         if (!playerTwoInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player two...");
             return;
         }
 
-        if (GenerateRandomBattleGroup(ctx, playerOneInfo.User.PlatformId) && GenerateRandomBattleGroup(ctx, playerTwoInfo.User.PlatformId))
+        if (GenerateRandomBattleGroup(ctx, playerOneInfo) && GenerateRandomBattleGroup(ctx, playerTwoInfo))
         {
             ctx.Reply($"Queuing <color=white>{playerOneInfo.User.CharacterName.Value}</color> and <color=white>{playerTwoInfo.User.CharacterName.Value}</color> for a battle!");
             Matchmaker.QueueMatch((playerOneInfo.User.PlatformId, playerTwoInfo.User.PlatformId));
@@ -104,14 +104,14 @@ internal static class TestCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
             return;
         }
 
-        if (GenerateRandomBattleGroup(ctx, playerInfo.User.PlatformId))
+        if (GenerateRandomBattleGroup(ctx, playerInfo))
         {
             Matchmaker.QueueMatch((steamId, playerInfo.User.PlatformId));
         }
@@ -141,7 +141,7 @@ internal static class TestCommands
             }
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -167,6 +167,7 @@ internal static class TestCommands
 
         ctx.Reply($"Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)");
         LocalizationService.HandleServerReply(EntityManager, playerInfo.User, $"<color=white>{ctx.User.CharacterName.Value}</color> has challenged you to a battle! (<color=yellow>30s</color> until it expires, accept by emoting '<color=green>Yes</color>' or decline by emoting '<color=red>No</color>')");
+        
         Core.StartCoroutine(ChallengeExpirationRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)));
     }
 
@@ -188,7 +189,7 @@ internal static class TestCommands
         DataService.PlayerDictionaries.familiarBattleCoords.Add(floats);
         DataService.PlayerPersistence.SaveFamiliarBattleCoords();
 
-        if (SpawnTransformSystemOnSpawnPatch.BattlePosition.Equals(float3.zero))
+        if (BattlePosition.Equals(float3.zero))
         {
             Initialize();
             LocalizationService.HandleReply(ctx, "Familiar battle arena position set, battle service started! (one allowed)");
@@ -198,8 +199,9 @@ internal static class TestCommands
             LocalizationService.HandleReply(ctx, "Familiar battle arena position set (one allowed, previous coords overwritten).");
         }
     }
-    static bool GenerateRandomBattleGroup(ChatCommandContext ctx, ulong steamId)
+    static bool GenerateRandomBattleGroup(ChatCommandContext ctx, PlayerInfo playerInfo)
     {
+        ulong steamId = playerInfo.User.PlatformId;
         UnlockedFamiliarData unlockedFamiliarData = FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
 
         if (!steamId.TryGetFamiliarBattleGroup(out var battleGroup))
@@ -215,108 +217,43 @@ internal static class TestCommands
 
         FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
 
-        if (unlocks.Count >= 3)
+        // Gather all eligible familiars with level >= 50
+        var eligibleFamiliars = new List<(int famKey, int level)>();
+        foreach (var familiarList in unlocks)
         {
-            // Case 1: Enough groups to select 3 unique lists
-            var randomLists = unlocks.OrderBy(x => random.Next()).Take(3).ToList();
-
-            // Pick a familiar with weighted randomness based on level
-            for (int i = 0; i < 3; i++)
+            foreach (var famKey in familiarList)
             {
-                var list = randomLists[i];
-                battleGroup[i] = SelectFamiliarWithLevelWeight(list, xpData, random);
+                if (xpData.FamiliarExperience.TryGetValue(famKey, out var xpDataPair) && xpDataPair.Key >= 50)
+                {
+                    eligibleFamiliars.Add((famKey, xpDataPair.Key));
+                }
             }
-
-            ctx.Reply($"Random battle group successfully generated for <color=white>{ctx.Event.User.CharacterName.Value}</color>!");
         }
-        else if (unlocks.Count > 0 && unlocks.Any(list => list.Count >= 3))
+
+        if (eligibleFamiliars.Count < 3)
         {
-            // Case 2: Not enough groups, but one list has enough to fill the battle group
-            var largeEnoughList = unlocks.First(list => list.Count >= 3);
-
-            // Pick 3 familiars with weighted randomness based on level
-            var selectedFamiliars = largeEnoughList.OrderBy(x => random.Next())
-                                                   .Select(famKey => SelectFamiliarWithLevelWeight(new List<int> { famKey }, xpData, random))
-                                                   .Take(3)
-                                                   .ToArray();
-
-            for (int i = 0; i < 3; i++)
-            {
-                battleGroup[i] = selectedFamiliars[i];
-            }
-
-            ctx.Reply($"Random battle group successfully generated for <color=white>{ctx.Event.User.CharacterName.Value}</color>!");
-        }
-        else
-        {
-            // Case 3: Not enough familiars to form a full battle group
-            ctx.Reply($"Not enough unlocked familiars to generate a battle group for <color=white>{ctx.Event.User.CharacterName.Value}</color>...");
+            ctx.Reply($"Not enough level 50+ familiars to generate a battle group for <color=white>{playerInfo.User.CharacterName.Value}</color>...");
             return false;
         }
+
+        // Select 3 familiars with pseudo-randomness
+        var selectedFamiliars = eligibleFamiliars.OrderBy(x => random.Next()) // Shuffle for randomness
+                                                 .Take(3)
+                                                 .Select(familiar => familiar.famKey)
+                                                 .ToList();
+
+        for (int i = 0; i < 3; i++)
+        {
+            battleGroup[i] = selectedFamiliars[i];
+        }
+
+        ctx.Reply($"Random battle group successfully generated for <color=white>{playerInfo.User.CharacterName.Value}</color>!");
 
         // Save the generated battle group
         steamId.SetFamiliarBattleGroup(battleGroup);
         Familiars.HandleBattleGroupDetailsReply(ctx, steamId, battleGroup);
         return true;
     }
-
-    /*
-    static bool GenerateRandomBattleGroup(ChatCommandContext ctx, ulong steamId)
-    {
-        DataService.FamiliarPersistence.UnlockedFamiliarData unlockedFamiliarData = DataService.FamiliarPersistence.FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
-
-        if (!steamId.TryGetFamiliarBattleGroup(out var battleGroup))
-        {
-            battleGroup = [0,0,0]; // Initialize battle group if not found
-            steamId.SetFamiliarBattleGroup(battleGroup);
-        }
-
-        System.Random random = new();
-        var unlocks = unlockedFamiliarData.UnlockedFamiliars.Values
-                                           .Where(list => list.Count > 0)
-                                           .ToList();
-        if (unlocks.Count >= 3)
-        {
-            // Case 1: Enough groups to select 3 unique lists
-            var randomLists = unlocks.OrderBy(x => random.Next()).Take(3).ToList();
-
-            // Pick one random familiar from each selected list
-            for (int i = 0; i < 3; i++)
-            {
-                var list = randomLists[i];
-                battleGroup[i] = list[random.Next(list.Count)];
-            }
-
-            ctx.Reply($"Random battle group successfully generated for <color=white>{ctx.Event.User.CharacterName.Value}</color>!");
-        }
-        else if (unlocks.Count > 0 && unlocks.Any(list => list.Count >= 3))
-        {
-            // Case 2: Not enough groups, but one list has enough to fill the battle group
-            var largeEnoughList = unlocks.First(list => list.Count >= 3);
-
-            // Pick 3 unique familiars from the single large list
-            var randomFamiliars = largeEnoughList.OrderBy(x => random.Next()).Take(3).ToArray();
-
-            for (int i = 0; i < 3; i++)
-            {
-                battleGroup[i] = randomFamiliars[i];
-            }
-
-            ctx.Reply($"Random battle group successfully generated for <color=white>{ctx.Event.User.CharacterName.Value}</color>!");
-        }
-        else
-        {
-            // Case 3: Not enough familiars to form a full battle group
-            ctx.Reply($"Not enough unlocked familiars to generate a battle group for <color=white>{ctx.Event.User.CharacterName.Value}</color>...");
-            return false;
-        }
-
-        // Save the generated battle group
-        steamId.SetFamiliarBattleGroup(battleGroup);
-        Familiars.HandleBattleGroupDetailsReply(ctx, steamId, battleGroup);
-        return true;
-    }
-    */
     static int SelectFamiliarWithLevelWeight(List<int> familiarKeys, FamiliarExperienceData xpData, System.Random random)
     {
         // Create a weighted list of familiars

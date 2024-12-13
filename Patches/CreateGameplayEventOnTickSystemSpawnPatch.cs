@@ -23,7 +23,7 @@ internal static class CreateGameplayEventOnTickSpawnSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnTickSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try

@@ -50,19 +50,19 @@ internal static class MiscCommands
     [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
-        var SteamID = ctx.Event.User.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(SteamID, "Reminders");
-        LocalizationService.HandleReply(ctx, $"Reminders {(Misc.GetPlayerBool(SteamID, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(steamId, "Reminders");
+        LocalizationService.HandleReply(ctx, $"Reminders {(Misc.GetPlayerBool(steamId, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "sct", adminOnly: false, usage: ".sct", description: "Toggles scrolling text.")]
     public static void ToggleScrollingText(ChatCommandContext ctx)
     {
-        var SteamID = ctx.Event.User.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(SteamID, "ScrollingText");
-        LocalizationService.HandleReply(ctx, $"ScrollingText {(Misc.GetPlayerBool(SteamID, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(steamId, "ScrollingText");
+        LocalizationService.HandleReply(ctx, $"ScrollingText {(Misc.GetPlayerBool(steamId, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -136,8 +136,9 @@ internal static class MiscCommands
 
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
+
         Misc.TogglePlayerBool(SteamID, "SpellLock");
-            
+        
         if (Misc.GetPlayerBool(SteamID, "SpellLock"))
         {
             LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
@@ -183,7 +184,6 @@ internal static class MiscCommands
                 if (spellPrefabGUID.HasValue())
                 {
                     Utilities.Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
-                    //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
                 }
             }
 
@@ -192,7 +192,6 @@ internal static class MiscCommands
         else
         {
             Utilities.Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
-            //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
 
             LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
         }
@@ -347,7 +346,7 @@ internal static class MiscCommands
             LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> disabled summons...");
         }
 
-        Dictionary<string, PlayerInfo> playerCache = new(PlayerCache);
+        Dictionary<ulong, PlayerInfo> playerCache = new(PlayerCache);
         counter = 0;
 
         foreach (var keyValuePair in playerCache)

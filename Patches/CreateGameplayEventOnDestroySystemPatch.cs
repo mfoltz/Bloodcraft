@@ -23,7 +23,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnDestroySystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ProfessionSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1297357609_0.ToEntityArray(Allocator.Temp);

@@ -16,7 +16,7 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.ExpertiseSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
@@ -63,7 +63,7 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
     [HarmonyPostfix]
     static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.LevelingSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.Temp);

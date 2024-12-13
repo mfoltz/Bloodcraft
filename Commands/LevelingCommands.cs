@@ -19,9 +19,10 @@ internal static class LevelingCommands
             LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
             return;
         }
-        var SteamID = ctx.Event.User.PlatformId;
-        Misc.TogglePlayerBool(SteamID, "ExperienceLogging");
 
+        var SteamID = ctx.Event.User.PlatformId;
+
+        Misc.TogglePlayerBool(SteamID, "ExperienceLogging");
         LocalizationService.HandleReply(ctx, $"Leveling experience logging {(Misc.GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
@@ -40,12 +41,16 @@ internal static class LevelingCommands
         {
             int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[PrestigeType.Experience] : 0;
             int level = xpData.Key;
+
             int progress = (int)(xpData.Value - ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
+
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            
             if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
             {
                 int roundedXP = (int)(Math.Round(restedData.Value / 100.0) * 100);
+
                 LocalizationService.HandleReply(ctx, $"<color=#FFD700>{roundedXP}</color> bonus <color=#FFC0CB>experience</color> remaining from <color=green>resting</color>~");
             }
         }
@@ -64,7 +69,7 @@ internal static class LevelingCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");

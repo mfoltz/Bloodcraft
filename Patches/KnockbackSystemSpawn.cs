@@ -26,7 +26,7 @@ internal static class KnockbackSystemSpawnPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(KnockbackSystemSpawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1729431709_0.ToEntityArray(Allocator.Temp);

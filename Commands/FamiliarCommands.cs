@@ -315,7 +315,7 @@ internal static class FamiliarCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -559,7 +559,7 @@ internal static class FamiliarCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -900,7 +900,7 @@ internal static class FamiliarCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");

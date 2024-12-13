@@ -34,6 +34,8 @@ internal static class Familiars
     static readonly PrefabGUID PvPCombatBuff = new(697095869);
     static readonly PrefabGUID DominateBuff = new(-1447419822);
     static readonly PrefabGUID TakeFlightBuff = new(1205505492);
+    static readonly PrefabGUID InkCrawlerDeathBuff = new(1273155981);
+
     public static void ClearFamiliarActives(ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var actives))
@@ -150,34 +152,14 @@ internal static class Familiars
             LocalizationService.HandleReply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
         }
     }
-
-    /*
-    public static void ReturnFamiliar(Entity player, Entity familiar)
-    {
-        Follower following = familiar.Read<Follower>();
-        following.ModeModifiable._Value = 1;
-        familiar.Write(following);
-
-        float3 playerPos = player.Read<Translation>().Value;
-        float distance = UnityEngine.Vector3.Distance(familiar.Read<Translation>().Value, playerPos);
-
-        if (distance > 25f)
-        {
-            familiar.Write(new LastTranslation { Value = playerPos });
-            familiar.Write(new Translation { Value = playerPos });
-
-            ResetAggro(familiar);
-        }
-    }
-    */
     public static void TryReturnFamiliar(Entity player, Entity familiar)
     {
-        float3 playerPos = player.Read<Translation>().Value;
-        float distance = UnityEngine.Vector3.Distance(familiar.Read<Translation>().Value, playerPos);
+        float3 playerPosition = player.GetPosition();
+        float distance = UnityEngine.Vector3.Distance(familiar.GetPosition(), playerPosition);
 
         if (distance >= 25f)
         {
-            ReturnFamiliar(playerPos, familiar);
+            ReturnFamiliar(playerPosition, familiar);
         }
     }
     public static void ReturnFamiliar(float3 position, Entity familiar)
@@ -226,65 +208,11 @@ internal static class Familiars
 
         return false;
     }
-    public static void ClearBuffers(Entity playerCharacter, ulong steamId)
-    {
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
-        if (playerCharacter.Has<FollowerBuffer>())
-        {
-            var buffer = playerCharacter.ReadBuffer<FollowerBuffer>();
-            
-            foreach (FollowerBuffer follower in buffer)
-            {
-                Entity followerEntity = follower.Entity.GetEntityOnServer();
-
-                if (followerEntity.Exists())
-                {
-                    if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>(entityCommandBuffer);
-                    if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>(entityCommandBuffer);
-                    if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>(entityCommandBuffer);
-                    //if (followerEntity.Has<Minion>()) followerEntity.Remove<Minion>(entityCommandBuffer);
-                    if (followerEntity.Has<BlockFeedBuff>()) followerEntity.Remove<BlockFeedBuff>(entityCommandBuffer);
-
-                    //DestroyUtility.Destroy(EntityManager, followerEntity);
-                    entityCommandBuffer.DestroyEntity(followerEntity);
-                }
-            }
-
-            //buffer.Clear();
-            entityCommandBuffer.SetBuffer<FollowerBuffer>(playerCharacter).Clear();
-        }
-
-        if (playerCharacter.Has<MinionBuffer>())
-        {
-            var buffer = playerCharacter.ReadBuffer<MinionBuffer>();
-
-            foreach (MinionBuffer minion in buffer)
-            {
-                if (minion.Entity.Exists())
-                {
-                    if (minion.Entity.Has<Disabled>()) minion.Entity.Remove<Disabled>(entityCommandBuffer);
-                    if (minion.Entity.Has<DisableWhenNoPlayersInRange>()) minion.Entity.Remove<DisableWhenNoPlayersInRange>(entityCommandBuffer);
-                    if (minion.Entity.Has<DisabledDueToNoPlayersInRange>()) minion.Entity.Remove<DisabledDueToNoPlayersInRange>(entityCommandBuffer);
-                    //if (minion.Entity.Has<Minion>()) minion.Entity.Remove<Minion>(entityCommandBuffer);
-                    if (minion.Entity.Has<BlockFeedBuff>()) minion.Entity.Remove<BlockFeedBuff>(entityCommandBuffer);
-
-                    //DestroyUtility.Destroy(EntityManager, minion.Entity);
-                    entityCommandBuffer.DestroyEntity(minion.Entity);
-                }
-            }
-
-            //buffer.Clear();
-            entityCommandBuffer.SetBuffer<MinionBuffer>(playerCharacter).Clear();
-        }
-
-        ClearFamiliarActives(steamId);
-    }
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId, (Entity Familiar, int FamKey) data)
     {
         familiar.Remove<Disabled>();
 
-        float3 position = playerCharacter.Read<Translation>().Value;
+        float3 position = playerCharacter.GetPosition();
         familiar.Write(new Translation { Value = position });
         familiar.Write(new LastTranslation { Value = position });
 
@@ -304,6 +232,16 @@ internal static class Familiars
 
         string message = "<color=yellow>Familiar</color> <color=green>enabled</color>!";
         LocalizationService.HandleServerReply(EntityManager, user, message);
+    }
+    public static void NothingLivesForever(Entity familiar, float duration = FAMILIAR_LIFETIME)
+    {
+        if (Buffs.TryApplyBuff(familiar, InkCrawlerDeathBuff) && familiar.TryGetBuff(InkCrawlerDeathBuff, out Entity buffEntity))
+        {
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = duration;
+            });
+        }
     }
     public static void DismissFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId, (Entity Familiar, int FamKey) data)
     {
@@ -459,14 +397,14 @@ internal static class Familiars
             PrefabGUID prefabGUID = familiar.GetPrefabGUID();
             int famKey = prefabGUID.GuidHash;
 
-            FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+            FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
             string shinyHexColor = "";
 
             // Check if the familiar has buffs and update the color based on RandomVisuals
             if (buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 // Look up the color from the RandomVisuals dictionary if it exists
-                if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
+                if (ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
                 {
                     shinyHexColor = $"<color={hexColor}>";
                 }
@@ -551,13 +489,6 @@ internal static class Familiars
 
             familiars.Add($"<color=white>{battleGroup.IndexOf(famKey) + 1}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]");
         }
-    }
-
-    public static string BuildBattleGroupAddReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData prestigeData, List<int> battleGroup)
-    {
-        string reply = string.Empty;
-
-        return reply;
     }
     public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, List<int> battleGroup)
     {

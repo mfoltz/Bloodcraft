@@ -26,10 +26,7 @@ namespace Bloodcraft.Patches;
 internal static class SpawnTransformSystemOnSpawnPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     static readonly PrefabGUID manticore = new(-393555055);
     static readonly PrefabGUID dracula = new(-327335305);
@@ -57,22 +54,11 @@ internal static class SpawnTransformSystemOnSpawnPatch
     public static readonly ConcurrentDictionary<ulong, HashSet<Entity>> PlayerBattleFamiliars = [];
     public static readonly List<ulong> SetRotation = [];
 
-    static readonly WaitForSeconds SecondDelay = new(1f);
-
-    static readonly AssetGuid AssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
-    static readonly PrefabGUID BattleSCT = new(1876501183);
-    static readonly float3 Green = new(0f, 1f, 0f);
-
-    public static float3 BattlePosition = float3.zero;
-    public static float3 SCTPosition = float3.zero;
-
-    const float MATCH_START_COUNTDOWN = 5f;
-
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         if (!ConfigService.FamiliarSystem && !ConfigService.EliteShardBearers) return;
 
         NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.Temp);
@@ -115,6 +101,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                                     {
                                         entity.With((ref TargetDirection targetDirection) =>
                                         {
+                                            Core.Log.LogInfo($"Setting rotation for {prefabGUID.LookupName()} | {steamId}");
                                             targetDirection.AimDirection = new float3(0f, 0f, -1f);
                                         });
                                     }
@@ -133,7 +120,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
                                             if (PlayerSummoningForBattle.TryGetValue(pairedId, out bool summoning) && !summoning)
                                             {
-                                                Core.StartCoroutine(BattleStartCountdown((steamId, pairedId)));
+                                                Core.StartCoroutine(BattleService.BattleStartCountdown((steamId, pairedId)));
                                             }
                                         }
                                     }
@@ -440,89 +427,5 @@ internal static class SpawnTransformSystemOnSpawnPatch
                 unitLevel.Level._Value = ConfigService.ShardBearerLevel;
             });
         }
-    }
-    static void EnableAggro(HashSet<Entity> familiars)
-    {
-        foreach (Entity familiar in familiars)
-        {
-            if (familiar.Has<AggroConsumer>())
-            {
-                familiar.With((ref AggroConsumer aggroConsumer) =>
-                {
-                    aggroConsumer.Active._Value = true;
-                });
-            }
-
-            if (familiar.Has<Aggroable>())
-            {
-                familiar.With((ref Aggroable aggroable) =>
-                {
-                    aggroable.Value._Value = true;
-                });
-            }
-        }
-    }
-    static IEnumerator BattleStartCountdown((ulong playerOne, ulong playerTwo) matchPair)
-    {
-        if (!matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
-        {
-            Core.Log.LogWarning("Failed to get match pair info during battle start countdown...");
-
-            yield break;
-        }
-
-        float countdown = MATCH_START_COUNTDOWN; // maybe send messages as well, see about the spectator stuff too
-
-        ulong steamIdOne = matchPairInfo.Item1.User.PlatformId;
-        ulong steamIdTwo = matchPairInfo.Item2.User.PlatformId;
-
-        Entity playerOne = matchPairInfo.Item1.CharEntity;
-        Entity playerTwo = matchPairInfo.Item2.CharEntity;
-
-        Entity playerUserOne = matchPairInfo.Item1.UserEntity;
-        Entity playerUserTwo = matchPairInfo.Item2.UserEntity;
-
-        while (countdown > 0f)
-        {
-            User userOne = playerOne.GetUser();
-            User userTwo = playerTwo.GetUser();
-
-            if (userOne.IsConnected)
-            {
-                ScrollingCombatTextMessage.Create(
-                EntityManager,
-                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                AssetGuid,
-                BattlePosition, // arena center or w/e calling it
-                Green,
-                playerOne,
-                countdown,
-                default,
-                playerUserOne
-                );
-            }
-
-            if (userTwo.IsConnected)
-            {
-
-                ScrollingCombatTextMessage.Create(
-                EntityManager,
-                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                AssetGuid,
-                BattlePosition, // arena center or w/e calling it
-                Green,
-                playerTwo,
-                countdown,
-                default,
-                playerUserTwo
-                );
-            }
-
-            countdown--;
-            yield return SecondDelay;
-        }
-
-        EnableAggro(PlayerBattleFamiliars[steamIdOne]);
-        EnableAggro(PlayerBattleFamiliars[steamIdTwo]);
     }
 }

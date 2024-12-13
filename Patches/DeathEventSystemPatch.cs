@@ -4,7 +4,6 @@ using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -35,7 +34,7 @@ internal static class DeathEventListenerSystemPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(DeathEventListenerSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
         try
@@ -109,10 +108,10 @@ internal static class DeathEventListenerSystemPatch
 
                 if (PlayerBattleFamiliars[pairedId].Any())
                 {
-                    // logic for winner here after cleanup?
                     foreach (Entity familiar in PlayerBattleFamiliars[pairedId])
                     {
-                        familiar.Destroy();
+                        if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Utilities.Familiars.HandleFamiliarMinions(familiar);
+                        if (familiar.Exists()) familiar.Destroy();
                     }
 
                     PlayerBattleFamiliars[pairedId].Clear();

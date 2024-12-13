@@ -41,7 +41,7 @@ internal static class ScriptSpawnServerPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ScriptSpawnServer __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.__query_1231292176_0.ToEntityArray(Allocator.Temp);
         try

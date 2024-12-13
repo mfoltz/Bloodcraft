@@ -138,7 +138,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -277,7 +277,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -436,13 +436,6 @@ internal static class PrestigeCommands
             return;
         }
 
-        /*
-        string prestigeTypes = string.Join(", ",
-            Enum.GetNames(typeof(PrestigeType))
-                .Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")
-        );
-        */
-
         List<string> prestigeTypes = Enum.GetNames(typeof(PrestigeType))
                 .Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")
                 .ToList();
@@ -490,7 +483,7 @@ internal static class PrestigeCommands
 
         var leaderboard = prestigeData
             .Take(10)
-            .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerCache[p.Key].User.CharacterName.Value}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
+            .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerCache.Values.Select(x => x.User.CharacterName.Value == p.Key)}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
             .ToList();
 
         if (leaderboard.Count == 0)

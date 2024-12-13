@@ -1,6 +1,7 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
+using ProjectM;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -16,6 +17,8 @@ namespace Bloodcraft.Services;
 internal class BattleService
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     public static readonly List<float3> FamiliarBattleCoords = []; // one for now but leaving as list for potential expansion later
 
@@ -26,11 +29,22 @@ internal class BattleService
     static readonly WaitForSeconds TimeoutDelay = new(FamiliarSummonSystem.FAMILIAR_LIFETIME);
     static readonly WaitForSeconds ChallengeExpiration = new(CHALLENGE_EXPIRATION);
 
+    static readonly WaitForSeconds SecondDelay = new(1f);
+
+    static readonly AssetGuid AssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
+    static readonly PrefabGUID BattleSCT = new(106212079); // InfoWarning
+    static readonly float3 Green = new(0f, 1f, 0f);
+
+    public static float3 BattlePosition = float3.zero;
+    public static float3 SCTPosition = float3.zero;
+
+    const float MATCH_START_COUNTDOWN = 5f;
     const float BATTLE_INTERVAL = 300f;
     const float CHALLENGE_EXPIRATION = 30f;
     const float UNIT_SPACING = 2.5f;
     const float TEAM_DISTANCE = 2.5f;
-    public const int BATTLE_SIZE = 3;
+    public const int TEAM_SIZE = 3;
+    const float SPECTATE_DISTANCE = 25f;
 
     static DateTime _matchPendingStart;
     static bool _serviceActive = false;
@@ -44,9 +58,8 @@ internal class BattleService
         if (familiarBattleCoords.Any())
         {
             List<float> floats = familiarBattleCoords.FirstOrDefault();
-            float3 position = new(floats[0], floats[1], floats[2]);
-            FamiliarBattleCoords.Add(position);
-            float3 battlePosition = FamiliarBattleCoords.FirstOrDefault();
+            float3 battlePosition = new(floats[0], floats[1], floats[2]);
+            FamiliarBattleCoords.Add(battlePosition);
 
             BattlePosition = new(battlePosition.x, battlePosition.y, battlePosition.z);
             SCTPosition = new(battlePosition.x, battlePosition.y + 5f, battlePosition.z);
@@ -102,6 +115,19 @@ internal class BattleService
             QueuedPlayers.Remove(matchPair.Item2);
             MatchPairs.Remove(matchPair);
 
+            foreach (Entity familiar in PlayerBattleFamiliars[matchPair.Item1])
+            {
+                if (familiar.Exists()) familiar.Destroy();
+            }
+
+            foreach (Entity familiar in PlayerBattleFamiliars[matchPair.Item2])
+            {
+                if (familiar.Exists()) familiar.Destroy();
+            }
+
+            PlayerBattleFamiliars[matchPair.Item1].Clear();
+            PlayerBattleFamiliars[matchPair.Item2].Clear();
+
             if (matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
             {
                 // other logic after match ends, inform players of outcome handle rewards or whatever
@@ -114,7 +140,7 @@ internal class BattleService
                 : $"{loserName}’s";
                 string formattedLoserName = $"<color=#808080>{loserNameWithSuffix}</color>";
 
-                NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#FFD700>{winnerInfo.User.CharacterName.Value}</color>");
+                NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
             }
         }
         public static void HandleMatchTimeout((ulong, ulong) matchPair)
@@ -134,14 +160,13 @@ internal class BattleService
 
             if (matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo) && winner != 0)
             {
-                // other logic after match ends, inform players of outcome handle rewards or whatever
                 PlayerInfo winnerInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item1 : matchPairInfo.Item2;
                 PlayerInfo loserInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item2 : matchPairInfo.Item1;
 
                 string loserName = loserInfo.User.CharacterName.Value;
                 string formattedLoserName = $"<color=#808080>{loserName}</color>";
 
-                NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} has the fewest familiars remaining! Winner: <color=#FFD700>{winnerInfo.User.CharacterName.Value}</color>");
+                NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} has the fewest familiars remaining! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
             }
             else
             {
@@ -150,11 +175,13 @@ internal class BattleService
 
             foreach (Entity familiar in PlayerBattleFamiliars[matchPair.Item1])
             {
+                if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
                 if (familiar.Exists()) familiar.Destroy();
             }
 
             foreach (Entity familiar in PlayerBattleFamiliars[matchPair.Item2])
             {
+                if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
                 if (familiar.Exists()) familiar.Destroy();
             }
 
@@ -184,6 +211,7 @@ internal class BattleService
                 if (CancelledPairs.Contains(match))
                 {
                     // Skip this match
+                    CancelledPairs.Remove(match);
                     continue;
                 }
 
@@ -214,7 +242,7 @@ internal class BattleService
     {
         Core.Log.LogInfo($"PlayerOneFams: {playerOneFamiliars.Count} | PlayerTwoFams: {playerTwoFamiliars.Count} | FormationOne: {PlayerOneFamiliarPositions.Count} | FormationTwo: {PlayerTwoFamiliarPositions.Count}");
 
-        for (int i = 0; i < BATTLE_SIZE; i++)
+        for (int i = 0; i < TEAM_SIZE; i++)
         {
             FamiliarSummonSystem.SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i]);
             FamiliarSummonSystem.SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i]);
@@ -300,10 +328,10 @@ internal class BattleService
             if (!groupOneValid || !groupTwoValid)
             {
                 string message = !groupOneValid && !groupTwoValid
-                    ? $"Both players have less than <color=white>{BATTLE_SIZE}</color> familiars in their battle groups!"
+                    ? $"Both players have less than <color=white>{TEAM_SIZE}</color> familiars in their battle groups!"
                     : !groupOneValid
-                        ? $"Player One has less than <color=white>{BATTLE_SIZE}</color> familiars in their battle group!"
-                        : $"Player Two has less than <color=white>{BATTLE_SIZE}</color> familiars in their battle group!";
+                        ? $"Player One has less than <color=white>{TEAM_SIZE}</color> familiars in their battle group!"
+                        : $"Player Two has less than <color=white>{TEAM_SIZE}</color> familiars in their battle group!";
                 NotifyPlayer(playerOne, message);
 
                 return false;
@@ -331,12 +359,12 @@ internal class BattleService
     }
     public static void NotifyBothPlayers(ulong playerOne, ulong playerTwo, string message)
     {
-        if (playerOne.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.User.IsConnected)
+        if (playerOne.TryGetPlayerInfo(out PlayerInfo playerInfo))
         {
             LocalizationService.HandleServerReply(EntityManager, playerInfo.User, message);
         }
 
-        if (playerTwo.TryGetPlayerInfo(out playerInfo) && playerInfo.User.IsConnected)
+        if (playerTwo.TryGetPlayerInfo(out playerInfo))
         {
             LocalizationService.HandleServerReply(EntityManager, playerInfo.User, message);
         }
@@ -389,11 +417,126 @@ internal class BattleService
         MatchPairs.Remove(matchPair);
         CancelledPairs.Add(matchPair);
     }
+    public static IEnumerator BattleStartCountdown((ulong playerOne, ulong playerTwo) matchPair)
+    {
+        if (!matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
+        {
+            Core.Log.LogWarning("Failed to get match pair info during battle start countdown...");
+
+            yield break;
+        }
+
+        float countdown = MATCH_START_COUNTDOWN; // maybe send messages as well, see about the spectator stuff too
+        List<PlayerInfo> onlineNearbyPlayers = OnlineCache.Values
+            .Where(player => Vector3.Distance(BattlePosition, player.CharEntity.GetPosition()) < SPECTATE_DISTANCE)
+            .ToList();
+
+        ulong steamIdOne = matchPair.playerOne;
+        ulong steamIdTwo = matchPair.playerTwo;
+
+        /*
+        ulong steamIdOne = matchPairInfo.Item1.User.PlatformId;
+        ulong steamIdTwo = matchPairInfo.Item2.User.PlatformId;
+
+        Entity playerOne = matchPairInfo.Item1.CharEntity;
+        Entity playerTwo = matchPairInfo.Item2.CharEntity;
+
+        Entity playerUserOne = matchPairInfo.Item1.UserEntity;
+        Entity playerUserTwo = matchPairInfo.Item2.UserEntity;
+        */
+
+        while (countdown > 0f)
+        {
+            /*
+            User userOne = playerOne.GetUser();
+            User userTwo = playerTwo.GetUser();
+
+            if (userOne.IsConnected)
+            {
+                ScrollingCombatTextMessage.Create(
+                EntityManager,
+                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                AssetGuid,
+                BattlePosition,
+                Green,
+                playerOne,
+                countdown,
+                BattleSCT,
+                playerUserOne
+                );
+            }
+
+            if (userTwo.IsConnected)
+            {
+
+                ScrollingCombatTextMessage.Create(
+                EntityManager,
+                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                AssetGuid,
+                BattlePosition,
+                Green,
+                playerTwo,
+                countdown,
+                BattleSCT,
+                playerUserTwo
+                );
+            }
+            */
+            
+            EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(); // okay to use same commandBuffer if operations happen in the same frame (I think >_>)
+            foreach (PlayerInfo player in onlineNearbyPlayers)
+            {
+                ScrollingCombatTextMessage.Create(
+                EntityManager,
+                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                AssetGuid,
+                BattlePosition,
+                Green,
+                player.CharEntity,
+                countdown,
+                BattleSCT,
+                player.UserEntity
+                );
+            }
+
+            --countdown;
+            yield return SecondDelay;
+        }
+
+        EnableAggro(PlayerBattleFamiliars[steamIdOne]);
+        EnableAggro(PlayerBattleFamiliars[steamIdTwo]);
+
+        Core.StartCoroutine(MatchTimeoutRoutine(matchPair));
+    }
+    static void EnableAggro(HashSet<Entity> familiars)
+    {
+        foreach (Entity familiar in familiars)
+        {
+            if (familiar.Has<AggroConsumer>())
+            {
+                familiar.With((ref AggroConsumer aggroConsumer) =>
+                {
+                    aggroConsumer.Active._Value = true;
+                });
+            }
+
+            if (familiar.Has<Aggroable>())
+            {
+                familiar.With((ref Aggroable aggroable) =>
+                {
+                    aggroable.Value._Value = true;
+                });
+            }
+        }
+    }
     public static IEnumerator MatchTimeoutRoutine((ulong, ulong) matchPair)
     {
         yield return TimeoutDelay;
 
-        if (MatchPairs.Contains(matchPair))
+        bool remainingOne = PlayerBattleFamiliars[matchPair.Item1].Any();
+        bool remainingTwo = PlayerBattleFamiliars[matchPair.Item2].Any();
+
+        if (remainingOne && remainingTwo && MatchPairs.Contains(matchPair))
         {
             HandleMatchTimeout(matchPair);
         }
@@ -402,13 +545,10 @@ internal class BattleService
     {
         yield return ChallengeExpiration;
 
-        if (!MatchPairs.Contains(matchPair))
+        if (!MatchPairs.Contains(matchPair) && EmoteSystemPatch.BattleChallenges.Contains(matchPair))
         {
-            if (EmoteSystemPatch.BattleChallenges.Contains(matchPair))
-            {
-                EmoteSystemPatch.BattleChallenges.Remove(matchPair);
-                NotifyBothPlayers(matchPair.Item1, matchPair.Item2, "Challenge expired...");
-            }
+            EmoteSystemPatch.BattleChallenges.Remove(matchPair);
+            NotifyBothPlayers(matchPair.Item1, matchPair.Item2, "Challenge expired...");
         }
     }
 }

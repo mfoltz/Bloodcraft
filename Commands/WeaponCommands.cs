@@ -185,7 +185,7 @@ internal static class WeaponCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -285,7 +285,7 @@ internal static class WeaponCommands
             float3 charPosition = character.Read<Translation>().Value;
 
             HashSet<PlayerInfo> processed = [];
-            Dictionary<string, PlayerInfo> players = new(OnlineCache);
+            Dictionary<ulong, PlayerInfo> players = new(OnlineCache);
 
             foreach (PlayerInfo playerInfo in players.Values)
             {
@@ -321,7 +321,7 @@ internal static class WeaponCommands
         }
         else
         {
-            PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == name.ToLower()).Value;
+            PlayerInfo playerInfo = GetPlayerInfo(name);
             if (!playerInfo.UserEntity.Exists())
             {
                 ctx.Reply($"Couldn't find player.");

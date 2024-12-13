@@ -23,7 +23,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void WeaponLevelDestroyPostfix(WeaponLevelSystem_Destroy __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.LevelingSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682408_0.ToEntityArray(Allocator.Temp);
@@ -48,7 +48,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPrefix]
     static void OnUpdatePrefix(WeaponLevelSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
         try
@@ -119,7 +119,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void OnUpdatePostfix(WeaponLevelSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.LevelingSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
@@ -144,7 +144,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPrefix]
     static void ArmorLevelSpawnPrefix(ArmorLevelSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.LevelingSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
@@ -169,7 +169,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.LevelingSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
@@ -194,7 +194,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     [HarmonyPostfix]
     static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.LevelingSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);

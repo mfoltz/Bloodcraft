@@ -18,7 +18,7 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);

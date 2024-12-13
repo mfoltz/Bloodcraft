@@ -27,10 +27,10 @@ internal static class PartyCommands
             return;
         }
 
-        ulong SteamID = ctx.Event.User.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(SteamID, "Grouping");
-        LocalizationService.HandleReply(ctx, $"Party invites {(Misc.GetPlayerBool(SteamID, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(steamId, "Grouping");
+        LocalizationService.HandleReply(ctx, $"Party invites {(Misc.GetPlayerBool(steamId, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]

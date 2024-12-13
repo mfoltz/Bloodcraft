@@ -160,7 +160,7 @@ namespace Bloodcraft
                     if (groupName == "misc")
                     {
                         commandLine = commandLine.Replace("misc ", "");
-                        int adjustmentLength = adminOnly ? usage.Length + 3 : usage.Length + 1; // +3 for " 🔒"
+                        int adjustmentLength = adminOnly ? usage.Length + 4 : usage.Length + 1; // +3 for " 🔒"
                         commandLine = commandLine[..^adjustmentLength] + (adminOnly ? "` 🔒" : "`");
                     }
 

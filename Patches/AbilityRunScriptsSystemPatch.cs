@@ -38,7 +38,7 @@ internal static class AbilityRunScriptsSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(AbilityRunScriptsSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!Classes) return;
 
         NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
@@ -80,7 +80,7 @@ internal static class AbilityRunScriptsSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(AbilityCastStarted_SetupAbilityTargetSystem_Shared __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);

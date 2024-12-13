@@ -160,7 +160,6 @@ internal static class ClassCommands
                         steamId.SetPlayerSpells(data);
 
                         Utilities.Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
-                        //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
                         return;
                     }
                 }
@@ -171,7 +170,6 @@ internal static class ClassCommands
                     steamId.SetPlayerSpells(spellsData);
 
                     Utilities.Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
-                    //EclipseService.SendClientAbilityData(ctx.Event.SenderCharacterEntity);
                 }
             }
         }

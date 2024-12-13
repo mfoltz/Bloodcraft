@@ -8,8 +8,7 @@ internal static class PartyUtilities
 {
     public static void HandlePartyAdd(ChatCommandContext ctx, ulong ownerId, string playerName)
     {
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == playerName.ToLower()).Value;
-
+        PlayerInfo playerInfo = GetPlayerInfo(playerName);
         if (playerInfo.UserEntity.Exists())
         {
             if (playerInfo.User.PlatformId == ownerId)
@@ -92,7 +91,7 @@ internal static class PartyUtilities
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Key.ToLower() == playerName.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(playerName);
         if (playerInfo.UserEntity.Exists() && party.Contains(playerInfo.User.CharacterName.Value))
         {
             party.Remove(playerInfo.User.CharacterName.Value);

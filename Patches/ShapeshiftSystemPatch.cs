@@ -21,7 +21,7 @@ internal static class ShapeshiftSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix(ShapeshiftSystem __instance)
     {
-        if (!Core.hasInitialized) return;
+        if (!Core._initialized) return;
         else if (!ConfigService.FamiliarSystem) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
