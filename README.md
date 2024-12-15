@@ -1,6 +1,6 @@
 ## Table of Contents
 
-*Features section under construction*
+-*Features section under construction*-
 
 - [Sponsors](#sponsors)
 - [Features](#features)
