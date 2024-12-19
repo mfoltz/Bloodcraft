@@ -7,10 +7,10 @@ using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Runtime.InteropServices;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
@@ -21,56 +21,66 @@ internal static class Extensions
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    public delegate void ActionRef<T>(ref T item);
-    public static void With<T>(this Entity entity, ActionRef<T> action) where T : struct
+    const string EMPTY_KEY = "LocalizationKey.Empty";
+
+    public delegate void WithRefHandler<T>(ref T item);
+    public static void With<T>(this Entity entity, WithRefHandler<T> action) where T : struct
     {
         T item = entity.ReadRW<T>();
+
         action(ref item);
         EntityManager.SetComponentData(entity, item);
     }
+    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+    {
+        if (!entity.Has<T>())
+        {
+            entity.Add<T>();
+        }
+
+        entity.With(action);
+    }
     public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
     {
-        // Get the ComponentType for T
-        var ct = new ComponentType(Il2CppType.Of<T>());
+        ComponentType componentType = new(Il2CppType.Of<T>());
+        TypeIndex typeIndex = componentType.TypeIndex;
 
-        // Marshal the component data to a byte array
         byte[] byteArray = StructureToByteArray(componentData);
-
-        // Get the size of T
         int size = Marshal.SizeOf<T>();
 
-        // Create a pointer to the byte array
-        fixed (byte* p = byteArray)
+        fixed (byte* byteData = byteArray)
         {
-            // Set the component data
-            EntityManager.SetComponentDataRaw(entity, ct.TypeIndex, p, size);
+            EntityManager.SetComponentDataRaw(entity, typeIndex, byteData, size);
         }
     }
-    public static byte[] StructureToByteArray<T>(T structure) where T : struct
+    static byte[] StructureToByteArray<T>(T structure) where T : struct
     {
         int size = Marshal.SizeOf(structure);
         byte[] byteArray = new byte[size];
-        IntPtr ptr = Marshal.AllocHGlobal(size);
 
+        IntPtr ptr = Marshal.AllocHGlobal(size);
         Marshal.StructureToPtr(structure, ptr, true);
+
         Marshal.Copy(ptr, byteArray, 0, size);
         Marshal.FreeHGlobal(ptr);
 
         return byteArray;
     }
-    public unsafe static T ReadRW<T>(this Entity entity) where T : struct
+    unsafe static T ReadRW<T>(this Entity entity) where T : struct
     {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        void* componentDataRawRW = EntityManager.GetComponentDataRawRW(entity, ct.TypeIndex);
-        T componentData = Marshal.PtrToStructure<T>(new IntPtr(componentDataRawRW));
-        return componentData;
+        ComponentType componentType = new(Il2CppType.Of<T>());
+        TypeIndex typeIndex = componentType.TypeIndex;
+
+        void* componentData = EntityManager.GetComponentDataRawRW(entity, typeIndex);
+        return Marshal.PtrToStructure<T>(new IntPtr(componentData));
     }
-    public unsafe static T Read<T>(this Entity entity) where T : struct
+    public unsafe static T ReadRO<T>(this Entity entity) where T : struct
     {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        void* rawPointer = EntityManager.GetComponentDataRawRO(entity, ct.TypeIndex);
-        T componentData = Marshal.PtrToStructure<T>(new IntPtr(rawPointer));
-        return componentData;
+        ComponentType componentType = new(Il2CppType.Of<T>());
+        TypeIndex typeIndex = componentType.TypeIndex;
+
+        void* componentData = EntityManager.GetComponentDataRawRO(entity, typeIndex);
+        return Marshal.PtrToStructure<T>(new IntPtr(componentData));
     }
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
     {
@@ -86,7 +96,8 @@ internal static class Extensions
 
         if (entity.Has<T>())
         {
-            componentData = entity.Read<T>();
+            componentData = entity.ReadRO<T>();
+
             return true;
         }
 
@@ -105,33 +116,22 @@ internal static class Extensions
     }
     public static bool Has<T>(this Entity entity)
     {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        return EntityManager.HasComponent(entity, ct);
+        return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
     }
-    public static string LookupName(this PrefabGUID prefabGUID)
+    public static string GetPrefabName(this PrefabGUID prefabGUID)
     {
-        return (PrefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGUID)
-            ? PrefabCollectionSystem.PrefabGuidToNameDictionary[prefabGUID] + " " + prefabGUID : "Guid Not Found").ToString();
+        return PrefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(prefabGUID, out string prefabName) ? $"{prefabName} {prefabGUID}" : "String.Empty";
     }
-    public static string GetPrefabName(this PrefabGUID itemPrefabGUID)
+    public static string GetLocalizedName(this PrefabGUID prefabGUID)
     {
-        return LocalizationService.GetPrefabName(itemPrefabGUID);
-    }
-    public static void LogComponentTypes(this Entity entity)
-    {
-        NativeArray<ComponentType>.Enumerator enumerator = EntityManager.GetComponentTypes(entity).GetEnumerator();
+        string localizedName = GetNameFromGuidString(GetGuidString(prefabGUID));
 
-        Core.Log.LogInfo("===");
-
-        while (enumerator.MoveNext())
+        if (!string.IsNullOrEmpty(localizedName))
         {
-            ComponentType current = enumerator.Current;
-            Core.Log.LogInfo($"{current}");
+            return localizedName;
         }
 
-        Core.Log.LogInfo("===");
-
-        enumerator.Dispose();
+        return EMPTY_KEY;
     }
     public static void Add<T>(this Entity entity)
     {
@@ -141,23 +141,14 @@ internal static class Extensions
     {
         EntityManager.RemoveComponent(entity, new(Il2CppType.Of<T>()));
     }
-    public static Entity GetOwner(this Entity entity)
-    {
-        return ServerGameManager.GetOwner(entity);
-    }
     public static bool TryGetFollowedPlayer(this Entity entity, out Entity player)
     {
         player = Entity.Null;
 
-        if (entity.Has<Follower>())
+        if (entity.TryGetComponent(out Follower follower))
         {
-            Follower follower = entity.Read<Follower>();
-            Entity followed = follower.Followed._Value;
-
-            if (followed.IsPlayer())
+            if (follower.Followed._Value.TryGetPlayer(out player))
             {
-                player = followed;
-
                 return true;
             }
         }
@@ -197,9 +188,8 @@ internal static class Extensions
     }
     public static bool IsFollowingPlayer(this Entity entity)
     {
-        if (entity.Has<Follower>())
+        if (entity.TryGetComponent(out Follower follower))
         {
-            Follower follower = entity.Read<Follower>();
             if (follower.Followed._Value.IsPlayer())
             {
                 return true;
@@ -214,7 +204,7 @@ internal static class Extensions
     }
     public static Entity GetPrefabEntity(this Entity entity)
     {
-        return ServerGameManager.GetPrefabEntity(entity.Read<PrefabGUID>());
+        return ServerGameManager.GetPrefabEntity(entity.ReadRO<PrefabGUID>());
     }
     public static Entity GetSpellTarget(this Entity entity)
     {
@@ -227,7 +217,7 @@ internal static class Extensions
         if (entity.TryGetComponent(out TeamReference teamReference))
         {
             Entity teamReferenceEntity = teamReference.Value._Value;
-            
+
             if (teamReferenceEntity.Exists())
             {
                 teamEntity = teamReferenceEntity;
@@ -254,7 +244,7 @@ internal static class Extensions
     {
         if (entity.TryGetComponent(out PlayerCharacter playerCharacter))
         {
-            return playerCharacter.UserEntity.Read<User>().PlatformId;
+            return playerCharacter.UserEntity.ReadRO<User>().PlatformId;
         }
         else if (entity.TryGetComponent(out User user))
         {
@@ -262,6 +252,15 @@ internal static class Extensions
         }
 
         return 0;
+    }
+    public static NetworkId GetNetworkId(this Entity entity)
+    {
+        if (entity.TryGetComponent(out NetworkId networkId))
+        {
+            return networkId;
+        }
+
+        return NetworkId.Empty;
     }
     public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
     {
@@ -280,21 +279,21 @@ internal static class Extensions
     public static PrefabGUID GetPrefabGUID(this Entity entity)
     {
         if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID;
+
         return PrefabGUID.Empty;
     }
     public static Entity GetUserEntity(this Entity character)
     {
         if (character.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
+
         return Entity.Null;
     }
     public static User GetUser(this Entity entity)
     {
-        User user = User.Empty;
-
-        if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
+        if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out User user)) return user;
         else if (entity.TryGetComponent(out user)) return user;
 
-        return user;
+        return User.Empty;
     }
     public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGUID)
     {
@@ -317,10 +316,6 @@ internal static class Extensions
         }
 
         return false;
-    }
-    public static void Remove<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer)
-    {
-        entityCommandBuffer.RemoveComponent(entity, new(Il2CppType.Of<T>()));
     }
     public static float3 GetAimPosition(this Entity entity)
     {
@@ -385,8 +380,45 @@ internal static class Extensions
 
         return false;
     }
+    public static bool IsCustomSpawned(this Entity entity)
+    {
+        if (entity.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
+        {
+            return true;
+        }
+
+        return false;
+    }
     public static void Destroy(this Entity entity)
     {
         if (entity.Exists()) DestroyUtility.Destroy(EntityManager, entity);
+    }
+    public static void SetTeam(this Entity entity, Entity teamSource)
+    {
+        if (entity.Has<Team>() && entity.Has<TeamReference>() && teamSource.TryGetComponent(out Team sourceTeam) && teamSource.TryGetComponent(out TeamReference sourceTeamReference))
+        {
+            Entity teamRefEntity = sourceTeamReference.Value._Value;
+            int teamId = sourceTeam.Value;
+
+            entity.With((ref TeamReference teamReference) =>
+            {
+                teamReference.Value._Value = teamRefEntity;
+            });
+
+            entity.With((ref Team team) =>
+            {
+                team.Value = teamId;
+            });
+        }
+    }
+    public static void SetFaction(this Entity entity, PrefabGUID factionPrefabGUID)
+    {
+        if (entity.Has<FactionReference>())
+        {
+            entity.With((ref FactionReference factionReference) =>
+            {
+                factionReference.FactionGuid._Value = factionPrefabGUID;
+            });
+        }
     }
 }

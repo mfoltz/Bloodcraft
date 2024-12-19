@@ -16,14 +16,20 @@ namespace Bloodcraft.Patches;
 internal static class ReactToInventoryChangedSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    const float PROFESSION_BASE_XP = 50f;
+
+    static readonly bool _professions = ConfigService.ProfessionSystem;
+    static readonly bool _quests = ConfigService.QuestSystem;
+
+    static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
+
+    const float BASE_PROFESSION_XP = 50f;
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!_professions && !_quests) return;
 
         NativeArray<InventoryChangedEvent> inventoryChangedEvents = __instance.__query_2096870024_0.ToComponentDataArray<InventoryChangedEvent>(Allocator.Temp);
         try
@@ -34,16 +40,16 @@ internal static class ReactToInventoryChangedSystemPatch
 
                 if (inventoryChangedEvent.ChangeType.Equals(InventoryChangedEventType.Obtained) && inventory.TryGetComponent(out InventoryConnection inventoryConnection))
                 {
-                    if (ConfigService.QuestSystem && inventoryConnection.InventoryOwner.IsPlayer())
+                    if (_quests && inventoryConnection.InventoryOwner.IsPlayer())
                     {
-                        User questUser = inventoryConnection.InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>();
+                        User questUser = inventoryConnection.InventoryOwner.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
 
                         if (!DealDamageSystemPatch.LastDamageTime.ContainsKey(questUser.PlatformId)) continue;
                         else if (DealDamageSystemPatch.LastDamageTime.TryGetValue(questUser.PlatformId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
                         {
                             if (questUser.PlatformId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, questUser);
                         }
-                        else continue;   
+                        else continue;
                     }
                     else if (inventoryConnection.InventoryOwner.TryGetComponent(out UserOwner userOwner) && userOwner.Owner.GetEntityOnServer().TryGetComponent(out User user))
                     {
@@ -55,11 +61,11 @@ internal static class ReactToInventoryChangedSystemPatch
 
                         PrefabGUID itemPrefabGUID = inventoryChangedEvent.Item;
                         Entity itemPrefab = inventoryChangedEvent.ItemEntity;
-                        string itemName = itemPrefabGUID.LookupName();
+                        string itemName = itemPrefabGUID.GetPrefabName();
 
                         if (itemPrefab.Has<UpgradeableLegendaryItem>())
                         {
-                            int tier = itemPrefab.Read<UpgradeableLegendaryItem>().CurrentTier;
+                            int tier = itemPrefab.ReadRO<UpgradeableLegendaryItem>().CurrentTier;
                             itemPrefabGUID = itemPrefab.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
                         }
 
@@ -87,13 +93,13 @@ internal static class ReactToInventoryChangedSystemPatch
                                 if (jobs == 0) craftingJobs.Remove(itemPrefabGUID);
                                 else craftingJobs[itemPrefabGUID] = jobs;
 
-                                if (ConfigService.QuestSystem && steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefabGUID, 1, user);
+                                if (_quests && steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefabGUID, 1, user);
 
-                                if (ConfigService.ProfessionSystem)
+                                if (_professions)
                                 {
-                                    float professionXP = PROFESSION_BASE_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
-                                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGUID, "");
+                                    float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
 
+                                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGUID, "");
                                     if (handler != null)
                                     {
                                         if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
@@ -105,9 +111,9 @@ internal static class ReactToInventoryChangedSystemPatch
                                             case BlacksmithingHandler:
                                                 if (itemPrefab.Has<Durability>())
                                                 {
-                                                    Durability durability = itemPrefab.Read<Durability>();
+                                                    Durability durability = itemPrefab.ReadRO<Durability>();
                                                     int level = handler.GetProfessionData(steamId).Key;
-                                                    durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                                                    durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
                                                     durability.Value = durability.MaxDurability;
                                                     itemPrefab.Write(durability);
                                                 }
@@ -118,9 +124,9 @@ internal static class ReactToInventoryChangedSystemPatch
                                             case EnchantingHandler:
                                                 if (itemPrefab.Has<Durability>())
                                                 {
-                                                    Durability durability = itemPrefab.Read<Durability>();
+                                                    Durability durability = itemPrefab.ReadRO<Durability>();
                                                     int level = handler.GetProfessionData(steamId).Key;
-                                                    durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                                                    durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
                                                     durability.Value = durability.MaxDurability;
                                                     itemPrefab.Write(durability);
                                                 }
@@ -129,9 +135,9 @@ internal static class ReactToInventoryChangedSystemPatch
                                             case TailoringHandler:
                                                 if (itemPrefab.Has<Durability>())
                                                 {
-                                                    Durability durability = itemPrefab.Read<Durability>();
+                                                    Durability durability = itemPrefab.ReadRO<Durability>();
                                                     int level = handler.GetProfessionData(steamId).Key;
-                                                    durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                                                    durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
                                                     durability.Value = durability.MaxDurability;
                                                     itemPrefab.Write(durability);
                                                 }

@@ -13,10 +13,10 @@ internal static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly int MaxBloodLevel = ConfigService.MaxBloodLevel;
-    static readonly int LegacyStatChoices = ConfigService.LegacyStatChoices;
-    static readonly float VBloodLegacyMultiplier = ConfigService.VBloodLegacyMultiplier;
-    static readonly float UnitLegacyMultiplier = ConfigService.UnitLegacyMultiplier;
+    static readonly int _maxBloodLevel = ConfigService.MaxBloodLevel;
+    static readonly int _legacyStatChoices = ConfigService.LegacyStatChoices;
+    static readonly float _vBloodLegacyMultiplier = ConfigService.VBloodLegacyMultiplier;
+    static readonly float _unitLegacyMultiplier = ConfigService.UnitLegacyMultiplier;
 
     const int BASE_BLOOD_FACTOR = 10;
     const float BLOOD_TYPE_FACTOR = 3f;
@@ -186,27 +186,27 @@ internal static class BloodSystem
     {
         if (!target.Has<BloodConsumeSource>()) return;
 
-        BloodConsumeSource bloodConsumeSource = target.Read<BloodConsumeSource>();
+        BloodConsumeSource bloodConsumeSource = target.ReadRO<BloodConsumeSource>();
         BloodType targetBloodType = GetBloodTypeFromPrefab(bloodConsumeSource.UnitBloodType._Value);
 
-        int unitLevel = target.Read<UnitLevel>().Level;
+        int unitLevel = target.ReadRO<UnitLevel>().Level;
         float bloodValue = 0;
 
         if (target.Has<VBloodConsumeSource>())
         {
-            bloodValue = BASE_BLOOD_FACTOR * unitLevel * VBloodLegacyMultiplier;
+            bloodValue = BASE_BLOOD_FACTOR * unitLevel * _vBloodLegacyMultiplier;
         }
         else
         {
-            bloodValue = bloodConsumeSource.BloodQuality / BASE_BLOOD_FACTOR * unitLevel * UnitLegacyMultiplier;
+            bloodValue = bloodConsumeSource.BloodQuality / BASE_BLOOD_FACTOR * unitLevel * _unitLegacyMultiplier;
         }
 
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
+        Entity userEntity = source.ReadRO<PlayerCharacter>().UserEntity;
+        User user = userEntity.ReadRO<User>();
         ulong steamID = user.PlatformId;
 
         BloodType bloodType = BloodManager.GetCurrentBloodType(source);
-        float bloodQuality = source.Read<Blood>().Quality;
+        float bloodQuality = source.ReadRO<Blood>().Quality;
 
         if (bloodType.Equals(BloodType.None)) return;
         else if (targetBloodType.Equals(bloodType))
@@ -275,7 +275,7 @@ internal static class BloodSystem
         int currentLevel = xpData.Key;
         float currentXP = xpData.Value;
 
-        if (currentLevel >= MaxBloodLevel)
+        if (currentLevel >= _maxBloodLevel)
         {
             // Already at max level, no changes
             leveledUp = false;
@@ -291,10 +291,10 @@ internal static class BloodSystem
         if (newLevel > currentLevel)
         {
             leveledUp = true;
-            if (newLevel > MaxBloodLevel)
+            if (newLevel > _maxBloodLevel)
             {
-                newLevel = MaxBloodLevel;
-                newExperience = ConvertLevelToXp(MaxBloodLevel);
+                newLevel = _maxBloodLevel;
+                newExperience = ConvertLevelToXp(_maxBloodLevel);
             }
         }
 
@@ -302,7 +302,7 @@ internal static class BloodSystem
     }
     static void HandleBloodLevelUp(User user, BloodType bloodType, int newLevel, ulong steamID)
     {
-        if (newLevel <= MaxBloodLevel)
+        if (newLevel <= _maxBloodLevel)
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
@@ -314,9 +314,9 @@ internal static class BloodSystem
             if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
             {
                 int currentStatCount = stats.Count;
-                if (currentStatCount < LegacyStatChoices)
+                if (currentStatCount < _legacyStatChoices)
                 {
-                    int choicesLeft = LegacyStatChoices - currentStatCount;
+                    int choicesLeft = _legacyStatChoices - currentStatCount;
                     string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
                     LocalizationService.HandleServerReply(EntityManager, user,
                         $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to choose and '<color=white>.bl lst</color>' to view legacy stat options. (toggle reminders with <color=white>'.remindme'</color>)");
@@ -335,8 +335,8 @@ internal static class BloodSystem
         {
             HandleBloodLevelUp(user, bloodType, newLevel, steamID);
         }
-
-        if (Misc.GetPlayerBool(steamID, "BloodLogging"))
+        else if (newLevel >= _maxBloodLevel) return;
+        else if (Misc.GetPlayerBool(steamID, "BloodLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
@@ -399,7 +399,7 @@ internal static class BloodSystem
     }
     public static BloodType GetBloodTypeFromPrefab(PrefabGUID bloodPrefab)
     {
-        string bloodCheck = bloodPrefab.LookupName();
+        string bloodCheck = bloodPrefab.GetPrefabName();
 
         return Enum.GetValues(typeof(BloodType))
             .Cast<BloodType>()

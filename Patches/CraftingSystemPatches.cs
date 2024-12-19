@@ -24,9 +24,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static NetworkIdSystem.Singleton NetworkIdSystem => SystemService.NetworkIdSystem;
 
     const float CRAFT_THRESHOLD = 0.99f;
-    static readonly float CraftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
+    static readonly float _craftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
-    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> playerCraftingJobs = []; // guess I'll just start using these if in doubt about the order of operations, so to speak >_>
+    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = []; // guess I'll just start using these if in doubt about the order of operations, so to speak >_>   
     public static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> ValidatedCraftingJobs = [];
 
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
@@ -41,24 +41,24 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         {
             foreach (Entity entity in repairEntities)
             {
-                Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
+                Forge_Shared forge_Shared = entity.ReadRO<Forge_Shared>();
                 if (forge_Shared.State == ForgeState.Empty) continue;
 
-                UserOwner userOwner = entity.Read<UserOwner>();
+                UserOwner userOwner = entity.ReadRO<UserOwner>();
                 Entity userEntity = userOwner.Owner._Entity;
-                User user = userEntity.Read<User>();
+                User user = userEntity.ReadRO<User>();
                 ulong steamId = user.PlatformId;
 
                 Entity itemEntity = forge_Shared.ItemEntity._Entity;
-                PrefabGUID itemPrefab = itemEntity.Read<PrefabGUID>();
+                PrefabGUID itemPrefab = itemEntity.ReadRO<PrefabGUID>();
 
                 if (itemEntity.Has<ShatteredItem>())
                 {
-                    itemPrefab = itemEntity.Read<ShatteredItem>().OutputItem;
+                    itemPrefab = itemEntity.ReadRO<ShatteredItem>().OutputItem;
                 }
                 else if (itemEntity.Has<UpgradeableLegendaryItem>())
                 {
-                    int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                    int tier = itemEntity.ReadRO<UpgradeableLegendaryItem>().CurrentTier;
                     var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
                     itemPrefab = buffer[tier].TierPrefab;
                 }
@@ -78,14 +78,14 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         {
                             Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
 
-                            Durability durability = itemEntity.Read<Durability>();
-                            Durability originalDurability = originalItem.Read<Durability>();
+                            Durability durability = itemEntity.ReadRO<Durability>();
+                            Durability originalDurability = originalItem.ReadRO<Durability>();
 
                             if (durability.MaxDurability > originalDurability.MaxDurability) continue; // already handled
 
                             int level = handler.GetProfessionData(steamId).Key;
 
-                            durability.MaxDurability *= (1 + (float)level / (float)ConfigService.MaxProfessionLevel);
+                            durability.MaxDurability *= (1 + level / (float)ConfigService.MaxProfessionLevel);
                             durability.Value = durability.MaxDurability;
                             itemEntity.Write(durability);
 
@@ -125,7 +125,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         }
 
                         QueuedWorkstationCraftAction queuedWorkstationCraftAction = buffer[0];
-                        float recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75f : 1f;
+                        float recipeReduction = entity.ReadRO<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75f : 1f;
 
                         ProcessQueuedCraftAction(entity, queuedWorkstationCraftAction, recipeReduction);
                     }
@@ -194,17 +194,17 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                     ulong steamId = fromCharacter.User.GetSteamId();
 
-                    if (!playerCraftingJobs.ContainsKey(steamId))
+                    if (!_playerCraftingJobs.ContainsKey(steamId))
                     {
-                        playerCraftingJobs.TryAdd(steamId, []);
+                        _playerCraftingJobs.TryAdd(steamId, []);
                     }
 
-                    if (!playerCraftingJobs[steamId].ContainsKey(craftingStation))
+                    if (!_playerCraftingJobs[steamId].ContainsKey(craftingStation))
                     {
-                        playerCraftingJobs[steamId].Add(craftingStation, []);
+                        _playerCraftingJobs[steamId].Add(craftingStation, []);
                     }
 
-                    Dictionary<PrefabGUID, int> RecipesCrafting = playerCraftingJobs[steamId][craftingStation];
+                    Dictionary<PrefabGUID, int> RecipesCrafting = _playerCraftingJobs[steamId][craftingStation];
 
                     if (!RecipesCrafting.ContainsKey(itemPrefabGUID))
                     {
@@ -217,7 +217,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         RecipesCrafting[itemPrefabGUID] = ++RecipesCrafting[itemPrefabGUID];
                     }
 
-                    playerCraftingJobs[steamId][craftingStation] = RecipesCrafting;
+                    _playerCraftingJobs[steamId][craftingStation] = RecipesCrafting;
                 }
             }
         }
@@ -289,12 +289,12 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                     //Entity inventoryOwner = receivingInventory.Has<InventoryConnection>() ? receivingInventory.Read<InventoryConnection>().InventoryOwner : Entity.Null;
                     int fromSlot = moveItemBetweenInventoriesEvent.FromSlot;
 
-                    PrefabGUID itemPrefabGUID = InventoryUtilities.TryGetInventoryEntity(EntityManager, fromCharacter.Character, out Entity playerInventory) 
+                    PrefabGUID itemPrefabGUID = InventoryUtilities.TryGetInventoryEntity(EntityManager, fromCharacter.Character, out Entity playerInventory)
                         && ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var inventoryBuffer) && inventoryBuffer.TryGetAtIndex(fromSlot, out InventoryBuffer item) ? item.ItemType : PrefabGUID.Empty;
 
                     if (receivingInventory.Has<CastleWorkstation>())
                     {
-                        if (playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(receivingInventory, out var craftingJobs))
+                        if (_playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(receivingInventory, out var craftingJobs))
                         {
                             if (craftingJobs.ContainsKey(itemPrefabGUID))
                             {
@@ -343,7 +343,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
             float craftDuration = recipeData.CraftDuration;
             float craftProgress = craftAction.ProgressTime;
 
-            float totalTime = (craftDuration * recipeReduction) / CraftRateModifier;
+            float totalTime = (craftDuration * recipeReduction) / _craftRateModifier;
             if (!craftFinished && craftProgress / totalTime >= CRAFT_THRESHOLD)
             {
                 //Core.Log.LogInfo($"Crafting progress finished for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
@@ -370,9 +370,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     }
     static void ValidateCraftingJob(Entity craftingStation, PrefabGUID itemPrefabGUID, ulong steamId)
     {
-        if (playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(craftingStation, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
+        if (_playerCraftingJobs.TryGetValue(steamId, out var stationJobs) && stationJobs.TryGetValue(craftingStation, out var craftingJobs) && craftingJobs.ContainsKey(itemPrefabGUID))
         {
-            if (craftingJobs[itemPrefabGUID] > 0) 
+            if (craftingJobs[itemPrefabGUID] > 0)
             {
                 if (!ValidatedCraftingJobs.ContainsKey(steamId))
                 {

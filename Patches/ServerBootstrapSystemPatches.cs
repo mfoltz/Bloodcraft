@@ -31,32 +31,32 @@ internal static class ServerBootstrapSystemPatches
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static PrefabLookupMap PrefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
+    static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
-    static readonly WaitForSeconds Delay = new(2.5f);
+    static readonly WaitForSeconds _delay = new(2.5f);
 
-    static readonly PrefabGUID InsideWoodenCoffin = new(381160212);
-    static readonly PrefabGUID InsideStoneCoffin = new(569692162);
+    static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
+    static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
-    static readonly bool BloodSystem = ConfigService.BloodSystem;
-    static readonly bool Leveling = ConfigService.LevelingSystem;
-    static readonly bool Prestige = ConfigService.PrestigeSystem;
-    static readonly bool FamiliarSystem = ConfigService.FamiliarSystem;
-    static readonly bool ExpertiseSystem = ConfigService.ExpertiseSystem;
-    static readonly bool QuestSystem = ConfigService.QuestSystem;
-    static readonly bool ClientCompanion = ConfigService.ClientCompanion;
-    static readonly bool ExoPrestiging = ConfigService.ExoPrestiging;
-    static readonly bool RestedXPSystem = ConfigService.RestedXPSystem;
-    static readonly bool Professions = ConfigService.ProfessionSystem;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _bloodSystem = ConfigService.BloodSystem;
+    static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _prestige = ConfigService.PrestigeSystem;
+    static readonly bool _familiarSystem = ConfigService.FamiliarSystem;
+    static readonly bool _expertiseSystem = ConfigService.ExpertiseSystem;
+    static readonly bool _questSystem = ConfigService.QuestSystem;
+    static readonly bool _clientCompanion = ConfigService.ClientCompanion;
+    static readonly bool _exoPrestiging = ConfigService.ExoPrestiging;
+    static readonly bool _restedXPSystem = ConfigService.RestedXPSystem;
+    static readonly bool _professions = ConfigService.ProfessionSystem;
 
-    static readonly float RestedXPTickRate = ConfigService.RestedXPTickRate;
-    static readonly float RestedXPRate = ConfigService.RestedXPRate;
-    static readonly int RestedXPMax = ConfigService.RestedXPMax;
-    static readonly int StartingLevel = ConfigService.StartingLevel;
-    static readonly int MaxLevel = ConfigService.MaxLevel;
+    static readonly float _restedXPTickRate = ConfigService.RestedXPTickRate;
+    static readonly float _restedXPRate = ConfigService.RestedXPRate;
+    static readonly int _restedXPMax = ConfigService.RestedXPMax;
+    static readonly int _startingLevel = ConfigService.StartingLevel;
+    static readonly int _maxLevel = ConfigService.MaxLevel;
 
-    static readonly ConcurrentDictionary<string, bool> DefaultBools = new()
+    static readonly ConcurrentDictionary<string, bool> _defaultBools = new()
     {
         ["ExperienceLogging"] = false,
         ["QuestLogging"] = false,
@@ -96,26 +96,26 @@ internal static class ServerBootstrapSystemPatches
     }
     static IEnumerator UpdatePlayerData(ulong steamId, Entity playerCharacter, Entity userEntity, User user, bool exists)
     {
-        yield return Delay;
+        yield return _delay;
 
         if (!steamId.TryGetPlayerBools(out var bools))
         {
-            steamId.SetPlayerBools(DefaultBools);
+            steamId.SetPlayerBools(_defaultBools);
         }
         else
         {
-            foreach (string key in DefaultBools.Keys)
+            foreach (string key in _defaultBools.Keys)
             {
                 if (!bools.ContainsKey(key))
                 {
-                    bools[key] = DefaultBools[key];
+                    bools[key] = _defaultBools[key];
                 }
             }
 
             steamId.SetPlayerBools(bools);
         }
 
-        if (Professions)
+        if (_professions)
         {
             if (!steamId.TryGetPlayerWoodcutting(out var _))
             {
@@ -158,7 +158,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (ExpertiseSystem)
+        if (_expertiseSystem)
         {
             if (!steamId.TryGetPlayerUnarmedExpertise(out var _))
             {
@@ -248,7 +248,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (BloodSystem)
+        if (_bloodSystem)
         {
             if (!steamId.TryGetPlayerWorkerLegacy(out var _))
             {
@@ -318,14 +318,14 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (Leveling)
+        if (_leveling)
         {
             if (!steamId.TryGetPlayerExperience(out var experience))
             {
-                steamId.SetPlayerExperience(new KeyValuePair<int, float>(StartingLevel, ConvertLevelToXp(StartingLevel)));
+                steamId.SetPlayerExperience(new KeyValuePair<int, float>(_startingLevel, ConvertLevelToXp(_startingLevel)));
             }
 
-            if (RestedXPSystem)
+            if (_restedXPSystem)
             {
                 if (!steamId.TryGetPlayerRestedXP(out var restedData))
                 {
@@ -335,22 +335,22 @@ internal static class ServerBootstrapSystemPatches
                 {
                     float restedMultiplier = 0f;
 
-                    if (ServerGameManager.HasBuff(playerCharacter, InsideWoodenCoffin)) restedMultiplier = 0.5f;
-                    else if (ServerGameManager.HasBuff(playerCharacter, InsideStoneCoffin)) restedMultiplier = 1f;
+                    if (ServerGameManager.HasBuff(playerCharacter, _insideWoodenCoffin)) restedMultiplier = 0.5f;
+                    else if (ServerGameManager.HasBuff(playerCharacter, _insideStoneCoffin)) restedMultiplier = 1f;
 
                     DateTime lastLogout = restedData.Key;
                     TimeSpan timeOffline = DateTime.UtcNow - lastLogout;
 
-                    if (timeOffline.TotalMinutes >= RestedXPTickRate && restedMultiplier != 0f && experience.Key < MaxLevel)
+                    if (timeOffline.TotalMinutes >= _restedXPTickRate && restedMultiplier != 0f && experience.Key < _maxLevel)
                     {
                         float currentRestedXP = restedData.Value;
 
                         int currentLevel = experience.Key;
-                        int maxRestedLevel = Math.Min(RestedXPMax + currentLevel, MaxLevel);
+                        int maxRestedLevel = Math.Min(_restedXPMax + currentLevel, _maxLevel);
                         float restedCap = ConvertLevelToXp(maxRestedLevel) - ConvertLevelToXp(currentLevel);
 
-                        float earnedPerTick = RestedXPRate * restedCap;
-                        float earnedRestedXP = (float)timeOffline.TotalMinutes / RestedXPTickRate * earnedPerTick * restedMultiplier;
+                        float earnedPerTick = _restedXPRate * restedCap;
+                        float earnedRestedXP = (float)timeOffline.TotalMinutes / _restedXPTickRate * earnedPerTick * restedMultiplier;
 
                         currentRestedXP = Math.Min(currentRestedXP + earnedRestedXP, restedCap);
                         int roundedXP = (int)(Math.Round(currentRestedXP / 100.0) * 100);
@@ -365,7 +365,7 @@ internal static class ServerBootstrapSystemPatches
             if (exists) LevelingSystem.SetLevel(playerCharacter);
         }
 
-        if (Prestige)
+        if (_prestige)
         {
             if (!steamId.TryGetPlayerPrestiges(out var prestiges))
             {
@@ -385,7 +385,7 @@ internal static class ServerBootstrapSystemPatches
                     if (!prestiges.ContainsKey(prestigeType)) prestiges.Add(prestigeType, 0);
                 }
 
-                if (ExoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
+                if (_exoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
                     PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
 
@@ -396,7 +396,7 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                if (ExoPrestiging && !steamId.TryGetPlayerExoFormData(out var _))
+                if (_exoPrestiging && !steamId.TryGetPlayerExoFormData(out var _))
                 {
                     KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MaxValue, 0f);
                     steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -404,7 +404,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (FamiliarSystem)
+        if (_familiarSystem)
         {
             if (!steamId.TryGetFamiliarActives(out var _))
             {
@@ -418,7 +418,7 @@ internal static class ServerBootstrapSystemPatches
 
             if (!steamId.TryGetFamiliarBattleGroup(out var _))
             {
-                steamId.SetFamiliarBattleGroup([0,0,0]);
+                steamId.SetFamiliarBattleGroup([0, 0, 0]);
             }
 
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
@@ -436,7 +436,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (Classes)
+        if (_classes)
         {
             if (!steamId.TryGetPlayerClasses(out var _))
             {
@@ -449,7 +449,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (ClientCompanion && exists)
+        if (_clientCompanion && exists)
         {
             PlayerInfo playerInfo = new()
             {
@@ -464,7 +464,7 @@ internal static class ServerBootstrapSystemPatches
     }
     static IEnumerator UpdatePlayerFamiliar(Entity playerCharacter, Entity familiar)
     {
-        yield return Delay;
+        yield return _delay;
 
         FamiliarSummonSystem.HandleFamiliar(playerCharacter, familiar);
     }
@@ -480,16 +480,16 @@ internal static class ServerBootstrapSystemPatches
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
 
-        if (Leveling)
+        if (_leveling)
         {
-            if (RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+            if (_restedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                 steamId.SetPlayerRestedXP(restedData);
             }
         }
-        
-        if (ClientCompanion)
+
+        if (_clientCompanion)
         {
             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
         }
@@ -510,16 +510,16 @@ internal static class ServerBootstrapSystemPatches
 
                     if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
                     {
-                        if (Leveling)
+                        if (_leveling)
                         {
-                            if (RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+                            if (_restedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
                             {
                                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                                 steamId.SetPlayerRestedXP(restedData);
                             }
                         }
 
-                        if (ClientCompanion)
+                        if (_clientCompanion)
                         {
                             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
                         }

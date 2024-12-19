@@ -12,12 +12,15 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ModifyUnitStatBuffSystemSpawnPatch
 {
+    static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
+
     [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ExpertiseSystem) return;
+        else if (!_expertise) return;
 
         NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
         try
@@ -37,6 +40,7 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
                     //if (ConfigService.ProfessionSystem) EquipmentManager.ApplyEquipmentStats(steamId, weaponEntity);
                     WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
                 }
+
                 /*
                 else if (ConfigService.ProfessionSystem && entity.Has<ArmorLevel>() && entity.GetOwner().TryGetPlayer(out player))
                 {
@@ -64,7 +68,7 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
     static void OnUpdatePostix(ModifyUnitStatBuffSystem_Spawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.LevelingSystem) return;
+        else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.Temp);
         try

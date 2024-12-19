@@ -8,8 +8,8 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodManager;
-using static VCF.Core.Basics.RoleCommands;
 using static Bloodcraft.Utilities.Progression;
+using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
@@ -30,7 +30,7 @@ internal static class BloodCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        Blood playerBlood = character.Read<Blood>();
+        Blood playerBlood = character.ReadRO<Blood>();
         BloodType bloodType = GetCurrentBloodType(character);
 
         if (string.IsNullOrEmpty(blood))
@@ -184,7 +184,7 @@ internal static class BloodCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
             }
         }
         else

@@ -16,26 +16,27 @@ internal static class ExoForm
     static SystemService SystemService => Core.SystemService;
     static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
-    public const float BaseDuration = 15f;
-    public const float MaxAddedDuration = 165f;
+    public const float BASE_DURATION = 15f;
+    public const float MAX_ADDED_DURATION = 165f;
 
-    static readonly int ExoPrestiges = ConfigService.ExoPrestiges;
+    static readonly int _exoPrestiges = ConfigService.ExoPrestiges;
 
-    static readonly AssetGuid AssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
-    static readonly float3 Red = new(1f, 0f, 0f);
+    static readonly AssetGuid _assetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
+    static readonly PrefabGUID _exoCountdownSCT = new(106212079);
+    static readonly float3 _red = new(1f, 0f, 0f);
 
-    static readonly WaitForSeconds SecondDelay = new(1f);
+    static readonly WaitForSeconds _secondDelay = new(1f);
     public static bool CheckExoFormCharge(User user, ulong steamId) // also BuffUtilities? maybe ExoForm utilities or something, idk
     {
         UpdateExoFormChargeStored(steamId);
 
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BaseDuration)
+        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BASE_DURATION)
         {
             ReplyNotEnoughCharge(user, steamId);
 
             return false;
         }
-        else if (steamId.TryGetPlayerExoFormData(out exoFormData) && exoFormData.Value >= BaseDuration)
+        else if (steamId.TryGetPlayerExoFormData(out exoFormData) && exoFormData.Value >= BASE_DURATION)
         {
             return true;
         }
@@ -54,7 +55,7 @@ internal static class ExoForm
         float totalDuration = CalculateFormDuration(exoLevel);
 
         //float chargeNeeded = BaseDuration - exoFormData.Value; hmm this really shouldn't have been giving realistic values, need to check this out
-        float chargeNeeded = BaseDuration;
+        float chargeNeeded = BASE_DURATION;
         float ratioToTotal = chargeNeeded / totalDuration;
         float secondsRequired = 86400f * ratioToTotal;
 
@@ -84,7 +85,7 @@ internal static class ExoForm
         }
         else if (prestigeLevel > 1)
         {
-            return 15f + (MaxAddedDuration / ExoPrestiges) * (prestigeLevel);
+            return 15f + (MAX_ADDED_DURATION / _exoPrestiges) * (prestigeLevel);
         }
 
         return 0f;
@@ -99,23 +100,23 @@ internal static class ExoForm
         // Wait until there are 5 seconds left
         while (buffEntity.Exists() && countdown > 0f)
         {
-            float3 targetPosition = playerEntity.Read<Translation>().Value;
+            float3 targetPosition = playerEntity.ReadRO<Translation>().Value;
             targetPosition = new float3(targetPosition.x, targetPosition.y + 1.5f, targetPosition.z);
 
             ScrollingCombatTextMessage.Create(
                 EntityManager,
                 EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                AssetGuid,
+                _assetGuid,
                 targetPosition,
-                Red,
+                _red,
                 playerEntity,
                 countdown,
-                default,
+                _exoCountdownSCT,
                 userEntity
             );
 
             countdown--;
-            yield return SecondDelay;
+            yield return _secondDelay;
 
             if (countdown == 0f)
             {
@@ -145,7 +146,7 @@ internal static class ExoForm
     {
         if (steamId.TryGetPlayerExoFormData(out var exoFormData))
         {
-            float timeInForm = buffEntity.Read<Age>().Value;
+            float timeInForm = buffEntity.ReadRO<Age>().Value;
 
             KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - timeInForm);
             steamId.SetPlayerExoFormData(timeEnergyPair);

@@ -1,6 +1,6 @@
 ## Table of Contents
 
-Commands/config up to date, better feature summaries next on the list.
+*Features section under construction*
 
 - [Sponsors](#sponsors)
 - [Features](#features)
@@ -26,6 +26,40 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **Familiars:** Every kill of a valid unit is a chance to unlock that unit as a familiar, now including VBloods and summoners! VBloods can be toggled on/off and unit types can be configurably allowed (humans, demons, beasts, etc) although do note that some category bans will supercede VBlood checks (if humans are banned, Vincent will be banned as well even if VBloods are enabled); there is also a list for individual unit bans. They will level up, fight for you, and you can collect them all. Only one familiar can be summoned at a time. They can be toggled (called/dismissed) without fully unbinding them to quickly use waygates (attempting to use a waygate with a familiar out will dismiss it automatically now and using it will then summon the familiar again so it is there after teleporting) and perform other actions normally prohibited by having a follower like a charmed human. Each set can hold 10 and more sets will be created once the one being added to is full. You can choose the active set by name (default is FamiliarsList1, FamiliarsList2, etc), remove familiars from sets, move familiars between sets, and the sets can be renamed. To summon a familiar from your current set (which can be chosen with .cfs [Name]), .lf to see the units available and use .bind #; to choose a different one, use .unbind, and if it gets weird or buggy at any point .resetfams can be used to clear your active familiar data and followerBuffer. All units have the same stats as usual, however their phys/spell power starts at 10% at level 1 and will scale to 100% again when they reach max level. Base health is 500 and will scale with up to 2500 at max level. Traders, carriages, horses, crystals (looking at you dracula blood crystal thing) and werewolves are unavailable. Werewolves will be in the pool once I add handling for their transformations (ngl completely forgot about this, oops >_>) but the rest will likely stay banned (if you manually add one of them to your unlocks as an admin that's on you :P). Can't bind in combat or pvp combat. Shinies are back! 20% chance to unlock 1 of 6 visuals when first obtaining unit and 100% to unlock one on repeat unlock of same unit, one visual per unit for now. Can toggle visual being applied when familiar is bound using 'yes' if familiar emote actions are enabled. '.fam v [SpellSchool]' is good for one free shiny visual of choice and will apply to your active familiar.
 - **Classes:** Soft synergies allows for the encouragement of stat choices without restricting choices while hard synergies will only allow the stats for that class to be chosen. Both soft or hard will apply the synergy multiplier to the max stat bonuses for that class for weapon expertise/blood legacies. Additionally, each class has a config spot for 4 blood buffs (the correct prefabs for this start with AB_BloodBuff_) that are granted every MaxPlayerLevel/#buffs while leveling up (with 4 buffs and 90 being the max, they'll be applied at 22, 44, 66, and 88) and apply permanently at max strength without regard to the blood quality or type the player possesses (can be skipped with 0 in the spot). They do not stack with buffs from the same blood type (if a player has the scholar free cast proc buff from class and also has 100% scholar blood, those chances will not stack) which maintains a sense of balance while allowing each class to have a persistent theme/identity that can be earned without excessive grinding. Classes also get extra spells to use on shift that are configurable, both the spell and at what level of prestige they are earned at but do keep in mind the considerations mentioned in the prestige section. Will probably be changing at least a few aspects of these new class systems in the future but am overall happy with where they're at in the sense that they allow for a lot of customization and can be made to feel as unique as you'd like. Tried to make decent thematic choices for the default blood buffs and spells per class but no promises :P. Changing classes should properly remove and apply buffs based on level. Also, spell school effects on hit unique to each class if enabled! (will be debuff of spell school for class and if debuff already present will proc respective t08 necklace effect)
 - **Quests:** Daily and weekly kill quests. Configurable reward pool and amounts. Dailies give 2.5% of your total exp as reward, weeklies give 10%. Can track progress and see details with commands.
+
+### Experience Leveling
+
+### Weapon Expertise
+- Gain levels in weapon types when slaying (equipped for final blow) enemies.
+  - .wep log (toggle gains logging in chat) 
+  - .wep get (view weapon progression/stat details)
+- Pick stats to enhance per weapon when equipped.
+  - .wep lst (view weapon bonus stat options)
+  - .wep cst [Weapon] [WeaponStat] (select bonus stat for entered weapon)
+  - .wep rst (reset stat selection for current weapon)
+- Stat bonus values scale with player weapon expertise level per weapon.
+  - classes have synergies with different weapon stats (see Classes section)
+
+### Blood Legacies
+- Gain levels in blood types when feeding on (executes and completions) enemies.
+  - .bl log (toggle gains logging in chat) 
+  - .bl get (view blood progression/stat details)
+- Pick stats to enhance per blood when using.
+  - .bl lst (view blood bonus stat options)
+  - .bl cst [Blood] [BloodStat] (select bonus stat for entered weapon)
+  - .bl rst (reset stat selection for current weapon)
+- Stat bonus values scale with player blood legacy level per blood.
+  - classes have synergies with different blood stats (see Classes section)
+	
+### Prestige
+
+### Classes
+
+### Familiars
+
+### Quests
+
+### Professions
 
 ## Commands
 
@@ -177,7 +211,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Toggles taunting to enter exo form.
   - Shortcut: *.exoform*
 - `.cleanupfams` 🔒
-  - Removes disabled, invisible familiars on the map preventing building. Pending deprecation.
+  - Removes disabled, invisible familiars on the map preventing building.
   - Shortcut: *.cleanupfams*
 
 ### Party Commands
@@ -262,6 +296,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.quest reroll [QuestType]`
   - Reroll quest for cost (daily only currently).
   - Shortcut: *.quest r [QuestType]*
+- `.quest complete [Name] [QuestType]` 🔒
+  - Forcibly completes a specified quest for a player.
+  - Shortcut: *.quest c [Name] [QuestType]*
 
 ### Weapon Commands
 - `.weapon getexpertise`
@@ -595,7 +632,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The PrefabGUID hashes for arcane leveling blood buffs
 - **Arcane Sorcerer Spells**: `ArcaneSorcererSpells` (string, default: "247896794,268059675,-242769430,-2053450457,1650878435")
   Arcane Sorcerer shift spells, granted at levels of prestige
-- **Death Mage Buffs**: `DeathMageBuffs` (string, default: "-901503997,-651661301,1934870645,1201299233")
+- **Death Mage Buffs**: `DeathMageBuffs` (string, default: "-901503997,-491525099,1934870645,1201299233")
   The PrefabGUID hashes for death mage leveling blood buffs
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige
@@ -619,3 +656,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Custom merchants! Great for letting players buy items they normally can't or providing a use for otherwise unused prefabs.
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
+
+## Credits
+Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed anybody on a specific change please let me know!

@@ -22,30 +22,40 @@ internal static class FamiliarSummonSystem
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly GameDifficulty GameDifficulty = SystemService.ServerGameSettingsSystem.Settings.GameDifficulty;
-    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+    static readonly GameDifficulty _gameDifficulty = SystemService.ServerGameSettingsSystem.Settings.GameDifficulty;
+    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     public const float FAMILIAR_LIFETIME = 240f;
 
-    static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
-    static readonly float FamiliarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
-    static readonly float VBloodDamageMultiplier = ConfigService.VBloodDamageMultiplier;
+    static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
+    static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
+    static readonly float _vBloodDamageMultiplier = ConfigService.VBloodDamageMultiplier;
 
-    static readonly bool FamiliarPrestige = ConfigService.FamiliarPrestige;
+    static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
 
-    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
+    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
 
-    static readonly PrefabGUID DivineAngel = new(-1737346940);
+    static readonly PrefabGUID _divineAngel = new(-1737346940);
 
-    static readonly PrefabGUID IgnoredFaction = new(-1430861195);
-    static readonly PrefabGUID PlayerFaction = new(1106458752);
+    static readonly PrefabGUID _ignoredFaction = new(-1430861195);
+    static readonly PrefabGUID _playerFaction = new(1106458752);
+    static readonly PrefabGUID _legionFaction = new(-772044125);
+    static readonly PrefabGUID _cursedFaction = new(1522496317);
 
-    static readonly PrefabGUID HideStaffBuff = new(2053361366);
+    static readonly List<PrefabGUID> _teamFactions =
+    [
+        _legionFaction,
+        _cursedFaction
+    ];
+
+    static readonly PrefabGUID _hideStaffBuff = new(2053361366);
+
+    public static Entity _unitTeam = Entity.Null;
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
     {
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
-        User user = userEntity.Read<User>();
+        User user = userEntity.ReadRO<User>();
         int index = user.Index;
 
         FromCharacter fromCharacter = new() { Character = character, User = userEntity };
@@ -57,7 +67,7 @@ internal static class FamiliarSummonSystem
             Roam = false,
             Team = SpawnDebugEvent.TeamEnum.Ally,
             Level = 1,
-            Position = character.Read<LocalToWorld>().Position,
+            Position = character.ReadRO<LocalToWorld>().Position,
             DyeIndex = 0
         };
 
@@ -67,7 +77,7 @@ internal static class FamiliarSummonSystem
     {
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
-        User user = userEntity.Read<User>();
+        User user = userEntity.ReadRO<User>();
         int index = user.Index;
 
         FromCharacter fromCharacter = new() { Character = character, User = userEntity };
@@ -87,15 +97,15 @@ internal static class FamiliarSummonSystem
     }
     public static bool HandleFamiliar(Entity player, Entity familiar)
     {
-        User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
+        User user = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
 
         try
         {
-            UnitLevel unitLevel = familiar.Read<UnitLevel>();
+            UnitLevel unitLevel = familiar.ReadRO<UnitLevel>();
             int level = unitLevel.Level._Value;
-            int famKey = familiar.Read<PrefabGUID>().GuidHash;
+            int famKey = familiar.ReadRO<PrefabGUID>().GuidHash;
             ulong steamId = user.PlatformId;
-            
+
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
             level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
@@ -118,19 +128,19 @@ internal static class FamiliarSummonSystem
         catch (Exception ex)
         {
             Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
-            
+
             return false;
         }
     }
-    public static bool HandleFamiliarForBattle(Entity player, Entity familiar)
+    public static bool HandleFamiliarForBattle(Entity player, Entity familiar, int factionIndex = -1)
     {
-        User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
+        User user = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
 
         try
         {
-            UnitLevel unitLevel = familiar.Read<UnitLevel>();
+            UnitLevel unitLevel = familiar.ReadRO<UnitLevel>();
             int level = unitLevel.Level._Value;
-            int famKey = familiar.Read<PrefabGUID>().GuidHash;
+            int famKey = familiar.ReadRO<PrefabGUID>().GuidHash;
             ulong steamId = user.PlatformId;
 
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
@@ -146,7 +156,7 @@ internal static class FamiliarSummonSystem
                 FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
             }
 
-            if (ModifyFamiliarForBattle(user, steamId, famKey, player, familiar, level)) return true;
+            if (ModifyFamiliarForBattle(user, steamId, famKey, player, familiar, level, factionIndex)) return true;
             else
             {
                 return false;
@@ -155,7 +165,7 @@ internal static class FamiliarSummonSystem
         catch (Exception ex)
         {
             Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
-            
+
             return false;
         }
     }
@@ -164,7 +174,7 @@ internal static class FamiliarSummonSystem
         try
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
-            ModifyFollowerAndTeam(player, familiar);
+            ModifyFollowerFactionMinion(player, familiar);
             ModifyDamageStats(familiar, level, steamId, famKey);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
@@ -183,24 +193,24 @@ internal static class FamiliarSummonSystem
                 }
             }
 
-            if (GameMode.Equals(GameModeType.PvP)) ManualAggroHandling(familiar);
+            if (_gameMode.Equals(GameModeType.PvP)) ManualAggroHandling(familiar);
 
             return true;
         }
         catch (Exception ex)
         {
             Core.Log.LogError($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
-            
+
             return false;
         }
     }
-    public static bool ModifyFamiliarForBattle(User user, ulong steamId, int famKey, Entity player, Entity familiar, int level)
+    public static bool ModifyFamiliarForBattle(User user, ulong steamId, int famKey, Entity player, Entity familiar, int level, int factionIndex)
     {
         try
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
 
-            ModifyFactionAndAggro(familiar);
+            ModifyTeamFactionAggro(familiar, factionIndex);
             ModifyDamageStatsForBattle(familiar, level, steamId, famKey);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
@@ -230,15 +240,15 @@ internal static class FamiliarSummonSystem
     }
     static void DisableCombat(Entity player, Entity familiar)
     {
-        FactionReference factionReference = familiar.Read<FactionReference>();
-        factionReference.FactionGuid._Value = IgnoredFaction;
+        FactionReference factionReference = familiar.ReadRO<FactionReference>();
+        factionReference.FactionGuid._Value = _ignoredFaction;
         familiar.Write(factionReference);
 
-        AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+        AggroConsumer aggroConsumer = familiar.ReadRO<AggroConsumer>();
         aggroConsumer.Active._Value = false;
         familiar.Write(aggroConsumer);
 
-        Aggroable aggroable = familiar.Read<Aggroable>();
+        Aggroable aggroable = familiar.ReadRO<Aggroable>();
         aggroable.Value._Value = false;
         aggroable.DistanceFactor._Value = 0f;
         aggroable.AggroFactor._Value = 0f;
@@ -246,35 +256,35 @@ internal static class FamiliarSummonSystem
 
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
-            BuffPrefabGUID = InvulnerableBuff,
+            BuffPrefabGUID = _invulnerableBuff,
         };
 
         FromCharacter fromCharacter = new()
         {
             Character = familiar,
-            User = player.Read<PlayerCharacter>().UserEntity,
+            User = player.ReadRO<PlayerCharacter>().UserEntity,
         };
 
         DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-        if (ServerGameManager.TryGetBuff(familiar, InvulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
+        if (ServerGameManager.TryGetBuff(familiar, _invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
         {
             if (invlunerableBuff.Has<LifeTime>())
             {
-                var lifetime = invlunerableBuff.Read<LifeTime>();
+                var lifetime = invlunerableBuff.ReadRO<LifeTime>();
                 lifetime.Duration = -1;
                 lifetime.EndAction = LifeTimeEndAction.None;
                 invlunerableBuff.Write(lifetime);
             }
         }
     }
-    static void ModifyFactionAndAggro(Entity familiar)
+    static void ModifyTeamFactionAggro(Entity familiar, int factionIndex)
     {
-        if (familiar.Has<FactionReference>())
+        if (familiar.Has<FactionReference>() && factionIndex != -1)
         {
-            familiar.With((ref FactionReference factionReference) =>
-            {
-                factionReference.FactionGuid._Value = PlayerFaction;
-            });
+            PrefabGUID factionPrefabGUID = _teamFactions[factionIndex];
+            Core.Log.LogInfo($"Setting FactionReference - {factionPrefabGUID.GetPrefabName()} | {familiar.GetPrefabGUID().GetPrefabName()}");
+
+            familiar.SetFaction(factionPrefabGUID);
         }
 
         if (familiar.Has<AggroConsumer>())
@@ -293,15 +303,30 @@ internal static class FamiliarSummonSystem
             });
         }
 
+        if (familiar.Has<Team>() && _unitTeam.Exists())
+        {
+            Core.Log.LogInfo($"Setting Team/TeamReference - {_unitTeam.GetPrefabGUID().GetPrefabName()} | {familiar.GetPrefabGUID().GetPrefabName()}");
+
+            familiar.With((ref Team team) =>
+            {
+                team.Value = 2;
+            });
+
+            familiar.With((ref TeamReference teamReference) =>
+            {
+                teamReference.Value._Value = _unitTeam;
+            });
+        }
+
         if (!familiar.Has<BlockFeedBuff>()) familiar.Add<BlockFeedBuff>(); // general marker for fams
     }
-    static void ModifyFollowerAndTeam(Entity player, Entity familiar)
+    static void ModifyFollowerFactionMinion(Entity player, Entity familiar)
     {
         if (familiar.Has<FactionReference>())
         {
             familiar.With((ref FactionReference factionReference) =>
             {
-                factionReference.FactionGuid._Value = PlayerFaction;
+                factionReference.FactionGuid._Value = _playerFaction;
             });
         }
 
@@ -314,21 +339,15 @@ internal static class FamiliarSummonSystem
             });
         }
 
-        if (familiar.Has<IsMinion>())
-        {
-            //familiar.Write(new IsMinion { Value = true }); // this or the entityOwner is sufficient apparently to stop player attacks, guess it was this? skellie priest summoning again as well
-            // this prevents summoners from summoning so do not want
-        }
-
         if (!familiar.Has<Minion>())
         {
-            familiar.Add<Minion>(); //try taking this one off first and see if they summon things again, may also be related to entityOwner
-            familiar.With((ref Minion minion) => minion.MasterDeathAction = MinionMasterDeathAction.Kill); // kill fam on owner death
+            familiar.Add<Minion>();
+            familiar.With((ref Minion minion) => minion.MasterDeathAction = MinionMasterDeathAction.Kill);
         }
 
         if (familiar.Has<EntityOwner>())
         {
-            familiar.Write(new EntityOwner { Owner = player }); //try taking this away? see if SCT persists and what else is affected, like if they now just die immediately when summoned -_- leaving that then
+            familiar.Write(new EntityOwner { Owner = player });
         }
 
         if (!familiar.Has<BlockFeedBuff>()) familiar.Add<BlockFeedBuff>();
@@ -338,8 +357,8 @@ internal static class FamiliarSummonSystem
     }
     public static void ModifyBloodSource(Entity familiar, int level)
     {
-        BloodConsumeSource bloodConsumeSource = familiar.Read<BloodConsumeSource>();
-        bloodConsumeSource.BloodQuality = level / (float)MaxFamiliarLevel * 100;
+        BloodConsumeSource bloodConsumeSource = familiar.ReadRO<BloodConsumeSource>();
+        bloodConsumeSource.BloodQuality = level / (float)_maxFamiliarLevel * 100;
         bloodConsumeSource.CanBeConsumed = false;
         familiar.Write(bloodConsumeSource);
     }
@@ -365,74 +384,73 @@ internal static class FamiliarSummonSystem
     };
     public static void ModifyDamageStatsForBattle(Entity familiar, int level, ulong steamId, int famKey)
     {
-        float scalingFactor = 0.25f + (level / (float)MaxFamiliarLevel) * 0.75f; // Calculate scaling factor for power and such
-        float healthScalingFactor = 1.0f + ((level - 1) / (float)MaxFamiliarLevel) * 1.5f; // Calculate scaling factor for max health
+        float scalingFactor = 0.25f + (level / (float)_maxFamiliarLevel) * 0.75f; // Calculate scaling factor for power and such
+        float healthScalingFactor = 1.0f + ((level - 1) / (float)_maxFamiliarLevel) * 1.5f; // Calculate scaling factor for max health
 
-        if (level == MaxFamiliarLevel) healthScalingFactor = 2.5f;
+        if (level == _maxFamiliarLevel) healthScalingFactor = 2.5f;
 
         int prestigeLevel = 0;
         List<FamiliarStatType> stats = [];
 
-        if (FamiliarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
             prestigeLevel = prestigeData.Key;
             stats = prestigeData.Value;
         }
 
-        // get base stats from original unit prefab then apply scaling
-        PrefabGUID prefabGUID = familiar.Read<PrefabGUID>();
+        PrefabGUID prefabGUID = familiar.ReadRO<PrefabGUID>();
 
-        if (prefabGUID.GuidHash.Equals(1945956671) && familiar.TryGetBuff(HideStaffBuff, out Entity buffEntity))
+        if (prefabGUID.GuidHash.Equals(1945956671) && familiar.TryGetBuff(_hideStaffBuff, out Entity buffEntity))
         {
             DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
         }
 
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
-        UnitStats unitStats = original.Read<UnitStats>();
+        UnitStats unitStats = original.ReadRO<UnitStats>();
 
-        UnitStats familiarStats = familiar.Read<UnitStats>();
-        familiarStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * scalingFactor * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
-        familiarStats.SpellPower._Value = unitStats.SpellPower._Value * scalingFactor * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+        UnitStats familiarStats = familiar.ReadRO<UnitStats>();
+        familiarStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * scalingFactor * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
+        familiarStats.SpellPower._Value = unitStats.SpellPower._Value * scalingFactor * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
 
         foreach (FamiliarStatType stat in stats)
         {
             switch (stat)
             {
                 case FamiliarStatType.PhysicalCritChance:
-                    familiarStats.PhysicalCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.PhysicalCritChance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.PhysicalCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.PhysicalCritChance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.SpellCritChance:
-                    familiarStats.SpellCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.SpellCritChance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.SpellCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.SpellCritChance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.HealingReceived:
-                    familiarStats.HealingReceived._Value = FamiliarStatValues[FamiliarStatType.HealingReceived] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.HealingReceived._Value = FamiliarStatValues[FamiliarStatType.HealingReceived] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.PhysicalResistance:
-                    familiarStats.PhysicalResistance._Value = FamiliarStatValues[FamiliarStatType.PhysicalResistance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.PhysicalResistance._Value = FamiliarStatValues[FamiliarStatType.PhysicalResistance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.SpellResistance:
-                    familiarStats.SpellResistance._Value = FamiliarStatValues[FamiliarStatType.SpellResistance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.SpellResistance._Value = FamiliarStatValues[FamiliarStatType.SpellResistance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.CCReduction:
-                    familiarStats.CCReduction._Value = (int)(FamiliarStatValues[FamiliarStatType.CCReduction] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier));
+                    familiarStats.CCReduction._Value = (int)(FamiliarStatValues[FamiliarStatType.CCReduction] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier));
                     break;
                 case FamiliarStatType.ShieldAbsorb:
-                    familiarStats.ShieldAbsorbModifier._Value = unitStats.ShieldAbsorbModifier._Value + FamiliarStatValues[FamiliarStatType.ShieldAbsorb] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.ShieldAbsorbModifier._Value = unitStats.ShieldAbsorbModifier._Value + FamiliarStatValues[FamiliarStatType.ShieldAbsorb] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
             }
         }
 
         familiar.Write(familiarStats);
 
-        UnitLevel unitLevel = familiar.Read<UnitLevel>();
+        UnitLevel unitLevel = familiar.ReadRO<UnitLevel>();
         unitLevel.Level._Value = level;
         unitLevel.HideLevel = false;
         familiar.Write(unitLevel);
 
-        Health familiarHealth = familiar.Read<Health>();
+        Health familiarHealth = familiar.ReadRO<Health>();
         int baseHealth = 500;
 
-        if (GameDifficulty.Equals(GameDifficulty.Hard))
+        if (_gameDifficulty.Equals(GameDifficulty.Hard))
         {
             baseHealth = 750;
         }
@@ -441,13 +459,13 @@ internal static class FamiliarSummonSystem
         familiarHealth.Value = familiarHealth.MaxHealth._Value;
         familiar.Write(familiarHealth);
 
-        if (VBloodDamageMultiplier != 1f)
+        if (_vBloodDamageMultiplier != 1f)
         {
-            DamageCategoryStats damageCategoryStats = familiar.Read<DamageCategoryStats>();
+            DamageCategoryStats damageCategoryStats = familiar.ReadRO<DamageCategoryStats>();
 
-            if (damageCategoryStats.DamageVsVBloods._Value != VBloodDamageMultiplier)
+            if (damageCategoryStats.DamageVsVBloods._Value != _vBloodDamageMultiplier)
             {
-                damageCategoryStats.DamageVsVBloods._Value *= VBloodDamageMultiplier;
+                damageCategoryStats.DamageVsVBloods._Value *= _vBloodDamageMultiplier;
                 familiar.Write(damageCategoryStats);
             }
         }
@@ -457,17 +475,19 @@ internal static class FamiliarSummonSystem
             var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
             for (int i = 0; i < buffer.Length; i++)
             {
-                if (buffer[i].SpawnPrefab.LookupName().ToLower().Contains("pilot"))
+                if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.OrdinalIgnoreCase))
                 {
                     familiar.Remove<SpawnPrefabOnGameplayEvent>();
                 }
             }
         }
 
-        if (prefabGUID.Equals(DivineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
+        if (prefabGUID.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
         {
-            script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
-            familiar.Write(script_ApplyBuffUnderHealthThreshold_DataServer);
+            familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
+            {
+                script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
+            });
         }
 
         if (familiar.Has<Immortal>())
@@ -484,6 +504,7 @@ internal static class FamiliarSummonSystem
                 {
                     item.Buff0 = new(0);
                     buffer[i] = item;
+
                     break;
                 }
             }
@@ -491,74 +512,74 @@ internal static class FamiliarSummonSystem
     }
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
-        float scalingFactor = 0.1f + (level / (float)MaxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such
-        float healthScalingFactor = 1.0f + ((level - 1) / (float)MaxFamiliarLevel) * 4.0f; // Calculate scaling factor for max health
-        
-        if (level == MaxFamiliarLevel) healthScalingFactor = 5.0f;
+        float scalingFactor = 0.1f + (level / (float)_maxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such
+        float healthScalingFactor = 1.0f + ((level - 1) / (float)_maxFamiliarLevel) * 4.0f; // Calculate scaling factor for max health
+
+        if (level == _maxFamiliarLevel) healthScalingFactor = 5.0f;
 
         int prestigeLevel = 0;
         List<FamiliarStatType> stats = [];
 
-        if (FamiliarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
             prestigeLevel = prestigeData.Key;
             stats = prestigeData.Value;
         }
 
         // get base stats from original unit prefab then apply scaling
-        PrefabGUID prefabGUID = familiar.Read<PrefabGUID>();
+        PrefabGUID prefabGUID = familiar.ReadRO<PrefabGUID>();
 
-        if (prefabGUID.GuidHash.Equals(1945956671) && familiar.TryGetBuff(HideStaffBuff, out Entity buffEntity))
+        if (prefabGUID.GuidHash.Equals(1945956671) && familiar.TryGetBuff(_hideStaffBuff, out Entity buffEntity))
         {
             DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
         }
 
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
-        UnitStats unitStats = original.Read<UnitStats>();
+        UnitStats unitStats = original.ReadRO<UnitStats>();
 
-        UnitStats familiarStats = familiar.Read<UnitStats>();
-        familiarStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * scalingFactor * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
-        familiarStats.SpellPower._Value = unitStats.SpellPower._Value * scalingFactor * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+        UnitStats familiarStats = familiar.ReadRO<UnitStats>();
+        familiarStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * scalingFactor * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
+        familiarStats.SpellPower._Value = unitStats.SpellPower._Value * scalingFactor * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
 
         foreach (FamiliarStatType stat in stats)
         {
             switch (stat)
             {
                 case FamiliarStatType.PhysicalCritChance:
-                    familiarStats.PhysicalCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.PhysicalCritChance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.PhysicalCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.PhysicalCritChance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.SpellCritChance:
-                    familiarStats.SpellCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.SpellCritChance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.SpellCriticalStrikeChance._Value = FamiliarStatValues[FamiliarStatType.SpellCritChance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.HealingReceived:
-                    familiarStats.HealingReceived._Value = FamiliarStatValues[FamiliarStatType.HealingReceived] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.HealingReceived._Value = FamiliarStatValues[FamiliarStatType.HealingReceived] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.PhysicalResistance:
-                    familiarStats.PhysicalResistance._Value = FamiliarStatValues[FamiliarStatType.PhysicalResistance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.PhysicalResistance._Value = FamiliarStatValues[FamiliarStatType.PhysicalResistance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.SpellResistance:
-                    familiarStats.SpellResistance._Value = FamiliarStatValues[FamiliarStatType.SpellResistance] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.SpellResistance._Value = FamiliarStatValues[FamiliarStatType.SpellResistance] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
                 case FamiliarStatType.CCReduction:
-                    familiarStats.CCReduction._Value = (int)(FamiliarStatValues[FamiliarStatType.CCReduction] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier));
+                    familiarStats.CCReduction._Value = (int)(FamiliarStatValues[FamiliarStatType.CCReduction] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier));
                     break;
                 case FamiliarStatType.ShieldAbsorb:
-                    familiarStats.ShieldAbsorbModifier._Value = unitStats.ShieldAbsorbModifier._Value + FamiliarStatValues[FamiliarStatType.ShieldAbsorb] * (1 + prestigeLevel * FamiliarPrestigeStatMultiplier);
+                    familiarStats.ShieldAbsorbModifier._Value = unitStats.ShieldAbsorbModifier._Value + FamiliarStatValues[FamiliarStatType.ShieldAbsorb] * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
                     break;
             }
         }
 
         familiar.Write(familiarStats);
 
-        UnitLevel unitLevel = familiar.Read<UnitLevel>();
+        UnitLevel unitLevel = familiar.ReadRO<UnitLevel>();
         unitLevel.Level._Value = level;
         unitLevel.HideLevel = false;
         familiar.Write(unitLevel);
 
-        Health familiarHealth = familiar.Read<Health>();
+        Health familiarHealth = familiar.ReadRO<Health>();
         int baseHealth = 500;
 
-        if (GameDifficulty.Equals(GameDifficulty.Hard))
+        if (_gameDifficulty.Equals(GameDifficulty.Hard))
         {
             baseHealth = 750;
         }
@@ -567,13 +588,13 @@ internal static class FamiliarSummonSystem
         familiarHealth.Value = familiarHealth.MaxHealth._Value;
         familiar.Write(familiarHealth);
 
-        if (VBloodDamageMultiplier != 1f)
+        if (_vBloodDamageMultiplier != 1f)
         {
-            DamageCategoryStats damageCategoryStats = familiar.Read<DamageCategoryStats>();
+            DamageCategoryStats damageCategoryStats = familiar.ReadRO<DamageCategoryStats>();
 
-            if (damageCategoryStats.DamageVsVBloods._Value != VBloodDamageMultiplier)
+            if (damageCategoryStats.DamageVsVBloods._Value != _vBloodDamageMultiplier)
             {
-                damageCategoryStats.DamageVsVBloods._Value *= VBloodDamageMultiplier;
+                damageCategoryStats.DamageVsVBloods._Value *= _vBloodDamageMultiplier;
                 familiar.Write(damageCategoryStats);
             }
         }
@@ -583,14 +604,14 @@ internal static class FamiliarSummonSystem
             var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
             for (int i = 0; i < buffer.Length; i++)
             {
-                if (buffer[i].SpawnPrefab.LookupName().ToLower().Contains("pilot"))
+                if (buffer[i].SpawnPrefab.GetPrefabName().ToLower().Contains("pilot"))
                 {
                     familiar.Remove<SpawnPrefabOnGameplayEvent>();
                 }
             }
         }
 
-        if (prefabGUID.Equals(DivineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
+        if (prefabGUID.Equals(_divineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
         {
             script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
             familiar.Write(script_ApplyBuffUnderHealthThreshold_DataServer);
@@ -634,7 +655,7 @@ internal static class FamiliarSummonSystem
     }
     static void ModifyCollision(Entity familiar)
     {
-        DynamicCollision collision = familiar.Read<DynamicCollision>();
+        DynamicCollision collision = familiar.ReadRO<DynamicCollision>();
         collision.AgainstPlayers.RadiusOverride = -1f;
         collision.AgainstPlayers.HardnessThreshold._Value = 0f;
         collision.AgainstPlayers.PushStrengthMax._Value = 0f;

@@ -653,22 +653,6 @@ public class MutantLegacyPrestigeHandler : BasePrestigeHandler
         return PrestigeType.MutantLegacy;
     }
 }
-/*
-public class VBloodLegacyPrestigeHandler : BasePrestigeHandler
-{
-    protected override IDictionary<ulong, KeyValuePair<int, float>> DataStructure => Core.DataStructures.PlayerVBloodLegacy;
-
-    public override void SaveChanges()
-    {
-        Core.DataStructures.SavePlayerVBloodLegacy();
-    }
-
-    public override PrestigeType GetPrestigeType()
-    {
-        return PrestigeType.VBloodLegacy;
-    }
-}
-*/
 public class DraculinLegacyPrestigeHandler : BasePrestigeHandler
 {
     public override void Prestige(ulong steamID)

@@ -15,18 +15,20 @@ internal static class SpawnTravelBuffSystemPatch
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
 
-    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
-    static readonly PrefabGUID BatLandingTravel = new(-371745443);
-    static readonly PrefabGUID DraculaFlyToCenter = new(-1961466676);
-    static readonly PrefabGUID PvPProtectedBuff = new(1111481396);
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+
+    static readonly PrefabGUID _batLandingTravel = new(-371745443);
+    static readonly PrefabGUID _draculaFlyToCenter = new(-1961466676);
+    static readonly PrefabGUID _pvpProtectedBuff = new(1111481396);
 
     [HarmonyPatch(typeof(Spawn_TravelBuffSystem), nameof(Spawn_TravelBuffSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(Spawn_TravelBuffSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.FamiliarSystem) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
@@ -34,18 +36,17 @@ internal static class SpawnTravelBuffSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if (prefabGUID.Equals(BatLandingTravel) && entityOwner.Owner.TryGetPlayer(out Entity player))
-                {         
+                else if (prefabGUID.Equals(_batLandingTravel) && entityOwner.Owner.TryGetPlayer(out Entity player))
+                {
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
-                    if (Familiars.AutoCallMap.TryGetValue(player, out Entity familiar) && familiar.Exists() && steamId.TryGetFamiliarActives(out var data))
+                    if (Familiars.AutoCallMap.TryRemove(player, out Entity familiar) && familiar.Exists() && steamId.TryGetFamiliarActives(out var data))
                     {
                         Familiars.CallFamiliar(player, familiar, user, steamId, data);
-                        Familiars.AutoCallMap.Remove(player);
                     }
                 }
-                
+
                 /*
                 else if (ConfigService.FamiliarSystem && entity.TryGetComponent(out Buff buff) && buff.Target.IsPlayer())
                 {
@@ -79,19 +80,6 @@ internal static class SpawnTravelBuffSystemPatch
                                 if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
                             }
                         }
-                    }
-                }
-                */
-
-                /*
-                else if (prefabGUID.Equals(DraculaFlyToCenter) && entity.TryGetComponent(out Buff buff) && buff.Target.TryGetComponent(out UnitStats unitStats))
-                {
-                    Core.Log.LogInfo("DraculaFlyToCenter detected, applying damage reduction...");
-
-                    if (unitStats.DamageReduction._Value == 0f)
-                    {
-                        unitStats.DamageReduction._Value = 0.25f;
-                        entity.Write(unitStats);
                     }
                 }
                 */

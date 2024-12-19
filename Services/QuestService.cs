@@ -16,9 +16,9 @@ internal class QuestService
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly WaitForSeconds updateDelay = new(60);
+    static readonly WaitForSeconds _updateDelay = new(60);
 
-    static readonly ComponentType[] UnitComponents =
+    static readonly ComponentType[] _unitComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
         ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
@@ -26,57 +26,57 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<Translation>())
     ];
 
-    static readonly ComponentType[] CraftingComponents =
+    static readonly ComponentType[] _craftingComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<InventoryItem>()),
         ComponentType.ReadOnly(Il2CppType.Of<ItemData>())
     ];
 
-    static readonly ComponentType[] ResourceComponents =
+    static readonly ComponentType[] _resourceComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<YieldResourcesOnDamageTaken>()),
         ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
     ];
 
-    static readonly ComponentType[] NoneComponents =
+    static readonly ComponentType[] _noneComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<SpawnTag>()),
         ComponentType.ReadOnly(Il2CppType.Of<Minion>())
     ];
 
-    static EntityQuery UnitQuery;
-    static EntityQuery ItemQuery;
-    static EntityQuery ResourceQuery;
+    static EntityQuery _unitQuery;
+    static EntityQuery _itemQuery;
+    static EntityQuery _resourceQuery;
 
-    public static Dictionary<PrefabGUID, HashSet<Entity>> TargetCache = [];
-    public static DateTime LastUpdate;
+    public static Dictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
+    public static DateTime _lastUpdate;
 
-    static readonly PrefabGUID Manticore = new(-393555055);
-    static readonly PrefabGUID Dracula = new(-327335305);
-    static readonly PrefabGUID Monster = new(1233988687);
-    static readonly PrefabGUID Solarus = new(-740796338);
+    static readonly PrefabGUID _manticore = new(-393555055);
+    static readonly PrefabGUID _dracula = new(-327335305);
+    static readonly PrefabGUID _monster = new(1233988687);
+    static readonly PrefabGUID _solarus = new(-740796338);
 
-    static bool shardBearersReset = false;
-    static bool craftAndGather = false;
-    static bool targetsLogged = false;
+    static bool _shardBearersReset = false;
+    static bool _craftAndGather = false;
+    static bool _targetsLogged = false;
     public QuestService()
     {
-        UnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        _unitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = UnitComponents,
-            None = NoneComponents,
+            All = _unitComponents,
+            None = _noneComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
 
-        ItemQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        _itemQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = CraftingComponents,
+            All = _craftingComponents,
             Options = EntityQueryOptions.IncludeAll
         });
 
-        ResourceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        _resourceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = ResourceComponents,
+            All = _resourceComponents,
             Options = EntityQueryOptions.IncludeAll
         });
 
@@ -87,24 +87,24 @@ internal class QuestService
     {
         while (true)
         {
-            if (ConfigService.EliteShardBearers && !shardBearersReset) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
+            if (ConfigService.EliteShardBearers && !_shardBearersReset) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
             {
-                IEnumerable<Entity> vBloods = Queries.GetEntitiesEnumerable(UnitQuery);
+                IEnumerable<Entity> vBloods = Queries.GetEntitiesEnumerable(_unitQuery);
                 foreach (Entity entity in vBloods)
                 {
-                    PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
-                    if (vBloodPrefab == Manticore || vBloodPrefab == Dracula || vBloodPrefab == Monster || vBloodPrefab == Solarus)
+                    PrefabGUID vBloodPrefab = entity.ReadRO<PrefabGUID>();
+                    if (vBloodPrefab == _manticore || vBloodPrefab == _dracula || vBloodPrefab == _monster || vBloodPrefab == _solarus)
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
                     }
                 }
 
-                shardBearersReset = true;
+                _shardBearersReset = true;
             }
 
-            if (!craftAndGather)
+            if (!_craftAndGather)
             {
-                IEnumerable<Entity> entities = Queries.GetEntitiesEnumerable(ItemQuery, (int)TargetType.Craft);
+                IEnumerable<Entity> entities = Queries.GetEntitiesEnumerable(_itemQuery, (int)TargetType.Craft);
                 foreach (Entity entity in entities)
                 {
                     if (entity.TryGetComponent(out PrefabGUID prefab) && !entity.Has<ShatteredItem>() && !entity.Has<UpgradeableLegendaryItem>())
@@ -114,7 +114,7 @@ internal class QuestService
                     }
                 }
 
-                entities = Queries.GetEntitiesEnumerable(ResourceQuery, (int)TargetType.Gather);
+                entities = Queries.GetEntitiesEnumerable(_resourceQuery, (int)TargetType.Gather);
                 foreach (Entity entity in entities)
                 {
                     if (entity.TryGetComponent(out PrefabGUID prefab))
@@ -123,23 +123,23 @@ internal class QuestService
                     }
                 }
 
-                craftAndGather = true;
-                foreach(PrefabGUID prefabGUID in CraftPrefabs)
+                _craftAndGather = true;
+                foreach (PrefabGUID prefabGUID in CraftPrefabs)
                 {
                     //Core.Log.LogInfo(prefabGUID.LookupName());
                 }
 
-                ItemQuery.Dispose();
-                ResourceQuery.Dispose();
+                _itemQuery.Dispose();
+                _resourceQuery.Dispose();
             }
 
-            TargetCache = Queries.GetEntitiesEnumerable(UnitQuery, (int)TargetType.Kill)
-                .GroupBy(entity => entity.Read<PrefabGUID>())
+            _targetCache = Queries.GetEntitiesEnumerable(_unitQuery, (int)TargetType.Kill)
+                .GroupBy(entity => entity.ReadRO<PrefabGUID>())
                 .ToDictionary(
                     group => group.Key,
                     group =>
                     {
-                        if (TargetCache.TryGetValue(group.Key, out var existingSet))
+                        if (_targetCache.TryGetValue(group.Key, out var existingSet))
                         {
                             existingSet.Clear();
                             existingSet.UnionWith(group);
@@ -152,10 +152,10 @@ internal class QuestService
                     }
                 );
 
-            if (TargetCache.ContainsKey(Manticore)) TargetCache.Remove(Manticore);
-            if (TargetCache.ContainsKey(Dracula)) TargetCache.Remove(Dracula);
-            if (TargetCache.ContainsKey(Monster)) TargetCache.Remove(Monster);
-            if (TargetCache.ContainsKey(Solarus)) TargetCache.Remove(Solarus);
+            if (_targetCache.ContainsKey(_manticore)) _targetCache.Remove(_manticore);
+            if (_targetCache.ContainsKey(_dracula)) _targetCache.Remove(_dracula);
+            if (_targetCache.ContainsKey(_monster)) _targetCache.Remove(_monster);
+            if (_targetCache.ContainsKey(_solarus)) _targetCache.Remove(_solarus);
 
             Dictionary<ulong, PlayerInfo> players = new(PlayerCache);
             foreach (PlayerInfo playerInfo in players.Values)
@@ -168,7 +168,7 @@ internal class QuestService
                     Entity character = playerInfo.CharEntity.Has<Equipment>() ? playerInfo.CharEntity : Entity.Null;
                     if (!character.Exists()) continue;
 
-                    RefreshQuests(user, steamId, (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel());
+                    RefreshQuests(user, steamId, (int)playerInfo.CharEntity.ReadRO<Equipment>().GetFullLevel());
                 }
                 else if (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var xpData))
                 {
@@ -176,17 +176,17 @@ internal class QuestService
                 }
             }
 
-            if (!targetsLogged)
+            if (!_targetsLogged)
             {
-                foreach (var kvp in TargetCache)
+                foreach (var kvp in _targetCache)
                 {
                     //Core.Log.LogInfo(kvp.Key.LookupName());
                 }
-                targetsLogged = true;
-            }   
+                _targetsLogged = true;
+            }
 
-            LastUpdate = DateTime.UtcNow;
-            yield return updateDelay; // Wait 60 seconds before processing players/units again
+            _lastUpdate = DateTime.UtcNow;
+            yield return _updateDelay; // Wait 60 seconds before processing players/units again
         }
     }
 }

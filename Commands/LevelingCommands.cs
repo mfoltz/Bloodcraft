@@ -46,7 +46,7 @@ internal static class LevelingCommands
             int percent = LevelingSystem.GetLevelProgress(steamId);
 
             LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
-            
+
             if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
             {
                 int roundedXP = (int)(Math.Round(restedData.Value / 100.0) * 100);

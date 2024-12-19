@@ -1,13 +1,13 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
-using static VCF.Core.Basics.RoleCommands;
 
 namespace Bloodcraft.Commands;
 
@@ -26,10 +26,10 @@ internal static class QuestCommands
             return;
         }
 
-        var SteamID = ctx.Event.User.PlatformId;
-        Misc.TogglePlayerBool(SteamID, "QuestLogging");
+        var steamId = ctx.Event.User.PlatformId;
 
-        LocalizationService.HandleReply(ctx, $"Quest logging is now {(Misc.GetPlayerBool(SteamID, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(steamId, "QuestLogging");
+        LocalizationService.HandleReply(ctx, $"Quest logging is now {(Misc.GetPlayerBool(steamId, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "progress", shortHand: "p", adminOnly: false, usage: ".quest p [QuestType]", description: "Display your current quest progress.")]
@@ -42,7 +42,6 @@ internal static class QuestCommands
         }
 
         questType = questType.ToLower();
-
         if (!Enum.TryParse(questType, true, out QuestType typeEnum))
         {
             if (questType == "d")
@@ -60,8 +59,8 @@ internal static class QuestCommands
             }
         }
 
-        ulong steamID = ctx.Event.User.PlatformId;
-        if (steamID.TryGetPlayerQuests(out var questData))
+        ulong steamId = ctx.Event.User.PlatformId;
+        if (steamId.TryGetPlayerQuests(out var questData))
         {
             Quests.QuestObjectiveReply(ctx, questData, typeEnum);
         }
@@ -81,7 +80,6 @@ internal static class QuestCommands
         }
 
         questType = questType.ToLower();
-
         if (!Enum.TryParse(questType, true, out QuestType typeEnum))
         {
             if (questType == "d")
@@ -99,14 +97,13 @@ internal static class QuestCommands
             }
         }
 
-        if (QuestService.LastUpdate == default)
+        if (QuestService._lastUpdate == default)
         {
             LocalizationService.HandleReply(ctx, "Target cache isn't ready yet, check back shortly!");
             return;
         }
 
         ulong steamId = ctx.Event.User.PlatformId;
-
         if (steamId.TryGetPlayerQuests(out var questData))
         {
             Quests.QuestTrackReply(ctx, questData, typeEnum);
@@ -126,7 +123,7 @@ internal static class QuestCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -135,7 +132,7 @@ internal static class QuestCommands
 
         ulong steamId = playerInfo.User.PlatformId;
 
-        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel();
+        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)playerInfo.CharEntity.ReadRO<Equipment>().GetFullLevel();
         ForceRefresh(steamId, level);
 
         LocalizationService.HandleReply(ctx, $"Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.");
@@ -167,7 +164,6 @@ internal static class QuestCommands
         }
 
         ulong steamId = ctx.Event.User.PlatformId;
-
         if (type.Equals(QuestType.Daily))
         {
             if (steamId.TryGetPlayerQuests(out var questData) && questData[QuestType.Weekly].Objective.Complete && !ConfigService.InfiniteDailies)
@@ -184,16 +180,16 @@ internal static class QuestCommands
                 {
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
-                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.ReadRO<Equipment>().GetFullLevel();
                         ForceDaily(ctx.Event.User.PlatformId, level);
 
-                        LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                        LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!");
                         Quests.QuestObjectiveReply(ctx, questData, type);
                     }
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                    LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your daily... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
                 }
             }
             else
@@ -217,16 +213,16 @@ internal static class QuestCommands
                 {
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
-                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.ReadRO<Equipment>().GetFullLevel();
                         ForceWeekly(ctx.Event.User.PlatformId, level);
 
-                        LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>!");
+                        LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!");
                         Quests.QuestObjectiveReply(ctx, questData, type);
                     }
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                    LocalizationService.HandleReply(ctx, $"You couldn't afford to reroll your wekly... (<color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
                 }
             }
             else
@@ -234,5 +230,72 @@ internal static class QuestCommands
                 LocalizationService.HandleReply(ctx, "No weekly reroll item configured or couldn't find weekly quest entry for player.");
             }
         }
+    }
+
+    [Command(name: "complete", shortHand: "c", adminOnly: true, usage: ".quest c [Name] [QuestType]", description: "Forcibly completes a specified quest for a player.")]
+    public static void ForceCompleteQuest(ChatCommandContext ctx, string name, string questTypeName)
+    {
+        if (!ConfigService.QuestSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Quests are not enabled.");
+            return;
+        }
+
+        PlayerInfo playerInfo = GetPlayerInfo(name);
+        if (!playerInfo.UserEntity.Exists())
+        {
+            ctx.Reply("Couldn't find player.");
+            return;
+        }
+
+        User user = playerInfo.User;
+        ulong steamId = user.PlatformId;
+
+        if (!steamId.TryGetPlayerQuests(out var questData))
+        {
+            ctx.Reply("Player has no active quests.");
+            return;
+        }
+
+        questTypeName = questTypeName.ToLower();
+        if (questTypeName == "d")
+        {
+            questTypeName = "Daily";
+        }
+        else if (questTypeName == "w")
+        {
+            questTypeName = "Weekly";
+        }
+
+        if (!Enum.TryParse<QuestType>(questTypeName, true, out var questType))
+        {
+            ctx.Reply($"Invalid quest type '{questTypeName}'. Valid values are: {string.Join(", ", Enum.GetNames(typeof(QuestType)))}");
+            return;
+        }
+
+        if (!questData.ContainsKey(questType))
+        {
+            ctx.Reply($"Player does not have an active {questType} quest to complete.");
+            return;
+        }
+
+        var quest = questData[questType];
+        if (quest.Objective.Complete)
+        {
+            ctx.Reply($"The {questType} quest is already complete for {playerInfo.User.CharacterName.Value}.");
+            return;
+        }
+
+        PrefabGUID target = quest.Objective.Target;
+
+        int currentProgress = quest.Progress;
+        int required = quest.Objective.RequiredAmount;
+
+        int toAdd = required - currentProgress;
+        if (toAdd <= 0) toAdd = required;
+
+        ProcessQuestProgress(questData, target, toAdd, user);
+
+        ctx.Reply($"Completed {Quests.QuestTypeColor[questType]} for <color=green>{playerInfo.User.CharacterName.Value}</color>!");
     }
 }

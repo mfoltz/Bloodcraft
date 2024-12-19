@@ -21,7 +21,10 @@ internal static class UnitSpawnerPatch
             {
                 if (entity.Has<IsMinion>())
                 {
-                    entity.Write(new IsMinion { Value = true });
+                    entity.With((ref IsMinion isMinion) =>
+                    {
+                        isMinion.Value = true;
+                    });
                 }
             }
         }

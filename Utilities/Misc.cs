@@ -14,11 +14,11 @@ internal static class Misc
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly float ShareDistance = ConfigService.ExpShareDistance;
+    static readonly float _shareDistance = ConfigService.ExpShareDistance;
 
-    static readonly bool Parties = ConfigService.PlayerParties;
+    static readonly bool _parties = ConfigService.PlayerParties;
 
-    static readonly PrefabGUID DraculaVBlood = new(-327335305);
+    static readonly PrefabGUID _draculaVBlood = new(-327335305);
     public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later <--- >_>
     {
         return steamId.TryGetPlayerBools(out var bools) && bools[boolKey];
@@ -41,16 +41,16 @@ internal static class Misc
     }
     public static HashSet<Entity> GetDeathParticipants(Entity source)
     {
-        float3 sourcePosition = source.Read<Translation>().Value;
+        float3 sourcePosition = source.ReadRO<Translation>().Value;
         User sourceUser = source.GetUser();
         string playerName = sourceUser.CharacterName.Value;
 
         Entity clanEntity = sourceUser.ClanEntity.GetEntityOnServer();
         HashSet<Entity> players = [source]; // use hashset to prevent double gains processing
 
-        if (Parties)
+        if (_parties)
         {
-            List<HashSet<string>> playerParties = new([..DataService.PlayerDictionaries.playerParties.Values]);
+            List<HashSet<string>> playerParties = new([.. DataService.PlayerDictionaries._playerParties.Values]);
 
             foreach (HashSet<string> party in playerParties)
             {
@@ -64,7 +64,7 @@ internal static class Misc
                         {
                             float distance = UnityEngine.Vector3.Distance(sourcePosition, targetPosition);
 
-                            if (distance > ShareDistance) continue;
+                            if (distance > _shareDistance) continue;
                             else players.Add(playerInfo.CharEntity);
                         }
                     }
@@ -76,7 +76,7 @@ internal static class Misc
 
         if (!clanEntity.Exists()) return players;
         else if (ServerGameManager.TryGetBuffer<SyncToUserBuffer>(clanEntity, out var clanUserBuffer) && !clanUserBuffer.IsEmpty)
-        {        
+        {
             foreach (SyncToUserBuffer clanUser in clanUserBuffer)
             {
                 if (clanUser.UserEntity.TryGetComponent(out User user))
@@ -87,7 +87,7 @@ internal static class Misc
                     {
                         float distance = UnityEngine.Vector3.Distance(sourcePosition, targetPosition);
 
-                        if (distance > ShareDistance) continue;
+                        if (distance > _shareDistance) continue;
                         else players.Add(player);
                     }
                 }
@@ -106,7 +106,7 @@ internal static class Misc
             {
                 foreach (UnlockedVBlood unlockedVBlood in buffer)
                 {
-                    if (unlockedVBlood.VBlood.Equals(DraculaVBlood))
+                    if (unlockedVBlood.VBlood.Equals(_draculaVBlood))
                     {
                         return true;
                     }
@@ -130,6 +130,12 @@ internal static class Misc
         {
             BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
         }
+    }
+    
+    public static void CreatePlayerUnlockChanceModifiers(Entity userEntity)
+    {
+        UserStats userStats = userEntity.ReadRO<UserStats>();
+
     }
     */
 }

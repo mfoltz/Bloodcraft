@@ -1,19 +1,13 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Sequencer;
-using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
-using static Bloodcraft.Services.PlayerService;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -28,24 +22,11 @@ internal static class MiscCommands
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    static readonly ComponentType[] DisabledFamiliarComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
-        ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
-        ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
-    ];
+    static readonly PrefabGUID _combatBuff = new(581443919);
 
-    static readonly ComponentType[] SpawnSequenceComponent =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<SpawnSequenceForEntity>()),
-    ];
-
-    static readonly PrefabGUID CombatBuff = new(581443919);
-    static readonly PrefabGUID NetworkedSequence = new(651179295);
-
-    public static readonly Dictionary<PrefabGUID, int> KitPrefabs = [];
+    public static readonly Dictionary<PrefabGUID, int> StarterKitItemPrefabGUIDs = [];
 
     [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
@@ -81,12 +62,12 @@ internal static class MiscCommands
             Misc.SetPlayerBool(steamId, "Kit", true);
             Entity character = ctx.Event.SenderCharacterEntity;
 
-            foreach (var item in KitPrefabs)
+            foreach (var item in StarterKitItemPrefabGUIDs)
             {
                 ServerGameManager.TryAddInventoryItem(character, item.Key, item.Value);
             }
 
-            List<string> kitItems = KitPrefabs.Select(x => $"<color=white>{x.Key.GetPrefabName()}</color>").ToList();
+            List<string> kitItems = StarterKitItemPrefabGUIDs.Select(x => $"<color=white>{x.Key.GetLocalizedName()}</color>").ToList();
 
             LocalizationService.HandleReply(ctx, $"You've received a starting kit with:");
 
@@ -119,7 +100,7 @@ internal static class MiscCommands
 
         Entity userEntity = ctx.Event.SenderUserEntity;
         Entity characterEntity = ctx.Event.SenderCharacterEntity;
-        Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
+        Entity achievementOwnerEntity = userEntity.ReadRO<AchievementOwner>().Entity._Entity;
 
         ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
         LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
@@ -138,7 +119,7 @@ internal static class MiscCommands
         ulong SteamID = user.PlatformId;
 
         Misc.TogglePlayerBool(SteamID, "SpellLock");
-        
+
         if (Misc.GetPlayerBool(SteamID, "SpellLock"))
         {
             LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
@@ -152,7 +133,7 @@ internal static class MiscCommands
     [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Toggle shift spell.")]
     public static void ShiftPlayerSpells(ChatCommandContext ctx)
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
             return;
@@ -183,7 +164,7 @@ internal static class MiscCommands
 
                 if (spellPrefabGUID.HasValue())
                 {
-                    Utilities.Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                    Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
                 }
             }
 
@@ -191,7 +172,7 @@ internal static class MiscCommands
         }
         else
         {
-            Utilities.Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
+            Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
 
             LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
         }
@@ -201,15 +182,18 @@ internal static class MiscCommands
     public static void GetUserStats(ChatCommandContext ctx)
     {
         Entity userEntity = ctx.Event.SenderUserEntity;
+        UserStats userStats = userEntity.ReadRO<UserStats>();
 
-        UserStats userStats = userEntity.Read<UserStats>();
         int VBloodKills = userStats.VBloodKills;
         int UnitKills = userStats.UnitKills;
         int Deaths = userStats.Deaths;
+
         float OnlineTime = userStats.OnlineTime;
         OnlineTime = (int)OnlineTime / 3600;
+
         float DistanceTraveled = userStats.DistanceTravelled;
         DistanceTraveled = (int)DistanceTraveled / 1000;
+
         float LitresBloodConsumed = userStats.LitresBloodConsumed;
         LitresBloodConsumed = (int)LitresBloodConsumed;
 
@@ -221,13 +205,13 @@ internal static class MiscCommands
     {
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (ServerGameManager.HasBuff(character, CombatBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, _combatBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "This command should only be used as required and certainly not while in combat.");
             return;
         }
 
-        CombatMusicListener_Shared combatMusicListener_Shared = character.Read<CombatMusicListener_Shared>();
+        CombatMusicListener_Shared combatMusicListener_Shared = character.ReadRO<CombatMusicListener_Shared>();
         combatMusicListener_Shared.UnitPrefabGuid = new PrefabGUID(0);
         character.Write(combatMusicListener_Shared);
 
@@ -262,12 +246,27 @@ internal static class MiscCommands
         }
     }
 
+    /*
+    static readonly ComponentType[] _disabledFamiliarComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
+        ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
+    ];
+
+    static readonly ComponentType[] _spawnSequenceComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<SpawnSequenceForEntity>()),
+    ];
+
+    static readonly PrefabGUID _networkedSequence = new(651179295);
+
     [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
     public static void CleanUpFams(ChatCommandContext ctx)
     {
         EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = DisabledFamiliarComponents,
+            All = _disabledFamiliarComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
 
@@ -307,7 +306,7 @@ internal static class MiscCommands
 
         EntityQuery networkedSequencesQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = SpawnSequenceComponent,
+            All = _spawnSequenceComponent,
             Options = EntityQueryOptions.IncludeDisabled
         });
 
@@ -319,9 +318,9 @@ internal static class MiscCommands
 
             foreach (Entity entity in networkedSequences)
             {
-                if (entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(NetworkedSequence))
+                if (entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(_networkedSequence))
                 {
-                    SpawnSequenceForEntity spawnSequenceForEntity = entity.Read<SpawnSequenceForEntity>();
+                    SpawnSequenceForEntity spawnSequenceForEntity = entity.ReadRO<SpawnSequenceForEntity>();
 
                     Entity target = spawnSequenceForEntity.Target.GetEntityOnServer();
                     Entity secondaryTarget = spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer();
@@ -394,4 +393,5 @@ internal static class MiscCommands
 
         LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
     }
+    */
 }

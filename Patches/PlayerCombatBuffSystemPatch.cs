@@ -14,14 +14,16 @@ internal static class PlayerCombatBuffSystemPatch
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
 
-    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
 
     [HarmonyPatch(typeof(PlayerCombatBuffSystem_OnAggro), nameof(PlayerCombatBuffSystem_OnAggro.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(PlayerCombatBuffSystem_OnAggro __instance)
     {
         if (!Core._initialized) return;
-        else if (!GameMode.Equals(GameModeType.PvP) || !ConfigService.FamiliarSystem) return;
+        else if (!_gameMode.Equals(GameModeType.PvP) || !_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
@@ -32,7 +34,7 @@ internal static class PlayerCombatBuffSystemPatch
                 else if (inverseAggroEvent.Producer.TryGetPlayer(out Entity playerCharacter))
                 {
                     Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
-                    
+
                     if (familiar.Exists() && !familiar.IsDisabled())
                     {
                         Familiars.AddToFamiliarAggroBuffer(familiar, inverseAggroEvent.Consumer);
@@ -51,7 +53,7 @@ internal static class PlayerCombatBuffSystemPatch
     static void OnUpdatePrefix(PlayerCombatBuffSystem_Reapplication __instance)
     {
         if (!Core._initialized) return;
-        else if (!GameMode.Equals(GameModeType.PvP) || !ConfigService.FamiliarSystem) return;
+        else if (!_gameMode.Equals(GameModeType.PvP) || !_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try

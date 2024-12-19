@@ -1,13 +1,17 @@
 `1.5.3`
+- deprecating '.cleanupfams' and '.wep restore' as both should no longer be needed
+- quest experience rewards overflow to expertise/legacy/familiar depending on which ones are maxed and active when player is at max level (expertise/legacy if both under max, expertise or legacy if one of the two is maxed, then familiar if both are maxed; gains split between expertise/legacy when awarded to both)
+- when at max level for experience, expertise and legacy will no longer receive notifications for gains
+- familiar battle queuing system! choose a location for the arena center (would recommend closing this off in such a way people can still view) and players can challenge each other to battle, see details in feature section for familiars (WIP)
 - added '.prestige shroud' command to toggle perma shroud from prestige if applicable
 - prestige buff will no longer cause players to appear on the boosted players list from KindredCommands (if they log out in their coffin, this will also unbind active familiars and recommend using rested XP to encourage this although people are usually pretty good about it already)
 - no more >100% blood quality from legacy prestiging, culprit of occasional stat stacking
-- modified return buff prefabs such that large amounts of SCT entities are no longer generated in some scenarios in which they previously would be
-- deathmage tier 2 passive default change to MutantBiteBuff, except it spawns a short-lived fallen angel instead :D (does not provide any progression or unlocks when killed)
+- modified return buff prefabs such that large amounts of SCT entities are no longer generated as was happening under certain conditions
+- deathmage tier 2 passive default changed to MutantBiteBuff,spawns a short-lived fallen angel instead (can't find any direct references to the player who triggers it so had to get creative for allied angel, 100% to spawn on first bite then 0% chance next two bites before back to 100% on fourth, repeat)
 - config now handles different locales correctly in regards to decimals (period vs comma)
 - excluded holy pots from potion stacking as temporary bandaid for overall problem with holy resist/damage reduction stat interaction
 - taking a more delicate approach to some things that were causing crashes for various reasons (familiar destruction and various buff stuff no longer happens on log in or log out)
-- '.quest d' and '.quest w' now under same command as '.quest progress/p d/w', familiar command for choosing/changing shiny buffs is now '.fam shiny [SpellSchool]'
+- '.quest d' and '.quest w' are now under '.quest progress/p d/w', familiar command for choosing/changing shiny buffs is now '.fam shiny [SpellSchool]'
 - going forward Bloodcraft will work with older versions of Eclipse from 1.1.2 (usually >_> WIP) onwards (will still need to update Eclipse for newer features)
 - added config option to unbind familiars when entering pvp combat
 - familiars receive shared experience when player should, refactored death event handling to facilitate this and improve general performance

@@ -21,7 +21,7 @@ internal static class PartyCommands
 
         string name = ctx.Event.User.CharacterName.Value;
 
-        if (playerParties.Any(kvp => kvp.Value.Contains(name)))
+        if (_playerParties.Any(kvp => kvp.Value.Contains(name)))
         {
             LocalizationService.HandleReply(ctx, "You are already in a party. Leave or disband it before enabling invites.");
             return;
@@ -57,13 +57,13 @@ internal static class PartyCommands
 
         ulong ownerId = ctx.Event.User.PlatformId;
 
-        if (!playerParties.ContainsKey(ownerId))
+        if (!_playerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You don't have a party.");
             return;
         }
 
-        HashSet<string> party = playerParties[ownerId]; // check size and if player is already present in group before adding
+        HashSet<string> party = _playerParties[ownerId]; // check size and if player is already present in group before adding
         RemovePlayerFromParty(ctx, party, name);
     }
 
@@ -76,7 +76,7 @@ internal static class PartyCommands
             return;
         }
 
-        ListPartyMembers(ctx, playerParties);
+        ListPartyMembers(ctx, _playerParties);
     }
 
     [Command(name: "disband", shortHand: "end", adminOnly: false, usage: ".party end", description: "Disbands party.")]
@@ -90,13 +90,13 @@ internal static class PartyCommands
 
         ulong ownerId = ctx.Event.User.PlatformId;
 
-        if (!playerParties.ContainsKey(ownerId))
+        if (!_playerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You don't have a party to disband.");
             return;
         }
 
-        playerParties.Remove(ownerId);
+        _playerParties.Remove(ownerId);
         SavePlayerParties();
         LocalizationService.HandleReply(ctx, "Party disbanded.");
     }
@@ -113,13 +113,13 @@ internal static class PartyCommands
         ulong ownerId = ctx.Event.User.PlatformId;
         string playerName = ctx.Event.User.CharacterName.Value;
 
-        if (playerParties.ContainsKey(ownerId))
+        if (_playerParties.ContainsKey(ownerId))
         {
             LocalizationService.HandleReply(ctx, "You can't leave your own party. Disband it instead.");
             return;
         }
 
-        HashSet<string> party = playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
+        HashSet<string> party = _playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
 
         if (party != null)
         {
@@ -146,20 +146,20 @@ internal static class PartyCommands
         bool ownedParty = false;
 
         // Check if the player owns a party and disband it
-        if (playerParties.ContainsKey(steamId))
+        if (_playerParties.ContainsKey(steamId))
         {
-            playerParties.Remove(steamId);
+            _playerParties.Remove(steamId);
             SavePlayerParties();
             ownedParty = true;
         }
 
         // Remove the player from all parties they might be a member of
-        List<ulong> owners = [..playerParties.Keys];
+        List<ulong> owners = [.. _playerParties.Keys];
         bool removedFromParties = false;
 
         foreach (var ownerId in owners)
         {
-            HashSet<string> party = playerParties[ownerId];
+            HashSet<string> party = _playerParties[ownerId];
             if (party.Contains(playerName))
             {
                 party.Remove(playerName);

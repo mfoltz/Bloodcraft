@@ -21,32 +21,34 @@ internal static class EmoteSystemPatch
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly PrefabGUID IgnoredFaction = new(-1430861195);
-    static readonly PrefabGUID PlayerFaction = new(1106458752);
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
 
-    static readonly PrefabGUID DominateBuff = new(-1447419822);
-    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
-    static readonly PrefabGUID CombatBuff = new(581443919);
-    static readonly PrefabGUID PvPCombatBuff = new(697095869);
-    static readonly PrefabGUID TakeFlightBuff = new(1205505492);
-    static readonly PrefabGUID ExoFormBuff = new(-31099041);
-    static readonly PrefabGUID PhasingBuff = new(-79611032);
+    static readonly PrefabGUID _ignoredFaction = new(-1430861195);
+    static readonly PrefabGUID _playerFaction = new(1106458752);
 
-    static readonly PrefabGUID WaveEmote = new(1177797340);
-    static readonly PrefabGUID SaluteEmote = new(-370061286);
-    static readonly PrefabGUID ClapEmote = new(-26826346);
-    public static readonly PrefabGUID TauntEmote = new(-158502505);
-    static readonly PrefabGUID YesEmote = new(-1525577000);
-    static readonly PrefabGUID NoEmote = new(-53273186);
+    static readonly PrefabGUID _dominateBuff = new(-1447419822);
+    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
+    static readonly PrefabGUID _combatBuff = new(581443919);
+    static readonly PrefabGUID _pvPCombatBuff = new(697095869);
+    static readonly PrefabGUID _takeFlightBuff = new(1205505492);
+    static readonly PrefabGUID _exoFormBuff = new(-31099041);
+    static readonly PrefabGUID _phasingBuff = new(-79611032);
 
-    public static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> actions = new()
+    static readonly PrefabGUID _waveEmote = new(1177797340);
+    static readonly PrefabGUID _saluteEmote = new(-370061286);
+    static readonly PrefabGUID _clapEmote = new(-26826346);
+    static readonly PrefabGUID _tauntEmote = new(-158502505);
+    static readonly PrefabGUID _yesEmote = new(-1525577000);
+    static readonly PrefabGUID _noEmote = new(-53273186);
+
+    public static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> EmoteActions = new()
     {
         { new(1177797340), CallDismiss }, // Wave
         { new(-370061286), CombatMode }, // Salute
         { new(-26826346), BindUnbind } // clap
     };
 
-    static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> matchActions = new()
+    static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> _matchActions = new()
     {
         { new(-1525577000), AcceptBattle }, // Yes
         { new(-53273186), DeclineBattle }  // No
@@ -60,53 +62,54 @@ internal static class EmoteSystemPatch
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.FamiliarSystem) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)
             {
-                UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
-                FromCharacter fromCharacter = entity.Read<FromCharacter>();
+                UseEmoteEvent useEmoteEvent = entity.ReadRO<UseEmoteEvent>();
+                FromCharacter fromCharacter = entity.ReadRO<FromCharacter>();
 
-                User user = fromCharacter.User.Read<User>();
+                User user = fromCharacter.User.ReadRO<User>();
                 Entity character = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
-                if (useEmoteEvent.Action.Equals(TauntEmote) && Misc.GetPlayerBool(steamId, "ExoForm"))
+                if (useEmoteEvent.Action.Equals(_tauntEmote) && Misc.GetPlayerBool(steamId, "ExoForm"))
                 {
-                    if (!character.HasBuff(ExoFormBuff))
+                    if (!character.HasBuff(_exoFormBuff))
                     {
-                        Buffs.TryApplyBuff(character, PhasingBuff);
+                        Buffs.TryApplyBuff(character, _phasingBuff);
 
-                        if (character.TryGetBuff(PhasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
+                        if (character.TryGetBuff(_phasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
                         {
                             buffEntity.Remove<BuffModificationFlagData>();
                         }
                     }
-                    else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
+                    else if (character.TryGetBuff(_exoFormBuff, out Entity buffEntity))
                     {
                         ExitingForm.Add(steamId);
                         ExoForm.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+
                         DestroyUtility.Destroy(EntityManager, buffEntity);
                     }
                 }
-                else if (BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(YesEmote) || useEmoteEvent.Action.Equals(NoEmote)))
+                else if (BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesEmote) || useEmoteEvent.Action.Equals(_noEmote)))
                 {
-                    if (matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
+                    if (_matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
                 }
                 else if (Misc.GetPlayerBool(steamId, "Emotes"))
                 {
-                    if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()) && actions.ContainsKey(useEmoteEvent.Action))
+                    if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using dominate form!");
                     }
-                    else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()) && actions.ContainsKey(useEmoteEvent.Action))
+                    else if (ServerGameManager.HasBuff(character, _takeFlightBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
-                    else if (actions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, character, steamId);
+                    else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, character, steamId);
                 }
             }
         }
@@ -189,21 +192,21 @@ internal static class EmoteSystemPatch
                 return;
             }
 
-            if (ServerGameManager.HasBuff(familiar, InvulnerableBuff.ToIdentifier())) // remove and enable combat
+            if (ServerGameManager.HasBuff(familiar, _invulnerableBuff.ToIdentifier())) // remove and enable combat
             {
                 BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
                 EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, InvulnerableBuff, familiar);
+                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, _invulnerableBuff, familiar);
 
-                FactionReference factionReference = familiar.Read<FactionReference>();
-                factionReference.FactionGuid._Value = PlayerFaction;
+                FactionReference factionReference = familiar.ReadRO<FactionReference>();
+                factionReference.FactionGuid._Value = _playerFaction;
                 familiar.Write(factionReference);
 
-                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                AggroConsumer aggroConsumer = familiar.ReadRO<AggroConsumer>();
                 aggroConsumer.Active._Value = true;
                 familiar.Write(aggroConsumer);
 
-                Aggroable aggroable = familiar.Read<Aggroable>();
+                Aggroable aggroable = familiar.ReadRO<Aggroable>();
                 aggroable.Value._Value = true;
                 aggroable.DistanceFactor._Value = 1f;
                 aggroable.AggroFactor._Value = 1f;
@@ -213,17 +216,17 @@ internal static class EmoteSystemPatch
             }
             else // if not, disable combat
             {
-                FactionReference factionReference = familiar.Read<FactionReference>();
-                factionReference.FactionGuid._Value = IgnoredFaction;
+                FactionReference factionReference = familiar.ReadRO<FactionReference>();
+                factionReference.FactionGuid._Value = _ignoredFaction;
                 familiar.Write(factionReference);
 
-                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
+                AggroConsumer aggroConsumer = familiar.ReadRO<AggroConsumer>();
                 aggroConsumer.Active._Value = false;
                 aggroConsumer.AggroTarget._Entity = Entity.Null;
                 aggroConsumer.AlertTarget._Entity = Entity.Null;
                 familiar.Write(aggroConsumer);
 
-                Aggroable aggroable = familiar.Read<Aggroable>();
+                Aggroable aggroable = familiar.ReadRO<Aggroable>();
                 aggroable.Value._Value = false;
                 aggroable.DistanceFactor._Value = 0f;
                 aggroable.AggroFactor._Value = 0f;
@@ -231,7 +234,7 @@ internal static class EmoteSystemPatch
 
                 ApplyBuffDebugEvent applyBuffDebugEvent = new()
                 {
-                    BuffPrefabGUID = InvulnerableBuff,
+                    BuffPrefabGUID = _invulnerableBuff,
                 };
 
                 FromCharacter fromCharacter = new()
@@ -241,11 +244,11 @@ internal static class EmoteSystemPatch
                 };
 
                 DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                if (ServerGameManager.TryGetBuff(familiar, InvulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
+                if (ServerGameManager.TryGetBuff(familiar, _invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
                 {
                     if (invlunerableBuff.Has<LifeTime>())
                     {
-                        var lifetime = invlunerableBuff.Read<LifeTime>();
+                        var lifetime = invlunerableBuff.ReadRO<LifeTime>();
                         lifetime.Duration = -1;
                         lifetime.EndAction = LifeTimeEndAction.None;
                         invlunerableBuff.Write(lifetime);
@@ -260,52 +263,4 @@ internal static class EmoteSystemPatch
             LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for...");
         }
     }
-
-    /*
-    static void HandleExoForm(User user, Entity character, ulong steamId) // moved this to after the taunt buff being destroyed so the visual before transforming looks nicer but leaving here for now >_>
-    {
-        ExoFormUtilities.UpdateExoFormChargeStored(steamId);
-
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < ExoFormUtilities.BaseDuration)
-        {
-            int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
-            float totalDuration = ExoFormUtilities.CalculateFormDuration(exoLevel);
-
-            float chargeNeeded = ExoFormUtilities.BaseDuration - exoFormData.Value;
-            float ratioToTotal = chargeNeeded / totalDuration;
-            float secondsRequired = 86400f * ratioToTotal;
-
-            // Convert seconds to hours, minutes, and seconds
-            TimeSpan timeSpan = TimeSpan.FromSeconds(secondsRequired);
-            string timeRemaining;
-
-            // Format based on the amount of time left
-            if (timeSpan.TotalHours >= 1)
-            {
-                // Display hours, minutes, and seconds if more than an hour remains
-                timeRemaining = $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes}m {timeSpan.Seconds}s";
-            }
-            else
-            {
-                // Display only minutes and seconds if less than an hour remains
-                timeRemaining = $"{timeSpan.Minutes}m {timeSpan.Seconds}s";
-            }
-
-            LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color> remaining)");
-            return;
-        }
-
-        if (!character.HasBuff(ExoFormBuff))
-        {
-            BuffUtilities.TryApplyBuff(character, PhasingBuff);
-            BuffUtilities.TryApplyBuff(character, ExoFormBuff);
-            BuffUtilities.TryApplyBuff(character, PhasingBuff);
-        }
-        else if (character.TryGetBuff(ExoFormBuff, out Entity buffEntity))
-        {
-            ExoFormUtilities.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
-            DestroyUtility.Destroy(EntityManager, buffEntity);
-        }
-    }
-    */
 }

@@ -10,19 +10,18 @@ internal static class EquipmentManager // for potential professions expansion, n
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly float MaxDurabilityMultiplier = 1f;
-    static readonly float MaxWeaponMultiplier = 0.25f;
-    static readonly float MaxArmorMultiplier = 0.25f;
-    static readonly float MaxSourceMultiplier = 0.25f;
-
+    static readonly float _maxDurabilityMultiplier = 1f;
+    static readonly float _maxWeaponMultiplier = 0.25f;
+    static readonly float _maxArmorMultiplier = 0.25f;
+    static readonly float _maxSourceMultiplier = 0.25f;
     public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.Read<PrefabGUID>());
+        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.ReadRO<PrefabGUID>());
         float scaledBonus = 0f;
 
         if (equipmentEntity.Has<Durability>())
         {
-            Durability durability = equipmentEntity.Read<Durability>();
+            Durability durability = equipmentEntity.ReadRO<Durability>();
             scaledBonus = CalculateDurabilityBonus(handler, steamId);
             durability.MaxDurability *= scaledBonus;
             durability.Value = durability.MaxDurability;
@@ -48,19 +47,19 @@ internal static class EquipmentManager // for potential professions expansion, n
 
             if (professionName.Contains("Blacksmithing"))
             {
-                equipmentMultiplier = MaxWeaponMultiplier;
+                equipmentMultiplier = _maxWeaponMultiplier;
             }
             else if (professionName.Contains("Tailoring"))
             {
-                equipmentMultiplier = MaxArmorMultiplier;
+                equipmentMultiplier = _maxArmorMultiplier;
             }
             else if (professionName.Contains("Enchanting"))
             {
-                equipmentMultiplier = MaxSourceMultiplier;
+                equipmentMultiplier = _maxSourceMultiplier;
             }
 
             int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (equipmentMultiplier * ((float)professionLevel / (float)ConfigService.MaxProfessionLevel)); // Scale bonus up to 100%
+            float scaledBonus = 1 + (equipmentMultiplier * (professionLevel / (float)ConfigService.MaxProfessionLevel)); // Scale bonus up to 100%
 
             return scaledBonus;
         }
@@ -71,7 +70,7 @@ internal static class EquipmentManager // for potential professions expansion, n
         if (handler != null)
         {
             int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (MaxDurabilityMultiplier * ((float)professionLevel / (float)ConfigService.MaxProfessionLevel)); // Scale bonus up to 100%
+            float scaledBonus = 1 + (_maxDurabilityMultiplier * (professionLevel / (float)ConfigService.MaxProfessionLevel)); // Scale bonus up to 100%
 
             return scaledBonus;
         }

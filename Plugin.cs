@@ -1,6 +1,7 @@
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
+using Bloodcraft.Services;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
@@ -28,9 +29,19 @@ internal class Plugin : BasePlugin
         }
 
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+
         InitializeConfig();
         CommandRegistry.RegisterAll();
         LoadPlayerData();
+
+        try
+        {
+            _ = new LocalizationService();
+        }
+        catch (Exception e)
+        {
+            LogInstance.LogWarning($"Failed to load localization service - Plugin.Load: {e}");
+        }
 
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }

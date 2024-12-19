@@ -18,7 +18,7 @@ internal static class Configuration
 
         foreach (PrefabGUID unit in unitBans)
         {
-            if (unit.HasValue()) FamiliarUnlockSystem.ExemptPrefabGUIDs.Add(unit);
+            if (unit.HasValue()) FamiliarUnlockSystem.ConfiguredPrefabGUIDBans.Add(unit);
         }
 
         List<string> categoryBans = ConfigService.BannedTypes.Split(',').Select(s => s.Trim()).ToList();
@@ -27,7 +27,7 @@ internal static class Configuration
         {
             if (Enum.TryParse(category, out UnitCategory unitCategory))
             {
-                FamiliarUnlockSystem.ExemptCategories.Add(unitCategory);
+                FamiliarUnlockSystem.ConfiguredUnitCategoryBans.Add(unitCategory);
             }
         }
     }
@@ -42,7 +42,7 @@ internal static class Configuration
     }
     public static void QuestRewardItems()
     {
-        List<int> rewardAmounts = [..ParseConfigIntegerString(ConfigService.QuestRewardAmounts)];
+        List<int> rewardAmounts = [.. ParseConfigIntegerString(ConfigService.QuestRewardAmounts)];
         List<PrefabGUID> questRewards = ParseConfigIntegerString(ConfigService.QuestRewards)
             .Select(itemPrefab => new PrefabGUID(itemPrefab))
             .ToList();
@@ -56,12 +56,10 @@ internal static class Configuration
         {
             QuestSystem.QuestRewards.TryAdd(questRewards[i], rewardAmounts[i]);
         }
-
-        //QuestSystem.QuestRewards = questRewards.Zip(rewardAmounts, (reward, amount) => new { reward, amount }).ToList().ForEach(x => QuestSystem.QuestRewards.TryAdd(x.reward, x.amount)); implementation pending removal before changing QuestRewards to readonly
     }
     public static void StarterKitItems()
     {
-        List<int> kitAmounts = [..ParseConfigIntegerString(ConfigService.KitQuantities)];
+        List<int> kitAmounts = [.. ParseConfigIntegerString(ConfigService.KitQuantities)];
         List<PrefabGUID> kitPrefabs = ParseConfigIntegerString(ConfigService.KitPrefabs)
             .Select(itemPrefab => new PrefabGUID(itemPrefab))
             .ToList();
@@ -73,10 +71,8 @@ internal static class Configuration
 
         for (int i = 0; i < kitPrefabs.Count; i++)
         {
-            MiscCommands.KitPrefabs.TryAdd(kitPrefabs[i], kitAmounts[i]);
+            MiscCommands.StarterKitItemPrefabGUIDs.TryAdd(kitPrefabs[i], kitAmounts[i]);
         }
-
-        //MiscCommands.KitPrefabs = kitPrefabs.Zip(kitAmounts, (item, amount) => new { item, amount }).ToDictionary(x => x.item, x => x.amount); implementation pending removal before changing KitPrefabs to readonly
     }
     public static void ClassSpellCooldownMap()
     {
@@ -91,19 +87,6 @@ internal static class Configuration
                 AbilityRunScriptsSystemPatch.ClassSpells.TryAdd(spell, spellPrefabs.IndexOf(spell));
             }
         }
-
-        /* implementation pending removal before changing ClassSpells to readonly Dictionary<PrefabGUID, int> from Dictionary<int, int>
-        foreach (LevelingSystem.PlayerClass playerClass in Enum.GetValues(typeof(LevelingSystem.PlayerClass)))
-        {
-            if (LevelingSystem.ClassSpellsMap.TryGetValue(playerClass, out string classSpells))
-            {
-                ParseConfigString(classSpells)
-                    .Select((x, index) => new { Hash = x, Index = index })
-                    .ToList()
-                    .ForEach(x => AbilityRunScriptsSystemPatch.ClassSpells.TryAdd(x.Hash, x.Index));
-            }    
-        }
-        */
     }
     public static void ClassPassiveBuffsMap()
     {

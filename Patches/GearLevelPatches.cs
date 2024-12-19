@@ -17,14 +17,17 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     static SystemService SystemService => Core.SystemService;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
-    static readonly Dictionary<ulong, int> PlayerMaxWeaponLevels = [];
+    static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
+
+    static readonly Dictionary<ulong, int> _playerMaxWeaponLevels = [];
 
     [HarmonyPatch(typeof(WeaponLevelSystem_Destroy), nameof(WeaponLevelSystem_Destroy.OnUpdate))]
     [HarmonyPostfix]
     static void WeaponLevelDestroyPostfix(WeaponLevelSystem_Destroy __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.LevelingSystem) return;
+        else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682408_0.ToEntityArray(Allocator.Temp);
         try
@@ -57,7 +60,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
             {
                 if (!entity.Has<WeaponLevel>() || !entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
 
-                if (ConfigService.ExpertiseSystem && entityOwner.Owner.TryGetPlayer(out Entity player))
+                if (_expertise && entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
 
@@ -69,34 +72,34 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     }
                 }
 
-                if (ConfigService.LevelingSystem && entityOwner.Owner.TryGetPlayer(out player))
+                if (_leveling && entityOwner.Owner.TryGetPlayer(out player))
                 {
                     LevelingSystem.SetLevel(player);
                 }
-                else if (!ConfigService.LevelingSystem && ConfigService.ExpertiseSystem && entityOwner.Owner.TryGetPlayer(out player))
+                else if (!_leveling && _expertise && entityOwner.Owner.TryGetPlayer(out player))
                 {
-                    ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
-                    int weaponLevel = (int)entity.Read<WeaponLevel>().Level;
+                    ulong steamId = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>().PlatformId;
+                    int weaponLevel = (int)entity.ReadRO<WeaponLevel>().Level;
                     int unarmedWeaponLevel = 0;
 
-                    Equipment equipment = player.Read<Equipment>(); // fix weapon level on equipment if leveling turned off?
+                    Equipment equipment = player.ReadRO<Equipment>(); // fix weapon level on equipment if leveling turned off?
                     if (equipment.WeaponLevel._Value != 0)
                     {
                         equipment.WeaponLevel._Value = 0;
                         player.Write(equipment);
                     }
 
-                    if (!PlayerMaxWeaponLevels.ContainsKey(steamId))
+                    if (!_playerMaxWeaponLevels.ContainsKey(steamId))
                     {
-                        PlayerMaxWeaponLevels[steamId] = weaponLevel;
+                        _playerMaxWeaponLevels[steamId] = weaponLevel;
                     }
                     else
                     {
-                        int maxWeaponLevel = PlayerMaxWeaponLevels[steamId];
+                        int maxWeaponLevel = _playerMaxWeaponLevels[steamId];
 
                         if (weaponLevel > maxWeaponLevel)
                         {
-                            PlayerMaxWeaponLevels[steamId] = weaponLevel;
+                            _playerMaxWeaponLevels[steamId] = weaponLevel;
                             unarmedWeaponLevel = weaponLevel;
                         }
                     }
@@ -120,7 +123,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     static void OnUpdatePostfix(WeaponLevelSystem_Spawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.LevelingSystem) return;
+        else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
         try
@@ -145,7 +148,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     static void ArmorLevelSpawnPrefix(ArmorLevelSystem_Spawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.LevelingSystem) return;
+        else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
         try
@@ -170,7 +173,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     static void ArmorLevelSpawnPostfix(ArmorLevelSystem_Spawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.LevelingSystem) return;
+        else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
         try
@@ -195,7 +198,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
     static void ArmorLevelDestroyPostfix(ArmorLevelSystem_Destroy __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.LevelingSystem) return;
+        else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
         try

@@ -16,9 +16,9 @@ internal static class PrestigeSystem
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly PrefabGUID ExperienceVisualBuff = new(104224016);
-    static readonly PrefabGUID ExpertiseVisualBuff = new(620130895);
-    static readonly PrefabGUID LegacyVisualBuff = new(-1381763893);
+    static readonly PrefabGUID _experienceVisualBuff = new(104224016);
+    static readonly PrefabGUID _expertiseVisualBuff = new(620130895);
+    static readonly PrefabGUID _legacyVisualBuff = new(-1381763893);
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -351,7 +351,7 @@ internal static class PrestigeSystem
         else
         {
             if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
-                prestigeData.TryGetValue(parsedPrestigeType, out var parsedPrestigeLevel) && parsedPrestigeLevel > 0 
+                prestigeData.TryGetValue(parsedPrestigeType, out var parsedPrestigeLevel) && parsedPrestigeLevel > 0
                 && prestigeData.TryGetValue(PrestigeType.Experience, out var expPrestigeLevel) && expPrestigeLevel > 0)
             {
                 // Apply flat rate reduction for leveling experience
@@ -416,8 +416,8 @@ internal static class PrestigeSystem
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * prestigeLevel;
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
-        Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, ExperienceVisualBuff);
-        if (ctx.Event.SenderCharacterEntity.TryGetBuff(ExperienceVisualBuff, out Entity buffEntity))
+        Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, _experienceVisualBuff);
+        if (ctx.Event.SenderCharacterEntity.TryGetBuff(_experienceVisualBuff, out Entity buffEntity))
         {
             if (!buffEntity.Has<LifeTime>())
             {
@@ -450,11 +450,11 @@ internal static class PrestigeSystem
 
         if (BloodSystem.BloodTypeToPrestigeMap.ContainsValue(parsedPrestigeType))
         {
-            Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, LegacyVisualBuff);
+            Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, _legacyVisualBuff);
         }
         else if (WeaponSystem.WeaponPrestigeMap.ContainsValue(parsedPrestigeType))
         {
-            Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, ExpertiseVisualBuff);
+            Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, _expertiseVisualBuff);
         }
 
         LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
@@ -540,7 +540,7 @@ internal static class PrestigeSystem
     }
     public static Dictionary<string, int> GetPrestigeForType(PrestigeType prestigeType)
     {
-        return DataService.PlayerDictionaries.playerPrestiges
+        return DataService.PlayerDictionaries._playerPrestiges
             .Where(p => p.Value.ContainsKey(prestigeType))
             .Select(p => new
             {
@@ -562,7 +562,7 @@ internal static class PrestigeSystem
     }
     static void AdjustResistStats(Entity character)
     {
-        ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
+        ResistCategoryStats resistCategoryStats = character.ReadRO<ResistCategoryStats>();
 
         resistCategoryStats.ResistVsBeasts._Value = 0;
         resistCategoryStats.ResistVsHumans._Value = 0;
@@ -575,7 +575,7 @@ internal static class PrestigeSystem
     }
     static void AdjustDamageStats(Entity character)
     {
-        DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
+        DamageCategoryStats damageCategoryStats = character.ReadRO<DamageCategoryStats>();
 
         damageCategoryStats.DamageVsBeasts._Value = 1;
         damageCategoryStats.DamageVsHumans._Value = 1;

@@ -1,12 +1,12 @@
-﻿using HarmonyLib;
+﻿using Bloodcraft.Services;
+using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay;
-using Unity.Collections;
-using Unity.Entities;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using Bloodcraft.Services;
 using Stunlock.Core;
+using Unity.Collections;
+using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
@@ -17,17 +17,19 @@ internal static class KnockbackSystemSpawnPatch
     static ServerGameManager ServerGameManger => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
 
-    static readonly GameModeType GameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
-    static readonly PrefabGUID PvPProtectionBuff = new(1111481396);
-    static readonly PrefabGUID AllyKnockbackBuff = new(-2099203048);
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+
+    static readonly PrefabGUID _pvpProtectionBuff = new(1111481396);
+    static readonly PrefabGUID _allyKnockbackBuff = new(-2099203048);
 
     [HarmonyPatch(typeof(KnockbackSystemSpawn), nameof(KnockbackSystemSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(KnockbackSystemSpawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.FamiliarSystem) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_1729431709_0.ToEntityArray(Allocator.Temp);
         try
@@ -35,7 +37,7 @@ internal static class KnockbackSystemSpawnPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if (prefabGUID == AllyKnockbackBuff) continue;
+                else if (prefabGUID == _allyKnockbackBuff) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
                 Entity owner = entityOwner.Owner;
@@ -46,22 +48,22 @@ internal static class KnockbackSystemSpawnPatch
                     {
                         PreventKnockback(entity);
                     }
-                    else if (GameMode.Equals(GameModeType.PvE))
+                    else if (_gameMode.Equals(GameModeType.PvE))
                     {
                         PreventKnockback(entity);
                     }
-                    else if (player.HasBuff(PvPProtectionBuff))
+                    else if (player.HasBuff(_pvpProtectionBuff))
                     {
                         PreventKnockback(entity);
                     }
                 }
                 else if (owner.IsPlayer() && !owner.Equals(buffTarget) && buffTarget.TryGetPlayer(out player))
                 {
-                    if (GameMode.Equals(GameModeType.PvP) && player.HasBuff(PvPProtectionBuff))
+                    if (_gameMode.Equals(GameModeType.PvP) && player.HasBuff(_pvpProtectionBuff))
                     {
                         PreventKnockback(entity);
                     }
-                    else if (GameMode.Equals(GameModeType.PvE))
+                    else if (_gameMode.Equals(GameModeType.PvE))
                     {
                         PreventKnockback(entity);
                     }

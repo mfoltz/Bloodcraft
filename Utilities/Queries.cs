@@ -9,7 +9,7 @@ internal static class Queries
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly HashSet<string> FilteredTargets =
+    static readonly HashSet<string> _filteredTargets =
     [
         "Trader",
         "HostileVillager",
@@ -37,7 +37,7 @@ internal static class Queries
         "Airborne"
     ];
 
-    static readonly HashSet<string> FilteredCrafts =
+    static readonly HashSet<string> _filteredCrafts =
     [
         "Item_Cloak",
         "BloodKey_T01",
@@ -69,7 +69,7 @@ internal static class Queries
         "GarlicResistance",
         "T01_Bone"
     ];
-    public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1) 
+    public static IEnumerable<Entity> GetEntitiesEnumerable(EntityQuery entityQuery, int targetType = -1)
     {
         JobHandle handle = GetEntities(entityQuery, out NativeArray<Entity> entities, Allocator.TempJob);
         handle.Complete();
@@ -80,22 +80,21 @@ internal static class Queries
             {
                 if (targetType == 0)
                 {
-                    if (entity.Has<DestroyOnSpawn>()) continue; // filter out locked bosses from KindredCommands
+                    if (entity.Has<DestroyOnSpawn>()) continue;  // filter out locked bosses from KindredCommands
+                    else if (entity.IsCustomSpawned()) continue; // filter units spawned with UnitSpawnerSystem
                     else if (entity.TryGetComponent(out PrefabGUID unitPrefab))
                     {
-                        string prefabName = unitPrefab.LookupName();
-                        bool customSpawned = entity.TryGetComponent(out IsMinion isMinion) && isMinion.Value;
-                        
-                        if (customSpawned) continue;
-                        else if (!FilteredTargets.Any(part => prefabName.Contains(part))) yield return entity;
+                        string prefabName = unitPrefab.GetPrefabName();
+
+                        if (!_filteredTargets.Any(part => prefabName.Contains(part))) yield return entity;
                     }
                 }
                 else if (targetType == 1)
                 {
                     if (entity.TryGetComponent(out PrefabGUID craftPrefab))
                     {
-                        string prefabName = craftPrefab.LookupName();
-                        if (!FilteredCrafts.Any(part => prefabName.Contains(part))) yield return entity;
+                        string prefabName = craftPrefab.GetPrefabName();
+                        if (!_filteredCrafts.Any(part => prefabName.Contains(part))) yield return entity;
                     }
                 }
                 else if (targetType == 2)

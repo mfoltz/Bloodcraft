@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -42,17 +41,17 @@ internal class EclipseService
     public static readonly float PrestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
     public static readonly float ClassStatMultiplier = ConfigService.StatSynergyMultiplier;
 
-    static readonly WaitForSeconds Delay = new(2.5f);
-    static readonly WaitForSeconds NewUserDelay = new(15f);
+    static readonly WaitForSeconds _delay = new(2.5f);
+    static readonly WaitForSeconds _newUserDelay = new(15f);
 
     const int MAX_RETRIES = 20;
     const string LEGACY_VERSION = "1.1.2"; // Default version for old messages
 
     //static readonly Regex oldRegex = new(@"^\[(\d+)\]:");
-    static readonly Regex oldRegex = new(@"^\[(\d+)\]:(\d+)$");
+    static readonly Regex _oldRegex = new(@"^\[(\d+)\]:(\d+)$");
 
     //static readonly Regex regex = new(@"^\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
-    static readonly Regex regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
+    static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
 
     public static readonly Dictionary<ulong, string> RegisteredUsersAndClientVersions = [];
     public EclipseService()
@@ -68,7 +67,7 @@ internal class EclipseService
     }
     public static void HandleClientMessage(string message)
     {
-        Match match = regex.Match(message);
+        Match match = _regex.Match(message);
 
         if (match.Success)
         {
@@ -100,7 +99,7 @@ internal class EclipseService
         }
 
         // If new regex didn't match, try the old regex format
-        Match oldMatch = oldRegex.Match(message);
+        Match oldMatch = _oldRegex.Match(message);
 
         if (oldMatch.Success)
         {
@@ -226,7 +225,7 @@ internal class EclipseService
 
         if (Legacies)
         {
-            BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
+            BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.ReadRO<Blood>().BloodType);
             IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
 
             if (bloodHandler != null)
@@ -269,7 +268,7 @@ internal class EclipseService
 
         if (Expertise)
         {
-            WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
+            WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.ReadRO<Equipment>().WeaponSlot.SlotEntity._Entity);
             IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
             if (expertiseHandler != null)
@@ -318,7 +317,7 @@ internal class EclipseService
             PrefabGUID familiarPrefabGUID = familiar.GetPrefabGUID();
 
             int familiarId = familiarPrefabGUID.GuidHash;
-            familiarName = familiarPrefabGUID.GetPrefabName();
+            familiarName = familiarPrefabGUID.GetLocalizedName();
 
             KeyValuePair<int, float> familiarXP = FamiliarLevelingSystem.GetFamiliarExperience(steamId, familiarId);
 
@@ -330,8 +329,8 @@ internal class EclipseService
                 familiarPrestige = FamiliarPrestigeManager.GetFamiliarPrestigeLevel(FamiliarPrestigeManager.LoadFamiliarPrestige(steamId), familiarId);
             }
 
-            UnitStats unitStats = familiar.Read<UnitStats>();
-            Health health = familiar.Read<Health>();
+            UnitStats unitStats = familiar.ReadRO<UnitStats>();
+            Health health = familiar.ReadRO<Health>();
 
             int maxHealth = (int)health.MaxHealth._Value;
             int physicalPower = (int)unitStats.PhysicalPower._Value;
@@ -342,8 +341,8 @@ internal class EclipseService
 
         return (familiarPercent, familiarLevel, familiarPrestige, familiarName, familiarStats);
     }
-    public static (int EnchantingProgress, int EnchantingLevel, 
-            int AlchemyProgress, int AlchemyLevel, 
+    public static (int EnchantingProgress, int EnchantingLevel,
+            int AlchemyProgress, int AlchemyLevel,
             int HarvestingProgress, int HarvestingLevel,
             int BlacksmithingProgress, int BlacksmithingLevel,
             int TailoringProgress, int TailoringLevel,
@@ -401,9 +400,9 @@ internal class EclipseService
             professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "fishing");
             fishingLevel = professionHandler.GetProfessionData(steamId).Key;
             fishingProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
-            
-            return (enchantingProgress, enchantingLevel, alchemyProgress, alchemyLevel, harvestingProgress, 
-                harvestingLevel, blacksmithingProgress, blacksmithingLevel, tailoringProgress, tailoringLevel, 
+
+            return (enchantingProgress, enchantingLevel, alchemyProgress, alchemyLevel, harvestingProgress,
+                harvestingLevel, blacksmithingProgress, blacksmithingLevel, tailoringProgress, tailoringLevel,
                 woodcuttingProgress, woodcuttingLevel, miningProgress, miningLevel, fishingProgress, fishingLevel);
         }
 
@@ -426,7 +425,7 @@ internal class EclipseService
                 type = (int)quest.Objective.Goal;
                 progress = quest.Progress;
                 goal = quest.Objective.RequiredAmount;
-                target = quest.Objective.Target.GetPrefabName();
+                target = quest.Objective.Target.GetLocalizedName();
                 if (type == 0 && PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(quest.Objective.Target)) isVBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[quest.Objective.Target].Has<VBloodConsumeSource>().ToString();
             }
         }
@@ -439,7 +438,7 @@ internal class EclipseService
 
         while (tries <= MAX_RETRIES)
         {
-            yield return NewUserDelay;
+            yield return _newUserDelay;
 
             if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
             {
@@ -462,11 +461,12 @@ internal class EclipseService
         {
             if (RegisteredUsersAndClientVersions.Count == 0)
             {
-                yield return Delay;
+                yield return _delay;
+
                 continue;
             }
 
-            HashSet<PlayerInfo> playerInfos = [..OnlineCache.Values];
+            HashSet<PlayerInfo> playerInfos = [.. OnlineCache.Values];
             Dictionary<ulong, string> registeredUsers = new(RegisteredUsersAndClientVersions);
 
             foreach (PlayerInfo playerInfo in playerInfos)
@@ -512,7 +512,7 @@ internal class EclipseService
                 }
             }
 
-            yield return Delay;
+            yield return _delay;
         }
     }
 }

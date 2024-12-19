@@ -18,6 +18,7 @@ internal static class Buffs
     static SystemService SystemService => Core.SystemService;
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
+    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
     {
@@ -42,8 +43,6 @@ internal static class Buffs
         { 6, 60 },
         { 7, 75 }
     };
-
-    //static readonly PrefabGUID ExoFormExitBuff = new(-1797102561);
     public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefab)
     {
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
@@ -71,12 +70,12 @@ internal static class Buffs
         ApplyBuffDebugEvent applyBuffDebugEvent = new()
         {
             BuffPrefabGUID = buffPrefab,
-            Who = target.Read<NetworkId>()
+            Who = target.ReadRO<NetworkId>()
         };
 
         FromCharacter fromCharacter = new() // fam should be entityOwner
         {
-            Character = target,
+            Character = owner,
             User = owner
         };
 
@@ -93,7 +92,7 @@ internal static class Buffs
     {
         if (buff.Has<BloodBuffScript_Rogue_MountDamageBonus>())
         {
-            var mountDamageBonus = buff.Read<BloodBuffScript_Rogue_MountDamageBonus>();
+            var mountDamageBonus = buff.ReadRO<BloodBuffScript_Rogue_MountDamageBonus>();
 
             mountDamageBonus.RequiredBloodPercentage = 0f;
             mountDamageBonus.MinMountDamageIncrease = 0;
@@ -105,7 +104,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_HealReceivedProc_DataShared>())
         {
-            var healReceivedProc = buff.Read<BloodBuff_HealReceivedProc_DataShared>();
+            var healReceivedProc = buff.ReadRO<BloodBuff_HealReceivedProc_DataShared>();
 
             healReceivedProc.RequiredBloodPercentage = 0;
             buff.Write(healReceivedProc);
@@ -115,7 +114,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuffScript_Brute_HealthRegenBonus>())
         {
-            var bruteHealthRegenBonus = buff.Read<BloodBuffScript_Brute_HealthRegenBonus>();
+            var bruteHealthRegenBonus = buff.ReadRO<BloodBuffScript_Brute_HealthRegenBonus>();
 
             bruteHealthRegenBonus.RequiredBloodPercentage = 0;
             bruteHealthRegenBonus.MinHealthRegenIncrease = bruteHealthRegenBonus.MaxHealthRegenIncrease;
@@ -126,7 +125,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuffScript_Brute_NulifyAndEmpower>())
         {
-            var bruteNulifyAndEmpower = buff.Read<BloodBuffScript_Brute_NulifyAndEmpower>();
+            var bruteNulifyAndEmpower = buff.ReadRO<BloodBuffScript_Brute_NulifyAndEmpower>();
 
             bruteNulifyAndEmpower.RequiredBloodPercentage = 0;
             buff.Write(bruteNulifyAndEmpower);
@@ -136,7 +135,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Brute_PhysLifeLeech_DataShared>())
         {
-            var brutePhysLifeLeech = buff.Read<BloodBuff_Brute_PhysLifeLeech_DataShared>();
+            var brutePhysLifeLeech = buff.ReadRO<BloodBuff_Brute_PhysLifeLeech_DataShared>();
 
             brutePhysLifeLeech.RequiredBloodPercentage = 0;
             brutePhysLifeLeech.MinIncreasedPhysicalLifeLeech = brutePhysLifeLeech.MaxIncreasedPhysicalLifeLeech;
@@ -147,7 +146,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Brute_RecoverOnKill_DataShared>())
         {
-            var bruteRecoverOnKill = buff.Read<BloodBuff_Brute_RecoverOnKill_DataShared>();
+            var bruteRecoverOnKill = buff.ReadRO<BloodBuff_Brute_RecoverOnKill_DataShared>();
 
             bruteRecoverOnKill.RequiredBloodPercentage = 0;
             bruteRecoverOnKill.MinHealingReceivedValue = bruteRecoverOnKill.MaxHealingReceivedValue;
@@ -158,7 +157,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Creature_SpeedBonus_DataShared>())
         {
-            var creatureSpeedBonus = buff.Read<BloodBuff_Creature_SpeedBonus_DataShared>();
+            var creatureSpeedBonus = buff.ReadRO<BloodBuff_Creature_SpeedBonus_DataShared>();
 
             creatureSpeedBonus.RequiredBloodPercentage = 0;
             creatureSpeedBonus.MinMovementSpeedIncrease = creatureSpeedBonus.MaxMovementSpeedIncrease;
@@ -169,7 +168,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_SunResistance_DataShared>())
         {
-            var sunResistance = buff.Read<BloodBuff_SunResistance_DataShared>();
+            var sunResistance = buff.ReadRO<BloodBuff_SunResistance_DataShared>();
 
             sunResistance.RequiredBloodPercentage = 0;
             sunResistance.MinBonus = sunResistance.MaxBonus;
@@ -180,7 +179,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuffScript_Draculin_BloodMendBonus>())
         {
-            var draculinBloodMendBonus = buff.Read<BloodBuffScript_Draculin_BloodMendBonus>();
+            var draculinBloodMendBonus = buff.ReadRO<BloodBuffScript_Draculin_BloodMendBonus>();
 
             draculinBloodMendBonus.RequiredBloodPercentage = 0;
             draculinBloodMendBonus.MinBonusHealing = draculinBloodMendBonus.MaxBonusHealing;
@@ -191,7 +190,7 @@ internal static class Buffs
 
         if (buff.Has<Script_BloodBuff_CCReduction_DataShared>())
         {
-            var bloodBuffCCReduction = buff.Read<Script_BloodBuff_CCReduction_DataShared>();
+            var bloodBuffCCReduction = buff.ReadRO<Script_BloodBuff_CCReduction_DataShared>();
 
             bloodBuffCCReduction.RequiredBloodPercentage = 0;
             bloodBuffCCReduction.MinBonus = bloodBuffCCReduction.MaxBonus;
@@ -202,7 +201,7 @@ internal static class Buffs
 
         if (buff.Has<Script_BloodBuff_Draculin_ImprovedBite_DataShared>())
         {
-            var draculinImprovedBite = buff.Read<Script_BloodBuff_Draculin_ImprovedBite_DataShared>();
+            var draculinImprovedBite = buff.ReadRO<Script_BloodBuff_Draculin_ImprovedBite_DataShared>();
 
             draculinImprovedBite.RequiredBloodPercentage = 0;
             buff.Write(draculinImprovedBite);
@@ -212,7 +211,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuffScript_LastStrike>())
         {
-            var lastStrike = buff.Read<BloodBuffScript_LastStrike>();
+            var lastStrike = buff.ReadRO<BloodBuffScript_LastStrike>();
 
             lastStrike.RequiredBloodQuality = 0;
             lastStrike.LastStrikeBonus_Min = lastStrike.LastStrikeBonus_Max;
@@ -223,7 +222,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Draculin_SpeedBonus_DataShared>())
         {
-            var draculinSpeedBonus = buff.Read<BloodBuff_Draculin_SpeedBonus_DataShared>();
+            var draculinSpeedBonus = buff.ReadRO<BloodBuff_Draculin_SpeedBonus_DataShared>();
 
             draculinSpeedBonus.RequiredBloodPercentage = 0;
             draculinSpeedBonus.MinMovementSpeedIncrease = draculinSpeedBonus.MaxMovementSpeedIncrease;
@@ -234,7 +233,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_AllResistance_DataShared>())
         {
-            var allResistance = buff.Read<BloodBuff_AllResistance_DataShared>();
+            var allResistance = buff.ReadRO<BloodBuff_AllResistance_DataShared>();
 
             allResistance.RequiredBloodPercentage = 0;
             allResistance.MinBonus = allResistance.MaxBonus;
@@ -245,10 +244,10 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_BiteToMutant_DataShared>())
         {
-            var biteToMutant = buff.Read<BloodBuff_BiteToMutant_DataShared>();
+            var biteToMutant = buff.ReadRO<BloodBuff_BiteToMutant_DataShared>();
 
             biteToMutant.RequiredBloodPercentage = 0;
-            biteToMutant.MutantFaction = new(877850148); // slaves_rioters
+            //biteToMutant.MutantFaction = new(877850148); slaves_rioters <-- completely forgot this was here, oops lol
             buff.Write(biteToMutant);
 
             return;
@@ -256,7 +255,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_BloodConsumption_DataShared>())
         {
-            var bloodConsumption = buff.Read<BloodBuff_BloodConsumption_DataShared>();
+            var bloodConsumption = buff.ReadRO<BloodBuff_BloodConsumption_DataShared>();
 
             bloodConsumption.RequiredBloodPercentage = 0;
             bloodConsumption.MinBonus = bloodConsumption.MaxBonus;
@@ -267,7 +266,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_HealthRegeneration_DataShared>())
         {
-            var healthRegeneration = buff.Read<BloodBuff_HealthRegeneration_DataShared>();
+            var healthRegeneration = buff.ReadRO<BloodBuff_HealthRegeneration_DataShared>();
 
             healthRegeneration.RequiredBloodPercentage = 0;
             healthRegeneration.MinBonus = healthRegeneration.MaxBonus;
@@ -278,7 +277,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_ApplyMovementSpeedOnShapeshift_DataShared>())
         {
-            var applyMovementSpeedOnShapeshift = buff.Read<BloodBuff_ApplyMovementSpeedOnShapeshift_DataShared>();
+            var applyMovementSpeedOnShapeshift = buff.ReadRO<BloodBuff_ApplyMovementSpeedOnShapeshift_DataShared>();
 
             applyMovementSpeedOnShapeshift.RequiredBloodPercentage = 0;
             applyMovementSpeedOnShapeshift.MinBonus = applyMovementSpeedOnShapeshift.MaxBonus;
@@ -289,7 +288,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_PrimaryAttackLifeLeech_DataShared>())
         {
-            var primaryAttackLifeLeech = buff.Read<BloodBuff_PrimaryAttackLifeLeech_DataShared>();
+            var primaryAttackLifeLeech = buff.ReadRO<BloodBuff_PrimaryAttackLifeLeech_DataShared>();
 
             primaryAttackLifeLeech.RequiredBloodPercentage = 0;
             primaryAttackLifeLeech.MinBonus = primaryAttackLifeLeech.MaxBonus;
@@ -300,7 +299,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_PrimaryProc_FreeCast_DataShared>())
         {
-            var primaryProcFreeCast = buff.Read<BloodBuff_PrimaryProc_FreeCast_DataShared>();
+            var primaryProcFreeCast = buff.ReadRO<BloodBuff_PrimaryProc_FreeCast_DataShared>();
 
             primaryProcFreeCast.RequiredBloodPercentage = 0;
             primaryProcFreeCast.MinBonus = primaryProcFreeCast.MaxBonus;
@@ -311,14 +310,14 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Rogue_AttackSpeedBonus_DataShared>())
         {
-            var rogueAttackSpeedBonus = buff.Read<BloodBuff_Rogue_AttackSpeedBonus_DataShared>();
+            var rogueAttackSpeedBonus = buff.ReadRO<BloodBuff_Rogue_AttackSpeedBonus_DataShared>();
 
             rogueAttackSpeedBonus.RequiredBloodPercentage = 0;
             buff.Write(rogueAttackSpeedBonus);
 
             if (buff.Has<BloodBuff_Rogue_SpeedBonus_DataShared>()) // dracula blood
             {
-                var rogueSpeedBonus = buff.Read<BloodBuff_Rogue_SpeedBonus_DataShared>();
+                var rogueSpeedBonus = buff.ReadRO<BloodBuff_Rogue_SpeedBonus_DataShared>();
 
                 rogueSpeedBonus.RequiredBloodPercentage = 0;
                 buff.Write(rogueSpeedBonus);
@@ -331,7 +330,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_CritAmplifyProc_DataShared>())
         {
-            var critAmplifyProc = buff.Read<BloodBuff_CritAmplifyProc_DataShared>();
+            var critAmplifyProc = buff.ReadRO<BloodBuff_CritAmplifyProc_DataShared>();
 
             critAmplifyProc.RequiredBloodPercentage = 0;
             critAmplifyProc.MinBonus = critAmplifyProc.MaxBonus;
@@ -342,7 +341,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_PhysCritChanceBonus_DataShared>())
         {
-            var physCritChanceBonus = buff.Read<BloodBuff_PhysCritChanceBonus_DataShared>();
+            var physCritChanceBonus = buff.ReadRO<BloodBuff_PhysCritChanceBonus_DataShared>();
 
             physCritChanceBonus.RequiredBloodPercentage = 0;
             physCritChanceBonus.MinPhysicalCriticalStrikeChance = physCritChanceBonus.MaxPhysicalCriticalStrikeChance;
@@ -353,7 +352,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Rogue_SpeedBonus_DataShared>())
         {
-            var rogueSpeedBonus = buff.Read<BloodBuff_Rogue_SpeedBonus_DataShared>();
+            var rogueSpeedBonus = buff.ReadRO<BloodBuff_Rogue_SpeedBonus_DataShared>();
 
             rogueSpeedBonus.RequiredBloodPercentage = 0;
             rogueSpeedBonus.MinMovementSpeedIncrease = rogueSpeedBonus.MaxMovementSpeedIncrease;
@@ -364,7 +363,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_ReducedTravelCooldown_DataShared>())
         {
-            var reducedTravelCooldown = buff.Read<BloodBuff_ReducedTravelCooldown_DataShared>();
+            var reducedTravelCooldown = buff.ReadRO<BloodBuff_ReducedTravelCooldown_DataShared>();
 
             reducedTravelCooldown.RequiredBloodPercentage = 0;
             reducedTravelCooldown.MinBonus = reducedTravelCooldown.MaxBonus;
@@ -375,7 +374,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Scholar_SpellCooldown_DataShared>())
         {
-            var scholarSpellCooldown = buff.Read<BloodBuff_Scholar_SpellCooldown_DataShared>();
+            var scholarSpellCooldown = buff.ReadRO<BloodBuff_Scholar_SpellCooldown_DataShared>();
 
             scholarSpellCooldown.RequiredBloodPercentage = 0;
             scholarSpellCooldown.MinCooldownReduction = scholarSpellCooldown.MaxCooldownReduction;
@@ -386,7 +385,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>())
         {
-            var scholarSpellCritChanceBonus = buff.Read<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>();
+            var scholarSpellCritChanceBonus = buff.ReadRO<BloodBuff_Scholar_SpellCritChanceBonus_DataShared>();
 
             scholarSpellCritChanceBonus.RequiredBloodPercentage = 0;
             scholarSpellCritChanceBonus.MinSpellCriticalStrikeChance = scholarSpellCritChanceBonus.MaxSpellCriticalStrikeChance;
@@ -397,7 +396,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Scholar_SpellPowerBonus_DataShared>())
         {
-            var scholarSpellPowerBonus = buff.Read<BloodBuff_Scholar_SpellPowerBonus_DataShared>();
+            var scholarSpellPowerBonus = buff.ReadRO<BloodBuff_Scholar_SpellPowerBonus_DataShared>();
 
             scholarSpellPowerBonus.RequiredBloodPercentage = 0;
             scholarSpellPowerBonus.MinSpellPowerIncrease = scholarSpellPowerBonus.MaxSpellPowerIncrease;
@@ -405,7 +404,7 @@ internal static class Buffs
 
             if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>()) // blood of the immortal
             {
-                var warriorPhysDamageBonus = buff.Read<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
+                var warriorPhysDamageBonus = buff.ReadRO<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
 
                 warriorPhysDamageBonus.RequiredBloodPercentage = 0;
                 warriorPhysDamageBonus.MinPhysDamageIncrease = warriorPhysDamageBonus.MaxPhysDamageIncrease;
@@ -419,7 +418,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_SpellLifeLeech_DataShared>())
         {
-            var spellLifeLeech = buff.Read<BloodBuff_SpellLifeLeech_DataShared>();
+            var spellLifeLeech = buff.ReadRO<BloodBuff_SpellLifeLeech_DataShared>();
 
             spellLifeLeech.RequiredBloodPercentage = 0;
             spellLifeLeech.MinBonus = spellLifeLeech.MaxBonus;
@@ -429,7 +428,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Warrior_DamageReduction_DataShared>())
         {
-            var warriorDamageReduction = buff.Read<BloodBuff_Warrior_DamageReduction_DataShared>();
+            var warriorDamageReduction = buff.ReadRO<BloodBuff_Warrior_DamageReduction_DataShared>();
 
             warriorDamageReduction.RequiredBloodPercentage = 0;
             warriorDamageReduction.MinDamageReduction = warriorDamageReduction.MaxDamageReduction;
@@ -440,7 +439,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Warrior_PhysCritDamageBonus_DataShared>())
         {
-            var warriorPhysCritDamageBonus = buff.Read<BloodBuff_Warrior_PhysCritDamageBonus_DataShared>();
+            var warriorPhysCritDamageBonus = buff.ReadRO<BloodBuff_Warrior_PhysCritDamageBonus_DataShared>();
 
             warriorPhysCritDamageBonus.RequiredBloodPercentage = 0;
             warriorPhysCritDamageBonus.MinWeaponCriticalStrikeDamageIncrease = warriorPhysCritDamageBonus.MaxWeaponCriticalStrikeDamageIncrease;
@@ -451,7 +450,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Warrior_PhysDamageBonus_DataShared>())
         {
-            var warriorPhysDamageBonus = buff.Read<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
+            var warriorPhysDamageBonus = buff.ReadRO<BloodBuff_Warrior_PhysDamageBonus_DataShared>();
 
             warriorPhysDamageBonus.RequiredBloodPercentage = 0;
             warriorPhysDamageBonus.MinPhysDamageIncrease = warriorPhysDamageBonus.MaxPhysDamageIncrease;
@@ -462,7 +461,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Warrior_PhysicalBonus_DataShared>())
         {
-            var warriorPhysicalBonus = buff.Read<BloodBuff_Warrior_PhysicalBonus_DataShared>();
+            var warriorPhysicalBonus = buff.ReadRO<BloodBuff_Warrior_PhysicalBonus_DataShared>();
 
             warriorPhysicalBonus.RequiredBloodPercentage = 0;
             warriorPhysicalBonus.MinWeaponPowerIncrease = warriorPhysicalBonus.MaxWeaponPowerIncrease;
@@ -473,7 +472,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Warrior_WeaponCooldown_DataShared>())
         {
-            var warriorWeaponCooldown = buff.Read<BloodBuff_Warrior_WeaponCooldown_DataShared>();
+            var warriorWeaponCooldown = buff.ReadRO<BloodBuff_Warrior_WeaponCooldown_DataShared>();
 
             warriorWeaponCooldown.RequiredBloodPercentage = 0;
             warriorWeaponCooldown.MinCooldownReduction = warriorWeaponCooldown.MaxCooldownReduction;
@@ -484,7 +483,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Brute_100_DataShared>())
         {
-            var bruteEffect = buff.Read<BloodBuff_Brute_100_DataShared>();
+            var bruteEffect = buff.ReadRO<BloodBuff_Brute_100_DataShared>();
 
             bruteEffect.RequiredBloodPercentage = 0;
             bruteEffect.MinHealthRegainPercentage = bruteEffect.MaxHealthRegainPercentage;
@@ -495,7 +494,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Rogue_100_DataShared>())
         {
-            var rogueEffect = buff.Read<BloodBuff_Rogue_100_DataShared>();
+            var rogueEffect = buff.ReadRO<BloodBuff_Rogue_100_DataShared>();
 
             rogueEffect.RequiredBloodPercentage = 0;
             buff.Write(rogueEffect);
@@ -505,7 +504,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Warrior_100_DataShared>())
         {
-            var warriorEffect = buff.Read<BloodBuff_Warrior_100_DataShared>();
+            var warriorEffect = buff.ReadRO<BloodBuff_Warrior_100_DataShared>();
 
             warriorEffect.RequiredBloodPercentage = 0;
             buff.Write(warriorEffect);
@@ -515,7 +514,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuffScript_Scholar_MovementSpeedOnCast>())
         {
-            var scholarEffect = buff.Read<BloodBuffScript_Scholar_MovementSpeedOnCast>();
+            var scholarEffect = buff.ReadRO<BloodBuffScript_Scholar_MovementSpeedOnCast>();
 
             scholarEffect.RequiredBloodPercentage = 0;
             scholarEffect.ChanceToGainMovementOnCast_Min = scholarEffect.ChanceToGainMovementOnCast_Max;
@@ -526,7 +525,7 @@ internal static class Buffs
 
         if (buff.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>())
         {
-            var bruteAttackSpeedBonus = buff.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
+            var bruteAttackSpeedBonus = buff.ReadRO<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
 
             bruteAttackSpeedBonus.MinValue = bruteAttackSpeedBonus.MaxValue;
             bruteAttackSpeedBonus.RequiredBloodPercentage = 0;
@@ -581,7 +580,7 @@ internal static class Buffs
 
         if (buffEntity.Has<LifeTime>())
         {
-            LifeTime lifeTime = buffEntity.Read<LifeTime>();
+            LifeTime lifeTime = buffEntity.ReadRO<LifeTime>();
             lifeTime.Duration = -1f;
             lifeTime.EndAction = LifeTimeEndAction.Destroy;
             buffEntity.Write(lifeTime);
@@ -603,7 +602,7 @@ internal static class Buffs
         }
         else
         {
-            Equipment equipment = player.Read<Equipment>();
+            Equipment equipment = player.ReadRO<Equipment>();
             playerLevel = (int)equipment.GetFullLevel();
         }
 
@@ -644,7 +643,7 @@ internal static class Buffs
         {
             if (buff.Has<Buff>())
             {
-                BuffCategory component = buff.Read<BuffCategory>();
+                BuffCategory component = buff.ReadRO<BuffCategory>();
                 component.Groups = BuffCategoryFlag.None;
                 buff.Write(component);
             }
@@ -658,7 +657,7 @@ internal static class Buffs
             }
             if (buff.Has<LifeTime>())
             {
-                LifeTime lifetime = buff.Read<LifeTime>();
+                LifeTime lifetime = buff.ReadRO<LifeTime>();
                 lifetime.Duration = -1f; // need to try changing this to 9999 instead? death to console spam
                 lifetime.EndAction = LifeTimeEndAction.None;
                 buff.Write(lifetime);
@@ -731,21 +730,40 @@ internal static class Buffs
     public static void HandleExoFormBuff(Entity buffEntity, Entity playerCharacter)
     {
         Entity userEntity = playerCharacter.GetUserEntity();
-        User user = userEntity.Read<User>();
+        User user = userEntity.ReadRO<User>();
         ulong steamId = user.PlatformId;
 
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int level) ? level : 0;
         float duration = steamId.TryGetPlayerExoFormData(out var exoFormData) ? exoFormData.Value : 0f;
-        //float maxDuration = Mathf.Min(ExoFormUtilities.CalculateFormDuration(exoLevel), duration);
-
-        //float duration = ExoFormUtilities.CalculateFormDuration(exoLevel);
-        //Core.Log.LogInfo("HandleExoFormBuff...");
+        float bonusPhysicalPower = playerCharacter.TryGetComponent(out UnitStats unitStats) ? unitStats.SpellPower._Value : 0f;
 
         if (!buffEntity.Has<ReplaceAbilityOnSlotData>()) buffEntity.Add<ReplaceAbilityOnSlotData>();
         if (!buffEntity.Has<ScriptUpdate>()) buffEntity.Add<ScriptUpdate>();
         if (!buffEntity.Has<Script_Buff_Shapeshift_DataShared>()) buffEntity.Add<Script_Buff_Shapeshift_DataShared>();
         //if (!buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Add<ModifyTargetHUDBuff>();
         if (!buffEntity.Has<AmplifyBuff>()) buffEntity.Add<AmplifyBuff>();
+        if (!buffEntity.Has<ModifyUnitStatBuff_DOTS>())
+        {
+            EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buffEntity);
+        }
+
+        var buffer = buffEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+
+        ModifyUnitStatBuff_DOTS extraPhysicalPower = new()
+        {
+            StatType = UnitStatType.PhysicalPower,
+            ModificationType = ModificationType.AddToBase,
+            Value = bonusPhysicalPower,
+            Modifier = 1,
+            IncreaseByStacks = false,
+            ValueByStacks = 0,
+            Priority = 0,
+            Id = ModificationIDs.Create().NewModificationId()
+        };
+
+        buffer.Add(extraPhysicalPower);
+
+        ModifyUnitStatBuffSystemSpawn.OnUpdate();
 
         AmplifyBuff amplifyBuff = new()
         {

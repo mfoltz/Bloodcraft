@@ -30,10 +30,11 @@ internal static class FamiliarCommands
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly PrefabGUID DominateBuff = new(-1447419822);
-    static readonly PrefabGUID TakeFlightBuff = new(1205505492);
+    static readonly PrefabGUID _dominateBuff = new(-1447419822);
+    static readonly PrefabGUID _takeFlightBuff = new(1205505492);
+    static readonly PrefabGUID _tauntEmote = new(-158502505);
 
-    static readonly Dictionary<string, Action<ChatCommandContext, ulong>> FamiliarSettings = new()
+    static readonly Dictionary<string, Action<ChatCommandContext, ulong>> _familiarSettings = new()
     {
         {"VBloodEmotes", Familiars.ToggleVBloodEmotes},
         {"Shiny", Familiars.ToggleShinies}
@@ -94,7 +95,7 @@ internal static class FamiliarCommands
             foreach (var famKey in famKeys)
             {
                 PrefabGUID famPrefab = new(famKey);
-                string famName = famPrefab.GetPrefabName();
+                string famName = famPrefab.GetLocalizedName();
                 string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
 
                 // Check if the familiar has buffs and update the color based on RandomVisuals
@@ -245,7 +246,7 @@ internal static class FamiliarCommands
                 }
 
                 PrefabGUID PrefabGUID = new(actives.FamKey);
-                LocalizationService.HandleReply(ctx, $"<color=green>{PrefabGUID.GetPrefabName()}</color> moved to <color=white>{name}</color>.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{PrefabGUID.GetLocalizedName()}</color> moved to <color=white>{name}</color>.");
             }
         }
         else
@@ -373,7 +374,7 @@ internal static class FamiliarCommands
             // remove from set
             familiarSet.RemoveAt(choice - 1);
             SaveUnlockedFamiliars(steamId, data);
-            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetPrefabName()}</color> removed from <color=white>{activeSet}</color>.");
+            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeSet}</color>.");
         }
         else
         {
@@ -393,12 +394,12 @@ internal static class FamiliarCommands
         ulong platformId = ctx.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't call a familiar when using dominating presence!");
             return;
         }
-        else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
+        else if (ServerGameManager.HasBuff(character, _takeFlightBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't call a familiar when using batform!");
             return;
@@ -418,12 +419,12 @@ internal static class FamiliarCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (ServerGameManager.HasBuff(character, DominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't toggle combat for a familiar when using dominating presence!");
             return;
         }
-        else if (ServerGameManager.HasBuff(character, TakeFlightBuff.ToIdentifier()))
+        else if (ServerGameManager.HasBuff(character, _takeFlightBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't toggle combat for a familiar when using batform!");
             return;
@@ -458,11 +459,11 @@ internal static class FamiliarCommands
         }
 
         List<string> emoteInfoList = [];
-        foreach (var emote in EmoteSystemPatch.actions)
+        foreach (var emote in EmoteSystemPatch.EmoteActions)
         {
-            if (emote.Key.Equals(EmoteSystemPatch.TauntEmote)) continue;
+            if (emote.Key.Equals(_tauntEmote)) continue;
 
-            string emoteName = emote.Key.GetPrefabName();
+            string emoteName = emote.Key.GetLocalizedName();
             string actionName = emote.Value.Method.Name;
             emoteInfoList.Add($"<color=#FFC0CB>{emoteName}</color>: <color=yellow>{actionName}</color>");
         }
@@ -507,8 +508,8 @@ internal static class FamiliarCommands
             if (familiar != Entity.Null)
             {
                 // read stats and such here
-                Health health = familiar.Read<Health>();
-                UnitStats unitStats = familiar.Read<UnitStats>();
+                Health health = familiar.ReadRO<Health>();
+                UnitStats unitStats = familiar.ReadRO<UnitStats>();
 
                 float physicalPower = unitStats.PhysicalPower._Value;
                 float spellPower = unitStats.SpellPower._Value;
@@ -708,17 +709,20 @@ internal static class FamiliarCommands
         var buffer = ctx.Event.SenderCharacterEntity.ReadBuffer<FollowerBuffer>();
         for (int i = 0; i < buffer.Length; i++)
         {
-            if (EntityManager.Exists(buffer[i].Entity._Entity))
+            Entity follower = buffer[i].Entity.GetEntityOnServer();
+
+            if (follower.Exists())
             {
-                if (buffer[i].Entity._Entity.Has<Disabled>()) buffer[i].Entity._Entity.Remove<Disabled>();
-                DestroyUtility.CreateDestroyEvent(EntityManager, buffer[i].Entity._Entity, DestroyReason.Default, DestroyDebugReason.None);
+                if (follower.IsDisabled()) follower.Remove<Disabled>();
+
+                DestroyUtility.Destroy(EntityManager, follower);
             }
         }
 
         Familiars.ClearFamiliarActives(steamId);
-        if (Familiars.AutoCallMap.ContainsKey(character)) Familiars.AutoCallMap.Remove(character);
+        if (Familiars.AutoCallMap.TryRemove(character, out Entity _))
 
-        LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
+            LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
 
     [Command(name: "search", shortHand: "s", adminOnly: false, usage: ".fam s [Name]", description: "Searches boxes for unit with entered name.")]
@@ -783,7 +787,7 @@ internal static class FamiliarCommands
                     var matchingFamiliars = box.Value.Where(famKey =>
                     {
                         PrefabGUID famPrefab = new(famKey);
-                        return famPrefab.GetPrefabName().ToLower().Contains(name.ToLower());
+                        return famPrefab.GetLocalizedName().ToLower().Contains(name.ToLower());
                     }).ToList();
 
                     if (matchingFamiliars.Count > 0)
@@ -831,7 +835,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
 
         PrefabGUID visual = ShinyBuffColorHexMap.Keys
-                .SingleOrDefault(prefab => prefab.LookupName().ToLower().Contains(spellSchool.ToLower()));
+                .SingleOrDefault(prefab => prefab.GetPrefabName().ToLower().Contains(spellSchool.ToLower()));
 
         if (!ShinyBuffColorHexMap.ContainsKey(visual))
         {
@@ -841,7 +845,7 @@ internal static class FamiliarCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity familiar = Familiars.FindPlayerFamiliar(character);
-        int famKey = familiar.Read<PrefabGUID>().GuidHash;
+        int famKey = familiar.ReadRO<PrefabGUID>().GuidHash;
 
         if (familiar != Entity.Null)
         {
@@ -876,7 +880,7 @@ internal static class FamiliarCommands
                     }
                     else
                     {
-                        LocalizationService.HandleReply(ctx, $"You do not have the required item quantity to change your familiar visual (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                        LocalizationService.HandleReply(ctx, $"You do not have the required item quantity to change your familiar visual (<color=#ffd9eb>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
                     }
                 }
                 else
@@ -932,7 +936,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        var action = FamiliarSettings
+        var action = _familiarSettings
             .Where(kvp => kvp.Key.ToLower() == option.ToLower())
             .Select(kvp => kvp.Value)
             .FirstOrDefault();
@@ -943,7 +947,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            string validOptions = string.Join(", ", FamiliarSettings.Keys.Select(kvp => $"<color=white>{kvp}</color>"));
+            string validOptions = string.Join(", ", _familiarSettings.Keys.Select(kvp => $"<color=white>{kvp}</color>"));
             LocalizationService.HandleReply(ctx, $"Invalid option. Please choose from the following: {validOptions}");
         }
     }

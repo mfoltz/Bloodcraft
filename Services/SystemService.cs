@@ -57,7 +57,7 @@ public class SystemService(World world)
 
     ReplaceAbilityOnSlotSystem _replaceAbilityOnSlotSystem;
     public ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => _replaceAbilityOnSlotSystem ??= GetSystem<ReplaceAbilityOnSlotSystem>();
-    
+
     UnEquipItemSystem _unEquipItemSystem;
     public UnEquipItemSystem UnEquipItemSystem => _unEquipItemSystem ??= GetSystem<UnEquipItemSystem>();
 
@@ -87,6 +87,15 @@ public class SystemService(World world)
 
     AbilitySpawnSystem _abilitySpawnSystem;
     public AbilitySpawnSystem AbilitySpawnSystem => _abilitySpawnSystem ??= GetSystem<AbilitySpawnSystem>();
+
+    SpawnTeamSystem _spawnTeamSystem;
+    public SpawnTeamSystem SpawnTeamSystem => _spawnTeamSystem ??= GetSystem<SpawnTeamSystem>();
+
+    ModificationSystem _modificationSystem;
+    public ModificationSystem ModificationSystem => _modificationSystem ??= GetSystem<ModificationSystem>();
+
+    SetTeamOnSpawnSystem _setTeamOnSpawnSystem;
+    public SetTeamOnSpawnSystem SetTeamOnSpawnSystem => _setTeamOnSpawnSystem ??= GetSystem<SetTeamOnSpawnSystem>();
     T GetSystem<T>() where T : ComponentSystemBase
     {
         return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"Failed to get {Il2CppType.Of<T>().FullName} from the Server...");

@@ -51,8 +51,8 @@ public class VersionHandler_1_1_2 : IVersionHandler<ProgressDataV1_1_2>
     }
     public void SendClientProgress(Entity character, ulong steamId)
     {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
+        Entity userEntity = character.ReadRO<PlayerCharacter>().UserEntity;
+        User user = userEntity.ReadRO<User>();
 
         ProgressDataV1_1_2 data = new()
         {
@@ -145,8 +145,8 @@ public class VersionHandler_1_2_2 : IVersionHandler<ProgressDataV1_2_2>
     }
     public void SendClientProgress(Entity character, ulong steamId)
     {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
+        Entity userEntity = character.ReadRO<PlayerCharacter>().UserEntity;
+        User user = userEntity.ReadRO<User>();
 
         ProgressDataV1_2_2 data = new()
         {
@@ -255,7 +255,8 @@ public class ProgressDataV1_2_2
     public (int EnchantingProgress, int EnchantingLevel, int AlchemyProgress, int AlchemyLevel,
         int HarvestingProgress, int HarvestingLevel, int BlacksmithingProgress, int BlacksmithingLevel,
         int TailoringProgress, int TailoringLevel, int WoodcuttingProgress, int WoodcuttingLevel,
-        int MiningProgress, int MiningLevel, int FishingProgress, int FishingLevel) ProfessionData { get; set; }
+        int MiningProgress, int MiningLevel, int FishingProgress, int FishingLevel) ProfessionData
+    { get; set; }
     public (int Type, int Progress, int Goal, string Target, string IsVBlood) DailyQuestData { get; set; }
     public (int Type, int Progress, int Goal, string Target, string IsVBlood) WeeklyQuestData { get; set; }
 }

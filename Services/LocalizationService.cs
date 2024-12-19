@@ -1,7 +1,6 @@
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
-using Stunlock.Localization;
 using System.Reflection;
 using System.Text.Json;
 using Unity.Entities;
@@ -10,8 +9,6 @@ using VampireCommandFramework;
 namespace Bloodcraft.Services;
 internal class LocalizationService
 {
-    //static readonly Regex Regex = new(@"(?<open>\<.*?\>)|(?<word>\b\w+(?:'\w+)?\b)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    static readonly string Language = ConfigService.LanguageLocalization;
     struct Code
     {
         public string Key { get; set; }
@@ -35,10 +32,8 @@ internal class LocalizationService
         public Words[] Words { get; set; }
     }
 
-    static readonly Dictionary<string, string> Localization = [];
-    static readonly Dictionary<int, string> PrefabNames = [];
-
-    static readonly Dictionary<string, string> LocalizationMapping = new()
+    static readonly string _language = ConfigService.LanguageLocalization;
+    static readonly Dictionary<string, string> _localizedLanguages = new()
     {
         {"English", "Bloodcraft.Localization.English.json"},
         {"German", "Bloodcraft.Localization.German.json"},
@@ -59,36 +54,46 @@ internal class LocalizationService
         {"Vietnamese", "Bloodcraft.Localization.Vietnamese.json"},
         {"Brazilian", "Bloodcraft.Localization.Brazilian.json"}
     };
+
+    static readonly Dictionary<int, string> _prefabHashesToGuidStrings = [];
+    static readonly Dictionary<string, string> _guidStringsToLocalizedNames = [];
     public LocalizationService()
     {
-        LoadLocalizations();
-        LoadPrefabNames();
+        InitializeLocalizations();
     }
-    static void LoadLocalizations()
+    static void InitializeLocalizations()
     {
-        var resourceName = LocalizationMapping.ContainsKey(Language) ? LocalizationMapping[Language] : "Bloodcraft.Localization.English.json";
-
-        var assembly = Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream(resourceName);
-
-        using StreamReader localizationReader = new(stream);
-        string jsonContent = localizationReader.ReadToEnd();
-        var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
-
-        localizationFile.Nodes
-            .ToDictionary(x => x.Guid, x => x.Text)
-            .ForEach(kvp => Localization[kvp.Key] = kvp.Value);
+        LoadPrefabHashesToGuidStrings();
+        LoadGuidStringsToLocalizedNames();
     }
-    static void LoadPrefabNames()
+    static void LoadPrefabHashesToGuidStrings()
     {
-        var resourceName = "Bloodcraft.Localization.Prefabs.json";
-        var assembly = Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream(resourceName);
+        string resourceName = "Bloodcraft.Localization.Prefabs.json";
+
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        Stream stream = assembly.GetManifestResourceStream(resourceName);
 
         using StreamReader reader = new(stream);
         string jsonContent = reader.ReadToEnd();
+
         var prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
-        prefabNames.ForEach(kvp => PrefabNames[kvp.Key] = kvp.Value);
+        prefabNames
+            .ForEach(kvp => _prefabHashesToGuidStrings[kvp.Key] = kvp.Value);
+    }
+    static void LoadGuidStringsToLocalizedNames()
+    {
+        string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Localization.English.json";
+
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        Stream stream = assembly.GetManifestResourceStream(resourceName);
+
+        using StreamReader localizationReader = new(stream);
+        string jsonContent = localizationReader.ReadToEnd();
+
+        var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
+        localizationFile.Nodes
+            .ToDictionary(x => x.Guid, x => x.Text)
+            .ForEach(kvp => _guidStringsToLocalizedNames[kvp.Key] = kvp.Value);
     }
     internal static void HandleReply(ChatCommandContext ctx, string message)
     {
@@ -98,27 +103,32 @@ internal class LocalizationService
     {
         ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
     }
-    static string GetLocalizationFromKey(LocalizationKey key)
+    public static string GetAssetGuidString(PrefabGUID prefabGUID)
     {
-        var guid = key.Key.ToGuid().ToString();
-        return GetLocalization(guid);
-    }
-    public static string GetPrefabName(PrefabGUID prefabGUID)
-    {
-        if (PrefabNames.TryGetValue(prefabGUID.GuidHash, out var itemLocalizationHash))
+        if (_prefabHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out var guidString))
         {
-            return GetLocalization(itemLocalizationHash);
-        }
-        return prefabGUID.LookupName();
-    }
-    public static string GetLocalization(string Guid)
-    {
-        if (Localization.TryGetValue(Guid, out var Text))
-        {
-            return Text;
+            return guidString;
         }
 
-        return "Couldn't find key for localization...";
+        return string.Empty;
+    }
+    public static string GetGuidString(PrefabGUID prefabGUID)
+    {
+        if (_prefabHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out string guidString))
+        {
+            return guidString;
+        }
+
+        return string.Empty;
+    }
+    public static string GetNameFromGuidString(string guidString)
+    {
+        if (_guidStringsToLocalizedNames.TryGetValue(guidString, out string localizedName))
+        {
+            return localizedName;
+        }
+
+        return string.Empty;
     }
 
     /*

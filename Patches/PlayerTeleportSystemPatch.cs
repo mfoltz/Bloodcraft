@@ -1,7 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
-using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using Unity.Collections;
@@ -12,12 +11,14 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class PlayerTeleportSystemPatch
 {
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+
     [HarmonyPatch(typeof(PlayerTeleportSystem), nameof(PlayerTeleportSystem.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePrefix(PlayerTeleportSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (ConfigService.FamiliarSystem) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[1].ToEntityArray(Allocator.Temp);
         try

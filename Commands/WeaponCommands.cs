@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -166,7 +165,7 @@ internal static class WeaponCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats (<color=#ffd9eb>{item.GetPrefabName()}</color> x<color=white>{quantity}</color>)");
+                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats (<color=#ffd9eb>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
                 return;
             }
 
@@ -206,7 +205,6 @@ internal static class WeaponCommands
         }
 
         IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
-
         if (expertiseHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon type.");
@@ -282,7 +280,7 @@ internal static class WeaponCommands
         if (radius > 0f)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
-            float3 charPosition = character.Read<Translation>().Value;
+            float3 charPosition = character.ReadRO<Translation>().Value;
 
             HashSet<PlayerInfo> processed = [];
             Dictionary<ulong, PlayerInfo> players = new(OnlineCache);
@@ -299,12 +297,12 @@ internal static class WeaponCommands
                         if (slot == 1)
                         {
                             spells.FirstUnarmed = ability;
-                            LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                            LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                         }
                         else if (slot == 2)
                         {
                             spells.SecondUnarmed = ability;
-                            LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                            LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                         }
 
                         steamId.SetPlayerSpells(spells);
@@ -335,12 +333,12 @@ internal static class WeaponCommands
                 if (slot == 1)
                 {
                     spells.FirstUnarmed = ability;
-                    LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                    LocalizationService.HandleReply(ctx, $"First unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                 }
                 else if (slot == 2)
                 {
                     spells.SecondUnarmed = ability;
-                    LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).LookupName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
+                    LocalizationService.HandleReply(ctx, $"Second unarmed slot set to <color=white>{new PrefabGUID(ability).GetPrefabName()}</color> for <color=green>{playerInfo.User.CharacterName.Value}</color>.");
                 }
 
                 steamId.SetPlayerSpells(spells);
@@ -348,6 +346,7 @@ internal static class WeaponCommands
         }
     }
 
+    /*
     [Command(name: "restorelevels", shortHand: "restore", adminOnly: false, usage: ".wep restore", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
     public static void ResetWeaponLevels(ChatCommandContext ctx)
     {
@@ -357,18 +356,21 @@ internal static class WeaponCommands
         {
             for (int i = 0; i < inventoryBuffer.Length; i++)
             {
-                Entity itemEntity = inventoryBuffer[i].ItemEntity._Entity;
+                Entity itemEntity = inventoryBuffer[i].ItemEntity.GetEntityOnServer();
+
                 if (itemEntity.Has<WeaponLevelSource>())
                 {
-                    Entity originalWeapon = PrefabCollectionSystem._PrefabGuidToEntityMap[itemEntity.Read<PrefabGUID>()];
-                    WeaponLevelSource weaponLevelSource = originalWeapon.Read<WeaponLevelSource>();
+                    Entity originalWeapon = PrefabCollectionSystem._PrefabGuidToEntityMap[itemEntity.ReadRO<PrefabGUID>()];
+                    WeaponLevelSource weaponLevelSource = originalWeapon.ReadRO<WeaponLevelSource>();
+
                     if (itemEntity.Has<UpgradeableLegendaryItem>())
                     {
-                        int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                         var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
-                        PrefabGUID PrefabGUID = buffer[tier].TierPrefab;
-                        weaponLevelSource = PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUID].Read<WeaponLevelSource>();
+                        int tier = itemEntity.ReadRO<UpgradeableLegendaryItem>().CurrentTier;
+
+                        weaponLevelSource = PrefabCollectionSystem._PrefabGuidToEntityMap[buffer[tier].TierPrefab].ReadRO<WeaponLevelSource>();
                     }
+
                     itemEntity.Write(weaponLevelSource);
                 }
             }
@@ -376,4 +378,5 @@ internal static class WeaponCommands
             LocalizationService.HandleReply(ctx, "Set weapon levels to original values.");
         }
     }
+    */
 }

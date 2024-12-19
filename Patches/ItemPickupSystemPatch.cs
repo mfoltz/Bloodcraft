@@ -9,12 +9,14 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ItemPickupSystemPatch
 {
+    static readonly bool _quests = ConfigService.QuestSystem;
+
     [HarmonyPatch(typeof(ItemPickupSystem), nameof(ItemPickupSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ItemPickupSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.QuestSystem) return;
+        else if (!_quests) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try

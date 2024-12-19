@@ -16,12 +16,12 @@ internal static class ClassCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
     public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -49,7 +49,7 @@ internal static class ClassCommands
     [Command(name: "choosespell", shortHand: "csp", adminOnly: false, usage: ".class csp [#]", description: "Sets shift spell for class if prestige level is high enough.")]
     public static void ChooseClassSpell(ChatCommandContext ctx, int choice)
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -182,7 +182,7 @@ internal static class ClassCommands
     [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
     public static void ClassChangeCommand(ChatCommandContext ctx, string className)
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -217,7 +217,7 @@ internal static class ClassCommands
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
     public static void SyncClassBuffsCommand(ChatCommandContext ctx)
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -248,7 +248,7 @@ internal static class ClassCommands
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".class l", description: "Lists classes.")]
     public static void ListClasses(ChatCommandContext ctx)
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -261,7 +261,7 @@ internal static class ClassCommands
     [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [ClassType]", description: "Shows perks that can be gained from class.")]
     public static void ClassPerks(ChatCommandContext ctx, string classType = "")
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;
@@ -296,7 +296,7 @@ internal static class ClassCommands
     [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [ClassType]", description: "Shows spells that can be gained from class.")]
     public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
     {
-        if (!Classes)
+        if (!_classes)
         {
             LocalizationService.HandleReply(ctx, "Classes are not enabled.");
             return;

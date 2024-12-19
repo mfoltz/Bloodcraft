@@ -12,12 +12,14 @@ internal static class ImprisonedBuffSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
 
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+
     [HarmonyPatch(typeof(ImprisonedBuffSystem), nameof(ImprisonedBuffSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ImprisonedBuffSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.FamiliarSystem) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_1231815368_0.ToEntityArray(Allocator.Temp);
         try

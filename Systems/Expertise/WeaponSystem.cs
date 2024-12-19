@@ -13,13 +13,14 @@ internal static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
-    static readonly int ExpertiseStatChoices = ConfigService.ExpertiseStatChoices;
-    static readonly float UnitExpertiseMultiplier = ConfigService.UnitExpertiseMultiplier;
-    static readonly float VBloodExpertiseMultiplier = ConfigService.VBloodExpertiseMultiplier;
-    static readonly float PrestigeRatesReducer = ConfigService.PrestigeRatesReducer;
-    static readonly float PrestigeRateMultiplier = ConfigService.PrestigeRateMultiplier;
-    static readonly float UnitSpawnerExpertiseFactor = ConfigService.UnitSpawnerExpertiseFactor;
+    static readonly int _maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
+    static readonly int _expertiseStatChoices = ConfigService.ExpertiseStatChoices;
+
+    static readonly float _unitExpertiseMultiplier = ConfigService.UnitExpertiseMultiplier;
+    static readonly float _vBloodExpertiseMultiplier = ConfigService.VBloodExpertiseMultiplier;
+    static readonly float _prestigeRatesReducer = ConfigService.PrestigeRatesReducer;
+    static readonly float _prestigeRateMultiplier = ConfigService.PrestigeRateMultiplier;
+    static readonly float _unitSpawnerExpertiseFactor = ConfigService.UnitSpawnerExpertiseFactor;
 
     public static readonly Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -181,8 +182,8 @@ internal static class WeaponSystem
     {
         if (target.Has<Minion>()) return;
 
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
+        Entity userEntity = source.ReadRO<PlayerCharacter>().UserEntity;
+        User user = userEntity.ReadRO<User>();
         ulong steamID = user.PlatformId;
         WeaponType weaponType = WeaponManager.GetCurrentWeaponType(source);
 
@@ -191,9 +192,9 @@ internal static class WeaponSystem
             float expertiseValue = CalculateExpertiseValue(unitStats, target.Has<VBloodConsumeSource>());
             float changeFactor = 1f;
 
-            if (UnitSpawnerExpertiseFactor < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
+            if (_unitSpawnerExpertiseFactor < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
             {
-                expertiseValue *= UnitSpawnerExpertiseFactor;
+                expertiseValue *= _unitSpawnerExpertiseFactor;
                 if (expertiseValue == 0) return;
             }
 
@@ -201,12 +202,12 @@ internal static class WeaponSystem
             {
                 if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige))
                 {
-                    changeFactor -= (PrestigeRatesReducer * expertisePrestige);
+                    changeFactor -= (_prestigeRatesReducer * expertisePrestige);
                 }
 
                 if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige))
                 {
-                    changeFactor += (PrestigeRateMultiplier * xpPrestige);
+                    changeFactor += (_prestigeRateMultiplier * xpPrestige);
                 }
             }
 
@@ -247,8 +248,8 @@ internal static class WeaponSystem
     {
         float ExpertiseValue = unitStats.SpellPower + unitStats.PhysicalPower;
 
-        if (isVBlood) return ExpertiseValue * VBloodExpertiseMultiplier;
-        else return ExpertiseValue * UnitExpertiseMultiplier;
+        if (isVBlood) return ExpertiseValue * _vBloodExpertiseMultiplier;
+        else return ExpertiseValue * _unitExpertiseMultiplier;
     }
     public static void SaveWeaponExperience(ulong steamID, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
     {
@@ -256,7 +257,7 @@ internal static class WeaponSystem
         int currentLevel = xpData.Key;
         float currentXP = xpData.Value;
 
-        if (currentLevel >= MaxExpertiseLevel)
+        if (currentLevel >= _maxExpertiseLevel)
         {
             // Already at max level
             leveledUp = false;
@@ -271,10 +272,10 @@ internal static class WeaponSystem
         if (newLevel > currentLevel)
         {
             leveledUp = true;
-            if (newLevel > MaxExpertiseLevel)
+            if (newLevel > _maxExpertiseLevel)
             {
-                newLevel = MaxExpertiseLevel;
-                newExperience = ConvertLevelToXp(MaxExpertiseLevel);
+                newLevel = _maxExpertiseLevel;
+                newExperience = ConvertLevelToXp(_maxExpertiseLevel);
             }
         }
 
@@ -291,8 +292,8 @@ internal static class WeaponSystem
         {
             HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
         }
-
-        if (Misc.GetPlayerBool(steamID, "ExpertiseLogging"))
+        else if (newLevel >= _maxExpertiseLevel) return;
+        else if (Misc.GetPlayerBool(steamID, "ExpertiseLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
@@ -332,7 +333,7 @@ internal static class WeaponSystem
     */
     static void HandleWeaponLevelUp(User user, WeaponType weaponType, int newLevel, ulong steamID)
     {
-        if (newLevel <= MaxExpertiseLevel)
+        if (newLevel <= _maxExpertiseLevel)
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
@@ -343,9 +344,9 @@ internal static class WeaponSystem
             if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {
                 int currentStatCount = stats.Count;
-                if (currentStatCount < ExpertiseStatChoices)
+                if (currentStatCount < _expertiseStatChoices)
                 {
-                    int choicesLeft = ExpertiseStatChoices - currentStatCount;
+                    int choicesLeft = _expertiseStatChoices - currentStatCount;
                     string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
 
                     LocalizationService.HandleServerReply(EntityManager, user,
@@ -380,7 +381,7 @@ internal static class WeaponSystem
     public static WeaponType GetWeaponTypeFromWeaponEntity(Entity weaponEntity)
     {
         if (weaponEntity == Entity.Null) return WeaponType.Unarmed;
-        string weaponCheck = weaponEntity.Read<PrefabGUID>().LookupName();
+        string weaponCheck = weaponEntity.ReadRO<PrefabGUID>().GetPrefabName();
 
         return Enum.GetValues(typeof(WeaponType))
             .Cast<WeaponType>()

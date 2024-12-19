@@ -1,7 +1,5 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using ProjectM;
-using ProjectM.Shared;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
@@ -13,7 +11,14 @@ internal static class BloodManager
     static SystemService SystemService => Core.SystemService;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _hardSynergies = ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _prestige = ConfigService.PrestigeSystem;
+
+    static readonly float _statSynergyMultiplier = ConfigService.StatSynergyMultiplier;
+    static readonly float _prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
+    static readonly int _maxLegacyLevel = ConfigService.MaxBloodLevel;
+    static readonly int _legacyStatChoices = ConfigService.LegacyStatChoices;
     public static class BloodStats
     {
         public enum BloodStatType
@@ -68,7 +73,7 @@ internal static class BloodManager
     {
         if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
         {
-            if (ConfigService.HardSynergies)
+            if (_hardSynergies)
             {
                 if (!Utilities.Classes.HasClass(steamId))
                 {
@@ -84,7 +89,7 @@ internal static class BloodManager
                     return false;
                 }
 
-                if (Stats.Count >= ConfigService.LegacyStatChoices || Stats.Contains(statType))
+                if (Stats.Count >= _legacyStatChoices || Stats.Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen and no duplicates
                 }
@@ -96,7 +101,7 @@ internal static class BloodManager
             }
             else
             {
-                if (Stats.Count >= ConfigService.LegacyStatChoices || Stats.Contains(statType))
+                if (Stats.Count >= _legacyStatChoices || Stats.Contains(statType))
                 {
                     return false; // Only allow configured amount of stats to be chosen and no duplicates
                 }
@@ -127,7 +132,7 @@ internal static class BloodManager
             {
                 EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
             }
-            
+
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
             foreach (var bloodStatType in bonuses)
             {
@@ -142,15 +147,14 @@ internal static class BloodManager
                         statBuff.Value += scaledBonus; // Modify the value accordingly
                         buffer[i] = statBuff; // Assign the modified struct back to the buffer
                         found = true;
+
                         break;
                     }
                 }
 
                 if (!found)
                 {
-                    // If not found, create a new stat modifier
                     UnitStatType statType = BloodStatTypes[bloodStatType];
-
                     ModifyUnitStatBuff_DOTS newStatBuff = new()
                     {
                         StatType = statType,
@@ -160,8 +164,9 @@ internal static class BloodManager
                         IncreaseByStacks = false,
                         ValueByStacks = 0,
                         Priority = 0,
-                        Id = ModificationId.Empty
+                        Id = ModificationIDs.Create().NewModificationId()
                     };
+
                     buffer.Add(newStatBuff);
                 }
             }
@@ -176,61 +181,31 @@ internal static class BloodManager
             var xpData = handler.GetLegacyData(steamId);
             float maxBonus = BloodStatValues[statType];
 
-            if (Classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
+            if (_classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
             {
                 var (_, classBloodStats) = classes.First().Value; // get class to check if stat allowed
                 List<BloodStatType> bloodStatTypes = classBloodStats.Select(value => (BloodStatType)value).ToList();
 
                 if (bloodStatTypes.Contains(statType))
                 {
-                    maxBonus *= ConfigService.StatSynergyMultiplier;
+                    maxBonus *= _statSynergyMultiplier;
                 }
             }
 
-            if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var PrestigeData))
+            if (_prestige && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var PrestigeData))
             {
-                float gainFactor = 1 + (ConfigService.PrestigeStatMultiplier * PrestigeData);
+                float gainFactor = 1 + (_prestigeStatMultiplier * PrestigeData);
                 maxBonus *= gainFactor;
             }
 
-            float scaledBonus = maxBonus * ((float)xpData.Key / ConfigService.MaxBloodLevel); // Scale bonus up to maxLevel then full effect
+            float scaledBonus = maxBonus * ((float)xpData.Key / _maxLegacyLevel); // Scale bonus up to maxLevel then full effect
             return scaledBonus;
         }
         return 0; // Return 0 if no handler is found or other error
     }
-    public static void UpdateBloodStats(Entity player, BloodType bloodType)
-    {
-        if (!BloodTypeToBuffMap.TryGetValue(bloodType, out var buffPrefabGUID)) return;
-        else if (bloodType.Equals(BloodType.None)) return;
-
-        //Core.Log.LogInfo($"Updating blood stats, reapplying first bloodQualityBuff for bloodType...");
-        if (player.TryGetBuff(buffPrefabGUID, out Entity buffEntity))
-        {
-            /*
-            if ((ConfigService.SoftSynergies || ConfigService.HardSynergies) && ClassUtilities.HasClass(user.PlatformId)) // verify against class blood buffs, gross
-            {
-                PlayerClass playerClass = ClassUtilities.GetPlayerClass(user.PlatformId);
-
-                if (UpdateBuffsBufferDestroyPatch.ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGUID))
-                {
-                    // how to handle this for bloodknight etc which have perma buffs that are temporarily replaced by actual bloodbuffs then reapplied when
-                    // changing bloodtypes automatically by other patch? think that's already accounted for by checking bloodType against bloodBuff and class in ServerScriptSpawn
-                    // but worth keeping an eye on
-                }
-            }
-            else // if no classes just destroy and reapply so stats buffer gets refreshed actually just do that anyway since already accounting for this elsewhere?
-            {
-                DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-                BuffUtilities.TryApplyBuff(player, buffPrefabGUID);
-            }
-            */
-            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-            Buffs.TryApplyBuff(player, buffPrefabGUID);
-        }
-    }
     public static BloodType GetCurrentBloodType(Entity character)
     {
-        Blood blood = character.Read<Blood>();
+        Blood blood = character.ReadRO<Blood>();
         return GetBloodTypeFromPrefab(blood.BloodType);
     }
 }

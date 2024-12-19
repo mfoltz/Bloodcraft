@@ -15,9 +15,9 @@ internal static class ChatMessageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly bool ClientCompanion = ConfigService.ClientCompanion;
+    static readonly bool _clientCompanion = ConfigService.ClientCompanion;
 
-    static readonly Regex RegexMAC = new(@";mac([^;]+)$");
+    static readonly Regex _regexMAC = new(@";mac([^;]+)$");
 
     [HarmonyBefore("gg.deca.Bloodstone")]
     [HarmonyPatch(typeof(ChatMessageSystem), nameof(ChatMessageSystem.OnUpdate))]
@@ -31,7 +31,7 @@ internal static class ChatMessageSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
+                ChatMessageEvent chatMessageEvent = entity.ReadRO<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
 
                 if (ConfigService.ClientCompanion && VerifyMAC(message, out string originalMessage))
@@ -48,19 +48,19 @@ internal static class ChatMessageSystemPatch
     }
     public static bool VerifyMAC(string receivedMessage, out string originalMessage)
     {
-        // Match the MAC using RegexMAC
-        Match match = RegexMAC.Match(receivedMessage);
+        Match match = _regexMAC.Match(receivedMessage);
         originalMessage = "";
 
         if (match.Success)
         {
             string receivedMAC = match.Groups[1].Value;
-            string intermediateMessage = RegexMAC.Replace(receivedMessage, "");
+            string intermediateMessage = _regexMAC.Replace(receivedMessage, "");
 
             if (CheckMAC(intermediateMessage, receivedMAC, Core.OLD_SHARED_KEY) ||
                 CheckMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
             {
                 originalMessage = intermediateMessage;
+
                 return true;
             }
         }
@@ -71,6 +71,7 @@ internal static class ChatMessageSystemPatch
     {
         using var hmac = new HMACSHA256(key);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
         string recalculatedMAC = Convert.ToBase64String(hashBytes);
 
@@ -82,14 +83,18 @@ internal static class ChatMessageSystemPatch
     {
         using var hmac = new HMACSHA256(Core.OLD_SHARED_KEY);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
+
         return Convert.ToBase64String(hashBytes);
     }
     public static string GenerateMACV1_2_2(string message)
     {
         using var hmac = new HMACSHA256(Core.NEW_SHARED_KEY);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
         byte[] hashBytes = hmac.ComputeHash(messageBytes);
+
         return Convert.ToBase64String(hashBytes);
     }
 }

@@ -20,8 +20,8 @@ internal static class PrestigeCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly PrefabGUID ShroudBuff = new(1504279833);
-    static readonly PrefabGUID ShroudCloak = new(1063517722);
+    static readonly PrefabGUID _shroudBuff = new(1504279833);
+    static readonly PrefabGUID _shroudCloak = new(1063517722);
 
     [Command(name: "self", shortHand: "me", adminOnly: false, usage: ".prestige me [PrestigeType]", description: "Handles player prestiging.")]
     public static void PrestigeCommand(ChatCommandContext ctx, string prestigeType)
@@ -82,13 +82,13 @@ internal static class PrestigeCommands
 
                 if (ServerGameManager.TryAddInventoryItem(character, exoReward, ConfigService.ExoPrestigeRewardQuantity))
                 {
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetPrefabName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
                     return;
                 }
                 else
                 {
                     InventoryUtilitiesServer.CreateDropItem(EntityManager, character, exoReward, ConfigService.ExoPrestigeRewardQuantity, new Entity());
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetPrefabName()}</color>x<color=white>{ConfigService.ExoPrestigeReward}</color>! It dropped on the ground becuase your inventory was full though.");
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeReward}</color>! It dropped on the ground becuase your inventory was full though.");
                     return;
                 }
             }
@@ -145,8 +145,8 @@ internal static class PrestigeCommands
             return;
         }
 
-        ulong steamId = playerInfo.User.PlatformId;
         Entity character = playerInfo.CharEntity;
+        ulong steamId = playerInfo.User.PlatformId;
 
         if (parsedPrestigeType == PrestigeType.Exo)
         {
@@ -162,7 +162,7 @@ internal static class PrestigeCommands
                 return;
             }
 
-            if (steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(PrestigeType.Exo, out var exoPrestige))
+            if (steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(PrestigeType.Exo, out int exoPrestige))
             {
                 exoPrestige = level;
 
@@ -177,7 +177,7 @@ internal static class PrestigeCommands
             }
         }
 
-        var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+        IPrestigeHandler handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
 
         if (handler == null)
         {
@@ -239,7 +239,7 @@ internal static class PrestigeCommands
         var prestigeBuffs = buffs.Select((buff, index) =>
         {
             int level = index + 1;
-            string prefab = new PrefabGUID(buff).LookupName();
+            string prefab = new PrefabGUID(buff).GetPrefabName();
             int prefabIndex = prefab.IndexOf("Prefab");
             if (prefabIndex != -1)
             {
@@ -284,8 +284,8 @@ internal static class PrestigeCommands
             return;
         }
 
-        ulong steamId = playerInfo.User.PlatformId;
         Entity character = playerInfo.CharEntity;
+        ulong steamId = playerInfo.User.PlatformId;
 
         if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
             prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel))
@@ -322,13 +322,14 @@ internal static class PrestigeCommands
             return;
         }
 
-        var steamId = ctx.Event.User.PlatformId;
-        Entity character = ctx.Event.SenderCharacterEntity;
+        ulong steamId = ctx.Event.User.PlatformId;
 
         if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
             prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel) && prestigeLevel > 0)
         {
+            Entity character = ctx.Event.SenderCharacterEntity;
             ApplyPrestigeBuffs(character, prestigeLevel);
+
             LocalizationService.HandleReply(ctx, "Prestige buffs applied.");
         }
         else
@@ -353,7 +354,7 @@ internal static class PrestigeCommands
         }
 
         User user = ctx.Event.User;
-        ulong steamId = ctx.Event.User.PlatformId;
+        ulong steamId = user.PlatformId;
 
         if (parsedPrestigeType == PrestigeType.Exo && steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
         {
@@ -362,11 +363,11 @@ internal static class PrestigeCommands
 
             if (steamId.TryGetPlayerExoFormData(out var exoFormData))
             {
-                if (exoFormData.Value < ExoForm.BaseDuration)
+                if (exoFormData.Value < ExoForm.BASE_DURATION)
                 {
                     ExoForm.ReplyNotEnoughCharge(user, steamId);
                 }
-                else if (exoFormData.Value >= ExoForm.BaseDuration)
+                else if (exoFormData.Value >= ExoForm.BASE_DURATION)
                 {
                     LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
                 }
@@ -377,7 +378,7 @@ internal static class PrestigeCommands
                     .Select(pair =>
                     {
                         // Get the ability name from ExoFormAbilityMap and remove the "Prefab" suffix
-                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].LookupName();
+                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].GetPrefabName();
                         int prefabIndex = abilityName.IndexOf("Prefab");
                         if (prefabIndex != -1)
                         {
@@ -406,16 +407,14 @@ internal static class PrestigeCommands
             return;
         }
 
-        var handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
-
+        IPrestigeHandler handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
         if (handler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid prestige type.");
             return;
         }
 
-        var maxPrestigeLevel = PrestigeTypeToMaxPrestiges[parsedPrestigeType];
-
+        int maxPrestigeLevel = PrestigeTypeToMaxPrestiges[parsedPrestigeType];
         if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
             prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
         {
@@ -459,11 +458,13 @@ internal static class PrestigeCommands
             LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
             return;
         }
+
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
             LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
             return;
         }
+
         if (!ConfigService.ExoPrestiging && parsedPrestigeType == PrestigeType.Exo)
         {
             LocalizationService.HandleReply(ctx, "Exo prestiging is not enabled.");
@@ -483,7 +484,11 @@ internal static class PrestigeCommands
 
         var leaderboard = prestigeData
             .Take(10)
-            .Select((p, index) => $"<color=yellow>{index + 1}</color>| <color=green>{PlayerCache.Values.Select(x => x.User.CharacterName.Value == p.Key)}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>")
+            .Select((p, index) =>
+            {
+                var playerName = PlayerCache.Values.FirstOrDefault(x => x.User.CharacterName.Value == p.Key).User.CharacterName.Value ?? "Unknown";
+                return $"<color=yellow>{index + 1}</color>| <color=green>{playerName}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>";
+            })
             .ToList();
 
         if (leaderboard.Count == 0)
@@ -511,26 +516,25 @@ internal static class PrestigeCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        User user = ctx.Event.User;
-        ulong steamId = user.PlatformId;
+        ulong steamId = ctx.Event.User.PlatformId;
 
         Misc.TogglePlayerBool(steamId, "Shroud");
         if (Misc.GetPlayerBool(steamId, "Shroud"))
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
 
-            if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(ShroudBuff) && !character.HasBuff(ShroudBuff) 
-                && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(ShroudBuff))
+            if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !character.HasBuff(_shroudBuff)
+                && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
             {
-                Buffs.ApplyPermanentBuff(character, ShroudBuff);
+                Buffs.ApplyPermanentBuff(character, _shroudBuff);
             }
         }
         else
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=red>disabled</color>!");
-            Equipment equipment = character.Read<Equipment>();
+            Equipment equipment = character.ReadRO<Equipment>();
 
-            if (!equipment.IsEquipped(ShroudCloak, out var _) && character.TryGetBuff(ShroudBuff, out Entity shroudBuff))
+            if (!equipment.IsEquipped(_shroudCloak, out var _) && character.TryGetBuff(_shroudBuff, out Entity shroudBuff))
             {
                 DestroyUtility.Destroy(EntityManager, shroudBuff, DestroyDebugReason.TryRemoveBuff);
             }

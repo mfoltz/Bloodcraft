@@ -19,9 +19,11 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _unarmedSlots = ConfigService.UnarmedSlots;
+    static readonly bool _shiftSlot = ConfigService.ShiftSlot;
 
-    static readonly PrefabGUID VBloodAbilityBuff = new(1171608023);
+    static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
 
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -38,17 +40,17 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                 else if (entityOwner.Owner.TryGetPlayer(out Entity character))
                 {
                     ulong steamId = character.GetSteamId();
-                    string prefabName = entity.Read<PrefabGUID>().LookupName().ToLower();
+                    string prefabName = entity.ReadRO<PrefabGUID>().GetPrefabName().ToLower();
 
                     bool slotSpells = prefabName.Contains("unarmed") || prefabName.Contains("fishingpole");
                     bool shiftSpell = prefabName.Contains("weapon");
 
                     (int FirstSlot, int SecondSlot, int ShiftSlot) spells;
-                    if (ConfigService.UnarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
+                    if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
                     {
                         HandleExtraSpells(entity, character, steamId, spells);
                     }
-                    else if (ConfigService.ShiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
+                    else if (_shiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
                         HandleShiftSpell(entity, character, spells, Misc.GetPlayerBool(steamId, "ShiftLock"));
                     }
@@ -93,7 +95,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        HandleShiftSpell(entity, character, spells, Misc.GetPlayerBool(steamId, "ShiftLock"));    
+        HandleShiftSpell(entity, character, spells, Misc.GetPlayerBool(steamId, "ShiftLock"));
     }
     static void HandleShiftSpell(Entity entity, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
     {
@@ -113,7 +115,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             };
 
             buffer.Add(buff);
-        }   
+        }
     }
     static void SetSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
@@ -125,13 +127,11 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             if (buff.Slot == 5)
             {
                 if (lockSpells) spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot); // then want to check on the spell in shift and get rid of it if the same prefab, same for slot 6 below
-                //HandleDuplicate(entity, buff, player, steamId, spells);
             }
 
             if (buff.Slot == 6)
             {
                 if (lockSpells) spells = (spells.FirstSlot, buff.NewGroupId.GuidHash, spells.ShiftSlot);
-                //HandleDuplicate(entity, buff, player, steamId, spells);
             }
         }
 

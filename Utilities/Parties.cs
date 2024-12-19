@@ -50,9 +50,9 @@ internal static class PartyUtilities
         string playerName = playerInfo.User.CharacterName.Value;
 
         // Check if the player is already in a party or owns a party
-        KeyValuePair<ulong, HashSet<string>> existingPartyEntry = DataService.PlayerDictionaries.playerParties.FirstOrDefault(entry => entry.Value.Contains(playerName));
+        KeyValuePair<ulong, HashSet<string>> existingPartyEntry = DataService.PlayerDictionaries._playerParties.FirstOrDefault(entry => entry.Value.Contains(playerName));
 
-        if (existingPartyEntry.Value != null || DataService.PlayerDictionaries.playerParties.ContainsKey(playerInfo.User.PlatformId))
+        if (existingPartyEntry.Value != null || DataService.PlayerDictionaries._playerParties.ContainsKey(playerInfo.User.PlatformId))
         {
             LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> is already in or leading another party!");
             return;

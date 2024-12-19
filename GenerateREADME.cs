@@ -11,9 +11,9 @@ namespace Bloodcraft
         static string ReadMePath { get; set; }
 
         // Regex patterns for parsing commands
-        static readonly Regex CommandGroupRegex1 = new(@"\[CommandGroup\(name:\s*""(?<group>[^""]+)"",\s*""(?<short>[^""]+)""\)\]"); // the first and second one here should really just be one but this works and tired so leaving >_>
-        static readonly Regex CommandGroupRegex2 = new(@"\[CommandGroup\(name:\s*""(?<group>[^""]+)""(?:\s*,\s*short:\s*""(?<short>[^""]+)"")?\)\]");
-        static readonly Regex CommandAttributeRegex = new(@"\[Command\(name:\s*""(?<name>[^""]+)""(?:,\s*shortHand:\s*""(?<shortHand>[^""]+)"")?(?:,\s*adminOnly:\s*(?<adminOnly>\w+))?(?:,\s*usage:\s*""(?<usage>[^""]+)"")?(?:,\s*description:\s*""(?<description>[^""]+)"")?\)\]");
+        static readonly Regex _commandGroupRegex = new(@"\[CommandGroup\(name:\s*""(?<group>[^""]+)"",\s*""(?<short>[^""]+)""\)\]"); // the first and second one here should really just be one but this works and tired so leaving >_>
+        static readonly Regex _commandGroupAndShortRegex = new(@"\[CommandGroup\(name:\s*""(?<group>[^""]+)""(?:\s*,\s*short:\s*""(?<short>[^""]+)"")?\)\]");
+        static readonly Regex _commandAttributeRegex = new(@"\[Command\(name:\s*""(?<name>[^""]+)""(?:,\s*shortHand:\s*""(?<shortHand>[^""]+)"")?(?:,\s*adminOnly:\s*(?<adminOnly>\w+))?(?:,\s*usage:\s*""(?<usage>[^""]+)"")?(?:,\s*description:\s*""(?<description>[^""]+)"")?\)\]");
 
         // Constants for README sections
         const string COMMANDS_HEADER = "## Commands";
@@ -71,12 +71,12 @@ namespace Bloodcraft
             foreach (var file in files)
             {
                 var fileContent = File.ReadAllText(file);
-                var commandGroupMatch = CommandGroupRegex1.Match(fileContent);
+                var commandGroupMatch = _commandGroupRegex.Match(fileContent);
 
-                if (!commandGroupMatch.Success) commandGroupMatch = CommandGroupRegex2.Match(fileContent);
+                if (!commandGroupMatch.Success) commandGroupMatch = _commandGroupAndShortRegex.Match(fileContent);
 
                 string groupName, groupShort;
-                
+
                 if (commandGroupMatch.Success)
                 {
                     // Extract group name and shorthand from regex match
@@ -96,7 +96,7 @@ namespace Bloodcraft
                 }
 
                 // Find all commands within the group
-                foreach (Match commandMatch in CommandAttributeRegex.Matches(fileContent))
+                foreach (Match commandMatch in _commandAttributeRegex.Matches(fileContent))
                 {
                     string name = commandMatch.Groups["name"].Value;
 

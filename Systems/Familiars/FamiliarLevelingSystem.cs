@@ -18,18 +18,18 @@ internal static class FamiliarLevelingSystem
     static SystemService SystemService => Core.SystemService;
     static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
-    static readonly float UnitFamiliarMultiplier = ConfigService.UnitFamiliarMultiplier;
-    static readonly float VBloodFamiliarMultiplier = ConfigService.VBloodFamiliarMultiplier;
-    static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
+    static readonly float _unitFamiliarMultiplier = ConfigService.UnitFamiliarMultiplier;
+    static readonly float _vBloodFamiliarMultiplier = ConfigService.VBloodFamiliarMultiplier;
+    static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
 
-    static readonly PrefabGUID LevelUpBuff = new(-1133938228);
-    static readonly PrefabGUID InvulnerableBuff = new(-480024072);
+    static readonly PrefabGUID _levelUpBuff = new(-1133938228);
+    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
 
-    static readonly WaitForSeconds SCTDelay = new(0.75f);
+    static readonly WaitForSeconds _sCTDelay = new(0.75f);
 
-    static readonly float3 Gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
-    static readonly AssetGuid AssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
-    static readonly PrefabGUID FamiliarSCT = new(1876501183); // SCT resource gain prefabguid, good visibility
+    static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
+    static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
+    static readonly PrefabGUID _familiarSCT = new(1876501183); // SCT resource gain prefabguid, good visibility
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         foreach (Entity player in deathEvent.DeathParticipants)
@@ -43,16 +43,16 @@ internal static class FamiliarLevelingSystem
     {
         Entity familiar = Utilities.Familiars.FindPlayerFamiliar(source);
 
-        if (!familiar.Exists() || familiar.IsDisabled() || familiar.HasBuff(InvulnerableBuff)) return; // don't process if familiar not found, not active, or not in combat mode
+        if (!familiar.Exists() || familiar.IsDisabled() || familiar.HasBuff(_invulnerableBuff)) return; // don't process if familiar not found, not active, or not in combat mode
 
-        PrefabGUID familiarUnit = familiar.Read<PrefabGUID>();
+        PrefabGUID familiarUnit = familiar.ReadRO<PrefabGUID>();
         int familiarId = familiarUnit.GuidHash;
 
         ProcessExperienceGain(source, familiar, target, steamId, familiarId, groupMultiplier);
     }
     static void ProcessExperienceGain(Entity player, Entity familiar, Entity target, ulong steamId, int familiarId, float groupMultiplier)
     {
-        UnitLevel victimLevel = target.Read<UnitLevel>();
+        UnitLevel victimLevel = target.ReadRO<UnitLevel>();
         bool isVBlood = target.IsVBlood();
 
         float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
@@ -60,7 +60,7 @@ internal static class FamiliarLevelingSystem
 
         KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamId, familiarId);
 
-        if (familiarXP.Key >= MaxFamiliarLevel) return;
+        if (familiarXP.Key >= _maxFamiliarLevel) return;
 
         int currentLevel = ConvertXpToLevel(familiarXP.Value);
         UpdateFamiliarExperience(player, familiar, familiarId, steamId, familiarXP, gainedXP, currentLevel);
@@ -68,8 +68,8 @@ internal static class FamiliarLevelingSystem
     static float CalculateExperienceGained(int victimLevel, bool isVBlood)
     {
         int baseXP = victimLevel;
-        if (isVBlood) return baseXP * VBloodFamiliarMultiplier;
-        return baseXP * UnitFamiliarMultiplier;
+        if (isVBlood) return baseXP * _vBloodFamiliarMultiplier;
+        return baseXP * _unitFamiliarMultiplier;
     }
     public static void UpdateFamiliarExperience(Entity player, Entity familiar, int familiarId, ulong playerId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
     {
@@ -110,9 +110,9 @@ internal static class FamiliarLevelingSystem
 
         if (leveledUp)
         {
-            Buffs.TryApplyBuff(familiar, LevelUpBuff);
+            Buffs.TryApplyBuff(familiar, _levelUpBuff);
 
-            UnitLevel unitLevel = familiar.Read<UnitLevel>();
+            UnitLevel unitLevel = familiar.ReadRO<UnitLevel>();
             unitLevel.Level._Value = newLevel;
             familiar.Write(unitLevel);
 
@@ -122,16 +122,16 @@ internal static class FamiliarLevelingSystem
 
         if (Misc.GetPlayerBool(steamID, "ScrollingText"))
         {
-            float3 targetPosition = familiar.Read<Translation>().Value;
+            float3 targetPosition = familiar.ReadRO<Translation>().Value;
 
-            Core.StartCoroutine(DelayedProfessionSCT(player, userEntity, targetPosition, Gold, gainedXP));
+            Core.StartCoroutine(DelayedFamiliarSCT(player, userEntity, targetPosition, _gold, gainedXP));
         }
     }
-    static IEnumerator DelayedProfessionSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    static IEnumerator DelayedFamiliarSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
     {
-        yield return SCTDelay;
+        yield return _sCTDelay;
 
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), AssetGuid, position, color, character, gainedXP, FamiliarSCT, userEntity);
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _familiarSCT, userEntity);
     }
     static float GetXp(ulong steamID, int familiarId)
     {

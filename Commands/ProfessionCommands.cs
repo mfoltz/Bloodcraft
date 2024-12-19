@@ -4,6 +4,7 @@ using Bloodcraft.Utilities;
 using Stunlock.Core;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Commands;
 
@@ -19,10 +20,10 @@ internal static class ProfessionCommands
             return;
         }
 
-        var SteamID = ctx.Event.User.PlatformId;
-        Misc.TogglePlayerBool(SteamID, "ProfessionLogging");
+        ulong steamId = ctx.Event.User.PlatformId;
 
-        LocalizationService.HandleReply(ctx, $"Profession logging is now {(Misc.GetPlayerBool(SteamID, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        Misc.TogglePlayerBool(steamId, "ProfessionLogging");
+        LocalizationService.HandleReply(ctx, $"Profession logging is now {(Misc.GetPlayerBool(steamId, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]
@@ -33,23 +34,25 @@ internal static class ProfessionCommands
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
-        ulong steamID = ctx.Event.User.PlatformId;
-        PrefabGUID empty = new(0);
-        IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(empty, profession.ToLower());
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, profession.ToLower());
         if (professionHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid profession.");
             return;
         }
-        var data = professionHandler.GetProfessionData(steamID);
-        int progress = (int)(data.Value - ProfessionSystem.ConvertLevelToXp(data.Key));
+
+        KeyValuePair<int, float> data = professionHandler.GetProfessionData(steamId);
         if (data.Key > 0)
         {
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamID, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
+            int progress = (int)(data.Value - ConvertLevelToXp(data.Key));
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>proficiency</color> (<color=white>{ProfessionSystem.GetLevelProgress(steamId, professionHandler)}%</color>) in {professionHandler.GetProfessionName()}");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"No progress in {professionHandler.GetProfessionName()} yet.");
+            LocalizationService.HandleReply(ctx, $"No progress in {professionHandler.GetProfessionName()} yet!");
         }
     }
 
@@ -62,7 +65,7 @@ internal static class ProfessionCommands
             return;
         }
 
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == name.ToLower()).Value;
+        PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
             ctx.Reply($"Couldn't find player.");
@@ -74,8 +77,8 @@ internal static class ProfessionCommands
             LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxProfessionLevel}.");
             return;
         }
-        PrefabGUID empty = new(0);
-        IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(empty, profession.ToLower());
+
+        IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, profession.ToLower());
         if (professionHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid profession.");
@@ -83,7 +86,8 @@ internal static class ProfessionCommands
         }
 
         ulong steamId = playerInfo.User.PlatformId;
-        float xp = ProfessionSystem.ConvertLevelToXp(level);
+
+        float xp = ConvertLevelToXp(level);
         professionHandler.SetProfessionData(steamId, new KeyValuePair<int, float>(level, xp));
 
         LocalizationService.HandleReply(ctx, $"{professionHandler.GetProfessionName()} set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>");
@@ -97,7 +101,7 @@ internal static class ProfessionCommands
             LocalizationService.HandleReply(ctx, "Professions are not enabled.");
             return;
         }
-        string professions = ProfessionHandlerFactory.GetAllProfessions();
-        LocalizationService.HandleReply(ctx, $"Available professions: {professions}");
+
+        LocalizationService.HandleReply(ctx, $"Available professions: {ProfessionHandlerFactory.GetAllProfessions()}");
     }
 }

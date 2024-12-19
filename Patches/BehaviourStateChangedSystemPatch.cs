@@ -29,7 +29,7 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                 if (!entity.TryGetComponent(out BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent)) continue;
                 else if (behaviourTreeStateChangedEvent.Entity.TryGetFollowedPlayer(out Entity player))
                 {
-                    BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.Read<BehaviourTreeState>();
+                    BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.ReadRO<BehaviourTreeState>();
 
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {

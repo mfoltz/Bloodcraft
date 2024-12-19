@@ -7,153 +7,6 @@ namespace Bloodcraft.Services;
 
 public static class ConfigService
 {
-    /*
-    public static string LanguageLocalization { get; private set; }
-    public static bool ClientCompanion { get; private set; }
-    public static bool EliteShardBearers { get; private set; }
-    public static int ShardBearerLevel { get; private set; }
-    public static bool PotionStacking { get; private set; }
-    public static bool StarterKit { get; private set; }
-    public static string KitPrefabs { get; private set; }
-    public static string KitQuantities { get; private set; }
-    public static bool QuestSystem { get; private set; }
-    public static bool InfiniteDailies { get; private set; }
-    public static string QuestRewards { get; private set; }
-    public static string QuestRewardAmounts { get; private set; }
-    public static int RerollDailyPrefab { get; private set; }
-    public static int RerollDailyAmount { get; private set; }
-    public static int RerollWeeklyPrefab { get; private set; }
-    public static int RerollWeeklyAmount { get; private set; }
-    public static bool LevelingSystem { get; private set; }
-    public static bool RestedXPSystem { get; private set; }
-    public static float RestedXPRate { get; private set; }
-    public static int RestedXPMax { get; private set; }
-    public static float RestedXPTickRate { get; private set; }
-    public static int MaxLevel { get; private set; }
-    public static int StartingLevel { get; private set; }
-    public static float UnitLevelingMultiplier { get; private set; }
-    public static float VBloodLevelingMultiplier { get; private set; }
-    public static float DocileUnitMultiplier { get; private set; }
-    public static float WarEventMultiplier { get; private set; }
-    public static float UnitSpawnerMultiplier { get; private set; }
-    public static float UnitSpawnerExpertiseFactor { get; private set; }
-    public static int ChangeClassItem { get; private set; }
-    public static int ChangeClassQuantity { get; private set; }
-    public static float GroupLevelingMultiplier { get; private set; }
-    public static float LevelScalingMultiplier { get; private set; }
-    public static bool PlayerParties { get; private set; }
-    public static int MaxPartySize { get; private set; }
-    public static float ExpShareDistance { get; private set; }
-    public static bool PrestigeSystem { get; private set; }
-    public static string PrestigeBuffs { get; private set; }
-    public static string PrestigeLevelsToUnlockClassSpells { get; private set; }
-    public static int MaxLevelingPrestiges { get; private set; }
-    public static float LevelingPrestigeReducer { get; private set; }
-    public static float PrestigeRatesReducer { get; private set; }
-    public static float PrestigeStatMultiplier { get; private set; }
-    public static float PrestigeRateMultiplier { get; private set; }
-    public static bool ExoPrestiging { get; private set; }
-    public static int ExoPrestiges { get; private set; }
-    public static int ExoPrestigeReward { get; private set; }
-    public static int ExoPrestigeRewardQuantity { get; private set; }
-    public static bool ExpertiseSystem { get; private set; }
-    public static int MaxExpertisePrestiges { get; private set; }
-    public static bool UnarmedSlots { get; private set; }
-    public static bool ShiftSlot { get; private set; }
-    public static int MaxExpertiseLevel { get; private set; }
-    public static float UnitExpertiseMultiplier { get; private set; }
-    public static float VBloodExpertiseMultiplier { get; private set; }
-    public static int ExpertiseStatChoices { get; private set; }
-    public static int ResetExpertiseItem { get; private set; }
-    public static int ResetExpertiseItemQuantity { get; private set; }
-    public static float MaxHealth { get; private set; }
-    public static float MovementSpeed { get; private set; }
-    public static float PrimaryAttackSpeed { get; private set; }
-    public static float PhysicalLifeLeech { get; private set; }
-    public static float SpellLifeLeech { get; private set; }
-    public static float PrimaryLifeLeech { get; private set; }
-    public static float PhysicalPower { get; private set; }
-    public static float SpellPower { get; private set; }
-    public static float PhysicalCritChance { get; private set; }
-    public static float PhysicalCritDamage { get; private set; }
-    public static float SpellCritChance { get; private set; }
-    public static float SpellCritDamage { get; private set; }
-    public static bool BloodSystem { get; private set; }
-    public static int MaxLegacyPrestiges { get; private set; }
-    public static bool BloodQualityBonus { get; private set; }
-    public static float PrestigeBloodQuality { get; private set; }
-    public static int MaxBloodLevel { get; private set; }
-    public static float UnitLegacyMultiplier { get; private set; }
-    public static float VBloodLegacyMultiplier { get; private set; }
-    public static int LegacyStatChoices { get; private set; }
-    public static int ResetLegacyItem { get; private set; }
-    public static int ResetLegacyItemQuantity { get; private set; }
-    public static float HealingReceived { get; private set; }
-    public static float DamageReduction { get; private set; }
-    public static float PhysicalResistance { get; private set; }
-    public static float SpellResistance { get; private set; }
-    public static float ResourceYield { get; private set; }
-    public static float CCReduction { get; private set; }
-    public static float SpellCooldownRecoveryRate { get; private set; }
-    public static float WeaponCooldownRecoveryRate { get; private set; }
-    public static float UltimateCooldownRecoveryRate { get; private set; }
-    public static float MinionDamage { get; private set; }
-    public static float ShieldAbsorb { get; private set; }
-    public static float BloodEfficiency { get; private set; }
-    public static bool ProfessionSystem { get; private set; }
-    public static int MaxProfessionLevel { get; private set; }
-    public static float ProfessionMultiplier { get; private set; }
-    public static bool ExtraRecipes { get; private set; }
-    public static bool FamiliarSystem { get; private set; }
-    public static bool ShareUnlocks { get; private set; }
-    public static bool FamiliarCombat { get; private set; }
-    public static bool FamiliarPvP { get; private set; }
-    public static bool FamiliarPrestige { get; private set; }
-    public static int MaxFamiliarPrestiges { get; private set; }
-    public static float FamiliarPrestigeStatMultiplier { get; private set; }
-    public static int MaxFamiliarLevel { get; private set; }
-    public static bool AllowVBloods { get; private set; }
-    public static string BannedUnits { get; private set; }
-    public static string BannedTypes { get; private set; }
-    public static float VBloodDamageMultiplier { get; private set; }
-    public static float UnitFamiliarMultiplier { get; private set; }
-    public static float VBloodFamiliarMultiplier { get; private set; }
-    public static float UnitUnlockChance { get; private set; }
-    public static float VBloodUnlockChance { get; private set; }
-    public static float ShinyChance { get; private set; }
-    public static int ShinyCostItemPrefab { get; private set; }
-    public static int ShinyCostItemQuantity { get; private set; }
-    public static bool SoftSynergies { get; private set; }
-    public static bool HardSynergies { get; private set; }
-    public static bool ClassSpellSchoolOnHitEffects { get; private set; }
-    public static float OnHitProcChance { get; private set; }
-    public static float StatSynergyMultiplier { get; private set; }
-    public static string BloodKnightWeapon { get; private set; }
-    public static string BloodKnightBlood { get; private set; }
-    public static string DemonHunterWeapon { get; private set; }
-    public static string DemonHunterBlood { get; private set; }
-    public static string VampireLordWeapon { get; private set; }
-    public static string VampireLordBlood { get; private set; }
-    public static string ShadowBladeWeapon { get; private set; }
-    public static string ShadowBladeBlood { get; private set; }
-    public static string ArcaneSorcererWeapon { get; private set; }
-    public static string ArcaneSorcererBlood { get; private set; }
-    public static string DeathMageWeapon { get; private set; }
-    public static string DeathMageBlood { get; private set; }
-    public static int DefaultClassSpell { get; private set; }
-    public static string BloodKnightBuffs { get; private set; }
-    public static string BloodKnightSpells { get; private set; }
-    public static string DemonHunterBuffs { get; private set; }
-    public static string DemonHunterSpells { get; private set; }
-    public static string VampireLordBuffs { get; private set; }
-    public static string VampireLordSpells { get; private set; }
-    public static string ShadowBladeBuffs { get; private set; }
-    public static string ShadowBladeSpells { get; private set; }
-    public static string ArcaneSorcererBuffs { get; private set; }
-    public static string ArcaneSorcererSpells { get; private set; }
-    public static string DeathMageBuffs { get; private set; }
-    public static string DeathMageSpells { get; private set; }
-    */
     static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
     public static string LanguageLocalization => _languageLocalization.Value;
 
@@ -589,26 +442,10 @@ public static class ConfigService
     public static string DeathMageSpells => _deathMageSpells.Value;
     public static class ConfigInitialization
     {
-        static readonly Regex regex = new(@"^\[(.+)\]$");
+        static readonly Regex _regex = new(@"^\[(.+)\]$");
 
         public static readonly Dictionary<string, object> FinalConfigValues = [];
 
-        /*
-        public static readonly List<string> DirectoryPaths =
-        [
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME), // 0
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerLeveling"), // 1
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Quests"), // 2
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "WeaponExpertise"), // 3
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "BloodLegacies"), // 4
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Professions"), // 5
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars"), // 6
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"), // 7
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks") // 8
-        ];
-        */
-
-        // Lazy initialization for DirectoryPaths
         static readonly Lazy<List<string>> _directoryPaths = new(() =>
         {
             return
@@ -624,7 +461,7 @@ public static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks")
         ];
         });
-        
+
         public static List<string> DirectoryPaths => _directoryPaths.Value;
 
         public static readonly List<string> SectionOrder =
@@ -790,7 +627,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Classes", "ShadowBladeSpells", "1019568127,1575317901,1112116762,-358319417,1174831223", "Shadow Blade shift spells, granted at levels of prestige"),
             new ConfigEntryDefinition("Classes", "ArcaneSorcererBuffs", "1614027598,884683323,-1576592687,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs"),
             new ConfigEntryDefinition("Classes", "ArcaneSorcererSpells", "247896794,268059675,-242769430,-2053450457,1650878435", "Arcane Sorcerer shift spells, granted at levels of prestige"),
-            new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-651661301,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
+            new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-491525099,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs"),
             new ConfigEntryDefinition("Classes", "DeathMageSpells", "-1204819086,481411985,1961570821,2138402840,-1781779733", "Death Mage shift spells, granted at levels of prestige")
         ];
         public static void InitializeConfig()
@@ -800,7 +637,6 @@ public static class ConfigService
                 CreateDirectory(path);
             }
 
-            // Load old config file if it exists
             var oldConfigFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
             Dictionary<string, string> oldConfigValues = [];
 
@@ -868,8 +704,6 @@ public static class ConfigService
                         object valueProp = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
                         if (valueProp != null)
                         {
-                            //Core.Log.LogInfo($"Adding {valueProp} to dictionary!");
-                            //var finalVal = valueProp.GetValue(configEntry);
                             FinalConfigValues[entry.Key] = valueProp;
                         }
                         else
@@ -891,8 +725,6 @@ public static class ConfigService
                     object valueProp = configEntry.GetType().GetProperty("Value")?.GetValue(configEntry);
                     if (valueProp != null)
                     {
-                        //Core.Log.LogInfo($"Adding {valueProp} to dictionary!");
-                        //var finalVal = valueProp.GetValue(configEntry);
                         FinalConfigValues[entry.Key] = valueProp;
                     }
                     else
@@ -1015,7 +847,7 @@ public static class ConfigService
                                 Plugin.LogInstance.LogError($"Failed to convert config value for {key}: {ex.Message}");
                             }
 
-                            break; // Stop searching once the key is found
+                            break;
                         }
                     }
                 }
@@ -1041,7 +873,7 @@ public static class ConfigService
             foreach (var line in lines)
             {
                 string trimmedLine = line.Trim();
-                var match = regex.Match(trimmedLine);
+                var match = _regex.Match(trimmedLine);
 
                 if (match.Success)
                 {
@@ -1079,10 +911,8 @@ public static class ConfigService
     }
     static T GetConfigValue<T>(string key)
     {
-        // If runtime-initialized values are available, use them
         if (ConfigInitialization.FinalConfigValues.TryGetValue(key, out var val))
         {
-            //Core.Log.LogInfo($"Getting {key} from dictionary!");
             return (T)Convert.ChangeType(val, typeof(T));
         }
         else
@@ -1090,16 +920,7 @@ public static class ConfigService
             Core.Log.LogInfo($"Using default config value...");
         }
 
-        // Otherwise, return the default value from the entries
         var entry = ConfigInitialization.ConfigEntries.FirstOrDefault(e => e.Key == key);
         return entry == null ? throw new InvalidOperationException($"Config entry for key '{key}' not found.") : (T)entry.DefaultValue;
     }
-
-    /*
-    static T GetConfigValue<T>(string key)
-    {
-        var entry = ConfigInitialization.ConfigEntries.FirstOrDefault(e => e.Key == key);
-        return entry == null ? throw new InvalidOperationException($"Config entry for key '{key}' not found.") : (T)entry.DefaultValue;
-    }
-    */
 }

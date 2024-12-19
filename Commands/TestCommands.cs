@@ -33,7 +33,7 @@ internal static class TestCommands
         {
             var (position, timeRemaining) = GetQueuePositionAndTime(steamId);
 
-            LocalizationService.HandleReply(ctx, $"You can't make changes to your battle group while queued! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)");
+            LocalizationService.HandleReply(ctx, $"You can't make changes to your battle group while queued/battle in progress! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)");
             Familiars.HandleBattleGroupDetailsReply(ctx, steamId, battleGroup);
 
             return;
@@ -132,13 +132,21 @@ internal static class TestCommands
         {
             foreach (var matchPairs in Matchmaker.MatchPairs)
             {
-                if (matchPairs.Item1 == steamId || matchPairs.Item2 == steamId)
+                if (SpawnTransformSystemOnSpawnPatch.PlayerBattleFamiliars.TryGetValue(steamId, out List<Entity> familiarsInBattle) && familiarsInBattle.Count > 0)
+                {
+                    ctx.Reply("Can't cancel challenge until battle is over!");
+                    return;
+                }
+                else if (matchPairs.Item1 == steamId || matchPairs.Item2 == steamId)
                 {
                     NotifyBothPlayers(matchPairs.Item1, matchPairs.Item2, "Challenge cancelled, removed from queue...");
                     CancelAndRemovePairFromQueue(matchPairs);
                     return;
                 }
             }
+
+            ctx.Reply("You're not currently queued for a battle!");
+            return;
         }
 
         PlayerInfo playerInfo = GetPlayerInfo(name);
@@ -150,7 +158,7 @@ internal static class TestCommands
 
         if (playerInfo.User.PlatformId == steamId)
         {
-            ctx.Reply("Can't challenge yourself!");
+            ctx.Reply("You can't challenge yourself!");
             return;
         }
 
@@ -167,7 +175,7 @@ internal static class TestCommands
 
         ctx.Reply($"Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)");
         LocalizationService.HandleServerReply(EntityManager, playerInfo.User, $"<color=white>{ctx.User.CharacterName.Value}</color> has challenged you to a battle! (<color=yellow>30s</color> until it expires, accept by emoting '<color=green>Yes</color>' or decline by emoting '<color=red>No</color>')");
-        
+
         Core.StartCoroutine(ChallengeExpirationRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)));
     }
 
@@ -182,14 +190,14 @@ internal static class TestCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        float3 location = character.Read<Translation>().Value;
+        float3 location = character.ReadRO<Translation>().Value;
         List<float> floats = [location.x, location.y, location.z];
 
-        DataService.PlayerDictionaries.familiarBattleCoords.Clear();
-        DataService.PlayerDictionaries.familiarBattleCoords.Add(floats);
+        DataService.PlayerDictionaries._familiarBattleCoords.Clear();
+        DataService.PlayerDictionaries._familiarBattleCoords.Add(floats);
         DataService.PlayerPersistence.SaveFamiliarBattleCoords();
 
-        if (BattlePosition.Equals(float3.zero))
+        if (_battlePosition.Equals(float3.zero))
         {
             Initialize();
             LocalizationService.HandleReply(ctx, "Familiar battle arena position set, battle service started! (one allowed)");
@@ -206,7 +214,7 @@ internal static class TestCommands
 
         if (!steamId.TryGetFamiliarBattleGroup(out var battleGroup))
         {
-            battleGroup = [0,0,0]; // Initialize battle group if not found
+            battleGroup = [0, 0, 0]; // Initialize battle group if not found
             steamId.SetFamiliarBattleGroup(battleGroup);
         }
 
@@ -217,13 +225,13 @@ internal static class TestCommands
 
         FamiliarExperienceData xpData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
 
-        // Gather all eligible familiars with level >= 50
+        // Gather all eligible familiars with level >= 25
         var eligibleFamiliars = new List<(int famKey, int level)>();
         foreach (var familiarList in unlocks)
         {
             foreach (var famKey in familiarList)
             {
-                if (xpData.FamiliarExperience.TryGetValue(famKey, out var xpDataPair) && xpDataPair.Key >= 50)
+                if (xpData.FamiliarExperience.TryGetValue(famKey, out var xpDataPair) && xpDataPair.Key >= 25)
                 {
                     eligibleFamiliars.Add((famKey, xpDataPair.Key));
                 }
@@ -232,7 +240,7 @@ internal static class TestCommands
 
         if (eligibleFamiliars.Count < 3)
         {
-            ctx.Reply($"Not enough level 50+ familiars to generate a battle group for <color=white>{playerInfo.User.CharacterName.Value}</color>...");
+            ctx.Reply($"Not enough level 25+ familiars to generate a battle group for <color=white>{playerInfo.User.CharacterName.Value}</color>...");
             return false;
         }
 
@@ -252,20 +260,7 @@ internal static class TestCommands
         // Save the generated battle group
         steamId.SetFamiliarBattleGroup(battleGroup);
         Familiars.HandleBattleGroupDetailsReply(ctx, steamId, battleGroup);
-        return true;
-    }
-    static int SelectFamiliarWithLevelWeight(List<int> familiarKeys, FamiliarExperienceData xpData, System.Random random)
-    {
-        // Create a weighted list of familiars
-        var weightedList = new List<int>();
-        foreach (var famKey in familiarKeys)
-        {
-            var level = xpData.FamiliarExperience.TryGetValue(famKey, out var xpDataPair) ? xpDataPair.Key : 1; // Default to level 1
-            int weight = level; // Use level as weight; adjust if needed for more randomness
-            weightedList.AddRange(Enumerable.Repeat(famKey, weight));
-        }
 
-        // Randomly select from the weighted list
-        return weightedList[random.Next(weightedList.Count)];
+        return true;
     }
 }

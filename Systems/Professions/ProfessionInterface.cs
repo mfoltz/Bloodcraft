@@ -12,7 +12,7 @@ public interface IProfessionHandler
 }
 public static class ProfessionHandlerFactory
 {
-    static readonly List<BaseProfessionHandler> professionHandlers =
+    static readonly List<BaseProfessionHandler> _professionHandlers =
     [
         new WoodcuttingHandler(),
         new MiningHandler(),
@@ -23,9 +23,11 @@ public static class ProfessionHandlerFactory
         new HarvestingHandler(),
         new EnchantingHandler()
     ];
-    public static IProfessionHandler GetProfessionHandler(PrefabGUID PrefabGUID, string context = "")
+    public static IProfessionHandler GetProfessionHandler(PrefabGUID prefabGUID, string context = "")
     {
-        string itemTypeName = PrefabGUID.LookupName().ToLower();
+        string itemTypeName = string.Empty;
+
+        if (prefabGUID.HasValue()) itemTypeName = prefabGUID.GetPrefabName().ToLower();
 
         // Check conText to decide on a handler
         switch (context)
@@ -77,7 +79,7 @@ public static class ProfessionHandlerFactory
     }
     public static string GetAllProfessions()
     {
-        return string.Join(", ", professionHandlers.Select(ph => ph.GetProfessionName()));
+        return string.Join(", ", _professionHandlers.Select(profession => profession.GetProfessionName()));
     }
 }
 

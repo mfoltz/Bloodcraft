@@ -6,7 +6,6 @@ using Bloodcraft.Systems.Quests;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Unity.Entities;
-using static Bloodcraft.Services.BattleService;
 using static Bloodcraft.Services.ConfigService;
 using static Bloodcraft.Services.ConfigService.ConfigInitialization;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
@@ -18,488 +17,489 @@ internal static class DataService
 {
     public static bool TryGetPlayerExperience(this ulong steamID, out KeyValuePair<int, float> experience)
     {
-        return playerExperience.TryGetValue(steamID, out experience);
+        return _playerExperience.TryGetValue(steamID, out experience);
     }
     public static bool TryGetPlayerRestedXP(this ulong steamID, out KeyValuePair<DateTime, float> restedXP)
     {
-        return playerRestedXP.TryGetValue(steamID, out restedXP);
+        return _playerRestedXP.TryGetValue(steamID, out restedXP);
     }
     public static bool TryGetPlayerBools(this ulong steamID, out ConcurrentDictionary<string, bool> bools)
     {
-        return playerBools.TryGetValue(steamID, out bools);
+        return _playerBools.TryGetValue(steamID, out bools);
     }
     public static bool TryGetPlayerClasses(this ulong steamID, out Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> classes)
     {
-        return playerClass.TryGetValue(steamID, out classes);
+        return _playerClass.TryGetValue(steamID, out classes);
     }
     public static bool TryGetPlayerPrestiges(this ulong steamID, out Dictionary<PrestigeType, int> prestiges)
     {
-        return playerPrestiges.TryGetValue(steamID, out prestiges);
+        return _playerPrestiges.TryGetValue(steamID, out prestiges);
     }
     public static bool TryGetPlayerExoFormData(this ulong steamID, out KeyValuePair<DateTime, float> exoFormData)
     {
-        return playerExoFormData.TryGetValue(steamID, out exoFormData);
+        return _playerExoFormData.TryGetValue(steamID, out exoFormData);
     }
     public static bool TryGetPlayerWoodcutting(this ulong steamID, out KeyValuePair<int, float> woodcutting)
     {
-        return playerWoodcutting.TryGetValue(steamID, out woodcutting);
+        return _playerWoodcutting.TryGetValue(steamID, out woodcutting);
     }
     public static bool TryGetPlayerMining(this ulong steamID, out KeyValuePair<int, float> mining)
     {
-        return playerMining.TryGetValue(steamID, out mining);
+        return _playerMining.TryGetValue(steamID, out mining);
     }
     public static bool TryGetPlayerFishing(this ulong steamID, out KeyValuePair<int, float> fishing)
     {
-        return playerFishing.TryGetValue(steamID, out fishing);
+        return _playerFishing.TryGetValue(steamID, out fishing);
     }
     public static bool TryGetPlayerBlacksmithing(this ulong steamID, out KeyValuePair<int, float> blacksmithing)
     {
-        return playerBlacksmithing.TryGetValue(steamID, out blacksmithing);
+        return _playerBlacksmithing.TryGetValue(steamID, out blacksmithing);
     }
     public static bool TryGetPlayerTailoring(this ulong steamID, out KeyValuePair<int, float> tailoring)
     {
-        return playerTailoring.TryGetValue(steamID, out tailoring);
+        return _playerTailoring.TryGetValue(steamID, out tailoring);
     }
     public static bool TryGetPlayerEnchanting(this ulong steamID, out KeyValuePair<int, float> enchanting)
     {
-        return playerEnchanting.TryGetValue(steamID, out enchanting);
+        return _playerEnchanting.TryGetValue(steamID, out enchanting);
     }
     public static bool TryGetPlayerAlchemy(this ulong steamID, out KeyValuePair<int, float> alchemy)
     {
-        return playerAlchemy.TryGetValue(steamID, out alchemy);
+        return _playerAlchemy.TryGetValue(steamID, out alchemy);
     }
     public static bool TryGetPlayerHarvesting(this ulong steamID, out KeyValuePair<int, float> harvesting)
     {
-        return playerHarvesting.TryGetValue(steamID, out harvesting);
+        return _playerHarvesting.TryGetValue(steamID, out harvesting);
     }
     public static bool TryGetPlayerSwordExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerSwordExpertise.TryGetValue(steamID, out expertise);
+        return _playerSwordExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerAxeExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerAxeExpertise.TryGetValue(steamID, out expertise);
+        return _playerAxeExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerMaceExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerMaceExpertise.TryGetValue(steamID, out expertise);
+        return _playerMaceExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerSpearExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerSpearExpertise.TryGetValue(steamID, out expertise);
+        return _playerSpearExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerCrossbowExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerCrossbowExpertise.TryGetValue(steamID, out expertise);
+        return _playerCrossbowExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerGreatSwordExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerGreatSwordExpertise.TryGetValue(steamID, out expertise);
+        return PlayerDictionaries._playerGreatSwordExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerSlashersExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerSlashersExpertise.TryGetValue(steamID, out expertise);
+        return _playerSlashersExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerPistolsExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerPistolsExpertise.TryGetValue(steamID, out expertise);
+        return _playerPistolsExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerReaperExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerReaperExpertise.TryGetValue(steamID, out expertise);
+        return PlayerDictionaries._playerReaperExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerLongbowExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerLongbowExpertise.TryGetValue(steamID, out expertise);
+        return _playerLongbowExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerWhipExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerWhipExpertise.TryGetValue(steamID, out expertise);
+        return _playerWhipExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerFishingPoleExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerFishingPoleExpertise.TryGetValue(steamID, out expertise);
+        return _playerFishingPoleExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerUnarmedExpertise(this ulong steamID, out KeyValuePair<int, float> expertise)
     {
-        return playerUnarmedExpertise.TryGetValue(steamID, out expertise);
+        return _playerUnarmedExpertise.TryGetValue(steamID, out expertise);
     }
     public static bool TryGetPlayerWeaponStats(this ulong steamID, out Dictionary<WeaponType, List<WeaponManager.WeaponStats.WeaponStatType>> weaponStats)
     {
-        return playerWeaponStats.TryGetValue(steamID, out weaponStats);
+        return _playerWeaponStats.TryGetValue(steamID, out weaponStats);
     }
     public static bool TryGetPlayerSpells(this ulong steamID, out (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells)
     {
-        return playerSpells.TryGetValue(steamID, out spells);
+        return _playerSpells.TryGetValue(steamID, out spells);
     }
     public static bool TryGetPlayerWorkerLegacy(this ulong steamID, out KeyValuePair<int, float> workerLegacy)
     {
-        return playerWorkerLegacy.TryGetValue(steamID, out workerLegacy);
+        return _playerWorkerLegacy.TryGetValue(steamID, out workerLegacy);
     }
     public static bool TryGetPlayerWarriorLegacy(this ulong steamID, out KeyValuePair<int, float> warriorLegacy)
     {
-        return playerWarriorLegacy.TryGetValue(steamID, out warriorLegacy);
+        return _playerWarriorLegacy.TryGetValue(steamID, out warriorLegacy);
     }
     public static bool TryGetPlayerScholarLegacy(this ulong steamID, out KeyValuePair<int, float> scholarLegacy)
     {
-        return playerScholarLegacy.TryGetValue(steamID, out scholarLegacy);
+        return _playerScholarLegacy.TryGetValue(steamID, out scholarLegacy);
     }
     public static bool TryGetPlayerRogueLegacy(this ulong steamID, out KeyValuePair<int, float> rogueLegacy)
     {
-        return playerRogueLegacy.TryGetValue(steamID, out rogueLegacy);
+        return _playerRogueLegacy.TryGetValue(steamID, out rogueLegacy);
     }
     public static bool TryGetPlayerMutantLegacy(this ulong steamID, out KeyValuePair<int, float> mutantLegacy)
     {
-        return playerMutantLegacy.TryGetValue(steamID, out mutantLegacy);
+        return _playerMutantLegacy.TryGetValue(steamID, out mutantLegacy);
     }
     public static bool TryGetPlayerVBloodLegacy(this ulong steamID, out KeyValuePair<int, float> vBloodLegacy)
     {
-        return playerVBloodLegacy.TryGetValue(steamID, out vBloodLegacy);
+        return _playerVBloodLegacy.TryGetValue(steamID, out vBloodLegacy);
     }
     public static bool TryGetPlayerDraculinLegacy(this ulong steamID, out KeyValuePair<int, float> draculinLegacy)
     {
-        return playerDraculinLegacy.TryGetValue(steamID, out draculinLegacy);
+        return _playerDraculinLegacy.TryGetValue(steamID, out draculinLegacy);
     }
     public static bool TryGetPlayerImmortalLegacy(this ulong steamID, out KeyValuePair<int, float> immortalLegacy)
     {
-        return playerImmortalLegacy.TryGetValue(steamID, out immortalLegacy);
+        return _playerImmortalLegacy.TryGetValue(steamID, out immortalLegacy);
     }
     public static bool TryGetPlayerCreatureLegacy(this ulong steamID, out KeyValuePair<int, float> creatureLegacy)
     {
-        return playerCreatureLegacy.TryGetValue(steamID, out creatureLegacy);
+        return _playerCreatureLegacy.TryGetValue(steamID, out creatureLegacy);
     }
     public static bool TryGetPlayerBruteLegacy(this ulong steamID, out KeyValuePair<int, float> bruteLegacy)
     {
-        return playerBruteLegacy.TryGetValue(steamID, out bruteLegacy);
+        return _playerBruteLegacy.TryGetValue(steamID, out bruteLegacy);
     }
     public static bool TryGetPlayerBloodStats(this ulong steamID, out Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>> bloodStats)
     {
-        return playerBloodStats.TryGetValue(steamID, out bloodStats);
+        return _playerBloodStats.TryGetValue(steamID, out bloodStats);
     }
     public static bool TryGetFamiliarActives(this ulong steamID, out (Entity Familiar, int FamKey) activeFamiliar)
     {
-        return familiarActives.TryGetValue(steamID, out activeFamiliar);
+        return _familiarActives.TryGetValue(steamID, out activeFamiliar);
     }
     public static bool TryGetFamiliarBox(this ulong steamID, out string familiarSet)
     {
-        return familiarBox.TryGetValue(steamID, out familiarSet);
+        return _familiarBox.TryGetValue(steamID, out familiarSet);
     }
     public static bool TryGetFamiliarDefault(this ulong steamID, out int defaultFamiliar)
     {
-        return familiarDefault.TryGetValue(steamID, out defaultFamiliar);
+        return _familiarDefault.TryGetValue(steamID, out defaultFamiliar);
     }
     public static bool TryGetFamiliarBattleGroup(this ulong steamID, out List<int> battleGroup)
     {
-        return playerBattleGroups.TryGetValue(steamID, out battleGroup);
+        return _playerBattleGroups.TryGetValue(steamID, out battleGroup);
     }
     public static bool TryGetPlayerQuests(this ulong steamID, out Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> quests)
     {
-        return playerQuests.TryGetValue(steamID, out quests);
+        return _playerQuests.TryGetValue(steamID, out quests);
     }
     public static bool TryGetPlayerParties(this ulong steamID, out HashSet<string> parties)
     {
-        return playerParties.TryGetValue(steamID, out parties);
+        return _playerParties.TryGetValue(steamID, out parties);
     }
     public static void SetPlayerExperience(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerExperience[steamID] = data;
+        _playerExperience[steamID] = data;
         SavePlayerExperience();
     }
     public static void SetPlayerRestedXP(this ulong steamID, KeyValuePair<DateTime, float> data)
     {
-        playerRestedXP[steamID] = data;
+        _playerRestedXP[steamID] = data;
         SavePlayerRestedXP();
     }
     public static void SetPlayerBools(this ulong steamID, ConcurrentDictionary<string, bool> data)
     {
-        playerBools[steamID] = data;
+        _playerBools[steamID] = data;
         SavePlayerBools();
     }
     public static void SetPlayerClasses(this ulong steamID, Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> data)
     {
-        playerClass[steamID] = data;
+        _playerClass[steamID] = data;
         SavePlayerClasses();
     }
     public static void SetPlayerPrestiges(this ulong steamID, Dictionary<PrestigeType, int> data)
     {
-        playerPrestiges[steamID] = data;
+        _playerPrestiges[steamID] = data;
         SavePlayerPrestiges();
     }
     public static void SetPlayerExoFormData(this ulong steamID, KeyValuePair<DateTime, float> data)
     {
-        playerExoFormData[steamID] = data;
+        _playerExoFormData[steamID] = data;
         SavePlayerExoFormData();
     }
     public static void SetPlayerWoodcutting(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerWoodcutting[steamID] = data;
+        _playerWoodcutting[steamID] = data;
         SavePlayerWoodcutting();
     }
     public static void SetPlayerMining(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerMining[steamID] = data;
+        _playerMining[steamID] = data;
         SavePlayerMining();
     }
     public static void SetPlayerFishing(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerFishing[steamID] = data;
+        _playerFishing[steamID] = data;
         SavePlayerFishing();
     }
     public static void SetPlayerBlacksmithing(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerBlacksmithing[steamID] = data;
+        _playerBlacksmithing[steamID] = data;
         SavePlayerBlacksmithing();
     }
     public static void SetPlayerTailoring(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerTailoring[steamID] = data;
+        _playerTailoring[steamID] = data;
         SavePlayerTailoring();
     }
     public static void SetPlayerEnchanting(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerEnchanting[steamID] = data;
+        _playerEnchanting[steamID] = data;
         SavePlayerEnchanting();
     }
     public static void SetPlayerAlchemy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerAlchemy[steamID] = data;
+        _playerAlchemy[steamID] = data;
         SavePlayerAlchemy();
     }
     public static void SetPlayerHarvesting(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerHarvesting[steamID] = data;
+        _playerHarvesting[steamID] = data;
         SavePlayerHarvesting();
     }
     public static void SetPlayerSwordExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerSwordExpertise[steamID] = data;
+        _playerSwordExpertise[steamID] = data;
         SavePlayerSwordExpertise();
     }
     public static void SetPlayerAxeExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerAxeExpertise[steamID] = data;
+        _playerAxeExpertise[steamID] = data;
         SavePlayerAxeExpertise();
     }
     public static void SetPlayerMaceExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerMaceExpertise[steamID] = data;
+        _playerMaceExpertise[steamID] = data;
         SavePlayerMaceExpertise();
     }
     public static void SetPlayerSpearExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerSpearExpertise[steamID] = data;
+        _playerSpearExpertise[steamID] = data;
         SavePlayerSpearExpertise();
     }
     public static void SetPlayerCrossbowExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerCrossbowExpertise[steamID] = data;
+        _playerCrossbowExpertise[steamID] = data;
         SavePlayerCrossbowExpertise();
     }
     public static void SetPlayerGreatSwordExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerGreatSwordExpertise[steamID] = data;
+        PlayerDictionaries._playerGreatSwordExpertise[steamID] = data;
         SavePlayerGreatSwordExpertise();
     }
     public static void SetPlayerSlashersExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerSlashersExpertise[steamID] = data;
+        _playerSlashersExpertise[steamID] = data;
         SavePlayerSlashersExpertise();
     }
     public static void SetPlayerPistolsExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerPistolsExpertise[steamID] = data;
+        _playerPistolsExpertise[steamID] = data;
         SavePlayerPistolsExpertise();
     }
     public static void SetPlayerReaperExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerReaperExpertise[steamID] = data;
+        PlayerDictionaries._playerReaperExpertise[steamID] = data;
         SavePlayerReaperExpertise();
     }
     public static void SetPlayerLongbowExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerLongbowExpertise[steamID] = data;
+        _playerLongbowExpertise[steamID] = data;
         SavePlayerLongbowExpertise();
     }
     public static void SetPlayerWhipExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerWhipExpertise[steamID] = data;
+        _playerWhipExpertise[steamID] = data;
         SavePlayerWhipExpertise();
     }
     public static void SetPlayerFishingPoleExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerFishingPoleExpertise[steamID] = data;
+        _playerFishingPoleExpertise[steamID] = data;
         SavePlayerFishingPoleExpertise();
     }
     public static void SetPlayerUnarmedExpertise(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerUnarmedExpertise[steamID] = data;
+        _playerUnarmedExpertise[steamID] = data;
         SavePlayerUnarmedExpertise();
     }
     public static void SetPlayerWeaponStats(this ulong steamID, Dictionary<WeaponType, List<WeaponManager.WeaponStats.WeaponStatType>> data)
     {
-        playerWeaponStats[steamID] = data;
+        _playerWeaponStats[steamID] = data;
         SavePlayerWeaponStats();
     }
     public static void SetPlayerSpells(this ulong steamID, (int FirstUnarmed, int SecondUnarmed, int ClassSpell) data)
     {
-        playerSpells[steamID] = data;
+        _playerSpells[steamID] = data;
         SavePlayerSpells();
     }
     public static void SetPlayerWorkerLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerWorkerLegacy[steamID] = data;
+        _playerWorkerLegacy[steamID] = data;
         SavePlayerWorkerLegacy();
     }
     public static void SetPlayerWarriorLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerWarriorLegacy[steamID] = data;
+        _playerWarriorLegacy[steamID] = data;
         SavePlayerWarriorLegacy();
     }
     public static void SetPlayerScholarLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerScholarLegacy[steamID] = data;
+        _playerScholarLegacy[steamID] = data;
         SavePlayerScholarLegacy();
     }
     public static void SetPlayerRogueLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerRogueLegacy[steamID] = data;
+        _playerRogueLegacy[steamID] = data;
         SavePlayerRogueLegacy();
     }
     public static void SetPlayerMutantLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerMutantLegacy[steamID] = data;
+        _playerMutantLegacy[steamID] = data;
         SavePlayerMutantLegacy();
     }
     public static void SetPlayerVBloodLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerVBloodLegacy[steamID] = data;
+        _playerVBloodLegacy[steamID] = data;
         SavePlayerVBloodLegacy();
     }
     public static void SetPlayerDraculinLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerDraculinLegacy[steamID] = data;
+        _playerDraculinLegacy[steamID] = data;
         SavePlayerDraculinLegacy();
     }
     public static void SetPlayerImmortalLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerImmortalLegacy[steamID] = data;
+        _playerImmortalLegacy[steamID] = data;
         SavePlayerImmortalLegacy();
     }
     public static void SetPlayerCreatureLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerCreatureLegacy[steamID] = data;
+        _playerCreatureLegacy[steamID] = data;
         SavePlayerCreatureLegacy();
     }
     public static void SetPlayerBruteLegacy(this ulong steamID, KeyValuePair<int, float> data)
     {
-        playerBruteLegacy[steamID] = data;
+        _playerBruteLegacy[steamID] = data;
         SavePlayerBruteLegacy();
     }
     public static void SetPlayerBloodStats(this ulong steamID, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>> data)
     {
-        playerBloodStats[steamID] = data;
+        _playerBloodStats[steamID] = data;
         SavePlayerBloodStats();
     }
     public static void SetFamiliarActives(this ulong steamID, (Entity Familiar, int FamKey) data)
     {
-        familiarActives[steamID] = data;
+        _familiarActives[steamID] = data;
         SavePlayerFamiliarActives();
     }
     public static void SetFamiliarBox(this ulong steamID, string data)
     {
-        familiarBox[steamID] = data;
+        _familiarBox[steamID] = data;
         SavePlayerFamiliarSets();
     }
     public static void SetFamiliarDefault(this ulong steamID, int data)
     {
-        familiarDefault[steamID] = data;
+        _familiarDefault[steamID] = data;
         SavePlayerFamiliarSets();
     }
     public static void SetFamiliarBattleGroup(this ulong steamID, List<int> data)
     {
-        playerBattleGroups[steamID] = data;
+        _playerBattleGroups[steamID] = data;
         SaveFamiliarBattleGroups();
     }
     public static void SetPlayerQuests(this ulong steamID, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> data)
     {
-        playerQuests[steamID] = data;
+        _playerQuests[steamID] = data;
         SavePlayerQuests();
     }
     public static void SetPlayerParties(this ulong steamID, HashSet<string> data)
     {
-        playerParties[steamID] = data;
+        _playerParties[steamID] = data;
         SavePlayerParties();
     }
     internal static class PlayerDictionaries
     {
         // exoform timestamp & cooldown
-        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> playerExoFormData = [];
+        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> _playerExoFormData = [];
 
         // leveling
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerExperience = [];
-        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> playerRestedXP = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerExperience = [];
+        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> _playerRestedXP = [];
 
         // bools
-        internal static ConcurrentDictionary<ulong, ConcurrentDictionary<string, bool>> playerBools = [];
+        internal static ConcurrentDictionary<ulong, ConcurrentDictionary<string, bool>> _playerBools = [];
 
         // classes
-        internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> playerClass = [];
+        internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> _playerClass = [];
 
         // prestiges
-        internal static Dictionary<ulong, Dictionary<PrestigeType, int>> playerPrestiges = [];
+        internal static Dictionary<ulong, Dictionary<PrestigeType, int>> _playerPrestiges = [];
 
         // professions
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerWoodcutting = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerMining = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerFishing = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerBlacksmithing = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerTailoring = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerEnchanting = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerAlchemy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerHarvesting = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWoodcutting = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerMining = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerFishing = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerBlacksmithing = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerTailoring = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerEnchanting = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerAlchemy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerHarvesting = [];
 
         // weapon expertise
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerSwordExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerAxeExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerMaceExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerSpearExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerCrossbowExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerGreatSwordExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerSlashersExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerPistolsExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerReaperExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerLongbowExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerWhipExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerFishingPoleExpertise = [];
-        internal static Dictionary<ulong, Dictionary<WeaponType, List<WeaponManager.WeaponStats.WeaponStatType>>> playerWeaponStats = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
-        internal static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> playerSpells = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerSwordExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerAxeExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerMaceExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerSpearExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerCrossbowExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerGreatSwordExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerSlashersExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerPistolsExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerReaperExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerLongbowExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWhipExpertise = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerFishingPoleExpertise = [];
+        internal static Dictionary<ulong, Dictionary<WeaponType, List<WeaponManager.WeaponStats.WeaponStatType>>> _playerWeaponStats = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
+        internal static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> _playerSpells = [];
 
         // blood legacies
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerWorkerLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerWarriorLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerScholarLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerRogueLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerMutantLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerVBloodLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerDraculinLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerImmortalLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerCreatureLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> playerBruteLegacy = [];
-        internal static Dictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> playerBloodStats = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWorkerLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWarriorLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerScholarLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerRogueLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerMutantLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerVBloodLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerDraculinLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerImmortalLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerCreatureLegacy = [];
+        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerBruteLegacy = [];
+        internal static Dictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> _playerBloodStats = [];
 
         // familiar data
-        internal static Dictionary<ulong, (Entity Familiar, int FamKey)> familiarActives = [];
-        internal static Dictionary<ulong, string> familiarBox = [];
-        internal static Dictionary<ulong, int> familiarDefault = [];
-        internal static Dictionary<ulong, List<int>> playerBattleGroups = [];
-        internal static List<List<float>> familiarBattleCoords = [];
+        internal static Dictionary<ulong, (Entity Familiar, int FamKey)> _familiarActives = [];
+        internal static Dictionary<ulong, string> _familiarBox = [];
+        internal static Dictionary<ulong, int> _familiarDefault = [];
+        internal static Dictionary<ulong, List<int>> _playerBattleGroups = [];
+        internal static List<List<float>> _familiarBattleCoords = [];
+        internal static List<int> _familiarBattleTeams = [];
 
         // quest data
-        internal static Dictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> playerQuests = [];
+        internal static Dictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> _playerQuests = [];
 
         // parties
-        internal static Dictionary<ulong, HashSet<string>> playerParties = [];
+        internal static Dictionary<ulong, HashSet<string>> _playerParties = [];
 
         // cache-only
         //internal static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = []; // userEntities
@@ -507,113 +507,115 @@ internal static class DataService
     }
     internal static class PlayerPersistence
     {
-        static readonly JsonSerializerOptions prettyJsonOptions = new()
+        static readonly JsonSerializerOptions _prettyJsonOptions = new()
         {
             WriteIndented = true,
             IncludeFields = true
         };
-        static readonly Dictionary<string, string> filePaths = new()
-        {
-            {"Experience", PlayerExperienceJson},
-            {"RestedXP", PlayerRestedXPJson },
-            {"Quests", PlayerQuestsJson },
-            {"Classes", PlayerClassesJson },
-            {"Prestiges", PlayerPrestigesJson },
-            {"ExoFormData", PlayerExoFormsJson },
-            {"PlayerBools", PlayerBoolsJson},
-            {"PlayerParties", PlayerPartiesJson},
-            {"Woodcutting", PlayerWoodcuttingJson},
-            {"Mining", PlayerMiningJson},
-            {"Fishing", PlayerFishingJson},
-            {"Blacksmithing", PlayerBlacksmithingJson},
-            {"Tailoring", PlayerTailoringJson},
-            {"Enchanting", PlayerEnchantingJson},
-            {"Alchemy", PlayerAlchemyJson},
-            {"Harvesting", PlayerHarvestingJson},
-            {"SwordExpertise", PlayerSwordExpertiseJson },
-            {"AxeExpertise", PlayerAxeExpertiseJson},
-            {"MaceExpertise", PlayerMaceExpertiseJson},
-            {"SpearExpertise", PlayerSpearExpertiseJson},
-            {"CrossbowExpertise", PlayerCrossbowExpertiseJson},
-            {"GreatSwordExpertise", PlayerGreatSwordExpertise},
-            {"SlashersExpertise", PlayerSlashersExpertiseJson},
-            {"PistolsExpertise", PlayerPistolsExpertiseJson},
-            {"ReaperExpertise", PlayerReaperExpertise},
-            {"LongbowExpertise", PlayerLongbowExpertiseJson},
-            {"WhipExpertise", PlayerWhipExpertiseJson},
-            {"FishingPoleExpertise", PlayerFishingPoleExpertiseJson},
-            {"UnarmedExpertise", PlayerUnarmedExpertiseJson},
-            {"PlayerSpells", PlayerSpellsJson},
-            {"WeaponStats", PlayerWeaponStatsJson},
-            {"WorkerLegacy", PlayerWorkerLegacyJson},
-            {"WarriorLegacy", PlayerWarriorLegacyJson},
-            {"ScholarLegacy", PlayerScholarLegacyJson},
-            {"RogueLegacy", PlayerRogueLegacyJson},
-            {"MutantLegacy", PlayerMutantLegacyJson},
-            {"VBloodLegacy", PlayerVBloodLegacyJson},
-            {"DraculinLegacy", PlayerDraculinLegacyJson},
-            {"ImmortalLegacy", PlayerImmortalLegacyJson},
-            {"CreatureLegacy", PlayerCreatureLegacyJson},
-            {"BruteLegacy", PlayerBruteLegacyJson},
-            {"BloodStats", PlayerBloodStatsJson},
-            {"FamiliarActives", PlayerFamiliarActivesJson},
-            {"FamiliarSets", PlayerFamiliarSetsJson },
-            {"FamiliarBattleCoords", FamiliarBattleCoordsJson },
-            {"FamiliarBattleGroups", PlayerFamiliarBattleGroupsJson }
 
+        static readonly Dictionary<string, string> _filePaths = new()
+        {
+            {"Experience", _playerExperienceJson},
+            {"RestedXP", _playerRestedXPJson },
+            {"Quests", _playerQuestsJson },
+            {"Classes", _playerClassesJson },
+            {"Prestiges", _playerPrestigesJson },
+            {"ExoFormData", _playerExoFormsJson },
+            {"PlayerBools", _playerBoolsJson},
+            {"PlayerParties", _playerPartiesJson},
+            {"Woodcutting", _playerWoodcuttingJson},
+            {"Mining", _playerMiningJson},
+            {"Fishing", _playerFishingJson},
+            {"Blacksmithing", _playerBlacksmithingJson},
+            {"Tailoring", _playerTailoringJson},
+            {"Enchanting", _playerEnchantingJson},
+            {"Alchemy", _playerAlchemyJson},
+            {"Harvesting", _playerHarvestingJson},
+            {"SwordExpertise", _playerSwordExpertiseJson },
+            {"AxeExpertise", _playerAxeExpertiseJson},
+            {"MaceExpertise", _playerMaceExpertiseJson},
+            {"SpearExpertise", _playerSpearExpertiseJson},
+            {"CrossbowExpertise", _playerCrossbowExpertiseJson},
+            {"GreatSwordExpertise", JsonFilePaths._playerGreatSwordExpertise},
+            {"SlashersExpertise", _playerSlashersExpertiseJson},
+            {"PistolsExpertise", _playerPistolsExpertiseJson},
+            {"ReaperExpertise", JsonFilePaths._playerReaperExpertise},
+            {"LongbowExpertise", _playerLongbowExpertiseJson},
+            {"WhipExpertise", _playerWhipExpertiseJson},
+            {"FishingPoleExpertise", _playerFishingPoleExpertiseJson},
+            {"UnarmedExpertise", _playerUnarmedExpertiseJson},
+            {"PlayerSpells", _playerSpellsJson},
+            {"WeaponStats", _playerWeaponStatsJson},
+            {"WorkerLegacy", _playerWorkerLegacyJson},
+            {"WarriorLegacy", _playerWarriorLegacyJson},
+            {"ScholarLegacy", _playerScholarLegacyJson},
+            {"RogueLegacy", _playerRogueLegacyJson},
+            {"MutantLegacy", _playerMutantLegacyJson},
+            {"VBloodLegacy", _playerVBloodLegacyJson},
+            {"DraculinLegacy", _playerDraculinLegacyJson},
+            {"ImmortalLegacy", _playerImmortalLegacyJson},
+            {"CreatureLegacy", _playerCreatureLegacyJson},
+            {"BruteLegacy", _playerBruteLegacyJson},
+            {"BloodStats", _playerBloodStatsJson},
+            {"FamiliarActives", _playerFamiliarActivesJson},
+            {"FamiliarSets", _playerFamiliarSetsJson },
+            {"FamiliarBattleCoords", _familiarBattleCoordsJson },
+            {"FamiliarBattleGroups", _playerFamiliarBattleGroupsJson },
+            {"FamiliarBattleTeams", _familiarBattleTeamsJson}
         };
         internal static class JsonFilePaths
         {
-            internal static readonly string PlayerExperienceJson = Path.Combine(DirectoryPaths[1], "player_experience.json");
-            internal static readonly string PlayerRestedXPJson = Path.Combine(DirectoryPaths[1], "player_rested_xp.json");
-            internal static readonly string PlayerQuestsJson = Path.Combine(DirectoryPaths[2], "player_quests.json");
-            internal static readonly string PlayerPrestigesJson = Path.Combine(DirectoryPaths[1], "player_prestiges.json");
-            internal static readonly string PlayerExoFormsJson = Path.Combine(DirectoryPaths[1], "player_exoforms.json");
-            internal static readonly string PlayerClassesJson = Path.Combine(DirectoryPaths[0], "player_classes.json");
-            internal static readonly string PlayerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
-            internal static readonly string PlayerPartiesJson = Path.Combine(DirectoryPaths[0], "player_parties.json");
-            internal static readonly string PlayerWoodcuttingJson = Path.Combine(DirectoryPaths[5], "player_woodcutting.json");
-            internal static readonly string PlayerMiningJson = Path.Combine(DirectoryPaths[5], "player_mining.json");
-            internal static readonly string PlayerFishingJson = Path.Combine(DirectoryPaths[5], "player_fishing.json");
-            internal static readonly string PlayerBlacksmithingJson = Path.Combine(DirectoryPaths[5], "player_blacksmithing.json");
-            internal static readonly string PlayerTailoringJson = Path.Combine(DirectoryPaths[5], "player_tailoring.json");
-            internal static readonly string PlayerEnchantingJson = Path.Combine(DirectoryPaths[5], "player_enchanting.json");
-            internal static readonly string PlayerAlchemyJson = Path.Combine(DirectoryPaths[5], "player_alchemy.json");
-            internal static readonly string PlayerHarvestingJson = Path.Combine(DirectoryPaths[5], "player_harvesting.json");
-            internal static readonly string PlayerSwordExpertiseJson = Path.Combine(DirectoryPaths[3], "player_sword.json");
-            internal static readonly string PlayerAxeExpertiseJson = Path.Combine(DirectoryPaths[3], "player_axe.json");
-            internal static readonly string PlayerMaceExpertiseJson = Path.Combine(DirectoryPaths[3], "player_mace.json");
-            internal static readonly string PlayerSpearExpertiseJson = Path.Combine(DirectoryPaths[3], "player_spear.json");
-            internal static readonly string PlayerCrossbowExpertiseJson = Path.Combine(DirectoryPaths[3], "player_crossbow.json");
-            internal static readonly string PlayerGreatSwordExpertise = Path.Combine(DirectoryPaths[3], "player_greatsword.json");
-            internal static readonly string PlayerSlashersExpertiseJson = Path.Combine(DirectoryPaths[3], "player_slashers.json");
-            internal static readonly string PlayerPistolsExpertiseJson = Path.Combine(DirectoryPaths[3], "player_pistols.json");
-            internal static readonly string PlayerReaperExpertise = Path.Combine(DirectoryPaths[3], "player_reaper.json");
-            internal static readonly string PlayerLongbowExpertiseJson = Path.Combine(DirectoryPaths[3], "player_longbow.json");
-            internal static readonly string PlayerUnarmedExpertiseJson = Path.Combine(DirectoryPaths[3], "player_unarmed.json");
-            internal static readonly string PlayerWhipExpertiseJson = Path.Combine(DirectoryPaths[3], "player_whip.json");
-            internal static readonly string PlayerFishingPoleExpertiseJson = Path.Combine(DirectoryPaths[3], "player_fishingpole.json");
-            internal static readonly string PlayerSpellsJson = Path.Combine(DirectoryPaths[1], "player_spells.json");
-            internal static readonly string PlayerWeaponStatsJson = Path.Combine(DirectoryPaths[3], "player_weapon_stats.json");
-            internal static readonly string PlayerWorkerLegacyJson = Path.Combine(DirectoryPaths[4], "player_worker.json");
-            internal static readonly string PlayerWarriorLegacyJson = Path.Combine(DirectoryPaths[4], "player_warrior.json");
-            internal static readonly string PlayerScholarLegacyJson = Path.Combine(DirectoryPaths[4], "player_scholar.json");
-            internal static readonly string PlayerRogueLegacyJson = Path.Combine(DirectoryPaths[4], "player_rogue.json");
-            internal static readonly string PlayerMutantLegacyJson = Path.Combine(DirectoryPaths[4], "player_mutant.json");
-            internal static readonly string PlayerVBloodLegacyJson = Path.Combine(DirectoryPaths[4], "player_vblood.json");
-            internal static readonly string PlayerDraculinLegacyJson = Path.Combine(DirectoryPaths[4], "player_draculin.json");
-            internal static readonly string PlayerImmortalLegacyJson = Path.Combine(DirectoryPaths[4], "player_immortal.json");
-            internal static readonly string PlayerCreatureLegacyJson = Path.Combine(DirectoryPaths[4], "player_creature.json");
-            internal static readonly string PlayerBruteLegacyJson = Path.Combine(DirectoryPaths[4], "player_brute.json");
-            internal static readonly string PlayerBloodStatsJson = Path.Combine(DirectoryPaths[4], "player_blood_stats.json");
-            internal static readonly string PlayerFamiliarActivesJson = Path.Combine(DirectoryPaths[6], "player_familiar_actives.json");
-            internal static readonly string PlayerFamiliarSetsJson = Path.Combine(DirectoryPaths[8], "player_familiar_sets.json");
-            internal static readonly string FamiliarBattleCoordsJson = Path.Combine(DirectoryPaths[6], "familiar_battle_coords.json");
-            internal static readonly string PlayerFamiliarBattleGroupsJson = Path.Combine(DirectoryPaths[6], "player_familiar_battle_groups.json");
+            internal static readonly string _playerExperienceJson = Path.Combine(DirectoryPaths[1], "player_experience.json");
+            internal static readonly string _playerRestedXPJson = Path.Combine(DirectoryPaths[1], "player_rested_xp.json");
+            internal static readonly string _playerQuestsJson = Path.Combine(DirectoryPaths[2], "player_quests.json");
+            internal static readonly string _playerPrestigesJson = Path.Combine(DirectoryPaths[1], "player_prestiges.json");
+            internal static readonly string _playerExoFormsJson = Path.Combine(DirectoryPaths[1], "player_exoforms.json");
+            internal static readonly string _playerClassesJson = Path.Combine(DirectoryPaths[0], "player_classes.json");
+            internal static readonly string _playerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
+            internal static readonly string _playerPartiesJson = Path.Combine(DirectoryPaths[0], "player_parties.json");
+            internal static readonly string _playerWoodcuttingJson = Path.Combine(DirectoryPaths[5], "player_woodcutting.json");
+            internal static readonly string _playerMiningJson = Path.Combine(DirectoryPaths[5], "player_mining.json");
+            internal static readonly string _playerFishingJson = Path.Combine(DirectoryPaths[5], "player_fishing.json");
+            internal static readonly string _playerBlacksmithingJson = Path.Combine(DirectoryPaths[5], "player_blacksmithing.json");
+            internal static readonly string _playerTailoringJson = Path.Combine(DirectoryPaths[5], "player_tailoring.json");
+            internal static readonly string _playerEnchantingJson = Path.Combine(DirectoryPaths[5], "player_enchanting.json");
+            internal static readonly string _playerAlchemyJson = Path.Combine(DirectoryPaths[5], "player_alchemy.json");
+            internal static readonly string _playerHarvestingJson = Path.Combine(DirectoryPaths[5], "player_harvesting.json");
+            internal static readonly string _playerSwordExpertiseJson = Path.Combine(DirectoryPaths[3], "player_sword.json");
+            internal static readonly string _playerAxeExpertiseJson = Path.Combine(DirectoryPaths[3], "player_axe.json");
+            internal static readonly string _playerMaceExpertiseJson = Path.Combine(DirectoryPaths[3], "player_mace.json");
+            internal static readonly string _playerSpearExpertiseJson = Path.Combine(DirectoryPaths[3], "player_spear.json");
+            internal static readonly string _playerCrossbowExpertiseJson = Path.Combine(DirectoryPaths[3], "player_crossbow.json");
+            internal static readonly string _playerGreatSwordExpertise = Path.Combine(DirectoryPaths[3], "player_greatsword.json");
+            internal static readonly string _playerSlashersExpertiseJson = Path.Combine(DirectoryPaths[3], "player_slashers.json");
+            internal static readonly string _playerPistolsExpertiseJson = Path.Combine(DirectoryPaths[3], "player_pistols.json");
+            internal static readonly string _playerReaperExpertise = Path.Combine(DirectoryPaths[3], "player_reaper.json");
+            internal static readonly string _playerLongbowExpertiseJson = Path.Combine(DirectoryPaths[3], "player_longbow.json");
+            internal static readonly string _playerUnarmedExpertiseJson = Path.Combine(DirectoryPaths[3], "player_unarmed.json");
+            internal static readonly string _playerWhipExpertiseJson = Path.Combine(DirectoryPaths[3], "player_whip.json");
+            internal static readonly string _playerFishingPoleExpertiseJson = Path.Combine(DirectoryPaths[3], "player_fishingpole.json");
+            internal static readonly string _playerSpellsJson = Path.Combine(DirectoryPaths[1], "player_spells.json");
+            internal static readonly string _playerWeaponStatsJson = Path.Combine(DirectoryPaths[3], "player_weapon_stats.json");
+            internal static readonly string _playerWorkerLegacyJson = Path.Combine(DirectoryPaths[4], "player_worker.json");
+            internal static readonly string _playerWarriorLegacyJson = Path.Combine(DirectoryPaths[4], "player_warrior.json");
+            internal static readonly string _playerScholarLegacyJson = Path.Combine(DirectoryPaths[4], "player_scholar.json");
+            internal static readonly string _playerRogueLegacyJson = Path.Combine(DirectoryPaths[4], "player_rogue.json");
+            internal static readonly string _playerMutantLegacyJson = Path.Combine(DirectoryPaths[4], "player_mutant.json");
+            internal static readonly string _playerVBloodLegacyJson = Path.Combine(DirectoryPaths[4], "player_vblood.json");
+            internal static readonly string _playerDraculinLegacyJson = Path.Combine(DirectoryPaths[4], "player_draculin.json");
+            internal static readonly string _playerImmortalLegacyJson = Path.Combine(DirectoryPaths[4], "player_immortal.json");
+            internal static readonly string _playerCreatureLegacyJson = Path.Combine(DirectoryPaths[4], "player_creature.json");
+            internal static readonly string _playerBruteLegacyJson = Path.Combine(DirectoryPaths[4], "player_brute.json");
+            internal static readonly string _playerBloodStatsJson = Path.Combine(DirectoryPaths[4], "player_blood_stats.json");
+            internal static readonly string _playerFamiliarActivesJson = Path.Combine(DirectoryPaths[6], "player_familiar_actives.json");
+            internal static readonly string _playerFamiliarSetsJson = Path.Combine(DirectoryPaths[8], "player_familiar_sets.json");
+            internal static readonly string _familiarBattleCoordsJson = Path.Combine(DirectoryPaths[6], "familiar_battle_coords.json");
+            internal static readonly string _playerFamiliarBattleGroupsJson = Path.Combine(DirectoryPaths[6], "player_familiar_battle_groups.json");
+            internal static readonly string _familiarBattleTeamsJson = Path.Combine(DirectoryPaths[6], "familiar_battle_teams.json");
         }
         static void LoadData<T>(ref ConcurrentDictionary<ulong, T> dataStructure, string key)
         {
-            string path = filePaths[key];
+            string path = _filePaths[key];
             if (!File.Exists(path))
             {
                 File.Create(path).Dispose();
@@ -633,7 +635,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<ConcurrentDictionary<ulong, T>>(json, prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<ConcurrentDictionary<ulong, T>>(json, _prettyJsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -644,7 +646,7 @@ internal static class DataService
         }
         static void LoadData<T>(ref Dictionary<ulong, T> dataStructure, string key)
         {
-            string path = filePaths[key];
+            string path = _filePaths[key];
             if (!File.Exists(path))
             {
                 File.Create(path).Dispose();
@@ -664,7 +666,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, _prettyJsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -675,7 +677,7 @@ internal static class DataService
         }
         static void LoadData<T>(ref List<List<float>> dataStructure, string key)
         {
-            string path = filePaths[key];
+            string path = _filePaths[key];
             if (!File.Exists(path))
             {
                 File.Create(path).Dispose();
@@ -687,7 +689,34 @@ internal static class DataService
             {
                 string json = File.ReadAllText(path);
 
-                json = json.Replace("Sanguimancy", "UnarmedExpertise");
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    dataStructure = [];
+                }
+                else
+                {
+                    var data = JsonSerializer.Deserialize<List<List<float>>>(json, _prettyJsonOptions);
+                    dataStructure = data ?? [];
+                }
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to read {key} data from file: {ex.Message}");
+            }
+        }
+        static void LoadData<T>(ref List<int> dataStructure, string key)
+        {
+            string path = _filePaths[key];
+            if (!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+                dataStructure = [];
+                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                return;
+            }
+            try
+            {
+                string json = File.ReadAllText(path);
 
                 if (string.IsNullOrWhiteSpace(json))
                 {
@@ -695,7 +724,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<List<List<float>>>(json, prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<List<int>>(json, _prettyJsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -706,10 +735,10 @@ internal static class DataService
         }
         static void SaveData<T>(ConcurrentDictionary<ulong, T> data, string key)
         {
-            string path = filePaths[key];
+            string path = _filePaths[key];
             try
             {
-                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
             }
@@ -724,10 +753,10 @@ internal static class DataService
         }
         static void SaveData<T>(Dictionary<ulong, T> data, string key)
         {
-            string path = filePaths[key];
+            string path = _filePaths[key];
             try
             {
-                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
             }
@@ -742,11 +771,11 @@ internal static class DataService
         }
         static void SaveData<T>(List<List<float>> data, string key)
         {
-            string path = filePaths[key];
+            string path = _filePaths[key];
 
             try
             {
-                string json = JsonSerializer.Serialize(data, prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
                 File.WriteAllText(path, json);
             }
             catch (IOException ex)
@@ -758,189 +787,211 @@ internal static class DataService
                 Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
-        public static void LoadPlayerExperience() => LoadData(ref playerExperience, "Experience");
+        static void SaveData<T>(List<int> data, string key)
+        {
+            string path = _filePaths[key];
 
-        public static void LoadPlayerRestedXP() => LoadData(ref playerRestedXP, "RestedXP");
+            try
+            {
+                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
+                File.WriteAllText(path, json);
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to write {key} data to file: {ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
+            }
+        }
+        public static void LoadPlayerExperience() => LoadData(ref _playerExperience, "Experience");
 
-        public static void LoadPlayerQuests() => LoadData(ref playerQuests, "Quests");
+        public static void LoadPlayerRestedXP() => LoadData(ref _playerRestedXP, "RestedXP");
 
-        public static void LoadPlayerClasses() => LoadData(ref playerClass, "Classes");
+        public static void LoadPlayerQuests() => LoadData(ref _playerQuests, "Quests");
 
-        public static void LoadPlayerPrestiges() => LoadData(ref playerPrestiges, "Prestiges");
+        public static void LoadPlayerClasses() => LoadData(ref _playerClass, "Classes");
 
-        public static void LoadPlayerExoFormData() => LoadData(ref playerExoFormData, "ExoFormData");
+        public static void LoadPlayerPrestiges() => LoadData(ref _playerPrestiges, "Prestiges");
 
-        public static void LoadPlayerBools() => LoadData(ref playerBools, "PlayerBools");
+        public static void LoadPlayerExoFormData() => LoadData(ref _playerExoFormData, "ExoFormData");
 
-        public static void LoadPlayerParties() => LoadData(ref playerParties, "PlayerParties");
+        public static void LoadPlayerBools() => LoadData(ref _playerBools, "PlayerBools");
 
-        public static void LoadPlayerWoodcutting() => LoadData(ref playerWoodcutting, "Woodcutting");
+        public static void LoadPlayerParties() => LoadData(ref _playerParties, "PlayerParties");
 
-        public static void LoadPlayerMining() => LoadData(ref playerMining, "Mining");
+        public static void LoadPlayerWoodcutting() => LoadData(ref _playerWoodcutting, "Woodcutting");
 
-        public static void LoadPlayerFishing() => LoadData(ref playerFishing, "Fishing");
+        public static void LoadPlayerMining() => LoadData(ref _playerMining, "Mining");
 
-        public static void LoadPlayerBlacksmithing() => LoadData(ref playerBlacksmithing, "Blacksmithing");
+        public static void LoadPlayerFishing() => LoadData(ref _playerFishing, "Fishing");
 
-        public static void LoadPlayerTailoring() => LoadData(ref playerTailoring, "Tailoring");
+        public static void LoadPlayerBlacksmithing() => LoadData(ref _playerBlacksmithing, "Blacksmithing");
 
-        public static void LoadPlayerEnchanting() => LoadData(ref playerEnchanting, "Enchanting");
+        public static void LoadPlayerTailoring() => LoadData(ref _playerTailoring, "Tailoring");
 
-        public static void LoadPlayerAlchemy() => LoadData(ref playerAlchemy, "Alchemy");
+        public static void LoadPlayerEnchanting() => LoadData(ref _playerEnchanting, "Enchanting");
 
-        public static void LoadPlayerHarvesting() => LoadData(ref playerHarvesting, "Harvesting");
+        public static void LoadPlayerAlchemy() => LoadData(ref _playerAlchemy, "Alchemy");
 
-        public static void LoadPlayerSwordExpertise() => LoadData(ref playerSwordExpertise, "SwordExpertise");
+        public static void LoadPlayerHarvesting() => LoadData(ref _playerHarvesting, "Harvesting");
 
-        public static void LoadPlayerAxeExpertise() => LoadData(ref playerAxeExpertise, "AxeExpertise");
+        public static void LoadPlayerSwordExpertise() => LoadData(ref _playerSwordExpertise, "SwordExpertise");
 
-        public static void LoadPlayerMaceExpertise() => LoadData(ref playerMaceExpertise, "MaceExpertise");
+        public static void LoadPlayerAxeExpertise() => LoadData(ref _playerAxeExpertise, "AxeExpertise");
 
-        public static void LoadPlayerSpearExpertise() => LoadData(ref playerSpearExpertise, "SpearExpertise");
+        public static void LoadPlayerMaceExpertise() => LoadData(ref _playerMaceExpertise, "MaceExpertise");
 
-        public static void LoadPlayerCrossbowExpertise() => LoadData(ref playerCrossbowExpertise, "CrossbowExpertise");
+        public static void LoadPlayerSpearExpertise() => LoadData(ref _playerSpearExpertise, "SpearExpertise");
 
-        public static void LoadPlayerGreatSwordExpertise() => LoadData(ref playerGreatSwordExpertise, "GreatSwordExpertise");
+        public static void LoadPlayerCrossbowExpertise() => LoadData(ref _playerCrossbowExpertise, "CrossbowExpertise");
 
-        public static void LoadPlayerSlashersExpertise() => LoadData(ref playerSlashersExpertise, "SlashersExpertise");
+        public static void LoadPlayerGreatSwordExpertise() => LoadData(ref PlayerDictionaries._playerGreatSwordExpertise, "GreatSwordExpertise");
 
-        public static void LoadPlayerPistolsExpertise() => LoadData(ref playerPistolsExpertise, "PistolsExpertise");
+        public static void LoadPlayerSlashersExpertise() => LoadData(ref _playerSlashersExpertise, "SlashersExpertise");
 
-        public static void LoadPlayerReaperExpertise() => LoadData(ref playerReaperExpertise, "ReaperExpertise");
+        public static void LoadPlayerPistolsExpertise() => LoadData(ref _playerPistolsExpertise, "PistolsExpertise");
 
-        public static void LoadPlayerLongbowExpertise() => LoadData(ref playerLongbowExpertise, "LongbowExpertise");
+        public static void LoadPlayerReaperExpertise() => LoadData(ref PlayerDictionaries._playerReaperExpertise, "ReaperExpertise");
 
-        public static void LoadPlayerWhipExpertise() => LoadData(ref playerWhipExpertise, "WhipExpertise");
+        public static void LoadPlayerLongbowExpertise() => LoadData(ref _playerLongbowExpertise, "LongbowExpertise");
 
-        public static void LoadPlayerFishingPoleExpertise() => LoadData(ref playerFishingPoleExpertise, "FishingPoleExpertise");
+        public static void LoadPlayerWhipExpertise() => LoadData(ref _playerWhipExpertise, "WhipExpertise");
 
-        public static void LoadPlayerUnarmedExpertise() => LoadData(ref playerUnarmedExpertise, "UnarmedExpertise");
+        public static void LoadPlayerFishingPoleExpertise() => LoadData(ref _playerFishingPoleExpertise, "FishingPoleExpertise");
 
-        public static void LoadPlayerSpells() => LoadData(ref playerSpells, "PlayerSpells");
+        public static void LoadPlayerUnarmedExpertise() => LoadData(ref _playerUnarmedExpertise, "UnarmedExpertise");
 
-        public static void LoadPlayerWeaponStats() => LoadData(ref playerWeaponStats, "WeaponStats");
+        public static void LoadPlayerSpells() => LoadData(ref _playerSpells, "PlayerSpells");
 
-        public static void LoadPlayerWorkerLegacy() => LoadData(ref playerWorkerLegacy, "WorkerLegacy");
+        public static void LoadPlayerWeaponStats() => LoadData(ref _playerWeaponStats, "WeaponStats");
 
-        public static void LoadPlayerWarriorLegacy() => LoadData(ref playerWarriorLegacy, "WarriorLegacy");
+        public static void LoadPlayerWorkerLegacy() => LoadData(ref _playerWorkerLegacy, "WorkerLegacy");
 
-        public static void LoadPlayerScholarLegacy() => LoadData(ref playerScholarLegacy, "ScholarLegacy");
+        public static void LoadPlayerWarriorLegacy() => LoadData(ref _playerWarriorLegacy, "WarriorLegacy");
 
-        public static void LoadPlayerRogueLegacy() => LoadData(ref playerRogueLegacy, "RogueLegacy");
+        public static void LoadPlayerScholarLegacy() => LoadData(ref _playerScholarLegacy, "ScholarLegacy");
 
-        public static void LoadPlayerMutantLegacy() => LoadData(ref playerMutantLegacy, "MutantLegacy");
+        public static void LoadPlayerRogueLegacy() => LoadData(ref _playerRogueLegacy, "RogueLegacy");
 
-        public static void LoadPlayerVBloodLegacy() => LoadData(ref playerVBloodLegacy, "VBloodLegacy");
+        public static void LoadPlayerMutantLegacy() => LoadData(ref _playerMutantLegacy, "MutantLegacy");
 
-        public static void LoadPlayerDraculinLegacy() => LoadData(ref playerDraculinLegacy, "DraculinLegacy");
+        public static void LoadPlayerVBloodLegacy() => LoadData(ref _playerVBloodLegacy, "VBloodLegacy");
 
-        public static void LoadPlayerImmortalLegacy() => LoadData(ref playerImmortalLegacy, "ImmortalLegacy");
+        public static void LoadPlayerDraculinLegacy() => LoadData(ref _playerDraculinLegacy, "DraculinLegacy");
 
-        public static void LoadPlayerCreatureLegacy() => LoadData(ref playerCreatureLegacy, "CreatureLegacy");
+        public static void LoadPlayerImmortalLegacy() => LoadData(ref _playerImmortalLegacy, "ImmortalLegacy");
 
-        public static void LoadPlayerBruteLegacy() => LoadData(ref playerBruteLegacy, "BruteLegacy");
+        public static void LoadPlayerCreatureLegacy() => LoadData(ref _playerCreatureLegacy, "CreatureLegacy");
 
-        public static void LoadPlayerBloodStats() => LoadData(ref playerBloodStats, "BloodStats");
+        public static void LoadPlayerBruteLegacy() => LoadData(ref _playerBruteLegacy, "BruteLegacy");
 
-        public static void LoadPlayerFamiliarActives() => LoadData(ref familiarActives, "FamiliarActives");
+        public static void LoadPlayerBloodStats() => LoadData(ref _playerBloodStats, "BloodStats");
 
-        public static void LoadPlayerFamiliarSets() => LoadData(ref familiarBox, "FamiliarSets");
+        public static void LoadPlayerFamiliarActives() => LoadData(ref _familiarActives, "FamiliarActives");
 
-        public static void LoadFamiliarBattleCoords() => LoadData<List<float>>(ref familiarBattleCoords, "FamiliarBattleCoords");
+        public static void LoadPlayerFamiliarSets() => LoadData(ref _familiarBox, "FamiliarSets");
 
-        public static void LoadFamiliarBattleGroups() => LoadData(ref playerBattleGroups, "FamiliarBattleGroups");
+        public static void LoadFamiliarBattleCoords() => LoadData<List<float>>(ref _familiarBattleCoords, "FamiliarBattleCoords");
 
-        public static void SavePlayerExperience() => SaveData(playerExperience, "Experience");
+        public static void LoadFamiliarBattleGroups() => LoadData(ref _playerBattleGroups, "FamiliarBattleGroups");
 
-        public static void SavePlayerRestedXP() => SaveData(playerRestedXP, "RestedXP");
+        public static void LoadFamiliarBattleTeams() => LoadData<List<int>>(ref _familiarBattleTeams, "FamiliarBattleTeams");
 
-        public static void SavePlayerQuests() => SaveData(playerQuests, "Quests");
+        public static void SavePlayerExperience() => SaveData(_playerExperience, "Experience");
 
-        public static void SavePlayerClasses() => SaveData(playerClass, "Classes");
+        public static void SavePlayerRestedXP() => SaveData(_playerRestedXP, "RestedXP");
 
-        public static void SavePlayerPrestiges() => SaveData(playerPrestiges, "Prestiges");
+        public static void SavePlayerQuests() => SaveData(_playerQuests, "Quests");
 
-        public static void SavePlayerExoFormData() => SaveData(playerExoFormData, "ExoFormData");
+        public static void SavePlayerClasses() => SaveData(_playerClass, "Classes");
 
-        public static void SavePlayerBools() => SaveData(playerBools, "PlayerBools");
+        public static void SavePlayerPrestiges() => SaveData(_playerPrestiges, "Prestiges");
 
-        public static void SavePlayerParties() => SaveData(playerParties, "PlayerParties");
+        public static void SavePlayerExoFormData() => SaveData(_playerExoFormData, "ExoFormData");
 
-        public static void SavePlayerWoodcutting() => SaveData(playerWoodcutting, "Woodcutting");
+        public static void SavePlayerBools() => SaveData(_playerBools, "PlayerBools");
 
-        public static void SavePlayerMining() => SaveData(playerMining, "Mining");
+        public static void SavePlayerParties() => SaveData(_playerParties, "PlayerParties");
 
-        public static void SavePlayerFishing() => SaveData(playerFishing, "Fishing");
+        public static void SavePlayerWoodcutting() => SaveData(_playerWoodcutting, "Woodcutting");
 
-        public static void SavePlayerBlacksmithing() => SaveData(playerBlacksmithing, "Blacksmithing");
+        public static void SavePlayerMining() => SaveData(_playerMining, "Mining");
 
-        public static void SavePlayerTailoring() => SaveData(playerTailoring, "Tailoring");
+        public static void SavePlayerFishing() => SaveData(_playerFishing, "Fishing");
 
-        public static void SavePlayerEnchanting() => SaveData(playerEnchanting, "Enchanting");
+        public static void SavePlayerBlacksmithing() => SaveData(_playerBlacksmithing, "Blacksmithing");
 
-        public static void SavePlayerAlchemy() => SaveData(playerAlchemy, "Alchemy");
+        public static void SavePlayerTailoring() => SaveData(_playerTailoring, "Tailoring");
 
-        public static void SavePlayerHarvesting() => SaveData(playerHarvesting, "Harvesting");
+        public static void SavePlayerEnchanting() => SaveData(_playerEnchanting, "Enchanting");
 
-        public static void SavePlayerSwordExpertise() => SaveData(playerSwordExpertise, "SwordExpertise");
+        public static void SavePlayerAlchemy() => SaveData(_playerAlchemy, "Alchemy");
 
-        public static void SavePlayerAxeExpertise() => SaveData(playerAxeExpertise, "AxeExpertise");
+        public static void SavePlayerHarvesting() => SaveData(_playerHarvesting, "Harvesting");
 
-        public static void SavePlayerMaceExpertise() => SaveData(playerMaceExpertise, "MaceExpertise");
+        public static void SavePlayerSwordExpertise() => SaveData(_playerSwordExpertise, "SwordExpertise");
 
-        public static void SavePlayerSpearExpertise() => SaveData(playerSpearExpertise, "SpearExpertise");
+        public static void SavePlayerAxeExpertise() => SaveData(_playerAxeExpertise, "AxeExpertise");
 
-        public static void SavePlayerCrossbowExpertise() => SaveData(playerCrossbowExpertise, "CrossbowExpertise");
+        public static void SavePlayerMaceExpertise() => SaveData(_playerMaceExpertise, "MaceExpertise");
 
-        public static void SavePlayerGreatSwordExpertise() => SaveData(playerGreatSwordExpertise, "GreatSwordExpertise");
+        public static void SavePlayerSpearExpertise() => SaveData(_playerSpearExpertise, "SpearExpertise");
 
-        public static void SavePlayerSlashersExpertise() => SaveData(playerSlashersExpertise, "SlashersExpertise");
+        public static void SavePlayerCrossbowExpertise() => SaveData(_playerCrossbowExpertise, "CrossbowExpertise");
 
-        public static void SavePlayerPistolsExpertise() => SaveData(playerPistolsExpertise, "PistolsExpertise");
+        public static void SavePlayerGreatSwordExpertise() => SaveData(PlayerDictionaries._playerGreatSwordExpertise, "GreatSwordExpertise");
 
-        public static void SavePlayerReaperExpertise() => SaveData(playerReaperExpertise, "ReaperExpertise");
+        public static void SavePlayerSlashersExpertise() => SaveData(_playerSlashersExpertise, "SlashersExpertise");
 
-        public static void SavePlayerLongbowExpertise() => SaveData(playerLongbowExpertise, "LongbowExpertise");
+        public static void SavePlayerPistolsExpertise() => SaveData(_playerPistolsExpertise, "PistolsExpertise");
 
-        public static void SavePlayerWhipExpertise() => SaveData(playerWhipExpertise, "WhipExpertise");
+        public static void SavePlayerReaperExpertise() => SaveData(PlayerDictionaries._playerReaperExpertise, "ReaperExpertise");
 
-        public static void SavePlayerFishingPoleExpertise() => SaveData(playerFishingPoleExpertise, "FishingPoleExpertise");
+        public static void SavePlayerLongbowExpertise() => SaveData(_playerLongbowExpertise, "LongbowExpertise");
 
-        public static void SavePlayerUnarmedExpertise() => SaveData(playerUnarmedExpertise, "UnarmedExpertise");
+        public static void SavePlayerWhipExpertise() => SaveData(_playerWhipExpertise, "WhipExpertise");
 
-        public static void SavePlayerSpells() => SaveData(playerSpells, "PlayerSpells");
+        public static void SavePlayerFishingPoleExpertise() => SaveData(_playerFishingPoleExpertise, "FishingPoleExpertise");
 
-        public static void SavePlayerWeaponStats() => SaveData(playerWeaponStats, "WeaponStats");
+        public static void SavePlayerUnarmedExpertise() => SaveData(_playerUnarmedExpertise, "UnarmedExpertise");
 
-        public static void SavePlayerWorkerLegacy() => SaveData(playerWorkerLegacy, "WorkerLegacy");
+        public static void SavePlayerSpells() => SaveData(_playerSpells, "PlayerSpells");
 
-        public static void SavePlayerWarriorLegacy() => SaveData(playerWarriorLegacy, "WarriorLegacy");
+        public static void SavePlayerWeaponStats() => SaveData(_playerWeaponStats, "WeaponStats");
 
-        public static void SavePlayerScholarLegacy() => SaveData(playerScholarLegacy, "ScholarLegacy");
+        public static void SavePlayerWorkerLegacy() => SaveData(_playerWorkerLegacy, "WorkerLegacy");
 
-        public static void SavePlayerRogueLegacy() => SaveData(playerRogueLegacy, "RogueLegacy");
+        public static void SavePlayerWarriorLegacy() => SaveData(_playerWarriorLegacy, "WarriorLegacy");
 
-        public static void SavePlayerMutantLegacy() => SaveData(playerMutantLegacy, "MutantLegacy");
+        public static void SavePlayerScholarLegacy() => SaveData(_playerScholarLegacy, "ScholarLegacy");
 
-        public static void SavePlayerVBloodLegacy() => SaveData(playerVBloodLegacy, "VBloodLegacy");
+        public static void SavePlayerRogueLegacy() => SaveData(_playerRogueLegacy, "RogueLegacy");
 
-        public static void SavePlayerDraculinLegacy() => SaveData(playerDraculinLegacy, "DraculinLegacy");
+        public static void SavePlayerMutantLegacy() => SaveData(_playerMutantLegacy, "MutantLegacy");
 
-        public static void SavePlayerImmortalLegacy() => SaveData(playerImmortalLegacy, "ImmortalLegacy");
+        public static void SavePlayerVBloodLegacy() => SaveData(_playerVBloodLegacy, "VBloodLegacy");
 
-        public static void SavePlayerCreatureLegacy() => SaveData(playerCreatureLegacy, "CreatureLegacy");
+        public static void SavePlayerDraculinLegacy() => SaveData(_playerDraculinLegacy, "DraculinLegacy");
 
-        public static void SavePlayerBruteLegacy() => SaveData(playerBruteLegacy, "BruteLegacy");
+        public static void SavePlayerImmortalLegacy() => SaveData(_playerImmortalLegacy, "ImmortalLegacy");
 
-        public static void SavePlayerBloodStats() => SaveData(playerBloodStats, "BloodStats");
+        public static void SavePlayerCreatureLegacy() => SaveData(_playerCreatureLegacy, "CreatureLegacy");
 
-        public static void SavePlayerFamiliarActives() => SaveData(familiarActives, "FamiliarActives");
+        public static void SavePlayerBruteLegacy() => SaveData(_playerBruteLegacy, "BruteLegacy");
 
-        public static void SavePlayerFamiliarSets() => SaveData(familiarBox, "FamiliarSets");
+        public static void SavePlayerBloodStats() => SaveData(_playerBloodStats, "BloodStats");
 
-        public static void SaveFamiliarBattleCoords() => SaveData<List<float>>(familiarBattleCoords, "FamiliarBattleCoords");
+        public static void SavePlayerFamiliarActives() => SaveData(_familiarActives, "FamiliarActives");
 
-        public static void SaveFamiliarBattleGroups() => SaveData(playerBattleGroups, "FamiliarBattleGroups");
+        public static void SavePlayerFamiliarSets() => SaveData(_familiarBox, "FamiliarSets");
+
+        public static void SaveFamiliarBattleCoords() => SaveData<List<float>>(_familiarBattleCoords, "FamiliarBattleCoords");
+
+        public static void SaveFamiliarBattleGroups() => SaveData(_playerBattleGroups, "FamiliarBattleGroups");
+
+        public static void SaveFamiliarBattleTeams() => SaveData<List<int>>(_familiarBattleTeams, "FamiliarBattleTeams");
     }
     internal static class FamiliarPersistence
     {
@@ -968,10 +1019,10 @@ internal static class DataService
             public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = [];
         }
 
-        internal static Dictionary<ulong, UnlockedFamiliarData> unlockedFamiliars = [];
-        internal static Dictionary<ulong, FamiliarExperienceData> familiarExperience = [];
-        internal static Dictionary<ulong, FamiliarPrestigeData> familiarPrestiges = [];
-        internal static Dictionary<ulong, FamiliarBuffsData> familiarBuffs = [];
+        internal static Dictionary<ulong, UnlockedFamiliarData> _unlockedFamiliars = [];
+        internal static Dictionary<ulong, FamiliarExperienceData> _familiarExperience = [];
+        internal static Dictionary<ulong, FamiliarPrestigeData> _familiarPrestiges = [];
+        internal static Dictionary<ulong, FamiliarBuffsData> _familiarBuffs = [];
         internal static class FamiliarExperienceManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_experience.json");
@@ -1076,7 +1127,7 @@ internal static class DataService
                 if (File.Exists(PlayerSanguimancyJson) && !File.Exists(PlayerUnarmedJson))
                 {
                     // Copy the old file to the new file name
-                    File.Copy(PlayerSanguimancyJson, PlayerUnarmedExpertiseJson, overwrite: false);
+                    File.Copy(PlayerSanguimancyJson, _playerUnarmedExpertiseJson, overwrite: false);
                 }
             }
             catch (Exception ex)
@@ -1103,7 +1154,7 @@ internal static class DataService
 
             if (ConfigService.LevelingSystem)
             {
-                foreach (var loadFunction in loadLeveling)
+                foreach (var loadFunction in _loadLeveling)
                 {
                     loadFunction();
                 }
@@ -1115,7 +1166,7 @@ internal static class DataService
 
             if (ExpertiseSystem)
             {
-                foreach (var loadFunction in loadExpertises)
+                foreach (var loadFunction in _loadExpertises)
                 {
                     loadFunction();
                 }
@@ -1123,7 +1174,7 @@ internal static class DataService
 
             if (ConfigService.BloodSystem)
             {
-                foreach (var loadFunction in loadLegacies)
+                foreach (var loadFunction in _loadLegacies)
                 {
                     loadFunction();
                 }
@@ -1131,7 +1182,7 @@ internal static class DataService
 
             if (ConfigService.ProfessionSystem)
             {
-                foreach (var loadFunction in loadProfessions)
+                foreach (var loadFunction in _loadProfessions)
                 {
                     loadFunction();
                 }
@@ -1139,21 +1190,21 @@ internal static class DataService
 
             if (FamiliarSystem)
             {
-                foreach (var loadFunction in loadFamiliars)
+                foreach (var loadFunction in _loadFamiliars)
                 {
                     loadFunction();
                 }
             }
         }
 
-        static readonly Action[] loadLeveling =
+        static readonly Action[] _loadLeveling =
         [
             LoadPlayerExperience,
             LoadPlayerPrestiges,
             LoadPlayerExoFormData
         ];
 
-        static readonly Action[] loadExpertises =
+        static readonly Action[] _loadExpertises =
         [
             LoadPlayerSwordExpertise,
             LoadPlayerAxeExpertise,
@@ -1172,7 +1223,7 @@ internal static class DataService
             LoadPlayerWeaponStats
         ];
 
-        static readonly Action[] loadLegacies =
+        static readonly Action[] _loadLegacies =
         [
             LoadPlayerWorkerLegacy,
             LoadPlayerWarriorLegacy,
@@ -1187,7 +1238,7 @@ internal static class DataService
             LoadPlayerBloodStats
         ];
 
-        static readonly Action[] loadProfessions =
+        static readonly Action[] _loadProfessions =
         [
             LoadPlayerWoodcutting,
             LoadPlayerMining,
@@ -1199,12 +1250,13 @@ internal static class DataService
             LoadPlayerHarvesting,
         ];
 
-        static readonly Action[] loadFamiliars =
+        static readonly Action[] _loadFamiliars =
         [
             LoadPlayerFamiliarActives,
             LoadPlayerFamiliarSets,
             LoadFamiliarBattleCoords,
-            LoadFamiliarBattleGroups
+            LoadFamiliarBattleGroups,
+            LoadFamiliarBattleTeams
         ];
     }
 }

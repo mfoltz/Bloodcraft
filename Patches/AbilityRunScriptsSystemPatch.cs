@@ -15,15 +15,15 @@ internal static class AbilityRunScriptsSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     public static readonly Dictionary<PrefabGUID, int> ClassSpells = [];
 
-    static readonly PrefabGUID DominateBuff = new(-1447419822);
-    static readonly PrefabGUID UseWaypointAbilityGroup = new(695067846);
-    static readonly PrefabGUID UseCastleWaypointAbilityGroup = new(893332545);
-    
-    static readonly Dictionary<int, float> ExoFormCooldownMap = new() // not currently setting cooldowns, will consider later
+    static readonly PrefabGUID _dominateBuff = new(-1447419822);
+    static readonly PrefabGUID _useWaypointAbilityGroup = new(695067846);
+    static readonly PrefabGUID _useCastleWaypointAbilityGroup = new(893332545);
+
+    static readonly Dictionary<int, float> _exoFormCooldownMap = new() // not currently setting cooldowns, will consider later
     {
         { 1, 8f },
         { 2, 8f },
@@ -39,7 +39,7 @@ internal static class AbilityRunScriptsSystemPatch
     static void OnUpdatePrefix(AbilityRunScriptsSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!Classes) return;
+        else if (!_classes) return;
 
         NativeArray<Entity> entities = __instance._OnPostCastFinishedQuery.ToEntityArray(Allocator.Temp);
         try
@@ -89,14 +89,14 @@ internal static class AbilityRunScriptsSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out AbilityCastStartedEvent castStartedEvent) || !castStartedEvent.AbilityGroup.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if ((prefabGUID.Equals(UseCastleWaypointAbilityGroup) || prefabGUID.Equals(UseWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity player))
+                else if ((prefabGUID.Equals(_useCastleWaypointAbilityGroup) || prefabGUID.Equals(_useWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity player))
                 {
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
                     Entity familiar = Familiars.FindPlayerFamiliar(player);
                     if (familiar.Exists() && !familiar.IsDisabled() && steamId.TryGetFamiliarActives(out var data))
-                    {                        
+                    {
                         Familiars.AutoCallMap[player] = familiar;
                         Familiars.DismissFamiliar(player, familiar, user, steamId, data);
                     }
@@ -106,7 +106,7 @@ internal static class AbilityRunScriptsSystemPatch
         finally
         {
             entities.Dispose();
-        }  
+        }
     }
 
     /*

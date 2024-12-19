@@ -4,21 +4,20 @@ using ProjectM.Network;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
-using static Bloodcraft.Services.DataService.FamiliarPersistence;
 
 namespace Bloodcraft.Services;
 internal class PlayerService // this is basically a worse version of the PlayerService from KindredCommands, if you're here looking for good examples to follow :p
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly WaitForSeconds Delay = new(60);
+    static readonly WaitForSeconds _delay = new(60);
 
-    static readonly ComponentType[] UserComponent =
+    static readonly ComponentType[] _userComponent =
     [
         ComponentType.ReadOnly(Il2CppType.Of<User>()),
     ];
 
-    static EntityQuery UserQuery;
+    static EntityQuery _userQuery;
 
     public static readonly Dictionary<ulong, PlayerInfo> PlayerCache = [];
     public static readonly Dictionary<ulong, PlayerInfo> OnlineCache = [];
@@ -30,7 +29,7 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     }
     public PlayerService()
     {
-        UserQuery = EntityManager.CreateEntityQuery(UserComponent);
+        _userQuery = EntityManager.CreateEntityQuery(_userComponent);
         Core.StartCoroutine(PlayerCacheRoutine());
     }
     static IEnumerator PlayerCacheRoutine()
@@ -40,12 +39,12 @@ internal class PlayerService // this is basically a worse version of the PlayerS
             PlayerCache.Clear();
             OnlineCache.Clear();
 
-            var players = Queries.GetEntitiesEnumerable(UserQuery);
+            var players = Queries.GetEntitiesEnumerable(_userQuery);
 
             players
                 .Select(userEntity =>
                 {
-                    User user = userEntity.Read<User>();
+                    User user = userEntity.ReadRO<User>();
                     string playerName = user.CharacterName.Value;
                     ulong steamId = user.PlatformId;
                     Entity character = user.LocalCharacter.GetEntityOnServer();
@@ -69,7 +68,7 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     }
                 });
 
-            yield return Delay;
+            yield return _delay;
         }
     }
     public static PlayerInfo GetPlayerInfo(string playerName)
