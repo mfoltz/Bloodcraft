@@ -11,6 +11,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Commands;
 
@@ -306,7 +307,7 @@ internal static class PrestigeCommands
                     steamId.SetPlayerExoFormData(timeEnergyPair);
                 }
 
-                if (Misc.GetPlayerBool(steamId, "ExoForm")) Misc.SetPlayerBool(steamId, "ExoForm", false);
+                if (GetPlayerBool(steamId, "ExoForm")) SetPlayerBool(steamId, "ExoForm", false);
             }
 
             LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.");
@@ -518,8 +519,8 @@ internal static class PrestigeCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "Shroud");
-        if (Misc.GetPlayerBool(steamId, "Shroud"))
+        TogglePlayerBool(steamId, "Shroud");
+        if (GetPlayerBool(steamId, "Shroud"))
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
 

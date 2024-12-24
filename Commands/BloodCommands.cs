@@ -1,6 +1,5 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -8,6 +7,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Legacies.BloodManager;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
@@ -101,8 +101,8 @@ internal static class BloodCommands
 
         var steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "BloodLogging");
-        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(Misc.GetPlayerBool(steamId, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, "BloodLogging");
+        LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(GetPlayerBool(steamId, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]

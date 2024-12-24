@@ -22,7 +22,7 @@ internal static class Quests
         { QuestType.Weekly, "<color=#BF40BF>Weekly Quest</color>" }
     };
 
-    static readonly Dictionary<TargetType, string> QuestTargetType = new()
+    static readonly Dictionary<TargetType, string> _questTargetType = new()
     {
         { TargetType.Kill, "Unit" },
         { TargetType.Craft, "Item" },
@@ -111,7 +111,7 @@ internal static class Quests
             }
 
             LocalizationService.HandleReply(ctx, $"{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]");
-            LocalizationService.HandleReply(ctx, $"Time until {questType} reset: <color=yellow>{timeLeft}</color> | {QuestTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
+            LocalizationService.HandleReply(ctx, $"Time until {questType} reset: <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
         }
         else if (questObjective.Objective.Complete)
         {

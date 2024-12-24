@@ -326,7 +326,7 @@ internal static class FamiliarCommands
         User foundUser = playerInfo.User;
         ulong steamId = foundUser.PlatformId;
 
-        if (steamId.TryGetFamiliarBox(out string activeSet)) // add to active box if one exists
+        if (steamId.TryGetFamiliarBox(out string activeSet) && !string.IsNullOrEmpty(activeSet)) // add to active box if one exists
         {
             Familiars.ParseAddedFamiliar(ctx, steamId, unit, activeSet);
         }
@@ -444,9 +444,9 @@ internal static class FamiliarCommands
         }
 
         ulong platformId = ctx.User.PlatformId;
-        Misc.TogglePlayerBool(platformId, "Emotes");
+        Misc.PlayerBoolsManager.TogglePlayerBool(platformId, "Emotes");
 
-        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(Misc.GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
+        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(Misc.PlayerBoolsManager.GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
     }
 
     [Command(name: "emoteactions", shortHand: "actions", usage: ".fam actions", description: "Shows available emote actions.", adminOnly: false)]
@@ -852,11 +852,11 @@ internal static class FamiliarCommands
             FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // if no shiny unlocked already use the freebie
             {
-                bool madeShinyChoice = Misc.GetPlayerBool(steamId, "ShinyChoice");
+                bool madeShinyChoice = Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ShinyChoice");
 
                 if (!madeShinyChoice && HandleShiny(famKey, steamId, 1f, visual.GuidHash)) // if false use free visual then set to true
                 {
-                    Misc.SetPlayerBool(steamId, "ShinyChoice", true);
+                    Misc.PlayerBoolsManager.SetPlayerBool(steamId, "ShinyChoice", true);
                     LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
                 }
                 else if (madeShinyChoice)
@@ -913,11 +913,11 @@ internal static class FamiliarCommands
 
         ulong steamId = playerInfo.User.PlatformId;
         string playerName = playerInfo.User.CharacterName.Value;
-        bool madeShinyChoice = Misc.GetPlayerBool(steamId, "ShinyChoice");
+        bool madeShinyChoice = Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ShinyChoice");
 
         if (madeShinyChoice)
         {
-            Misc.SetPlayerBool(steamId, "ShinyChoice", false);
+            Misc.PlayerBoolsManager.SetPlayerBool(steamId, "ShinyChoice", false);
             LocalizationService.HandleReply(ctx, $"Visual choice reset for <color=white>{playerName}</color>. (does not remove previously chosen visuals from player data)");
         }
         else if (!madeShinyChoice)

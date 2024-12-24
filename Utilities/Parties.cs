@@ -1,7 +1,8 @@
 ﻿using Bloodcraft.Services;
+using System.Collections.Concurrent;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities.Misc;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Utilities;
 internal static class PartyUtilities
@@ -104,7 +105,7 @@ internal static class PartyUtilities
             LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party to remove...");
         }
     }
-    public static void ListPartyMembers(ChatCommandContext ctx, Dictionary<ulong, HashSet<string>> playerParties)
+    public static void ListPartyMembers(ChatCommandContext ctx, ConcurrentDictionary<ulong, HashSet<string>> playerParties)
     {
         ulong ownerId = ctx.Event.User.PlatformId;
         string playerName = ctx.Event.User.CharacterName.Value;

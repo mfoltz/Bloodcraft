@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -7,6 +6,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Patches;
 
@@ -52,7 +52,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     }
                     else if (_shiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleShiftSpell(entity, character, spells, Misc.GetPlayerBool(steamId, "ShiftLock"));
+                        HandleShiftSpell(entity, character, spells, GetPlayerBool(steamId, "ShiftLock"));
                     }
                     else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
@@ -95,7 +95,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        HandleShiftSpell(entity, character, spells, Misc.GetPlayerBool(steamId, "ShiftLock"));
+        HandleShiftSpell(entity, character, spells, GetPlayerBool(steamId, "ShiftLock"));
     }
     static void HandleShiftSpell(Entity entity, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
     {
@@ -119,7 +119,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     }
     static void SetSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
-        bool lockSpells = Misc.GetPlayerBool(steamId, "SpellLock");
+        bool lockSpells = GetPlayerBool(steamId, "SpellLock");
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
 
         foreach (var buff in buffer)

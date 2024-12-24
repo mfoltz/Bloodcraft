@@ -299,6 +299,3 @@ dist/
 /TODO.txt
 *.env
 secrets.json
-PrefabCollectionSystemPatch.cs
-PrefabClonerFactory.cs
-DynamicOnUpdatePatch.cs

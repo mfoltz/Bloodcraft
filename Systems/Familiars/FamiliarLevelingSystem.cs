@@ -9,6 +9,7 @@ using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Familiars;
@@ -25,7 +26,7 @@ internal static class FamiliarLevelingSystem
     static readonly PrefabGUID _levelUpBuff = new(-1133938228);
     static readonly PrefabGUID _invulnerableBuff = new(-480024072);
 
-    static readonly WaitForSeconds _sCTDelay = new(0.75f);
+    static readonly WaitForSeconds _delay = new(0.75f);
 
     static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
     static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
@@ -92,7 +93,7 @@ internal static class FamiliarLevelingSystem
             return new(0, 0);
         }
     }
-    public static void CheckAndHandleLevelUp(Entity player, Entity familiar, int familiarId, ulong steamID, KeyValuePair<int, float> familiarXP, int currentLevel, float gainedXP)
+    public static void CheckAndHandleLevelUp(Entity player, Entity familiar, int familiarId, ulong steamId, KeyValuePair<int, float> familiarXP, int currentLevel, float gainedXP)
     {
         Entity userEntity = player.GetUserEntity();
 
@@ -102,10 +103,10 @@ internal static class FamiliarLevelingSystem
         if (newLevel > currentLevel)
         {
             leveledUp = true;
-            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(steamID);
+            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
 
             data.FamiliarExperience[familiarId] = new(newLevel, familiarXP.Value);
-            FamiliarExperienceManager.SaveFamiliarExperience(steamID, data);
+            FamiliarExperienceManager.SaveFamiliarExperience(steamId, data);
         }
 
         if (leveledUp)
@@ -116,11 +117,11 @@ internal static class FamiliarLevelingSystem
             unitLevel.Level._Value = newLevel;
             familiar.Write(unitLevel);
 
-            FamiliarSummonSystem.ModifyDamageStats(familiar, newLevel, steamID, familiarId);
+            FamiliarSummonSystem.ModifyDamageStats(familiar, newLevel, steamId, familiarId);
             if (familiar.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiar, newLevel);
         }
 
-        if (Misc.GetPlayerBool(steamID, "ScrollingText"))
+        if (GetPlayerBool(steamId, "ScrollingText"))
         {
             float3 targetPosition = familiar.ReadRO<Translation>().Value;
 
@@ -129,7 +130,7 @@ internal static class FamiliarLevelingSystem
     }
     static IEnumerator DelayedFamiliarSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
     {
-        yield return _sCTDelay;
+        yield return _delay;
 
         ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _familiarSCT, userEntity);
     }

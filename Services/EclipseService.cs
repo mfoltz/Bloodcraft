@@ -22,24 +22,15 @@ internal class EclipseService
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    public static readonly bool Classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
-    public static readonly bool Leveling = ConfigService.LevelingSystem;
-    public static readonly bool Legacies = ConfigService.BloodSystem;
-    public static readonly bool Expertise = ConfigService.ExpertiseSystem;
-    public static readonly bool Prestige = ConfigService.PrestigeSystem;
-    public static readonly bool Familiars = ConfigService.FamiliarSystem;
-    public static readonly bool FamiliarPrestige = ConfigService.FamiliarPrestige;
-    public static readonly bool Professions = ConfigService.ProfessionSystem;
-    public static readonly bool Quests = ConfigService.QuestSystem;
-
-    public static readonly int MaxLevel = ConfigService.MaxLevel;
-    public static readonly int MaxLegacyLevel = ConfigService.MaxBloodLevel;
-    public static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
-    public static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
-    public static readonly int MaxProfessionLevel = ConfigService.MaxProfessionLevel;
-
-    public static readonly float PrestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
-    public static readonly float ClassStatMultiplier = ConfigService.StatSynergyMultiplier;
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
+    static readonly bool _prestige = ConfigService.PrestigeSystem;
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
+    static readonly bool _professions = ConfigService.ProfessionSystem;
+    static readonly bool _quests = ConfigService.QuestSystem;
 
     static readonly WaitForSeconds _delay = new(2.5f);
     static readonly WaitForSeconds _newUserDelay = new(15f);
@@ -63,7 +54,6 @@ internal class EclipseService
         RegisterUser,
         ProgressToClient,
         ConfigsToClient
-        //ClientDebug
     }
     public static void HandleClientMessage(string message)
     {
@@ -196,19 +186,19 @@ internal class EclipseService
         int experiencePrestige = 0;
         int classEnum = 0;
 
-        if (Leveling)
+        if (_leveling)
         {
             experiencePercent = LevelingSystem.GetLevelProgress(steamId);
             experienceLevel = LevelingSystem.GetLevel(steamId);
 
-            if (Prestige)
+            if (_prestige)
             {
                 IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(PrestigeType.Experience);
                 experiencePrestige = prestigeHandler.GetPrestigeLevel(steamId);
             }
         }
 
-        if (Classes && Utilities.Classes.HasClass(steamId))
+        if (_classes && Utilities.Classes.HasClass(steamId))
         {
             classEnum = (int)Utilities.Classes.GetPlayerClass(steamId) + 1; // 0 for no class on client
         }
@@ -223,7 +213,7 @@ internal class EclipseService
         int legacyEnum = 0;
         int legacyBonusStats = 0;
 
-        if (Legacies)
+        if (_legacies)
         {
             BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.ReadRO<Blood>().BloodType);
             IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
@@ -234,7 +224,7 @@ internal class EclipseService
                 legacyLevel = BloodSystem.GetLevel(steamId, bloodHandler);
                 legacyEnum = (int)bloodType;
 
-                if (Prestige)
+                if (_prestige)
                 {
                     IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(BloodSystem.BloodTypeToPrestigeMap[bloodType]);
                     legacyPrestige = prestigeHandler.GetPrestigeLevel(steamId);
@@ -266,7 +256,7 @@ internal class EclipseService
         int expertiseEnum = 0;
         int expertiseBonusStats = 0;
 
-        if (Expertise)
+        if (_expertise)
         {
             WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.ReadRO<Equipment>().WeaponSlot.SlotEntity._Entity);
             IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
@@ -277,7 +267,7 @@ internal class EclipseService
                 expertiseLevel = WeaponSystem.GetLevel(steamId, expertiseHandler);
                 expertiseEnum = (int)weaponType;
 
-                if (Prestige)
+                if (_prestige)
                 {
                     IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponSystem.WeaponPrestigeMap[weaponType]);
                     expertisePrestige = prestigeHandler.GetPrestigeLevel(steamId);
@@ -305,7 +295,7 @@ internal class EclipseService
         string familiarName = "";
         string familiarStats = "";
 
-        if (Familiars)
+        if (_familiars)
         {
             Entity familiar = Utilities.Familiars.FindPlayerFamiliar(character);
 
@@ -324,7 +314,7 @@ internal class EclipseService
             familiarPercent = FamiliarLevelingSystem.GetLevelProgress(steamId, familiarId);
             familiarLevel = familiarXP.Key;
 
-            if (FamiliarPrestige)
+            if (_familiarPrestige)
             {
                 familiarPrestige = FamiliarPrestigeManager.GetFamiliarPrestigeLevel(FamiliarPrestigeManager.LoadFamiliarPrestige(steamId), familiarId);
             }
@@ -367,7 +357,7 @@ internal class EclipseService
         int fishingProgress = 0;
         int fishingLevel = 0;
 
-        if (Professions)
+        if (_professions)
         {
             IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "enchanting");
             enchantingLevel = professionHandler.GetProfessionData(steamId).Key;
@@ -418,7 +408,7 @@ internal class EclipseService
         string target = "";
         string isVBlood = "false";
 
-        if (Quests && steamId.TryGetPlayerQuests(out var questData))
+        if (_quests && steamId.TryGetPlayerQuests(out var questData))
         {
             if (questData.TryGetValue(questType, out var quest) && !quest.Objective.Complete)
             {

@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -23,7 +24,9 @@ internal static class FamiliarSummonSystem
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static readonly GameDifficulty _gameDifficulty = SystemService.ServerGameSettingsSystem.Settings.GameDifficulty;
-    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+    // static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
+
+    static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
     public const float FAMILIAR_LIFETIME = 240f;
 
@@ -53,10 +56,12 @@ internal static class FamiliarSummonSystem
     public static Entity _unitTeam = Entity.Null;
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
     {
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
         User user = userEntity.ReadRO<User>();
         int index = user.Index;
+
+        SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.TryAdd(user.PlatformId, new(famKey));
+
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
         FromCharacter fromCharacter = new() { Character = character, User = userEntity };
 
@@ -75,6 +80,7 @@ internal static class FamiliarSummonSystem
     }
     public static void SummonFamiliarForBattle(Entity character, Entity userEntity, PrefabGUID familiarPrefabGUID, float3 position)
     {
+        // this method is already kind of doing what I'm updating the other one above to do so probably don't need to do it here
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
         User user = userEntity.ReadRO<User>();
@@ -174,6 +180,7 @@ internal static class FamiliarSummonSystem
         try
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
+
             ModifyFollowerFactionMinion(player, familiar);
             ModifyDamageStats(familiar, level, steamId, famKey);
             ModifyConvertable(familiar);
@@ -181,9 +188,9 @@ internal static class FamiliarSummonSystem
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
 
-            if (!ConfigService.FamiliarCombat) DisableCombat(player, familiar);
+            if (!_familiarCombat) DisableCombat(player, familiar);
 
-            if (Misc.GetPlayerBool(steamId, "FamiliarVisual"))
+            if (Misc.PlayerBoolsManager.TryGetPlayerBool(steamId, "FamiliarVisual", out bool value))
             {
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
                 if (data.FamiliarBuffs.ContainsKey(famKey))
@@ -193,7 +200,8 @@ internal static class FamiliarSummonSystem
                 }
             }
 
-            if (_gameMode.Equals(GameModeType.PvP)) ManualAggroHandling(familiar);
+            //if (_gameMode.Equals(GameModeType.PvP)) 
+            ManualAggroHandling(familiar); // seems generally better than even normal game handling when they're considered minions
 
             return true;
         }
@@ -216,9 +224,9 @@ internal static class FamiliarSummonSystem
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
-            Utilities.Familiars.NothingLivesForever(familiar);
+            familiar.NothingLivesForever();
 
-            if (Misc.GetPlayerBool(steamId, "FamiliarVisual"))
+            if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "FamiliarVisual"))
             {
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
 
@@ -638,8 +646,12 @@ internal static class FamiliarSummonSystem
     }
     static void PreventDisableFamiliar(Entity familiar)
     {
+        // one of the relics from the inception of familiars, might be better off not doing this in the long run
+        // but hasn't caused issues and need to get out of current rabbit hole before entering another so leaving note for later >_>
+
         ModifiableBool modifiableBool = new() { _Value = false };
         CanPreventDisableWhenNoPlayersInRange canPreventDisable = new() { CanDisable = modifiableBool };
+
         EntityManager.AddComponentData(familiar, canPreventDisable);
     }
     static void ModifyConvertable(Entity familiar)
@@ -676,8 +688,6 @@ internal static class FamiliarSummonSystem
     }
     static void ManualAggroHandling(Entity familiar)
     {
-        //if (familiar.Has<EntitiesInView_Server>()) familiar.Remove<EntitiesInView_Server>(); see if new handling still works without touching this
-
         familiar.With((ref AggroConsumer aggroConsumer) =>
         {
             aggroConsumer.ProximityRadius = 0f;

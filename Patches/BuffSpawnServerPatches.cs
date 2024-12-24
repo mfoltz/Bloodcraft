@@ -10,6 +10,7 @@ using Stunlock.Core;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Patches;
 
@@ -106,7 +107,7 @@ internal static class BuffSystemSpawnPatches
                     }
                     else if (buffTarget.GetPrefabGUID().Equals(_fallenAngel) && DeathMagePlayerAngelSpawnOrder.TryDequeue(out player))
                     {
-                        Classes.ModifyFallenAngelTeam(entity, player);
+                        Classes.ModifyFallenAngelForDeathMage(buffTarget, player);
                     }
                 }
                 else if (_familiars && prefabGUID.Equals(_witchPigTransformationBuff) && buffTarget.Has<VBloodUnit>())
@@ -165,7 +166,7 @@ internal static class BuffSystemSpawnPatches
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (!Misc.GetPlayerBool(steamId, "VBloodEmotes"))
+                    if (!GetPlayerBool(steamId, "VBloodEmotes"))
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
                     }

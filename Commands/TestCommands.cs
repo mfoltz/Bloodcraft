@@ -176,7 +176,7 @@ internal static class TestCommands
         ctx.Reply($"Challenged <color=white>{playerInfo.User.CharacterName.Value}</color> to a battle! (<color=yellow>30s</color> until it expires)");
         LocalizationService.HandleServerReply(EntityManager, playerInfo.User, $"<color=white>{ctx.User.CharacterName.Value}</color> has challenged you to a battle! (<color=yellow>30s</color> until it expires, accept by emoting '<color=green>Yes</color>' or decline by emoting '<color=red>No</color>')");
 
-        Core.StartCoroutine(ChallengeExpirationRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)));
+        Core.StartCoroutine(ChallengeExpiredRoutine((ctx.User.PlatformId, playerInfo.User.PlatformId)));
     }
 
     [Command(name: "setfamiliarbattlearena", shortHand: "sfba", adminOnly: true, usage: ".sfba", description: "Designate current position as the center used for the familiar arena.")]

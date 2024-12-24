@@ -16,6 +16,7 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocks
 using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Utilities;
 internal static class Familiars
@@ -177,13 +178,13 @@ internal static class Familiars
     }
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
     {
-        Misc.TogglePlayerBool(steamId, "FamiliarVisual");
-        LocalizationService.HandleReply(ctx, Misc.GetPlayerBool(steamId, "FamiliarVisual") ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
+        TogglePlayerBool(steamId, "FamiliarVisual");
+        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, "FamiliarVisual") ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
     }
     public static void ToggleVBloodEmotes(ChatCommandContext ctx, ulong steamId)
     {
-        Misc.TogglePlayerBool(steamId, "VBloodEmotes");
-        LocalizationService.HandleReply(ctx, Misc.GetPlayerBool(steamId, "VBloodEmotes") ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
+        TogglePlayerBool(steamId, "VBloodEmotes");
+        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, "VBloodEmotes") ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
     }
     public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
     {
@@ -232,7 +233,7 @@ internal static class Familiars
         string message = "<color=yellow>Familiar</color> <color=green>enabled</color>!";
         LocalizationService.HandleServerReply(EntityManager, user, message);
     }
-    public static void NothingLivesForever(Entity familiar, float duration = FAMILIAR_LIFETIME)
+    public static void NothingLivesForever(this Entity familiar, float duration = FAMILIAR_LIFETIME)
     {
         if (Buffs.TryApplyBuff(familiar, _inkCrawlerDeathBuff) && familiar.TryGetBuff(_inkCrawlerDeathBuff, out Entity buffEntity))
         {
@@ -353,7 +354,7 @@ internal static class Familiars
                     return;
                 }
 
-                Misc.SetPlayerBool(steamId, "Binding", true);
+                // SetPlayerBool(steamId, "Binding", true);
 
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
@@ -372,7 +373,7 @@ internal static class Familiars
             }
             else
             {
-                Misc.SetPlayerBool(steamId, "Binding", true);
+                // SetPlayerBool(steamId, "Binding", true);
                 steamId.SetFamiliarDefault(boxIndex);
 
                 data = new(Entity.Null, famKeys[boxIndex - 1]);

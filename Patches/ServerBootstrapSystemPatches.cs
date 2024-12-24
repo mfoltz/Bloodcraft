@@ -10,12 +10,12 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Stunlock.Network;
 using System.Collections;
-using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
@@ -56,29 +56,6 @@ internal static class ServerBootstrapSystemPatches
     static readonly int _startingLevel = ConfigService.StartingLevel;
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
-    static readonly ConcurrentDictionary<string, bool> _defaultBools = new()
-    {
-        ["ExperienceLogging"] = false,
-        ["QuestLogging"] = false,
-        ["ProfessionLogging"] = false,
-        ["ExpertiseLogging"] = false,
-        ["BloodLogging"] = false,
-        ["FamiliarLogging"] = false,
-        ["SpellLock"] = false,
-        ["ShiftLock"] = false,
-        ["Grouping"] = false,
-        ["Emotes"] = false,
-        ["Binding"] = false,
-        ["Kit"] = false,
-        ["VBloodEmotes"] = true,
-        ["FamiliarVisual"] = true,
-        ["ShinyChoice"] = false,
-        ["Reminders"] = true,
-        ["ScrollingText"] = true,
-        ["ExoForm"] = false,
-        ["Shroud"] = true
-    };
-
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
@@ -98,22 +75,7 @@ internal static class ServerBootstrapSystemPatches
     {
         yield return _delay;
 
-        if (!steamId.TryGetPlayerBools(out var bools))
-        {
-            steamId.SetPlayerBools(_defaultBools);
-        }
-        else
-        {
-            foreach (string key in _defaultBools.Keys)
-            {
-                if (!bools.ContainsKey(key))
-                {
-                    bools[key] = _defaultBools[key];
-                }
-            }
-
-            steamId.SetPlayerBools(bools);
-        }
+        DataService.PlayerBoolsManager.GetOrInitializePlayerBools(steamId, DefaultBools);
 
         if (_professions)
         {

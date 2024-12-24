@@ -27,8 +27,8 @@ internal static class Extensions
     public static void With<T>(this Entity entity, WithRefHandler<T> action) where T : struct
     {
         T item = entity.ReadRW<T>();
-
         action(ref item);
+
         EntityManager.SetComponentData(entity, item);
     }
     public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
@@ -90,6 +90,32 @@ internal static class Extensions
     {
         return EntityManager.AddBuffer<T>(entity);
     }
+    public unsafe static void* GetComponentData(this Entity entity, TypeIndex typeIndex)
+    {
+        return EntityManager.GetComponentDataRawRO(entity, typeIndex);
+    }
+    public unsafe static void SetComponentData(this Entity entity, TypeIndex typeIndex, void* byteData, int size)
+    {
+        EntityManager.SetComponentDataRaw(entity, typeIndex, byteData, size);
+    }
+    public unsafe static void* GetBufferData(this Entity entity, TypeIndex typeIndex)
+    {
+        return EntityManager.GetBufferRawRO(entity, typeIndex);
+    }
+    public static int GetBufferLength(this Entity entity, TypeIndex typeIndex)
+    {
+        return EntityManager.GetBufferLength(entity, typeIndex);
+    }
+    public static void SetBufferData<T>(Entity prefabSource, T[] bufferArray) where T : struct
+    {
+        DynamicBuffer<T> buffer = prefabSource.Has<T>() ? prefabSource.ReadBuffer<T>() : prefabSource.AddBuffer<T>();
+        buffer.Clear();
+
+        foreach (T element in bufferArray)
+        {
+            buffer.Add(element);
+        }
+    }
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
         componentData = default;
@@ -118,6 +144,10 @@ internal static class Extensions
     {
         return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
     }
+    public static bool Has(this Entity entity, ComponentType componentType)
+    {
+        return EntityManager.HasComponent(entity, componentType);
+    }
     public static string GetPrefabName(this PrefabGUID prefabGUID)
     {
         return PrefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(prefabGUID, out string prefabName) ? $"{prefabName} {prefabGUID}" : "String.Empty";
@@ -136,6 +166,10 @@ internal static class Extensions
     public static void Add<T>(this Entity entity)
     {
         EntityManager.AddComponent(entity, new(Il2CppType.Of<T>()));
+    }
+    public static void Add(this Entity entity, ComponentType componentType)
+    {
+        EntityManager.AddComponent(entity, componentType);
     }
     public static void Remove<T>(this Entity entity)
     {
@@ -420,5 +454,9 @@ internal static class Extensions
                 factionReference.FactionGuid._Value = factionPrefabGUID;
             });
         }
+    }
+    public static bool IsAllied(this Entity entity, Entity player)
+    {
+        return ServerGameManager.IsAllies(entity, player);
     }
 }

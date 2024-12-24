@@ -26,16 +26,20 @@ internal static class Classes
     static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
 
-    static readonly int _maxLevel = ConfigService.MaxLevel;
     static readonly bool _leveling = ConfigService.LevelingSystem;
 
+    static readonly int _maxLevel = ConfigService.MaxLevel;
+
     static readonly WaitForSeconds _secondDelay = new(1f);
-    static readonly WaitForSeconds _halfSecondDelay = new(0.5f);
 
     static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
 
     static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _fallenAngel = new(-76116724);
+
+    static readonly PrefabGUID _playerFaction = new(1106458752);
+
+    const float ANGEL_LIFETIME = 12f;
 
     static NativeParallelHashMap<PrefabGUID, ItemData> _itemLookup = SystemService.GameDataSystem.ItemHashLookupMap;
     static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
@@ -45,8 +49,6 @@ internal static class Classes
         ComponentType.ReadOnly(Il2CppType.Of<JewelInstance>()),
         ComponentType.ReadOnly(Il2CppType.Of<JewelLevelSource>())
     ];
-
-    static EntityQuery _jewelQuery;
 
     static readonly Dictionary<PrefabGUID, List<Entity>> _abilityJewelMap = [];
     public static List<int> GetClassBuffs(ulong steamId)
@@ -67,7 +69,7 @@ internal static class Classes
         }
         throw new Exception("Player does not have a class.");
     }
-    public static bool HandleClassChangeItem(ChatCommandContext ctx, ulong steamId)
+    public static bool HandleClassChangeItem(ChatCommandContext ctx)
     {
         PrefabGUID item = new(ConfigService.ChangeClassItem);
         int quantity = ConfigService.ChangeClassQuantity;
@@ -537,9 +539,9 @@ internal static class Classes
                     BuffSystemSpawnPatches.DeathMageMutantTriggerCounts.TryAdd(steamId, 0);
                 }
 
-                if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] < 3)
+                if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] < 2)
                 {
-                    BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] += 1; // coroutine to set chances to 0 until seen at 3 again then just set immediately back to 100% and repeat
+                    BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] += 1;
 
                     if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] == 1)
                     {
@@ -548,7 +550,7 @@ internal static class Classes
                         Core.StartCoroutine(PassiveBuffModificationWithDelayRoutine(buffEntity, 0f));
                     }
                 }
-                else if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] >= 3)
+                else if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] >= 2)
                 {
                     BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] = 0;
 
@@ -557,25 +559,11 @@ internal static class Classes
             }
         }
     }
-    public static void ModifyFallenAngelTeam(Entity buffEntity, Entity player)
+    public static void ModifyFallenAngelForDeathMage(Entity fallenAngel, Entity player)
     {
-        buffEntity.Add<AbilityTargetSource>();
-
-        buffEntity.With((ref EntityOwner entityOwner) =>
-        {
-            entityOwner.Owner = player;
-        });
-
-        buffEntity.AddWith((ref BlockHealBuff blockHealBuff) =>
-        {
-            blockHealBuff.PercentageBlocked = 1f;
-        });
-
-        buffEntity.AddWith((ref ModifyTeamBuff modifyTeamBuff) =>
-        {
-            modifyTeamBuff.Source = ModifyTeamBuffAuthoring.ModifyTeamSource.OwnerTeam;
-            modifyTeamBuff.ModificationId = ModificationIDs.Create().NewModificationId();
-        });
+        fallenAngel.SetTeam(player);
+        fallenAngel.SetFaction(_playerFaction);
+        fallenAngel.NothingLivesForever(ANGEL_LIFETIME);
     }
     static IEnumerator PassiveBuffModificationWithDelayRoutine(Entity buffEntity, float chance)
     {
@@ -589,7 +577,7 @@ internal static class Classes
     }
     public static void GenerateAbilityJewelMap()
     {
-        _jewelQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        EntityQuery jewelQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = _jewelComponents,
             Options = EntityQueryOptions.IncludeAll
@@ -597,7 +585,7 @@ internal static class Classes
 
         try
         {
-            IEnumerable<Entity> jewelEntities = Queries.GetEntitiesEnumerable(_jewelQuery);
+            IEnumerable<Entity> jewelEntities = Queries.GetEntitiesEnumerable(jewelQuery);
             foreach (Entity entity in jewelEntities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefab)) continue;
@@ -617,7 +605,7 @@ internal static class Classes
         }
         finally
         {
-            _jewelQuery.Dispose();
+            jewelQuery.Dispose();
         }
     }
     public static bool TryParseClassName(string className, out PlayerClass parsedClassType)

@@ -23,7 +23,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static NetworkIdSystem.Singleton NetworkIdSystem => SystemService.NetworkIdSystem;
 
-    const float CRAFT_THRESHOLD = 0.99f;
+    const float CRAFT_THRESHOLD = 0.975f;
     static readonly float _craftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
     static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = []; // guess I'll just start using these if in doubt about the order of operations, so to speak >_>   

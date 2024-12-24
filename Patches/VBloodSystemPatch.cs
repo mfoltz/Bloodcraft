@@ -34,6 +34,7 @@ internal static class VBloodSystemPatch
 
         DateTime now = DateTime.UtcNow;
         NativeList<VBloodConsumed> events = __instance.EventList;
+
         try
         {
             foreach (VBloodConsumed vBloodConsumed in events)

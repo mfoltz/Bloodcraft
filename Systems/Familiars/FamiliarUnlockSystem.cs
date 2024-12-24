@@ -51,7 +51,7 @@ internal static class FamiliarUnlockSystem
         { new PrefabGUID(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
     };
 
-    static readonly ConcurrentDictionary<ulong, float> _playerChanceModifiers = [];
+    public static readonly ConcurrentDictionary<ulong, float> Modifiers = [];
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         if (!_shareUnlocks) ProcessUnlock(deathEvent.Source, deathEvent.Target);
@@ -100,7 +100,7 @@ internal static class FamiliarUnlockSystem
     }
     static void HandleRoll(float dropChance, PrefabGUID targetPrefabGUID, Entity player, bool isVBlood)
     {
-        //HandleModifier(ref dropChance, player);
+        HandleModifier(ref dropChance, player);
 
         if (!isVBlood && RollForChance(dropChance)) // everyone in the vblood event system already gets their own roll, no double-dipping :p
         {
@@ -216,18 +216,20 @@ internal static class FamiliarUnlockSystem
             FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
             return true;
         }
+
         return false;
     }
     static bool RollForChance(float chance)
     {
-        float roll = (float)_random.NextDouble();
+        // float roll = (float)_random.NextDouble();
+        double roll = _random.NextDouble();
         return roll < chance;
     }
     static void HandleModifier(ref float dropChance, Entity player)
     {
         ulong steamId = player.GetSteamId();
 
-        if (_playerChanceModifiers.TryGetValue(steamId, out float modifier))
+        if (Modifiers.TryGetValue(steamId, out float modifier))
         {
             dropChance += modifier;
         }

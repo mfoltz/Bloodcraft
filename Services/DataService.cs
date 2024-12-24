@@ -15,6 +15,18 @@ using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
 namespace Bloodcraft.Services;
 internal static class DataService
 {
+    public static bool TryGetPlayerBools(this ulong steamID, out ConcurrentDictionary<string, bool> bools)
+    {
+        bools = [];
+
+        if (!_playerBools.Any()) return false;
+        else return _playerBools.TryGetValue(steamID, out bools);
+    }
+    public static void SetPlayerBools(this ulong steamID, ConcurrentDictionary<string, bool> data)
+    {
+        _playerBools[steamID] = data;
+        SavePlayerBools();
+    }
     public static bool TryGetPlayerExperience(this ulong steamID, out KeyValuePair<int, float> experience)
     {
         return _playerExperience.TryGetValue(steamID, out experience);
@@ -22,10 +34,6 @@ internal static class DataService
     public static bool TryGetPlayerRestedXP(this ulong steamID, out KeyValuePair<DateTime, float> restedXP)
     {
         return _playerRestedXP.TryGetValue(steamID, out restedXP);
-    }
-    public static bool TryGetPlayerBools(this ulong steamID, out ConcurrentDictionary<string, bool> bools)
-    {
-        return _playerBools.TryGetValue(steamID, out bools);
     }
     public static bool TryGetPlayerClasses(this ulong steamID, out Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> classes)
     {
@@ -208,11 +216,6 @@ internal static class DataService
     {
         _playerRestedXP[steamID] = data;
         SavePlayerRestedXP();
-    }
-    public static void SetPlayerBools(this ulong steamID, ConcurrentDictionary<string, bool> data)
-    {
-        _playerBools[steamID] = data;
-        SavePlayerBools();
     }
     public static void SetPlayerClasses(this ulong steamID, Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> data)
     {
@@ -432,74 +435,73 @@ internal static class DataService
     internal static class PlayerDictionaries
     {
         // exoform timestamp & cooldown
-        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> _playerExoFormData = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<DateTime, float>> _playerExoFormData = [];
 
         // leveling
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerExperience = [];
-        internal static Dictionary<ulong, KeyValuePair<DateTime, float>> _playerRestedXP = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerExperience = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<DateTime, float>> _playerRestedXP = [];
 
-        // bools
+        // old implementation of bools
         internal static ConcurrentDictionary<ulong, ConcurrentDictionary<string, bool>> _playerBools = [];
 
         // classes
-        internal static Dictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> _playerClass = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> _playerClass = [];
 
         // prestiges
-        internal static Dictionary<ulong, Dictionary<PrestigeType, int>> _playerPrestiges = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<PrestigeType, int>> _playerPrestiges = [];
 
         // professions
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWoodcutting = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerMining = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerFishing = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerBlacksmithing = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerTailoring = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerEnchanting = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerAlchemy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerHarvesting = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerWoodcutting = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerMining = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerFishing = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerBlacksmithing = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerTailoring = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerEnchanting = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerAlchemy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerHarvesting = [];
 
         // weapon expertise
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerSwordExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerAxeExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerMaceExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerSpearExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerCrossbowExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerGreatSwordExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerSlashersExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerPistolsExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerReaperExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerLongbowExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWhipExpertise = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerFishingPoleExpertise = [];
-        internal static Dictionary<ulong, Dictionary<WeaponType, List<WeaponManager.WeaponStats.WeaponStatType>>> _playerWeaponStats = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
-        internal static Dictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> _playerSpells = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerSwordExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerAxeExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerMaceExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerSpearExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerCrossbowExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerGreatSwordExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerSlashersExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerPistolsExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerReaperExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerLongbowExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerWhipExpertise = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerFishingPoleExpertise = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<WeaponType, List<WeaponManager.WeaponStats.WeaponStatType>>> _playerWeaponStats = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerUnarmedExpertise = []; // this is unarmed and needs to be renamed to match the rest
+        internal static ConcurrentDictionary<ulong, (int FirstUnarmed, int SecondUnarmed, int ClassSpell)> _playerSpells = [];
 
         // blood legacies
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWorkerLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerWarriorLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerScholarLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerRogueLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerMutantLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerVBloodLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerDraculinLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerImmortalLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerCreatureLegacy = [];
-        internal static Dictionary<ulong, KeyValuePair<int, float>> _playerBruteLegacy = [];
-        internal static Dictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> _playerBloodStats = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerWorkerLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerWarriorLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerScholarLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerRogueLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerMutantLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerVBloodLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerDraculinLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerImmortalLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerCreatureLegacy = [];
+        internal static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerBruteLegacy = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> _playerBloodStats = [];
 
         // familiar data
-        internal static Dictionary<ulong, (Entity Familiar, int FamKey)> _familiarActives = [];
-        internal static Dictionary<ulong, string> _familiarBox = [];
-        internal static Dictionary<ulong, int> _familiarDefault = [];
-        internal static Dictionary<ulong, List<int>> _playerBattleGroups = [];
+        internal static ConcurrentDictionary<ulong, (Entity Familiar, int FamKey)> _familiarActives = [];
+        internal static ConcurrentDictionary<ulong, string> _familiarBox = [];
+        internal static ConcurrentDictionary<ulong, int> _familiarDefault = [];
+        internal static ConcurrentDictionary<ulong, List<int>> _playerBattleGroups = [];
         internal static List<List<float>> _familiarBattleCoords = [];
-        internal static List<int> _familiarBattleTeams = [];
 
         // quest data
-        internal static Dictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> _playerQuests = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> _playerQuests = [];
 
         // parties
-        internal static Dictionary<ulong, HashSet<string>> _playerParties = [];
+        internal static ConcurrentDictionary<ulong, HashSet<string>> _playerParties = [];
 
         // cache-only
         //internal static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = []; // userEntities
@@ -521,7 +523,7 @@ internal static class DataService
             {"Classes", _playerClassesJson },
             {"Prestiges", _playerPrestigesJson },
             {"ExoFormData", _playerExoFormsJson },
-            {"PlayerBools", _playerBoolsJson},
+            {"PlayerBools", PlayerBoolsJson},
             {"PlayerParties", _playerPartiesJson},
             {"Woodcutting", _playerWoodcuttingJson},
             {"Mining", _playerMiningJson},
@@ -571,7 +573,7 @@ internal static class DataService
             internal static readonly string _playerPrestigesJson = Path.Combine(DirectoryPaths[1], "player_prestiges.json");
             internal static readonly string _playerExoFormsJson = Path.Combine(DirectoryPaths[1], "player_exoforms.json");
             internal static readonly string _playerClassesJson = Path.Combine(DirectoryPaths[0], "player_classes.json");
-            internal static readonly string _playerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
+            public static readonly string PlayerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
             internal static readonly string _playerPartiesJson = Path.Combine(DirectoryPaths[0], "player_parties.json");
             internal static readonly string _playerWoodcuttingJson = Path.Combine(DirectoryPaths[5], "player_woodcutting.json");
             internal static readonly string _playerMiningJson = Path.Combine(DirectoryPaths[5], "player_mining.json");
@@ -616,13 +618,12 @@ internal static class DataService
         static void LoadData<T>(ref ConcurrentDictionary<ulong, T> dataStructure, string key)
         {
             string path = _filePaths[key];
+
             if (!File.Exists(path))
             {
-                File.Create(path).Dispose();
-                dataStructure = [];
-                Core.Log.LogInfo($"{key} file created as it did not exist.");
                 return;
             }
+
             try
             {
                 string json = File.ReadAllText(path);
@@ -897,8 +898,6 @@ internal static class DataService
 
         public static void LoadFamiliarBattleGroups() => LoadData(ref _playerBattleGroups, "FamiliarBattleGroups");
 
-        public static void LoadFamiliarBattleTeams() => LoadData<List<int>>(ref _familiarBattleTeams, "FamiliarBattleTeams");
-
         public static void SavePlayerExperience() => SaveData(_playerExperience, "Experience");
 
         public static void SavePlayerRestedXP() => SaveData(_playerRestedXP, "RestedXP");
@@ -990,8 +989,48 @@ internal static class DataService
         public static void SaveFamiliarBattleCoords() => SaveData<List<float>>(_familiarBattleCoords, "FamiliarBattleCoords");
 
         public static void SaveFamiliarBattleGroups() => SaveData(_playerBattleGroups, "FamiliarBattleGroups");
+    }
+    public static class PlayerBoolsManager
+    {
+        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[0], $"{playerId}_bools.json");
+        public static void SavePlayerBools(ulong playerId, Dictionary<string, bool> preferences)
+        {
+            string filePath = GetFilePath(playerId);
 
-        public static void SaveFamiliarBattleTeams() => SaveData<List<int>>(_familiarBattleTeams, "FamiliarBattleTeams");
+            // Ensure directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonString = JsonSerializer.Serialize(preferences, options);
+
+            File.WriteAllText(filePath, jsonString);
+        }
+        public static Dictionary<string, bool> LoadPlayerBools(ulong playerId)
+        {
+            string filePath = GetFilePath(playerId);
+
+            if (!File.Exists(filePath))
+                return [];
+
+            string jsonString = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<Dictionary<string, bool>>(jsonString);
+        }
+        public static Dictionary<string, bool> GetOrInitializePlayerBools(ulong playerId, Dictionary<string, bool> defaultBools)
+        {
+            var bools = LoadPlayerBools(playerId);
+
+            // Ensure all default keys exist
+            foreach (var key in defaultBools.Keys)
+            {
+                if (!bools.ContainsKey(key))
+                {
+                    bools[key] = defaultBools[key];
+                }
+            }
+
+            SavePlayerBools(playerId, bools);
+            return bools;
+        }
     }
     internal static class FamiliarPersistence
     {
@@ -1255,8 +1294,7 @@ internal static class DataService
             LoadPlayerFamiliarActives,
             LoadPlayerFamiliarSets,
             LoadFamiliarBattleCoords,
-            LoadFamiliarBattleGroups,
-            LoadFamiliarBattleTeams
+            LoadFamiliarBattleGroups
         ];
     }
 }

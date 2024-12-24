@@ -100,12 +100,12 @@ internal static class ProfessionSystem
             PrefabGUID fish = fishDrops[index];
             if (ServerGameManager.TryAddInventoryItem(Killer, fish, bonus))
             {
-                if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
             }
             else
             {
                 InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, fish, bonus, new Entity());
-                if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
             }
         }
         else if (prefabEntity.Has<DropTableBuffer>())
@@ -134,13 +134,13 @@ internal static class ProfessionSystem
                                 if (bonus.Equals(0)) return;
                                 if (ServerGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
                                 {
-                                    if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                                    if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
                                     break;
                                 }
                                 else
                                 {
                                     InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, dropTableData.ItemGuid, bonus, new Entity());
-                                    if (Misc.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                                    if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
                                     break;
                                 }
                             }
@@ -211,13 +211,13 @@ internal static class ProfessionSystem
             if (newLevel < _maxProfessionLevel) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
         }
 
-        if (Misc.GetPlayerBool(steamID, "ProfessionLogging"))
+        if (Misc.PlayerBoolsManager.GetPlayerBool(steamID, "ProfessionLogging"))
         {
             int levelProgress = GetLevelProgress(steamID, handler);
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
         }
 
-        if (Misc.GetPlayerBool(steamID, "ScrollingText"))
+        if (Misc.PlayerBoolsManager.GetPlayerBool(steamID, "ScrollingText"))
         {
             float3 targetPosition = target.ReadRO<Translation>().Value;
             float3 professionColor = handler.GetProfessionColor();

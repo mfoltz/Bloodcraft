@@ -8,6 +8,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Commands;
 
@@ -28,8 +29,8 @@ internal static class QuestCommands
 
         var steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "QuestLogging");
-        LocalizationService.HandleReply(ctx, $"Quest logging is now {(Misc.GetPlayerBool(steamId, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, "QuestLogging");
+        LocalizationService.HandleReply(ctx, $"Quest logging is now {(GetPlayerBool(steamId, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "progress", shortHand: "p", adminOnly: false, usage: ".quest p [QuestType]", description: "Display your current quest progress.")]

@@ -7,6 +7,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Utilities.Progression;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem
@@ -309,7 +310,7 @@ internal static class BloodSystem
         }
 
         // Reminders and stat choices
-        if (Misc.GetPlayerBool(steamID, "Reminders"))
+        if (GetPlayerBool(steamID, "Reminders"))
         {
             if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
             {
@@ -336,7 +337,7 @@ internal static class BloodSystem
             HandleBloodLevelUp(user, bloodType, newLevel, steamID);
         }
         else if (newLevel >= _maxBloodLevel) return;
-        else if (Misc.GetPlayerBool(steamID, "BloodLogging"))
+        else if (GetPlayerBool(steamID, "BloodLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");

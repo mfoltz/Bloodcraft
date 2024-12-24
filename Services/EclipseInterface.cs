@@ -5,11 +5,22 @@ using ProjectM.Network;
 using System.Globalization;
 using System.Text;
 using Unity.Entities;
+using static Bloodcraft.Services.EclipseInterface;
 using static Bloodcraft.Services.EclipseService;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 
 namespace Bloodcraft.Services;
+public class EclipseInterface
+{
+    public static int MaxLevel => ConfigService.MaxLevel;
+    public static int MaxLegacyLevel => ConfigService.MaxBloodLevel;
+    public static int MaxExpertiseLevel => ConfigService.MaxExpertiseLevel;
+    public static int MaxFamiliarLevel => ConfigService.MaxFamiliarLevel;
+    public static int MaxProfessionLevel => ConfigService.MaxProfessionLevel;
+    public static float PrestigeStatMultiplier => ConfigService.PrestigeStatMultiplier;
+    public static float ClassStatMultiplier => ConfigService.StatSynergyMultiplier;
+}
 public interface IVersionHandler<TProgressData>
 {
     void SendClientConfig(User user);
@@ -19,14 +30,12 @@ public interface IVersionHandler<TProgressData>
 }
 public static class VersionHandler
 {
-    // Dictionary to store version handlers
     public static readonly Dictionary<string, object> VersionHandlers = new()
     {
-        { "1.1.2", new VersionHandler_1_1_2() }, // legacy version, took me too long to realize true legacy versions won't send their version to the server :P
+        { "1.1.2", new VersionHandler_1_1_2() },
         { "1.2.2", new VersionHandler_1_2_2() }
     };
 
-    // Generic method to retrieve the handler for a specific version
 #nullable enable
     public static IVersionHandler<TProgressData>? GetHandler<TProgressData>(string version)
     {

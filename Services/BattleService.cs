@@ -6,6 +6,7 @@ using ProjectM;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Reflection;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -14,6 +15,7 @@ using static Bloodcraft.Patches.SpawnTransformSystemOnSpawnPatch;
 using static Bloodcraft.Services.BattleService.Matchmaker;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Services;
 internal class BattleService
@@ -59,6 +61,13 @@ internal class BattleService
     static DateTime _matchPendingStart;
     static bool _serviceActive = false;
     static bool _matchPending = false;
+
+    // Sanguis reflection
+    public static bool _awardSanguis = false;
+    public static int _tokensTransferred;
+    public static PropertyInfo _tokensProperty;
+    public static MethodInfo _saveTokens;
+    public static Dictionary<ulong, (int Tokens, (DateTime Start, DateTime DailyLogin) TimeData)> _playerTokens;
     public BattleService()
     {
         Initialize();
@@ -75,7 +84,7 @@ internal class BattleService
             _sCTPosition = new(battlePosition.x, battlePosition.y + SCT_HEIGHT, battlePosition.z);
 
             GenerateBattleFormations(battlePosition);
-            Core.StartCoroutine(BattleRoutine());
+            Core.StartCoroutine(BattleUpdateRoutine());
 
             _serviceActive = true;
 
@@ -116,9 +125,7 @@ internal class BattleService
         public static readonly HashSet<(ulong, ulong)> MatchPairs = [];
         public static readonly HashSet<ulong> QueuedPlayers = [];
         public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> QueuedBattleGroups = new();
-        public static readonly List<(ulong, ulong)> CancelledPairs = []; // list to handle multiple cancels
-
-        // Add a pair of players to the queue if eligible
+        public static readonly ConcurrentList<(ulong, ulong)> CancelledPairs = []; // list to handle multiple cancels
         public static void QueueMatch((ulong, ulong) match)
         {
             ulong playerOne = match.Item1;
@@ -131,20 +138,16 @@ internal class BattleService
             }
             else if (!VerifyEligible(playerOne, playerTwo)) return;
 
-            // Block both players
             QueuedPlayers.Add(playerOne);
             QueuedPlayers.Add(playerTwo);
 
-            // Add to match queue
             (ulong, ulong) matchPair = new(playerOne, playerTwo);
             MatchQueue.Enqueue(matchPair);
             MatchPairs.Add(matchPair);
 
-            // Get position in queue and time remaining
             var (position, timeRemaining) = GetQueuePositionAndTime(playerOne);
-
-            // Inform players
             string message = $"Queued successfully! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)";
+
             NotifyBothPlayers(playerOne, playerTwo, message);
         }
 
@@ -181,10 +184,26 @@ internal class BattleService
                 string formattedLoserName = $"<color=#808080>{loserNameWithSuffix}</color>";
 
                 NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
+
+                /*
+                if (_awardSanguis)
+                {
+                    try
+                    {
+                        TransferTokensAndSave(winnerInfo.User.PlatformId, loserInfo.User.PlatformId, _tokensTransferred);
+                        NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogError($"Error transferring tokens and saving - {ex}");
+                    }
+                }
+                else
+                {
+                }
+                */
             }
         }
-
-        // Match end via timeout
         public static void HandleMatchTimeout((ulong, ulong) matchPair)
         {
             QueuedPlayers.Remove(matchPair.Item1);
@@ -211,7 +230,7 @@ internal class BattleService
                     string loserName = loserInfo.User.CharacterName.Value;
                     string formattedLoserName = $"<color=#808080>{loserName}</color>";
 
-                    NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} has the fewest familiars remaining! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
+                    NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} has the least familiars remaining! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
                 }
                 else
                 {
@@ -232,7 +251,7 @@ internal class BattleService
             }
         }
     }
-    static IEnumerator BattleRoutine()
+    static IEnumerator BattleUpdateRoutine()
     {
         while (true)
         {
@@ -286,77 +305,9 @@ internal class BattleService
                 Core.Log.LogInfo("No pending matches in queue...");
                 _matchPending = false;
             }
-
-            /*
-            if (MatchQueue.TryDequeue(out var match))
-            {
-                Core.Log.LogInfo("Starting match from queue...");
-
-                // Check if the match is in the cancelled pairs
-                if (CancelledPairs.Contains(match))
-                {
-                    // Skip this match
-                    CancelledPairs.Remove(match);
-                }
-                else
-                {
-                    ulong playerOne = match.Item1;
-                    ulong playerTwo = match.Item2;
-
-                    // Validate the players
-                    if (playerOne.TryGetPlayerInfo(out PlayerInfo playerOneInfo) &&
-                        playerTwo.TryGetPlayerInfo(out PlayerInfo playerTwoInfo))
-                    {
-                        // Found a valid match
-                        Core.Log.LogInfo("PlayerInfo acquired, invoking HandleBattleSummoning...");
-
-                        SetRotation.Add(playerTwo);
-                        HandleBattleSummoning(playerOneInfo, playerTwoInfo, playerOne, playerTwo);
-                        _matchPending = false;
-                    }
-                }
-            }
-            else
-            {
-                Core.Log.LogInfo("No pending matches in queue...");
-                _matchPending = false;
-            }
-            */
         }
     }
-    static void HandleBattleSummoning(PlayerInfo playerOneInfo, PlayerInfo playerTwoInfo, ulong playerOne, ulong playerTwo)
-    {
-        if (QueuedBattleGroups.TryRemove(playerOne, out var battleGroupOne) && QueuedBattleGroups.TryRemove(playerTwo, out var battleGroupTwo))
-        {
-            Core.Log.LogInfo("Battle groups popped, invoking BattleSummoningRoutine...");
-
-            PlayerFamiliarBattleGroups[playerOne] = battleGroupOne;
-            PlayerFamiliarBattleGroups[playerTwo] = battleGroupTwo;
-
-            PlayerSummoningForBattle[playerOne] = true;
-            PlayerSummoningForBattle[playerTwo] = true;
-
-            Core.StartCoroutine(BattleSummoningRoutine(playerOneInfo.CharEntity, playerOneInfo.UserEntity,
-                playerTwoInfo.CharEntity, playerTwoInfo.UserEntity,
-                new(battleGroupOne), new(battleGroupTwo)));
-        }
-        else
-        {
-            Core.Log.LogInfo("Couldn't pop battle groups for one or both players...");
-        }
-    }
-    static IEnumerator BattleSummoningRoutine(Entity playerOne, Entity playerUserOne, Entity playerTwo, Entity playerUserTwo,
-        List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
-    {
-        for (int i = 0; i < TEAM_SIZE; i++)
-        {
-            FamiliarSummonSystem.SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i]);
-            FamiliarSummonSystem.SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i]);
-
-            yield return null;
-        }
-    }
-    public static IEnumerator BattleStartCountdown((ulong playerOne, ulong playerTwo) matchPair)
+    public static IEnumerator BattleCountdownRoutine((ulong playerOne, ulong playerTwo) matchPair)
     {
         if (!matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
         {
@@ -375,7 +326,8 @@ internal class BattleService
 
         while (countdown > 0f)
         {
-            EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(); // okay to use same commandBuffer if operations happen in the same frame (I think >_>)
+            // EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(); // okay to use same commandBuffer if operations happen in the same frame (I think >_>)
+
             foreach (PlayerInfo player in onlineNearbyPlayers)
             {
                 ScrollingCombatTextMessage.Create(
@@ -400,6 +352,17 @@ internal class BattleService
 
         Core.StartCoroutine(MatchTimeoutRoutine(matchPair));
     }
+    static IEnumerator BattleSummoningRoutine(Entity playerOne, Entity playerUserOne, Entity playerTwo, Entity playerUserTwo,
+    List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
+    {
+        for (int i = 0; i < TEAM_SIZE; i++)
+        {
+            FamiliarSummonSystem.SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i]);
+            FamiliarSummonSystem.SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i]);
+
+            yield return null;
+        }
+    }
     public static IEnumerator MatchTimeoutRoutine((ulong, ulong) matchPair)
     {
         yield return _timeoutDelay;
@@ -415,7 +378,7 @@ internal class BattleService
             HandleMatchTimeout(matchPair);
         }
     }
-    public static IEnumerator ChallengeExpirationRoutine((ulong, ulong) matchPair)
+    public static IEnumerator ChallengeExpiredRoutine((ulong, ulong) matchPair)
     {
         yield return _challengeExpiration;
 
@@ -423,6 +386,27 @@ internal class BattleService
         {
             EmoteSystemPatch.BattleChallenges.Remove(matchPair);
             NotifyBothPlayers(matchPair.Item1, matchPair.Item2, "Challenge expired...");
+        }
+    }
+    static void HandleBattleSummoning(PlayerInfo playerOneInfo, PlayerInfo playerTwoInfo, ulong playerOne, ulong playerTwo)
+    {
+        if (QueuedBattleGroups.TryRemove(playerOne, out var battleGroupOne) && QueuedBattleGroups.TryRemove(playerTwo, out var battleGroupTwo))
+        {
+            Core.Log.LogInfo("Battle groups popped, invoking BattleSummoningRoutine...");
+
+            PlayerFamiliarBattleGroups[playerOne] = battleGroupOne;
+            PlayerFamiliarBattleGroups[playerTwo] = battleGroupTwo;
+
+            PlayerSummoningForBattle[playerOne] = true;
+            PlayerSummoningForBattle[playerTwo] = true;
+
+            Core.StartCoroutine(BattleSummoningRoutine(playerOneInfo.CharEntity, playerOneInfo.UserEntity,
+                playerTwoInfo.CharEntity, playerTwoInfo.UserEntity,
+                new(battleGroupOne), new(battleGroupTwo)));
+        }
+        else
+        {
+            Core.Log.LogInfo("Couldn't pop battle groups for one or both players...");
         }
     }
     static bool VerifyEligible(ulong playerOne, ulong playerTwo)
@@ -533,7 +517,7 @@ internal class BattleService
                 }
 
                 // Additional wait time based on position in queue
-                TimeSpan additionalWaitTime = TimeSpan.FromSeconds((index) * BATTLE_INTERVAL);
+                TimeSpan additionalWaitTime = TimeSpan.FromSeconds((index - 1) * BATTLE_INTERVAL);
                 TimeSpan totalTimeRemaining = currentLoopRemaining + additionalWaitTime;
 
                 return (index, totalTimeRemaining);
@@ -609,6 +593,19 @@ internal class BattleService
             // Calculate positions for Team Two
             float3 positionTwo = battleCenter + new float3((column - 1) * UNIT_SPACING, 0, TEAM_DISTANCE);
             PlayerTwoFamiliarPositions.Add(positionTwo);
+        }
+    }
+    static void TransferTokensAndSave(ulong winner, ulong loser, int amount)
+    {
+        var playerTokens = (Dictionary<ulong, (int, (DateTime, DateTime))>)_tokensProperty.GetValue(null);
+
+        if (playerTokens.TryGetValue(winner, out var winnerTokens) && playerTokens.TryGetValue(loser, out var loserTokens))
+        {
+            winnerTokens.Item1 += amount;
+            loserTokens.Item1 -= amount;
+
+            _saveTokens.Invoke(null, null);
+            Core.Log.LogInfo($"Sanguis awarded after battle: {amount} from {loser} to {winner}");
         }
     }
 }

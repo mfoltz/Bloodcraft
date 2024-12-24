@@ -2,8 +2,10 @@ using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM.Network;
 using System.Collections;
+using System.Collections.Concurrent;
 using Unity.Entities;
 using UnityEngine;
+using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Services;
 internal class PlayerService // this is basically a worse version of the PlayerService from KindredCommands, if you're here looking for good examples to follow :p
@@ -19,8 +21,10 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 
     static EntityQuery _userQuery;
 
-    public static readonly Dictionary<ulong, PlayerInfo> PlayerCache = [];
-    public static readonly Dictionary<ulong, PlayerInfo> OnlineCache = [];
+    public static readonly ConcurrentDictionary<ulong, PlayerInfo> PlayerCache = [];
+    public static readonly ConcurrentDictionary<ulong, PlayerInfo> OnlineCache = [];
+
+    static bool _migrated = false;
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -67,6 +71,27 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                         OnlineCache[kvp.Key] = kvp.Value;
                     }
                 });
+
+            if (!_migrated)
+            {
+                List<PlayerInfo> playerCache = new(PlayerCache.Values);
+
+                foreach (PlayerInfo playerInfo in playerCache)
+                {
+                    ulong steamId = playerInfo.User.PlatformId;
+
+                    if (PlayerBoolsManager.TryMigrateBools(steamId))
+                    {
+                        Core.Log.LogInfo($"Migrated player bools for {playerInfo.User.CharacterName.Value}! (should only happen once per player)");
+                    }
+                    else
+                    {
+                        Core.Log.LogInfo($"No bools to migrate for {playerInfo.User.CharacterName.Value}! (already migrated or didn't have bools data before now)");
+                    }
+                }
+
+                _migrated = true;
+            }
 
             yield return _delay;
         }

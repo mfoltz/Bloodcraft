@@ -5,6 +5,7 @@ using Stunlock.Core;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities.Progression;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Commands;
 
@@ -22,8 +23,8 @@ internal static class ProfessionCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "ProfessionLogging");
-        LocalizationService.HandleReply(ctx, $"Profession logging is now {(Misc.GetPlayerBool(steamId, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, "ProfessionLogging");
+        LocalizationService.HandleReply(ctx, $"Profession logging is now {(GetPlayerBool(steamId, "ProfessionLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".prof get [Profession]", description: "Display your current profession progress.")]

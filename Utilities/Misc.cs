@@ -1,8 +1,10 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -14,29 +16,192 @@ internal static class Misc
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly float _shareDistance = ConfigService.ExpShareDistance;
-
     static readonly bool _parties = ConfigService.PlayerParties;
 
+    static readonly float _shareDistance = ConfigService.ExpShareDistance;
+
     static readonly PrefabGUID _draculaVBlood = new(-327335305);
-    public static bool GetPlayerBool(ulong steamId, string boolKey) // changed some default values in playerBools a while ago such that trues returned here are more easily/correctly interpreted, may need to revisit later <--- >_>
+    public class ConcurrentList<T> : IEnumerable<T>
     {
-        return steamId.TryGetPlayerBools(out var bools) && bools[boolKey];
-    }
-    public static void SetPlayerBool(ulong steamId, string boolKey, bool value)
-    {
-        if (steamId.TryGetPlayerBools(out var bools))
+        readonly List<T> _list = [];
+        readonly object _lock = new();
+        public void Add(T item)
         {
-            bools[boolKey] = value;
-            steamId.SetPlayerBools(bools);
+            lock (_lock)
+            {
+                _list.Add(item);
+            }
+        }
+        public void Remove(T item)
+        {
+            lock (_lock)
+            {
+                _list.Remove(item);
+            }
+        }
+        public bool Contains(T item)
+        {
+            lock (_lock)
+            {
+                return _list.Contains(item);
+            }
+        }
+        public IEnumerator<T> GetEnumerator()
+        {
+            lock (_lock)
+            {
+                return _list.ToList().GetEnumerator(); // Create a copy to avoid threading issues
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+        public bool Any(Func<T, bool> predicate)
+        {
+            lock (_lock)
+            {
+                return _list.Any(predicate);
+            }
+        }
+        public List<T> ToList()
+        {
+            lock (_lock)
+            {
+                return new List<T>(_list);
+            }
         }
     }
-    public static void TogglePlayerBool(ulong steamId, string boolKey)
+    public static class PlayerBoolsManager
     {
-        if (steamId.TryGetPlayerBools(out var bools))
+        public static readonly Dictionary<string, bool> DefaultBools = new()
         {
-            bools[boolKey] = !bools[boolKey];
-            steamId.SetPlayerBools(bools);
+            ["ExperienceLogging"] = false,
+            ["QuestLogging"] = true,
+            ["ProfessionLogging"] = false,
+            ["ExpertiseLogging"] = false,
+            ["BloodLogging"] = false,
+            ["FamiliarLogging"] = false,
+            ["SpellLock"] = false,
+            ["ShiftLock"] = false,
+            ["Grouping"] = false,
+            ["Emotes"] = false,
+            // ["Binding"] = false, using dictionary in patch with paired ulong and prefabGUID then removing after matching probably makes more sense than using bool here
+            ["Kit"] = false,
+            ["VBloodEmotes"] = true,
+            ["FamiliarVisual"] = true,
+            ["ShinyChoice"] = false,
+            ["Reminders"] = true,
+            ["ScrollingText"] = true,
+            ["ExoForm"] = false,
+            ["Shroud"] = true
+        };
+        public static bool GetPlayerBool(ulong steamId, string boolKey)
+        {
+            // Load player preferences
+            var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
+
+            // Check if the key exists
+            if (bools.TryGetValue(boolKey, out bool value))
+            {
+                return value;
+            }
+
+            // If key doesn't exist, use the default value
+            if (DefaultBools.TryGetValue(boolKey, out bool defaultValue))
+            {
+                // Optionally, add the default key to the player's file
+                bools[boolKey] = defaultValue;
+                DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
+
+                return defaultValue;
+            }
+
+            // Return false if key is completely unknown
+            return false;
+        }
+
+        public static void SetPlayerBool(ulong steamId, string boolKey, bool value)
+        {
+            var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
+
+            // Update the value
+            bools[boolKey] = value;
+
+            // Save back to file
+            DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
+        }
+
+        public static void TogglePlayerBool(ulong steamId, string boolKey)
+        {
+            var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
+
+            // Toggle the value if the key exists
+            if (bools.ContainsKey(boolKey))
+            {
+                bools[boolKey] = !bools[boolKey];
+            }
+            else
+            {
+                // If key doesn't exist, initialize it with default (or true)
+                bools[boolKey] = !DefaultBools.TryGetValue(boolKey, out var defaultValue) || !defaultValue;
+            }
+
+            // Save back to file
+            DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
+        }
+
+        public static bool TryGetPlayerBool(ulong steamId, string boolKey, out bool value)
+        {
+            var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
+
+            // Attempt to get the value
+            if (bools.TryGetValue(boolKey, out value))
+            {
+                return true;
+            }
+
+            // Use default if available
+            if (DefaultBools.TryGetValue(boolKey, out var defaultValue))
+            {
+                value = defaultValue;
+
+                // Optionally, update the player's preferences
+                bools[boolKey] = defaultValue;
+                DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
+
+                return true;
+            }
+
+            // Key doesn't exist
+            value = false;
+            return false;
+        }
+        public static bool TryMigrateBools(ulong steamId)
+        {
+            var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
+
+            if (DataService.PlayerDictionaries._playerBools.TryRemove(steamId, out var oldBools))
+            {
+                foreach (string boolKey in oldBools.Keys)
+                {
+                    if (bools.ContainsKey(boolKey)) bools[boolKey] = oldBools[boolKey];
+                }
+
+                DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
+
+                return true;
+            }
+
+            if (!DataService.PlayerDictionaries._playerBools.Any())
+            {
+                if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
+                {
+                    File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
+                }
+            }
+
+            return false;
         }
     }
     public static HashSet<Entity> GetDeathParticipants(Entity source)
@@ -131,11 +296,24 @@ internal static class Misc
             BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
         }
     }
-    
-    public static void CreatePlayerUnlockChanceModifiers(Entity userEntity)
-    {
-        UserStats userStats = userEntity.ReadRO<UserStats>();
-
-    }
     */
+    public static void InitializeChanceModifiers()
+    {
+        List<PlayerInfo> playerInfos = new(PlayerCache.Values);
+
+        foreach (PlayerInfo playerInfo in playerInfos)
+        {
+            if (playerInfo.UserEntity.TryGetComponent(out UserStats userStats))
+            {
+                int vBloodKills = userStats.VBloodKills;
+
+                FamiliarUnlockSystem.Modifiers[playerInfo.User.PlatformId] = CalculateBonusChance(vBloodKills);
+            }
+        }
+    }
+    static float CalculateBonusChance(int vBloodKills)
+    {
+        // WIP
+        return 0f;
+    }
 }

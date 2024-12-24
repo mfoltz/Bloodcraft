@@ -8,15 +8,13 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
-using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
-using Unity.Collections;
+using System.Reflection;
 using Unity.Entities;
 using UnityEngine;
 
@@ -46,11 +44,17 @@ internal static class Core
         new PrefabGUID(-1435372081)  // SolarusReturnBuff
     ];
 
-    static readonly PrefabGUID _spawnMutantBiteBuff = new(-651661301);
     static readonly PrefabGUID _fallenAngel = new(-76116724);
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
 
-    const float DIRECTION_DURATION = 6f;
+    const float DIRECTION_DURATION = 6f; // for making familiars for player two face correct direction until battle starts
+
+    const string SANGUIS = "Sanguis";
+    const string SANGUIS_DATA_CLASS = "Sanguis.Core+DataStructures";
+    const string SANGUIS_DATA_PROPERTY = "PlayerTokens";
+    const string SANGUIS_CONFIG_CLASS = "Sanguis.Plugin";
+    const string SANGUIS_CONFIG_PROPERTY = "TokensPerMinute";
+    const string SANGUIS_SAVE_METHOD = "SavePlayerTokens";
     public static byte[] OLD_SHARED_KEY { get; internal set; }
     public static byte[] NEW_SHARED_KEY { get; internal set; }
 
@@ -63,7 +67,7 @@ internal static class Core
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         _ = new PlayerService();
-        //_ = new LocalizationService();
+        _ = new LocalizationService();
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
 
@@ -86,27 +90,15 @@ internal static class Core
         }
         if (ConfigService.FamiliarSystem)
         {
-            _ = new BattleService();
             Configuration.FamiliarBans();
             if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
+            //DetectSanguis(); want to nail the fun factor and make sure no glaring bugs before adding stakes
+            Misc.InitializeChanceModifiers();
+            _ = new BattleService();
         }
 
         ModifyBuffPrefabs();
-
-        try
-        {
-            //LogEntities();
-            //LogWorlds();
-            //LogActiveServerSystems();
-            //LogAllServerSystems();
-            //LogSCTEntities();
-            //LogDealDamageOnGameplayEvents();
-        }
-        catch (Exception ex)
-        {
-            Log.LogError($"Error during Core logging: {ex}");
-        }
 
         _initialized = true;
     }
@@ -159,6 +151,7 @@ internal static class Core
 
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
+            /*
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_spawnMutantBiteBuff, out Entity spawnMutantBiteBuffPrefab))
             {
                 spawnMutantBiteBuffPrefab.With((ref LifeTime lifeTime) =>
@@ -166,6 +159,7 @@ internal static class Core
                     lifeTime.Duration = 10f;
                 });
             }
+            */
 
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fallenAngel, out Entity fallenAngelPrefab))
             {
@@ -173,8 +167,66 @@ internal static class Core
             }
         }
     }
+    static void DetectSanguis()
+    {
+        try
+        {
+            Assembly sanguis = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name == SANGUIS);
 
-    static readonly PrefabGUID _sCTPrefab = new(-1661525964);
+            if (sanguis != null)
+            {
+                Type config = sanguis.GetType(SANGUIS_CONFIG_CLASS);
+                Type data = sanguis.GetType(SANGUIS_DATA_CLASS);
+
+                if (config != null && data != null)
+                {
+                    PropertyInfo configProperty = config.GetProperty(SANGUIS_CONFIG_PROPERTY, BindingFlags.Static | BindingFlags.Public);
+                    PropertyInfo dataProperty = data.GetProperty(SANGUIS_DATA_PROPERTY, BindingFlags.Static | BindingFlags.Public);
+
+                    if (configProperty != null && dataProperty != null)
+                    {
+                        MethodInfo saveTokens = data.GetMethod(SANGUIS_SAVE_METHOD, BindingFlags.Static | BindingFlags.Public);
+                        Dictionary<ulong, (int Tokens, (DateTime Start, DateTime DailyLogin) TimeData)> playerTokens = (Dictionary<ulong, (int, (DateTime, DateTime))>)(dataProperty?.GetValue(null) ?? new());
+                        int tokensTransferred = (int)(configProperty?.GetValue(null) ?? 0);
+
+                        if (saveTokens != null && playerTokens.Any() && tokensTransferred > 0)
+                        {
+                            BattleService._awardSanguis = true;
+                            BattleService._tokensProperty = dataProperty;
+                            BattleService._tokensTransferred = tokensTransferred;
+                            BattleService._saveTokens = saveTokens;
+                            BattleService._playerTokens = playerTokens;
+
+                            Log.LogInfo($"{SANGUIS} registered for familiar battle rewards!");
+                        }
+                        else
+                        {
+                            Log.LogWarning($"Couldn't get {SANGUIS_SAVE_METHOD} | {SANGUIS_CONFIG_PROPERTY} from {SANGUIS}!");
+                        }
+                    }
+                    else
+                    {
+                        Log.LogWarning($"Couldn't get {SANGUIS_DATA_PROPERTY} | {SANGUIS_CONFIG_PROPERTY} from {SANGUIS}!");
+                    }
+                }
+                else
+                {
+                    Log.LogWarning($"Couldn't get {SANGUIS_DATA_CLASS} | {SANGUIS_CONFIG_CLASS} from {SANGUIS}!");
+                }
+            }
+            else
+            {
+                Log.LogInfo($"{SANGUIS} not registered for familiar battle rewards!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Error during {SANGUIS} registration: {ex.Message}");
+        }
+    }
+
+    /*
+    static readonly PrefabGUID _sctPrefab = new(-1661525964);
 
     static readonly ComponentType[] _prefabGUIDComponent =
     [
@@ -202,7 +254,7 @@ internal static class Core
             {
                 if (entity.Exists())
                 {
-                    PrefabClonerFactory.EntityComponentLogger.LogEntityDetails(Server, entity);
+                    //PrefabClonerFactory.EntityComponentLogger.LogEntityDetails(Server, entity);
                 }
             }
         }
@@ -361,7 +413,7 @@ internal static class Core
             {
                 if (!entity.Has<SpawnTag>() && entity.TryGetComponent(out PrefabGUID prefabGUID))
                 {
-                    if (prefabGUID.Equals(_sCTPrefab) && entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatTextMessage))
+                    if (prefabGUID.Equals(_sctPrefab) && entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatTextMessage))
                     {
                         Entity target = scrollingCombatTextMessage.Target.GetEntityOnServer();
                         PrefabGUID prefabSCT = scrollingCombatTextMessage.Type; // SCT prefab type
@@ -455,4 +507,5 @@ internal static class Core
             dealDamageOnGameplayEventQuery.Dispose();
         }
     }
+    */
 }

@@ -4,8 +4,13 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
 
@@ -13,6 +18,8 @@ namespace Bloodcraft.Systems.Leveling;
 internal static class LevelingSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
@@ -32,8 +39,14 @@ internal static class LevelingSystem
 
     static readonly float _levelingPrestigeReducer = ConfigService.LevelingPrestigeReducer;
 
+    static readonly WaitForSeconds _delay = new(0.75f);
+
     static readonly PrefabGUID _levelUpBuff = new(-1133938228);
     static readonly PrefabGUID _warEventTrash = new(2090187901);
+
+    static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
+    static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
+    static readonly PrefabGUID _familiarSCT = new(1876501183); // SCT resource gain prefabguid, good visibility
     public enum PlayerClass
     {
         BloodKnight,
@@ -248,14 +261,15 @@ internal static class LevelingSystem
                     $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
 
-            if (Misc.GetPlayerBool(steamId, "Reminders") && _classes && !Utilities.Classes.HasClass(steamId))
+            if (GetPlayerBool(steamId, "Reminders") && _classes && !Utilities.Classes.HasClass(steamId))
             {
                 LocalizationService.HandleServerReply(EntityManager, user,
                     $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
             }
         }
         else if (newLevel >= _maxPlayerLevel) return;
-        else if (Misc.GetPlayerBool(steamId, "ExperienceLogging"))
+
+        if (GetPlayerBool(steamId, "ExperienceLogging"))
         {
             int levelProgress = GetLevelProgress(steamId);
             string message = restedXP > 0
@@ -264,6 +278,19 @@ internal static class LevelingSystem
 
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
+
+        if (GetPlayerBool(steamId, "ScrollingText"))
+        {
+            float3 targetPosition = character.ReadRO<Translation>().Value;
+
+            Core.StartCoroutine(DelayedPlayerSCT(player, player.GetUserEntity(), targetPosition, _gold, gainedXP));
+        }
+    }
+    static IEnumerator DelayedPlayerSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    {
+        yield return _delay;
+
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _familiarSCT, userEntity);
     }
     static float GetXp(ulong steamId)
     {

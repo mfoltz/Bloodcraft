@@ -1,11 +1,11 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Expertise;
@@ -293,7 +293,7 @@ internal static class WeaponSystem
             HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
         }
         else if (newLevel >= _maxExpertiseLevel) return;
-        else if (Misc.GetPlayerBool(steamID, "ExpertiseLogging"))
+        else if (GetPlayerBool(steamID, "ExpertiseLogging"))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
@@ -339,7 +339,7 @@ internal static class WeaponSystem
                 $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
         }
 
-        if (Misc.GetPlayerBool(steamID, "Reminders"))
+        if (GetPlayerBool(steamID, "Reminders"))
         {
             if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {

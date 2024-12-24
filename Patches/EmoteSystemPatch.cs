@@ -8,6 +8,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
@@ -76,7 +77,7 @@ internal static class EmoteSystemPatch
                 Entity character = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
-                if (useEmoteEvent.Action.Equals(_tauntEmote) && Misc.GetPlayerBool(steamId, "ExoForm"))
+                if (useEmoteEvent.Action.Equals(_tauntEmote) && GetPlayerBool(steamId, "ExoForm"))
                 {
                     if (!character.HasBuff(_exoFormBuff))
                     {
@@ -99,7 +100,7 @@ internal static class EmoteSystemPatch
                 {
                     if (_matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
                 }
-                else if (Misc.GetPlayerBool(steamId, "Emotes"))
+                else if (GetPlayerBool(steamId, "Emotes"))
                 {
                     if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {

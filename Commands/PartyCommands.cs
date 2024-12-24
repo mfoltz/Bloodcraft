@@ -1,8 +1,8 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.PartyUtilities;
 
 namespace Bloodcraft.Commands;
@@ -29,8 +29,8 @@ internal static class PartyCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "Grouping");
-        LocalizationService.HandleReply(ctx, $"Party invites {(Misc.GetPlayerBool(steamId, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, "Grouping");
+        LocalizationService.HandleReply(ctx, $"Party invites {(GetPlayerBool(steamId, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]
@@ -96,7 +96,7 @@ internal static class PartyCommands
             return;
         }
 
-        _playerParties.Remove(ownerId);
+        _playerParties.TryRemove(ownerId, out _);
         SavePlayerParties();
         LocalizationService.HandleReply(ctx, "Party disbanded.");
     }
@@ -148,7 +148,7 @@ internal static class PartyCommands
         // Check if the player owns a party and disband it
         if (_playerParties.ContainsKey(steamId))
         {
-            _playerParties.Remove(steamId);
+            _playerParties.TryRemove(steamId, out _);
             SavePlayerParties();
             ownedParty = true;
         }

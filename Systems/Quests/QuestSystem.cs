@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -14,6 +13,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using Match = System.Text.RegularExpressions.Match;
 using Random = System.Random;
@@ -815,7 +815,7 @@ internal static class QuestSystem
 
         yield return _questMessageDelay;
 
-        if (Misc.GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
+        if (GetPlayerBool(steamId, "QuestLogging") && !quest.Value.Objective.Complete)
         {
             string message = $"Progress added to {colorType}: <color=green>{quest.Value.Objective.Goal}</color> " +
                              $"<color=white>{quest.Value.Objective.Target.GetLocalizedName()}</color> " +

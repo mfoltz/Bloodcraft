@@ -8,6 +8,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -33,8 +34,8 @@ internal static class MiscCommands
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "Reminders");
-        LocalizationService.HandleReply(ctx, $"Reminders {(Misc.GetPlayerBool(steamId, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, "Reminders");
+        LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(steamId, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "sct", adminOnly: false, usage: ".sct", description: "Toggles scrolling text.")]
@@ -42,8 +43,8 @@ internal static class MiscCommands
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
-        Misc.TogglePlayerBool(steamId, "ScrollingText");
-        LocalizationService.HandleReply(ctx, $"ScrollingText {(Misc.GetPlayerBool(steamId, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, "ScrollingText");
+        LocalizationService.HandleReply(ctx, $"ScrollingText {(GetPlayerBool(steamId, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -57,9 +58,9 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!Misc.GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
+        if (!GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
         {
-            Misc.SetPlayerBool(steamId, "Kit", true);
+            SetPlayerBool(steamId, "Kit", true);
             Entity character = ctx.Event.SenderCharacterEntity;
 
             foreach (var item in StarterKitItemPrefabGUIDs)
@@ -118,9 +119,9 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        Misc.TogglePlayerBool(SteamID, "SpellLock");
+        TogglePlayerBool(SteamID, "SpellLock");
 
-        if (Misc.GetPlayerBool(SteamID, "SpellLock"))
+        if (GetPlayerBool(SteamID, "SpellLock"))
         {
             LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
         }
@@ -155,8 +156,8 @@ internal static class MiscCommands
             return;
         }
 
-        Misc.TogglePlayerBool(steamId, "ShiftLock");
-        if (Misc.GetPlayerBool(steamId, "ShiftLock"))
+        TogglePlayerBool(steamId, "ShiftLock");
+        if (GetPlayerBool(steamId, "ShiftLock"))
         {
             if (steamId.TryGetPlayerSpells(out var spellsData))
             {
@@ -237,8 +238,8 @@ internal static class MiscCommands
                 return;
             }
 
-            Misc.TogglePlayerBool(steamId, "ExoForm");
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(Misc.GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
+            TogglePlayerBool(steamId, "ExoForm");
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
         }
         else
         {
