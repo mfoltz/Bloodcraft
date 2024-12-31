@@ -7,6 +7,7 @@ using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using Unity.Entities;
 using UnityEngine;
@@ -44,7 +45,7 @@ internal class EclipseService
     //static readonly Regex regex = new(@"^\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
 
-    public static readonly Dictionary<ulong, string> RegisteredUsersAndClientVersions = [];
+    public static readonly ConcurrentDictionary<ulong, string> RegisteredUsersAndClientVersions = [];
     public EclipseService()
     {
         Core.StartCoroutine(ClientUpdateLoop());
@@ -487,7 +488,7 @@ internal class EclipseService
 
                                 if (RegisteredUsersAndClientVersions.ContainsKey(steamId))
                                 {
-                                    RegisteredUsersAndClientVersions.Remove(steamId);
+                                    RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
                                 }
 
                                 break;

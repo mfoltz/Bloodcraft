@@ -23,6 +23,7 @@ internal static class EmoteSystemPatch
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
     static readonly PrefabGUID _ignoredFaction = new(-1430861195);
     static readonly PrefabGUID _playerFaction = new(1106458752);
@@ -30,7 +31,7 @@ internal static class EmoteSystemPatch
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _invulnerableBuff = new(-480024072);
     static readonly PrefabGUID _combatBuff = new(581443919);
-    static readonly PrefabGUID _pvPCombatBuff = new(697095869);
+    static readonly PrefabGUID _pvpCombatBuff = new(697095869);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
     static readonly PrefabGUID _phasingBuff = new(-79611032);
@@ -170,15 +171,20 @@ internal static class EmoteSystemPatch
             LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found...");
         }
     }
-    public static void CombatMode(User user, Entity character, ulong steamId)
+    public static void CombatMode(User user, Entity character, ulong steamId) // need to tidy this up at some point
     {
-        if (!ConfigService.FamiliarCombat)
+        if (!_familiarCombat)
         {
             LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat is not enabled.");
             return;
         }
 
-        if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
+        if (character.HasBuff(_combatBuff) || character.HasBuff(_pvpCombatBuff))
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode in PvE/PvP combat!");
+            return;
+        }
+        else if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
             Entity familiar = Familiars.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 

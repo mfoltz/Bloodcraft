@@ -51,7 +51,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
     public static readonly ConcurrentDictionary<ulong, PrefabGUID> PlayerBindingValidation = [];
     public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerFamiliarBattleGroups = [];
-    public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = [];
+    public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = []; // can add this layer to normal binding if more validation is needed after moving away from binding bool in file
     public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];
     public static readonly ConcurrentList<ulong> SetDirectionAndFaction = [];
 
@@ -83,12 +83,14 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         .FirstOrDefault(id => GetPlayerBool(id, "Binding"));
                     */
 
-                    ulong? matchedKey = PlayerBindingValidation
+                    ulong matchedKey = PlayerBindingValidation
                         .Where(kv => kv.Value == prefabGUID)
-                        .Select(kv => (ulong?)kv.Key) // Cast to nullable to handle "not found" case
+                        .Select(kv => kv.Key) // Cast to nullable to handle "not found" case
                         .FirstOrDefault();
 
-                    if (!matchedKey.HasValue)
+                    Core.Log.LogInfo($"PlayerBindingValidation - {matchedKey} | {prefabGUID.GetPrefabName()}");
+
+                    if (matchedKey == 0)
                     {
                         ulong steamId = PlayerFamiliarBattleGroups
                             .FirstOrDefault(kvp => kvp.Value.Contains(prefabGUID)).Key;
@@ -101,7 +103,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
                         if (PlayerSummoningForBattle.TryGetValue(steamId, out bool isSummoning) && isSummoning)
                         {
-                            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && entity.IsAllied(playerInfo.CharEntity))
+                            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                             {
                                 int factionIndex = 0;
 
@@ -158,7 +160,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                             }
                         }
                     }
-                    else if (matchedKey.Value.TryGetPlayerInfo(out PlayerInfo playerInfo) && entity.IsAllied(playerInfo.CharEntity))
+                    else if (matchedKey.TryGetPlayerInfo(out PlayerInfo playerInfo))
                     {
                         User user = playerInfo.User;
                         ulong steamId = user.PlatformId;
@@ -183,7 +185,6 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
                             string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"<color=green>{prefabGUID.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{prefabGUID.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
                             LocalizationService.HandleServerReply(EntityManager, user, message);
-
                         }
                         else
                         {
@@ -193,38 +194,43 @@ internal static class SpawnTransformSystemOnSpawnPatch
                             continue;
                         }
                     }
-                }
-
-                if (summon) continue;
-
-                if (_eliteShardBearers)
-                {
-                    if (ShardBearers.Contains(prefabGUID))
+                    else
                     {
-                        if (prefabGUID.Equals(_manticore))
-                        {
-                            HandleManticore(entity);
-                        }
-                        else if (prefabGUID.Equals(_dracula))
-                        {
-                            HandleDracula(entity);
-                        }
-                        else if (prefabGUID.Equals(_monster))
-                        {
-                            HandleMonster(entity);
-                        }
-                        else if (prefabGUID.Equals(_solarus))
-                        {
-                            HandleSolarus(entity);
-                        }
+                        // Core.Log.LogWarning($"PlayerBindingValidation contained {matchedKey} but couldn't find PlayerInfo or wasn't allies!");
+                        // Core.LogEntity(EntityManager.World, entity);
                     }
-                    else if (prefabGUID.Equals(_divineAngel))
+
+                    if (summon) continue;
+
+                    if (_eliteShardBearers)
                     {
-                        HandleAngel(entity);
-                    }
-                    else if (prefabGUID.Equals(_fallenAngel))
-                    {
-                        HandleFallenAngel(entity);
+                        if (ShardBearers.Contains(prefabGUID))
+                        {
+                            if (prefabGUID.Equals(_manticore))
+                            {
+                                HandleManticore(entity);
+                            }
+                            else if (prefabGUID.Equals(_dracula))
+                            {
+                                HandleDracula(entity);
+                            }
+                            else if (prefabGUID.Equals(_monster))
+                            {
+                                HandleMonster(entity);
+                            }
+                            else if (prefabGUID.Equals(_solarus))
+                            {
+                                HandleSolarus(entity);
+                            }
+                        }
+                        else if (prefabGUID.Equals(_divineAngel))
+                        {
+                            HandleAngel(entity);
+                        }
+                        else if (prefabGUID.Equals(_fallenAngel))
+                        {
+                            HandleFallenAngel(entity);
+                        }
                     }
                 }
             }
@@ -238,6 +244,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
             entities.Dispose();
         }
     }
+
     static void HandleManticore(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();

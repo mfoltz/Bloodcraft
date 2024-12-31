@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Patches;
-using Bloodcraft.Services;
+﻿using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -10,6 +9,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using static Bloodcraft.Patches.SpawnTransformSystemOnSpawnPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Utilities.Progression;
 
@@ -27,6 +27,7 @@ internal static class FamiliarSummonSystem
     // static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
+    static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
 
     public const float FAMILIAR_LIFETIME = 240f;
 
@@ -34,9 +35,10 @@ internal static class FamiliarSummonSystem
     static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
     static readonly float _vBloodDamageMultiplier = ConfigService.VBloodDamageMultiplier;
 
-    static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
+    public static Entity _unitTeamSingleton = Entity.Null;
 
     static readonly PrefabGUID _invulnerableBuff = new(-480024072);
+    static readonly PrefabGUID _hideStaffBuff = new(2053361366);
 
     static readonly PrefabGUID _divineAngel = new(-1737346940);
 
@@ -50,16 +52,17 @@ internal static class FamiliarSummonSystem
         _legionFaction,
         _cursedFaction
     ];
-
-    static readonly PrefabGUID _hideStaffBuff = new(2053361366);
-
-    public static Entity _unitTeam = Entity.Null;
     public static void SummonFamiliar(Entity character, Entity userEntity, int famKey)
     {
         User user = userEntity.ReadRO<User>();
+        ulong steamId = user.PlatformId;
         int index = user.Index;
 
-        SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.TryAdd(user.PlatformId, new(famKey));
+        if (PlayerBindingValidation.ContainsKey(steamId))
+        {
+            PlayerBindingValidation[steamId] = new(famKey);
+        }
+        else PlayerBindingValidation.TryAdd(steamId, new(famKey));
 
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
@@ -76,11 +79,19 @@ internal static class FamiliarSummonSystem
             DyeIndex = 0
         };
 
+        if (PlayerBindingValidation.TryGetValue(steamId, out PrefabGUID prefab))
+        {
+            Core.Log.LogInfo($"PlayerBindingValidation found for {user.CharacterName.Value} - {prefab.GetPrefabName()}");
+        }
+        else
+        {
+            Core.Log.LogError($"PlayerBindingValidation not found for {user.CharacterName.Value}...");
+        }
+
         DebugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
     }
     public static void SummonFamiliarForBattle(Entity character, Entity userEntity, PrefabGUID familiarPrefabGUID, float3 position)
     {
-        // this method is already kind of doing what I'm updating the other one above to do so probably don't need to do it here
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
 
         User user = userEntity.ReadRO<User>();
@@ -311,9 +322,9 @@ internal static class FamiliarSummonSystem
             });
         }
 
-        if (familiar.Has<Team>() && _unitTeam.Exists())
+        if (familiar.Has<Team>() && _unitTeamSingleton.Exists())
         {
-            Core.Log.LogInfo($"Setting Team/TeamReference - {_unitTeam.GetPrefabGUID().GetPrefabName()} | {familiar.GetPrefabGUID().GetPrefabName()}");
+            Core.Log.LogInfo($"Setting Team/TeamReference - {_unitTeamSingleton.GetPrefabGUID().GetPrefabName()} | {familiar.GetPrefabGUID().GetPrefabName()}");
 
             familiar.With((ref Team team) =>
             {
@@ -322,7 +333,7 @@ internal static class FamiliarSummonSystem
 
             familiar.With((ref TeamReference teamReference) =>
             {
-                teamReference.Value._Value = _unitTeam;
+                teamReference.Value._Value = _unitTeamSingleton;
             });
         }
 

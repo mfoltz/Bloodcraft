@@ -103,7 +103,7 @@ internal class BattleService
                     {
                         if (entity.Has<UnitTeam>())
                         {
-                            FamiliarSummonSystem._unitTeam = entity;
+                            FamiliarSummonSystem._unitTeamSingleton = entity;
                         }
                     }
                 }

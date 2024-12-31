@@ -50,7 +50,7 @@ internal static class Misc
         {
             lock (_lock)
             {
-                return _list.ToList().GetEnumerator(); // Create a copy to avoid threading issues
+                return _list.ToList().GetEnumerator();
             }
         }
         IEnumerator IEnumerable.GetEnumerator()
@@ -188,17 +188,10 @@ internal static class Misc
                     if (bools.ContainsKey(boolKey)) bools[boolKey] = oldBools[boolKey];
                 }
 
+                // steamId.SetPlayerBools([]); // delete old bools and save so doesn't try to migrate again
                 DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
 
                 return true;
-            }
-
-            if (!DataService.PlayerDictionaries._playerBools.Any())
-            {
-                if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
-                {
-                    File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
-                }
             }
 
             return false;

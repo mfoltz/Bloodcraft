@@ -90,6 +90,25 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     }
                 }
 
+                if (!DataService.PlayerDictionaries._playerBools.Any())
+                {
+                    if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
+                    {
+                        File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
+
+                        Core.Log.LogInfo($"No entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
+                    }
+                }
+                else
+                {
+                    Core.Log.LogInfo($"Entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
+
+                    if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
+                    {
+                        File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
+                    }
+                }
+
                 _migrated = true;
             }
 

@@ -23,6 +23,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static NetworkIdSystem.Singleton NetworkIdSystem => SystemService.NetworkIdSystem;
 
+    static readonly bool _professions = ConfigService.ProfessionSystem;
+    static readonly bool _quests = ConfigService.QuestSystem;
+
     const float CRAFT_THRESHOLD = 0.975f;
     static readonly float _craftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
@@ -34,7 +37,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static void Prefix(ForgeSystem_Update __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!_professions && !_quests) return;
 
         NativeArray<Entity> repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
         try
@@ -101,14 +104,14 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         }
     }
 
-    static readonly Dictionary<Entity, bool> CraftFinished = [];
+    static readonly Dictionary<Entity, bool> _craftFinished = [];
 
     [HarmonyPatch(typeof(UpdateCraftingSystem), nameof(UpdateCraftingSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(UpdateCraftingSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
         try
@@ -119,9 +122,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 {
                     if (!buffer.IsEmpty)
                     {
-                        if (!CraftFinished.ContainsKey(entity))
+                        if (!_craftFinished.ContainsKey(entity))
                         {
-                            CraftFinished[entity] = false;
+                            _craftFinished[entity] = false;
                         }
 
                         QueuedWorkstationCraftAction queuedWorkstationCraftAction = buffer[0];
@@ -143,7 +146,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static void OnUpdatePrefix(UpdatePrisonSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem) return;
+        else if (!_professions) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
@@ -154,9 +157,9 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                 {
                     if (!buffer.IsEmpty)
                     {
-                        if (!CraftFinished.ContainsKey(entity))
+                        if (!_craftFinished.ContainsKey(entity))
                         {
-                            CraftFinished[entity] = false;
+                            _craftFinished[entity] = false;
                         }
 
                         QueuedWorkstationCraftAction queuedWorkstationCraftAction = buffer[0];
@@ -177,7 +180,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     public static void OnUpdatePrefix(StartCraftingSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
         try
@@ -232,7 +235,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     public static void OnUpdatePrefix(StopCraftingSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
         try
@@ -274,7 +277,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     public static void OnUpdatePrefix(MoveItemBetweenInventoriesSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.ProfessionSystem && !ConfigService.QuestSystem) return;
+        else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArray(Allocator.Temp);
         try
@@ -330,7 +333,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     {
         Entity userEntity = craftAction.InitiateUser;
         ulong steamId = userEntity.GetSteamId();
-        bool craftFinished = CraftFinished[entity];
+        bool craftFinished = _craftFinished[entity];
 
         PrefabGUID recipeGUID = craftAction.RecipeGuid;
         Entity recipePrefab = PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(recipeGUID) ? PrefabCollectionSystem._PrefabGuidToEntityMap[recipeGUID] : Entity.Null;
@@ -347,13 +350,13 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
             if (!craftFinished && craftProgress / totalTime >= CRAFT_THRESHOLD)
             {
                 //Core.Log.LogInfo($"Crafting progress finished for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
-                CraftFinished[entity] = true;
+                _craftFinished[entity] = true;
                 ValidateCraftingJob(entity, itemPrefabGUID, steamId);
             }
             else if (craftFinished && craftProgress / totalTime < CRAFT_THRESHOLD)
             {
                 //Core.Log.LogInfo($"Crafting progress reset for {itemPrefabGUID.LookupName()}... | {craftAction.ProgressTime}:{totalTime}");
-                CraftFinished[entity] = false;
+                _craftFinished[entity] = false;
             }
         }
     }

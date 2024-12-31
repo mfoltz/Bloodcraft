@@ -491,7 +491,7 @@ internal static class DataService
         internal static ConcurrentDictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> _playerBloodStats = [];
 
         // familiar data
-        internal static ConcurrentDictionary<ulong, (Entity Familiar, int FamKey)> _familiarActives = [];
+        internal static ConcurrentDictionary<ulong, (Entity Familiar, int FamKey)> _familiarActives = []; // mmm should probably either refactor to not need this or give everyone their own file
         internal static ConcurrentDictionary<ulong, string> _familiarBox = [];
         internal static ConcurrentDictionary<ulong, int> _familiarDefault = [];
         internal static ConcurrentDictionary<ulong, List<int>> _playerBattleGroups = [];
@@ -502,10 +502,6 @@ internal static class DataService
 
         // parties
         internal static ConcurrentDictionary<ulong, HashSet<string>> _playerParties = [];
-
-        // cache-only
-        //internal static Dictionary<Entity, Dictionary<PrefabGUID, int>> playerCraftingJobs = []; // userEntities
-        //internal static Dictionary<ulong, int> playerMaxWeaponLevels = [];
     }
     internal static class PlayerPersistence
     {

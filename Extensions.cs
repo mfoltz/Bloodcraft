@@ -455,7 +455,7 @@ internal static class Extensions
             });
         }
     }
-    public static bool IsAllied(this Entity entity, Entity player)
+    public static bool IsAllies(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }

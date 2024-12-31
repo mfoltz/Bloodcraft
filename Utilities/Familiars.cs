@@ -26,7 +26,7 @@ internal static class Familiars
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];
+    static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
     static readonly PrefabGUID _combatBuff = new(581443919);
@@ -34,8 +34,11 @@ internal static class Familiars
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
     static readonly PrefabGUID _inkCrawlerDeathBuff = new(1273155981);
+    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
 
     static readonly float3 _southFloat3 = new(0f, 0f, -1f);
+
+    public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];
     public static void ClearFamiliarActives(ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var actives))
@@ -220,11 +223,12 @@ internal static class Familiars
         follower.Followed._Value = playerCharacter;
         familiar.Write(follower);
 
-        if (ConfigService.FamiliarCombat)
+        if (_familiarCombat && !familiar.HasBuff(_invulnerableBuff))
         {
-            AggroConsumer aggroConsumer = familiar.ReadRO<AggroConsumer>();
-            aggroConsumer.Active._Value = true;
-            familiar.Write(aggroConsumer);
+            familiar.With((ref AggroConsumer aggroConsumer) =>
+            {
+                aggroConsumer.Active._Value = true;
+            });
         }
 
         data = (Entity.Null, data.FamKey);
@@ -259,6 +263,7 @@ internal static class Familiars
             if (buffer[i].Entity._Entity.Equals(familiar))
             {
                 buffer.RemoveAt(i);
+
                 break;
             }
         }

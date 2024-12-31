@@ -175,7 +175,7 @@ internal static class BuffSystemSpawnPatches
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (_potionStacking && !prefabName.Contains("holyresistance")) // stack t01/t02 potion effects
+                    if (_potionStacking && !prefabName.Contains("holyresistance")) // stack t01/t02 potion effects except for holy, gets whack with damage reduction
                     {
                         if (entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
                         if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();

@@ -167,7 +167,7 @@ internal static class QuestCommands
         ulong steamId = ctx.Event.User.PlatformId;
         if (type.Equals(QuestType.Daily))
         {
-            if (steamId.TryGetPlayerQuests(out var questData) && questData[QuestType.Weekly].Objective.Complete && !ConfigService.InfiniteDailies)
+            if (steamId.TryGetPlayerQuests(out var questData) && questData[QuestType.Daily].Objective.Complete && !ConfigService.InfiniteDailies)
             {
                 LocalizationService.HandleReply(ctx, "You've already completed your <color=#00FFFF>Daily Quest</color> today. Check back tomorrow.");
                 return;

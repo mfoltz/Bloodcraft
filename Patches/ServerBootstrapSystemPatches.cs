@@ -269,6 +269,7 @@ internal static class ServerBootstrapSystemPatches
                 {
                     bloodStats.Add(bloodType, []);
                 }
+
                 steamId.SetPlayerBloodStats(bloodStats);
             }
             else
@@ -453,7 +454,7 @@ internal static class ServerBootstrapSystemPatches
 
         if (_clientCompanion)
         {
-            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
+            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
         }
     }
 
@@ -483,7 +484,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (_clientCompanion)
                         {
-                            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.Remove(steamId);
+                            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
                         }
                     }
                 }

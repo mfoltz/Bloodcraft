@@ -721,8 +721,9 @@ internal static class FamiliarCommands
 
         Familiars.ClearFamiliarActives(steamId);
         if (Familiars.AutoCallMap.TryRemove(character, out Entity _))
+            if (SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.ContainsKey(steamId)) SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.TryRemove(steamId, out _);
 
-            LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
+        LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
 
     [Command(name: "search", shortHand: "s", adminOnly: false, usage: ".fam s [Name]", description: "Searches boxes for unit with entered name.")]

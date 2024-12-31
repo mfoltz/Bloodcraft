@@ -181,16 +181,15 @@ internal static class QuestSystem
     {
         HashSet<PrefabGUID> prefabs = [];
 
-        foreach (PrefabGUID prefab in CraftPrefabs)
+        foreach (PrefabGUID prefabGuid in CraftPrefabs)
         {
-            Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
-            PrefabGUID prefabGUID = prefabEntity.ReadRO<PrefabGUID>();
-            ItemData itemData = prefabEntity.ReadRO<ItemData>();
+            if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefab) || !prefab.TryGetComponent(out ItemData itemData)) continue;
 
-            string prefabName = prefabGUID.GetPrefabName();
+            string prefabName = prefabGuid.GetPrefabName();
             string tier;
 
             Match match = _regex.Match(prefabName);
+
             if (match.Success) tier = match.Value;
             else continue;
 
@@ -198,14 +197,14 @@ internal static class QuestSystem
             {
                 if (IsWithinLevelRange(tier, playerLevel, _equipmentTierLevelRangeMap))
                 {
-                    prefabs.Add(prefabGUID);
+                    prefabs.Add(prefabGuid);
                 }
             }
             else if (itemData.ItemType == ItemType.Consumable)
             {
                 if (IsConsumableWithinLevelRange(prefabName, playerLevel, _consumableTierLevelRangeMap))
                 {
-                    prefabs.Add(prefabGUID);
+                    prefabs.Add(prefabGuid);
                 }
             }
         }
@@ -218,9 +217,7 @@ internal static class QuestSystem
 
         foreach (PrefabGUID prefab in ResourcePrefabs)
         {
-            Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
-
-            if (prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
+            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity prefabEntity) && prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
             {
                 var buffer = prefabEntity.ReadBuffer<DropTableBuffer>();
 
