@@ -132,7 +132,7 @@ internal class EclipseService
                 Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (RegisterUser)");
             }
         }
-        else // delayed registration, wait for cache to update/player to make character...
+        else // delayed registration, wait for cache to update/player to make character
         {
             Core.StartCoroutine(DelayedRegistration(steamId, version));
         }
@@ -305,7 +305,7 @@ internal class EclipseService
                 return (familiarPercent, familiarLevel, familiarPrestige, familiarName, familiarStats);
             }
 
-            PrefabGUID familiarPrefabGUID = familiar.GetPrefabGUID();
+            PrefabGUID familiarPrefabGUID = familiar.GetPrefabGuid();
 
             int familiarId = familiarPrefabGUID.GuidHash;
             familiarName = familiarPrefabGUID.GetLocalizedName();
@@ -450,7 +450,7 @@ internal class EclipseService
     {
         while (true)
         {
-            if (RegisteredUsersAndClientVersions.Count == 0)
+            if (RegisteredUsersAndClientVersions.IsEmpty)
             {
                 yield return _delay;
 

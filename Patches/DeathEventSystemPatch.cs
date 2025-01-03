@@ -75,18 +75,17 @@ internal static class DeathEventListenerSystemPatch
     static Entity ValidateSource(Entity source)
     {
         Entity deathSource = Entity.Null;
-
-        if (source.IsPlayer()) return source; // player kills
+        if (source.IsPlayer()) return source; // players
 
         if (!source.TryGetComponent(out EntityOwner entityOwner)) return deathSource;
-        else if (entityOwner.Owner.TryGetPlayer(out Entity player)) deathSource = player; // player familiar and player summon kills
-        else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity followedPlayer)) deathSource = followedPlayer; // player familiar summon kills
+        else if (entityOwner.Owner.TryGetPlayer(out Entity player)) deathSource = player; // player familiars and player summons
+        else if (entityOwner.Owner.TryGetFollowedPlayer(out Entity followedPlayer)) deathSource = followedPlayer; // familiar summons
 
         return deathSource;
     }
     static bool ValidateTarget(DeathEvent deathEvent)
     {
-        if (_familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity player)) // auto-clear active if familiar dies for easier rebinding
+        if (_familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
         {
             ulong steamId = player.GetSteamId();
 

@@ -148,7 +148,7 @@ internal static class LevelingSystem
             }
         }
 
-        if (_unitSpawnerMultiplier < 1 && target.Has<IsMinion>() && target.ReadRO<IsMinion>().Value)
+        if (_unitSpawnerMultiplier < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
         {
             gainedXP *= _unitSpawnerMultiplier;
             if (gainedXP == 0) return;
@@ -167,9 +167,9 @@ internal static class LevelingSystem
             }
         }
 
-        if (_docileUnitMultiplier < 1 && target.Has<AggroConsumer>() && !isVBlood)
+        if (_docileUnitMultiplier < 1f && !isVBlood && target.TryGetComponent(out AggroConsumer aggroConsumer))
         {
-            if (target.ReadRO<AggroConsumer>().AlertDecayPerSecond == 99)
+            if (aggroConsumer.AlertDecayPerSecond == 99f)
             {
                 gainedXP *= _docileUnitMultiplier;
             }

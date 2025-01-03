@@ -11,6 +11,7 @@ using static Bloodcraft.Services.ConfigService.ConfigInitialization;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
 using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
+using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Services;
 internal static class DataService
@@ -203,7 +204,7 @@ internal static class DataService
     {
         return _playerQuests.TryGetValue(steamID, out quests);
     }
-    public static bool TryGetPlayerParties(this ulong steamID, out HashSet<string> parties)
+    public static bool TryGetPlayerParties(this ulong steamID, out ConcurrentList<string> parties)
     {
         return _playerParties.TryGetValue(steamID, out parties);
     }
@@ -427,10 +428,10 @@ internal static class DataService
         _playerQuests[steamID] = data;
         SavePlayerQuests();
     }
-    public static void SetPlayerParties(this ulong steamID, HashSet<string> data)
+    public static void SetPlayerParties(this ulong steamID, ConcurrentList<string> data)
     {
         _playerParties[steamID] = data;
-        SavePlayerParties();
+        // SavePlayerParties();
     }
     internal static class PlayerDictionaries
     {
@@ -500,12 +501,12 @@ internal static class DataService
         // quest data
         internal static ConcurrentDictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> _playerQuests = [];
 
-        // parties
-        internal static ConcurrentDictionary<ulong, HashSet<string>> _playerParties = [];
+        // parties cache
+        internal static ConcurrentDictionary<ulong, ConcurrentList<string>> _playerParties = [];
     }
     internal static class PlayerPersistence
     {
-        static readonly JsonSerializerOptions _prettyJsonOptions = new()
+        static readonly JsonSerializerOptions _jsonOptions = new()
         {
             WriteIndented = true,
             IncludeFields = true
@@ -632,7 +633,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<ConcurrentDictionary<ulong, T>>(json, _prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<ConcurrentDictionary<ulong, T>>(json, _jsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -663,7 +664,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, _prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<Dictionary<ulong, T>>(json, _jsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -692,7 +693,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<List<List<float>>>(json, _prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<List<List<float>>>(json, _jsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -721,7 +722,7 @@ internal static class DataService
                 }
                 else
                 {
-                    var data = JsonSerializer.Deserialize<List<int>>(json, _prettyJsonOptions);
+                    var data = JsonSerializer.Deserialize<List<int>>(json, _jsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -735,7 +736,7 @@ internal static class DataService
             string path = _filePaths[key];
             try
             {
-                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _jsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
             }
@@ -753,7 +754,7 @@ internal static class DataService
             string path = _filePaths[key];
             try
             {
-                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _jsonOptions);
                 File.WriteAllText(path, json);
                 //Core.Log.LogInfo($"{key} data saved successfully.");
             }
@@ -772,7 +773,7 @@ internal static class DataService
 
             try
             {
-                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _jsonOptions);
                 File.WriteAllText(path, json);
             }
             catch (IOException ex)
@@ -790,7 +791,7 @@ internal static class DataService
 
             try
             {
-                string json = JsonSerializer.Serialize(data, _prettyJsonOptions);
+                string json = JsonSerializer.Serialize(data, _jsonOptions);
                 File.WriteAllText(path, json);
             }
             catch (IOException ex)
@@ -816,7 +817,7 @@ internal static class DataService
 
         public static void LoadPlayerBools() => LoadData(ref _playerBools, "PlayerBools");
 
-        public static void LoadPlayerParties() => LoadData(ref _playerParties, "PlayerParties");
+        // public static void LoadPlayerParties() => LoadData(ref _playerParties, "PlayerParties");
 
         public static void LoadPlayerWoodcutting() => LoadData(ref _playerWoodcutting, "Woodcutting");
 
@@ -908,7 +909,7 @@ internal static class DataService
 
         public static void SavePlayerBools() => SaveData(_playerBools, "PlayerBools");
 
-        public static void SavePlayerParties() => SaveData(_playerParties, "PlayerParties");
+        // public static void SavePlayerParties() => SaveData(_playerParties, "PlayerParties");
 
         public static void SavePlayerWoodcutting() => SaveData(_playerWoodcutting, "Woodcutting");
 
@@ -1172,10 +1173,12 @@ internal static class DataService
 
             LoadPlayerBools();
 
+            /*
             if (PlayerParties)
             {
                 LoadPlayerParties();
             }
+            */
 
             if (SoftSynergies || HardSynergies)
             {
@@ -1215,7 +1218,7 @@ internal static class DataService
                 }
             }
 
-            if (ConfigService.ProfessionSystem)
+            if (ProfessionSystem)
             {
                 foreach (var loadFunction in _loadProfessions)
                 {

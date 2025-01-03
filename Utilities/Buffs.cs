@@ -43,44 +43,21 @@ internal static class Buffs
         { 6, 60 },
         { 7, 75 }
     };
-    public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefab)
+    public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefabGuid)
     {
-        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        if (!character.HasBuff(buffPrefabGuid))
         {
-            BuffPrefabGUID = buffPrefab
-        };
+            ApplyBuffDebugEvent applyBuffDebugEvent = new()
+            {
+                BuffPrefabGUID = buffPrefabGuid
+            };
 
-        FromCharacter fromCharacter = new()
-        {
-            Character = character,
-            User = character
-        };
+            FromCharacter fromCharacter = new()
+            {
+                Character = character,
+                User = character
+            };
 
-        if (!ServerGameManager.HasBuff(character, buffPrefab.ToIdentifier()))
-        {
-            DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-
-            return true;
-        }
-
-        return false;
-    }
-    public static bool TryApplyBuffWithOwner(Entity target, Entity owner, PrefabGUID buffPrefab)
-    {
-        ApplyBuffDebugEvent applyBuffDebugEvent = new()
-        {
-            BuffPrefabGUID = buffPrefab,
-            Who = target.ReadRO<NetworkId>()
-        };
-
-        FromCharacter fromCharacter = new() // fam should be entityOwner
-        {
-            Character = owner,
-            User = owner
-        };
-
-        if (!ServerGameManager.HasBuff(target, buffPrefab.ToIdentifier()))
-        {
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
 
             return true;
@@ -658,7 +635,7 @@ internal static class Buffs
             if (buff.Has<LifeTime>())
             {
                 LifeTime lifetime = buff.ReadRO<LifeTime>();
-                lifetime.Duration = -1f; // need to try changing this to 9999 instead? death to console spam
+                lifetime.Duration = -1f; // need to try changing this to 9999 or 0 instead to avert console spam at some point
                 lifetime.EndAction = LifeTimeEndAction.None;
                 buff.Write(lifetime);
             }
@@ -715,16 +692,6 @@ internal static class Buffs
         foreach (int buff in prestigeBuffs)
         {
             UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Add(new PrefabGUID(buff));
-        }
-    }
-    public static void SanitizePrestigeBuffs(Entity character)
-    {
-        foreach (PrefabGUID buff in UpdateBuffsBufferDestroyPatch.PrestigeBuffs)
-        {
-            if (ServerGameManager.TryGetBuff(character, buff.ToIdentifier(), out Entity buffEntity) && buffEntity.Has<LifeTime>())
-            {
-                buffEntity.Remove<LifeTime>();
-            }
         }
     }
     public static void HandleExoFormBuff(Entity buffEntity, Entity playerCharacter)

@@ -18,7 +18,7 @@ internal static class Configuration
 
         foreach (PrefabGUID unit in unitBans)
         {
-            if (unit.HasValue()) FamiliarUnlockSystem.ConfiguredPrefabGUIDBans.Add(unit);
+            if (unit.HasValue()) FamiliarUnlockSystem.ConfiguredPrefabGuidBans.Add(unit);
         }
 
         List<string> categoryBans = ConfigService.BannedTypes.Split(',').Select(s => s.Trim()).ToList();
@@ -27,7 +27,7 @@ internal static class Configuration
         {
             if (Enum.TryParse(category, out UnitCategory unitCategory))
             {
-                FamiliarUnlockSystem.ConfiguredUnitCategoryBans.Add(unitCategory);
+                FamiliarUnlockSystem.ConfiguredCategoryBans.Add(unitCategory);
             }
         }
     }

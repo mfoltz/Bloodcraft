@@ -21,10 +21,14 @@ internal static class Misc
     static readonly float _shareDistance = ConfigService.ExpShareDistance;
 
     static readonly PrefabGUID _draculaVBlood = new(-327335305);
+
+    [Serializable]
     public class ConcurrentList<T> : IEnumerable<T>
     {
-        readonly List<T> _list = [];
+        [NonSerialized]
         readonly object _lock = new();
+
+        readonly List<T> _list = [];
         public void Add(T item)
         {
             lock (_lock)
@@ -69,6 +73,13 @@ internal static class Misc
             lock (_lock)
             {
                 return new List<T>(_list);
+            }
+        }
+        public int Count()
+        {
+            lock (_lock)
+            {
+                return _list.Count;
             }
         }
     }
@@ -208,9 +219,9 @@ internal static class Misc
 
         if (_parties)
         {
-            List<HashSet<string>> playerParties = new([.. DataService.PlayerDictionaries._playerParties.Values]);
+            List<ConcurrentList<string>> playerParties = new([.. DataService.PlayerDictionaries._playerParties.Values]);
 
-            foreach (HashSet<string> party in playerParties)
+            foreach (ConcurrentList<string> party in playerParties)
             {
                 if (party.Contains(playerName)) // find party with death source player name
                 {

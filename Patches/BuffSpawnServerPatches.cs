@@ -80,7 +80,7 @@ internal static class BuffSystemSpawnPatches
                 //int guidHash = prefabGUID.GuidHash;
                 //Core.Log.LogInfo($"BuffSystem_Spawn_Server: {prefabName}");
 
-                if (_eliteShardBearers && prefabName.Contains("holybubble") && buffTarget.GetPrefabGUID().Equals(_solarus)) // holy mortar effect for Solarus when eliteShardBearers active
+                if (_eliteShardBearers && prefabName.Contains("holybubble") && buffTarget.GetPrefabGuid().Equals(_solarus)) // holy mortar effect for Solarus when eliteShardBearers active
                 {
                     if (!buffTarget.HasBuff(_holyBeamPowerBuff))
                     {
@@ -105,7 +105,7 @@ internal static class BuffSystemSpawnPatches
 
                         Classes.HandleDeathMageBiteTriggerBuffSpawnServer(player, steamId);
                     }
-                    else if (buffTarget.GetPrefabGUID().Equals(_fallenAngel) && DeathMagePlayerAngelSpawnOrder.TryDequeue(out player))
+                    else if (buffTarget.GetPrefabGuid().Equals(_fallenAngel) && DeathMagePlayerAngelSpawnOrder.TryDequeue(out player))
                     {
                         Classes.ModifyFallenAngelForDeathMage(buffTarget, player);
                     }

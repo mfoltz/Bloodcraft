@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Misc;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Utilities;
@@ -51,7 +52,7 @@ internal static class PartyUtilities
         string playerName = playerInfo.User.CharacterName.Value;
 
         // Check if the player is already in a party or owns a party
-        KeyValuePair<ulong, HashSet<string>> existingPartyEntry = DataService.PlayerDictionaries._playerParties.FirstOrDefault(entry => entry.Value.Contains(playerName));
+        KeyValuePair<ulong, ConcurrentList<string>> existingPartyEntry = DataService.PlayerDictionaries._playerParties.AsEnumerable().FirstOrDefault(entry => entry.Value.Contains(playerName));
 
         if (existingPartyEntry.Value != null || DataService.PlayerDictionaries._playerParties.ContainsKey(playerInfo.User.PlatformId))
         {
@@ -59,7 +60,7 @@ internal static class PartyUtilities
             return;
         }
 
-        if (!ownerId.TryGetPlayerParties(out HashSet<string> party) || party == null)
+        if (!ownerId.TryGetPlayerParties(out ConcurrentList<string> party) || party == null)
         {
             ownerId.SetPlayerParties([ownerName]);
         }
@@ -71,7 +72,7 @@ internal static class PartyUtilities
 
             LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party!");
         }
-        else if (party.Count == ConfigService.MaxPartySize)
+        else if (party.Count() == ConfigService.MaxPartySize)
         {
             LocalizationService.HandleReply(ctx, $"Party is full, can't add <color=green>{playerName}</color>.");
         }
@@ -84,11 +85,11 @@ internal static class PartyUtilities
             LocalizationService.HandleReply(ctx, $"Couldn't add <color=green>{playerName}</color> to party...");
         }
     }
-    static bool CanAddPlayerToParty(HashSet<string> party, string playerName)
+    static bool CanAddPlayerToParty(ConcurrentList<string> party, string playerName)
     {
-        return party.Count < ConfigService.MaxPartySize && !party.Contains(playerName);
+        return party.Count() < ConfigService.MaxPartySize && !party.Contains(playerName);
     }
-    public static void RemovePlayerFromParty(ChatCommandContext ctx, HashSet<string> party, string playerName)
+    public static void RemovePlayerFromParty(ChatCommandContext ctx, ConcurrentList<string> party, string playerName)
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
@@ -105,13 +106,13 @@ internal static class PartyUtilities
             LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party to remove...");
         }
     }
-    public static void ListPartyMembers(ChatCommandContext ctx, ConcurrentDictionary<ulong, HashSet<string>> playerParties)
+    public static void ListPartyMembers(ChatCommandContext ctx, ConcurrentDictionary<ulong, ConcurrentList<string>> playerParties)
     {
         ulong ownerId = ctx.Event.User.PlatformId;
         string playerName = ctx.Event.User.CharacterName.Value;
 
-        HashSet<string> members = playerParties.ContainsKey(ownerId) ? playerParties[ownerId] : playerParties.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value).ToHashSet();
-        string replyMessage = members.Count > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in party.";
+        ConcurrentList<string> members = (ConcurrentList<string>)(playerParties.ContainsKey(ownerId) ? playerParties[ownerId] : playerParties.Where(groupEntry => groupEntry.Value.Contains(playerName)).SelectMany(groupEntry => groupEntry.Value));
+        string replyMessage = members.Count() > 0 ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>")) : "No members in party.";
 
         LocalizationService.HandleReply(ctx, replyMessage);
     }

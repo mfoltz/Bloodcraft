@@ -21,11 +21,9 @@ internal static class FamiliarUnlockSystem
     static readonly bool _shareUnlocks = ConfigService.ShareUnlocks;
     static readonly bool _allowVBloods = ConfigService.AllowVBloods;
 
-    // HashSets of configured banned prefabGUIDs & EntityCategories
-    public static readonly HashSet<PrefabGUID> ConfiguredPrefabGUIDBans = [];
-    public static readonly HashSet<UnitCategory> ConfiguredUnitCategoryBans = [];
+    public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
+    public static readonly HashSet<UnitCategory> ConfiguredCategoryBans = [];
 
-    // HashSet of default banned strings to check against prefab names
     static readonly HashSet<string> _defaultNameBans =
     [
         "trader",
@@ -43,79 +41,71 @@ internal static class FamiliarUnlockSystem
 
     public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexMap = new()
     {
-        { new PrefabGUID(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
-        { new PrefabGUID(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
-        { new PrefabGUID(-1246704569), "#FF0000" },  // leech red (Hex: FF0000)
-        { new PrefabGUID(1723455773), "#008080" },   // weaken teal (Hex: 008080)
-        { new PrefabGUID(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
-        { new PrefabGUID(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
+        { new(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
+        { new(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
+        { new(-1246704569), "#FF0000" },  // leech red (Hex: FF0000)
+        { new(1723455773), "#008080" },   // weaken teal (Hex: 008080)
+        { new(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
+        { new(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
     };
 
     public static readonly ConcurrentDictionary<ulong, float> Modifiers = [];
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         if (!_shareUnlocks) ProcessUnlock(deathEvent.Source, deathEvent.Target);
-        else if (_shareUnlocks) ProcessGroupUnlock(deathEvent.Target, deathEvent.DeathParticipants);
+        else if (_shareUnlocks) HandleGroupUnlock(deathEvent.Target, deathEvent.DeathParticipants);
     }
     public static void ProcessUnlock(Entity source, Entity target)
     {
-        if (target.TryGetComponent(out PrefabGUID targetPrefabGUID) && target.TryGetComponent(out EntityCategory targetCategory))
+        if (target.TryGetComponent(out PrefabGUID targetPrefabGuid) && target.TryGetComponent(out EntityCategory targetCategory))
         {
-            string targetPrefabName = targetPrefabGUID.GetPrefabName().ToLower();
+            string targetPrefabName = targetPrefabGuid.GetPrefabName();
 
-            if (_defaultNameBans.Any(part => targetPrefabName.Contains(part)) || BannedPrefabGUID(targetPrefabGUID) || BannedCategory(targetCategory)) return;
-            else if (!target.Has<VBloodUnit>() && (int)targetCategory.UnitCategory < 5) // normal units
+            if (!ValidTarget(targetPrefabName, targetPrefabGuid, targetCategory)) return;
+            else if (!target.IsVBloodOrGateBoss() && (int)targetCategory.UnitCategory < 5)
             {
-                HandleRoll(_unitUnlockChance, targetPrefabGUID, source, false);
+                HandleRoll(_unitUnlockChance, targetPrefabGuid, source);
             }
-            else if (_allowVBloods && target.Has<VBloodUnit>()) // vbloods & gatebosses
+            else if (_allowVBloods && (target.IsVBlood() || target.IsGateBoss()))
             {
-                HandleRoll(_vBloodUnlockChance, targetPrefabGUID, source, true);
+                HandleRoll(_vBloodUnlockChance, targetPrefabGuid, source);
             }
         }
     }
-    public static void ProcessGroupUnlock(Entity target, HashSet<Entity> deathParticipants)
+    public static void HandleGroupUnlock(Entity target, HashSet<Entity> deathParticipants)
     {
-        if (target.TryGetComponent(out PrefabGUID targetPrefabGUID) && target.TryGetComponent(out EntityCategory targetCategory))
+        foreach (Entity player in deathParticipants)
         {
-            string targetPrefabName = targetPrefabGUID.GetPrefabName().ToLower();
-
-            if (_defaultNameBans.Any(part => targetPrefabName.Contains(part)) || BannedPrefabGUID(targetPrefabGUID) || BannedCategory(targetCategory)) return;
-            else if (!target.Has<VBloodUnit>() && (int)targetCategory.UnitCategory < 5) // normal units
-            {
-                foreach (Entity player in deathParticipants)
-                {
-                    HandleRoll(_unitUnlockChance, targetPrefabGUID, player, false);
-                }
-            }
+            ProcessUnlock(player, target);
         }
     }
-    static bool BannedPrefabGUID(PrefabGUID prefabGUID)
+    static bool ValidTarget(string targetPrefabName, PrefabGUID targetPrefabGuid, EntityCategory targetCategory)
     {
-        return (ConfiguredPrefabGUIDBans.Contains(prefabGUID) || _defaultPrefabGUIDBans.Contains(prefabGUID));
+        if (_defaultNameBans.Any(part => targetPrefabName.Contains(part, StringComparison.OrdinalIgnoreCase)) || IsBannedPrefabGuid(targetPrefabGuid) || BannedCategory(targetCategory)) return false;
+        return true;
+    }
+    static bool IsBannedPrefabGuid(PrefabGUID prefabGUID)
+    {
+        return (ConfiguredPrefabGuidBans.Contains(prefabGUID) || _defaultPrefabGUIDBans.Contains(prefabGUID));
     }
     static bool BannedCategory(EntityCategory category)
     {
-        return ConfiguredUnitCategoryBans.Contains(category.UnitCategory);
+        return ConfiguredCategoryBans.Contains(category.UnitCategory);
     }
-    static void HandleRoll(float dropChance, PrefabGUID targetPrefabGUID, Entity player, bool isVBlood)
+    static void HandleRoll(float dropChance, PrefabGUID targetPrefabGUID, Entity player)
     {
-        HandleModifier(ref dropChance, player);
+        // HandleModifier(ref dropChance, player);
 
-        if (!isVBlood && RollForChance(dropChance)) // everyone in the vblood event system already gets their own roll, no double-dipping :p
-        {
-            HandleUnlock(targetPrefabGUID, player);
-        }
-        else if (isVBlood && RollForChance(dropChance))
+        if (RollForChance(dropChance))
         {
             HandleUnlock(targetPrefabGUID, player);
         }
     }
-    static void HandleUnlock(PrefabGUID familiarPrefabGUID, Entity player)
+    static void HandleUnlock(PrefabGUID familiarPrefabGuid, Entity player)
     {
-        int famKey = familiarPrefabGUID.GuidHash;
-        User user = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
+        User user = player.GetUser();
         ulong steamId = user.PlatformId;
+        int famKey = familiarPrefabGuid.GuidHash;
 
         UnlockedFamiliarData data = FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
         string lastListName = data.UnlockedFamiliars.Keys.LastOrDefault();
@@ -156,13 +146,13 @@ internal static class FamiliarUnlockSystem
 
             isShiny = HandleShiny(famKey, steamId, _shinyChance);
 
-            if (!isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{familiarPrefabGUID.GetLocalizedName()}</color>");
-            else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{familiarPrefabGUID.GetLocalizedName()}</color>");
+            if (!isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New unit unlocked: <color=green>{familiarPrefabGuid.GetLocalizedName()}</color>");
+            else if (isShiny) LocalizationService.HandleServerReply(EntityManager, user, $"New <color=#00FFFF>shiny</color> unit unlocked: <color=green>{familiarPrefabGuid.GetLocalizedName()}</color>");
             return;
         }
         else if (isShiny)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{familiarPrefabGUID.GetLocalizedName()}</color>");
+            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{familiarPrefabGuid.GetLocalizedName()}</color>");
         }
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)
@@ -222,8 +212,7 @@ internal static class FamiliarUnlockSystem
     static bool RollForChance(float chance)
     {
         // float roll = (float)_random.NextDouble();
-        double roll = _random.NextDouble();
-        return roll < chance;
+        return _random.NextDouble() < chance;
     }
     static void HandleModifier(ref float dropChance, Entity player)
     {

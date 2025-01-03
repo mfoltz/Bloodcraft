@@ -82,11 +82,11 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 
                     if (PlayerBoolsManager.TryMigrateBools(steamId))
                     {
-                        Core.Log.LogInfo($"Migrated player bools for {playerInfo.User.CharacterName.Value}! (should only happen once per player)");
+                        // Core.Log.LogInfo($"Migrated player bools for {playerInfo.User.CharacterName.Value}! (should only happen once per player)");
                     }
                     else
                     {
-                        Core.Log.LogInfo($"No bools to migrate for {playerInfo.User.CharacterName.Value}! (already migrated or didn't have bools data before now)");
+                        // Core.Log.LogInfo($"No bools to migrate for {playerInfo.User.CharacterName.Value}! (already migrated or didn't have bools data before now)");
                     }
                 }
 
@@ -96,12 +96,12 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     {
                         File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
 
-                        Core.Log.LogInfo($"No entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
+                        // Core.Log.LogInfo($"No entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
                     }
                 }
                 else
                 {
-                    Core.Log.LogInfo($"Entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
+                    // Core.Log.LogInfo($"Entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
 
                     if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
                     {

@@ -79,6 +79,7 @@ internal static class FamiliarSummonSystem
             DyeIndex = 0
         };
 
+        /*
         if (PlayerBindingValidation.TryGetValue(steamId, out PrefabGUID prefab))
         {
             Core.Log.LogInfo($"PlayerBindingValidation found for {user.CharacterName.Value} - {prefab.GetPrefabName()}");
@@ -87,6 +88,7 @@ internal static class FamiliarSummonSystem
         {
             Core.Log.LogError($"PlayerBindingValidation not found for {user.CharacterName.Value}...");
         }
+        */
 
         DebugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
     }
@@ -301,7 +303,7 @@ internal static class FamiliarSummonSystem
         if (familiar.Has<FactionReference>() && factionIndex != -1)
         {
             PrefabGUID factionPrefabGUID = _teamFactions[factionIndex];
-            Core.Log.LogInfo($"Setting FactionReference - {factionPrefabGUID.GetPrefabName()} | {familiar.GetPrefabGUID().GetPrefabName()}");
+            Core.Log.LogInfo($"Setting FactionReference - {factionPrefabGUID.GetPrefabName()} | {familiar.GetPrefabGuid().GetPrefabName()}");
 
             familiar.SetFaction(factionPrefabGUID);
         }
@@ -324,7 +326,7 @@ internal static class FamiliarSummonSystem
 
         if (familiar.Has<Team>() && _unitTeamSingleton.Exists())
         {
-            Core.Log.LogInfo($"Setting Team/TeamReference - {_unitTeamSingleton.GetPrefabGUID().GetPrefabName()} | {familiar.GetPrefabGUID().GetPrefabName()}");
+            Core.Log.LogInfo($"Setting Team/TeamReference - {_unitTeamSingleton.GetPrefabGuid().GetPrefabName()} | {familiar.GetPrefabGuid().GetPrefabName()}");
 
             familiar.With((ref Team team) =>
             {

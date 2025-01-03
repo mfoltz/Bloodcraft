@@ -16,14 +16,15 @@ internal class Plugin : BasePlugin
     Harmony _harmony;
     internal static Plugin Instance { get; private set; }
     public static Harmony Harmony => Instance._harmony;
-    public static ManualLogSource LogInstance => Instance.Log;
+    internal static ManualLogSource LogInstance => Instance.Log;
     public override void Load()
     {
         Instance = this;
 
         if (Application.productName != "VRisingServer")
         {
-            LogInstance.LogError("Bloodcraft is a server mod, not continuing to load on client.");
+            LogInstance.LogInfo("Bloodcraft is a server mod and will not continue loading on the client.");
+
             return;
         }
 
@@ -39,6 +40,7 @@ internal class Plugin : BasePlugin
     {
         Config.Clear();
         _harmony.UnpatchSelf();
+
         return true;
     }
 }

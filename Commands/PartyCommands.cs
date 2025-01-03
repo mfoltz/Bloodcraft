@@ -1,7 +1,7 @@
 ﻿using Bloodcraft.Services;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
-using static Bloodcraft.Services.DataService.PlayerPersistence;
+using static Bloodcraft.Utilities.Misc;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.PartyUtilities;
 
@@ -63,7 +63,7 @@ internal static class PartyCommands
             return;
         }
 
-        HashSet<string> party = _playerParties[ownerId]; // check size and if player is already present in group before adding
+        ConcurrentList<string> party = _playerParties[ownerId]; // check size and if player is already present in group before adding
         RemovePlayerFromParty(ctx, party, name);
     }
 
@@ -97,7 +97,7 @@ internal static class PartyCommands
         }
 
         _playerParties.TryRemove(ownerId, out _);
-        SavePlayerParties();
+        // SavePlayerParties();
         LocalizationService.HandleReply(ctx, "Party disbanded.");
     }
 
@@ -119,7 +119,7 @@ internal static class PartyCommands
             return;
         }
 
-        HashSet<string> party = _playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
+        ConcurrentList<string> party = _playerParties.Values.FirstOrDefault(set => set.Contains(playerName));
 
         if (party != null)
         {
@@ -149,7 +149,6 @@ internal static class PartyCommands
         if (_playerParties.ContainsKey(steamId))
         {
             _playerParties.TryRemove(steamId, out _);
-            SavePlayerParties();
             ownedParty = true;
         }
 
@@ -159,12 +158,14 @@ internal static class PartyCommands
 
         foreach (var ownerId in owners)
         {
-            HashSet<string> party = _playerParties[ownerId];
+            ConcurrentList<string> party = _playerParties[ownerId];
+
             if (party.Contains(playerName))
             {
                 party.Remove(playerName);
-                ownerId.SetPlayerParties(party);
                 removedFromParties = true;
+
+                ownerId.SetPlayerParties(party);
             }
         }
 
@@ -184,5 +185,7 @@ internal static class PartyCommands
         {
             LocalizationService.HandleReply(ctx, $"No parties found that you own or are a member in.");
         }
+
+        // SavePlayerParties();
     }
 }

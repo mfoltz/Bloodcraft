@@ -2,6 +2,7 @@
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -74,21 +75,17 @@ internal static class DealDamageSystemPatch
                 else if (sourcePrefabGUID.Equals(_silverDebuff) || sourcePrefabGUID.Equals(_garlicDebuff)) continue; // these both count for physical damage so need to check source prefab first
                 else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities here do weird things I don't want to have to figure out >_>
 
-                //else if (dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) && (sourcePrefabGUID.Equals(silverDebuff) || sourcePrefabGUID.Equals(garlicDebuff))) continue; // skip if source is silver or garlic
-                //if (!dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
-
                 if (entityOwner.Owner.TryGetFollowedPlayer(out Entity player)) // not sure if any fam besides raziel does this
                 {
                     if (dealDamageEvent.Target.IsPlayer() && player.Equals(dealDamageEvent.Target))
                     {
-                        EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroyEvent not sufficient to prevent damage
+                        EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, normal destroy not sufficient to prevent damage at this point
                     }
                 }
-                else if (dealDamageEvent.MainType == MainDamageType.Holy) // do anti-healing from too much holy resist + damage reduction? 155 75.5% | 170 85% holy resist
+                else if (dealDamageEvent.MainType == MainDamageType.Holy) // do anti-healing from too much holy resist + damage reduction? 155 75.5% | 170 85% holy resist ehhhhh
                 {
-                    //Core.Log.LogInfo($"MainFactor: {dealDamageEvent.MainFactor} | Modifier: {dealDamageEvent.Modifier} | RawDamage: {dealDamageEvent.RawDamage} | RawDamagePercent: {dealDamageEvent.RawDamagePercent}");
+                    // Core.Log.LogInfo($"MainFactor: {dealDamageEvent.MainFactor} | Modifier: {dealDamageEvent.Modifier} | RawDamage: {dealDamageEvent.RawDamage} | RawDamagePercent: {dealDamageEvent.RawDamagePercent}");
                 }
-                //if (dealDamageEvent.MainType != MainDamageType.Physical && dealDamageEvent.MainType != MainDamageType.Spell) continue; // skip if source isn't phys/spell at this point
                 else if (dealDamageEvent.MainType == MainDamageType.Physical || dealDamageEvent.MainType == MainDamageType.Spell)
                 {
                     if (_quests && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && entityOwner.Owner.TryGetPlayer(out player))
@@ -96,7 +93,7 @@ internal static class DealDamageSystemPatch
                         ulong steamId = player.GetSteamId();
                         LastDamageTime[steamId] = DateTime.UtcNow;
                     }
-                    else if (_onHitEffects && dealDamageEvent.Target.Has<Movement>() && dealDamageEvent.Target.Has<Health>() && entityOwner.Owner.TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
+                    else if (_onHitEffects && IsValidTarget(dealDamageEvent.Target) && entityOwner.Owner.TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
                     {
                         Entity userEntity = player.ReadRO<PlayerCharacter>().UserEntity;
                         ulong steamId = userEntity.ReadRO<User>().PlatformId;
@@ -178,6 +175,18 @@ internal static class DealDamageSystemPatch
                                 Familiars.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
                             }
                         }
+                        else if (dealDamageEvent.Target.TryGetFollowedPlayer(out player))
+                        {
+                            Entity familiar = Familiars.FindPlayerFamiliar(player);
+
+                            if (familiar.Exists() && familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState))
+                            {
+                                if (!behaviourTreeState.Value.Equals(GenericEnemyState.Combat))
+                                {
+                                    Familiars.AddToFamiliarAggroBuffer(familiar, entityOwner.Owner);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -186,5 +195,9 @@ internal static class DealDamageSystemPatch
         {
             entities.Dispose();
         }
+    }
+    static bool IsValidTarget(Entity entity)
+    {
+        return entity.Has<Movement>() && entity.Has<Health>();
     }
 }

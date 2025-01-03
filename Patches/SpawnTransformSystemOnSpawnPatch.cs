@@ -88,12 +88,13 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         .Select(kv => kv.Key) // Cast to nullable to handle "not found" case
                         .FirstOrDefault();
 
-                    Core.Log.LogInfo($"PlayerBindingValidation - {matchedKey} | {prefabGUID.GetPrefabName()}");
+                    // Core.Log.LogInfo($"PlayerBindingValidation - {matchedKey} | {prefabGUID.GetPrefabName()}");
 
                     if (matchedKey == 0)
                     {
                         ulong steamId = PlayerFamiliarBattleGroups
                             .FirstOrDefault(kvp => kvp.Value.Contains(prefabGUID)).Key;
+
                         /*
                         matchedKey = PlayerFamiliarBattleGroups
                             .Where(kv => kv.Value.Contains(prefabGUID))
@@ -193,11 +194,6 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
                             continue;
                         }
-                    }
-                    else
-                    {
-                        // Core.Log.LogWarning($"PlayerBindingValidation contained {matchedKey} but couldn't find PlayerInfo or wasn't allies!");
-                        // Core.LogEntity(EntityManager.World, entity);
                     }
 
                     if (summon) continue;

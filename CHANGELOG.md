@@ -1,5 +1,9 @@
+`1.6.4`
+- spirit double destroyed instead of killed when using Gorecrusher as a familiar
+- 
+
 `1.5.3`
-- deprecating '.cleanupfams' and '.wep restore' as both should no longer be needed
+- deprecating '.cleanupfams' and '.wep restore', latter no longer needed former less useful than it used to be and prone to causing crashes
 - quest experience rewards overflow to expertise/legacy/familiar depending on which ones are maxed and active when player is at max level (expertise/legacy if both under max, expertise or legacy if one of the two is maxed, then familiar if both are maxed; gains split between expertise/legacy when awarded to both)
 - when at max level for experience, expertise and legacy will no longer receive notifications for gains
 - familiar battle queuing system! choose a location for the arena center (would recommend closing this off in such a way people can still view) and players can challenge each other to battle, see details in feature section for familiars (WIP)

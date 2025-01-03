@@ -10,7 +10,7 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class BehaviourStateChangedSystemPatch // stops familiars from trying to return to where they spawned at when coming out of combat
+internal static class BehaviourStateChangedSystemPatch // stops familiars from trying to return to where they spawned when leaving combat
 {
     static EntityManager EntityManager => Core.EntityManager;
 
@@ -29,24 +29,23 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                 if (!entity.TryGetComponent(out BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent)) continue;
                 else if (behaviourTreeStateChangedEvent.Entity.TryGetFollowedPlayer(out Entity player))
                 {
-                    BehaviourTreeState behaviourTreeState = behaviourTreeStateChangedEvent.Entity.ReadRO<BehaviourTreeState>();
+                    Entity familiar = behaviourTreeStateChangedEvent.Entity;
+                    BehaviourTreeState behaviourTreeState = familiar.ReadRO<BehaviourTreeState>();
 
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
-                        Entity familiar = behaviourTreeStateChangedEvent.Entity;
-
                         behaviourTreeState.Value = GenericEnemyState.Follow;
                         behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
 
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
 
-                        Familiars.HandleFamiliarMinions(familiar); // destroy any minions of familiar if familiar tries to return
+
+
+                        Familiars.HandleFamiliarMinions(familiar);
                     }
                     else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Idle))
                     {
-                        Entity familiar = behaviourTreeStateChangedEvent.Entity;
-
                         Familiars.TryReturnFamiliar(player, familiar);
                     }
                 }

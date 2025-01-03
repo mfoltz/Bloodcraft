@@ -1,4 +1,5 @@
 using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -14,7 +15,7 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
-internal static class Extensions
+internal static class Extensions // probably need to organize this soon
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -93,28 +94,6 @@ internal static class Extensions
     public unsafe static void* GetComponentData(this Entity entity, TypeIndex typeIndex)
     {
         return EntityManager.GetComponentDataRawRO(entity, typeIndex);
-    }
-    public unsafe static void SetComponentData(this Entity entity, TypeIndex typeIndex, void* byteData, int size)
-    {
-        EntityManager.SetComponentDataRaw(entity, typeIndex, byteData, size);
-    }
-    public unsafe static void* GetBufferData(this Entity entity, TypeIndex typeIndex)
-    {
-        return EntityManager.GetBufferRawRO(entity, typeIndex);
-    }
-    public static int GetBufferLength(this Entity entity, TypeIndex typeIndex)
-    {
-        return EntityManager.GetBufferLength(entity, typeIndex);
-    }
-    public static void SetBufferData<T>(Entity prefabSource, T[] bufferArray) where T : struct
-    {
-        DynamicBuffer<T> buffer = prefabSource.Has<T>() ? prefabSource.ReadBuffer<T>() : prefabSource.AddBuffer<T>();
-        buffer.Clear();
-
-        foreach (T element in bufferArray)
-        {
-            buffer.Add(element);
-        }
     }
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
@@ -272,6 +251,14 @@ internal static class Extensions
     }
     public static bool IsVBlood(this Entity entity)
     {
+        return entity.Has<VBloodConsumeSource>();
+    }
+    public static bool IsGateBoss(this Entity entity)
+    {
+        return entity.Has<VBloodUnit>() && !entity.Has<VBloodConsumeSource>();
+    }
+    public static bool IsVBloodOrGateBoss(this Entity entity)
+    {
         return entity.Has<VBloodUnit>();
     }
     public static ulong GetSteamId(this Entity entity)
@@ -310,7 +297,7 @@ internal static class Extensions
 
         return false;
     }
-    public static PrefabGUID GetPrefabGUID(this Entity entity)
+    public static PrefabGUID GetPrefabGuid(this Entity entity)
     {
         if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID;
 
@@ -337,6 +324,51 @@ internal static class Extensions
     {
         if (ServerGameManager.TryGetBuff(entity, buffPrefabGUID.ToIdentifier(), out buffEntity))
         {
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryApplyBuff(this Entity entity, PrefabGUID buffPrefabGUID)
+    {
+        if (Buffs.TryApplyBuff(entity, buffPrefabGUID))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryRemoveBuff(this Entity entity, PrefabGUID buffPrefabGuid)
+    {
+        if (entity.TryGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            buffEntity.Destroy();
+
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryApplyAndGetBuff(this Entity entity, PrefabGUID buffPrefabGUID, out Entity buffEntity)
+    {
+        buffEntity = Entity.Null;
+
+        if (Buffs.TryApplyBuff(entity, buffPrefabGUID) && entity.TryGetBuff(buffPrefabGUID, out buffEntity))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryApplyBuffWithOwner(Entity target, Entity owner, PrefabGUID buffPrefabGuid)
+    {
+        if (target.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity) && buffEntity.Has<EntityOwner>())
+        {
+            buffEntity.With((ref EntityOwner entityOwner) =>
+            {
+                entityOwner.Owner = owner;
+            });
+
             return true;
         }
 
