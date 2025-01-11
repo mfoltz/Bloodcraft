@@ -12,6 +12,8 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using VampireCommandFramework;
+using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
+using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Utilities;
@@ -132,6 +134,26 @@ internal static class Classes
             {
                 prefab = prefab[..prefabIndex].TrimEnd();
             }
+            return $"<color=yellow>{index + 1}</color>| <color=white>{prefab}</color> at level <color=green>{level}</color>";
+        }).ToList();
+
+        for (int i = 0; i < classBuffs.Count; i += 4) // Using batches of 4 for better readability
+        {
+            var batch = classBuffs.Skip(i).Take(4);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
+        }
+
+        /*
+        var classBuffs = perks.Select((perk, index) =>
+        {
+            int level = (index + 1) * step;
+            string prefab = new PrefabGUID(perk).GetPrefabName();
+            int prefabIndex = prefab.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                prefab = prefab[..prefabIndex].TrimEnd();
+            }
             return $"<color=white>{prefab}</color> at level <color=yellow>{level}</color>";
         }).ToList();
 
@@ -140,6 +162,36 @@ internal static class Classes
             var batch = classBuffs.Skip(i).Take(6);
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
+        }
+        */
+    }
+    public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
+    {
+        if (ClassWeaponBloodMap.TryGetValue(playerClass, out var weaponBloodStats))
+        {
+            var weaponStats = weaponBloodStats.Item1.Split(',').Select(v => ((WeaponStatType)int.Parse(v)).ToString()).ToList();
+            var bloodStats = weaponBloodStats.Item2.Split(',').Select(v => ((BloodStatType)int.Parse(v)).ToString()).ToList();
+
+            if (weaponStats.Count == 0 && bloodStats.Count == 0)
+            {
+                LocalizationService.HandleReply(ctx, "No stat synergies found for class.");
+                return;
+            }
+
+            var allStats = new List<string>();
+            allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
+            allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
+
+            for (int i = 0; i < allStats.Count; i += 6)
+            {
+                var batch = allStats.Skip(i).Take(6);
+                string replyMessage = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, $"{playerClass} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]: {replyMessage}");
+            }
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"Couldn't find stat synergies for {playerClass}...");
         }
     }
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
@@ -152,7 +204,7 @@ internal static class Classes
             return;
         }
 
-        var classSpells = perks.Select(perk =>
+        var classSpells = perks.Select((perk, index) =>
         {
             string prefab = new PrefabGUID(perk).GetLocalizedName();
             int prefabIndex = prefab.IndexOf("Prefab");
@@ -160,13 +212,16 @@ internal static class Classes
             {
                 prefab = prefab[..prefabIndex].TrimEnd();
             }
-            if (prefab.Contains("Name")) prefab = new PrefabGUID(perk).GetPrefabName();
-            return $"<color=white>{prefab}</color>";
+            if (prefab.Contains("Name"))
+            {
+                prefab = new PrefabGUID(perk).GetPrefabName();
+            }
+            return $"<color=yellow>{index + 1}</color>| <color=white>{prefab}</color>";
         }).ToList();
 
-        for (int i = 0; i < classSpells.Count; i += 6)
+        for (int i = 0; i < classSpells.Count; i += 4) // Using batches of 4 for better readability
         {
-            var batch = classSpells.Skip(i).Take(6);
+            var batch = classSpells.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
         }
@@ -218,7 +273,7 @@ internal static class Classes
 
             if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
             {
-                PrefabGUID oldAbility = abilityGroup.ReadRO<PrefabGUID>();
+                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
                 for (int i = 0; i < firstBuffer.Length; i++)
@@ -283,7 +338,7 @@ internal static class Classes
             if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
             {
                 Entity buffEntity = Entity.Null;
-                PrefabGUID oldAbility = abilityGroup.ReadRO<PrefabGUID>();
+                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
                 if (spellPrefabGUID.Equals(oldAbility))
@@ -364,7 +419,7 @@ internal static class Classes
                 bool tryEquip = false;
 
                 Entity buffEntity = Entity.Null;
-                PrefabGUID oldAbility = abilityGroup.ReadRO<PrefabGUID>();
+                PrefabGUID oldAbility = abilityGroup.Read<PrefabGUID>();
                 int index = -1;
 
                 if (spellPrefabGUID.Equals(oldAbility))
@@ -507,7 +562,7 @@ internal static class Classes
             if (indexOfBuff != -1)
             {
                 int step = _maxLevel / perks.Count;
-                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.ReadRO<Equipment>().GetFullLevel();
+                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.Read<Equipment>().GetFullLevel();
 
                 if (level >= step * (indexOfBuff + 1))
                 {
@@ -596,7 +651,7 @@ internal static class Classes
                         _abilityJewelMap.Add(jewelInstance.OverrideAbilityType, []);
                     }
 
-                    string prefabName = entity.ReadRO<PrefabGUID>().GetPrefabName().Split(" ", 2)[0];
+                    string prefabName = entity.Read<PrefabGUID>().GetPrefabName().Split(" ", 2)[0];
 
                     if (prefabName.EndsWith("T01") || prefabName.EndsWith("T02") || prefabName.EndsWith("T03") || prefabName.EndsWith("T04")) continue;
                     else _abilityJewelMap[jewelInstance.OverrideAbilityType].Add(entity);

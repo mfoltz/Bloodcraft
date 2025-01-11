@@ -7,7 +7,7 @@ using ProjectM;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Patches.SpawnTransformSystemOnSpawnPatch;
+using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 
 namespace Bloodcraft.Patches;
 
@@ -89,7 +89,7 @@ internal static class DeathEventListenerSystemPatch
         {
             ulong steamId = player.GetSteamId();
 
-            if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.ReadRO<PrefabGUID>().GuidHash))
+            if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
             {
                 Familiars.ClearFamiliarActives(steamId);
 

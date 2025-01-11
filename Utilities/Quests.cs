@@ -41,12 +41,12 @@ internal static class Quests
             }
             else if (entities.Count > 0)
             {
-                float3 userPosition = character.ReadRO<Translation>().Value;
+                float3 userPosition = character.Read<Translation>().Value;
                 Entity closest = entities
                     .Select(entity => new
                     {
                         Entity = entity,
-                        Distance = math.distance(userPosition, entity.ReadRO<Translation>().Value)
+                        Distance = math.distance(userPosition, entity.Read<Translation>().Value)
                     })
                     .Where(x => EntityManager.Exists(x.Entity) && !x.Entity.HasBuff(_imprisonedBuff)
                         && !x.Entity.Has<BlockFeedBuff>() && x.Distance <= MAX_DISTANCE)
@@ -65,7 +65,7 @@ internal static class Quests
                     return;
                 }
 
-                float3 targetPosition = closest.ReadRO<Translation>().Value;
+                float3 targetPosition = closest.Read<Translation>().Value;
                 float distance = math.distance(userPosition, targetPosition);
 
                 float3 direction = math.normalize(targetPosition - userPosition);

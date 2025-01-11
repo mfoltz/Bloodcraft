@@ -42,7 +42,7 @@ internal static class ReactToInventoryChangedSystemPatch
                 {
                     if (_quests && inventoryConnection.InventoryOwner.IsPlayer())
                     {
-                        User questUser = inventoryConnection.InventoryOwner.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
+                        User questUser = inventoryConnection.InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>();
 
                         if (!DealDamageSystemPatch.LastDamageTime.ContainsKey(questUser.PlatformId)) continue;
                         else if (DealDamageSystemPatch.LastDamageTime.TryGetValue(questUser.PlatformId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
@@ -65,7 +65,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                         if (itemPrefab.Has<UpgradeableLegendaryItem>())
                         {
-                            int tier = itemPrefab.ReadRO<UpgradeableLegendaryItem>().CurrentTier;
+                            int tier = itemPrefab.Read<UpgradeableLegendaryItem>().CurrentTier;
                             itemPrefabGUID = itemPrefab.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
                         }
 
@@ -111,7 +111,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                             case BlacksmithingHandler:
                                                 if (itemPrefab.Has<Durability>())
                                                 {
-                                                    Durability durability = itemPrefab.ReadRO<Durability>();
+                                                    Durability durability = itemPrefab.Read<Durability>();
                                                     int level = handler.GetProfessionData(steamId).Key;
                                                     durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
                                                     durability.Value = durability.MaxDurability;
@@ -124,7 +124,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                             case EnchantingHandler:
                                                 if (itemPrefab.Has<Durability>())
                                                 {
-                                                    Durability durability = itemPrefab.ReadRO<Durability>();
+                                                    Durability durability = itemPrefab.Read<Durability>();
                                                     int level = handler.GetProfessionData(steamId).Key;
                                                     durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
                                                     durability.Value = durability.MaxDurability;
@@ -135,7 +135,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                             case TailoringHandler:
                                                 if (itemPrefab.Has<Durability>())
                                                 {
-                                                    Durability durability = itemPrefab.ReadRO<Durability>();
+                                                    Durability durability = itemPrefab.Read<Durability>();
                                                     int level = handler.GetProfessionData(steamId).Key;
                                                     durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
                                                     durability.Value = durability.MaxDurability;

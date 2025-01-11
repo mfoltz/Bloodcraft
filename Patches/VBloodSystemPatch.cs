@@ -40,7 +40,7 @@ internal static class VBloodSystemPatch
             foreach (VBloodConsumed vBloodConsumed in events)
             {
                 Entity player = vBloodConsumed.Target;
-                User user = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
+                User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
                 ulong steamId = user.PlatformId;
 
                 if (_lastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;

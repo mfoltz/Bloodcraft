@@ -78,11 +78,11 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                 }
                 else if (!_leveling && _expertise && entityOwner.Owner.TryGetPlayer(out player))
                 {
-                    ulong steamId = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>().PlatformId;
-                    int weaponLevel = (int)entity.ReadRO<WeaponLevel>().Level;
+                    ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    int weaponLevel = (int)entity.Read<WeaponLevel>().Level;
                     int unarmedWeaponLevel = 0;
 
-                    Equipment equipment = player.ReadRO<Equipment>(); // fix weapon level on equipment if leveling turned off?
+                    Equipment equipment = player.Read<Equipment>(); // fix weapon level on equipment if leveling turned off?
                     if (equipment.WeaponLevel._Value != 0)
                     {
                         equipment.WeaponLevel._Value = 0;

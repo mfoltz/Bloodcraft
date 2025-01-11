@@ -182,8 +182,8 @@ internal static class WeaponSystem
     {
         if (target.Has<Minion>()) return;
 
-        Entity userEntity = source.ReadRO<PlayerCharacter>().UserEntity;
-        User user = userEntity.ReadRO<User>();
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
         WeaponType weaponType = WeaponManager.GetCurrentWeaponType(source);
 
@@ -381,7 +381,7 @@ internal static class WeaponSystem
     public static WeaponType GetWeaponTypeFromWeaponEntity(Entity weaponEntity)
     {
         if (weaponEntity == Entity.Null) return WeaponType.Unarmed;
-        string weaponCheck = weaponEntity.ReadRO<PrefabGUID>().GetPrefabName();
+        string weaponCheck = weaponEntity.Read<PrefabGUID>().GetPrefabName();
 
         return Enum.GetValues(typeof(WeaponType))
             .Cast<WeaponType>()

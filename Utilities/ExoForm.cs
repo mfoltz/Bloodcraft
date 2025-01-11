@@ -100,7 +100,7 @@ internal static class ExoForm
         // Wait until there are 5 seconds left
         while (buffEntity.Exists() && countdown > 0f)
         {
-            float3 targetPosition = playerEntity.ReadRO<Translation>().Value;
+            float3 targetPosition = playerEntity.Read<Translation>().Value;
             targetPosition = new float3(targetPosition.x, targetPosition.y + 1.5f, targetPosition.z);
 
             ScrollingCombatTextMessage.Create(
@@ -146,7 +146,7 @@ internal static class ExoForm
     {
         if (steamId.TryGetPlayerExoFormData(out var exoFormData))
         {
-            float timeInForm = buffEntity.ReadRO<Age>().Value;
+            float timeInForm = buffEntity.Read<Age>().Value;
 
             KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - timeInForm);
             steamId.SetPlayerExoFormData(timeEnergyPair);

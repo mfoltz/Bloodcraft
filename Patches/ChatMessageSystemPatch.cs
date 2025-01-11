@@ -31,7 +31,7 @@ internal static class ChatMessageSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                ChatMessageEvent chatMessageEvent = entity.ReadRO<ChatMessageEvent>();
+                ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
 
                 if (ConfigService.ClientCompanion && VerifyMAC(message, out string originalMessage))

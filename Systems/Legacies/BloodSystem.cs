@@ -187,10 +187,10 @@ internal static class BloodSystem
     {
         if (!target.Has<BloodConsumeSource>()) return;
 
-        BloodConsumeSource bloodConsumeSource = target.ReadRO<BloodConsumeSource>();
+        BloodConsumeSource bloodConsumeSource = target.Read<BloodConsumeSource>();
         BloodType targetBloodType = GetBloodTypeFromPrefab(bloodConsumeSource.UnitBloodType._Value);
 
-        int unitLevel = target.ReadRO<UnitLevel>().Level;
+        int unitLevel = target.Read<UnitLevel>().Level;
         float bloodValue = 0;
 
         if (target.Has<VBloodConsumeSource>())
@@ -202,12 +202,12 @@ internal static class BloodSystem
             bloodValue = bloodConsumeSource.BloodQuality / BASE_BLOOD_FACTOR * unitLevel * _unitLegacyMultiplier;
         }
 
-        Entity userEntity = source.ReadRO<PlayerCharacter>().UserEntity;
-        User user = userEntity.ReadRO<User>();
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
         ulong steamID = user.PlatformId;
 
         BloodType bloodType = BloodManager.GetCurrentBloodType(source);
-        float bloodQuality = source.ReadRO<Blood>().Quality;
+        float bloodQuality = source.Read<Blood>().Quality;
 
         if (bloodType.Equals(BloodType.None)) return;
         else if (targetBloodType.Equals(bloodType))

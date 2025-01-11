@@ -261,8 +261,8 @@ public static class ConfigService
     static readonly Lazy<float> _resourceYield = new(() => GetConfigValue<float>("ResourceYield"));
     public static float ResourceYield => _resourceYield.Value;
 
-    static readonly Lazy<float> _ccReduction = new(() => GetConfigValue<float>("CCReduction"));
-    public static float CCReduction => _ccReduction.Value;
+    static readonly Lazy<float> _bloodDrain = new(() => GetConfigValue<float>("BloodDrain"));
+    public static float BloodDrain => _bloodDrain.Value;
 
     static readonly Lazy<float> _spellCooldownRecoveryRate = new(() => GetConfigValue<float>("SpellCooldownRecoveryRate"));
     public static float SpellCooldownRecoveryRate => _spellCooldownRecoveryRate.Value;
@@ -567,7 +567,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Legacies", "PhysicalResistance", 0.10f, "The base cap for physical resistance"),
             new ConfigEntryDefinition("Legacies", "SpellResistance", 0.10f, "The base cap for spell resistance"),
             new ConfigEntryDefinition("Legacies", "ResourceYield", 0.25f, "The base cap for resource yield"),
-            new ConfigEntryDefinition("Legacies", "CCReduction", 0.20f, "The base cap for crowd control reduction"),
+            new ConfigEntryDefinition("Legacies", "BloodDrain", 0.5f, "The base cap for blood drain reduction"),
             new ConfigEntryDefinition("Legacies", "SpellCooldownRecoveryRate", 0.10f, "The base cap for spell cooldown recovery rate"),
             new ConfigEntryDefinition("Legacies", "WeaponCooldownRecoveryRate", 0.10f, "The base cap for weapon cooldown recovery rate"),
             new ConfigEntryDefinition("Legacies", "UltimateCooldownRecoveryRate", 0.20f, "The base cap for ultimate cooldown recovery rate"),

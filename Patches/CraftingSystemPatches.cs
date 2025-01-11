@@ -44,24 +44,24 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
         {
             foreach (Entity entity in repairEntities)
             {
-                Forge_Shared forge_Shared = entity.ReadRO<Forge_Shared>();
+                Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
                 if (forge_Shared.State == ForgeState.Empty) continue;
 
-                UserOwner userOwner = entity.ReadRO<UserOwner>();
+                UserOwner userOwner = entity.Read<UserOwner>();
                 Entity userEntity = userOwner.Owner._Entity;
-                User user = userEntity.ReadRO<User>();
+                User user = userEntity.Read<User>();
                 ulong steamId = user.PlatformId;
 
                 Entity itemEntity = forge_Shared.ItemEntity._Entity;
-                PrefabGUID itemPrefab = itemEntity.ReadRO<PrefabGUID>();
+                PrefabGUID itemPrefab = itemEntity.Read<PrefabGUID>();
 
                 if (itemEntity.Has<ShatteredItem>())
                 {
-                    itemPrefab = itemEntity.ReadRO<ShatteredItem>().OutputItem;
+                    itemPrefab = itemEntity.Read<ShatteredItem>().OutputItem;
                 }
                 else if (itemEntity.Has<UpgradeableLegendaryItem>())
                 {
-                    int tier = itemEntity.ReadRO<UpgradeableLegendaryItem>().CurrentTier;
+                    int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                     var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
                     itemPrefab = buffer[tier].TierPrefab;
                 }
@@ -81,8 +81,8 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         {
                             Entity originalItem = PrefabCollectionSystem._PrefabGuidToEntityMap[itemPrefab];
 
-                            Durability durability = itemEntity.ReadRO<Durability>();
-                            Durability originalDurability = originalItem.ReadRO<Durability>();
+                            Durability durability = itemEntity.Read<Durability>();
+                            Durability originalDurability = originalItem.Read<Durability>();
 
                             if (durability.MaxDurability > originalDurability.MaxDurability) continue; // already handled
 
@@ -128,7 +128,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                         }
 
                         QueuedWorkstationCraftAction queuedWorkstationCraftAction = buffer[0];
-                        float recipeReduction = entity.ReadRO<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75f : 1f;
+                        float recipeReduction = entity.Read<CastleWorkstation>().WorkstationLevel.HasFlag(WorkstationLevel.MatchingFloor) ? 0.75f : 1f;
 
                         ProcessQueuedCraftAction(entity, queuedWorkstationCraftAction, recipeReduction);
                     }

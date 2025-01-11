@@ -508,8 +508,8 @@ internal static class FamiliarCommands
             if (familiar != Entity.Null)
             {
                 // read stats and such here
-                Health health = familiar.ReadRO<Health>();
-                UnitStats unitStats = familiar.ReadRO<UnitStats>();
+                Health health = familiar.Read<Health>();
+                UnitStats unitStats = familiar.Read<UnitStats>();
 
                 float physicalPower = unitStats.PhysicalPower._Value;
                 float spellPower = unitStats.SpellPower._Value;
@@ -721,7 +721,7 @@ internal static class FamiliarCommands
 
         Familiars.ClearFamiliarActives(steamId);
         if (Familiars.AutoCallMap.TryRemove(character, out Entity _))
-            if (SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.ContainsKey(steamId)) SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.TryRemove(steamId, out _);
+            // if (SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.ContainsKey(steamId)) SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.TryRemove(steamId, out _);
 
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
@@ -846,7 +846,7 @@ internal static class FamiliarCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
         Entity familiar = Familiars.FindPlayerFamiliar(character);
-        int famKey = familiar.ReadRO<PrefabGUID>().GuidHash;
+        int famKey = familiar.Read<PrefabGUID>().GuidHash;
 
         if (familiar != Entity.Null)
         {

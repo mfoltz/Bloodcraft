@@ -48,7 +48,7 @@ internal class PlayerService // this is basically a worse version of the PlayerS
             players
                 .Select(userEntity =>
                 {
-                    User user = userEntity.ReadRO<User>();
+                    User user = userEntity.Read<User>();
                     string playerName = user.CharacterName.Value;
                     ulong steamId = user.PlatformId;
                     Entity character = user.LocalCharacter.GetEntityOnServer();

@@ -500,7 +500,7 @@ internal static class QuestSystem
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         Entity died = deathEvent.Target;
-        PrefabGUID target = died.ReadRO<PrefabGUID>();
+        PrefabGUID target = died.Read<PrefabGUID>();
         HashSet<Entity> participants = deathEvent.DeathParticipants;
 
         foreach (Entity player in participants)
@@ -563,7 +563,7 @@ internal static class QuestSystem
 
                     if (quest.Key == QuestType.Daily && _infiniteDailies)
                     {
-                        int level = (_leveling && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.ReadRO<Equipment>().GetFullLevel();
+                        int level = (_leveling && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                         TargetType goal = GetRandomQuestType();
 
                         HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);

@@ -562,7 +562,7 @@ internal static class PrestigeSystem
     }
     static void AdjustResistStats(Entity character)
     {
-        ResistCategoryStats resistCategoryStats = character.ReadRO<ResistCategoryStats>();
+        ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
 
         resistCategoryStats.ResistVsBeasts._Value = 0;
         resistCategoryStats.ResistVsHumans._Value = 0;
@@ -575,7 +575,7 @@ internal static class PrestigeSystem
     }
     static void AdjustDamageStats(Entity character)
     {
-        DamageCategoryStats damageCategoryStats = character.ReadRO<DamageCategoryStats>();
+        DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
 
         damageCategoryStats.DamageVsBeasts._Value = 1;
         damageCategoryStats.DamageVsHumans._Value = 1;

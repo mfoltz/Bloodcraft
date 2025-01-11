@@ -133,7 +133,7 @@ internal static class QuestCommands
 
         ulong steamId = playerInfo.User.PlatformId;
 
-        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)playerInfo.CharEntity.ReadRO<Equipment>().GetFullLevel();
+        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel();
         ForceRefresh(steamId, level);
 
         LocalizationService.HandleReply(ctx, $"Quests for <color=green>{playerInfo.User.CharacterName.Value}</color> have been refreshed.");
@@ -181,7 +181,7 @@ internal static class QuestCommands
                 {
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
-                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.ReadRO<Equipment>().GetFullLevel();
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
                         ForceDaily(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#00FFFF>Daily Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!");
@@ -214,7 +214,7 @@ internal static class QuestCommands
                 {
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                     {
-                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.ReadRO<Equipment>().GetFullLevel();
+                        int level = (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)ctx.Event.SenderCharacterEntity.Read<Equipment>().GetFullLevel();
                         ForceWeekly(ctx.Event.User.PlatformId, level);
 
                         LocalizationService.HandleReply(ctx, $"Your <color=#BF40BF>Weekly Quest</color> has been rerolled for <color=#C0C0C0>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>!");

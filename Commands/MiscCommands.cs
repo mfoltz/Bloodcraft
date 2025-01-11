@@ -101,7 +101,7 @@ internal static class MiscCommands
 
         Entity userEntity = ctx.Event.SenderUserEntity;
         Entity characterEntity = ctx.Event.SenderCharacterEntity;
-        Entity achievementOwnerEntity = userEntity.ReadRO<AchievementOwner>().Entity._Entity;
+        Entity achievementOwnerEntity = userEntity.Read<AchievementOwner>().Entity._Entity;
 
         ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
         LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
@@ -183,7 +183,7 @@ internal static class MiscCommands
     public static void GetUserStats(ChatCommandContext ctx)
     {
         Entity userEntity = ctx.Event.SenderUserEntity;
-        UserStats userStats = userEntity.ReadRO<UserStats>();
+        UserStats userStats = userEntity.Read<UserStats>();
 
         int VBloodKills = userStats.VBloodKills;
         int UnitKills = userStats.UnitKills;
@@ -212,7 +212,7 @@ internal static class MiscCommands
             return;
         }
 
-        CombatMusicListener_Shared combatMusicListener_Shared = character.ReadRO<CombatMusicListener_Shared>();
+        CombatMusicListener_Shared combatMusicListener_Shared = character.Read<CombatMusicListener_Shared>();
         combatMusicListener_Shared.UnitPrefabGuid = new PrefabGUID(0);
         character.Write(combatMusicListener_Shared);
 

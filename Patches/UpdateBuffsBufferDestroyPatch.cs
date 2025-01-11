@@ -125,7 +125,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                         if (player.TryGetBuff(_shroudBuff, out Entity shroudBuff))
                         {
-                            Equipment equipment = player.ReadRO<Equipment>();
+                            Equipment equipment = player.Read<Equipment>();
 
                             if (!equipment.IsEquipped(_shroudCloak, out var _)) DestroyUtility.Destroy(EntityManager, shroudBuff, DestroyDebugReason.TryRemoveBuff);
                         }

@@ -25,7 +25,7 @@ internal static class Recipes // would like to tie this into professions eventua
         Entity stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedGrinder];
         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_vampiricDust];
 
-        RecipeData recipeData = recipeEntity.ReadRO<RecipeData>();
+        RecipeData recipeData = recipeEntity.Read<RecipeData>();
 
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;
@@ -43,7 +43,7 @@ internal static class Recipes // would like to tie this into professions eventua
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fabricator];
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_copperWires];
 
-        recipeData = recipeEntity.ReadRO<RecipeData>();
+        recipeData = recipeEntity.Read<RecipeData>();
 
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;
@@ -54,7 +54,7 @@ internal static class Recipes // would like to tie this into professions eventua
 
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_ironBody];
 
-        recipeData = recipeEntity.ReadRO<RecipeData>();
+        recipeData = recipeEntity.Read<RecipeData>();
 
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;
@@ -65,7 +65,7 @@ internal static class Recipes // would like to tie this into professions eventua
 
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_silverIngot];
 
-        recipeData = recipeEntity.ReadRO<RecipeData>();
+        recipeData = recipeEntity.Read<RecipeData>();
 
         recipeData.AlwaysUnlocked = true;
         recipeData.HideInStation = false;

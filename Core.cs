@@ -94,11 +94,11 @@ internal static class Core
             if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
             //DetectSanguis(); want to nail the fun factor and make sure no glaring bugs before adding stakes
-            Misc.InitializeChanceModifiers();
             _ = new BattleService();
         }
 
         ModifyBuffPrefabs();
+        // MiscLogging();
 
         _initialized = true;
     }
@@ -165,6 +165,13 @@ internal static class Core
             {
                 if (!fallenAngelPrefab.Has<BlockFeedBuff>()) fallenAngelPrefab.Add<BlockFeedBuff>();
             }
+        }
+    }
+    static void MiscLogging()
+    {
+        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(1649578802), out Entity prefabEntity))
+        {
+            LogEntity(Server, prefabEntity);
         }
     }
     public static void LogEntity(World world, Entity entity)

@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using ProjectM.Scripting;
 using Unity.Entities;
@@ -132,7 +133,7 @@ internal static class TestCommands
         {
             foreach (var matchPairs in Matchmaker.MatchPairs)
             {
-                if (SpawnTransformSystemOnSpawnPatch.PlayerBattleFamiliars.TryGetValue(steamId, out List<Entity> familiarsInBattle) && familiarsInBattle.Count > 0)
+                if (FamiliarSummonSystem.PlayerBattleFamiliars.TryGetValue(steamId, out List<Entity> familiarsInBattle) && familiarsInBattle.Count > 0)
                 {
                     ctx.Reply("Can't cancel challenge until battle is over!");
                     return;
@@ -190,7 +191,7 @@ internal static class TestCommands
 
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        float3 location = character.ReadRO<Translation>().Value;
+        float3 location = character.Read<Translation>().Value;
         List<float> floats = [location.x, location.y, location.z];
 
         DataService.PlayerDictionaries._familiarBattleCoords.Clear();
@@ -246,9 +247,9 @@ internal static class TestCommands
 
         // Select 3 familiars with pseudo-randomness
         var selectedFamiliars = eligibleFamiliars.OrderBy(x => random.Next()) // Shuffle for randomness
-                                                 .Take(3)
-                                                 .Select(familiar => familiar.famKey)
-                                                 .ToList();
+            .Take(3)
+            .Select(familiar => familiar.famKey)
+            .ToList();
 
         for (int i = 0; i < 3; i++)
         {

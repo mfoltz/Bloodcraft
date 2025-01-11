@@ -11,10 +11,10 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using static Bloodcraft.Patches.SpawnTransformSystemOnSpawnPatch;
 using static Bloodcraft.Services.BattleService.Matchmaker;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Services;
@@ -291,7 +291,7 @@ internal class BattleService
                             // Found a valid match
                             Core.Log.LogInfo("PlayerInfo acquired, invoking HandleBattleSummoning...");
 
-                            SetDirectionAndFaction.Add(playerTwo);
+                            // SetDirectionAndFaction.Add(playerTwo);
                             HandleBattleSummoning(playerOneInfo, playerTwoInfo, playerOne, playerTwo);
                             _matchPending = false;
 
@@ -357,8 +357,8 @@ internal class BattleService
     {
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            FamiliarSummonSystem.SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i]);
-            FamiliarSummonSystem.SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i]);
+            FamiliarSummonSystem.SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i], 0);
+            FamiliarSummonSystem.SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i], 1);
 
             yield return null;
         }

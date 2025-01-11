@@ -28,7 +28,7 @@ internal static class Familiars
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
-    static readonly WaitForSeconds _delay = new(0.5f);
+    static readonly WaitForSeconds _delay = new(1f);
 
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
@@ -40,6 +40,7 @@ internal static class Familiars
     static readonly PrefabGUID _inkCrawlerDeathBuff = new(1273155981);
     static readonly PrefabGUID _invulnerableBuff = new(-480024072);
     static readonly PrefabGUID _disableAggroBuff = new(1934061152);
+    static readonly PrefabGUID _vanishBuff = new(1595547018);
 
     static readonly PrefabGUID _spiritDouble = new(-935560085);
 
@@ -108,7 +109,7 @@ internal static class Familiars
         if (int.TryParse(unit, out int prefabHash) && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(prefabHash), out Entity prefabEntity))
         {
             // Add to set if valid
-            if (!prefabEntity.ReadRO<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
+            if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
             {
                 LocalizationService.HandleReply(ctx, "Invalid unit prefab (match found but does not start with CHAR/char).");
                 return;
@@ -139,7 +140,7 @@ internal static class Familiars
             // verify prefab is a char unit
             if (!match.IsEmpty() && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(match, out prefabEntity))
             {
-                if (!prefabEntity.ReadRO<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
+                if (!prefabEntity.Read<PrefabGUID>().GetPrefabName().StartsWith("CHAR"))
                 {
                     LocalizationService.HandleReply(ctx, "Invalid unit name (match found but does not start with CHAR/char).");
                     return;
@@ -163,7 +164,7 @@ internal static class Familiars
     public static void TryReturnFamiliar(Entity player, Entity familiar)
     {
         float3 playerPosition = player.GetPosition();
-        float distance = UnityEngine.Vector3.Distance(familiar.GetPosition(), playerPosition);
+        float distance = Vector3.Distance(familiar.GetPosition(), playerPosition);
 
         if (distance >= 25f)
         {
@@ -337,9 +338,9 @@ internal static class Familiars
         */
 
         if (!familiar.Has<AggroConsumer>()) return;
-        else if (familiar.TryApplyAndGetBuff(_disableAggroBuff, out Entity buffEntity))
+        else if (familiar.TryApplyBuff(_disableAggroBuff))
         {
-            Core.StartCoroutine(DisableAggroDurationRoutine(buffEntity));
+            BuffDurationRoutine(familiar, _disableAggroBuff).Start();
         }
     }
     public static void ResetAndDisableAggro(Entity familiar)
@@ -366,18 +367,15 @@ internal static class Familiars
             familiar.TryApplyBuff(_disableAggroBuff);
         }
     }
-    static IEnumerator DisableAggroDurationRoutine(Entity buffEntity) // suspect the game doesn't like lifetime components on buffs that use scriptDestroy so doing this instead of trying that first
+    public static IEnumerator BuffDurationRoutine(Entity entity, PrefabGUID buffPrefabGuid, float delay = 0.5f) // scared to add Lifetime component to things that don't already have one after the blood buff incident >_>
     {
-        yield return _delay;
+        yield return new WaitForSeconds(delay);
 
-        if (buffEntity.Exists())
-        {
-            buffEntity.Destroy();
-        }
+        entity.TryRemoveBuff(buffPrefabGuid); // may want to change this to use TryRemoveBuff but might not matter
     }
     public static void BindFamiliar(Entity character, Entity userEntity, ulong steamId, int boxIndex = -1)
     {
-        User user = userEntity.ReadRO<User>();
+        User user = userEntity.Read<User>();
         Entity familiar = FindPlayerFamiliar(character);
 
         if (familiar.Exists())
@@ -442,42 +440,49 @@ internal static class Familiars
     }
     public static void UnbindFamiliar(Entity playerCharacter, Entity userEntity, ulong steamId)
     {
-        User user = userEntity.ReadRO<User>();
+        User user = userEntity.Read<User>();
         Entity familiar = FindPlayerFamiliar(playerCharacter);
 
         if (familiar.Exists())
         {
-            PrefabGUID prefabGUID = familiar.GetPrefabGuid();
-            int famKey = prefabGUID.GuidHash;
-
-            FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
-            string shinyHexColor = "";
-
-            // Check if the familiar has buffs and update the color based on RandomVisuals
-            if (buffsData.FamiliarBuffs.ContainsKey(famKey))
-            {
-                // Look up the color from the RandomVisuals dictionary if it exists
-                if (ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
-                {
-                    shinyHexColor = $"<color={hexColor}>";
-                }
-            }
-
-            HandleFamiliarMinions(familiar);
-
-            if (familiar.Has<Disabled>()) familiar.Remove<Disabled>();
-            if (AutoCallMap.ContainsKey(playerCharacter)) AutoCallMap.TryRemove(playerCharacter, out var _);
-
-            DestroyUtility.Destroy(EntityManager, familiar);
-            ClearFamiliarActives(steamId);
-
-            string message = !string.IsNullOrEmpty(shinyHexColor) ? $"<color=green>{prefabGUID.GetLocalizedName()}</color>{shinyHexColor}*</color> <color=#FFC0CB>unbound</color>!" : $"<color=green>{prefabGUID.GetLocalizedName()}</color> <color=#FFC0CB>unbound</color>!";
-            LocalizationService.HandleServerReply(EntityManager, user, message);
+            familiar.TryApplyBuff(_vanishBuff);
+            UnbindFamiliarRoutine(user, playerCharacter, familiar).Start();
         }
         else
         {
             LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find familiar to unbind, if this doesn't seem right try using '<color=white>.fam reset</color>'.");
         }
+    }
+    static IEnumerator UnbindFamiliarRoutine(User user, Entity playerCharacter, Entity familiar)
+    {
+        yield return _delay;
+
+        PrefabGUID prefabGUID = familiar.GetPrefabGuid();
+
+        ulong steamId = user.PlatformId;
+        int famKey = prefabGUID.GuidHash;
+
+        FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
+        string shinyHexColor = "";
+
+        if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+        {
+            if (ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
+            {
+                shinyHexColor = $"<color={hexColor}>";
+            }
+        }
+
+        HandleFamiliarMinions(familiar);
+
+        if (familiar.Has<Disabled>()) familiar.Remove<Disabled>();
+        if (AutoCallMap.ContainsKey(playerCharacter)) AutoCallMap.TryRemove(playerCharacter, out var _);
+
+        DestroyUtility.Destroy(EntityManager, familiar);
+        ClearFamiliarActives(steamId);
+
+        string message = !string.IsNullOrEmpty(shinyHexColor) ? $"<color=green>{prefabGUID.GetLocalizedName()}</color>{shinyHexColor}*</color> <color=#FFC0CB>unbound</color>!" : $"<color=green>{prefabGUID.GetLocalizedName()}</color> <color=#FFC0CB>unbound</color>!";
+        LocalizationService.HandleServerReply(EntityManager, user, message);
     }
     public static void AddToFamiliarAggroBuffer(Entity familiar, Entity target)
     {

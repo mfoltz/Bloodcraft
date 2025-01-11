@@ -112,6 +112,12 @@ internal static class WeaponCommands
             return;
         }
 
+        if (int.TryParse(statType, out int value))
+        {
+            --value;
+            statType = value.ToString();
+        }
+
         if (!Enum.TryParse<WeaponStats.WeaponStatType>(statType, true, out var StatType))
         {
             LocalizationService.HandleReply(ctx, "Invalid stat choice, use .wep lst to see options.");
@@ -237,6 +243,28 @@ internal static class WeaponCommands
 
         var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStats.WeaponStatType))
             .Cast<WeaponStats.WeaponStatType>()
+            .Select((stat, index) =>
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{WeaponStats.WeaponStatValues[stat]}</color>")
+            .ToList();
+
+        if (weaponStatsWithCaps.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "No weapon stats available at this time.");
+        }
+        else
+        {
+            for (int i = 0; i < weaponStatsWithCaps.Count; i += 4)
+            {
+                var batch = weaponStatsWithCaps.Skip(i).Take(4);
+                string replyMessage = string.Join(", ", batch);
+
+                LocalizationService.HandleReply(ctx, replyMessage);
+            }
+        }
+
+        /*
+        var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStats.WeaponStatType))
+            .Cast<WeaponStats.WeaponStatType>()
             .Select(stat =>
                 $"<color=#00FFFF>{stat}</color>: <color=white>{WeaponStats.WeaponStatValues[stat]}</color>")
             .ToArray();
@@ -248,6 +276,7 @@ internal static class WeaponCommands
 
         LocalizationService.HandleReply(ctx, $"Available weapon stats (1/2): {weaponStatsLine1}");
         LocalizationService.HandleReply(ctx, $"Available weapon stats (2/2): {weaponStatsLine2}");
+        */
     }
 
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".wep l", description: "Lists weapon expertises available.")]
@@ -281,7 +310,7 @@ internal static class WeaponCommands
         if (radius > 0f)
         {
             Entity character = ctx.Event.SenderCharacterEntity;
-            float3 charPosition = character.ReadRO<Translation>().Value;
+            float3 charPosition = character.Read<Translation>().Value;
 
             HashSet<PlayerInfo> processed = [];
             Dictionary<ulong, PlayerInfo> players = new(OnlineCache);

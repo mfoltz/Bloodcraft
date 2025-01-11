@@ -30,7 +30,7 @@ internal static class BloodCommands
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
-        Blood playerBlood = character.ReadRO<Blood>();
+        Blood playerBlood = character.Read<Blood>();
         BloodType bloodType = GetCurrentBloodType(character);
 
         if (string.IsNullOrEmpty(blood))
@@ -112,6 +112,12 @@ internal static class BloodCommands
         {
             LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
             return;
+        }
+
+        if (int.TryParse(statType, out int value))
+        {
+            --value;
+            statType = value.ToString();
         }
 
         if (!Enum.TryParse<BloodStats.BloodStatType>(statType, true, out var StatType))
@@ -207,6 +213,27 @@ internal static class BloodCommands
 
         var bloodStatsWithCaps = Enum.GetValues(typeof(BloodStats.BloodStatType))
             .Cast<BloodStats.BloodStatType>()
+            .Select((stat, index) =>
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{BloodStats.BloodStatValues[stat]}</color>")
+            .ToList();
+
+        if (bloodStatsWithCaps.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "No blood stats available at this time.");
+        }
+        else
+        {
+            for (int i = 0; i < bloodStatsWithCaps.Count; i += 4)
+            {
+                var batch = bloodStatsWithCaps.Skip(i).Take(4);
+                string replyMessage = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, replyMessage);
+            }
+        }
+
+        /*
+        var bloodStatsWithCaps = Enum.GetValues(typeof(BloodStats.BloodStatType))
+            .Cast<BloodStats.BloodStatType>()
             .Select(stat =>
                 $"<color=#00FFFF>{stat}</color>: <color=white>{BloodStats.BloodStatValues[stat]}</color>")
             .ToArray();
@@ -218,6 +245,7 @@ internal static class BloodCommands
 
         LocalizationService.HandleReply(ctx, $"Available blood stats (1/2): {bloodStatsLine1}");
         LocalizationService.HandleReply(ctx, $"Available blood stats (2/2): {bloodStatsLine2}");
+        */
     }
 
     [Command(name: "set", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]

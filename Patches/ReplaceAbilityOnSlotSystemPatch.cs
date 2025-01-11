@@ -40,7 +40,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                 else if (entityOwner.Owner.TryGetPlayer(out Entity character))
                 {
                     ulong steamId = character.GetSteamId();
-                    string prefabName = entity.ReadRO<PrefabGUID>().GetPrefabName().ToLower();
+                    string prefabName = entity.Read<PrefabGUID>().GetPrefabName().ToLower();
 
                     bool slotSpells = prefabName.Contains("unarmed") || prefabName.Contains("fishingpole");
                     bool shiftSpell = prefabName.Contains("weapon");

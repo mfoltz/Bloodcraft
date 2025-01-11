@@ -47,6 +47,14 @@ internal static class LevelingSystem
     static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
     static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
     static readonly PrefabGUID _familiarSCT = new(1876501183); // SCT resource gain prefabguid, good visibility
+
+    static readonly HashSet<PrefabGUID> _extraGearLevelBuffs =
+    [
+        new(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
+        new(244750581),   // SetBonus_GearLevel_02
+        new(-1469378405), // SetBonus_GearLevel_01
+        new(-1596803256)  // AB_BloodBuff_Brute_GearLevelBonus
+    ];
     public enum PlayerClass
     {
         BloodKnight,
@@ -126,8 +134,8 @@ internal static class LevelingSystem
     }
     public static void ProcessExperienceGain(Entity player, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
     {
-        UnitLevel victimLevel = target.ReadRO<UnitLevel>();
-        Health health = target.ReadRO<Health>();
+        UnitLevel victimLevel = target.Read<UnitLevel>();
+        Health health = target.Read<Health>();
 
         bool isVBlood = target.IsVBlood();
 
@@ -281,7 +289,7 @@ internal static class LevelingSystem
 
         if (GetPlayerBool(steamId, "ScrollingText"))
         {
-            float3 targetPosition = character.ReadRO<Translation>().Value;
+            float3 targetPosition = character.Read<Translation>().Value;
 
             Core.StartCoroutine(DelayedPlayerSCT(player, player.GetUserEntity(), targetPosition, _gold, gainedXP));
         }
@@ -334,19 +342,25 @@ internal static class LevelingSystem
         float scalingFactor = levelDifference > 0 ? MathF.Exp(-k * levelDifference) : 1.0f;
         return gainedXP * scalingFactor;
     }
-    public static void SetLevel(Entity player)
+    public static void SetLevel(Entity playerCharacter)
     {
-        ulong steamId = player.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>().PlatformId;
+        ulong steamId = playerCharacter.GetSteamId();
 
-        if (steamId.TryGetPlayerExperience(out var xpData))
+        if (steamId.TryGetPlayerExperience(out var xpData) && playerCharacter.Has<Equipment>())
         {
             int playerLevel = xpData.Key;
-            Equipment equipment = player.ReadRO<Equipment>();
 
-            equipment.ArmorLevel._Value = 0f;
-            equipment.SpellLevel._Value = 0f;
-            equipment.WeaponLevel._Value = playerLevel;
-            player.Write(equipment);
+            if (_extraGearLevelBuffs.Any(buff => playerCharacter.HasBuff(buff)))
+            {
+                playerLevel++;
+            }
+
+            playerCharacter.With((ref Equipment equipment) =>
+            {
+                equipment.ArmorLevel._Value = 0f;
+                equipment.SpellLevel._Value = 0f;
+                equipment.WeaponLevel._Value = playerLevel;
+            });
         }
     }
     public static void UpdateMaxRestedXP(ulong steamId, KeyValuePair<int, float> expData)
@@ -354,8 +368,8 @@ internal static class LevelingSystem
         if (steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
         {
             float currentRestedXP = restedData.Value;
-
             int currentLevel = expData.Key;
+
             int maxRestedLevel = Math.Min(_restedXPMax + currentLevel, _maxPlayerLevel);
             float restedCap = ConvertLevelToXp(maxRestedLevel) - ConvertLevelToXp(currentLevel);
 

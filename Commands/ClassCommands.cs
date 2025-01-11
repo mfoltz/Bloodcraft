@@ -332,10 +332,32 @@ internal static class ClassCommands
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".class lst [Class]", description: "Shows weapon and blood stat synergies for a class.")]
     public static void ListClassStats(ChatCommandContext ctx, string classType = "")
     {
-        if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+        if (!_classes)
         {
-            if (ClassWeaponBloodMap.TryGetValue(requestedClass, out var weaponBloodStats))
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (Classes.HasClass(steamId))
+        {
+            PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+
+            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
             {
+                playerClass = requestedClass;
+            }
+
+            Classes.ReplyClassSynergies(ctx, playerClass);
+        }
+        else
+        {
+            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            {
+                Classes.ReplyClassSynergies(ctx, requestedClass);
+
+                /*
                 var weaponStats = weaponBloodStats.Item1.Split(',').Select(v => ((WeaponStatType)int.Parse(v)).ToString()).ToList();
                 var bloodStats = weaponBloodStats.Item2.Split(',').Select(v => ((BloodStatType)int.Parse(v)).ToString()).ToList();
 
@@ -355,15 +377,12 @@ internal static class ClassCommands
                     string replyMessage = string.Join(", ", batch);
                     LocalizationService.HandleReply(ctx, $"{requestedClass} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]: {replyMessage}");
                 }
+                */
             }
             else
             {
-                LocalizationService.HandleReply(ctx, "Stats for the specified class are not configured.");
+                LocalizationService.HandleReply(ctx, "Invalid class type. Use '.class l' to see options.");
             }
-        }
-        else
-        {
-            LocalizationService.HandleReply(ctx, "Invalid or unspecified class type.");
         }
     }
 }

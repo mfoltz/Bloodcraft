@@ -1,18 +1,13 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Services.DataService.FamiliarPersistence;
-using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities.Misc;
-using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
 
@@ -43,64 +38,50 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
-    static readonly List<PrefabGUID> _prefabsToIgnore =
+    static readonly HashSet<PrefabGUID> _prefabGuidsToIgnore =
     [
         new(-259591573), // CHAR_Undead_SkeletonSoldier_TombSummon
         new(-1584807109) // CHAR_Undead_SkeletonSoldier_Withered
     ];
 
+    /*
     public static readonly ConcurrentDictionary<ulong, PrefabGUID> PlayerBindingValidation = [];
     public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerFamiliarBattleGroups = [];
     public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = []; // can add this layer to normal binding if more validation is needed after moving away from binding bool in file
     public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];
     public static readonly ConcurrentList<ulong> SetDirectionAndFaction = [];
+    */
 
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(SpawnTransformSystem_OnSpawn __instance)
     {
         if (!Core._initialized) return;
-        else if (!_familiars && !_eliteShardBearers) return;
+        else if (!_eliteShardBearers) return;
 
         NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out UnitLevel unitLevel) || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
 
+                /* deprecated
                 int level = unitLevel.Level._Value;
                 int famKey = prefabGUID.GuidHash;
                 bool summon = false;
 
-                if (_familiars && level == 1 && !_prefabsToIgnore.Contains(prefabGUID))
+                if (_familiars && level == 1 && !_prefabGuidsToIgnore.Contains(prefabGUID))
                 {
-                    /*
-                    Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(_familiarActives);
-                    ulong steamId = FamiliarActives
-                        .Where(f => f.Value.FamKey == famKey)
-                        .Select(f => f.Key)
-                        .FirstOrDefault(id => GetPlayerBool(id, "Binding"));
-                    */
-
                     ulong matchedKey = PlayerBindingValidation
                         .Where(kv => kv.Value == prefabGUID)
                         .Select(kv => kv.Key) // Cast to nullable to handle "not found" case
                         .FirstOrDefault();
 
-                    // Core.Log.LogInfo($"PlayerBindingValidation - {matchedKey} | {prefabGUID.GetPrefabName()}");
-
                     if (matchedKey == 0)
                     {
                         ulong steamId = PlayerFamiliarBattleGroups
                             .FirstOrDefault(kvp => kvp.Value.Contains(prefabGUID)).Key;
-
-                        /*
-                        matchedKey = PlayerFamiliarBattleGroups
-                            .Where(kv => kv.Value.Contains(prefabGUID))
-                            .Select(kv => (ulong?)kv.Key) // Cast to nullable to handle "not found" case
-                            .FirstOrDefault();
-                        */
 
                         if (PlayerSummoningForBattle.TryGetValue(steamId, out bool isSummoning) && isSummoning)
                         {
@@ -197,37 +178,34 @@ internal static class SpawnTransformSystemOnSpawnPatch
                     }
 
                     if (summon) continue;
+                    */
 
-                    if (_eliteShardBearers)
+                if (ShardBearers.Contains(prefabGUID))
+                {
+                    if (prefabGUID.Equals(_manticore))
                     {
-                        if (ShardBearers.Contains(prefabGUID))
-                        {
-                            if (prefabGUID.Equals(_manticore))
-                            {
-                                HandleManticore(entity);
-                            }
-                            else if (prefabGUID.Equals(_dracula))
-                            {
-                                HandleDracula(entity);
-                            }
-                            else if (prefabGUID.Equals(_monster))
-                            {
-                                HandleMonster(entity);
-                            }
-                            else if (prefabGUID.Equals(_solarus))
-                            {
-                                HandleSolarus(entity);
-                            }
-                        }
-                        else if (prefabGUID.Equals(_divineAngel))
-                        {
-                            HandleAngel(entity);
-                        }
-                        else if (prefabGUID.Equals(_fallenAngel))
-                        {
-                            HandleFallenAngel(entity);
-                        }
+                        HandleManticore(entity);
                     }
+                    else if (prefabGUID.Equals(_dracula))
+                    {
+                        HandleDracula(entity);
+                    }
+                    else if (prefabGUID.Equals(_monster))
+                    {
+                        HandleMonster(entity);
+                    }
+                    else if (prefabGUID.Equals(_solarus))
+                    {
+                        HandleSolarus(entity);
+                    }
+                }
+                else if (prefabGUID.Equals(_divineAngel))
+                {
+                    HandleAngel(entity);
+                }
+                else if (prefabGUID.Equals(_fallenAngel))
+                {
+                    HandleFallenAngel(entity);
                 }
             }
         }
@@ -245,27 +223,16 @@ internal static class SpawnTransformSystemOnSpawnPatch
     {
         entity.Remove<DynamicallyWeakenAttackers>();
 
-        Health health = entity.ReadRO<Health>();
-        health.MaxHealth._Value *= 5;
-        health.Value = health.MaxHealth._Value;
-        entity.Write(health);
+        SetLevel(entity);
+        SetAttackSpeed(entity);
+        SetHealth(entity);
+        SetPower(entity);
 
-        UnitStats unitStats = entity.ReadRO<UnitStats>();
-        unitStats.PhysicalPower._Value *= 1.5f;
-        unitStats.SpellPower._Value *= 1.5f;
-        entity.Write(unitStats);
-
-        AbilityBar_Shared abilityBarShared = entity.ReadRO<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 2f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
-        entity.Write(abilityBarShared);
-
-        AiMoveSpeeds aiMoveSpeeds = entity.ReadRO<AiMoveSpeeds>();
-        aiMoveSpeeds.Walk._Value = 5f;
-        aiMoveSpeeds.Run._Value = 6.5f;
-        entity.Write(aiMoveSpeeds);
-
-        SetShardBearerLevel(entity);
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value = 5f;
+            aiMoveSpeeds.Run._Value = 6.5f;
+        });
 
         Buffs.HandleVisual(entity, _manticoreVisual);
     }
@@ -273,27 +240,16 @@ internal static class SpawnTransformSystemOnSpawnPatch
     {
         entity.Remove<DynamicallyWeakenAttackers>();
 
-        Health health = entity.ReadRO<Health>();
-        health.MaxHealth._Value *= 5;
-        health.Value = health.MaxHealth._Value;
-        entity.Write(health);
+        SetLevel(entity);
+        SetAttackSpeed(entity);
+        SetHealth(entity);
+        SetPower(entity);
 
-        UnitStats unitStats = entity.ReadRO<UnitStats>();
-        unitStats.PhysicalPower._Value *= 1.5f;
-        unitStats.SpellPower._Value *= 1.5f;
-        entity.Write(unitStats);
-
-        AbilityBar_Shared abilityBarShared = entity.ReadRO<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 2f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
-        entity.Write(abilityBarShared);
-
-        AiMoveSpeeds aiMoveSpeeds = entity.ReadRO<AiMoveSpeeds>();
-        aiMoveSpeeds.Walk._Value = 2.5f;
-        aiMoveSpeeds.Run._Value = 5.5f;
-        entity.Write(aiMoveSpeeds);
-
-        SetShardBearerLevel(entity);
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value = 2.5f;
+            aiMoveSpeeds.Run._Value = 5.5f;
+        });
 
         Buffs.HandleVisual(entity, _monsterVisual);
     }
@@ -301,96 +257,86 @@ internal static class SpawnTransformSystemOnSpawnPatch
     {
         entity.Remove<DynamicallyWeakenAttackers>();
 
-        Health health = entity.ReadRO<Health>();
-        health.MaxHealth._Value *= 5;
-        health.Value = health.MaxHealth._Value;
-        entity.Write(health);
+        SetLevel(entity);
+        SetAttackSpeed(entity);
+        SetHealth(entity);
+        SetPower(entity);
 
-        UnitStats unitStats = entity.ReadRO<UnitStats>();
-        unitStats.PhysicalPower._Value *= 1.5f;
-        unitStats.SpellPower._Value *= 1.5f;
-        entity.Write(unitStats);
-
-        AbilityBar_Shared abilityBarShared = entity.ReadRO<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 2f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
-        entity.Write(abilityBarShared);
-
-        AiMoveSpeeds aiMoveSpeeds = entity.ReadRO<AiMoveSpeeds>();
-        aiMoveSpeeds.Walk._Value = 4f;
-        entity.Write(aiMoveSpeeds);
-
-        SetShardBearerLevel(entity);
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value = 4f;
+        });
 
         Buffs.HandleVisual(entity, _solarusVisual);
-    }
-    static void HandleAngel(Entity entity)
-    {
-        Health health = entity.ReadRO<Health>();
-        health.MaxHealth._Value *= 5;
-        health.Value = health.MaxHealth._Value;
-        entity.Write(health);
-
-        UnitStats unitStats = entity.ReadRO<UnitStats>();
-        unitStats.PhysicalPower._Value *= 1.5f;
-        unitStats.SpellPower._Value *= 1.5f;
-        entity.Write(unitStats);
-
-        AbilityBar_Shared abilityBarShared = entity.ReadRO<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 2f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
-        entity.Write(abilityBarShared);
-
-        AiMoveSpeeds aiMoveSpeeds = entity.ReadRO<AiMoveSpeeds>();
-        aiMoveSpeeds.Walk._Value = 5f;
-        aiMoveSpeeds.Run._Value = 7.5f;
-        entity.Write(aiMoveSpeeds);
-        Buffs.HandleVisual(entity, _solarusVisual);
-    }
-    static void HandleFallenAngel(Entity entity)
-    {
-        Health health = entity.ReadRO<Health>();
-        health.MaxHealth._Value *= 2.5f;
-        health.Value = health.MaxHealth._Value;
-        entity.Write(health);
     }
     static void HandleDracula(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
 
-        Health health = entity.ReadRO<Health>();
-        health.MaxHealth._Value *= 5;
-        health.Value = health.MaxHealth._Value;
-        entity.Write(health);
+        SetLevel(entity);
+        SetAttackSpeed(entity);
+        SetHealth(entity);
+        SetPower(entity);
 
-        UnitStats unitStats = entity.ReadRO<UnitStats>();
-        unitStats.PhysicalPower._Value *= 1.5f;
-        unitStats.SpellPower._Value *= 1.5f;
-        entity.Write(unitStats);
-
-        AbilityBar_Shared abilityBarShared = entity.ReadRO<AbilityBar_Shared>();
-        abilityBarShared.AttackSpeed._Value = 2f;
-        abilityBarShared.PrimaryAttackSpeed._Value = 2f;
-        entity.Write(abilityBarShared);
-
-        AiMoveSpeeds aiMoveSpeeds = entity.ReadRO<AiMoveSpeeds>();
-        aiMoveSpeeds.Walk._Value = 2.5f;
-        aiMoveSpeeds.Run._Value = 3.5f;
-        aiMoveSpeeds.Circle._Value = 3.5f;
-        entity.Write(aiMoveSpeeds);
-
-        SetShardBearerLevel(entity);
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value = 2.5f;
+            aiMoveSpeeds.Run._Value = 3.5f;
+            aiMoveSpeeds.Circle._Value = 3.5f;
+        });
 
         Buffs.HandleVisual(entity, _draculaVisual);
     }
-    static void SetShardBearerLevel(Entity shardBearer)
+    static void HandleAngel(Entity entity)
+    {
+        SetAttackSpeed(entity);
+        SetHealth(entity);
+        SetPower(entity);
+
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            aiMoveSpeeds.Walk._Value = 5f;
+            aiMoveSpeeds.Run._Value = 7.5f;
+        });
+
+        Buffs.HandleVisual(entity, _solarusVisual);
+    }
+    static void HandleFallenAngel(Entity entity)
+    {
+        SetHealth(entity);
+    }
+    static void SetLevel(Entity entity)
     {
         if (_shardBearerLevel > 0)
         {
-            shardBearer.With((ref UnitLevel unitLevel) =>
+            entity.With((ref UnitLevel unitLevel) =>
             {
                 unitLevel.Level._Value = _shardBearerLevel;
             });
         }
+    }
+    static void SetAttackSpeed(Entity entity)
+    {
+        entity.With((ref AbilityBar_Shared abilityBarShared) =>
+        {
+            abilityBarShared.AttackSpeed._Value = 2f;
+            abilityBarShared.PrimaryAttackSpeed._Value = 2f;
+        });
+    }
+    static void SetHealth(Entity entity)
+    {
+        entity.With((ref Health health) =>
+        {
+            health.MaxHealth._Value *= 5;
+            health.Value = health.MaxHealth._Value;
+        });
+    }
+    static void SetPower(Entity entity)
+    {
+        entity.With((ref UnitStats unitStats) =>
+        {
+            unitStats.PhysicalPower._Value *= 1.5f;
+            unitStats.SpellPower._Value *= 1.5f;
+        });
     }
 }

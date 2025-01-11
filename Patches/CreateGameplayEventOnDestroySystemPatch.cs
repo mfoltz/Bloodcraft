@@ -37,7 +37,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                 else if (prefabGUID.Equals(_fishingTravelToTarget)) // fishing travel to target, this indicates a succesful fishing event
                 {
                     Entity character = entityOwner.Owner;
-                    User user = character.ReadRO<PlayerCharacter>().UserEntity.ReadRO<User>();
+                    User user = character.Read<PlayerCharacter>().UserEntity.Read<User>();
                     ulong steamId = user.PlatformId;
 
                     PrefabGUID toProcess = PrefabGUID.Empty;

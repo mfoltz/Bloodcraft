@@ -33,8 +33,8 @@ internal static class ProfessionSystem
     static readonly PrefabGUID _professionsSCT = new(1876501183); // SCT resource gain prefabguid
     public static void UpdateProfessions(Entity Killer, Entity Victim)
     {
-        Entity userEntity = Killer.ReadRO<PlayerCharacter>().UserEntity;
-        User user = userEntity.ReadRO<User>();
+        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
         ulong SteamID = user.PlatformId;
 
         PrefabGUID PrefabGUID = new(0);
@@ -51,19 +51,19 @@ internal static class ProfessionSystem
             return;
         }
 
-        float ProfessionValue = Victim.ReadRO<EntityCategory>().ResourceLevel._Value;
+        float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel._Value;
 
-        PrefabGUID prefab = Victim.ReadRO<PrefabGUID>();
+        PrefabGUID prefab = Victim.Read<PrefabGUID>();
         Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
 
-        if (original.Has<EntityCategory>() && original.ReadRO<EntityCategory>().ResourceLevel._Value > ProfessionValue)
+        if (original.Has<EntityCategory>() && original.Read<EntityCategory>().ResourceLevel._Value > ProfessionValue)
         {
-            ProfessionValue = original.ReadRO<EntityCategory>().ResourceLevel._Value;
+            ProfessionValue = original.Read<EntityCategory>().ResourceLevel._Value;
         }
 
-        if (Victim.ReadRO<UnitLevel>().Level > ProfessionValue && !Victim.ReadRO<PrefabGUID>().GetPrefabName().ToLower().Contains("iron"))
+        if (Victim.Read<UnitLevel>().Level > ProfessionValue && !Victim.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("iron"))
         {
-            ProfessionValue = Victim.ReadRO<UnitLevel>().Level;
+            ProfessionValue = Victim.Read<UnitLevel>().Level;
         }
 
         if (ProfessionValue.Equals(0))
@@ -200,8 +200,8 @@ internal static class ProfessionSystem
     }
     static void NotifyPlayer(Entity target, Entity source, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
     {
-        Entity userEntity = source.ReadRO<PlayerCharacter>().UserEntity;
-        User user = userEntity.ReadRO<User>();
+        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        User user = userEntity.Read<User>();
 
         string professionName = handler.GetProfessionName();
 
@@ -219,7 +219,7 @@ internal static class ProfessionSystem
 
         if (Misc.PlayerBoolsManager.GetPlayerBool(steamID, "ScrollingText"))
         {
-            float3 targetPosition = target.ReadRO<Translation>().Value;
+            float3 targetPosition = target.Read<Translation>().Value;
             float3 professionColor = handler.GetProfessionColor();
 
             Core.StartCoroutine(DelayedProfessionSCT(user.LocalCharacter.GetEntityOnServer(), userEntity, targetPosition, professionColor, gainedXP));

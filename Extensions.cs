@@ -6,7 +6,9 @@ using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
+using Steamworks;
 using Stunlock.Core;
+using System.Collections;
 using System.Runtime.InteropServices;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -20,6 +22,7 @@ internal static class Extensions // probably need to organize this soon
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
+    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     const string EMPTY_KEY = "LocalizationKey.Empty";
@@ -75,7 +78,7 @@ internal static class Extensions // probably need to organize this soon
         void* componentData = EntityManager.GetComponentDataRawRW(entity, typeIndex);
         return Marshal.PtrToStructure<T>(new IntPtr(componentData));
     }
-    public unsafe static T ReadRO<T>(this Entity entity) where T : struct
+    public unsafe static T Read<T>(this Entity entity) where T : struct
     {
         ComponentType componentType = new(Il2CppType.Of<T>());
         TypeIndex typeIndex = componentType.TypeIndex;
@@ -101,7 +104,7 @@ internal static class Extensions // probably need to organize this soon
 
         if (entity.Has<T>())
         {
-            componentData = entity.ReadRO<T>();
+            componentData = entity.Read<T>();
 
             return true;
         }
@@ -217,7 +220,7 @@ internal static class Extensions // probably need to organize this soon
     }
     public static Entity GetPrefabEntity(this Entity entity)
     {
-        return ServerGameManager.GetPrefabEntity(entity.ReadRO<PrefabGUID>());
+        return ServerGameManager.GetPrefabEntity(entity.Read<PrefabGUID>());
     }
     public static Entity GetSpellTarget(this Entity entity)
     {
@@ -265,7 +268,7 @@ internal static class Extensions // probably need to organize this soon
     {
         if (entity.TryGetComponent(out PlayerCharacter playerCharacter))
         {
-            return playerCharacter.UserEntity.ReadRO<User>().PlatformId;
+            return playerCharacter.UserEntity.Read<User>().PlatformId;
         }
         else if (entity.TryGetComponent(out User user))
         {
@@ -342,7 +345,7 @@ internal static class Extensions // probably need to organize this soon
     {
         if (entity.TryGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
-            buffEntity.Destroy();
+            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
 
             return true;
         }
@@ -477,6 +480,24 @@ internal static class Extensions // probably need to organize this soon
             });
         }
     }
+    public static void SetPosition(this Entity entity, float3 position)
+    {
+        if (entity.Has<Translation>())
+        {
+            entity.With((ref Translation translation) =>
+            {
+                translation.Value = position;
+            });
+        }
+
+        if (entity.Has<LastTranslation>())
+        {
+            entity.With((ref LastTranslation lastTranslation) =>
+            {
+                lastTranslation.Value = position;
+            });
+        }
+    }
     public static void SetFaction(this Entity entity, PrefabGUID factionPrefabGUID)
     {
         if (entity.Has<FactionReference>())
@@ -490,5 +511,26 @@ internal static class Extensions // probably need to organize this soon
     public static bool IsAllies(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
+    }
+    public static void CastAbility(this Entity entity, PrefabGUID abilityGroup, Entity target) // 1292896032 swallow, 509296401
+    {
+        CastAbilityServerDebugEvent castAbilityServerDebugEvent = new()
+        {
+            AbilityGroup = abilityGroup,
+            Who = target.GetNetworkId()
+        };
+
+        FromCharacter fromCharacter = new()
+        {
+            Character = entity,
+            User = entity.IsPlayer() ? entity.GetUserEntity() : entity
+        };
+
+        int userIndex = entity.IsPlayer() ? entity.GetUser().Index : 0;
+        DebugEventsSystem.CastAbilityServerDebugEvent(userIndex, ref castAbilityServerDebugEvent, ref fromCharacter);
+    }
+    public static void Start(this IEnumerator routine)
+    {
+        Core.StartCoroutine(routine);
     }
 }

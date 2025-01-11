@@ -16,12 +16,12 @@ internal static class EquipmentManager // for potential professions expansion, n
     static readonly float _maxSourceMultiplier = 0.25f;
     public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.ReadRO<PrefabGUID>());
+        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.Read<PrefabGUID>());
         float scaledBonus = 0f;
 
         if (equipmentEntity.Has<Durability>())
         {
-            Durability durability = equipmentEntity.ReadRO<Durability>();
+            Durability durability = equipmentEntity.Read<Durability>();
             scaledBonus = CalculateDurabilityBonus(handler, steamId);
             durability.MaxDurability *= scaledBonus;
             durability.Value = durability.MaxDurability;

@@ -32,12 +32,12 @@ internal static class ShapeshiftSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out FromCharacter fromCharacter)) continue;
-                EnterShapeshiftEvent enterShapeshiftEvent = entity.ReadRO<EnterShapeshiftEvent>();
+                EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
 
                 if (enterShapeshiftEvent.Shapeshift.Equals(_psychicFormGroup))
                 {
                     Entity character = fromCharacter.Character;
-                    User user = fromCharacter.User.ReadRO<User>();
+                    User user = fromCharacter.User.Read<User>();
                     ulong steamId = user.PlatformId;
 
                     Entity familiar = Familiars.FindPlayerFamiliar(character);
@@ -49,7 +49,7 @@ internal static class ShapeshiftSystemPatch
                 else if (enterShapeshiftEvent.Shapeshift.Equals(_batFormGroup))
                 {
                     Entity character = fromCharacter.Character;
-                    User user = fromCharacter.User.ReadRO<User>();
+                    User user = fromCharacter.User.Read<User>();
                     ulong steamId = user.PlatformId;
 
                     Entity familiar = Familiars.FindPlayerFamiliar(character);

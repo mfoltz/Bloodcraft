@@ -92,7 +92,7 @@ internal class QuestService
                 IEnumerable<Entity> vBloods = Queries.GetEntitiesEnumerable(_unitQuery);
                 foreach (Entity entity in vBloods)
                 {
-                    PrefabGUID vBloodPrefab = entity.ReadRO<PrefabGUID>();
+                    PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
                     if (vBloodPrefab == _manticore || vBloodPrefab == _dracula || vBloodPrefab == _monster || vBloodPrefab == _solarus)
                     {
                         DestroyUtility.Destroy(EntityManager, entity);
@@ -134,7 +134,7 @@ internal class QuestService
             }
 
             _targetCache = Queries.GetEntitiesEnumerable(_unitQuery, (int)TargetType.Kill)
-                .GroupBy(entity => entity.ReadRO<PrefabGUID>())
+                .GroupBy(entity => entity.Read<PrefabGUID>())
                 .ToDictionary(
                     group => group.Key,
                     group =>
@@ -168,7 +168,7 @@ internal class QuestService
                     Entity character = playerInfo.CharEntity.Has<Equipment>() ? playerInfo.CharEntity : Entity.Null;
                     if (!character.Exists()) continue;
 
-                    RefreshQuests(user, steamId, (int)playerInfo.CharEntity.ReadRO<Equipment>().GetFullLevel());
+                    RefreshQuests(user, steamId, (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel());
                 }
                 else if (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var xpData))
                 {

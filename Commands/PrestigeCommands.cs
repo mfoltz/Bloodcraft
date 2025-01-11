@@ -239,6 +239,32 @@ internal static class PrestigeCommands
 
         var prestigeBuffs = buffs.Select((buff, index) =>
         {
+            string prefab = new PrefabGUID(buff).GetPrefabName();
+            int prefabIndex = prefab.IndexOf("Prefab");
+            if (prefabIndex != -1)
+            {
+                prefab = prefab[..prefabIndex].TrimEnd();
+            }
+            return $"<color=yellow>{index + 1}</color>| <color=white>{prefab}</color> at prestige <color=green>{index + 1}</color>";
+        }).ToList();
+
+        if (prestigeBuffs.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, "No prestige buffs available.");
+        }
+        else
+        {
+            for (int i = 0; i < prestigeBuffs.Count; i += 4)
+            {
+                var batch = prestigeBuffs.Skip(i).Take(4);
+                string replyMessage = string.Join(", ", batch);
+                LocalizationService.HandleReply(ctx, replyMessage);
+            }
+        }
+
+        /*
+        var prestigeBuffs = buffs.Select((buff, index) =>
+        {
             int level = index + 1;
             string prefab = new PrefabGUID(buff).GetPrefabName();
             int prefabIndex = prefab.IndexOf("Prefab");
@@ -255,6 +281,7 @@ internal static class PrestigeCommands
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, replyMessage);
         }
+        */
     }
 
     [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
@@ -533,11 +560,11 @@ internal static class PrestigeCommands
         else
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=red>disabled</color>!");
-            Equipment equipment = character.ReadRO<Equipment>();
+            Equipment equipment = character.Read<Equipment>();
 
             if (!equipment.IsEquipped(_shroudCloak, out var _) && character.TryGetBuff(_shroudBuff, out Entity shroudBuff))
             {
-                DestroyUtility.Destroy(EntityManager, shroudBuff, DestroyDebugReason.TryRemoveBuff);
+                character.TryRemoveBuff(_shroudBuff);
             }
         }
     }

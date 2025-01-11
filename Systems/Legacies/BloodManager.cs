@@ -28,7 +28,7 @@ internal static class BloodManager
             PhysicalResistance, // 2
             SpellResistance, // 3
             ResourceYield, // 4
-            CCReduction, // 5
+            BloodDrain, // 5
             SpellCooldownRecoveryRate, // 6
             WeaponCooldownRecoveryRate, // 7
             UltimateCooldownRecoveryRate, // 8
@@ -44,7 +44,7 @@ internal static class BloodManager
             { BloodStatType.PhysicalResistance, UnitStatType.PhysicalResistance },
             { BloodStatType.SpellResistance, UnitStatType.SpellResistance },
             { BloodStatType.ResourceYield, UnitStatType.ResourceYield },
-            { BloodStatType.CCReduction, UnitStatType.CCReduction },
+            { BloodStatType.BloodDrain, UnitStatType.BloodDrain },
             { BloodStatType.SpellCooldownRecoveryRate, UnitStatType.SpellCooldownRecoveryRate },
             { BloodStatType.WeaponCooldownRecoveryRate, UnitStatType.WeaponCooldownRecoveryRate },
             { BloodStatType.UltimateCooldownRecoveryRate, UnitStatType.UltimateCooldownRecoveryRate },
@@ -60,7 +60,7 @@ internal static class BloodManager
             {BloodStatType.PhysicalResistance, ConfigService.PhysicalResistance},
             {BloodStatType.SpellResistance, ConfigService.SpellResistance},
             {BloodStatType.ResourceYield, ConfigService.ResourceYield},
-            {BloodStatType.CCReduction, ConfigService.CCReduction},
+            {BloodStatType.BloodDrain, ConfigService.BloodDrain},
             {BloodStatType.SpellCooldownRecoveryRate, ConfigService.SpellCooldownRecoveryRate},
             {BloodStatType.WeaponCooldownRecoveryRate, ConfigService.WeaponCooldownRecoveryRate},
             {BloodStatType.UltimateCooldownRecoveryRate, ConfigService.UltimateCooldownRecoveryRate},
@@ -205,7 +205,7 @@ internal static class BloodManager
     }
     public static BloodType GetCurrentBloodType(Entity character)
     {
-        Blood blood = character.ReadRO<Blood>();
+        Blood blood = character.Read<Blood>();
         return GetBloodTypeFromPrefab(blood.BloodType);
     }
 }

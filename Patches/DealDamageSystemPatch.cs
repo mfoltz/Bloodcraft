@@ -95,8 +95,8 @@ internal static class DealDamageSystemPatch
                     }
                     else if (_onHitEffects && IsValidTarget(dealDamageEvent.Target) && entityOwner.Owner.TryGetPlayer(out player) && !dealDamageEvent.Target.IsPlayer())
                     {
-                        Entity userEntity = player.ReadRO<PlayerCharacter>().UserEntity;
-                        ulong steamId = userEntity.ReadRO<User>().PlatformId;
+                        Entity userEntity = player.Read<PlayerCharacter>().UserEntity;
+                        ulong steamId = userEntity.Read<User>().PlatformId;
 
                         if (!Classes.HasClass(steamId)) continue;
                         PlayerClass playerClass = Classes.GetPlayerClass(steamId);

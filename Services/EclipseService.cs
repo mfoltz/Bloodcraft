@@ -216,7 +216,7 @@ internal class EclipseService
 
         if (_legacies)
         {
-            BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.ReadRO<Blood>().BloodType);
+            BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
             IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
 
             if (bloodHandler != null)
@@ -259,7 +259,7 @@ internal class EclipseService
 
         if (_expertise)
         {
-            WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.ReadRO<Equipment>().WeaponSlot.SlotEntity._Entity);
+            WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
             IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
 
             if (expertiseHandler != null)
@@ -320,8 +320,8 @@ internal class EclipseService
                 familiarPrestige = FamiliarPrestigeManager.GetFamiliarPrestigeLevel(FamiliarPrestigeManager.LoadFamiliarPrestige(steamId), familiarId);
             }
 
-            UnitStats unitStats = familiar.ReadRO<UnitStats>();
-            Health health = familiar.ReadRO<Health>();
+            UnitStats unitStats = familiar.Read<UnitStats>();
+            Health health = familiar.Read<Health>();
 
             int maxHealth = (int)health.MaxHealth._Value;
             int physicalPower = (int)unitStats.PhysicalPower._Value;

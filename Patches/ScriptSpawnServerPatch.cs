@@ -71,7 +71,7 @@ internal static class ScriptSpawnServerPatch
                 else if (_familiars && entity.GetBuffTarget().IsPlayer() && entityOwner.Owner.TryGetFollowedPlayer(out player))
                 {
                     Entity familiar = entityOwner.Owner;
-                    Buff buff = entity.ReadRO<Buff>();
+                    Buff buff = entity.Read<Buff>();
 
                     if (buff.BuffEffectType == BuffEffectType.Debuff && ServerGameManager.IsAllies(player, familiar))
                     {
@@ -96,7 +96,7 @@ internal static class ScriptSpawnServerPatch
                             if (indexOfBuff != -1)
                             {
                                 int step = _maxLevel / perks.Count;
-                                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.ReadRO<Equipment>().GetFullLevel();
+                                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.Read<Equipment>().GetFullLevel();
 
                                 if (level >= step * (indexOfBuff + 1))
                                 {
@@ -120,7 +120,7 @@ internal static class ScriptSpawnServerPatch
 
                     if (_leveling && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
                     {
-                        BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.ReadRO<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
+                        BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
                         bloodBuff_Brute_ArmorLevelBonus_DataShared.GearLevel = 0;
                         entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
                     }

@@ -210,7 +210,7 @@ internal static class Misc
     }
     public static HashSet<Entity> GetDeathParticipants(Entity source)
     {
-        float3 sourcePosition = source.ReadRO<Translation>().Value;
+        float3 sourcePosition = source.Read<Translation>().Value;
         User sourceUser = source.GetUser();
         string playerName = sourceUser.CharacterName.Value;
 

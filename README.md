@@ -183,6 +183,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Shortcut: *.lvl set [Player] [Level]*
 
 ### Misc Commands
+- `.famservant` 🔒
+  - testing
+  - Shortcut: *.fs*
 - `.reminders`
   - Toggles general reminders for various mod features.
   - Shortcut: *.remindme*
@@ -506,8 +509,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The base cap for spell resistance
 - **Resource Yield**: `ResourceYield` (float, default: 0.25)
   The base cap for resource yield
-- **CC Reduction**: `CCReduction` (float, default: 0.2)
-  The base cap for crowd control reduction
+- **Blood Drain**: `BloodDrain` (float, default: 0.5)
+  The base cap for blood drain reduction
 - **Spell Cooldown Recovery Rate**: `SpellCooldownRecoveryRate` (float, default: 0.1)
   The base cap for spell cooldown recovery rate
 - **Weapon Cooldown Recovery Rate**: `WeaponCooldownRecoveryRate` (float, default: 0.1)

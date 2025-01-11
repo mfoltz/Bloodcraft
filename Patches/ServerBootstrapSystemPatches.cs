@@ -429,7 +429,7 @@ internal static class ServerBootstrapSystemPatches
     {
         yield return _delay;
 
-        FamiliarSummonSystem.HandleFamiliar(playerCharacter, familiar);
+        FamiliarSummonSystem.HandleFamiliar(playerCharacter.GetUser(), playerCharacter, familiar);
     }
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]

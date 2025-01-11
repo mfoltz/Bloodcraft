@@ -71,10 +71,10 @@ internal static class EmoteSystemPatch
         {
             foreach (var entity in entities)
             {
-                UseEmoteEvent useEmoteEvent = entity.ReadRO<UseEmoteEvent>();
-                FromCharacter fromCharacter = entity.ReadRO<FromCharacter>();
+                UseEmoteEvent useEmoteEvent = entity.Read<UseEmoteEvent>();
+                FromCharacter fromCharacter = entity.Read<FromCharacter>();
 
-                User user = fromCharacter.User.ReadRO<User>();
+                User user = fromCharacter.User.Read<User>();
                 Entity character = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
@@ -205,15 +205,15 @@ internal static class EmoteSystemPatch
                 EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
                 BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, _invulnerableBuff, familiar);
 
-                FactionReference factionReference = familiar.ReadRO<FactionReference>();
+                FactionReference factionReference = familiar.Read<FactionReference>();
                 factionReference.FactionGuid._Value = _playerFaction;
                 familiar.Write(factionReference);
 
-                AggroConsumer aggroConsumer = familiar.ReadRO<AggroConsumer>();
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
                 aggroConsumer.Active._Value = true;
                 familiar.Write(aggroConsumer);
 
-                Aggroable aggroable = familiar.ReadRO<Aggroable>();
+                Aggroable aggroable = familiar.Read<Aggroable>();
                 aggroable.Value._Value = true;
                 aggroable.DistanceFactor._Value = 1f;
                 aggroable.AggroFactor._Value = 1f;
@@ -223,17 +223,17 @@ internal static class EmoteSystemPatch
             }
             else // if not, disable combat
             {
-                FactionReference factionReference = familiar.ReadRO<FactionReference>();
+                FactionReference factionReference = familiar.Read<FactionReference>();
                 factionReference.FactionGuid._Value = _ignoredFaction;
                 familiar.Write(factionReference);
 
-                AggroConsumer aggroConsumer = familiar.ReadRO<AggroConsumer>();
+                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
                 aggroConsumer.Active._Value = false;
                 aggroConsumer.AggroTarget._Entity = Entity.Null;
                 aggroConsumer.AlertTarget._Entity = Entity.Null;
                 familiar.Write(aggroConsumer);
 
-                Aggroable aggroable = familiar.ReadRO<Aggroable>();
+                Aggroable aggroable = familiar.Read<Aggroable>();
                 aggroable.Value._Value = false;
                 aggroable.DistanceFactor._Value = 0f;
                 aggroable.AggroFactor._Value = 0f;
@@ -255,7 +255,7 @@ internal static class EmoteSystemPatch
                 {
                     if (invlunerableBuff.Has<LifeTime>())
                     {
-                        var lifetime = invlunerableBuff.ReadRO<LifeTime>();
+                        var lifetime = invlunerableBuff.Read<LifeTime>();
                         lifetime.Duration = -1;
                         lifetime.EndAction = LifeTimeEndAction.None;
                         invlunerableBuff.Write(lifetime);
