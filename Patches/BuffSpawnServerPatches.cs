@@ -36,11 +36,13 @@ internal static class BuffSystemSpawnPatches
     static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
+    const float FAMILIAR_TRAVEL_DURATION = 7.5f;
+
     static readonly PrefabGUID _fallenAngel = new(-76116724);
     static readonly PrefabGUID _solarus = new(-740796338);
 
     static readonly PrefabGUID _draculaReturnBuff = new(404387047);
-    static readonly PrefabGUID _vampiricCurse = new(-89195359);
+    static readonly PrefabGUID _vampiricCurse = new(-89195359); // Buff_Vampire_Dracula_BloodCurse
     static readonly PrefabGUID _channelHealBuff = new(478901515);
     static readonly PrefabGUID _highlordSwordSpawnBuff = new(-6635580);
     static readonly PrefabGUID _highlordSwordPermaBuff = new(-916946628);
@@ -56,6 +58,7 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID _wranglerPotionBuff = new(387154469);
 
     static readonly PrefabGUID _swallowAbilityGroup = new(1292896032);
+    static readonly PrefabGUID _targetSwallowedBuff = new(-915145807);
 
     static readonly PrefabGUID _traderFactionT01 = new(30052367);
 
@@ -148,8 +151,8 @@ internal static class BuffSystemSpawnPatches
                 {
                     if (buffTarget.TryGetPlayer(out player))
                     {
-                        Entity userEntity = player.GetUserEntity();
-                        ulong steamId = player.GetSteamId();
+                        User user = player.GetUser();
+                        ulong steamId = user.PlatformId;
 
                         Entity familiar = Familiars.FindPlayerFamiliar(player);
 
@@ -161,11 +164,11 @@ internal static class BuffSystemSpawnPatches
                             });
 
                             Familiars.TryReturnFamiliar(player, familiar);
-                            if (!_familiarPvP) Familiars.UnbindFamiliar(player, userEntity, steamId);
+                            if (!_familiarPvP) Familiars.UnbindFamiliar(user, player);
                         }
                     }
                 }
-                else if (_familiars && prefabGUID.Equals(_vampiricCurse)) // BloodyPoint teleports
+                else if (_familiars && prefabGUID.Equals(_vampiricCurse) && !entity.Has<GameplayEventListeners>()) // bring familiar with player for BloodyPoint teleports, but in a cheeky way ;P
                 {
                     if (buffTarget.TryGetPlayer(out player) && entityOwner.Owner.Equals(player))
                     {
@@ -173,7 +176,18 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
-                            player.CastAbility(_swallowAbilityGroup, familiar);
+                            player.CastAbility(familiar, _swallowAbilityGroup);
+
+                            if (familiar.TryApplyAndGetBuffWithOwner(player, _targetSwallowedBuff, out Entity buffEntity))
+                            {
+                                if (buffEntity.Has<LifeTime>())
+                                {
+                                    buffEntity.With((ref LifeTime lifeTime) =>
+                                    {
+                                        lifeTime.Duration = FAMILIAR_TRAVEL_DURATION;
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -209,24 +223,34 @@ internal static class BuffSystemSpawnPatches
                     if (_professions) // apply alchemy bonuses
                     {
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
+
                         int level = handler.GetProfessionData(steamId).Key;
+                        float bonus = 1 + level / (float)_maxProfessionLevel;
 
                         if (entity.Has<LifeTime>())
                         {
                             LifeTime lifeTime = entity.Read<LifeTime>();
-                            if (lifeTime.Duration != -1) lifeTime.Duration *= 1 + level / (float)_maxProfessionLevel;
+                            if (lifeTime.Duration != -1) lifeTime.Duration *= bonus;
                             entity.Write(lifeTime);
                         }
 
-                        if (entity.Has<ModifyUnitStatBuff_DOTS>())
+                        if (entity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var statBuffer) && !statBuffer.IsEmpty)
                         {
-                            var buffer = entity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-                            for (int i = 0; i < buffer.Length; i++)
+                            for (int i = 0; i < statBuffer.Length; i++)
                             {
-                                ModifyUnitStatBuff_DOTS statBuff = buffer[i];
+                                ModifyUnitStatBuff_DOTS statBuff = statBuffer[i];
                                 statBuff.Value *= 1 + level / (float)_maxProfessionLevel;
-                                buffer[i] = statBuff;
+
+                                statBuffer[i] = statBuff;
                             }
+                        }
+
+                        if (entity.Has<HealOnGameplayEvent>() && entity.TryGetBuffer<CreateGameplayEventsOnTick>(out var tickBuffer) && !tickBuffer.IsEmpty)
+                        {
+                            CreateGameplayEventsOnTick eventsOnTick = tickBuffer[0];
+                            eventsOnTick.MaxTicks = (int)(eventsOnTick.MaxTicks * bonus);
+
+                            tickBuffer[0] = eventsOnTick;
                         }
                     }
                 }

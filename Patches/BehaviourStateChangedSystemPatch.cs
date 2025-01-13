@@ -14,12 +14,14 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
 {
     static EntityManager EntityManager => Core.EntityManager;
 
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+
     [HarmonyPatch(typeof(CreateGameplayEventOnBehaviourStateChangedSystem), nameof(CreateGameplayEventOnBehaviourStateChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(CreateGameplayEventOnBehaviourStateChangedSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!ConfigService.FamiliarSystem) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);
         try
@@ -40,7 +42,7 @@ internal static class BehaviourStateChangedSystemPatch // stops familiars from t
                         entity.Write(behaviourTreeStateChangedEvent);
                         behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
 
-
+                        // ExtendedGameManager.SetBehaviourTreeState(); good to know about, don't feel like messing with what works atm
 
                         Familiars.HandleFamiliarMinions(familiar);
                     }

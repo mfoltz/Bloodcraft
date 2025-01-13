@@ -22,12 +22,12 @@ internal static class Buffs
 
     public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
     {
-        { 0, new(-1473399128) }, // primary fast shockwaveslash
+        { 0, new(-1473399128) }, // primary attack fast shockwaveslash
         { 1, new(841757706) }, // first weapon skill downswing detonate
-        { 2, new(-1940289109) }, // dash skill teleport behind target on shift
+        { 2, new(-1940289109) }, // space dash skill teleport behind target
         { 3, new(1270706044) }, // shift veil of bats
         { 4, new(532210332) }, // second weapon skill sword throw
-        { 5, new(716346677) }, // batswarm?
+        { 5, new(716346677) }, // batswarm? mmm don't like this one, animation looks off need to find good drac spell to use but not sure if any left and the 20 blood bolts one is kinda lame. the nuts one spams console since the homing bolts freak out when no players to target but doesn't technically cause issues per se
         { 6, new(-1161896955) }, // etherial sword
         { 7, new(-7407393) } // ring of blood
     };
@@ -224,7 +224,6 @@ internal static class Buffs
             var biteToMutant = buff.Read<BloodBuff_BiteToMutant_DataShared>();
 
             biteToMutant.RequiredBloodPercentage = 0;
-            //biteToMutant.MutantFaction = new(877850148); slaves_rioters <-- completely forgot this was here, oops lol
             buff.Write(biteToMutant);
 
             return;
@@ -602,86 +601,74 @@ internal static class Buffs
             }
         }
     }
-    public static void HandleVisual(Entity entity, PrefabGUID visual)
+    public static void HandleShinyBuff(Entity entity, PrefabGUID buffPrefabGuid) // using this for shardbearer visuals as well but prefer this method name
     {
-        ApplyBuffDebugEvent applyBuffDebugEvent = new()
+        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
-            BuffPrefabGUID = visual,
-        };
-
-        FromCharacter fromCharacter = new()
-        {
-            Character = entity,
-            User = entity
-        };
-
-        DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-        if (ServerGameManager.TryGetBuff(entity, applyBuffDebugEvent.BuffPrefabGUID.ToIdentifier(), out Entity buff))
-        {
-            if (buff.Has<Buff>())
+            if (buffEntity.Has<Buff>())
             {
-                BuffCategory component = buff.Read<BuffCategory>();
+                BuffCategory component = buffEntity.Read<BuffCategory>();
                 component.Groups = BuffCategoryFlag.None;
-                buff.Write(component);
+                buffEntity.Write(component);
             }
-            if (buff.Has<CreateGameplayEventsOnSpawn>())
+            if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
             {
-                buff.Remove<CreateGameplayEventsOnSpawn>();
+                buffEntity.Remove<CreateGameplayEventsOnSpawn>();
             }
-            if (buff.Has<GameplayEventListeners>())
+            if (buffEntity.Has<GameplayEventListeners>())
             {
-                buff.Remove<GameplayEventListeners>();
+                buffEntity.Remove<GameplayEventListeners>();
             }
-            if (buff.Has<LifeTime>())
+            if (buffEntity.Has<LifeTime>())
             {
-                LifeTime lifetime = buff.Read<LifeTime>();
-                lifetime.Duration = -1f; // need to try changing this to 9999 or 0 instead to avert console spam at some point
+                LifeTime lifetime = buffEntity.Read<LifeTime>();
+                lifetime.Duration = 0f; // need to try changing this to 9999 or 0 instead to avert console spam at some point
                 lifetime.EndAction = LifeTimeEndAction.None;
-                buff.Write(lifetime);
+                buffEntity.Write(lifetime);
             }
-            if (buff.Has<RemoveBuffOnGameplayEvent>())
+            if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
             {
-                buff.Remove<RemoveBuffOnGameplayEvent>();
+                buffEntity.Remove<RemoveBuffOnGameplayEvent>();
             }
-            if (buff.Has<RemoveBuffOnGameplayEventEntry>())
+            if (buffEntity.Has<RemoveBuffOnGameplayEventEntry>())
             {
-                buff.Remove<RemoveBuffOnGameplayEventEntry>();
+                buffEntity.Remove<RemoveBuffOnGameplayEventEntry>();
             }
-            if (buff.Has<DealDamageOnGameplayEvent>())
+            if (buffEntity.Has<DealDamageOnGameplayEvent>())
             {
-                buff.Remove<DealDamageOnGameplayEvent>();
+                buffEntity.Remove<DealDamageOnGameplayEvent>();
             }
-            if (buff.Has<HealOnGameplayEvent>())
+            if (buffEntity.Has<HealOnGameplayEvent>())
             {
-                buff.Remove<HealOnGameplayEvent>();
+                buffEntity.Remove<HealOnGameplayEvent>();
             }
-            if (buff.Has<BloodBuffScript_ChanceToResetCooldown>())
+            if (buffEntity.Has<BloodBuffScript_ChanceToResetCooldown>())
             {
-                buff.Remove<BloodBuffScript_ChanceToResetCooldown>();
+                buffEntity.Remove<BloodBuffScript_ChanceToResetCooldown>();
             }
-            if (buff.Has<ModifyMovementSpeedBuff>())
+            if (buffEntity.Has<ModifyMovementSpeedBuff>())
             {
-                buff.Remove<ModifyMovementSpeedBuff>();
+                buffEntity.Remove<ModifyMovementSpeedBuff>();
             }
-            if (buff.Has<ApplyBuffOnGameplayEvent>())
+            if (buffEntity.Has<ApplyBuffOnGameplayEvent>())
             {
-                buff.Remove<ApplyBuffOnGameplayEvent>();
+                buffEntity.Remove<ApplyBuffOnGameplayEvent>();
             }
-            if (buff.Has<DestroyOnGameplayEvent>())
+            if (buffEntity.Has<DestroyOnGameplayEvent>())
             {
-                buff.Remove<DestroyOnGameplayEvent>();
+                buffEntity.Remove<DestroyOnGameplayEvent>();
             }
-            if (buff.Has<WeakenBuff>())
+            if (buffEntity.Has<WeakenBuff>())
             {
-                buff.Remove<WeakenBuff>();
+                buffEntity.Remove<WeakenBuff>();
             }
-            if (buff.Has<ReplaceAbilityOnSlotBuff>())
+            if (buffEntity.Has<ReplaceAbilityOnSlotBuff>())
             {
-                buff.Remove<ReplaceAbilityOnSlotBuff>();
+                buffEntity.Remove<ReplaceAbilityOnSlotBuff>();
             }
-            if (buff.Has<AmplifyBuff>())
+            if (buffEntity.Has<AmplifyBuff>())
             {
-                buff.Remove<AmplifyBuff>();
+                buffEntity.Remove<AmplifyBuff>();
             }
         }
     }
@@ -769,7 +756,6 @@ internal static class Buffs
                 spawnPrefabOnGameplayEventBuffer[0] = spawnPrefabOnGameplayEvent;
             }
         }
-        
 
         ModifyTargetHUDBuff modifyTargetHUDBuff = new()
         {
@@ -780,7 +766,7 @@ internal static class Buffs
         buffEntity.Write(modifyTargetHUDBuff);
         */
 
-        // change to block buff to prevent other replaceAbilityOnSlotBuffers from overriding for the duration?
+        // change to block buff to prevent other replaceAbilityOnSlotBuffers from overriding for the duration? 
         buffEntity.With((ref Buff buff) =>
         {
             buff.BuffType = BuffType.Block;
@@ -791,7 +777,8 @@ internal static class Buffs
             buffCategory.Groups = BuffCategoryFlag.Shapeshift | BuffCategoryFlag.RemoveOnDisconnect;
         });
 
-        buffEntity.Add<LifeTime>();
+        if (!buffEntity.Has<LifeTime>()) buffEntity.Add<LifeTime>();
+
         buffEntity.Write(new LifeTime
         {
             Duration = duration,
@@ -824,6 +811,6 @@ internal static class Buffs
         string durationMessage = $"<color=red>Dracula's</color> latent power made manifest... (<color=white>{(int)duration}</color>s)";
         LocalizationService.HandleServerReply(EntityManager, user, durationMessage);
 
-        Core.StartCoroutine(ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f)); // Start countdown messages 5 seconds before buff expires
+        ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f).Start(); // Start countdown messages 5 seconds before buff expires
     }
 }

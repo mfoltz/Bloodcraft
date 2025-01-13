@@ -18,9 +18,6 @@ internal static class EmoteSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
 
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
@@ -130,18 +127,17 @@ internal static class EmoteSystemPatch
         BattleService.NotifyBothPlayers(match.Item1, match.Item2, "The challenge has been declined.");
         BattleChallenges.Remove(match);
     }
-    public static void BindUnbind(User user, Entity character, ulong steamId)
+    public static void BindUnbind(User user, Entity playerCharacter, ulong steamId)
     {
-        Entity userEntity = character.GetUserEntity();
-        Entity familiar = Familiars.FindPlayerFamiliar(character);
+        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
         if (familiar.Exists())
         {
-            Familiars.UnbindFamiliar(character, userEntity, steamId);
+            Familiars.UnbindFamiliar(user, playerCharacter);
         }
         else
         {
-            Familiars.BindFamiliar(character, userEntity, steamId);
+            Familiars.BindFamiliar(user, playerCharacter);
         }
     }
     public static void CallDismiss(User user, Entity character, ulong steamId)
@@ -163,7 +159,7 @@ internal static class EmoteSystemPatch
             }
             else
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "Active familiar doesn't exist! If this doesn't seem right try using '<color=white>.fam reset</color>'.");
+                LocalizationService.HandleServerReply(EntityManager, user, "Active familiar not found! If that doesn't seem quite right try using '<color=white>.fam reset</color>'.");
             }
         }
         else
@@ -175,13 +171,13 @@ internal static class EmoteSystemPatch
     {
         if (!_familiarCombat)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat is not enabled.");
+            LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat toggling is not enabled.");
             return;
         }
 
         if (character.HasBuff(_combatBuff) || character.HasBuff(_pvpCombatBuff))
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode in PvE/PvP combat!");
+            LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode during PvE/PvP combat!");
             return;
         }
         else if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
@@ -195,79 +191,36 @@ internal static class EmoteSystemPatch
 
             if (familiar == Entity.Null)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for.");
+                LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to toggle combat for...");
                 return;
             }
 
-            if (ServerGameManager.HasBuff(familiar, _invulnerableBuff.ToIdentifier())) // remove and enable combat
+            if (familiar.HasBuff(_invulnerableBuff)) // remove and enable combat
             {
-                BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
-                EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-                BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, _invulnerableBuff, familiar);
+                // BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
+                // EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+                // BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, _invulnerableBuff, familiar);
 
-                FactionReference factionReference = familiar.Read<FactionReference>();
-                factionReference.FactionGuid._Value = _playerFaction;
-                familiar.Write(factionReference);
-
-                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-                aggroConsumer.Active._Value = true;
-                familiar.Write(aggroConsumer);
-
-                Aggroable aggroable = familiar.Read<Aggroable>();
-                aggroable.Value._Value = true;
-                aggroable.DistanceFactor._Value = 1f;
-                aggroable.AggroFactor._Value = 1f;
-                familiar.Write(aggroable);
+                familiar.TryRemoveBuff(_invulnerableBuff);
+                familiar.SetFaction(_playerFaction);
+                familiar.EnableAggro();
+                familiar.EnableAggroable();
 
                 LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat <color=green>enabled</color>.");
             }
-            else // if not, disable combat
+            else
             {
-                FactionReference factionReference = familiar.Read<FactionReference>();
-                factionReference.FactionGuid._Value = _ignoredFaction;
-                familiar.Write(factionReference);
-
-                AggroConsumer aggroConsumer = familiar.Read<AggroConsumer>();
-                aggroConsumer.Active._Value = false;
-                aggroConsumer.AggroTarget._Entity = Entity.Null;
-                aggroConsumer.AlertTarget._Entity = Entity.Null;
-                familiar.Write(aggroConsumer);
-
-                Aggroable aggroable = familiar.Read<Aggroable>();
-                aggroable.Value._Value = false;
-                aggroable.DistanceFactor._Value = 0f;
-                aggroable.AggroFactor._Value = 0f;
-                familiar.Write(aggroable);
-
-                ApplyBuffDebugEvent applyBuffDebugEvent = new()
-                {
-                    BuffPrefabGUID = _invulnerableBuff,
-                };
-
-                FromCharacter fromCharacter = new()
-                {
-                    Character = familiar,
-                    User = familiar,
-                };
-
-                DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-                if (ServerGameManager.TryGetBuff(familiar, _invulnerableBuff.ToIdentifier(), out Entity invlunerableBuff))
-                {
-                    if (invlunerableBuff.Has<LifeTime>())
-                    {
-                        var lifetime = invlunerableBuff.Read<LifeTime>();
-                        lifetime.Duration = -1;
-                        lifetime.EndAction = LifeTimeEndAction.None;
-                        invlunerableBuff.Write(lifetime);
-                    }
-                }
+                familiar.SetFaction(_ignoredFaction);
+                familiar.DisableAggro();
+                familiar.DisableAggroable();
+                familiar.TryApplyBuff(_invulnerableBuff);
 
                 LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat <color=red>disabled</color>.");
             }
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to enable/disable combat mode for...");
+            LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to toggle combat mode for...");
         }
     }
 }

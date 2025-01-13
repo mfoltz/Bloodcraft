@@ -6,7 +6,6 @@ using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using Steamworks;
 using Stunlock.Core;
 using System.Collections;
 using System.Runtime.InteropServices;
@@ -35,7 +34,7 @@ internal static class Extensions // probably need to organize this soon
 
         EntityManager.SetComponentData(entity, item);
     }
-    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct // need to make sure this works but don't really want to atm
     {
         if (!entity.Has<T>())
         {
@@ -94,9 +93,31 @@ internal static class Extensions // probably need to organize this soon
     {
         return EntityManager.AddBuffer<T>(entity);
     }
-    public unsafe static void* GetComponentData(this Entity entity, TypeIndex typeIndex)
+    public unsafe static void AddComponent<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer, T componentData) where T : struct
     {
-        return EntityManager.GetComponentDataRawRO(entity, typeIndex);
+        ComponentType componentType = new(Il2CppType.Of<T>());
+        TypeIndex typeIndex = componentType.TypeIndex;
+
+        byte[] byteArray = StructureToByteArray(componentData);
+        int size = Marshal.SizeOf<T>();
+
+        fixed (byte* byteData = byteArray)
+        {
+            entityCommandBuffer.UnsafeAddComponent(entity, typeIndex, size, byteData);
+        }
+    }
+    public unsafe static void SetComponent<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer, T componentData) where T : struct
+    {
+        ComponentType componentType = new(Il2CppType.Of<T>());
+        TypeIndex typeIndex = componentType.TypeIndex;
+
+        byte[] byteArray = StructureToByteArray(componentData);
+        int size = Marshal.SizeOf<T>();
+
+        fixed (byte* byteData = byteArray)
+        {
+            entityCommandBuffer.UnsafeSetComponent(entity, typeIndex, size, byteData);
+        }
     }
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
@@ -306,6 +327,12 @@ internal static class Extensions // probably need to organize this soon
 
         return PrefabGUID.Empty;
     }
+    public static int GetPrefabGuidHash(this Entity entity)
+    {
+        if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID.GuidHash;
+
+        return PrefabGUID.Empty.GuidHash;
+    }
     public static Entity GetUserEntity(this Entity character)
     {
         if (character.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
@@ -363,9 +390,38 @@ internal static class Extensions // probably need to organize this soon
 
         return false;
     }
-    public static bool TryApplyBuffWithOwner(Entity target, Entity owner, PrefabGUID buffPrefabGuid)
+    public static bool TryApplyBuffWithOwner(this Entity target, Entity owner, PrefabGUID buffPrefabGuid)
     {
         if (target.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity) && buffEntity.Has<EntityOwner>())
+        {
+            buffEntity.With((ref EntityOwner entityOwner) =>
+            {
+                entityOwner.Owner = owner;
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+    public static void TryApplyBuffWithLifeTime(this Entity entity, PrefabGUID buffPrefabGuid, float duration)
+    {
+        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            if (!buffEntity.Has<LifeTime>()) buffEntity.Add<LifeTime>();
+
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = duration;
+                lifeTime.EndAction = LifeTimeEndAction.Destroy;
+            });
+        }
+    }
+    public static bool TryApplyAndGetBuffWithOwner(this Entity target, Entity owner, PrefabGUID buffPrefabGUID, out Entity buffEntity)
+    {
+        buffEntity = Entity.Null;
+
+        if (target.TryApplyAndGetBuff(buffPrefabGUID, out buffEntity))
         {
             buffEntity.With((ref EntityOwner entityOwner) =>
             {
@@ -413,6 +469,24 @@ internal static class Extensions // probably need to organize this soon
         if (entity.TryGetComponent(out Translation translation))
         {
             return translation.Value;
+        }
+
+        return float3.zero;
+    }
+    public static int GetUnitLevel(this Entity entity)
+    {
+        if (entity.TryGetComponent(out UnitLevel unitLevel))
+        {
+            return unitLevel.Level._Value;
+        }
+
+        return 0;
+    }
+    public static float3 GetOffset(this Entity source, Entity target)
+    {
+        if (source.TryGetPosition(out float3 sourcePosition) && target.TryGetPosition(out float3 targetPosition))
+        {
+            return sourcePosition - targetPosition;
         }
 
         return float3.zero;
@@ -508,11 +582,64 @@ internal static class Extensions // probably need to organize this soon
             });
         }
     }
+    public static void EnableAggro(this Entity entity)
+    {
+        if (entity.Has<AggroConsumer>())
+        {
+            entity.With((ref AggroConsumer aggroConsumer) =>
+            {
+                aggroConsumer.Active._Value = true;
+            });
+        }
+    }
+    public static void DisableAggro(this Entity entity)
+    {
+        if (entity.Has<AggroConsumer>())
+        {
+            entity.With((ref AggroConsumer aggroConsumer) =>
+            {
+                aggroConsumer.Active._Value = false;
+            });
+        }
+    }
+    public static void EnableAggroable(this Entity entity)
+    {
+        if (entity.Has<Aggroable>())
+        {
+            entity.With((ref Aggroable aggroable) =>
+            {
+                aggroable.Value._Value = true;
+                aggroable.DistanceFactor._Value = 1f;
+                aggroable.AggroFactor._Value = 1f;
+            });
+        }
+    }
+    public static void DisableAggroable(this Entity entity)
+    {
+        if (entity.Has<Aggroable>())
+        {
+            entity.With((ref Aggroable aggroable) =>
+            {
+                aggroable.Value._Value = false;
+                aggroable.DistanceFactor._Value = 0f;
+                aggroable.AggroFactor._Value = 0f;
+            });
+        }
+    }
     public static bool IsAllies(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }
-    public static void CastAbility(this Entity entity, PrefabGUID abilityGroup, Entity target) // 1292896032 swallow, 509296401
+    public static bool IsPlayerOwned(this Entity entity)
+    {
+        if (entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Exists())
+        {
+            return entityOwner.Owner.IsPlayer();
+        }
+
+        return false;
+    }
+    public static void CastAbility(this Entity entity, Entity target, PrefabGUID abilityGroup) // 1292896032 swallow, 509296401
     {
         CastAbilityServerDebugEvent castAbilityServerDebugEvent = new()
         {

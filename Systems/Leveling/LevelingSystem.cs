@@ -55,60 +55,11 @@ internal static class LevelingSystem
         new(-1469378405), // SetBonus_GearLevel_01
         new(-1596803256)  // AB_BloodBuff_Brute_GearLevelBonus
     ];
-    public enum PlayerClass
-    {
-        BloodKnight,
-        DemonHunter,
-        VampireLord,
-        ShadowBlade,
-        ArcaneSorcerer,
-        DeathMage
-    }
-
-    public static readonly Dictionary<PlayerClass, (string, string)> ClassWeaponBloodMap = new()
-    {
-        { PlayerClass.BloodKnight, (ConfigService.BloodKnightWeapon, ConfigService.BloodKnightBlood) },
-        { PlayerClass.DemonHunter, (ConfigService.DemonHunterWeapon, ConfigService.DemonHunterBlood) },
-        { PlayerClass.VampireLord, (ConfigService.VampireLordWeapon, ConfigService.VampireLordBlood) },
-        { PlayerClass.ShadowBlade, (ConfigService.ShadowBladeWeapon, ConfigService.ShadowBladeBlood) },
-        { PlayerClass.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeapon, ConfigService.ArcaneSorcererBlood) },
-        { PlayerClass.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
-    };
-
-    public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
-    {
-        { PlayerClass.BloodKnight, (Configuration.ParseConfigIntegerString(ConfigService.BloodKnightWeapon), Configuration.ParseConfigIntegerString(ConfigService.BloodKnightBlood)) },
-        { PlayerClass.DemonHunter, (Configuration.ParseConfigIntegerString(ConfigService.DemonHunterWeapon), Configuration.ParseConfigIntegerString(ConfigService.DemonHunterBlood)) },
-        { PlayerClass.VampireLord, (Configuration.ParseConfigIntegerString(ConfigService.VampireLordWeapon), Configuration.ParseConfigIntegerString(ConfigService.VampireLordBlood)) },
-        { PlayerClass.ShadowBlade, (Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeWeapon), Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeBlood)) },
-        { PlayerClass.ArcaneSorcerer, (Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererWeapon), Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererBlood)) },
-        { PlayerClass.DeathMage, (Configuration.ParseConfigIntegerString(ConfigService.DeathMageWeapon), Configuration.ParseConfigIntegerString(ConfigService.DeathMageBlood)) }
-    };
-
-    public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
-    {
-        { PlayerClass.BloodKnight, ConfigService.BloodKnightBuffs },
-        { PlayerClass.DemonHunter, ConfigService.DemonHunterBuffs },
-        { PlayerClass.VampireLord, ConfigService.VampireLordBuffs },
-        { PlayerClass.ShadowBlade, ConfigService.ShadowBladeBuffs },
-        { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererBuffs },
-        { PlayerClass.DeathMage, ConfigService.DeathMageBuffs }
-    };
-
-    public static readonly Dictionary<PlayerClass, string> ClassSpellsMap = new()
-    {
-        { PlayerClass.BloodKnight, ConfigService.BloodKnightSpells },
-        { PlayerClass.DemonHunter, ConfigService.DemonHunterSpells },
-        { PlayerClass.VampireLord, ConfigService.VampireLordSpells },
-        { PlayerClass.ShadowBlade, ConfigService.ShadowBladeSpells },
-        { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
-        { PlayerClass.DeathMage, ConfigService.DeathMageSpells }
-    };
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        ProcessExperience(deathEvent.Source, deathEvent.Target, deathEvent.DeathParticipants);
+        ProcessExperience(deathEvent.Target, deathEvent.DeathParticipants);
     }
-    public static void ProcessExperience(Entity source, Entity target, HashSet<Entity> deathParticipants)
+    public static void ProcessExperience(Entity target, HashSet<Entity> deathParticipants)
     {
         float groupMultiplier = 1f;
         bool inGroup = deathParticipants.Count > 1;
@@ -165,6 +116,7 @@ internal static class LevelingSystem
         if (_warEventMultiplier < 1 && target.Has<SpawnBuffElement>())
         {
             var spawnBuffElement = target.ReadBuffer<SpawnBuffElement>();
+
             for (int i = 0; i < spawnBuffElement.Length; i++)
             {
                 if (spawnBuffElement[i].Buff.Equals(_warEventTrash))
@@ -220,19 +172,19 @@ internal static class LevelingSystem
     {
         if (!steamId.TryGetPlayerExperience(out var xpData))
         {
-            // Initialize if not present
             xpData = new KeyValuePair<int, float>(0, 0);
         }
 
         int oldLevel = xpData.Key;
         float currentXP = xpData.Value;
+
         float newExperience = currentXP + gainedXP;
         newLevel = ConvertXpToLevel(newExperience);
+
         leveledUp = false;
 
         if (newLevel > _maxPlayerLevel)
         {
-            // Cap the level at the maximum
             newLevel = _maxPlayerLevel;
             newExperience = ConvertLevelToXp(_maxPlayerLevel);
         }
@@ -269,7 +221,7 @@ internal static class LevelingSystem
                     $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
 
-            if (GetPlayerBool(steamId, "Reminders") && _classes && !Utilities.Classes.HasClass(steamId))
+            if (GetPlayerBool(steamId, "Reminders") && _classes && !Classes.HasClass(steamId))
             {
                 LocalizationService.HandleServerReply(EntityManager, user,
                     $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
@@ -291,7 +243,7 @@ internal static class LevelingSystem
         {
             float3 targetPosition = character.Read<Translation>().Value;
 
-            Core.StartCoroutine(DelayedPlayerSCT(player, player.GetUserEntity(), targetPosition, _gold, gainedXP));
+            DelayedPlayerSCT(player, player.GetUserEntity(), targetPosition, _gold, gainedXP).Start();
         }
     }
     static IEnumerator DelayedPlayerSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)

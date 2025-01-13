@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -31,7 +32,7 @@ internal static class FamiliarSummonSystem
     // static readonly WaitForSeconds _delay = new(1f);
 
     public const float FAMILIAR_LIFETIME = 240f;
-    const float SPAWN_BUFF_LIFETIME = 2.5f;
+    const float SPAWN_BUFF_LIFETIME = 1.5f; // want to make as long as possible before another circle spawns, 1.25f is good try 1.5f?
 
     static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
@@ -40,11 +41,13 @@ internal static class FamiliarSummonSystem
     public static Entity _unitTeamSingleton = Entity.Null;
 
     static readonly PrefabGUID _invulnerableBuff = new(-480024072);
-    static readonly PrefabGUID _hideStaffBuff = new(2053361366);
-    static readonly PrefabGUID _spawnBuff = new(-1782768874); // AB_Undead_BishopOfShadows_Idle_Buff
-    static readonly PrefabGUID _hideSpawnBuff = new(396339796);
+    static readonly PrefabGUID _spawnBuff = new(-1782768874);        // AB_Undead_BishopOfShadows_Idle_Buff
+    static readonly PrefabGUID _hideSpawnBuff = new(-205058219);      // Buff_General_Spawn_Unit_Medium
+    static readonly PrefabGUID _distanceCheckBuff = new(1269197489); // AB_Vampire_CrimsonIronMaiden_DistanceChecker_Buff
+    static readonly PrefabGUID _solarusFinalStageBuff = new(2144624015);
 
     static readonly PrefabGUID _divineAngel = new(-1737346940);
+    static readonly PrefabGUID _solarus = new(-740796338);
 
     static readonly PrefabGUID _ignoredFaction = new(-1430861195);
     static readonly PrefabGUID _playerFaction = new(1106458752);
@@ -56,55 +59,51 @@ internal static class FamiliarSummonSystem
         _legionFaction,
         _cursedFaction
     ];
+    public enum FamiliarStatType
+    {
+        PhysicalCritChance,
+        SpellCritChance,
+        HealingReceived,
+        PhysicalResistance,
+        SpellResistance,
+        CCReduction,
+        ShieldAbsorb
+    }
 
-    public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerFamiliarBattleGroups = [];
-    public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = []; // can add this layer to normal binding if more validation is needed after moving away from binding bool in file
+    public static readonly Dictionary<FamiliarStatType, float> FamiliarStatValues = new()
+    {
+        {FamiliarStatType.PhysicalCritChance, 0.2f},
+        {FamiliarStatType.SpellCritChance, 0.2f},
+        {FamiliarStatType.HealingReceived, 0.5f},
+        {FamiliarStatType.PhysicalResistance, 0.2f},
+        {FamiliarStatType.SpellResistance, 0.2f},
+        {FamiliarStatType.CCReduction, 0.5f},
+        {FamiliarStatType.ShieldAbsorb, 1f}
+    };
+
+    public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerBattleGroups = [];
     public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];
-    public static void SummonFamiliar(Entity playerCharacter, Entity userEntity, int famKey)
+    public static void InstantiateFamiliarImmediate(User user, Entity playerCharacter, int famKey)
     {
         PrefabGUID familiarId = new(famKey);
-        User user = userEntity.Read<User>();
         Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);
 
-        HandleFamiliarV2(playerCharacter, user, familiar, familiarId, playerCharacter.GetPosition());
+        // if (SpawnTransformSystemOnSpawnPatch.UnitPrefabGuidsToModify.Contains(familiarId)) SpawnTransformSystemOnSpawnPatch.FamiliarsToSkip.Add(familiar);
 
-        /*
-ulong steamId = user.PlatformId;
-int index = user.Index;
-EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
-if (PlayerBindingValidation.ContainsKey(steamId))
-{
-    PlayerBindingValidation[steamId] = new(famKey);
-}
-else PlayerBindingValidation.TryAdd(steamId, new(famKey));
-
-FromCharacter fromCharacter = new() { Character = character, User = userEntity };
-
-SpawnDebugEvent debugEvent = new()
-{
-    PrefabGuid = new(famKey),
-    Control = false,
-    Roam = false,
-    Team = SpawnDebugEvent.TeamEnum.Ally,
-    Level = 1,
-    Position = character.ReadRO<LocalToWorld>().Position,
-    DyeIndex = 0
-};
-
-DebugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);     
-
-if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(familiarId, out Entity prefabEntity))
-{
-    Entity familiar = entityCommandBuffer.Instantiate(prefabEntity);
-}
-else
-{
-    Core.Log.LogWarning($"Failed to find prefab entity - {familiarId}");
-}
-*/
+        HandleBindingImmediate(playerCharacter, user, familiar, familiarId, playerCharacter.GetPosition());
     }
-    static void HandleFamiliarV2(Entity playerCharacter, User user, Entity familiar, PrefabGUID familiarId, float3 position)
+    public static void InstantiateFamiliarDeferred(User user, Entity playerCharacter, int famKey)
+    {
+        PrefabGUID familiarId = new(famKey);
+
+        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+        Entity familiar = ServerGameManager.InstantiateEntityDeferred(playerCharacter, familiarId);
+
+        // if (SpawnTransformSystemOnSpawnPatch.UnitPrefabGuidsToModify.Contains(familiarId)) SpawnTransformSystemOnSpawnPatch._familiarsToSkip.Add(familiar); can't add this while deferred, maybe check for owner in patch and see if player to verify shard bearers and such
+
+        HandleBindingDeferred(entityCommandBuffer, playerCharacter, user, familiar, familiarId, playerCharacter.GetPosition());
+    }
+    static void HandleBindingImmediate(Entity playerCharacter, User user, Entity familiar, PrefabGUID familiarId, float3 position)
     {
         ulong steamId = user.PlatformId;
         
@@ -113,7 +112,7 @@ else
             familiar.SetTeam(teamReference);
             familiar.SetPosition(position);
 
-            if (HandleFamiliar(user, playerCharacter, familiar))
+            if (HandleFamiliarImmediate(user, playerCharacter, familiar))
             {
                 string colorCode = "<color=#FF69B4>";
                 FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
@@ -140,46 +139,131 @@ else
             Core.Log.LogWarning($"Familiar playback incomplete!");
         }
     }
-    public static void SummonFamiliarForBattle(Entity playerCharacter, Entity userEntity, PrefabGUID familiarId, float3 position, int teamIndex)
+    static void HandleBindingDeferred(EntityCommandBuffer entityCommandBuffer, Entity playerCharacter, User user, Entity familiar, PrefabGUID familiarId, float3 position) // use commandBuffer instead of entityManager
     {
-        User user = userEntity.Read<User>();
+        ulong steamId = user.PlatformId;
+
+        if (playerCharacter.TryGetTeamEntity(out Entity teamReference))
+        {
+            familiar.SetTeam(teamReference);
+            // familiar.SetComponent<>
+
+            familiar.SetPosition(position);
+
+            if (HandleFamiliarImmediate(user, playerCharacter, familiar))
+            {
+                string colorCode = "<color=#FF69B4>";
+                FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+
+                if (buffsData.FamiliarBuffs.ContainsKey(familiarId.GuidHash))
+                {
+                    if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[familiarId.GuidHash].First()), out var hexColor))
+                    {
+                        colorCode = $"<color={hexColor}>";
+                    }
+                }
+
+                string message = buffsData.FamiliarBuffs.ContainsKey(familiarId.GuidHash) ? $"<color=green>{familiarId.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{familiarId.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
+                LocalizationService.HandleServerReply(EntityManager, user, message);
+            }
+            else
+            {
+                familiar.Destroy();
+                LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
+            }
+        }
+        else
+        {
+            Core.Log.LogWarning($"Familiar playback incomplete!");
+        }
+    }
+    public static void SummonFamiliarForBattle(Entity playerCharacter, User user, PrefabGUID familiarId, float3 position, int teamIndex)
+    {
+        ulong steamId = user.PlatformId;
         Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);
 
-        HandleFamiliarForBattle(playerCharacter, user, familiar, position, teamIndex);
-
         /*
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
+        if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
 
-        User user = userEntity.Read<User>();
-        int index = user.Index;
+        PlayerFamiliarBattleGroups[steamId].Remove(prefabGUID);
+        PlayerBattleFamiliars[steamId].Add(entity);
 
-        FromCharacter fromCharacter = new() { Character = character, User = userEntity };
-
-        SpawnDebugEvent debugEvent = new()
+        if (SetDirectionAndFaction.Contains(steamId))
         {
-            PrefabGuid = familiarPrefabGUID,
-            Control = false,
-            Roam = false,
-            Team = SpawnDebugEvent.TeamEnum.Ally,
-            Level = 1,
-            Position = position,
-            DyeIndex = 0
-        };
+            if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
+            {
+                factionIndex = 1;
+                ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
 
-        DebugEventsSystem.SpawnDebugEvent(index, ref debugEvent, entityCommandBuffer, ref fromCharacter);
+                int pairedIndex = PlayerBattleFamiliars[pairedId].Count - 1;
+                Familiars.FaceYourEnemy(entity, PlayerBattleFamiliars[pairedId][pairedIndex]);
+            }
+            else
+            {
+                Core.Log.LogWarning($"SetDirectionAndFaction contained {steamId} but couldn't find MatchPair for battle!");
+            }
+
+            SetDirectionAndFaction.Remove(steamId);
+        }
+
+        User user = playerInfo.User;
+        summon = true;
+
+        if (FamiliarSummonSystem.HandleFamiliarForBattle(playerInfo.CharEntity, entity, factionIndex))
+        {
+            if (PlayerFamiliarBattleGroups[steamId].Count == 0)
+            {
+                PlayerSummoningForBattle[steamId] = false;
+
+                if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
+                {
+                    ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
+
+                    if (PlayerSummoningForBattle.TryGetValue(pairedId, out bool summoning) && !summoning)
+                    {
+                        Core.StartCoroutine(BattleService.BattleCountdownRoutine((steamId, pairedId)));
+                    }
+                }
+            }
+        }
+        else
+        {
+            DestroyUtility.Destroy(EntityManager, entity);
+            LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
+
+            continue;
+        }
         */
+
+        if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
+
+        PlayerBattleGroups[steamId].Remove(familiarId);
+        PlayerBattleFamiliars[steamId].Add(familiar);
+
+        if (HandleFamiliarForBattle(playerCharacter, user, familiar, position, teamIndex))
+        {
+            if (PlayerBattleGroups[steamId].Count == 0)
+            {
+                if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
+                {
+                    ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
+
+                    BattleService.BattleCountdownRoutine((steamId, pairedId)).Start();
+                }
+            }
+        }
     }
-    public static bool HandleFamiliar(User user, Entity player, Entity familiar)
+    public static bool HandleFamiliarImmediate(User user, Entity playerCharacter, Entity familiar)
     {
+        ulong steamId = user.PlatformId;
+
         try
         {
-            UnitLevel unitLevel = familiar.Read<UnitLevel>();
-            int level = unitLevel.Level._Value;
-            int famKey = familiar.Read<PrefabGUID>().GuidHash;
-            ulong steamId = user.PlatformId;
+            // int level = familiar.GetUnitLevel();
+            int famKey = familiar.GetPrefabGuidHash();
 
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
-            level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
+            int level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
             if (level == 0)
             {
@@ -191,9 +275,50 @@ else
                 FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
             }
 
-            if (ModifyFamiliar(user, steamId, famKey, player, familiar, level))
+            if (ModifyFamiliarImmediate(user, steamId, famKey, playerCharacter, familiar, level))
             {
-                SpawnFamiliarBuff(player);
+                playerCharacter.TryApplyBuffWithLifeTime(_spawnBuff, SPAWN_BUFF_LIFETIME);
+                familiar.TryApplyBuff(_hideSpawnBuff);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogWarning($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
+
+            return false;
+        }
+    }
+    public static bool HandleFamiliarDeferred(User user, Entity playerCharacter, Entity familiar) // use commandBuffer instead of entityManager
+    {
+        ulong steamId = user.PlatformId;
+
+        try
+        {
+            // int level = familiar.GetUnitLevel();
+            int famKey = familiar.GetPrefabGuidHash();
+
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            int level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
+
+            if (level == 0)
+            {
+                level = 1;
+
+                KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1));
+                famData.FamiliarExperience[famKey] = newXP;
+
+                FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+            }
+
+            if (ModifyFamiliarImmediate(user, steamId, famKey, playerCharacter, familiar, level))
+            {
+                playerCharacter.TryApplyBuffWithLifeTime(_spawnBuff, SPAWN_BUFF_LIFETIME);
                 familiar.TryApplyBuff(_hideSpawnBuff);
 
                 return true;
@@ -212,16 +337,15 @@ else
     }
     public static bool HandleFamiliarForBattle(Entity playerCharacter, User user, Entity familiar, float3 position, int teamIndex)
     {
+        ulong steamId = user.PlatformId;
+
         try
         {
-            ulong steamId = user.PlatformId;
-
-            UnitLevel unitLevel = familiar.Read<UnitLevel>();
-            int level = unitLevel.Level._Value;
-            int famKey = familiar.Read<PrefabGUID>().GuidHash;
+            //int level = familiar.GetUnitLevel();
+            int famKey = familiar.GetPrefabGuidHash();
 
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
-            level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
+            int level = famData.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
             if (level == 0)
             {
@@ -237,8 +361,6 @@ else
 
             if (ModifyFamiliarForBattle(user, steamId, famKey, playerCharacter, familiar, level, teamIndex))
             {
-                // Utilities.Familiars.FaceYourEnemy
-
                 familiar.TryApplyBuff(_hideSpawnBuff);
 
                 return true;
@@ -255,50 +377,111 @@ else
             return false;
         }
     }
-    public static bool ModifyFamiliar(User user, ulong steamId, int famKey, Entity player, Entity familiar, int level)
+    public static bool ModifyFamiliarImmediate(User user, ulong steamId, int familiarId, Entity playerCharacter, Entity familiar, int level)
     {
         try
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
 
-            ModifyFollowerFactionMinion(player, familiar);
-            ModifyDamageStats(familiar, level, steamId, famKey);
+            ModifyFollowerFactionMinion(playerCharacter, familiar);
+            ModifyDamageStats(familiar, level, steamId, familiarId);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
             PreventDisableFamiliar(familiar);
 
-            if (!_familiarCombat) DisableCombat(player, familiar);
+            if (!_familiarCombat) DisableCombat(playerCharacter, familiar);
 
             if (Misc.PlayerBoolsManager.TryGetPlayerBool(steamId, "FamiliarVisual", out bool value))
             {
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
-                if (data.FamiliarBuffs.ContainsKey(famKey))
+                if (data.FamiliarBuffs.ContainsKey(familiarId))
                 {
-                    PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
-                    Buffs.HandleVisual(familiar, visualBuff);
+                    PrefabGUID visualBuff = new(data.FamiliarBuffs[familiarId].First());
+                    Buffs.HandleShinyBuff(familiar, visualBuff);
                 }
             }
 
             //if (_gameMode.Equals(GameModeType.PvP)) 
-            ManualAggroHandling(familiar); // seems generally better than normal game handling when they're considered minions even for PvE
+            ManualAggroHandling(familiar); // seems generally better than normal game handling for minions even on PvE
+
+            /* don't think I need this right now per se since BloodyPoint teleports are handled but may want to revisit for other edge-cases
+            try
+            {
+                if (familiar.TryApplyAndGetBuffWithOwner(playerCharacter, _distanceCheckBuff, out Entity buffEntity))
+                {
+                    buffEntity.With((ref LifeTime lifeTime) =>
+                    {
+                        lifeTime.Duration = -1f;
+                        lifeTime.EndAction = LifeTimeEndAction.None;
+                    });
+
+                    buffEntity.With((ref UpdateTranslationWithOffset updateTranslation) =>
+                    {
+                        updateTranslation.TranslationOffset = playerCharacter.GetOffset(familiar);
+                    });
+
+                    if (buffEntity.TryGetBuffer<CreateGameplayEventOnDistanceReached>(out var createEventBuffer) && !createEventBuffer.IsEmpty)
+                    {
+                        CreateGameplayEventOnDistanceReached distanceReachedEvent = createEventBuffer[0];
+
+                        distanceReachedEvent.DistanceSqThreshold = 250f;
+                        distanceReachedEvent.TriggerWhen = CreateGameplayEventOnDistanceReachedTriggerWhen.Farther;
+
+                        createEventBuffer[0] = distanceReachedEvent;
+                    }
+
+                    // no idea how to modify further with any reasonable confidence in the result, will be lucky enough for this to work as it is
+                    if (buffEntity.TryGetBuffer<GameplayEventIdMapping>(out var eventIdBuffer) && !eventIdBuffer.IsEmpty)
+                    {
+                        GameplayEventIdMapping eventIdMapping = eventIdBuffer[0];
+
+                        eventIdMapping.TriggerCooldown = 5f;
+                        eventIdMapping.TriggerMultipleTimes = true;
+                        eventIdMapping.MaxTriggers = 50;
+
+                        eventIdBuffer[0] = eventIdMapping;
+                    }
+
+                    if (buffEntity.TryGetBuffer<GameplayEventListeners>(out var listenerBuffer) && !listenerBuffer.IsEmpty)
+                    {
+                        GameplayEventListeners eventListener = listenerBuffer[0];
+
+                        // eventListener.GameplayEventType = GameplayEventTypeEnum.
+
+                    }
+
+                    if (buffEntity.TryGetBuffer<DestroyOnGameplayEvent>(out var destroyEventBuffer) && !destroyEventBuffer.IsEmpty)
+                    {
+                        DestroyOnGameplayEvent destroyOnEvent = destroyEventBuffer[0];
+
+                        // destroyOnEvent.Who = DestroyOnGameplayEventWho.Self;
+                        // destroyOnEvent.Type = DestroyOnGameplayEventType.Remove;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogWarning($"Error applying distance check buff to familiar: {ex}");
+            }
+            */
 
             return true;
         }
         catch (Exception ex)
         {
-            Core.Log.LogWarning($"Error during familiar battle modifications for {user.CharacterName.Value}: {ex}");
+            Core.Log.LogWarning($"Error during familiar modifications for {user.CharacterName.Value}: {ex}");
 
             return false;
         }
     }
-    public static bool ModifyFamiliarForBattle(User user, ulong steamId, int famKey, Entity player, Entity familiar, int level, int factionIndex)
+    public static bool ModifyFamiliarForBattle(User user, ulong steamId, int famKey, Entity player, Entity familiar, int level, int teamIndex)
     {
         try
         {
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
 
-            ModifyTeamFactionAggro(familiar, factionIndex);
+            ModifyTeamFactionAggro(familiar, teamIndex);
             ModifyDamageStatsForBattle(familiar, level, steamId, famKey);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
@@ -315,12 +498,12 @@ else
                     int pairedIndex = PlayerBattleFamiliars[pairedId].Count - 1;
                     Entity enemy = PlayerBattleFamiliars[pairedId][pairedIndex];
 
-                    if (enemy.Exists()) Utilities.Familiars.FaceYourEnemy(familiar, enemy);
+                    if (enemy.Exists()) Utilities.Familiars.FaceYourEnemy(familiar, enemy); // will need to possibly refactor logic for this
                 }
             }
             else
             {
-                Core.Log.LogWarning($"SetDirectionAndFaction contained {steamId} but couldn't find MatchPair for battle!");
+                Core.Log.LogWarning($"Couldn't find MatchPair to get team indices for familiar battle!");
             }
 
             if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "FamiliarVisual"))
@@ -329,8 +512,8 @@ else
 
                 if (data.FamiliarBuffs.ContainsKey(famKey))
                 {
-                    PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey][0]);
-                    Buffs.HandleVisual(familiar, visualBuff);
+                    PrefabGUID visualBuff = new(data.FamiliarBuffs[famKey].First());
+                    Buffs.HandleShinyBuff(familiar, visualBuff);
                 }
             }
 
@@ -341,19 +524,6 @@ else
             Core.Log.LogWarning($"Error during familiar battle modifications for {user.CharacterName.Value}: {ex}");
 
             return false;
-        }
-    }
-    static void SpawnFamiliarBuff(Entity playerCharacter)
-    {
-        if (playerCharacter.TryApplyAndGetBuff(_spawnBuff, out Entity buffEntity))
-        {
-            if (!buffEntity.Has<LifeTime>()) buffEntity.Add<LifeTime>();
-
-            buffEntity.With((ref LifeTime lifeTime) =>
-            {
-                lifeTime.Duration = SPAWN_BUFF_LIFETIME;
-                lifeTime.EndAction = LifeTimeEndAction.Destroy;
-            });
         }
     }
     static void DisableCombat(Entity player, Entity familiar)
@@ -480,26 +650,6 @@ else
         bloodConsumeSource.CanBeConsumed = false;
         familiar.Write(bloodConsumeSource);
     }
-    public enum FamiliarStatType
-    {
-        PhysicalCritChance,
-        SpellCritChance,
-        HealingReceived,
-        PhysicalResistance,
-        SpellResistance,
-        CCReduction,
-        ShieldAbsorb
-    }
-    public static readonly Dictionary<FamiliarStatType, float> FamiliarStatValues = new()
-    {
-        {FamiliarStatType.PhysicalCritChance, 0.2f},
-        {FamiliarStatType.SpellCritChance, 0.2f},
-        {FamiliarStatType.HealingReceived, 0.5f},
-        {FamiliarStatType.PhysicalResistance, 0.2f},
-        {FamiliarStatType.SpellResistance, 0.2f},
-        {FamiliarStatType.CCReduction, 0.5f},
-        {FamiliarStatType.ShieldAbsorb, 1f}
-    };
     public static void ModifyDamageStatsForBattle(Entity familiar, int level, ulong steamId, int famKey)
     {
         float scalingFactor = 0.25f + (level / (float)_maxFamiliarLevel) * 0.75f; // Calculate scaling factor for power and such
@@ -516,14 +666,9 @@ else
             stats = prestigeData.Value;
         }
 
-        PrefabGUID prefabGUID = familiar.Read<PrefabGUID>();
+        PrefabGUID familiarId = familiar.Read<PrefabGUID>();
 
-        if (prefabGUID.GuidHash.Equals(1945956671) && familiar.TryGetBuff(_hideStaffBuff, out Entity buffEntity))
-        {
-            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-        }
-
-        Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
+        Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[familiarId];
         UnitStats unitStats = original.Read<UnitStats>();
 
         UnitStats familiarStats = familiar.Read<UnitStats>();
@@ -588,6 +733,9 @@ else
             }
         }
 
+        HandleGeneralSnipping(familiar, familiarId);
+
+        /*
         if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
         {
             var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
@@ -600,7 +748,7 @@ else
             }
         }
 
-        if (prefabGUID.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
+        if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
         {
             familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
             {
@@ -612,21 +760,22 @@ else
         {
             familiar.Remove<Immortal>();
 
-            if (!familiar.Has<ApplyBuffOnGameplayEvent>()) return;
-
-            var buffer = familiar.ReadBuffer<ApplyBuffOnGameplayEvent>();
-            for (int i = 0; i < buffer.Length; i++)
+            if (familiarId.Equals(_solarus) && familiar.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
             {
-                var item = buffer[i];
-                if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
+                for (int i = 0; i < buffer.Length; i++)
                 {
-                    item.Buff0 = new(0);
-                    buffer[i] = item;
+                    var item = buffer[i];
+                    if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
+                    {
+                        item.Buff0 = PrefabGUID.Empty;
+                        buffer[i] = item;
 
-                    break;
+                        break;
+                    }
                 }
             }
         }
+        */
     }
     public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
     {
@@ -645,14 +794,9 @@ else
         }
 
         // get base stats from original unit prefab then apply scaling
-        PrefabGUID prefabGUID = familiar.Read<PrefabGUID>();
+        PrefabGUID familiarId = familiar.Read<PrefabGUID>();
 
-        if (prefabGUID.GuidHash.Equals(1945956671) && familiar.TryGetBuff(_hideStaffBuff, out Entity buffEntity))
-        {
-            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-        }
-
-        Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefabGUID];
+        Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[familiarId];
         UnitStats unitStats = original.Read<UnitStats>();
 
         UnitStats familiarStats = familiar.Read<UnitStats>();
@@ -717,6 +861,9 @@ else
             }
         }
 
+        HandleGeneralSnipping(familiar, familiarId);
+
+        /*
         if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
         {
             var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
@@ -729,7 +876,7 @@ else
             }
         }
 
-        if (prefabGUID.Equals(_divineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
+        if (familiarId.Equals(_divineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
         {
             script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
             familiar.Write(script_ApplyBuffUnderHealthThreshold_DataServer);
@@ -739,25 +886,27 @@ else
         {
             familiar.Remove<Immortal>();
 
-            if (!familiar.Has<ApplyBuffOnGameplayEvent>()) return;
-
-            var buffer = familiar.ReadBuffer<ApplyBuffOnGameplayEvent>();
-            for (int i = 0; i < buffer.Length; i++)
+            if (familiarId.Equals(_solarus) && familiar.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
             {
-                var item = buffer[i];
-                if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
+                for (int i = 0; i < buffer.Length; i++)
                 {
-                    item.Buff0 = new(0);
-                    buffer[i] = item;
-                    break;
+                    var item = buffer[i];
+                    if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
+                    {
+                        item.Buff0 = PrefabGUID.Empty;
+                        buffer[i] = item;
+
+                        break;
+                    }
                 }
             }
         }
+        */
     }
     static void PreventDisableFamiliar(Entity familiar)
     {
         // one of the relics from the inception of familiars, might be better off not doing this in the long run
-        // but hasn't caused issues (that I'm aware of, at least :p) and need to get out of current rabbit hole before entering another so leaving note for later >_>
+        // but hasn't caused issues (that I'm aware of, at least) and need to get out of current rabbit hole before entering another so leaving note for later >_>
 
         ModifiableBool modifiableBool = new() { _Value = false };
         CanPreventDisableWhenNoPlayersInRange canPreventDisable = new() { CanDisable = modifiableBool };
@@ -825,5 +974,47 @@ else
         {
             gainAlertByVicinity.Value.AggroValue = 0f;
         });
+    }
+    static void HandleGeneralSnipping(Entity familiar, PrefabGUID familiarId)
+    {
+        if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
+        {
+            var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.OrdinalIgnoreCase))
+                {
+                    familiar.Remove<SpawnPrefabOnGameplayEvent>();
+                }
+            }
+        }
+
+        if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
+        {
+            familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
+            {
+                script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
+            });
+        }
+
+        if (familiar.Has<Immortal>())
+        {
+            familiar.Remove<Immortal>();
+
+            if (familiarId.Equals(_solarus) && familiar.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
+            {
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    var item = buffer[i];
+                    if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
+                    {
+                        item.Buff0 = PrefabGUID.Empty;
+                        buffer[i] = item;
+
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

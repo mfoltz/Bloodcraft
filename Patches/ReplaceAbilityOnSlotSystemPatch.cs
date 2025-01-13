@@ -22,8 +22,14 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _unarmedSlots = ConfigService.UnarmedSlots;
     static readonly bool _shiftSlot = ConfigService.ShiftSlot;
+    static readonly bool _shapeshiftAbilities = ConfigService.ShapeshiftAbilities;
 
-    static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
+    static readonly PrefabGUID _vBloodAbilityReplaceBuff = new(1171608023);
+    static readonly PrefabGUID _bearFormBuff = new(-1569370346);
+    static readonly PrefabGUID _wolfFormBuff = new(-351718282);
+
+    static readonly PrefabGUID _bearDashAbility = new(1873182450);
+    static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
 
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -40,19 +46,26 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                 else if (entityOwner.Owner.TryGetPlayer(out Entity character))
                 {
                     ulong steamId = character.GetSteamId();
-                    string prefabName = entity.Read<PrefabGUID>().GetPrefabName().ToLower();
 
-                    bool slotSpells = prefabName.Contains("unarmed") || prefabName.Contains("fishingpole");
-                    bool shiftSpell = prefabName.Contains("weapon");
+                    PrefabGUID prefabGuid = entity.GetPrefabGuid();
+                    string prefabName = prefabGuid.GetPrefabName();
+
+                    bool slotSpells = prefabName.Contains("unarmed", StringComparison.OrdinalIgnoreCase) || prefabName.Contains("fishingpole", StringComparison.OrdinalIgnoreCase);
+                    bool shiftSpell = prefabName.Contains("weapon", StringComparison.OrdinalIgnoreCase);
 
                     (int FirstSlot, int SecondSlot, int ShiftSlot) spells;
                     if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleExtraSpells(entity, character, steamId, spells);
+                        HandleExtraSpells(entity, steamId, spells);
                     }
                     else if (_shiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleShiftSpell(entity, character, spells, GetPlayerBool(steamId, "ShiftLock"));
+                        HandleShiftSpell(entity, spells, GetPlayerBool(steamId, "ShiftLock"));
+                    }
+                    else if (_shapeshiftAbilities)
+                    {
+                        if (prefabGuid.Equals(_bearFormBuff)) HandleBearDash(entity);
+                        else if (prefabGuid.Equals(_wolfFormBuff)) HandleWolfBite(entity);
                     }
                     else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
@@ -66,7 +79,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             entities.Dispose();
         }
     }
-    static void HandleExtraSpells(Entity entity, Entity character, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void HandleExtraSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
         if (!spells.FirstSlot.Equals(0))
@@ -95,9 +108,46 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        HandleShiftSpell(entity, character, spells, GetPlayerBool(steamId, "ShiftLock"));
+        HandleShiftSpell(entity, spells, GetPlayerBool(steamId, "ShiftLock"));
     }
-    static void HandleShiftSpell(Entity entity, Entity character, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
+    static void HandleBearDash(Entity entity)
+    {
+        if (entity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+        {
+            ReplaceAbilityOnSlotBuff buff = new()
+            {
+                Slot = 3,
+                NewGroupId = _bearDashAbility,
+                CopyCooldown = true,
+                Priority = 99,
+                CastBlockType = GroupSlotModificationCastBlockType.WholeCast
+            };
+
+            buffer.Add(buff);
+        }
+    }
+    static void HandleWolfBite(Entity entity)
+    {
+        if (entity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+        {
+            ReplaceAbilityOnSlotBuff buff = new()
+            {
+                Slot = 0,
+                NewGroupId = _wolfBiteAbility,
+                CopyCooldown = true,
+                Priority = 99,
+                CastBlockType = GroupSlotModificationCastBlockType.WholeCast
+            };
+
+            // 4294967221
+            // AbilityTypeFlag
+            // AbilityKit, Interact_BreakMount, AbilityKit_IgnoreInCombat, IgnoreSpellBlock
+            // bear and wolf both have Demount
+
+            buffer.Add(buff);
+        }
+    }
+    static void HandleShiftSpell(Entity entity, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
     {
         PrefabGUID spellPrefabGUID = new(spells.ShiftSlot);
 

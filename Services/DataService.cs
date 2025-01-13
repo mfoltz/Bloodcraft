@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
+using Bloodcraft.Utilities;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Unity.Entities;
@@ -36,7 +37,7 @@ internal static class DataService
     {
         return _playerRestedXP.TryGetValue(steamID, out restedXP);
     }
-    public static bool TryGetPlayerClasses(this ulong steamID, out Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> classes)
+    public static bool TryGetPlayerClasses(this ulong steamID, out Dictionary<Classes.PlayerClass, (List<int>, List<int>)> classes)
     {
         return _playerClass.TryGetValue(steamID, out classes);
     }
@@ -218,7 +219,7 @@ internal static class DataService
         _playerRestedXP[steamID] = data;
         SavePlayerRestedXP();
     }
-    public static void SetPlayerClasses(this ulong steamID, Dictionary<LevelingSystem.PlayerClass, (List<int>, List<int>)> data)
+    public static void SetPlayerClasses(this ulong steamID, Dictionary<Classes.PlayerClass, (List<int>, List<int>)> data)
     {
         _playerClass[steamID] = data;
         SavePlayerClasses();
@@ -446,7 +447,7 @@ internal static class DataService
         internal static ConcurrentDictionary<ulong, ConcurrentDictionary<string, bool>> _playerBools = [];
 
         // classes
-        internal static ConcurrentDictionary<ulong, Dictionary<LevelingSystem.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> _playerClass = [];
+        internal static ConcurrentDictionary<ulong, Dictionary<Classes.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> _playerClass = [];
 
         // prestiges
         internal static ConcurrentDictionary<ulong, Dictionary<PrestigeType, int>> _playerPrestiges = [];

@@ -57,7 +57,7 @@ internal static class AbilityRunScriptsSystemPatch
                         float cooldown = ClassSpells[prefabGUID].Equals(0) ? 8f : (ClassSpells[prefabGUID] + 1) * 8f;
                         ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGUID, cooldown);
                     }
-
+                    
                     /*
                     else if (ConfigService.ExoPrestiging && BuffUtilities.ExoFormAbilityMap.ContainsValue(abilityGroupPrefab))
                     {

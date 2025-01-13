@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.Network;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -103,7 +104,7 @@ internal class BattleService
                     {
                         if (entity.Has<UnitTeam>())
                         {
-                            FamiliarSummonSystem._unitTeamSingleton = entity;
+                            _unitTeamSingleton = entity;
                         }
                     }
                 }
@@ -133,7 +134,7 @@ internal class BattleService
 
             if (!_serviceActive)
             {
-                NotifyBothPlayers(playerOne, playerTwo, "Battle service inactive, arena position hasn't been set.");
+                NotifyBothPlayers(playerOne, playerTwo, "Battle service inactive, arena position hasn't been set!");
                 return;
             }
             else if (!VerifyEligible(playerOne, playerTwo)) return;
@@ -326,8 +327,8 @@ internal class BattleService
 
         while (countdown > 0f)
         {
-            // EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(); // okay to use same commandBuffer if operations happen in the same frame (I think >_>)
-
+            // EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(); // okay to use same commandBuffer if operations happen in the same frame? haven't had luck with that before so leaving as is unless causes lag or something
+            
             foreach (PlayerInfo player in onlineNearbyPlayers)
             {
                 ScrollingCombatTextMessage.Create(
@@ -350,15 +351,15 @@ internal class BattleService
         EnableAggro(PlayerBattleFamiliars[steamIdOne]);
         EnableAggro(PlayerBattleFamiliars[steamIdTwo]);
 
-        Core.StartCoroutine(MatchTimeoutRoutine(matchPair));
+        MatchTimeoutRoutine(matchPair).Start();
     }
-    static IEnumerator BattleSummoningRoutine(Entity playerOne, Entity playerUserOne, Entity playerTwo, Entity playerUserTwo,
+    static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            FamiliarSummonSystem.SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i], 0);
-            FamiliarSummonSystem.SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i], 1);
+            SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i], 0);
+            SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i], 1);
 
             yield return null;
         }
@@ -394,15 +395,12 @@ internal class BattleService
         {
             Core.Log.LogInfo("Battle groups popped, invoking BattleSummoningRoutine...");
 
-            PlayerFamiliarBattleGroups[playerOne] = battleGroupOne;
-            PlayerFamiliarBattleGroups[playerTwo] = battleGroupTwo;
+            PlayerBattleGroups[playerOne] = battleGroupOne;
+            PlayerBattleGroups[playerTwo] = battleGroupTwo;
 
-            PlayerSummoningForBattle[playerOne] = true;
-            PlayerSummoningForBattle[playerTwo] = true;
-
-            Core.StartCoroutine(BattleSummoningRoutine(playerOneInfo.CharEntity, playerOneInfo.UserEntity,
-                playerTwoInfo.CharEntity, playerTwoInfo.UserEntity,
-                new(battleGroupOne), new(battleGroupTwo)));
+            BattleSummoningRoutine(playerOneInfo.CharEntity, playerOneInfo.User,
+                playerTwoInfo.CharEntity, playerTwoInfo.User,
+                new(battleGroupOne), new(battleGroupTwo)).Start();
         }
         else
         {
@@ -420,9 +418,8 @@ internal class BattleService
         }
         else if (playerOne.TryGetFamiliarBattleGroup(out var battleGroupOne) && playerTwo.TryGetFamiliarBattleGroup(out var battleGroupTwo))
         {
-            // Check the size of both groups
-            bool groupOneValid = battleGroupOne.Count >= 3;
-            bool groupTwoValid = battleGroupTwo.Count >= 3;
+            bool groupOneValid = battleGroupOne.Count == 3;
+            bool groupTwoValid = battleGroupTwo.Count == 3;
 
             foreach (int entry in battleGroupOne)
             {
@@ -461,7 +458,7 @@ internal class BattleService
                 QueuedBattleGroups[playerOne] = battleGroupOne.Select(x => new PrefabGUID(x)).ToList();
                 QueuedBattleGroups[playerTwo] = battleGroupTwo.Select(x => new PrefabGUID(x)).ToList();
 
-                Core.Log.LogInfo($"Battle groups verified and added to queue: {battleGroupOneString} | {battleGroupTwoString}");
+                Core.Log.LogInfo($"Battle groups for {playerOne} & {playerTwo} verified and added to queue: {battleGroupOneString} | {battleGroupTwoString}");
 
                 return true;
             }
@@ -497,26 +494,20 @@ internal class BattleService
 
             if (match.Item1 == steamId || match.Item2 == steamId)
             {
-                // handle pending cancellations
                 if (pendingCancels > 0)
                 {
                     pendingCancels--;
                     continue;
                 }
 
-                // Increment the index
-
-                // Calculate remaining time
                 DateTime now = DateTime.UtcNow;
 
-                // Remaining time for the current loop
                 TimeSpan currentLoopRemaining = _matchPendingStart.AddSeconds(BATTLE_INTERVAL) - now;
                 if (currentLoopRemaining < TimeSpan.Zero)
                 {
                     currentLoopRemaining = TimeSpan.Zero; // Ensure no negative values
                 }
 
-                // Additional wait time based on position in queue
                 TimeSpan additionalWaitTime = TimeSpan.FromSeconds((index - 1) * BATTLE_INTERVAL);
                 TimeSpan totalTimeRemaining = currentLoopRemaining + additionalWaitTime;
 
@@ -524,7 +515,6 @@ internal class BattleService
             }
         }
 
-        // If the player is not in the queue
         return (0, TimeSpan.Zero);
     }
     public static void CancelAndRemovePairFromQueue((ulong, ulong) matchPair)
@@ -583,14 +573,11 @@ internal class BattleService
         PlayerOneFamiliarPositions.Clear();
         PlayerTwoFamiliarPositions.Clear();
 
-        // Generate positions for Team One and Team Two
         for (int column = 0; column < 3; column++) // Three units per team
         {
-            // Calculate positions for Team One
             float3 positionOne = battleCenter + new float3((column - 1) * UNIT_SPACING, 0, -TEAM_DISTANCE);
             PlayerOneFamiliarPositions.Add(positionOne);
 
-            // Calculate positions for Team Two
             float3 positionTwo = battleCenter + new float3((column - 1) * UNIT_SPACING, 0, TEAM_DISTANCE);
             PlayerTwoFamiliarPositions.Add(positionTwo);
         }

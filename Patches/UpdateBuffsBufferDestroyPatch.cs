@@ -37,7 +37,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
-    public static readonly Dictionary<LevelingSystem.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
+    public static readonly Dictionary<Classes.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
 
     [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -107,7 +107,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (Classes.HasClass(steamId))
                     {
-                        LevelingSystem.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+                        Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
 
                         if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGUID)) Buffs.ApplyPermanentBuff(player, prefabGUID);
                     }
@@ -117,7 +117,8 @@ internal static class UpdateBuffsBufferDestroyPatch
                 if ((prefabGUID.Equals(_travelStoneBuff) || prefabGUID.Equals(_travelWoodenBuff)) && entity.GetBuffTarget().TryGetPlayer(out player))
                 {
                     //Core.Log.LogInfo("Entering coffin...");
-                    ulong steamId = player.GetSteamId();
+                    User user = player.GetUser();
+                    ulong steamId = user.PlatformId;
 
                     if (_prestige)
                     {
@@ -134,11 +135,10 @@ internal static class UpdateBuffsBufferDestroyPatch
                     if (_familiars)
                     {
                         Entity familiar = Familiars.FindPlayerFamiliar(player);
+
                         if (familiar.Exists())
                         {
-                            Entity userEntity = player.GetUserEntity();
-
-                            Familiars.UnbindFamiliar(player, userEntity, steamId);
+                            Familiars.UnbindFamiliar(user, player);
                         }
                     }
                 }

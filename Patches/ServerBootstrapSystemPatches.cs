@@ -39,15 +39,15 @@ internal static class ServerBootstrapSystemPatches
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
-    static readonly bool _bloodSystem = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.BloodSystem;
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
-    static readonly bool _familiarSystem = ConfigService.FamiliarSystem;
-    static readonly bool _expertiseSystem = ConfigService.ExpertiseSystem;
-    static readonly bool _questSystem = ConfigService.QuestSystem;
-    static readonly bool _clientCompanion = ConfigService.ClientCompanion;
-    static readonly bool _exoPrestiging = ConfigService.ExoPrestiging;
-    static readonly bool _restedXPSystem = ConfigService.RestedXPSystem;
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
+    static readonly bool _quests = ConfigService.QuestSystem;
+    static readonly bool _eclipse = ConfigService.ClientCompanion;
+    static readonly bool _exoform = ConfigService.ExoPrestiging;
+    static readonly bool _restedXP = ConfigService.RestedXPSystem;
     static readonly bool _professions = ConfigService.ProfessionSystem;
 
     static readonly float _restedXPTickRate = ConfigService.RestedXPTickRate;
@@ -65,8 +65,8 @@ internal static class ServerBootstrapSystemPatches
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
-        Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
 
+        Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         bool exists = playerCharacter.Exists();
 
         Core.StartCoroutine(UpdatePlayerData(steamId, playerCharacter, userEntity, user, exists));
@@ -120,7 +120,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (_expertiseSystem)
+        if (_expertise)
         {
             if (!steamId.TryGetPlayerUnarmedExpertise(out var _))
             {
@@ -210,7 +210,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (_bloodSystem)
+        if (_legacies)
         {
             if (!steamId.TryGetPlayerWorkerLegacy(out var _))
             {
@@ -288,7 +288,7 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetPlayerExperience(new KeyValuePair<int, float>(_startingLevel, ConvertLevelToXp(_startingLevel)));
             }
 
-            if (_restedXPSystem)
+            if (_restedXP)
             {
                 if (!steamId.TryGetPlayerRestedXP(out var restedData))
                 {
@@ -348,7 +348,7 @@ internal static class ServerBootstrapSystemPatches
                     if (!prestiges.ContainsKey(prestigeType)) prestiges.Add(prestigeType, 0);
                 }
 
-                if (_exoPrestiging && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
+                if (_exoform && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
                     PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
 
@@ -359,7 +359,7 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                if (_exoPrestiging && !steamId.TryGetPlayerExoFormData(out var _))
+                if (_exoform && !steamId.TryGetPlayerExoFormData(out var _))
                 {
                     KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MaxValue, 0f);
                     steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -367,7 +367,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (_familiarSystem)
+        if (_familiars)
         {
             if (!steamId.TryGetFamiliarActives(out var _))
             {
@@ -395,7 +395,7 @@ internal static class ServerBootstrapSystemPatches
             }
             else
             {
-                Core.StartCoroutine(UpdatePlayerFamiliar(playerCharacter, familiar));
+                UpdateFamiliarDelayRoutine(user, playerCharacter, familiar).Start();
             }
         }
 
@@ -412,7 +412,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (_clientCompanion && exists)
+        if (_eclipse && exists)
         {
             PlayerInfo playerInfo = new()
             {
@@ -425,11 +425,22 @@ internal static class ServerBootstrapSystemPatches
             if (!PlayerCache.ContainsKey(steamId)) PlayerCache.TryAdd(steamId, playerInfo);
         }
     }
-    static IEnumerator UpdatePlayerFamiliar(Entity playerCharacter, Entity familiar)
+    static IEnumerator UpdateFamiliarDelayRoutine(User user, Entity playerCharacter, Entity familiar)
     {
         yield return _delay;
 
-        FamiliarSummonSystem.HandleFamiliar(playerCharacter.GetUser(), playerCharacter, familiar);
+        FamiliarSummonSystem.HandleFamiliarImmediate(user, playerCharacter, familiar);
+    }
+    static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
+    {
+        yield return _delay;
+
+        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+
+        if (familiar.Exists())
+        {
+            Familiars.UnbindFamiliar(user, playerCharacter);
+        }
     }
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserDisconnected))]
@@ -441,20 +452,26 @@ internal static class ServerBootstrapSystemPatches
 
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
+        Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         ulong steamId = user.PlatformId;
 
         if (_leveling)
         {
-            if (_restedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+            if (_restedXP && steamId.TryGetPlayerRestedXP(out var restedData))
             {
                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                 steamId.SetPlayerRestedXP(restedData);
             }
         }
 
-        if (_clientCompanion)
+        if (_eclipse)
         {
             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
+        }
+
+        if (_familiars && playerCharacter.Exists())
+        {
+            UnbindFamiliarDelayRoutine(user, playerCharacter).Start();
         }
     }
 
@@ -471,20 +488,25 @@ internal static class ServerBootstrapSystemPatches
                 {
                     ulong steamId = kickEvent.PlatformId;
 
-                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
+                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                     {
                         if (_leveling)
                         {
-                            if (_restedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData))
+                            if (_restedXP && steamId.TryGetPlayerRestedXP(out var restedData))
                             {
                                 restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
                                 steamId.SetPlayerRestedXP(restedData);
                             }
                         }
 
-                        if (_clientCompanion)
+                        if (_eclipse)
                         {
                             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
+                        }
+
+                        if (_familiars && playerInfo.CharEntity.Exists())
+                        {
+                            UnbindFamiliarDelayRoutine(playerInfo.User, playerInfo.CharEntity).Start();
                         }
                     }
                 }

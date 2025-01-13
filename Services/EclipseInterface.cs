@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using System.Globalization;
@@ -103,7 +104,7 @@ public class VersionHandler_1_1_2 : IVersionHandler<ProgressDataV1_1_2>
             .Append(',');
 
         // Iterate over each class and its synergies
-        foreach (var classEntry in LevelingSystem.ClassWeaponBloodEnumMap)
+        foreach (var classEntry in Classes.ClassWeaponBloodEnumMap)
         {
             var playerClass = classEntry.Key;
             var (weaponSynergies, bloodSynergies) = classEntry.Value;
@@ -200,7 +201,7 @@ public class VersionHandler_1_2_2 : IVersionHandler<ProgressDataV1_2_2>
             .Append(',');
 
         // Iterate over each class and its synergies
-        foreach (var classEntry in LevelingSystem.ClassWeaponBloodEnumMap)
+        foreach (var classEntry in Classes.ClassWeaponBloodEnumMap)
         {
             var playerClass = classEntry.Key;
             var (weaponSynergies, bloodSynergies) = classEntry.Value;

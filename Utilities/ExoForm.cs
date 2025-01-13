@@ -26,7 +26,7 @@ internal static class ExoForm
     static readonly float3 _red = new(1f, 0f, 0f);
 
     static readonly WaitForSeconds _secondDelay = new(1f);
-    public static bool CheckExoFormCharge(User user, ulong steamId) // also BuffUtilities? maybe ExoForm utilities or something, idk
+    public static bool CheckExoFormCharge(User user, ulong steamId)
     {
         UpdateExoFormChargeStored(steamId);
 
@@ -43,35 +43,30 @@ internal static class ExoForm
 
         return false;
     }
-    public static void ReplyNotEnoughCharge(User user, ulong steamId) // this should be in BuffUtilities or something, need to organize later
+    public static void ReplyNotEnoughCharge(User user, ulong steamId)
     {
         string timeRemaining = GetTimeUntilCharged(steamId);
 
         if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color>)");
     }
-    static string GetTimeUntilCharged(ulong steamId) // same as method above, need to organize later
+    static string GetTimeUntilCharged(ulong steamId)
     {
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
         float totalDuration = CalculateFormDuration(exoLevel);
 
-        //float chargeNeeded = BaseDuration - exoFormData.Value; hmm this really shouldn't have been giving realistic values, need to check this out
         float chargeNeeded = BASE_DURATION;
         float ratioToTotal = chargeNeeded / totalDuration;
         float secondsRequired = 86400f * ratioToTotal;
 
-        // Convert seconds to hours, minutes, and seconds
         TimeSpan timeSpan = TimeSpan.FromSeconds(secondsRequired);
         string timeRemaining;
 
-        // Format based on the amount of time left
         if (timeSpan.TotalHours >= 1)
         {
-            // Display hours, minutes, and seconds if more than an hour remains
             timeRemaining = $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes}m {timeSpan.Seconds}s";
         }
         else
         {
-            // Display only minutes and seconds if less than an hour remains
             timeRemaining = $"{timeSpan.Minutes}m {timeSpan.Seconds}s";
         }
 
@@ -120,7 +115,7 @@ internal static class ExoForm
 
             if (countdown == 0f)
             {
-                fullDuration = true; // Mark as used full duration
+                fullDuration = true;
             }
         }
 

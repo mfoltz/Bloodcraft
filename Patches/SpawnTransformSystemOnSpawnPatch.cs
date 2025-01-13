@@ -22,6 +22,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
     static readonly int _shardBearerLevel = ConfigService.ShardBearerLevel;
 
+    const int UNIT_TEAM = 2;
+
     static readonly PrefabGUID _manticore = new(-393555055);
     static readonly PrefabGUID _dracula = new(-327335305);
     static readonly PrefabGUID _monster = new(1233988687);
@@ -34,23 +36,11 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID _monsterVisual = new(-2067402784);
     static readonly PrefabGUID _solarusVisual = new(178225731);
 
-    public static readonly List<PrefabGUID> ShardBearers = [_manticore, _dracula, _monster, _solarus];
+    public static readonly List<PrefabGUID> UnitPrefabGuidsToModify = [_manticore, _dracula, _monster, _solarus, _divineAngel, _fallenAngel];
 
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
 
-    static readonly HashSet<PrefabGUID> _prefabGuidsToIgnore =
-    [
-        new(-259591573), // CHAR_Undead_SkeletonSoldier_TombSummon
-        new(-1584807109) // CHAR_Undead_SkeletonSoldier_Withered
-    ];
-
-    /*
-    public static readonly ConcurrentDictionary<ulong, PrefabGUID> PlayerBindingValidation = [];
-    public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerFamiliarBattleGroups = [];
-    public static readonly ConcurrentDictionary<ulong, bool> PlayerSummoningForBattle = []; // can add this layer to normal binding if more validation is needed after moving away from binding bool in file
-    public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];
-    public static readonly ConcurrentList<ulong> SetDirectionAndFaction = [];
-    */
+    public static readonly HashSet<Entity> FamiliarsToSkip = [];
 
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
@@ -64,9 +54,18 @@ internal static class SpawnTransformSystemOnSpawnPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
+                /*
+                else if (FamiliarsToSkip.Contains(entity))
+                {
+                    FamiliarsToSkip.Remove(entity);
 
-                /* deprecated
+                    continue;
+                }
+                */
+                else if (entity.IsPlayerOwned()) continue;
+
+                /* deprecated but leaving for notes until completely refactored elsewhere
                 int level = unitLevel.Level._Value;
                 int famKey = prefabGUID.GuidHash;
                 bool summon = false;
@@ -178,35 +177,36 @@ internal static class SpawnTransformSystemOnSpawnPatch
                     }
 
                     if (summon) continue;
-                    */
+                */
 
-                if (ShardBearers.Contains(prefabGUID))
+                if (UnitPrefabGuidsToModify.Contains(prefabGuid))
                 {
-                    if (prefabGUID.Equals(_manticore))
+                    if (prefabGuid.Equals(_manticore))
                     {
                         HandleManticore(entity);
                     }
-                    else if (prefabGUID.Equals(_dracula))
+                    else if (prefabGuid.Equals(_dracula))
                     {
                         HandleDracula(entity);
                     }
-                    else if (prefabGUID.Equals(_monster))
+                    else if (prefabGuid.Equals(_monster))
                     {
                         HandleMonster(entity);
                     }
-                    else if (prefabGUID.Equals(_solarus))
+                    else if (prefabGuid.Equals(_solarus))
                     {
                         HandleSolarus(entity);
                     }
+                    else if (prefabGuid.Equals(_divineAngel))
+                    {
+                        HandleAngel(entity);
+                    }
+                    else if (prefabGuid.Equals(_fallenAngel))
+                    {
+                        HandleFallenAngel(entity);
+                    }
                 }
-                else if (prefabGUID.Equals(_divineAngel))
-                {
-                    HandleAngel(entity);
-                }
-                else if (prefabGUID.Equals(_fallenAngel))
-                {
-                    HandleFallenAngel(entity);
-                }
+
             }
         }
         catch (Exception ex)
@@ -218,7 +218,6 @@ internal static class SpawnTransformSystemOnSpawnPatch
             entities.Dispose();
         }
     }
-
     static void HandleManticore(Entity entity)
     {
         entity.Remove<DynamicallyWeakenAttackers>();
@@ -227,14 +226,9 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetAttackSpeed(entity);
         SetHealth(entity);
         SetPower(entity);
+        SetMoveSpeed(entity, 5f, 6.5f);
 
-        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
-        {
-            aiMoveSpeeds.Walk._Value = 5f;
-            aiMoveSpeeds.Run._Value = 6.5f;
-        });
-
-        Buffs.HandleVisual(entity, _manticoreVisual);
+        Buffs.HandleShinyBuff(entity, _manticoreVisual);
     }
     static void HandleMonster(Entity entity)
     {
@@ -244,14 +238,9 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetAttackSpeed(entity);
         SetHealth(entity);
         SetPower(entity);
+        SetMoveSpeed(entity, 2.5f, 5.5f);
 
-        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
-        {
-            aiMoveSpeeds.Walk._Value = 2.5f;
-            aiMoveSpeeds.Run._Value = 5.5f;
-        });
-
-        Buffs.HandleVisual(entity, _monsterVisual);
+        Buffs.HandleShinyBuff(entity, _monsterVisual);
     }
     static void HandleSolarus(Entity entity)
     {
@@ -261,13 +250,9 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetAttackSpeed(entity);
         SetHealth(entity);
         SetPower(entity);
+        SetMoveSpeed(entity, 4f);
 
-        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
-        {
-            aiMoveSpeeds.Walk._Value = 4f;
-        });
-
-        Buffs.HandleVisual(entity, _solarusVisual);
+        Buffs.HandleShinyBuff(entity, _solarusVisual);
     }
     static void HandleDracula(Entity entity)
     {
@@ -277,29 +262,18 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetAttackSpeed(entity);
         SetHealth(entity);
         SetPower(entity);
+        SetMoveSpeed(entity, 2.5f, 3.5f);
 
-        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
-        {
-            aiMoveSpeeds.Walk._Value = 2.5f;
-            aiMoveSpeeds.Run._Value = 3.5f;
-            aiMoveSpeeds.Circle._Value = 3.5f;
-        });
-
-        Buffs.HandleVisual(entity, _draculaVisual);
+        Buffs.HandleShinyBuff(entity, _draculaVisual);
     }
     static void HandleAngel(Entity entity)
     {
         SetAttackSpeed(entity);
         SetHealth(entity);
         SetPower(entity);
+        SetMoveSpeed(entity, 5f, 7.5f);
 
-        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
-        {
-            aiMoveSpeeds.Walk._Value = 5f;
-            aiMoveSpeeds.Run._Value = 7.5f;
-        });
-
-        Buffs.HandleVisual(entity, _solarusVisual);
+        Buffs.HandleShinyBuff(entity, _solarusVisual);
     }
     static void HandleFallenAngel(Entity entity)
     {
@@ -337,6 +311,14 @@ internal static class SpawnTransformSystemOnSpawnPatch
         {
             unitStats.PhysicalPower._Value *= 1.5f;
             unitStats.SpellPower._Value *= 1.5f;
+        });
+    }
+    static void SetMoveSpeed(Entity entity, float walk = float.NaN, float run = float.NaN)
+    {
+        entity.With((ref AiMoveSpeeds aiMoveSpeeds) =>
+        {
+            if (!float.IsNaN(walk)) aiMoveSpeeds.Walk._Value = walk;
+            if (!float.IsNaN(run)) aiMoveSpeeds.Run._Value = run;
         });
     }
 }

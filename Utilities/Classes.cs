@@ -14,7 +14,6 @@ using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
-using static Bloodcraft.Systems.Leveling.LevelingSystem;
 
 namespace Bloodcraft.Utilities;
 internal static class Classes
@@ -53,6 +52,56 @@ internal static class Classes
     ];
 
     static readonly Dictionary<PrefabGUID, List<Entity>> _abilityJewelMap = [];
+
+    public enum PlayerClass
+    {
+        BloodKnight,
+        DemonHunter,
+        VampireLord,
+        ShadowBlade,
+        ArcaneSorcerer,
+        DeathMage
+    }
+
+    public static readonly Dictionary<PlayerClass, (string, string)> ClassWeaponBloodMap = new()
+    {
+        { PlayerClass.BloodKnight, (ConfigService.BloodKnightWeapon, ConfigService.BloodKnightBlood) },
+        { PlayerClass.DemonHunter, (ConfigService.DemonHunterWeapon, ConfigService.DemonHunterBlood) },
+        { PlayerClass.VampireLord, (ConfigService.VampireLordWeapon, ConfigService.VampireLordBlood) },
+        { PlayerClass.ShadowBlade, (ConfigService.ShadowBladeWeapon, ConfigService.ShadowBladeBlood) },
+        { PlayerClass.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeapon, ConfigService.ArcaneSorcererBlood) },
+        { PlayerClass.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
+    };
+
+    public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
+    {
+        { PlayerClass.BloodKnight, (Configuration.ParseConfigIntegerString(ConfigService.BloodKnightWeapon), Configuration.ParseConfigIntegerString(ConfigService.BloodKnightBlood)) },
+        { PlayerClass.DemonHunter, (Configuration.ParseConfigIntegerString(ConfigService.DemonHunterWeapon), Configuration.ParseConfigIntegerString(ConfigService.DemonHunterBlood)) },
+        { PlayerClass.VampireLord, (Configuration.ParseConfigIntegerString(ConfigService.VampireLordWeapon), Configuration.ParseConfigIntegerString(ConfigService.VampireLordBlood)) },
+        { PlayerClass.ShadowBlade, (Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeWeapon), Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeBlood)) },
+        { PlayerClass.ArcaneSorcerer, (Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererWeapon), Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererBlood)) },
+        { PlayerClass.DeathMage, (Configuration.ParseConfigIntegerString(ConfigService.DeathMageWeapon), Configuration.ParseConfigIntegerString(ConfigService.DeathMageBlood)) }
+    };
+
+    public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
+    {
+        { PlayerClass.BloodKnight, ConfigService.BloodKnightBuffs },
+        { PlayerClass.DemonHunter, ConfigService.DemonHunterBuffs },
+        { PlayerClass.VampireLord, ConfigService.VampireLordBuffs },
+        { PlayerClass.ShadowBlade, ConfigService.ShadowBladeBuffs },
+        { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererBuffs },
+        { PlayerClass.DeathMage, ConfigService.DeathMageBuffs }
+    };
+
+    public static readonly Dictionary<PlayerClass, string> ClassSpellsMap = new()
+    {
+        { PlayerClass.BloodKnight, ConfigService.BloodKnightSpells },
+        { PlayerClass.DemonHunter, ConfigService.DemonHunterSpells },
+        { PlayerClass.VampireLord, ConfigService.VampireLordSpells },
+        { PlayerClass.ShadowBlade, ConfigService.ShadowBladeSpells },
+        { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
+        { PlayerClass.DeathMage, ConfigService.DeathMageSpells }
+    };
     public static List<int> GetClassBuffs(ulong steamId)
     {
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)

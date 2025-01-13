@@ -11,6 +11,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
+using static Bloodcraft.Utilities.Classes;
 
 namespace Bloodcraft.Patches;
 
@@ -84,9 +85,9 @@ internal static class ScriptSpawnServerPatch
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (_classes && entity.Has<BloodBuff_BiteToMutant_DataShared>() && Classes.HasClass(steamId))
+                    if (_classes && entity.Has<BloodBuff_BiteToMutant_DataShared>() && HasClass(steamId))
                     {
-                        PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+                        PlayerClass playerClass = GetPlayerClass(steamId);
 
                         if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out player))
                         {
