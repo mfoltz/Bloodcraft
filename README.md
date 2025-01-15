@@ -1,6 +1,34 @@
 ## Table of Contents
 
-*Features section under construction*
+*README under construction, putting these enums here at the top until deciding where to integrate them properly. note that when choosing these via command as stat bonuses in-game use the number shown by the respective list stats command for bloods or weapons*
+
+### BloodStatType
+HealingReceived, // 0
+DamageReduction, // 1
+PhysicalResistance, // 2
+SpellResistance, // 3
+ResourceYield, // 4
+BloodDrain, // 5
+SpellCooldownRecoveryRate, // 6
+WeaponCooldownRecoveryRate, // 7
+UltimateCooldownRecoveryRate, // 8
+MinionDamage, // 9
+ShieldAbsorb, // 10
+BloodEfficiency // 11
+
+### WeaponStatType
+MaxHealth, // 0
+MovementSpeed, // 1
+PrimaryAttackSpeed, // 2
+PhysicalLifeLeech, // 3
+SpellLifeLeech, // 4
+PrimaryLifeLeech, // 5
+PhysicalPower, // 6
+SpellPower, // 7
+PhysicalCritChance, // 8
+PhysicalCritDamage, // 9
+SpellCritChance, // 10
+SpellCritDamage // 11
 
 - [Sponsors](#sponsors)
 - [Features](#features)
