@@ -1,6 +1,6 @@
 ## Table of Contents
 
-*README under construction, putting these enums here at the top until deciding where to integrate them properly*
+*README under construction, putting these enums here at the top until deciding where to integrate them properly. note that when choosing these via command as stat bonuses in-game use the number shown by the respective list stats command for bloods or weapons*
 
 ### BloodStatType
 HealingReceived, // 0
