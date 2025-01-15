@@ -64,14 +64,14 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 ## Commands
 
 ### Bloodlegacy Commands
-- `.bloodlegacy get [BloodType]`
-  - Display your current blood legacy progress.
+- `.bloodlegacy getlegacy.bl get [BloodType]`
+  - Display current blood legacy details.
   - Shortcut: *.bl get [BloodType]*
-- `.bloodlegacy log`
+- `.bloodlegacy loglegacies.bl log`
   - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
 - `.bloodlegacy choosestat [Blood] [BloodStat]`
-  - Choose a blood stat to enhance based on your legacy.
+  - Choose a bonus stat to enhance for your blood legacy.
   - Shortcut: *.bl cst [Blood] [BloodStat]*
 - `.bloodlegacy resetstats`
   - Reset stats for current blood.
@@ -79,7 +79,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.bloodlegacy liststats`
   - Lists blood stats available.
   - Shortcut: *.bl lst*
-- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
+- `.bloodlegacy setlegacy.bl set [Player] [Blood] [Level]` 🔒
   - Sets player Blood Legacy level.
   - Shortcut: *.bl set [Player] [Blood] [Level]*
 - `.bloodlegacy list`
@@ -323,7 +323,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 
 ### Weapon Commands
 - `.weapon getexpertise`
-  - Displays your current expertise.
+  - Displays current weapon expertise details.
   - Shortcut: *.wep get*
 - `.weapon logexpertise`
   - Toggles expertise logging.
@@ -331,7 +331,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.weapon choosestat [Weapon] [WeaponStat]`
   - Choose a weapon stat to enhance based on your expertise.
   - Shortcut: *.wep cst [Weapon] [WeaponStat]*
-- `.weapon resetwepstats`
+- `.weapon resetstats`
   - Reset the stats for current weapon.
   - Shortcut: *.wep rst*
 - `.weapon setexpertise [Name] [Weapon] [Level]` 🔒
@@ -363,6 +363,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
   Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
+- **Shapeshift Abilities**: `ShapeshiftAbilities` (bool, default: False)
+  Enable or disable bear form dash and wolf form bite.
 
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
@@ -584,15 +586,15 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **V Blood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)
   The multiplier for experience gained from VBloods.
 - **Unit Unlock Chance**: `UnitUnlockChance` (float, default: 0.05)
-  The chance for a unit to unlock a familiar.
+  The chance for a unit unlock as a familiar.
 - **V Blood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)
-  The chance for a VBlood to unlock a familiar.
+  The chance for a VBlood unlock as a familiar.
 - **Trait Chance**: `TraitChance` (float, default: 0.2)
-  The chance for a trait when unlocking familiars for the first time.
+  The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit.
 - **Trait Reroll Item Quantity**: `TraitRerollItemQuantity` (int, default: 1000)
   Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
-  The chance for a shiny when unlocking familiars for the first time (6 total, 1 per familiar). Second unlock of same unit guarantees a shiny, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
+  The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
 - **Shiny Cost Item Prefab**: `ShinyCostItemPrefab` (int, default: -77477508)
   Item PrefabGUID cost for changing shiny visual if one is already unlocked (currently demon fragment by default).
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)

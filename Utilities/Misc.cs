@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -9,6 +8,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Systems.Expertise.WeaponManager;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Utilities;
@@ -290,6 +290,22 @@ internal static class Misc
         string timeString = timeSpan.ToString(@"mm\:ss");
         return timeString;
     }
+    public static string FormatBloodStatValue(float value)
+    {
+        string bonusString = (value * 100).ToString("F0") + "%";
+        return bonusString;
+    }
+    public static string FormatWeaponStatValue(WeaponStats.WeaponStatType statType, float value)
+    {
+        string formattedBonus = WeaponStats.WeaponStatFormats[statType] switch
+        {
+            "integer" => ((int)value).ToString(),
+            "decimal" => value.ToString("F2"),
+            "percentage" => (value * 100).ToString("F0") + "%",
+            _ => value.ToString(),
+        };
+        return formattedBonus;
+    }
 
     /*
     public static bool EarnedPermaShroud()
@@ -300,7 +316,7 @@ internal static class Misc
             BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
         }
     }
-    */
+    
     public static void InitializeChanceModifiers()
     {
         List<PlayerInfo> playerInfos = new(PlayerCache.Values);
@@ -320,4 +336,5 @@ internal static class Misc
         // WIP
         return 0f;
     }
+    */
 }

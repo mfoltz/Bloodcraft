@@ -7,7 +7,6 @@ using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.Utilities.Progression;
 using Random = System.Random;
@@ -24,26 +23,31 @@ internal static class ProfessionSystem
 
     static readonly Random _random = new();
 
-    static readonly WaitForSeconds _sCTDelay = new(0.75f);
+    static readonly WaitForSeconds _sctDelay = new(0.75f);
 
     static readonly float _professionMultiplier = ConfigService.ProfessionMultiplier;
     static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
 
-    static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
-    static readonly PrefabGUID _professionsSCT = new(1876501183); // SCT resource gain prefabguid
-    public static void UpdateProfessions(Entity Killer, Entity Victim)
-    {
-        Entity userEntity = Killer.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-        ulong SteamID = user.PlatformId;
+    static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly AssetGuid _yieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
 
-        PrefabGUID PrefabGUID = new(0);
-        if (Victim.Has<YieldResourcesOnDamageTaken>() && Victim.Has<EntityCategory>())
+    static readonly PrefabGUID _resourceGainSCT = new(1876501183); // SCT resource gain prefabguid
+    static readonly float3 _bonusYieldColor = new(0.6f, 0.8f, 1.0f);
+    public static void UpdateProfessions(Entity playerCharacter, Entity target)
+    {
+        Entity userEntity = playerCharacter.GetUserEntity();
+        User user = userEntity.GetUser();
+
+        ulong steamId = user.PlatformId;
+
+        PrefabGUID itemPrefabGuid = PrefabGUID.Empty;
+        if (target.Has<YieldResourcesOnDamageTaken>() && target.Has<EntityCategory>())
         {
-            var yield = Victim.ReadBuffer<YieldResourcesOnDamageTaken>();
+            var yield = target.ReadBuffer<YieldResourcesOnDamageTaken>();
+
             if (yield.IsCreated && !yield.IsEmpty)
             {
-                PrefabGUID = yield[0].ItemType;
+                itemPrefabGuid = yield[0].ItemType;
             }
         }
         else
@@ -51,66 +55,85 @@ internal static class ProfessionSystem
             return;
         }
 
-        float ProfessionValue = Victim.Read<EntityCategory>().ResourceLevel._Value;
+        float professionValue = target.TryGetComponent(out EntityCategory entityCategory) ? entityCategory.ResourceLevel._Value : 0f;
+        PrefabGUID targetPrefabGuid = target.GetPrefabGuid();
 
-        PrefabGUID prefab = Victim.Read<PrefabGUID>();
-        Entity original = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
+        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(itemPrefabGuid, out Entity prefabEntity)) return;
 
-        if (original.Has<EntityCategory>() && original.Read<EntityCategory>().ResourceLevel._Value > ProfessionValue)
+        if (prefabEntity.TryGetComponent(out entityCategory) && entityCategory.ResourceLevel._Value > professionValue)
         {
-            ProfessionValue = original.Read<EntityCategory>().ResourceLevel._Value;
+            professionValue = prefabEntity.Read<EntityCategory>().ResourceLevel._Value;
         }
 
-        if (Victim.Read<UnitLevel>().Level > ProfessionValue && !Victim.Read<PrefabGUID>().GetPrefabName().ToLower().Contains("iron"))
+        if (target.GetUnitLevel() > professionValue && !targetPrefabGuid.GetPrefabName().Contains("iron", StringComparison.OrdinalIgnoreCase))
         {
-            ProfessionValue = Victim.Read<UnitLevel>().Level;
+            professionValue = target.Read<UnitLevel>().Level;
         }
 
-        if (ProfessionValue.Equals(0))
+        if (professionValue.Equals(0))
         {
-            ProfessionValue = 10;
+            professionValue = 10;
         }
 
-        ProfessionValue = (int)(ProfessionValue * _professionMultiplier);
-
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID);
+        professionValue = (int)(professionValue * _professionMultiplier);
+        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGuid);
 
         if (handler != null)
         {
             if (handler.GetProfessionName().Contains("Woodcutting"))
             {
-                ProfessionValue *= ProfessionMappings.GetWoodcuttingModifier(PrefabGUID);
+                professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
             }
 
-            SetProfession(Victim, Killer, SteamID, ProfessionValue, handler);
-            GiveProfessionBonus(prefab, Killer, user, SteamID, handler);
+            SetProfession(target, playerCharacter, steamId, professionValue, handler);
+            GiveProfessionBonus(target, targetPrefabGuid, playerCharacter, userEntity, user, steamId, handler);
         }
     }
-    public static void GiveProfessionBonus(PrefabGUID prefab, Entity Killer, User user, ulong SteamID, IProfessionHandler handler)
+    public static void GiveProfessionBonus(Entity target, PrefabGUID prefabGuid, Entity playerCharacter, Entity userEntity, User user, ulong steamId, IProfessionHandler handler)
     {
-        Entity prefabEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[prefab];
-        int level = GetLevel(SteamID, handler);
-        string name = handler.GetProfessionName();
-        if (name.Contains("Fishing"))
+        if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity)) return;
+
+        int level = GetLevel(steamId, handler);
+        string prefabName = handler.GetProfessionName();
+
+        if (prefabName.Contains("Fishing"))
         {
-            List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefab);
-            int bonus = level / 20;
-            if (bonus.Equals(0)) return;
+            List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefabGuid);
+            int bonusYield = level / 20;
+
+            if (bonusYield.Equals(0)) return;
+
             int index = _random.Next(fishDrops.Count);
             PrefabGUID fish = fishDrops[index];
-            if (ServerGameManager.TryAddInventoryItem(Killer, fish, bonus))
+
+            if (ServerGameManager.TryAddInventoryItem(playerCharacter, fish, bonusYield))
             {
-                if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
+                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                {
+                    float3 position = target.GetPosition();
+
+                    ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                        _yieldAssetGuid, position, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                }
             }
             else
             {
-                InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, fish, bonus, new Entity());
-                if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, fish, bonusYield, new Entity());
+                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                {
+                    float3 position = target.GetPosition();
+
+                    ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                        _yieldAssetGuid, position, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                }
             }
         }
         else if (prefabEntity.Has<DropTableBuffer>())
         {
             var dropTableBuffer = prefabEntity.ReadBuffer<DropTableBuffer>();
+
             foreach (var drop in dropTableBuffer)
             {
                 switch (drop.DropTrigger)
@@ -120,34 +143,59 @@ internal static class ProfessionSystem
                         var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                         foreach (var dropTableData in dropTableDataBuffer)
                         {
-                            if (dropTableData.ItemGuid.GetPrefabName().ToLower().Contains("ingredient") || dropTableData.ItemGuid.GetPrefabName().ToLower().Contains("trippyshroom"))
+                            string itemName = dropTableData.ItemGuid.GetPrefabName();
+                            // string localizedItemName = dropTableData.ItemGuid.GetLocalizedName();
+
+                            if (itemName.Contains("ingredient", StringComparison.OrdinalIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.OrdinalIgnoreCase))
                             {
-                                int bonus = 0;
-                                if (dropTableData.ItemGuid.GetPrefabName().ToLower().Contains("plant") || dropTableData.ItemGuid.GetPrefabName().ToLower().Contains("trippyshroom"))
+                                int bonusYield = 0;
+
+                                if (itemName.Contains("plant", StringComparison.OrdinalIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    bonus = level / 10;
+                                    bonusYield = level / 10;
                                 }
                                 else
                                 {
-                                    bonus = level / 2;
+                                    bonusYield = level / 2;
                                 }
-                                if (bonus.Equals(0)) return;
-                                if (ServerGameManager.TryAddInventoryItem(Killer, dropTableData.ItemGuid, bonus))
+
+                                if (bonusYield <= 0) return;
+                                else if (ServerGameManager.TryAddInventoryItem(playerCharacter, dropTableData.ItemGuid, bonusYield))
                                 {
-                                    if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}");
+                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
+                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                                    {
+                                        float3 targetPosition = target.GetPosition();
+                                        // float3 sctPosition = new(targetPosition.x + 5f, targetPosition.y, targetPosition.z);
+
+                                        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), 
+                                            _yieldAssetGuid, targetPosition, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                                    }
+
                                     break;
                                 }
                                 else
                                 {
-                                    InventoryUtilitiesServer.CreateDropItem(EntityManager, Killer, dropTableData.ItemGuid, bonus, new Entity());
-                                    if (Misc.PlayerBoolsManager.GetPlayerBool(SteamID, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonus}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                                    InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, dropTableData.ItemGuid, bonusYield, new Entity());
+                                    
+                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                                    {
+                                        float3 targetPosition = target.GetPosition();
+                                        // float3 sctPosition = new(targetPosition.x + 5f, targetPosition.y, targetPosition.z);
+
+                                        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                                            _yieldAssetGuid, targetPosition, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                                    }
+
                                     break;
                                 }
                             }
                         }
                         break;
+                    /*
                     case DropTriggerType.OnDeath:
-                        /* WIP
+                        WIP
                         dropTable = prefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
                         dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
                         foreach (var dropTableData in dropTableDataBuffer)
@@ -160,10 +208,9 @@ internal static class ProfessionSystem
                                 Core.Log.LogInfo($"{itemDataDropGroup.DropItemPrefab.GetPrefabName()} | {itemDataDropGroup.Quantity} | {itemDataDropGroup.Weight}");
                             }
                         }
-                        */
                         break;
+                    */
                     default:
-                        //Core.Log.LogInfo($"{drop.DropTableGuid.GetPrefabName()} | {drop.DropTrigger}");
                         break;
                 }
             }
@@ -219,29 +266,18 @@ internal static class ProfessionSystem
 
         if (Misc.PlayerBoolsManager.GetPlayerBool(steamID, "ScrollingText"))
         {
-            float3 targetPosition = target.Read<Translation>().Value;
+            float3 targetPosition = target.GetPosition();
             float3 professionColor = handler.GetProfessionColor();
 
-            Core.StartCoroutine(DelayedProfessionSCT(user.LocalCharacter.GetEntityOnServer(), userEntity, targetPosition, professionColor, gainedXP));
+            ProfessionSCTDelayRoutine(user.LocalCharacter.GetEntityOnServer(), userEntity, targetPosition, professionColor, gainedXP).Start();
         }
     }
-    static IEnumerator DelayedProfessionSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    static IEnumerator ProfessionSCTDelayRoutine(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
     {
-        yield return _sCTDelay;
-
-        Entity scrollingTextEntity = ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _professionsSCT, userEntity);
+        yield return _sctDelay;
+        
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, character, gainedXP, _resourceGainSCT, userEntity);
     }
-
-    /*
-    static int ConvertXpToLevel(float xp)
-    {
-        return (int)(_professionConstant * Math.Sqrt(xp));
-    }
-    public static int ConvertLevelToXp(int level)
-    {
-        return (int)Math.Pow(level / _professionConstant, ProfessionPower);
-    }
-    */
     static float GetXp(ulong steamID, IProfessionHandler handler)
     {
         var xpData = handler.GetProfessionData(steamID);

@@ -93,7 +93,7 @@ internal static class Extensions // probably need to organize this soon
     {
         return EntityManager.AddBuffer<T>(entity);
     }
-    public unsafe static void AddComponent<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer, T componentData) where T : struct
+    public unsafe static void AddComponent<T>(this EntityCommandBuffer entityCommandBuffer, Entity entity, T componentData) where T : struct
     {
         ComponentType componentType = new(Il2CppType.Of<T>());
         TypeIndex typeIndex = componentType.TypeIndex;
@@ -106,7 +106,7 @@ internal static class Extensions // probably need to organize this soon
             entityCommandBuffer.UnsafeAddComponent(entity, typeIndex, size, byteData);
         }
     }
-    public unsafe static void SetComponent<T>(this Entity entity, EntityCommandBuffer entityCommandBuffer, T componentData) where T : struct
+    public unsafe static void SetComponent<T>(this EntityCommandBuffer entityCommandBuffer, Entity entity, T componentData) where T : struct
     {
         ComponentType componentType = new(Il2CppType.Of<T>());
         TypeIndex typeIndex = componentType.TypeIndex;
@@ -659,5 +659,27 @@ internal static class Extensions // probably need to organize this soon
     public static void Start(this IEnumerator routine)
     {
         Core.StartCoroutine(routine);
+    }
+
+    // note to organize this into ECBExtensions or something
+    public static void SetTeam(this Entity entity, EntityCommandBuffer entityCommandBuffer, Entity teamSource)
+    {
+        if (teamSource.TryGetComponent(out Team sourceTeam) && teamSource.TryGetComponent(out TeamReference sourceTeamReference))
+        {
+            Entity teamRefEntity = sourceTeamReference.Value._Value;
+            int teamId = sourceTeam.Value;
+
+            entityCommandBuffer.SetComponent(entity, new TeamReference { Value = new ModifiableEntity { _Value = teamRefEntity } });
+            entityCommandBuffer.SetComponent(entity, new Team { Value = teamId });
+        }
+    }
+    public static void SetPosition(this Entity entity, EntityCommandBuffer entityCommandBuffer, float3 position)
+    {
+        entityCommandBuffer.SetComponent(entity, new Translation { Value = position });
+        entityCommandBuffer.SetComponent(entity, new LastTranslation { Value = position });
+    }
+    public static void SetFaction(this Entity entity, EntityCommandBuffer entityCommandBuffer, PrefabGUID factionPrefabGUID)
+    {
+        entityCommandBuffer.SetComponent(entity, new FactionReference { FactionGuid = new ModifiablePrefabGUID { _Value = factionPrefabGUID } });
     }
 }

@@ -12,6 +12,7 @@ using static Bloodcraft.Services.ConfigService.ConfigInitialization;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
 using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
+using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Services;
@@ -1033,33 +1034,70 @@ internal static class DataService
     internal static class FamiliarPersistence
     {
         [Serializable]
-        internal class FamiliarExperienceData
-        {
-            public Dictionary<int, KeyValuePair<int, float>> FamiliarExperience { get; set; } = [];
-        }
-
-        [Serializable]
-        internal class FamiliarPrestigeData
-        {
-            public Dictionary<int, KeyValuePair<int, List<FamiliarSummonSystem.FamiliarStatType>>> FamiliarPrestige { get; set; } = [];
-        }
-
-        [Serializable]
-        internal class UnlockedFamiliarData
+        internal class FamiliarUnlocksData
         {
             public Dictionary<string, List<int>> UnlockedFamiliars { get; set; } = [];
         }
 
         [Serializable]
-        internal class FamiliarBuffsData
+        internal class FamiliarExperienceData
         {
-            public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = [];
+            public Dictionary<int, KeyValuePair<int, float>> FamiliarLevels { get; set; } = [];
         }
 
-        internal static Dictionary<ulong, UnlockedFamiliarData> _unlockedFamiliars = [];
+        [Serializable]
+        internal class FamiliarPrestigeData
+        {
+            public Dictionary<int, KeyValuePair<int, List<FamiliarStatType>>> FamiliarPrestiges { get; set; } = [];
+        }
+
+        [Serializable]
+        internal class FamiliarBuffsData
+        {
+            public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = []; // can use actual perma buffs or just musb_dots from traits
+        }
+
+        [Serializable]
+        internal class FamiliarEquipmentData
+        {
+            public Dictionary<int, List<int>> FamiliarEquipment { get; set; } = [];
+        }
+
+        [Serializable]
+        public class FamiliarTraitData(string name, Dictionary<FamiliarStatType, float> modifiers)
+        {
+            public string Name { get; set; } = name;
+            public Dictionary<FamiliarStatType, float> Modifiers { get; set; } = modifiers;
+        }
+
+        internal static Dictionary<ulong, FamiliarUnlocksData> _unlockedFamiliars = [];
         internal static Dictionary<ulong, FamiliarExperienceData> _familiarExperience = [];
         internal static Dictionary<ulong, FamiliarPrestigeData> _familiarPrestiges = [];
         internal static Dictionary<ulong, FamiliarBuffsData> _familiarBuffs = [];
+        internal static Dictionary<ulong, FamiliarEquipmentData> _familiarEquipment = [];
+        internal static class FamiliarUnlocksManager
+        {
+            static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_unlocks.json");
+
+            public static void SaveUnlockedFamiliars(ulong playerId, FamiliarUnlocksData data)
+            {
+                string filePath = GetFilePath(playerId);
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(data, options);
+                File.WriteAllText(filePath, jsonString);
+            }
+
+            public static FamiliarUnlocksData LoadUnlockedFamiliars(ulong playerId)
+            {
+                string filePath = GetFilePath(playerId);
+                if (!File.Exists(filePath))
+                    return new FamiliarUnlocksData();
+
+                string jsonString = File.ReadAllText(filePath);
+                return JsonSerializer.Deserialize<FamiliarUnlocksData>(jsonString);
+            }
+        }
+
         internal static class FamiliarExperienceManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_experience.json");
@@ -1081,7 +1119,7 @@ internal static class DataService
             }
             public static int GetFamiliarExperienceLevel(FamiliarExperienceData familiarExperienceData, int familiarId)
             {
-                return familiarExperienceData.FamiliarExperience.TryGetValue(familiarId, out var experienceData) ? experienceData.Key : 0;
+                return familiarExperienceData.FamiliarLevels.TryGetValue(familiarId, out var experienceData) ? experienceData.Key : 0;
             }
         }
         internal static class FamiliarPrestigeManager
@@ -1106,13 +1144,13 @@ internal static class DataService
             }
             public static int GetFamiliarPrestigeLevel(FamiliarPrestigeData familiarPrestigeData, int familiarId)
             {
-                return familiarPrestigeData.FamiliarPrestige.TryGetValue(familiarId, out var prestigeData) ? prestigeData.Key : 0;
+                return familiarPrestigeData.FamiliarPrestiges.TryGetValue(familiarId, out var prestigeData) ? prestigeData.Key : 0;
             }
         }
         internal static class FamiliarBuffsManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_buffs.json");
-            public static void SaveFamiliarBuffs(ulong playerId, FamiliarBuffsData data)
+            public static void SaveFamiliarBuffsData(ulong playerId, FamiliarBuffsData data)
             {
                 string filePath = GetFilePath(playerId);
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -1128,29 +1166,198 @@ internal static class DataService
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarBuffsData>(jsonString);
             }
-        }
-        internal static class FamiliarUnlocksManager
-        {
-            static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_unlocks.json");
+            public static List<int> GetFamiliarBuffs(ulong playerId, int famKey)
+            {
+                var buffsData = LoadFamiliarBuffs(playerId);
 
-            public static void SaveUnlockedFamiliars(ulong playerId, UnlockedFamiliarData data)
+                if (buffsData.FamiliarBuffs.TryGetValue(famKey, out var buffs))
+                    return buffs;
+
+                return [];
+            }
+            public static void SaveFamiliarBuffs(ulong playerId, int famKey, List<int> buffs)
+            {
+                var buffsData = LoadFamiliarBuffs(playerId);
+                buffsData.FamiliarBuffs[famKey] = buffs;
+
+                SaveFamiliarBuffsData(playerId, buffsData);
+            }
+        }
+        internal static class FamiliarEquipmentManager
+        {
+            static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_equipment.json");
+            public static void SaveFamiliarEquipmentData(ulong playerId, FamiliarEquipmentData data)
             {
                 string filePath = GetFilePath(playerId);
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string jsonString = JsonSerializer.Serialize(data, options);
                 File.WriteAllText(filePath, jsonString);
             }
-
-            public static UnlockedFamiliarData LoadUnlockedFamiliars(ulong playerId)
+            public static FamiliarEquipmentData LoadFamiliarEquipment(ulong playerId)
             {
                 string filePath = GetFilePath(playerId);
                 if (!File.Exists(filePath))
-                    return new UnlockedFamiliarData();
+                    return new FamiliarEquipmentData();
 
                 string jsonString = File.ReadAllText(filePath);
-                return JsonSerializer.Deserialize<UnlockedFamiliarData>(jsonString);
+                return JsonSerializer.Deserialize<FamiliarEquipmentData>(jsonString);
+            }
+            public static List<int> GetFamiliarEquipment(ulong playerId, int famKey)
+            {
+                var equipmentData = LoadFamiliarEquipment(playerId);
+
+                if (!equipmentData.FamiliarEquipment.TryGetValue(famKey, out var equipment))
+                {
+                    equipment = [0, 0, 0, 0, 0, 0];
+                    equipmentData.FamiliarEquipment[famKey] = equipment;
+
+                    SaveFamiliarEquipmentData(playerId, equipmentData);
+                }
+
+                return equipment;
+            }
+            public static void SaveFamiliarEquipment(ulong playerId, int famKey, List<int> equipment)
+            {
+                var equipmentData = LoadFamiliarEquipment(playerId);
+                equipmentData.FamiliarEquipment[famKey] = equipment;
+
+                SaveFamiliarEquipmentData(playerId, equipmentData);
             }
         }
+
+        public static readonly List<FamiliarTraitData> FamiliarTraits =
+        [
+        // Offensive Traits
+        new("Dextrous", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PrimaryAttackSpeed, 1.1f } // Primary Attack Speed +10%
+        }),
+
+        new("Alacritous", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.AttackSpeed, 1.1f } // Cast Speed +10%
+        }),
+
+        new("Powerful", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.15f } // Physical Power +15%
+        }),
+
+        new("Savant", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.SpellPower, 1.15f } // Spell Power +15%
+        }),
+
+        new("Piercing", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalCritChance, 1.2f }, // Physical Crit Chance +20%
+            { FamiliarStatType.PhysicalCritDamage, 1.1f }  // Physical Crit Damage +10%
+        }),
+
+        new("Cognizant", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.SpellCritChance, 1.2f }, // Spell Crit Chance +20%
+            { FamiliarStatType.SpellCritDamage, 1.1f }  // Spell Crit Damage +10%
+        }),
+
+        // Defensive Traits
+        new("Fortified", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalResistance, 1.2f }, // Physical Resistance +20%
+            { FamiliarStatType.DamageReduction, 1.1f }     // Damage Reduction +10%
+        }),
+
+        new("Aegis", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.SpellResistance, 1.2f }, // Spell Resistance +20%
+            { FamiliarStatType.DamageReduction, 1.1f }  // Damage Reduction +10%
+        }),
+
+        new("Stalwart", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalResistance, 1.15f }, // Physical Resistance +15%
+            { FamiliarStatType.MaxHealth, 1.1f }            // MaxHealth +10%
+        }),
+
+        new("Barrier", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.SpellResistance, 1.15f }, // Spell Resistance +15%
+            { FamiliarStatType.MaxHealth, 1.1f }         // CC Reduction +10%
+        }),
+
+        new("Resilient", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.DamageReduction, 1.15f },  // Damage Reduction +15%
+            { FamiliarStatType.PhysicalResistance, 1.1f } // Physical Resistance +10%
+        }),
+
+        // Movement Traits
+        new("Nimble", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.MovementSpeed, 1.2f } // Movement Speed +20%
+        }),
+
+        new("Spry", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.MovementSpeed, 1.1f } // Movement Speed +10%
+        }),
+
+        // Mixed traits
+        new("Brave", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.1f },      // Physical Power +10%
+            { FamiliarStatType.PhysicalResistance, 1.05f } // Physical Resistance +5%
+        }),
+
+        new("Fearless", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.1f },     // Physical Power +10%
+            { FamiliarStatType.PrimaryAttackSpeed, 1.1f } // CC Reduction +10%
+        }),
+
+        new("Ferocious", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.15f }, // Physical Power +15%
+            { FamiliarStatType.MovementSpeed, 1.1f }   // Movement Speed +10%
+        }),
+
+        new("Bulwark", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalResistance, 1.15f }, // Physical Resistance +15%
+            { FamiliarStatType.DamageReduction, 1.05f }     // Damage Reduction +5%
+        }),
+
+        new("Champion", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.2f },     // Physical Power +20%
+            { FamiliarStatType.PhysicalResistance, 1.1f } // Physical Resistance +10%
+        }),
+
+        // High-tier traits
+        new("Legend", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.2f },      // Physical Power +20%
+            { FamiliarStatType.PhysicalResistance, 1.2f }, // Physical Resistance +20%
+            { FamiliarStatType.MovementSpeed, 1.15f }      // Movement Speed +15%
+        }),
+
+        new("Swift", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.MovementSpeed, 1.3f } // Movement Speed +30%
+        }),
+
+        new("Ironclad", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalResistance, 1.25f }, // Physical Resistance +25%
+            { FamiliarStatType.DamageReduction, 1.15f }     // Damage Reduction +15%
+        }),
+
+        new("Furious", new Dictionary<FamiliarStatType, float>
+        {
+            { FamiliarStatType.PhysicalPower, 1.25f }, // Physical Power +25%
+            { FamiliarStatType.AttackSpeed, 1.1f }     // Attack Speed +10%
+        })
+        ];
     }
     internal static class PlayerDataInitialization
     {

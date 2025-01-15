@@ -1,8 +1,6 @@
 ﻿using BepInEx;
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
-using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -88,7 +86,7 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.User.PlatformId;
 
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
         FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
 
         string set = steamId.TryGetFamiliarBox(out set) ? set : "";
@@ -132,7 +130,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (data.UnlockedFamiliars.Keys.Count > 0)
         {
@@ -169,7 +167,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (data.UnlockedFamiliars.TryGetValue(name, out var _))
         {
@@ -192,7 +190,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (!data.UnlockedFamiliars.ContainsKey(name) && data.UnlockedFamiliars.TryGetValue(current, out var familiarSet))
         {
@@ -227,7 +225,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count < 10)
         {
@@ -265,7 +263,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count == 0)
         {
@@ -291,7 +289,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (data.UnlockedFamiliars.Count > 0 && data.UnlockedFamiliars.Count < 25)
         {
@@ -332,7 +330,7 @@ internal static class FamiliarCommands
         }
         else // add to last existing box if one exists or add a new box
         {
-            UnlockedFamiliarData unlocksData = LoadUnlockedFamiliars(steamId);
+            FamiliarUnlocksData unlocksData = LoadUnlockedFamiliars(steamId);
             string lastListName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
 
             if (string.IsNullOrEmpty(lastListName)) // add a box if none created yet
@@ -359,7 +357,7 @@ internal static class FamiliarCommands
         }
 
         ulong steamId = ctx.User.PlatformId;
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
         if (steamId.TryGetFamiliarBox(out var activeSet) && data.UnlockedFamiliars.TryGetValue(activeSet, out var familiarSet))
         {
@@ -494,14 +492,14 @@ internal static class FamiliarCommands
             int prestigeLevel = 0;
 
             FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
-            if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
+            if (!prestigeData.FamiliarPrestiges.ContainsKey(data.FamKey))
             {
-                prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
+                prestigeData.FamiliarPrestiges[data.FamKey] = new(0, []);
                 SaveFamiliarPrestige(steamId, prestigeData);
             }
             else
             {
-                prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key;
+                prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key;
             }
 
             LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>) ");
@@ -578,7 +576,7 @@ internal static class FamiliarCommands
 
             KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
             FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
-            xpData.FamiliarExperience[data.FamKey] = newXP;
+            xpData.FamiliarLevels[data.FamKey] = newXP;
             SaveFamiliarExperience(steamId, xpData);
 
             if (ModifyFamiliarImmediate(user, steamId, famKey, player, familiar, level))
@@ -616,19 +614,19 @@ internal static class FamiliarCommands
         {
             FamiliarExperienceData xpData = LoadFamiliarExperience(ctx.Event.User.PlatformId);
 
-            if (xpData.FamiliarExperience[data.FamKey].Key >= ConfigService.MaxFamiliarLevel)
+            if (xpData.FamiliarLevels[data.FamKey].Key >= ConfigService.MaxFamiliarLevel)
             {
                 FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
-                if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
+                if (!prestigeData.FamiliarPrestiges.ContainsKey(data.FamKey))
                 {
-                    prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
+                    prestigeData.FamiliarPrestiges[data.FamKey] = new(0, []);
                     SaveFamiliarPrestige(steamId, prestigeData);
                 }
 
                 prestigeData = LoadFamiliarPrestige(steamId);
-                List<FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
+                List<FamiliarStatType> stats = prestigeData.FamiliarPrestiges[data.FamKey].Value;
 
-                if (prestigeData.FamiliarPrestige[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
+                if (prestigeData.FamiliarPrestiges[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
                 {
                     LocalizationService.HandleReply(ctx, "Familiar is already at max prestige!");
                     return;
@@ -671,11 +669,11 @@ internal static class FamiliarCommands
                 }
 
                 KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1)); // reset level to 1
-                xpData.FamiliarExperience[data.FamKey] = newXP;
+                xpData.FamiliarLevels[data.FamKey] = newXP;
                 SaveFamiliarExperience(steamId, xpData);
 
-                int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
-                prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
+                int prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key + 1;
+                prestigeData.FamiliarPrestiges[data.FamKey] = new(prestigeLevel, stats);
                 SaveFamiliarPrestige(steamId, prestigeData);
 
                 Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
@@ -746,7 +744,7 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.User.PlatformId;
 
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
         FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
         int count = data.UnlockedFamiliars.Keys.Count;
 
@@ -847,7 +845,7 @@ internal static class FamiliarCommands
 
         ulong steamId = user.PlatformId;
 
-        UnlockedFamiliarData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
         FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
 
         var shinyFamiliars = buffsData.FamiliarBuffs;
@@ -882,7 +880,7 @@ internal static class FamiliarCommands
                         foundBoxMatches[box.Key] = [];
                     }
 
-                    string familiarName = Familiars.GetFamiliarName(steamId, new(keyValuePair.Key), buffsData);
+                    string familiarName = Familiars.GetFamiliarName(new(keyValuePair.Key), buffsData);
                     foundBoxMatches[box.Key][familiarName] = keyValuePair.Value;
                 }
             }
@@ -897,15 +895,20 @@ internal static class FamiliarCommands
             Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
             steamId.SetFamiliarBox(foundBoxMatches.Keys.First());
 
-            if (familiar.Exists() && steamId.TryGetFamiliarBox(out string box) && foundBoxMatches.TryGetValue(box, out var nameAndIndex))
+            if (familiar.Exists() && steamId.TryGetFamiliarBox(out string box) && foundBoxMatches.TryGetValue(box, out Dictionary<string, int> nameAndIndex))
             {
-                Familiars.UnbindFamiliar(user, playerCharacter, true, nameAndIndex.FirstOrDefault().Value);
-                // Familiars.BindFamiliarDelayRoutine(user, playerCharacter, nameAndIndex.Values.First());
+                int index = nameAndIndex.Any() ? nameAndIndex.First().Value : -1;
+                Familiars.UnbindFamiliar(user, playerCharacter, true, index);
+            }
+            else if (steamId.TryGetFamiliarBox(out box) && foundBoxMatches.TryGetValue(box, out nameAndIndex))
+            {
+                int index = nameAndIndex.Any() ? nameAndIndex.First().Value : -1;
+                Familiars.UnbindFamiliar(user, playerCharacter, true, index);
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Multiple matches found, support for greater than one matching familiar WIP!");
+            LocalizationService.HandleReply(ctx, "Multiple matches found! SmartBind doesn't support this yet... (WIP)");
         }
 
         /*

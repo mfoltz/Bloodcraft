@@ -4,13 +4,10 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
-using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Leveling.LevelingSystem;
 using static Bloodcraft.Utilities.Classes;
-using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Patches;
 
@@ -18,9 +15,7 @@ namespace Bloodcraft.Patches;
 internal static class DealDamageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
 
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
@@ -48,14 +43,14 @@ internal static class DealDamageSystemPatch
         { PlayerClass.DeathMage, new(-2071441247) }      // guardian block :p
     };
 
-    static readonly Dictionary<PrefabGUID, PrefabGUID> _shinyOnHitDebuffs = new()
+    static readonly HashSet<PrefabGUID> _shinyOnHitDebuffs = new()
     {
-        { new(348724578), new(348724578) },     // ignite
-        { new(-1576512627), new(-1576512627) }, // static
-        { new(-1246704569), new(-1246704569) }, // leech
-        { new(1723455773), new(1723455773) },   // weaken
-        { new(27300215), new(27300215) },       // chill
-        { new(-325758519), new(-325758519) }    // condemn
+        { new(348724578)},   // ignite
+        { new(-1576512627)}, // static
+        { new(-1246704569)}, // leech
+        { new(1723455773)},  // weaken
+        { new(27300215)},    // chill
+        { new(-325758519)}   // condemn
     };
 
     static readonly PrefabGUID _stormShield03 = new(1095865904);
@@ -67,6 +62,7 @@ internal static class DealDamageSystemPatch
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _onHitEffects = ConfigService.ClassSpellSchoolOnHitEffects;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _familiarPvP = ConfigService.FamiliarPvP;
     static readonly bool _quests = ConfigService.QuestSystem;
 
     static readonly float _onHitProcChance = ConfigService.OnHitProcChance;
@@ -83,46 +79,49 @@ internal static class DealDamageSystemPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent) || !dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) || !dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner)) continue;
-                else if (sourcePrefabGUID.Equals(_silverDebuff) || sourcePrefabGUID.Equals(_garlicDebuff)) continue; // these both count for physical damage so need to check source prefab first
-                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities here do weird things I don't want to have to figure out >_>
+                else if (sourcePrefabGUID.Equals(_silverDebuff) || sourcePrefabGUID.Equals(_garlicDebuff)) continue; // these both count for physical damage so need to check damage source
+                else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities here do weird things I don't want to have to figure out, like, ever >_>
 
-                if (entityOwner.Owner.TryGetFollowedPlayer(out Entity playerCharacter))
+                if (_familiars && entityOwner.Owner.TryGetFollowedPlayer(out Entity playerCharacter))
                 {
                     if (dealDamageEvent.Target.IsPlayer() && playerCharacter.Equals(dealDamageEvent.Target))
                     {
                         EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroy event too late/ineffective here for Raziel's holy damage against player owner
                     }
-                    else if (_random.NextDouble() <= _onHitProcChance && _shinyOnHitDebuffs.FirstOrDefault(kvp => entityOwner.Owner.HasBuff(kvp.Key)) is { Key: var _, Value: var debuffPrefabGuid })
+                    else if (IsValidDamageType(dealDamageEvent) && _random.NextDouble() <= _onHitProcChance)
                     {
-                        entity.TryApplyBuffWithOwner(playerCharacter, debuffPrefabGuid);
+                        Core.Log.LogInfo($"Shiny familiar damage roll successful - {entityOwner.Owner.GetPrefabGuid().GetPrefabName()}");
+                        PrefabGUID shinyDebuff = _shinyOnHitDebuffs.FirstOrDefault(buff => entityOwner.Owner.HasBuff(buff));
+
+                        if (shinyDebuff.HasValue())
+                        {
+                            Core.Log.LogInfo($"Applying {shinyDebuff.GetPrefabName()} to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
+                            entity.TryApplyBuffWithOwner(playerCharacter, shinyDebuff);
+                        }
+                        else
+                        {
+                            Core.Log.LogInfo($"Familiar is not shiny, skipping - {entityOwner.Owner.GetPrefabGuid().GetPrefabName()}");
+                        }
                     }
                 }
-                else if (dealDamageEvent.MainType == MainDamageType.Holy) // do anti-healing from too much holy resist + damage reduction? 155 75.5% | 170 85% holy resist ehhhhh
-                {
-                    // Core.Log.LogInfo($"MainFactor: {dealDamageEvent.MainFactor} | Modifier: {dealDamageEvent.Modifier} | RawDamage: {dealDamageEvent.RawDamage} | RawDamagePercent: {dealDamageEvent.RawDamagePercent}");
-                }
-                else if (dealDamageEvent.MainType == MainDamageType.Physical || dealDamageEvent.MainType == MainDamageType.Spell)
+                else if (IsValidDamageType(dealDamageEvent))
                 {
                     if (_quests && dealDamageEvent.Target.Has<YieldResourcesOnDamageTaken>() && entityOwner.Owner.TryGetPlayer(out playerCharacter))
                     {
                         ulong steamId = playerCharacter.GetSteamId();
                         LastDamageTime[steamId] = DateTime.UtcNow;
                     }
-                    else if (_onHitEffects && IsValidTarget(dealDamageEvent.Target) && entityOwner.Owner.TryGetPlayer(out playerCharacter) && !dealDamageEvent.Target.IsPlayer())
+                    else if (_onHitEffects && IsValidTarget(dealDamageEvent.Target) && entityOwner.Owner.TryGetPlayer(out playerCharacter))
                     {
                         ulong steamId = playerCharacter.GetSteamId();
 
                         if (!HasClass(steamId)) continue;
                         PlayerClass playerClass = GetPlayerClass(steamId);
 
-                        if (_random.NextDouble() <= _onHitProcChance)
+                        if (_random.NextDouble() <= _onHitProcChance && _classOnHitDebuffs.TryGetValue(playerClass, out PrefabGUID prefabGuid))
                         {
-                            PrefabGUID prefabGUID = _classOnHitDebuffs[playerClass];
-
-                            if (ServerGameManager.HasBuff(dealDamageEvent.Target, prefabGUID.ToIdentifier()))
+                            if (dealDamageEvent.Target.HasBuff(prefabGuid) && _classOnHitEffects.TryGetValue(playerClass, out prefabGuid))
                             {
-                                prefabGUID = _classOnHitEffects[playerClass];
-
                                 if (playerClass.Equals(PlayerClass.DemonHunter))
                                 {
                                     if (!playerCharacter.HasBuff(_stormShield03))
@@ -131,7 +130,7 @@ internal static class DealDamageSystemPatch
                                         {
                                             if (!playerCharacter.HasBuff(_stormShield01))
                                             {
-                                                Buffs.TryApplyBuff(playerCharacter, _stormShield01);
+                                                playerCharacter.TryApplyBuff(_stormShield01);
                                             }
                                             else if (playerCharacter.TryGetBuff(_stormShield01, out Entity stormShieldFirstBuff))
                                             {
@@ -140,7 +139,7 @@ internal static class DealDamageSystemPatch
                                                     age.Value = 0f;
                                                 });
 
-                                                Buffs.TryApplyBuff(playerCharacter, _stormShield02);
+                                                playerCharacter.TryApplyBuff(_stormShield02);
                                             }
                                         }
                                         else if (playerCharacter.TryGetBuff(_stormShield02, out Entity stormShieldSecondBuff))
@@ -150,7 +149,7 @@ internal static class DealDamageSystemPatch
                                                 age.Value = 0f;
                                             });
 
-                                            Buffs.TryApplyBuff(playerCharacter, _stormShield03);
+                                            playerCharacter.TryApplyBuff(_stormShield03);
                                         }
                                     }
                                     else if (playerCharacter.TryGetBuff(_stormShield03, out Entity stormShieldThirdBuff))
@@ -163,12 +162,12 @@ internal static class DealDamageSystemPatch
                                 }
                                 else
                                 {
-                                    Buffs.TryApplyBuff(playerCharacter, prefabGUID);
+                                    playerCharacter.TryApplyBuff(prefabGuid);
                                 }
                             }
                             else
                             {
-                                if (Buffs.TryApplyBuff(dealDamageEvent.Target, prefabGUID) && dealDamageEvent.Target.TryGetBuff(prefabGUID, out Entity buffEntity))
+                                if (Buffs.TryApplyBuff(dealDamageEvent.Target, prefabGuid) && dealDamageEvent.Target.TryGetBuff(prefabGuid, out Entity buffEntity))
                                 {
                                     buffEntity.With((ref EntityOwner entityOwner) =>
                                     {
@@ -184,7 +183,7 @@ internal static class DealDamageSystemPatch
                         {
                             Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-                            if (familiar.IsEligibleForCombat())
+                            if (_familiarPvP && familiar.IsEligibleForCombat())
                             {
                                 Familiars.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
                             }
@@ -202,15 +201,20 @@ internal static class DealDamageSystemPatch
             entities.Dispose();
         }
     }
+
+    static bool IsValidDamageType(DealDamageEvent dealDamageEvent)
+    {
+        return dealDamageEvent.MainType.Equals(MainDamageType.Physical) || dealDamageEvent.MainType.Equals(MainDamageType.Spell);
+    }
     static bool IsValidTarget(Entity entity)
     {
-        return entity.Has<Movement>() && entity.Has<Health>();
+        return entity.Has<Movement>() && entity.Has<Health>() && !entity.IsPlayer();
     }
     static void ReactToUnitDamage(Entity playerCharacter, EntityOwner entityOwner)
     {
         Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-        if (familiar.IsEligibleForCombat() && familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState))
+        if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && familiar.IsEligibleForCombat())
         {
             if (!behaviourTreeState.Value.Equals(GenericEnemyState.Combat))
             {

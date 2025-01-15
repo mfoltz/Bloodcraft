@@ -107,7 +107,7 @@ internal static class FamiliarUnlockSystem
         ulong steamId = user.PlatformId;
         int famKey = familiarPrefabGuid.GuidHash;
 
-        UnlockedFamiliarData data = FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
         string lastListName = data.UnlockedFamiliars.Keys.LastOrDefault();
 
         if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
@@ -141,7 +141,7 @@ internal static class FamiliarUnlockSystem
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
 
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
-            famData.FamiliarExperience[famKey] = new(1, Utilities.Progression.ConvertLevelToXp(1));
+            famData.FamiliarLevels[famKey] = new(1, Utilities.Progression.ConvertLevelToXp(1));
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
 
             isShiny = HandleShiny(famKey, steamId, _shinyChance);
@@ -171,7 +171,7 @@ internal static class FamiliarUnlockSystem
                 return false;
             }
 
-            FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
+            FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
         else if (chance >= 1f && choice == -1) // guaranteed from double unlock
@@ -187,7 +187,7 @@ internal static class FamiliarUnlockSystem
                 return false;
             }
 
-            FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
+            FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
         else if (chance >= 1f && choice != -1) // guaranteed with choice from shinyChoice
@@ -203,7 +203,7 @@ internal static class FamiliarUnlockSystem
                 buffsData.FamiliarBuffs[famKey][0] = choice;
             }
 
-            FamiliarBuffsManager.SaveFamiliarBuffs(steamId, buffsData);
+            FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
 

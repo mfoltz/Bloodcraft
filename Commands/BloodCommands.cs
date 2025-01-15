@@ -20,7 +20,7 @@ internal static class BloodCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    [Command(name: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display your current blood legacy progress.")]
+    [Command(name: "getlegacy", adminOnly: false, usage: ".bl get [BloodType]", description: "Display current blood legacy details.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = "")
     {
         if (!ConfigService.BloodSystem)
@@ -90,7 +90,7 @@ internal static class BloodCommands
         }
     }
 
-    [Command(name: "log", adminOnly: false, usage: ".bl log", description: "Toggles Legacy progress logging.")]
+    [Command(name: "loglegacies", adminOnly: false, usage: ".bl log", description: "Toggles Legacy progress logging.")]
     public static void LogLegacyCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.BloodSystem)
@@ -105,7 +105,7 @@ internal static class BloodCommands
         LocalizationService.HandleReply(ctx, $"Blood Legacy logging {(GetPlayerBool(steamId, "BloodLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a blood stat to enhance based on your legacy.")]
+    [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [Blood] [BloodStat]", description: "Choose a bonus stat to enhance for your blood legacy.")]
     public static void ChooseBloodStat(ChatCommandContext ctx, string blood, string statType)
     {
         if (!ConfigService.BloodSystem)
@@ -116,19 +116,27 @@ internal static class BloodCommands
 
         if (int.TryParse(statType, out int value))
         {
+            int length = Enum.GetValues(typeof(BloodStats.BloodStatType)).Length;
+
+            if (value < 1 || value > length)
+            {
+                LocalizationService.HandleReply(ctx, $"Invalid integer, please use the corresponding stat number shown when using '<color=white>.bl lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
+                return;
+            }
+
             --value;
             statType = value.ToString();
         }
 
         if (!Enum.TryParse<BloodStats.BloodStatType>(statType, true, out var StatType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood stat choice, use '.bl lst' to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid blood stat choice, use '<color=white>.bl lst</color>' to see options.");
             return;
         }
 
         if (!Enum.TryParse<BloodType>(blood, true, out var BloodType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid blood type, use '.bl l' to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid blood type, use '<color=white>.bl l</color>' to see options.");
             return;
         }
 
@@ -144,8 +152,8 @@ internal static class BloodCommands
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and will apply after refreshing blood.");
 
-            Entity player = ctx.Event.SenderCharacterEntity;
-            BloodType bloodType = GetCurrentBloodType(player);
+            // Entity player = ctx.Event.SenderCharacterEntity;
+            // BloodType bloodType = GetCurrentBloodType(player);
         }
         else
         {
@@ -214,7 +222,7 @@ internal static class BloodCommands
         var bloodStatsWithCaps = Enum.GetValues(typeof(BloodStats.BloodStatType))
             .Cast<BloodStats.BloodStatType>()
             .Select((stat, index) =>
-                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{BloodStats.BloodStatValues[stat]}</color>")
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Utilities.Misc.FormatBloodStatValue(BloodStats.BloodStatValues[stat])}</color>")
             .ToList();
 
         if (bloodStatsWithCaps.Count == 0)
@@ -230,25 +238,9 @@ internal static class BloodCommands
                 LocalizationService.HandleReply(ctx, replyMessage);
             }
         }
-
-        /*
-        var bloodStatsWithCaps = Enum.GetValues(typeof(BloodStats.BloodStatType))
-            .Cast<BloodStats.BloodStatType>()
-            .Select(stat =>
-                $"<color=#00FFFF>{stat}</color>: <color=white>{BloodStats.BloodStatValues[stat]}</color>")
-            .ToArray();
-
-        int halfLength = bloodStatsWithCaps.Length / 2;
-
-        string bloodStatsLine1 = string.Join(", ", bloodStatsWithCaps.Take(halfLength));
-        string bloodStatsLine2 = string.Join(", ", bloodStatsWithCaps.Skip(halfLength));
-
-        LocalizationService.HandleReply(ctx, $"Available blood stats (1/2): {bloodStatsLine1}");
-        LocalizationService.HandleReply(ctx, $"Available blood stats (2/2): {bloodStatsLine2}");
-        */
     }
 
-    [Command(name: "set", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
+    [Command(name: "setlegacy", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
     public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
     {
         if (!ConfigService.BloodSystem)

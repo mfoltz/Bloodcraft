@@ -1,6 +1,5 @@
 `1.6.4`
-- spirit double destroyed instead of killed when using Gorecrusher as a familiar
-- 
+- version changelog WIP
 
 `1.5.3`
 - deprecating '.cleanupfams' and '.wep restore', latter no longer needed former less useful than it used to be and prone to causing crashes

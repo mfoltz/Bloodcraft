@@ -25,11 +25,11 @@ internal static class Buffs
         { 0, new(-1473399128) }, // primary attack fast shockwaveslash
         { 1, new(841757706) }, // first weapon skill downswing detonate
         { 2, new(-1940289109) }, // space dash skill teleport behind target
-        { 3, new(1270706044) }, // shift veil of bats
+        { 3, new(1270706044) }, // shift dash skill veil of bats
         { 4, new(532210332) }, // second weapon skill sword throw
-        { 5, new(716346677) }, // batswarm? mmm don't like this one, animation looks off need to find good drac spell to use but not sure if any left and the 20 blood bolts one is kinda lame. the nuts one spams console since the homing bolts freak out when no players to target but doesn't technically cause issues per se
-        { 6, new(-1161896955) }, // etherial sword
-        { 7, new(-7407393) } // ring of blood
+        { 5, new(-1161896955) }, // first spell skill etherial sword
+        { 6, new(-7407393) }, // second spell skill ring of blood
+        { 7, new(797450963) } //  ultimate AB_Vampire_Dracula_BloodBoltSwarm_AbilityGroup
     };
 
     public static readonly Dictionary<int, int> ExoFormAbilityUnlockMap = new()
@@ -556,10 +556,11 @@ internal static class Buffs
 
         if (buffEntity.Has<LifeTime>())
         {
-            LifeTime lifeTime = buffEntity.Read<LifeTime>();
-            lifeTime.Duration = -1f;
-            lifeTime.EndAction = LifeTimeEndAction.Destroy;
-            buffEntity.Write(lifeTime);
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = 0f;
+                lifeTime.EndAction = LifeTimeEndAction.None;
+            });
         }
     }
     public static void ApplyClassBuffs(Entity player, ulong steamId)
@@ -621,10 +622,11 @@ internal static class Buffs
             }
             if (buffEntity.Has<LifeTime>())
             {
-                LifeTime lifetime = buffEntity.Read<LifeTime>();
-                lifetime.Duration = 0f; // need to try changing this to 9999 or 0 instead to avert console spam at some point
-                lifetime.EndAction = LifeTimeEndAction.None;
-                buffEntity.Write(lifetime);
+                buffEntity.With((ref LifeTime lifeTime) =>
+                {
+                    lifeTime.Duration = 0f;
+                    lifeTime.EndAction = LifeTimeEndAction.None;
+                });
             }
             if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
             {

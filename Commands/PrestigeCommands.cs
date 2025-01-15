@@ -5,7 +5,6 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;

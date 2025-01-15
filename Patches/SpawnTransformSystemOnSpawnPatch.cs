@@ -4,10 +4,8 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
-using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Patches;
 

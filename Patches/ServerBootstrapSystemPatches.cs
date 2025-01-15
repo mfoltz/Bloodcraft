@@ -56,6 +56,9 @@ internal static class ServerBootstrapSystemPatches
     static readonly int _startingLevel = ConfigService.StartingLevel;
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
+    static readonly PrefabGUID _shroudBuff = new(1504279833);
+    static readonly PrefabGUID _shroudCloak = new(1063517722);
+
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
@@ -365,6 +368,21 @@ internal static class ServerBootstrapSystemPatches
                     steamId.SetPlayerExoFormData(timeEnergyPair);
                 }
             }
+
+            if (_prestige)
+            {
+                SetPlayerBool(steamId, "Shroud", true);
+
+                if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
+                    && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
+                {
+                    Buffs.ApplyPermanentBuff(playerCharacter, _shroudBuff);
+                }
+                else
+                {
+                    SetPlayerBool(steamId, "Shroud", false);
+                }
+            }
         }
 
         if (_familiars)
@@ -469,6 +487,16 @@ internal static class ServerBootstrapSystemPatches
             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
         }
 
+        if (_prestige && playerCharacter.Exists())
+        {
+            SetPlayerBool(steamId, "Shroud", false);
+
+            if (playerCharacter.HasBuff(_shroudBuff) && playerCharacter.TryGetComponent(out Equipment equipment))
+            {
+                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerCharacter.TryRemoveBuff(_shroudBuff);
+            }
+        }
+
         if (_familiars && playerCharacter.Exists())
         {
             UnbindFamiliarDelayRoutine(user, playerCharacter).Start();
@@ -502,6 +530,16 @@ internal static class ServerBootstrapSystemPatches
                         if (_eclipse)
                         {
                             if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
+                        }
+
+                        if (_prestige)
+                        {
+                            SetPlayerBool(steamId, "Shroud", false);
+
+                            if (playerInfo.CharEntity.HasBuff(_shroudBuff) && playerInfo.CharEntity.TryGetComponent(out Equipment equipment))
+                            {
+                                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerInfo.CharEntity.TryRemoveBuff(_shroudBuff);
+                            }
                         }
 
                         if (_familiars && playerInfo.CharEntity.Exists())

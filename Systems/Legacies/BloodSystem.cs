@@ -1,13 +1,12 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using UnityEngine;
-using static Bloodcraft.Utilities.Progression;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem

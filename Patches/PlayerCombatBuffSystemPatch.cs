@@ -23,7 +23,7 @@ internal static class PlayerCombatBuffSystemPatch
     static void OnUpdatePrefix(PlayerCombatBuffSystem_OnAggro __instance)
     {
         if (!Core._initialized) return;
-        else if (!_gameMode.Equals(GameModeType.PvP) || !_familiars) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
@@ -35,7 +35,7 @@ internal static class PlayerCombatBuffSystemPatch
                 {
                     Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-                    if (familiar.Exists() && !familiar.IsDisabled())
+                    if (familiar.Exists() && Familiars.IsEligibleForCombat(familiar))
                     {
                         Familiars.AddToFamiliarAggroBuffer(familiar, inverseAggroEvent.Consumer);
                     }
@@ -53,7 +53,7 @@ internal static class PlayerCombatBuffSystemPatch
     static void OnUpdatePrefix(PlayerCombatBuffSystem_Reapplication __instance)
     {
         if (!Core._initialized) return;
-        else if (!_gameMode.Equals(GameModeType.PvP) || !_familiars) return;
+        else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
         try
@@ -64,7 +64,7 @@ internal static class PlayerCombatBuffSystemPatch
                 {
                     Entity familiar = Familiars.FindPlayerFamiliar(entity);
 
-                    if (familiar.Exists() && !familiar.IsDisabled())
+                    if (familiar.Exists() && Familiars.IsEligibleForCombat(familiar))
                     {
                         foreach (InverseAggroBufferElement element in buffer)
                         {

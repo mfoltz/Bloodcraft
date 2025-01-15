@@ -10,7 +10,6 @@ using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Leveling.LevelingSystem;
 using static Bloodcraft.Utilities.Classes;
 
 namespace Bloodcraft.Patches;
@@ -34,6 +33,11 @@ internal static class ScriptSpawnServerPatch
     static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _fallenAngelDeathBuff = new(-1934189109);
     static readonly PrefabGUID _fallenAngelDespawnBuff = new(1476380301);
+    static readonly PrefabGUID _bearFormBuff = new(-1569370346);
+    static readonly PrefabGUID _wolfFormBuff = new(-351718282);
+
+    static readonly PrefabGUID _bearDashAbility = new(1873182450);
+    static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
 
     static readonly PrefabGUID _playerFaction = new(1106458752);
 
@@ -50,9 +54,9 @@ internal static class ScriptSpawnServerPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
 
-                if (_exoPrestiging && prefabGUID.Equals(_exoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
+                if (_exoPrestiging && prefabGuid.Equals(_exoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
                 {
                     Buffs.HandleExoFormBuff(entity, player);
                 }
@@ -80,7 +84,14 @@ internal static class ScriptSpawnServerPatch
                     }
                 }
 
-                if (!entity.Has<BloodBuff>()) continue;
+                if (prefabGuid.Equals(_bearFormBuff) || prefabGuid.Equals(_wolfFormBuff))
+                {
+                    Core.Log.LogInfo($"ShapeshiftBuff in ScriptSpawnServer - {prefabGuid.GetPrefabName()}");
+
+                    if (prefabGuid.Equals(_bearFormBuff)) HandleBearDash(entity);
+                    else if (prefabGuid.Equals(_wolfFormBuff)) HandleWolfBite(entity);
+                }
+                else if (!entity.Has<BloodBuff>()) continue;
                 else if (entityOwner.Owner.TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
@@ -126,7 +137,7 @@ internal static class ScriptSpawnServerPatch
                         entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
                     }
 
-                    if (_legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGUID, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
+                    if (_legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGuid, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
                         {
@@ -139,6 +150,47 @@ internal static class ScriptSpawnServerPatch
         finally
         {
             entities.Dispose();
+        }
+    }
+    static void HandleBearDash(Entity entity)
+    {
+        if (entity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+        {
+            Core.Log.LogInfo("ReplaceAbilityOnSlotBuff in ScriptSpawnServer - BearDash");
+
+            ReplaceAbilityOnSlotBuff buff = new()
+            {
+                Slot = 3,
+                NewGroupId = _bearDashAbility,
+                CopyCooldown = true,
+                Priority = 99,
+                CastBlockType = GroupSlotModificationCastBlockType.WholeCast
+            };
+
+            buffer.Add(buff);
+        }
+    }
+    static void HandleWolfBite(Entity entity)
+    {
+        if (entity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+        {
+            Core.Log.LogInfo("ReplaceAbilityOnSlotBuff in ScriptSpawnServer - WolfBite");
+
+            ReplaceAbilityOnSlotBuff buff = new()
+            {
+                Slot = 0,
+                NewGroupId = _wolfBiteAbility,
+                CopyCooldown = true,
+                Priority = 99,
+                CastBlockType = GroupSlotModificationCastBlockType.WholeCast
+            };
+
+            // 4294967221
+            // AbilityTypeFlag
+            // AbilityKit, Interact_BreakMount, AbilityKit_IgnoreInCombat, IgnoreSpellBlock
+            // bear and wolf both have Demount
+
+            buffer.Add(buff);
         }
     }
 }

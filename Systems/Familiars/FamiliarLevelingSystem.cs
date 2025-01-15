@@ -75,16 +75,16 @@ internal static class FamiliarLevelingSystem
     public static void UpdateFamiliarExperience(Entity player, Entity familiar, int familiarId, ulong playerId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
     {
         FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
-        data.FamiliarExperience[familiarId] = new(familiarXP.Key, familiarXP.Value + gainedXP);
+        data.FamiliarLevels[familiarId] = new(familiarXP.Key, familiarXP.Value + gainedXP);
 
         FamiliarExperienceManager.SaveFamiliarExperience(playerId, data);
-        CheckAndHandleLevelUp(player, familiar, familiarId, playerId, data.FamiliarExperience[familiarId], currentLevel, gainedXP);
+        CheckAndHandleLevelUp(player, familiar, familiarId, playerId, data.FamiliarLevels[familiarId], currentLevel, gainedXP);
     }
     public static KeyValuePair<int, float> GetFamiliarExperience(ulong playerId, int familiarId)
     {
         FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
 
-        if (data.FamiliarExperience.TryGetValue(familiarId, out var familiarData))
+        if (data.FamiliarLevels.TryGetValue(familiarId, out var familiarData))
         {
             return familiarData;
         }
@@ -105,7 +105,7 @@ internal static class FamiliarLevelingSystem
             leveledUp = true;
             FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
 
-            data.FamiliarExperience[familiarId] = new(newLevel, familiarXP.Value);
+            data.FamiliarLevels[familiarId] = new(newLevel, familiarXP.Value);
             FamiliarExperienceManager.SaveFamiliarExperience(steamId, data);
         }
 

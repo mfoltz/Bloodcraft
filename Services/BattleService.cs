@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -33,7 +32,7 @@ internal class BattleService
 
     static readonly WaitForSeconds _challengeExpiration = new(CHALLENGE_EXPIRATION);
     static readonly WaitForSeconds _battleInterval = new(BATTLE_INTERVAL);
-    static readonly WaitForSeconds _timeoutDelay = new(FamiliarSummonSystem.FAMILIAR_LIFETIME - MATCH_START_COUNTDOWN);
+    static readonly WaitForSeconds _timeoutDelay = new(FAMILIAR_LIFETIME - MATCH_START_COUNTDOWN);
 
     static readonly WaitForSeconds _secondDelay = new(1f);
 
@@ -47,7 +46,7 @@ internal class BattleService
     static readonly float3 _green = new(0f, 1f, 0f);
 
     public static float3 _battlePosition = float3.zero;
-    public static float3 _sCTPosition = float3.zero;
+    public static float3 _sctPosition = float3.zero;
 
     const float MATCH_START_COUNTDOWN = 5f;
     const float BATTLE_INTERVAL = 300f;
@@ -82,10 +81,10 @@ internal class BattleService
             FamiliarBattleCoords.Add(battlePosition);
 
             _battlePosition = new(battlePosition.x, battlePosition.y, battlePosition.z);
-            _sCTPosition = new(battlePosition.x, battlePosition.y + SCT_HEIGHT, battlePosition.z);
+            _sctPosition = new(battlePosition.x, battlePosition.y + SCT_HEIGHT, battlePosition.z);
 
             GenerateBattleFormations(battlePosition);
-            Core.StartCoroutine(BattleUpdateRoutine());
+            BattleUpdateRoutine().Start();
 
             _serviceActive = true;
 
@@ -317,7 +316,7 @@ internal class BattleService
             yield break;
         }
 
-        float countdown = MATCH_START_COUNTDOWN; // maybe send messages as well, see about the spectator stuff too
+        float countdown = MATCH_START_COUNTDOWN;
         List<PlayerInfo> onlineNearbyPlayers = OnlineCache.Values
             .Where(player => Vector3.Distance(_battlePosition, player.CharEntity.GetPosition()) < SPECTATE_DISTANCE)
             .ToList();
@@ -342,6 +341,8 @@ internal class BattleService
                 _battleSCT,
                 player.UserEntity
                 );
+
+                Core.Log.LogInfo($"Countdown SCT created for {player.User.CharacterName.Value} - {countdown}s");
             }
 
             --countdown;

@@ -1,11 +1,10 @@
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
-using Bloodcraft.Utilities;
 using Stunlock.Core;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Utilities.Progression;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Commands;
 

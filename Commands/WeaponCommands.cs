@@ -11,9 +11,9 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Commands;
 
@@ -25,7 +25,7 @@ internal static class WeaponCommands
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays your current expertise.")]
+    [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.ExpertiseSystem)
@@ -60,6 +60,9 @@ internal static class WeaponCommands
                 foreach (var stat in stats)
                 {
                     float bonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, stat);
+                    string formattedBonus = Misc.FormatWeaponStatValue(stat, bonus);
+
+                    /*
                     string formattedBonus = WeaponStats.WeaponStatFormats[stat] switch
                     {
                         "integer" => ((int)bonus).ToString(),
@@ -67,6 +70,8 @@ internal static class WeaponCommands
                         "percentage" => (bonus * 100).ToString("F0") + "%",
                         _ => bonus.ToString(),
                     };
+                    */
+
                     bonusWeaponStats.Add(new KeyValuePair<WeaponStats.WeaponStatType, string>(stat, formattedBonus));
                 }
 
@@ -114,6 +119,14 @@ internal static class WeaponCommands
 
         if (int.TryParse(statType, out int value))
         {
+            int length = Enum.GetValues(typeof(WeaponStats.WeaponStatType)).Length;
+
+            if (value < 1 || value > length)
+            {
+                LocalizationService.HandleReply(ctx, $"Invalid integer, please use the corresponding stat number shown when using '<color=white>.wep lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
+                return;
+            }
+
             --value;
             statType = value.ToString();
         }
@@ -143,7 +156,7 @@ internal static class WeaponCommands
         }
     }
 
-    [Command(name: "resetwepstats", shortHand: "rst", adminOnly: false, usage: ".wep rst", description: "Reset the stats for current weapon.")]
+    [Command(name: "resetstats", shortHand: "rst", adminOnly: false, usage: ".wep rst", description: "Reset the stats for current weapon.")]
     public static void ResetWeaponStats(ChatCommandContext ctx)
     {
         if (!ConfigService.ExpertiseSystem)
@@ -160,7 +173,7 @@ internal static class WeaponCommands
         {
             PrefabGUID item = new(ConfigService.ResetExpertiseItem);
             int quantity = ConfigService.ResetExpertiseItemQuantity;
-            // Check if the player has the item to reset stats
+
             if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
             {
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
@@ -244,7 +257,7 @@ internal static class WeaponCommands
         var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStats.WeaponStatType))
             .Cast<WeaponStats.WeaponStatType>()
             .Select((stat, index) =>
-                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{WeaponStats.WeaponStatValues[stat]}</color>")
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Misc.FormatWeaponStatValue(stat, WeaponStats.WeaponStatValues[stat])}</color>")
             .ToList();
 
         if (weaponStatsWithCaps.Count == 0)
@@ -261,22 +274,6 @@ internal static class WeaponCommands
                 LocalizationService.HandleReply(ctx, replyMessage);
             }
         }
-
-        /*
-        var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStats.WeaponStatType))
-            .Cast<WeaponStats.WeaponStatType>()
-            .Select(stat =>
-                $"<color=#00FFFF>{stat}</color>: <color=white>{WeaponStats.WeaponStatValues[stat]}</color>")
-            .ToArray();
-
-        int halfLength = weaponStatsWithCaps.Length / 2;
-
-        string weaponStatsLine1 = string.Join(", ", weaponStatsWithCaps.Take(halfLength));
-        string weaponStatsLine2 = string.Join(", ", weaponStatsWithCaps.Skip(halfLength));
-
-        LocalizationService.HandleReply(ctx, $"Available weapon stats (1/2): {weaponStatsLine1}");
-        LocalizationService.HandleReply(ctx, $"Available weapon stats (2/2): {weaponStatsLine2}");
-        */
     }
 
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".wep l", description: "Lists weapon expertises available.")]

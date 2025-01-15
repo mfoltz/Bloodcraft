@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Patches;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;

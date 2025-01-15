@@ -5,7 +5,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections.Concurrent;
 using Unity.Collections;
@@ -37,6 +36,7 @@ internal static class BuffSystemSpawnPatches
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
     const float FAMILIAR_TRAVEL_DURATION = 7.5f;
+    const float MINION_LIFETIME = 30f;
 
     static readonly PrefabGUID _fallenAngel = new(-76116724);
     static readonly PrefabGUID _solarus = new(-740796338);
@@ -56,9 +56,11 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _witchPigTransformationBuff = new(1356064917);
     static readonly PrefabGUID _wranglerPotionBuff = new(387154469);
+    static readonly PrefabGUID _inkCrawlerDeathBuff = new(1273155981);
 
     static readonly PrefabGUID _swallowAbilityGroup = new(1292896032);
     static readonly PrefabGUID _targetSwallowedBuff = new(-915145807);
+    static readonly PrefabGUID _hasSwallowedBuff = new(1457576969);
 
     static readonly PrefabGUID _traderFactionT01 = new(30052367);
 
@@ -76,17 +78,14 @@ internal static class BuffSystemSpawnPatches
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
                 if (!buffTarget.Exists()) continue;
 
-                string prefabName = prefabGUID.GetPrefabName().ToLower();
+                string prefabName = prefabGuid.GetPrefabName();
 
-                //int guidHash = prefabGUID.GuidHash;
-                //Core.Log.LogInfo($"BuffSystem_Spawn_Server: {prefabName}");
-
-                if (_eliteShardBearers && prefabName.Contains("holybubble") && buffTarget.GetPrefabGuid().Equals(_solarus)) // holy mortar effect for Solarus when eliteShardBearers active
+                if (_eliteShardBearers && prefabName.Contains("holybubble", StringComparison.OrdinalIgnoreCase) && buffTarget.GetPrefabGuid().Equals(_solarus)) // holy mortar effect for Solarus when eliteShardBearers active
                 {
                     if (!buffTarget.HasBuff(_holyBeamPowerBuff))
                     {
@@ -103,7 +102,7 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (_classes && (prefabGUID.Equals(_feedBiteAbortTriggerBuff) || prefabGUID.Equals(_spawnMutantBiteBuff)))
+                else if (_classes && (prefabGuid.Equals(_feedBiteAbortTriggerBuff) || prefabGuid.Equals(_spawnMutantBiteBuff)))
                 {
                     if (buffTarget.TryGetPlayer(out Entity player))
                     {
@@ -116,11 +115,11 @@ internal static class BuffSystemSpawnPatches
                         Classes.ModifyFallenAngelForDeathMage(buffTarget, player);
                     }
                 }
-                else if (_familiars && prefabGUID.Equals(_witchPigTransformationBuff) && buffTarget.Has<VBloodUnit>())
+                else if (_familiars && prefabGuid.Equals(_witchPigTransformationBuff) && buffTarget.Has<VBloodUnit>())
                 {
                     entity.Destroy();
                 }
-                else if (_familiars && prefabGUID.Equals(_phasingBuff) && buffTarget.TryGetPlayer(out Entity player))
+                else if (_familiars && prefabGuid.Equals(_phasingBuff) && buffTarget.TryGetPlayer(out Entity player))
                 {
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
@@ -130,7 +129,7 @@ internal static class BuffSystemSpawnPatches
                         Familiars.CallFamiliar(player, familiar, user, steamId, data);
                     }
                 }
-                else if (_familiars && prefabGUID.Equals(_pveCombatBuff)) // return familiar when entering combat if far enough away
+                else if (_familiars && prefabGuid.Equals(_pveCombatBuff)) // return familiar when entering combat if far enough away
                 {
                     if (buffTarget.TryGetPlayer(out player))
                     {
@@ -147,7 +146,7 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (_familiars && prefabGUID.Equals(_pvpCombatBuff))
+                else if (_familiars && prefabGuid.Equals(_pvpCombatBuff))
                 {
                     if (buffTarget.TryGetPlayer(out player))
                     {
@@ -164,11 +163,12 @@ internal static class BuffSystemSpawnPatches
                             });
 
                             Familiars.TryReturnFamiliar(player, familiar);
+
                             if (!_familiarPvP) Familiars.UnbindFamiliar(user, player);
                         }
                     }
                 }
-                else if (_familiars && prefabGUID.Equals(_vampiricCurse) && !entity.Has<GameplayEventListeners>()) // bring familiar with player for BloodyPoint teleports, but in a cheeky way ;P
+                else if (_familiars && prefabGuid.Equals(_vampiricCurse) && !entity.Has<GameplayEventListeners>()) // bring familiar with player for BloodyPoint teleports, but in a cheeky way ;P
                 {
                     if (buffTarget.TryGetPlayer(out player) && entityOwner.Owner.Equals(player))
                     {
@@ -176,7 +176,7 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
-                            player.CastAbility(familiar, _swallowAbilityGroup);
+                            // player.CastAbility(familiar, _swallowAbilityGroup); see if works without this
 
                             if (familiar.TryApplyAndGetBuffWithOwner(player, _targetSwallowedBuff, out Entity buffEntity))
                             {
@@ -191,38 +191,38 @@ internal static class BuffSystemSpawnPatches
                         }
                     }
                 }
-                else if (_familiars && prefabName.Contains("emote_onaggro") && buffTarget.TryGetFollowedPlayer(out player))
+                else if (_familiars && prefabName.Contains("emote_onaggro", StringComparison.OrdinalIgnoreCase) && buffTarget.TryGetFollowedPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
 
                     if (!GetPlayerBool(steamId, "VBloodEmotes"))
                     {
-                        DestroyUtility.Destroy(EntityManager, entity);
+                        entity.Destroy();
                     }
                 }
-                else if (prefabName.Contains("consumable") && buffTarget.TryGetPlayer(out player)) // alchemy bonuses/potion stacking/familiar sharing
+                else if (prefabName.Contains("consumable", StringComparison.OrdinalIgnoreCase) && buffTarget.TryGetPlayer(out player)) // alchemy bonuses/potion stacking/familiar sharing
                 {
                     ulong steamId = player.GetSteamId();
 
-                    if (_potionStacking && !prefabName.Contains("holyresistance")) // stack t01/t02 potion effects except for holy, gets whack with damage reduction
+                    if (_potionStacking && !prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase)) // stack t01/t02 potion effects except for holy, gets whack with damage reduction
                     {
                         if (entity.Has<RemoveBuffOnGameplayEvent>()) entity.Remove<RemoveBuffOnGameplayEvent>();
                         if (entity.Has<RemoveBuffOnGameplayEventEntry>()) entity.Remove<RemoveBuffOnGameplayEventEntry>();
                     }
 
-                    if (_familiars && !prefabGUID.Equals(_wranglerPotionBuff))
+                    if (_familiars && !prefabGuid.Equals(_wranglerPotionBuff))
                     {
                         Entity familiar = Familiars.FindPlayerFamiliar(player);
 
                         if (familiar.Exists())
                         {
-                            Buffs.TryApplyBuff(familiar, prefabGUID);
+                            familiar.TryApplyBuff(prefabGuid);
                         }
                     }
 
                     if (_professions) // apply alchemy bonuses
                     {
-                        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGUID, "alchemy");
+                        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGuid, "alchemy");
 
                         int level = handler.GetProfessionData(steamId).Key;
                         float bonus = 1 + level / (float)_maxProfessionLevel;
@@ -260,20 +260,44 @@ internal static class BuffSystemSpawnPatches
 
                     if (familiar.Exists())
                     {
-                        if (prefabGUID.Equals(_draculaReturnBuff))
+                        if (prefabGuid.Equals(_draculaReturnBuff))
                         {
-                            DestroyUtility.Destroy(EntityManager, entity);
+                            entity.Destroy();
                         }
-                        else if (prefabGUID.Equals(_highlordSwordSpawnBuff))
+                        else if (prefabGuid.Equals(_highlordSwordSpawnBuff))
                         {
-                            if (ServerGameManager.TryGetBuff(familiar, _highlordSwordPermaBuff.ToIdentifier(), out Entity swordPermabuff))
+                            if (familiar.TryGetBuff(_highlordSwordPermaBuff, out Entity buffEntity))
                             {
-                                if (swordPermabuff.Has<AmplifyBuff>()) swordPermabuff.Remove<AmplifyBuff>();
+                                if (buffEntity.Has<AmplifyBuff>()) buffEntity.Remove<AmplifyBuff>();
+                                if (!buffTarget.HasBuff(_inkCrawlerDeathBuff))
+                                {
+                                    Familiars.NothingLivesForever(buffTarget, MINION_LIFETIME);
+                                }
                             }
                         }
-                        else if (prefabGUID.Equals(_holyBeamPowerBuff))
+                        else if (prefabGuid.Equals(_holyBeamPowerBuff))
                         {
-                            if (entity.Has<LifeTime>()) entity.Write(new LifeTime { Duration = 30f, EndAction = LifeTimeEndAction.Destroy });
+                            if (entity.Has<LifeTime>())
+                            {
+                                entity.With((ref LifeTime lifeTime) =>
+                                {
+                                    lifeTime.Duration = 30f;
+                                    lifeTime.EndAction = LifeTimeEndAction.Destroy;
+                                });
+                            }
+                        }
+                        else if (prefabGuid.Equals(_hasSwallowedBuff))
+                        {
+                            if (entity.Has<LifeTime>())
+                            {
+                                entity.With((ref LifeTime lifeTime) =>
+                                {
+                                    lifeTime.Duration = 0f;
+                                    lifeTime.EndAction = LifeTimeEndAction.None;
+                                });
+                            }
+
+                            if (!entity.Has<HideTargetHUD>()) entity.Add<HideTargetHUD>();
                         }
                     }
                 }
@@ -283,20 +307,17 @@ internal static class BuffSystemSpawnPatches
 
                     if (owner.IsPlayer() && !owner.Equals(buffTarget))
                     {
-                        Buff buff = entity.Read<Buff>();
-                        if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        PreventDebuff(entity);
                     }
                     else if (_familiars)
                     {
                         if (owner.IsFollowingPlayer())
                         {
-                            Buff buff = entity.Read<Buff>();
-                            if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                            PreventDebuff(entity);
                         }
                         else if (owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsFollowingPlayer())
                         {
-                            Buff buff = entity.Read<Buff>();
-                            if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                            PreventDebuff(entity);
                         }
                     }
                 }
@@ -307,20 +328,17 @@ internal static class BuffSystemSpawnPatches
 
                     if (owner.IsPlayer() && !owner.Equals(buffTarget) && pvpProtected)
                     {
-                        Buff buff = entity.Read<Buff>();
-                        if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                        PreventDebuff(entity);
                     }
                     else if (_familiars && pvpProtected)
                     {
                         if (owner.IsFollowingPlayer())
                         {
-                            Buff buff = entity.Read<Buff>();
-                            if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                            PreventDebuff(entity);
                         }
                         else if (owner.TryGetComponent(out entityOwner) && entityOwner.Owner.IsFollowingPlayer())
                         {
-                            Buff buff = entity.Read<Buff>();
-                            if (buff.BuffEffectType.Equals(BuffEffectType.Debuff)) DestroyUtility.Destroy(EntityManager, entity);
+                            PreventDebuff(entity);
                         }
                     }
                 }
@@ -331,8 +349,15 @@ internal static class BuffSystemSpawnPatches
             entities.Dispose();
         }
     }
+    static void PreventDebuff(Entity buffEntity)
+    {
+        if (buffEntity.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
+        {
+            buffEntity.Destroy();
+        }
+    }
 
-    // Methods for refactoring eventually
+    // Methods for refactoring... eventually >_>
     static void HandleEliteSolarusFinalPhase(Entity character)
     {
         if (character.Read<PrefabGUID>().Equals(_solarus) && !ServerGameManager.HasBuff(character, _holyBeamPowerBuff))

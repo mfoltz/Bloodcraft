@@ -72,7 +72,7 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     }
                 });
 
-            if (!_migrated)
+            if (!_migrated && File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
             {
                 List<PlayerInfo> playerCache = new(PlayerCache.Values);
 
