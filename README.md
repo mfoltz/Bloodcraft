@@ -1,6 +1,6 @@
 ## Table of Contents
 
-*Features section under construction, putting these enums here at the top until deciding where to integrate them properly into readme*
+*README under construction, putting these enums here at the top until deciding where to integrate them properly*
 
 ### BloodStatType
 HealingReceived, // 0
