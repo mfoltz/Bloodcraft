@@ -151,13 +151,11 @@ internal static class BloodCommands
         if (ChooseStat(steamId, BloodType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=red>{BloodType}</color> and will apply after refreshing blood.");
-
-            // Entity player = ctx.Event.SenderCharacterEntity;
-            // BloodType bloodType = GetCurrentBloodType(player);
         }
         else
         {
             LocalizationService.HandleReply(ctx, $"You have already chosen {ConfigService.LegacyStatChoices} stats for this legacy, the stat has already been chosen for this legacy, or the stat is not allowed for your class.");
+            // UpdateBloodStats(character, bloodType);
         }
     }
 
@@ -191,20 +189,20 @@ internal static class BloodCommands
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                 {
                     ResetStats(steamId, bloodType);
-                    //UpdateBloodStats(character, bloodType);
+                    // UpdateBloodStats(character, bloodType);
 
                     LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
+                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your blood stats (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
             }
         }
         else
         {
             ResetStats(steamId, bloodType);
-            //UpdateBloodStats(character, bloodType);
+            // UpdateBloodStats(character, bloodType);
 
             LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
         }

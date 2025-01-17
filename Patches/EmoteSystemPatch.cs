@@ -20,6 +20,8 @@ internal static class EmoteSystemPatch
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _familiarBattles = ConfigService.FamiliarBattles;
+    static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
     static readonly PrefabGUID _ignoredFaction = new(-1430861195);
@@ -61,7 +63,7 @@ internal static class EmoteSystemPatch
     static void OnUpdatePrefix(EmoteSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!_familiars) return;
+        else if (!_familiars && !_exoForm) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
         try
@@ -72,21 +74,21 @@ internal static class EmoteSystemPatch
                 FromCharacter fromCharacter = entity.Read<FromCharacter>();
 
                 User user = fromCharacter.User.Read<User>();
-                Entity character = fromCharacter.Character;
+                Entity playerCharacter = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
-                if (useEmoteEvent.Action.Equals(_tauntEmote) && GetPlayerBool(steamId, "ExoForm"))
+                if (_exoForm && useEmoteEvent.Action.Equals(_tauntEmote) && GetPlayerBool(steamId, "ExoForm"))
                 {
-                    if (!character.HasBuff(_exoFormBuff))
+                    if (!playerCharacter.HasBuff(_exoFormBuff))
                     {
-                        Buffs.TryApplyBuff(character, _phasingBuff);
+                        playerCharacter.TryApplyBuff(_phasingBuff);
 
-                        if (character.TryGetBuff(_phasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
+                        if (playerCharacter.TryGetBuff(_phasingBuff, out Entity buffEntity) && buffEntity.Has<BuffModificationFlagData>())
                         {
                             buffEntity.Remove<BuffModificationFlagData>();
                         }
                     }
-                    else if (character.TryGetBuff(_exoFormBuff, out Entity buffEntity))
+                    else if (playerCharacter.TryGetBuff(_exoFormBuff, out Entity buffEntity))
                     {
                         ExitingForm.Add(steamId);
                         ExoForm.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
@@ -94,21 +96,21 @@ internal static class EmoteSystemPatch
                         DestroyUtility.Destroy(EntityManager, buffEntity);
                     }
                 }
-                else if (BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesEmote) || useEmoteEvent.Action.Equals(_noEmote)))
+                else if (_familiarBattles && BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesEmote) || useEmoteEvent.Action.Equals(_noEmote)))
                 {
                     if (_matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
                 }
-                else if (GetPlayerBool(steamId, "Emotes"))
+                else if (_familiars && GetPlayerBool(steamId, "Emotes"))
                 {
-                    if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
+                    if (ServerGameManager.HasBuff(playerCharacter, _dominateBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using dominate form!");
                     }
-                    else if (ServerGameManager.HasBuff(character, _takeFlightBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
+                    else if (ServerGameManager.HasBuff(playerCharacter, _takeFlightBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
-                    else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, character, steamId);
+                    else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
                 }
             }
         }

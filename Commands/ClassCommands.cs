@@ -26,7 +26,7 @@ internal static class ClassCommands
             return;
         }
 
-        if (!Classes.TryParseClassName(className, out var parsedClassType))
+        if (!TryParseClassName(className, out var parsedClassType))
         {
             LocalizationService.HandleReply(ctx, "Invalid class, use .classes to see options.");
             return;
@@ -34,9 +34,9 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!Classes.HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
+        if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
         {
-            Classes.UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
+            UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
             LocalizationService.HandleReply(ctx, $"You have chosen <color=white>{parsedClassType}</color>");
         }
         else
@@ -69,9 +69,9 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (Classes.HasClass(steamId) && GetPlayerBool(steamId, "ShiftLock"))
+        if (HasClass(steamId) && GetPlayerBool(steamId, "ShiftLock"))
         {
-            PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+            PlayerClass playerClass = GetPlayerClass(steamId);
 
             if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
             {
@@ -109,7 +109,7 @@ internal static class ClassCommands
                         data.ClassSpell = ConfigService.DefaultClassSpell;
                         steamId.SetPlayerSpells(data);
 
-                        Classes.UpdateShift(ctx, character, spellPrefabGUID);
+                        UpdateShift(ctx, character, spellPrefabGUID);
                         return;
                     }
                 }
@@ -125,7 +125,7 @@ internal static class ClassCommands
                     spellsData.ClassSpell = spells[choice - 1];
                     steamId.SetPlayerSpells(spellsData);
 
-                    Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
+                    UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
                 }
             }
             else
@@ -158,7 +158,7 @@ internal static class ClassCommands
                         data.ClassSpell = ConfigService.DefaultClassSpell;
                         steamId.SetPlayerSpells(data);
 
-                        Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                        UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
                         return;
                     }
                 }
@@ -168,7 +168,7 @@ internal static class ClassCommands
                     spellsData.ClassSpell = spells[choice - 1];
                     steamId.SetPlayerSpells(spellsData);
 
-                    Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
+                    UpdateShift(ctx, ctx.Event.SenderCharacterEntity, new(spellsData.ClassSpell));
                 }
             }
         }
@@ -187,7 +187,7 @@ internal static class ClassCommands
             return;
         }
 
-        if (!Classes.TryParseClassName(className, out var parsedClassType))
+        if (!TryParseClassName(className, out var parsedClassType))
         {
             LocalizationService.HandleReply(ctx, "Invalid class, use .classes to see options.");
             return;
@@ -196,19 +196,19 @@ internal static class ClassCommands
         ulong steamId = ctx.Event.User.PlatformId;
         Entity character = ctx.Event.SenderCharacterEntity;
 
-        if (steamId.TryGetPlayerClasses(out var classes) && !Classes.HasClass(steamId))
+        if (steamId.TryGetPlayerClasses(out var classes) && !HasClass(steamId))
         {
             LocalizationService.HandleReply(ctx, "You haven't chosen a class yet.");
             return;
         }
 
-        if (ConfigService.ChangeClassItem != 0 && !Classes.HandleClassChangeItem(ctx))
+        if (ConfigService.ChangeClassItem != 0 && !HandleClassChangeItem(ctx))
         {
             return;
         }
 
-        Classes.RemoveClassBuffs(ctx, steamId);
-        Classes.UpdateClassData(character, parsedClassType, classes, steamId);
+        RemoveClassBuffs(ctx, steamId);
+        UpdateClassData(character, parsedClassType, classes, steamId);
 
         LocalizationService.HandleReply(ctx, $"Class changed to <color=white>{parsedClassType}</color>!");
     }
@@ -224,10 +224,10 @@ internal static class ClassCommands
 
         var steamId = ctx.Event.User.PlatformId;
 
-        if (Classes.HasClass(steamId))
+        if (HasClass(steamId))
         {
-            PlayerClass playerClass = Classes.GetPlayerClass(steamId);
-            List<int> perks = Classes.GetClassBuffs(steamId);
+            PlayerClass playerClass = GetPlayerClass(steamId);
+            List<int> perks = GetClassBuffs(steamId);
 
             if (perks.Count == 0)
             {
@@ -268,22 +268,22 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (Classes.HasClass(steamId))
+        if (HasClass(steamId))
         {
-            PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+            PlayerClass playerClass = GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClass requestedClass))
             {
                 playerClass = requestedClass;
             }
 
-            Classes.ReplyClassBuffs(ctx, playerClass);
+            ReplyClassBuffs(ctx, playerClass);
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClass requestedClass))
             {
-                Classes.ReplyClassBuffs(ctx, requestedClass);
+                ReplyClassBuffs(ctx, requestedClass);
             }
             else
             {
@@ -303,22 +303,22 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (Classes.HasClass(steamId))
+        if (HasClass(steamId))
         {
-            PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+            PlayerClass playerClass = GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClass requestedClass))
             {
                 playerClass = requestedClass;
             }
 
-            Classes.ReplyClassSpells(ctx, playerClass);
+            ReplyClassSpells(ctx, playerClass);
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClass requestedClass))
             {
-                Classes.ReplyClassSpells(ctx, requestedClass);
+                ReplyClassSpells(ctx, requestedClass);
             }
             else
             {
@@ -338,44 +338,22 @@ internal static class ClassCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (Classes.HasClass(steamId))
+        if (HasClass(steamId))
         {
-            PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+            PlayerClass playerClass = GetPlayerClass(steamId);
 
-            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClass requestedClass))
             {
                 playerClass = requestedClass;
             }
 
-            Classes.ReplyClassSynergies(ctx, playerClass);
+            ReplyClassSynergies(ctx, playerClass);
         }
         else
         {
-            if (!string.IsNullOrEmpty(classType) && Classes.TryParseClass(classType, out PlayerClass requestedClass))
+            if (!string.IsNullOrEmpty(classType) && TryParseClass(classType, out PlayerClass requestedClass))
             {
-                Classes.ReplyClassSynergies(ctx, requestedClass);
-
-                /*
-                var weaponStats = weaponBloodStats.Item1.Split(',').Select(v => ((WeaponStatType)int.Parse(v)).ToString()).ToList();
-                var bloodStats = weaponBloodStats.Item2.Split(',').Select(v => ((BloodStatType)int.Parse(v)).ToString()).ToList();
-
-                if (weaponStats.Count == 0 && bloodStats.Count == 0)
-                {
-                    LocalizationService.HandleReply(ctx, "No stat synergies found for class.");
-                    return;
-                }
-
-                var allStats = new List<string>();
-                allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
-                allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
-
-                for (int i = 0; i < allStats.Count; i += 6)
-                {
-                    var batch = allStats.Skip(i).Take(6);
-                    string replyMessage = string.Join(", ", batch);
-                    LocalizationService.HandleReply(ctx, $"{requestedClass} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]: {replyMessage}");
-                }
-                */
+                ReplyClassSynergies(ctx, requestedClass);
             }
             else
             {

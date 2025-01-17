@@ -402,7 +402,7 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetFamiliarBattleGroup([0, 0, 0]);
             }
 
-            FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
+            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, FamiliarExperienceManager.LoadFamiliarExperienceData(steamId));
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
 
             Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);

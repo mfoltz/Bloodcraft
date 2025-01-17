@@ -88,19 +88,15 @@ internal static class DealDamageSystemPatch
                     {
                         EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroy event too late/ineffective here for Raziel's holy damage against player owner
                     }
-                    else if (IsValidDamageType(dealDamageEvent) && _random.NextDouble() <= _onHitProcChance)
+                    else if (_random.NextDouble() <= _onHitProcChance && IsValidDamageType(dealDamageEvent) && IsValidTarget(dealDamageEvent.Target))
                     {
-                        Core.Log.LogInfo($"Shiny familiar damage roll successful - {entityOwner.Owner.GetPrefabGuid().GetPrefabName()}");
+                        // Core.Log.LogInfo($"Shiny familiar damage roll successful - {entityOwner.Owner.GetPrefabGuid().GetPrefabName()}");
                         PrefabGUID shinyDebuff = _shinyOnHitDebuffs.FirstOrDefault(buff => entityOwner.Owner.HasBuff(buff));
 
                         if (shinyDebuff.HasValue())
                         {
-                            Core.Log.LogInfo($"Applying {shinyDebuff.GetPrefabName()} to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
-                            entity.TryApplyBuffWithOwner(playerCharacter, shinyDebuff);
-                        }
-                        else
-                        {
-                            Core.Log.LogInfo($"Familiar is not shiny, skipping - {entityOwner.Owner.GetPrefabGuid().GetPrefabName()}");
+                            // Core.Log.LogInfo($"Applying {shinyDebuff.GetPrefabName()} to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
+                            dealDamageEvent.Target.TryApplyBuffWithOwner(playerCharacter, shinyDebuff);
                         }
                     }
                 }

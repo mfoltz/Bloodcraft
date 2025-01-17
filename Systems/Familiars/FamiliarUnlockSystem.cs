@@ -140,9 +140,9 @@ internal static class FamiliarUnlockSystem
             currentList.Add(famKey);
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
 
-            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
             famData.FamiliarLevels[famKey] = new(1, Utilities.Progression.ConvertLevelToXp(1));
-            FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, famData);
 
             isShiny = HandleShiny(famKey, steamId, _shinyChance);
 

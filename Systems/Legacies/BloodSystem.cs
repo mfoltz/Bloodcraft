@@ -221,50 +221,6 @@ internal static class BloodSystem
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
         if (handler != null)
         {
-            /*
-            // Check if the player leveled up
-            var xpData = handler.GetLegacyData(steamID);
-
-            if (xpData.Key >= ConfigService.MaxBloodLevel) return;
-
-            float changeFactor = 1f;
-
-            if (steamID.TryGetPlayerPrestiges(out var prestiges))
-            {
-                // Apply rate reduction with diminishing returns
-                if (prestiges.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var legacyPrestige))
-                {
-                    changeFactor -= (ConfigService.PrestigeRatesReducer * legacyPrestige);
-                    changeFactor = MathF.Max(changeFactor, 0);
-                }
-
-                // Apply rate gain with linear increase
-                if (prestiges.TryGetValue(PrestigeType.Experience, out var xpPrestige))
-                {
-                    changeFactor += 1 + (ConfigService.PrestigeRateMultiplier * xpPrestige);
-                }
-            }
-
-            bloodValue *= changeFactor;
-
-            float newExperience = xpData.Value + bloodValue;
-            int newLevel = ConvertXpToLevel(newExperience);
-            bool leveledUp = false;
-
-            if (newLevel > xpData.Key)
-            {
-                leveledUp = true;
-                if (newLevel > ConfigService.MaxBloodLevel)
-                {
-                    newLevel = ConfigService.MaxBloodLevel;
-                    newExperience = ConvertLevelToXp(ConfigService.MaxBloodLevel);
-                }
-            }
-
-            var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
-            handler.SetLegacyData(steamID, updatedXPData);
-            */
-
             SaveBloodExperience(steamID, handler, bloodValue, out bool leveledUp, out int newLevel);
             NotifyPlayer(user, bloodType, bloodValue, leveledUp, newLevel, handler);
         }
@@ -308,7 +264,6 @@ internal static class BloodSystem
                 $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
         }
 
-        // Reminders and stat choices
         if (GetPlayerBool(steamID, "Reminders"))
         {
             if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
@@ -342,38 +297,6 @@ internal static class BloodSystem
                 $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }
     }
-
-    /*
-    public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
-    {
-        ulong steamID = user.PlatformId;
-        gainedXP = (int)gainedXP; // Convert to integer if necessary
-        int levelProgress = GetLevelProgress(steamID, handler); // Calculate the current progress to the next level
-
-        if (leveledUp)
-        {
-            if (newLevel <= MaxBloodLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
-
-            if (Misc.GetPlayerBool(steamID, "Reminders"))
-            {
-                if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var Stats))
-                {
-                    if (Stats.Count < LegacyStatChoices)
-                    {
-                        int choices = LegacyStatChoices - Stats.Count;
-                        string bonusString = choices > 1 ? "bonuses" : "bonus";
-                        LocalizationService.HandleServerReply(EntityManager, user, $"{choices} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst {bloodType} [Stat]</color>' to make your choice and '<color=white>.bl lst</color>' to view legacy stat options. (toggle reminders with <color=white>'.remindme'</color>)");
-                    }
-                }
-            }
-        }
-
-        if (Misc.GetPlayerBool(steamID, "BloodLogging"))
-        {
-            LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
-        }
-    }
-    */
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
     {
         int currentLevel = GetLevel(SteamID, handler);

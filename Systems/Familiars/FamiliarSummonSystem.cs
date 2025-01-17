@@ -11,6 +11,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Utilities.Progression;
+using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
@@ -30,7 +31,7 @@ internal static class FamiliarSummonSystem
     // static readonly WaitForSeconds _delay = new(1f);
 
     public const float FAMILIAR_LIFETIME = 240f;
-    const float SPAWN_BUFF_LIFETIME = 1.35f; // want to make as long as possible before another circle spawns, 1.25f is good try 1.5f? 1.5f sliiightly too long
+    const float SPAWN_BUFF_LIFETIME = 1.25f; // want to make as long as possible before another circle spawns, 1.25f is good try 1.5f? 1.5f sliiightly too long
 
     static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
@@ -43,9 +44,12 @@ internal static class FamiliarSummonSystem
     static readonly PrefabGUID _hideSpawnBuff = new(-205058219);      // Buff_General_Spawn_Unit_Medium
     static readonly PrefabGUID _distanceCheckBuff = new(1269197489); // AB_Vampire_CrimsonIronMaiden_DistanceChecker_Buff
     static readonly PrefabGUID _solarusFinalStageBuff = new(2144624015);
+    static readonly PrefabGUID _targetSwallowedBuff = new(-915145807);
 
     static readonly PrefabGUID _divineAngel = new(-1737346940);
     static readonly PrefabGUID _solarus = new(-740796338);
+
+    static readonly PrefabGUID _familiarServant = new(51737727);
 
     static readonly PrefabGUID _ignoredFaction = new(-1430861195);
     static readonly PrefabGUID _playerFaction = new(1106458752);
@@ -99,7 +103,7 @@ internal static class FamiliarSummonSystem
 
         HandleBindingImmediate(playerCharacter, user, familiar, familiarId, playerCharacter.GetPosition());
     }
-    public static void InstantiateFamiliarDeferred(User user, Entity playerCharacter, int famKey)
+    public static void InstantiateFamiliarDeferred(User user, Entity playerCharacter, int famKey) // good idea in theory but a lot of effort to remake this entirely for ECB instead of EM, will reconsider in future
     {
         PrefabGUID familiarId = new(famKey);
 
@@ -191,59 +195,6 @@ internal static class FamiliarSummonSystem
         ulong steamId = user.PlatformId;
         Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);
 
-        /*
-        if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
-
-        PlayerFamiliarBattleGroups[steamId].Remove(prefabGUID);
-        PlayerBattleFamiliars[steamId].Add(entity);
-
-        if (SetDirectionAndFaction.Contains(steamId))
-        {
-            if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
-            {
-                factionIndex = 1;
-                ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
-
-                int pairedIndex = PlayerBattleFamiliars[pairedId].Count - 1;
-                Familiars.FaceYourEnemy(entity, PlayerBattleFamiliars[pairedId][pairedIndex]);
-            }
-            else
-            {
-                Core.Log.LogWarning($"SetDirectionAndFaction contained {steamId} but couldn't find MatchPair for battle!");
-            }
-
-            SetDirectionAndFaction.Remove(steamId);
-        }
-
-        User user = playerInfo.User;
-        summon = true;
-
-        if (FamiliarSummonSystem.HandleFamiliarForBattle(playerInfo.CharEntity, entity, factionIndex))
-        {
-            if (PlayerFamiliarBattleGroups[steamId].Count == 0)
-            {
-                PlayerSummoningForBattle[steamId] = false;
-
-                if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
-                {
-                    ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
-
-                    if (PlayerSummoningForBattle.TryGetValue(pairedId, out bool summoning) && !summoning)
-                    {
-                        Core.StartCoroutine(BattleService.BattleCountdownRoutine((steamId, pairedId)));
-                    }
-                }
-            }
-        }
-        else
-        {
-            DestroyUtility.Destroy(EntityManager, entity);
-            LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
-
-            continue;
-        }
-        */
-
         if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
 
         PlayerBattleGroups[steamId].Remove(familiarId);
@@ -268,10 +219,9 @@ internal static class FamiliarSummonSystem
 
         try
         {
-            // int level = familiar.GetUnitLevel();
             int famKey = familiar.GetPrefabGuidHash();
 
-            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
             int level = famData.FamiliarLevels.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
             if (level == 0)
@@ -281,7 +231,7 @@ internal static class FamiliarSummonSystem
                 KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1));
                 famData.FamiliarLevels[famKey] = newXP;
 
-                FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+                FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, famData);
             }
 
             if (ModifyFamiliarImmediate(user, steamId, famKey, playerCharacter, familiar, level))
@@ -289,7 +239,7 @@ internal static class FamiliarSummonSystem
                 playerCharacter.TryApplyBuffWithLifeTime(_spawnBuff, SPAWN_BUFF_LIFETIME);
                 familiar.TryApplyBuff(_hideSpawnBuff);
 
-                Utilities.Familiars.EquipFamiliar(steamId, familiar, famKey);
+                // if (HandleFamiliarServantImmediate(familiar)) Utilities.Familiars.EquipFamiliar(steamId, familiar, famKey);
 
                 return true;
             }
@@ -305,6 +255,25 @@ internal static class FamiliarSummonSystem
             return false;
         }
     }
+    static bool HandleFamiliarServantImmediate(Entity familiar)
+    {
+        Entity servant = ServerGameManager.InstantiateEntityImmediate(familiar, _familiarServant);
+
+        if (servant.Exists() && servant.TryApplyAndGetBuffWithOwner(familiar, _targetSwallowedBuff, out Entity buffEntity))
+        {
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = 0f;
+                lifeTime.EndAction = LifeTimeEndAction.None;
+            });
+
+            if (!Utilities.Familiars.FamiliarServantMap.ContainsKey(familiar)) Utilities.Familiars.FamiliarServantMap.TryAdd(familiar, servant);
+
+            return true;
+        }
+
+        return false;
+    }
     public static bool HandleFamiliarDeferred(User user, Entity playerCharacter, Entity familiar) // use commandBuffer instead of entityManager
     {
         ulong steamId = user.PlatformId;
@@ -314,7 +283,7 @@ internal static class FamiliarSummonSystem
             // int level = familiar.GetUnitLevel();
             int famKey = familiar.GetPrefabGuidHash();
 
-            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
             int level = famData.FamiliarLevels.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
             if (level == 0)
@@ -324,7 +293,7 @@ internal static class FamiliarSummonSystem
                 KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1));
                 famData.FamiliarLevels[famKey] = newXP;
 
-                FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+                FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, famData);
             }
 
             if (ModifyFamiliarImmediate(user, steamId, famKey, playerCharacter, familiar, level))
@@ -355,7 +324,7 @@ internal static class FamiliarSummonSystem
             //int level = familiar.GetUnitLevel();
             int famKey = familiar.GetPrefabGuidHash();
 
-            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
             int level = famData.FamiliarLevels.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
             if (level == 0)
@@ -365,7 +334,7 @@ internal static class FamiliarSummonSystem
                 KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
                 famData.FamiliarLevels[famKey] = newXP;
 
-                FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+                FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, famData);
             }
 
             familiar.SetPosition(position);
@@ -395,7 +364,7 @@ internal static class FamiliarSummonSystem
             if (familiar.Has<BloodConsumeSource>()) ModifyBloodSource(familiar, level);
 
             ModifyFollowerFactionMinion(playerCharacter, familiar);
-            ModifyDamageStats(familiar, level, steamId, familiarId);
+            ModifyUnitStats(familiar, level, steamId, familiarId);
             ModifyConvertable(familiar);
             ModifyCollision(familiar);
             ModifyDropTable(familiar);
@@ -655,7 +624,7 @@ internal static class FamiliarSummonSystem
         familiarStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * scalingFactor * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
         familiarStats.SpellPower._Value = unitStats.SpellPower._Value * scalingFactor * (1 + prestigeLevel * _familiarPrestigeStatMultiplier);
 
-        foreach (FamiliarStatType stat in stats)
+        foreach (FamiliarStatType stat in stats) // replicate this with list of stats but from traits and respective bonus %s to add?
         {
             switch (stat)
             {
@@ -679,6 +648,8 @@ internal static class FamiliarSummonSystem
                     break;
             }
         }
+
+
 
         familiar.Write(familiarStats);
 
@@ -714,50 +685,8 @@ internal static class FamiliarSummonSystem
         }
 
         HandleGeneralSnipping(familiar, familiarId);
-
-        /*
-        if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
-        {
-            var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.OrdinalIgnoreCase))
-                {
-                    familiar.Remove<SpawnPrefabOnGameplayEvent>();
-                }
-            }
-        }
-
-        if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
-        {
-            familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
-            {
-                script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
-            });
-        }
-
-        if (familiar.Has<Immortal>())
-        {
-            familiar.Remove<Immortal>();
-
-            if (familiarId.Equals(_solarus) && familiar.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
-            {
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    var item = buffer[i];
-                    if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
-                    {
-                        item.Buff0 = PrefabGUID.Empty;
-                        buffer[i] = item;
-
-                        break;
-                    }
-                }
-            }
-        }
-        */
     }
-    public static void ModifyDamageStats(Entity familiar, int level, ulong steamId, int famKey)
+    public static void ModifyUnitStats(Entity familiar, int level, ulong steamId, int famKey)
     {
         float scalingFactor = 0.1f + (level / (float)_maxFamiliarLevel) * 0.9f; // Calculate scaling factor for power and such
         float healthScalingFactor = 1.0f + ((level - 1) / (float)_maxFamiliarLevel) * 4.0f; // Calculate scaling factor for max health
@@ -772,6 +701,8 @@ internal static class FamiliarSummonSystem
             prestigeLevel = prestigeData.Key;
             stats = prestigeData.Value;
         }
+
+        // traits should be % added bonus on top of whatever their normal scaled stats are? still need to think about equipment but yeah that should mostly work
 
         // get base stats from original unit prefab then apply scaling
         PrefabGUID familiarId = familiar.Read<PrefabGUID>();
@@ -842,46 +773,6 @@ internal static class FamiliarSummonSystem
         }
 
         HandleGeneralSnipping(familiar, familiarId);
-
-        /*
-        if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
-        {
-            var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                if (buffer[i].SpawnPrefab.GetPrefabName().ToLower().Contains("pilot"))
-                {
-                    familiar.Remove<SpawnPrefabOnGameplayEvent>();
-                }
-            }
-        }
-
-        if (familiarId.Equals(_divineAngel) && familiar.TryGetComponent(out Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer))
-        {
-            script_ApplyBuffUnderHealthThreshold_DataServer.NewBuffEntity = PrefabGUID.Empty;
-            familiar.Write(script_ApplyBuffUnderHealthThreshold_DataServer);
-        }
-
-        if (familiar.Has<Immortal>())
-        {
-            familiar.Remove<Immortal>();
-
-            if (familiarId.Equals(_solarus) && familiar.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
-            {
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    var item = buffer[i];
-                    if (item.Buff0.GuidHash.Equals(2144624015)) // no bubble for Solarus
-                    {
-                        item.Buff0 = PrefabGUID.Empty;
-                        buffer[i] = item;
-
-                        break;
-                    }
-                }
-            }
-        }
-        */
     }
     static void PreventDisableFamiliar(Entity familiar)
     {

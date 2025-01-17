@@ -23,6 +23,7 @@ internal static class ReactToInventoryChangedSystemPatch
     static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
 
     const float BASE_PROFESSION_XP = 50f;
+    const float FAKE_DELAY = 0.75f;
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -98,6 +99,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                 if (_professions)
                                 {
                                     float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
+                                    float delay = FAKE_DELAY;
 
                                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGUID, "");
                                     if (handler != null)
@@ -105,7 +107,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                         if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
                                         if (itemName.EndsWith("Bloodwine")) professionXP *= 2;
 
-                                        ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler);
+                                        ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                         switch (handler)
                                         {
                                             case BlacksmithingHandler:

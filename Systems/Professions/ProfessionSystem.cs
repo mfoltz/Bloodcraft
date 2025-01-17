@@ -23,15 +23,17 @@ internal static class ProfessionSystem
 
     static readonly Random _random = new();
 
-    static readonly WaitForSeconds _sctDelay = new(0.75f);
+    const float SCT_DELAY = 0.75f;
 
     static readonly float _professionMultiplier = ConfigService.ProfessionMultiplier;
     static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
 
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
-    static readonly AssetGuid _yieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
+    static readonly AssetGuid _bonusYieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
+    // static readonly AssetGuid _yieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
 
-    static readonly PrefabGUID _resourceGainSCT = new(1876501183); // SCT resource gain prefabguid
+    static readonly PrefabGUID _experienceGainSCT = new(1876501183); // SCT resource gain prefabguid
+    static readonly PrefabGUID _bonusYieldSCT = new(106212079);
     static readonly float3 _bonusYieldColor = new(0.6f, 0.8f, 1.0f);
     public static void UpdateProfessions(Entity playerCharacter, Entity target)
     {
@@ -85,11 +87,13 @@ internal static class ProfessionSystem
                 professionValue *= ProfessionMappings.GetWoodcuttingModifier(itemPrefabGuid);
             }
 
-            SetProfession(target, playerCharacter, steamId, professionValue, handler);
-            GiveProfessionBonus(target, targetPrefabGuid, playerCharacter, userEntity, user, steamId, handler);
+            float delay = SCT_DELAY;
+
+            SetProfession(target, playerCharacter, steamId, professionValue, handler, ref delay);
+            GiveProfessionBonus(target, targetPrefabGuid, playerCharacter, userEntity, user, steamId, handler, delay);
         }
     }
-    public static void GiveProfessionBonus(Entity target, PrefabGUID prefabGuid, Entity playerCharacter, Entity userEntity, User user, ulong steamId, IProfessionHandler handler)
+    public static void GiveProfessionBonus(Entity target, PrefabGUID prefabGuid, Entity playerCharacter, Entity userEntity, User user, ulong steamId, IProfessionHandler handler, float delay)
     {
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity)) return;
 
@@ -111,22 +115,17 @@ internal static class ProfessionSystem
                 if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
                 if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
                 {
-                    float3 position = target.GetPosition();
-
-                    ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                        _yieldAssetGuid, position, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                    HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                 }
             }
             else
             {
                 InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, fish, bonusYield, new Entity());
                 if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                
                 if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
                 {
-                    float3 position = target.GetPosition();
-
-                    ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                        _yieldAssetGuid, position, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                    HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                 }
             }
         }
@@ -165,11 +164,7 @@ internal static class ProfessionSystem
                                     if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
                                     if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
                                     {
-                                        float3 targetPosition = target.GetPosition();
-                                        // float3 sctPosition = new(targetPosition.x + 5f, targetPosition.y, targetPosition.z);
-
-                                        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), 
-                                            _yieldAssetGuid, targetPosition, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                                        HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                                     }
 
                                     break;
@@ -181,11 +176,7 @@ internal static class ProfessionSystem
                                     if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
                                     if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
                                     {
-                                        float3 targetPosition = target.GetPosition();
-                                        // float3 sctPosition = new(targetPosition.x + 5f, targetPosition.y, targetPosition.z);
-
-                                        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                                            _yieldAssetGuid, targetPosition, _bonusYieldColor, playerCharacter, bonusYield, _resourceGainSCT, userEntity);
+                                        HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                                     }
 
                                     break;
@@ -216,15 +207,15 @@ internal static class ProfessionSystem
             }
         }
     }
-    public static void SetProfession(Entity target, Entity source, ulong steamID, float value, IProfessionHandler handler)
+    public static void SetProfession(Entity target, Entity source, ulong steamID, float value, IProfessionHandler handler, ref float delay)
     {
         var xpData = handler.GetProfessionData(steamID);
 
         if (xpData.Key >= _maxProfessionLevel) return;
 
-        UpdateProfessionExperience(target, source, steamID, xpData, value, handler);
+        UpdateProfessionExperience(target, source, steamID, xpData, value, handler, ref delay);
     }
-    static void UpdateProfessionExperience(Entity target, Entity source, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler)
+    static void UpdateProfessionExperience(Entity target, Entity source, ulong steamID, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler, ref float delay)
     {
         float newExperience = xpData.Value + gainedXP;
         int newLevel = ConvertXpToLevel(newExperience);
@@ -243,11 +234,11 @@ internal static class ProfessionSystem
         var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
         handler.SetProfessionData(steamID, updatedXPData);
 
-        NotifyPlayer(target, source, steamID, gainedXP, leveledUp, handler);
+        NotifyPlayer(target, source, steamID, gainedXP, leveledUp, handler, ref delay);
     }
-    static void NotifyPlayer(Entity target, Entity source, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler)
+    static void NotifyPlayer(Entity target, Entity playerCharacter, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler, ref float delay)
     {
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = playerCharacter.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
         string professionName = handler.GetProfessionName();
@@ -269,14 +260,22 @@ internal static class ProfessionSystem
             float3 targetPosition = target.GetPosition();
             float3 professionColor = handler.GetProfessionColor();
 
-            ProfessionSCTDelayRoutine(user.LocalCharacter.GetEntityOnServer(), userEntity, targetPosition, professionColor, gainedXP).Start();
+            ProfessionSCTDelayRoutine(_experienceGainSCT, _experienceAssetGuid, playerCharacter, userEntity, targetPosition, professionColor, gainedXP, delay).Start();
+            delay *= 2f;
         }
     }
-    static IEnumerator ProfessionSCTDelayRoutine(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    static IEnumerator ProfessionSCTDelayRoutine(PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 position, float3 color, float value, float delay)
     {
-        yield return _sctDelay;
-        
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, character, gainedXP, _resourceGainSCT, userEntity);
+        yield return new WaitForSeconds(delay);
+
+        try
+        {
+            ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), assetGuid, position, color, playerCharacter, value, sctPrefabGuid, userEntity);
+        }
+        catch (Exception e)
+        {
+            Core.Log.LogError($"Error in ProfessionSCTDelayRoutine: {e.Message}");
+        }
     }
     static float GetXp(ulong steamID, IProfessionHandler handler)
     {
@@ -296,6 +295,12 @@ internal static class ProfessionSystem
         double neededXP = nextLevelXP - currentLevelXP;
         double earnedXP = nextLevelXP - currentXP;
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
+    }
+    static void HandleBonusYieldScrollingText(Entity target, PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 color, float bonusYield, float delay)
+    {
+        float3 targetPosition = target.GetPosition();
+
+        ProfessionSCTDelayRoutine(sctPrefabGuid, assetGuid, playerCharacter, userEntity, targetPosition, color, bonusYield, delay).Start();
     }
 }
 internal static class ProfessionMappings

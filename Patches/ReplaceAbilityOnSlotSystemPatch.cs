@@ -22,7 +22,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _unarmedSlots = ConfigService.UnarmedSlots;
     static readonly bool _shiftSlot = ConfigService.ShiftSlot;
-    static readonly bool _shapeshiftAbilities = ConfigService.ShapeshiftAbilities;
+    static readonly bool _shapeshiftAbilities = ConfigService.BearFormDash;
 
     static readonly PrefabGUID _vBloodAbilityReplaceBuff = new(1171608023);
 

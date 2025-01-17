@@ -33,11 +33,6 @@ internal static class ScriptSpawnServerPatch
     static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _fallenAngelDeathBuff = new(-1934189109);
     static readonly PrefabGUID _fallenAngelDespawnBuff = new(1476380301);
-    static readonly PrefabGUID _bearFormBuff = new(-1569370346);
-    static readonly PrefabGUID _wolfFormBuff = new(-351718282);
-
-    static readonly PrefabGUID _bearDashAbility = new(1873182450);
-    static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
 
     static readonly PrefabGUID _playerFaction = new(1106458752);
 
@@ -84,14 +79,7 @@ internal static class ScriptSpawnServerPatch
                     }
                 }
 
-                if (prefabGuid.Equals(_bearFormBuff) || prefabGuid.Equals(_wolfFormBuff))
-                {
-                    Core.Log.LogInfo($"ShapeshiftBuff in ScriptSpawnServer - {prefabGuid.GetPrefabName()}");
-
-                    if (prefabGuid.Equals(_bearFormBuff)) HandleBearDash(entity);
-                    else if (prefabGuid.Equals(_wolfFormBuff)) HandleWolfBite(entity);
-                }
-                else if (!entity.Has<BloodBuff>()) continue;
+                if (!entity.Has<BloodBuff>()) continue;
                 else if (entityOwner.Owner.TryGetPlayer(out player))
                 {
                     ulong steamId = player.GetSteamId();
@@ -150,47 +138,6 @@ internal static class ScriptSpawnServerPatch
         finally
         {
             entities.Dispose();
-        }
-    }
-    static void HandleBearDash(Entity entity)
-    {
-        if (entity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
-        {
-            Core.Log.LogInfo("ReplaceAbilityOnSlotBuff in ScriptSpawnServer - BearDash");
-
-            ReplaceAbilityOnSlotBuff buff = new()
-            {
-                Slot = 3,
-                NewGroupId = _bearDashAbility,
-                CopyCooldown = true,
-                Priority = 99,
-                CastBlockType = GroupSlotModificationCastBlockType.WholeCast
-            };
-
-            buffer.Add(buff);
-        }
-    }
-    static void HandleWolfBite(Entity entity)
-    {
-        if (entity.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
-        {
-            Core.Log.LogInfo("ReplaceAbilityOnSlotBuff in ScriptSpawnServer - WolfBite");
-
-            ReplaceAbilityOnSlotBuff buff = new()
-            {
-                Slot = 0,
-                NewGroupId = _wolfBiteAbility,
-                CopyCooldown = true,
-                Priority = 99,
-                CastBlockType = GroupSlotModificationCastBlockType.WholeCast
-            };
-
-            // 4294967221
-            // AbilityTypeFlag
-            // AbilityKit, Interact_BreakMount, AbilityKit_IgnoreInCombat, IgnoreSpellBlock
-            // bear and wolf both have Demount
-
-            buffer.Add(buff);
         }
     }
 }

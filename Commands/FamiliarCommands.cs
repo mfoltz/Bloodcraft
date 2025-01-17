@@ -575,9 +575,9 @@ internal static class FamiliarCommands
             int famKey = data.FamKey;
 
             KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
-            FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
+            FamiliarExperienceData xpData = LoadFamiliarExperienceData(steamId);
             xpData.FamiliarLevels[data.FamKey] = newXP;
-            SaveFamiliarExperience(steamId, xpData);
+            SaveFamiliarExperienceData(steamId, xpData);
 
             if (ModifyFamiliarImmediate(user, steamId, famKey, player, familiar, level))
             {
@@ -612,7 +612,7 @@ internal static class FamiliarCommands
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
-            FamiliarExperienceData xpData = LoadFamiliarExperience(ctx.Event.User.PlatformId);
+            FamiliarExperienceData xpData = LoadFamiliarExperienceData(ctx.Event.User.PlatformId);
 
             if (xpData.FamiliarLevels[data.FamKey].Key >= ConfigService.MaxFamiliarLevel)
             {
@@ -628,7 +628,7 @@ internal static class FamiliarCommands
 
                 if (prestigeData.FamiliarPrestiges[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
                 {
-                    LocalizationService.HandleReply(ctx, "Familiar is already at max prestige!");
+                    LocalizationService.HandleReply(ctx, "Familiar is already at maximum prestiges!");
                     return;
                 }
 
@@ -670,7 +670,7 @@ internal static class FamiliarCommands
 
                 KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1)); // reset level to 1
                 xpData.FamiliarLevels[data.FamKey] = newXP;
-                SaveFamiliarExperience(steamId, xpData);
+                SaveFamiliarExperienceData(steamId, xpData);
 
                 int prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key + 1;
                 prestigeData.FamiliarPrestiges[data.FamKey] = new(prestigeLevel, stats);
@@ -678,12 +678,10 @@ internal static class FamiliarCommands
 
                 Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-                if (ModifyFamiliarImmediate(user, steamId, data.FamKey, playerCharacter, familiar, newXP.Key))
-                {
-                    LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
-                }
+                ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
+                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
             }
-            else if (ServerGameManager.GetInventoryItemCount(playerCharacter, _itemSchematic) >= ConfigService.PrestigeCostItemQuantity)
+            else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventory) && ServerGameManager.GetInventoryItemCount(inventory, _itemSchematic) >= ConfigService.PrestigeCostItemQuantity)
             {
                 if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, ConfigService.PrestigeCostItemQuantity))
                 {
@@ -692,7 +690,7 @@ internal static class FamiliarCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Familiar must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) to prestige.");
+                LocalizationService.HandleReply(ctx, $"Prestiging familiar must be at max level (<color=green>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color>x<color=white>{ConfigService.PrestigeCostItemQuantity}</color>.");
             }
         }
         else
@@ -903,7 +901,7 @@ internal static class FamiliarCommands
             else if (steamId.TryGetFamiliarBox(out box) && foundBoxMatches.TryGetValue(box, out nameAndIndex))
             {
                 int index = nameAndIndex.Any() ? nameAndIndex.First().Value : -1;
-                Familiars.UnbindFamiliar(user, playerCharacter, true, index);
+                Familiars.BindFamiliar(user, playerCharacter, index);
             }
         }
         else

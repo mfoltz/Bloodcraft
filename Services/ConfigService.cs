@@ -22,8 +22,8 @@ public static class ConfigService
     static readonly Lazy<bool> _potionStacking = new(() => GetConfigValue<bool>("PotionStacking"));
     public static bool PotionStacking => _potionStacking.Value;
 
-    static readonly Lazy<bool> _shapeshiftAbilities = new(() => GetConfigValue<bool>("ShapeshiftAbilities"));
-    public static bool ShapeshiftAbilities => _shapeshiftAbilities.Value;
+    static readonly Lazy<bool> _bearFormDash = new(() => GetConfigValue<bool>("BearFormDash"));
+    public static bool BearFormDash => _bearFormDash.Value;
 
     static readonly Lazy<bool> _starterKit = new(() => GetConfigValue<bool>("StarterKit"));
     public static bool StarterKit => _starterKit.Value;
@@ -152,6 +152,9 @@ public static class ConfigService
 
     static readonly Lazy<int> _exoPrestigeRewardQuantity = new(() => GetConfigValue<int>("ExoPrestigeRewardQuantity"));
     public static int ExoPrestigeRewardQuantity => _exoPrestigeRewardQuantity.Value;
+
+    static readonly Lazy<bool> _trueImmortal = new(() => GetConfigValue<bool>("TrueImmortal"));
+    public static bool TrueImmortal => _trueImmortal.Value;
 
     static readonly Lazy<bool> _expertiseSystem = new(() => GetConfigValue<bool>("ExpertiseSystem"));
     public static bool ExpertiseSystem => _expertiseSystem.Value;
@@ -506,7 +509,7 @@ public static class ConfigService
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
-            new ConfigEntryDefinition("General", "ShapeshiftAbilities", false, "Enable or disable bear form dash and wolf form bite."),
+            new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
@@ -529,7 +532,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Leveling", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Leveling", "DocileUnitMultiplier", 0.15f, "The multiplier for experience gained from docile units."),
             new ConfigEntryDefinition("Leveling", "WarEventMultiplier", 0.2f, "The multiplier for experience gained from war event trash spawns."),
-            new ConfigEntryDefinition("Leveling", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs)."),
+            new ConfigEntryDefinition("Leveling", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs). Applies to familiar experience as well."),
             new ConfigEntryDefinition("Leveling", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills."),
             new ConfigEntryDefinition("Leveling", "LevelScalingMultiplier", 0.05f, "Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove."),
             new ConfigEntryDefinition("Leveling", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience/familiar unlock sharing."),
@@ -547,6 +550,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Prestige", "ExoPrestiges", 100, "The number of exo prestiges available."),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default)."),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging."),
+            new ConfigEntryDefinition("Prestige", "TrueImmortal", false, "Enable or disable Immortal blood for the duration of exoform."),
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
@@ -611,12 +615,12 @@ public static class ConfigService
             new ConfigEntryDefinition("Familiars", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood unlock as a familiar."),
-            new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
-            new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"),
+            // new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
+            // new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"), // actually maybe vampiricDust
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
             new ConfigEntryDefinition("Familiars", "ShinyCostItemPrefab", -77477508, "Item PrefabGUID cost for changing shiny visual if one is already unlocked (currently demon fragment by default)."),
             new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 1, "Quantity of item required for changing shiny buff."),
-            new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 2500, "Quantity of (surprise!) schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging)."),
+            new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 2500, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging)."),
             new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),

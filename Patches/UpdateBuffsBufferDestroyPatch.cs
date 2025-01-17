@@ -4,7 +4,7 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.Shared;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -16,6 +16,7 @@ namespace Bloodcraft.Patches;
 internal static class UpdateBuffsBufferDestroyPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
@@ -23,6 +24,8 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID _tauntEmoteBuff = new(-508293388);
     static readonly PrefabGUID _phasingBuff = new(-79611032);
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
+
+    static readonly PrefabGUID _gateBossFeedCompleteGroup = new(-1446310610);
 
     static readonly PrefabGUID _shroudBuff = new(1504279833);
     static readonly PrefabGUID _shroudCloak = new(1063517722);
@@ -159,9 +162,10 @@ internal static class UpdateBuffsBufferDestroyPatch
             entities.Dispose();
         }
     }
-    static void ApplyExoFormBuff(Entity character)
+    static void ApplyExoFormBuff(Entity playerCharacter)
     {
-        Buffs.TryApplyBuff(character, _exoFormBuff);
-        Buffs.TryApplyBuff(character, _phasingBuff);
+        playerCharacter.TryApplyBuff(_exoFormBuff);
+        playerCharacter.TryApplyBuff(_phasingBuff); // check if need this here for the entire visual effect after transforming
+        playerCharacter.CastAbility(playerCharacter, _gateBossFeedCompleteGroup);
     }
 }

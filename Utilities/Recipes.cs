@@ -1,5 +1,7 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
+using ProjectM.CastleBuilding;
+using ProjectM.UI;
 using Stunlock.Core;
 using Unity.Entities;
 
@@ -18,6 +20,10 @@ internal static class Recipes // would like to tie this into professions eventua
     static readonly PrefabGUID _vampiricDust = new(311920560);
     static readonly PrefabGUID _copperWires = new(-2031309726);
     static readonly PrefabGUID _silverIngot = new(-1633898285);
+    // static readonly PrefabGUID _extractShard = new(1743327679);
+    static readonly PrefabGUID _fakeFlower = new(-2095604835);
+
+    // static readonly PrefabGUID _demonFragment = new(-77477508);
     public static void AddExtraRecipes()
     {
         var recipeMap = GameDataSystem.RecipeHashLookupMap;
@@ -27,11 +33,12 @@ internal static class Recipes // would like to tie this into professions eventua
 
         RecipeData recipeData = recipeEntity.Read<RecipeData>();
 
-        recipeData.AlwaysUnlocked = true;
-        recipeData.HideInStation = false;
-        recipeData.HudSortingOrder = 0;
-
-        recipeEntity.Write(recipeData);
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
 
         recipeMap[_vampiricDust] = recipeData;
 
@@ -39,40 +46,70 @@ internal static class Recipes // would like to tie this into professions eventua
 
         var refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _vampiricDust, Disabled = false, Unlocked = true });
+        // refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _extractShard, Disabled = false, Unlocked = true });
 
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fabricator];
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_copperWires];
 
         recipeData = recipeEntity.Read<RecipeData>();
 
-        recipeData.AlwaysUnlocked = true;
-        recipeData.HideInStation = false;
-        recipeData.HudSortingOrder = 0;
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
 
-        recipeEntity.Write(recipeData);
         recipeMap[_copperWires] = recipeData;
 
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_ironBody];
 
         recipeData = recipeEntity.Read<RecipeData>();
 
-        recipeData.AlwaysUnlocked = true;
-        recipeData.HideInStation = false;
-        recipeData.HudSortingOrder = 0;
-
-        recipeEntity.Write(recipeData);
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
         recipeMap[_ironBody] = recipeData;
 
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_silverIngot];
 
         recipeData = recipeEntity.Read<RecipeData>();
 
-        recipeData.AlwaysUnlocked = true;
-        recipeData.HideInStation = false;
-        recipeData.HudSortingOrder = 0;
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
 
-        recipeEntity.Write(recipeData);
         recipeMap[_silverIngot] = recipeData;
+
+        /*
+        recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShard];
+
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
+
+        if (recipeEntity.TryGetBuffer<RecipeOutputBuffer>(out var buffer))
+        {
+            RecipeOutputBuffer recipeOutputBuffer = new()
+            {
+                Amount = 1,
+                Guid = _demonFragment
+            };
+
+            buffer.Add(recipeOutputBuffer);
+        }
+
+        recipeMap[_extractShard] = recipeData;
+        */
 
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _copperWires, Disabled = false, Unlocked = true });
@@ -81,6 +118,35 @@ internal static class Recipes // would like to tie this into professions eventua
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedFurnace];
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _silverIngot, Disabled = false, Unlocked = true });
+
+        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fakeFlower, out Entity recipePrefab) 
+            && recipePrefab.TryGetBuffer<RecipeRequirementBuffer>(out var refinementRecipeBuffer) && !refinementRecipeBuffer.IsEmpty)
+        {
+            RecipeRequirementBuffer recipeRequirement = refinementRecipeBuffer[0];
+            recipeRequirement.Guid = new(-598100816); // Item_Ingredient_Plant_Thistle
+
+            refinementRecipeBuffer[0] = recipeRequirement;
+        }
+
+        /*
+        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(-64110296), out Entity altarPrefab)
+            && altarPrefab.TryGetBuffer<WorkstationRecipesBuffer>(out var craftingRecipeBuffer))
+        {
+            WorkstationRecipesBuffer craftingRecipe = new()
+            {
+                RecipeGuid = new(-1525227854) // crafting recipe
+            };
+
+            craftingRecipeBuffer.Add(craftingRecipe);
+
+            craftingRecipe = new()
+            {
+                RecipeGuid = new(1743327679) // refinement recipe
+            };
+            
+            craftingRecipeBuffer.Add(craftingRecipe);
+        }
+        */
 
         GameDataSystem.RegisterRecipes();
     }

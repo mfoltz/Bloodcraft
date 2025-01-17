@@ -61,8 +61,10 @@ internal static class CreateGameplayEventOnDestroySystemPatch
                     {
                         int multiplier = ProfessionMappings.GetFishingModifier(prefabGuid);
 
-                        ProfessionSystem.SetProfession(target, playerCharacter, steamId, BASE_FISHING_XP * multiplier, handler);
-                        ProfessionSystem.GiveProfessionBonus(target, prefabGuid, playerCharacter, userEntity, user, steamId, handler);
+                        float delay = 0.75f; // make const or whatever later
+
+                        ProfessionSystem.SetProfession(target, playerCharacter, steamId, BASE_FISHING_XP * multiplier, handler, ref delay);
+                        ProfessionSystem.GiveProfessionBonus(target, prefabGuid, playerCharacter, userEntity, user, steamId, handler, delay);
                     }
                 }
             }

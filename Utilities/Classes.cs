@@ -8,12 +8,14 @@ using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
+using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
+using static UnityEngine.Rendering.ProbeReferenceVolume;
 
 namespace Bloodcraft.Utilities;
 internal static class Classes
@@ -128,13 +130,13 @@ internal static class Classes
         if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.User.LocalCharacter._Entity, out var inventoryEntity) ||
             ServerGameManager.GetInventoryItemCount(inventoryEntity, item) < quantity)
         {
-            LocalizationService.HandleReply(ctx, $"You do not have the required item to change classes ({item.GetLocalizedName()}x{quantity})");
+            LocalizationService.HandleReply(ctx, $"You do not have enough of the required item to change classes (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
             return false;
         }
 
         if (!ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
         {
-            LocalizationService.HandleReply(ctx, $"Failed to remove the required item ({item.GetLocalizedName()}x{quantity})");
+            LocalizationService.HandleReply(ctx, $"Failed to remove enough of the item required (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
             return false;
         }
 
@@ -253,20 +255,38 @@ internal static class Classes
             return;
         }
 
-        var classSpells = perks.Select((perk, index) =>
+        var classSpells = perks.Select((spell, index) =>
         {
-            string prefab = new PrefabGUID(perk).GetLocalizedName();
-            int prefabIndex = prefab.IndexOf("Prefab");
+            PrefabGUID spellGuid = new(spell);
+
+            string prefabName = spellGuid.GetLocalizedName();
+            int prefabIndex = prefabName.IndexOf("Prefab");
+
             if (prefabIndex != -1)
             {
-                prefab = prefab[..prefabIndex].TrimEnd();
+                prefabName = prefabName[..prefabIndex].TrimEnd();
             }
-            if (prefab.Contains("Name"))
+            if (prefabName.Contains("Name"))
             {
-                prefab = new PrefabGUID(perk).GetPrefabName();
+                prefabName = spellGuid.GetPrefabName();
             }
-            return $"<color=yellow>{index + 1}</color>| <color=white>{prefab}</color>";
+
+            return $"<color=yellow>{index + 1}</color>| <color=white>{prefabName}</color>";
         }).ToList();
+
+        if (!ConfigService.DefaultClassSpell.Equals(0))
+        {
+            PrefabGUID spellGuid = new(ConfigService.DefaultClassSpell);
+
+            string prefabName = spellGuid.GetLocalizedName();
+
+            if (prefabName.Contains("Name"))
+            {
+                prefabName = spellGuid.GetPrefabName();
+            }
+
+            classSpells.Insert(0, $"<color=yellow>{0}</color>| <color=white>{prefabName}</color>");
+        }
 
         for (int i = 0; i < classSpells.Count; i += 4) // Using batches of 4 for better readability
         {

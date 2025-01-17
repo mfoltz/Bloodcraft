@@ -24,13 +24,16 @@ internal static class KnockbackSystemSpawnPatch
     static readonly PrefabGUID _pvpProtectionBuff = new(1111481396);
     static readonly PrefabGUID _allyKnockbackBuff = new(-2099203048);
 
+    // KnockbackSystem
+    // KnockbackEvent
+
     [HarmonyPatch(typeof(KnockbackSystemSpawn), nameof(KnockbackSystemSpawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(KnockbackSystemSpawn __instance)
     {
         if (!Core._initialized) return;
         else if (!_familiars) return;
-
+        
         NativeArray<Entity> entities = __instance.__query_1729431709_0.ToEntityArray(Allocator.Temp);
         try
         {
@@ -41,6 +44,9 @@ internal static class KnockbackSystemSpawnPatch
 
                 Entity buffTarget = entity.GetBuffTarget();
                 Entity owner = entityOwner.Owner;
+
+                // Core.Log.LogInfo($"KnockbackSystemSpawn - {owner.GetPrefabGuid().GetPrefabName()} | {entity.GetPrefabGuid().GetPrefabName()}"); // octavian stuff does go through here but should be already handled if that was all there was to it?
+                // maybe try destroying with main EntityManager destroyEntity?
 
                 if (owner.IsFollowingPlayer() && buffTarget.TryGetPlayer(out Entity player))
                 {
@@ -79,7 +85,7 @@ internal static class KnockbackSystemSpawnPatch
     {
         if (knockbackBuff.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
         {
-            DestroyUtility.Destroy(EntityManager, knockbackBuff);
+            knockbackBuff.Destroy();
         }
     }
 }

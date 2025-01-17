@@ -62,16 +62,6 @@ internal static class WeaponCommands
                     float bonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, stat);
                     string formattedBonus = Misc.FormatWeaponStatValue(stat, bonus);
 
-                    /*
-                    string formattedBonus = WeaponStats.WeaponStatFormats[stat] switch
-                    {
-                        "integer" => ((int)bonus).ToString(),
-                        "decimal" => bonus.ToString("F2"),
-                        "percentage" => (bonus * 100).ToString("F0") + "%",
-                        _ => bonus.ToString(),
-                    };
-                    */
-
                     bonusWeaponStats.Add(new KeyValuePair<WeaponStats.WeaponStatType, string>(stat, formattedBonus));
                 }
 
@@ -148,7 +138,7 @@ internal static class WeaponCommands
         if (ChooseStat(steamId, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
-            //WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+            // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
         }
         else
         {
@@ -179,6 +169,8 @@ internal static class WeaponCommands
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                 {
                     ResetStats(steamId, weaponType);
+                    // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+
                     LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
                     return;
                 }
@@ -192,6 +184,8 @@ internal static class WeaponCommands
         }
 
         ResetStats(steamId, weaponType);
+        // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+
         LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
     }
 

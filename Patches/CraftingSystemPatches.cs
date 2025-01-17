@@ -27,6 +27,7 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
     static readonly bool _quests = ConfigService.QuestSystem;
 
     const float CRAFT_THRESHOLD = 0.975f;
+    const float FAKE_DELAY = 0.75f;
     static readonly float _craftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
     static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = []; // guess I'll just start using these if in doubt about the order of operations, so to speak >_>   
@@ -86,13 +87,14 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
 
                             if (durability.MaxDurability > originalDurability.MaxDurability) continue; // already handled
 
+                            float delay = FAKE_DELAY;
                             int level = handler.GetProfessionData(steamId).Key;
 
                             durability.MaxDurability *= (1 + level / (float)ConfigService.MaxProfessionLevel);
                             durability.Value = durability.MaxDurability;
                             itemEntity.Write(durability);
 
-                            ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler);
+                            ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler, ref delay);
                         }
                     }
                 }

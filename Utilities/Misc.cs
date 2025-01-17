@@ -97,7 +97,6 @@ internal static class Misc
             ["ShiftLock"] = false,
             ["Grouping"] = false,
             ["Emotes"] = false,
-            // ["Binding"] = false, using dictionary in patch with paired ulong and prefabGUID then removing after matching probably makes more sense than using bool here
             ["Kit"] = false,
             ["VBloodEmotes"] = true,
             ["FamiliarVisual"] = true,

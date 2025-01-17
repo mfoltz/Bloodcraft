@@ -226,6 +226,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.famservant` 🔒
   - testing
   - Shortcut: *.fs*
+- `.famhorse` 🔒
+  - testing
+  - Shortcut: *.fh*
 - `.queuetest` 🔒
   - Queue testing.
   - Shortcut: *.qt [PlayerOne] [PlayerTwo]*
@@ -391,8 +394,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
   Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
-- **Shapeshift Abilities**: `ShapeshiftAbilities` (bool, default: False)
-  Enable or disable bear form dash and wolf form bite.
+- **Bear Form Dash**: `BearFormDash` (bool, default: False)
+  Enable or disable bear form dash.
 
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
@@ -444,7 +447,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **War Event Multiplier**: `WarEventMultiplier` (float, default: 0.2)
   The multiplier for experience gained from war event trash spawns.
 - **Unit Spawner Multiplier**: `UnitSpawnerMultiplier` (float, default: 0)
-  The multiplier for experience gained from unit spawners (vermin nests, tombs).
+  The multiplier for experience gained from unit spawners (vermin nests, tombs). Applies to familiar experience as well.
 - **Group Leveling Multiplier**: `GroupLevelingMultiplier` (float, default: 1)
   The multiplier for experience gained from group kills.
 - **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)
@@ -481,6 +484,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The reward for exo prestiging (tier 3 nether shards by default).
 - **Exo Prestige Reward Quantity**: `ExoPrestigeRewardQuantity` (int, default: 500)
   The quantity of the reward for exo prestiging.
+- **True Immortal**: `TrueImmortal` (bool, default: False)
+  Enable or disable Immortal blood for the duration of exoform.
 
 ### Expertise
 - **Expertise System**: `ExpertiseSystem` (bool, default: False)
@@ -617,10 +622,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The chance for a unit unlock as a familiar.
 - **V Blood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)
   The chance for a VBlood unlock as a familiar.
-- **Trait Chance**: `TraitChance` (float, default: 0.2)
-  The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit.
-- **Trait Reroll Item Quantity**: `TraitRerollItemQuantity` (int, default: 1000)
-  Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
 - **Shiny Cost Item Prefab**: `ShinyCostItemPrefab` (int, default: -77477508)
@@ -628,7 +629,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)
   Quantity of item required for changing shiny buff.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 2500)
-  Quantity of (surprise!) schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging).
+  Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging).
 
 ### Classes
 - **Soft Synergies**: `SoftSynergies` (bool, default: False)

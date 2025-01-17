@@ -65,6 +65,7 @@ internal static class Familiars
 
     public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];
     public static readonly ConcurrentDictionary<Entity, Entity> FamiliarServantMap = [];
+    public static readonly ConcurrentDictionary<Entity, Entity> FamiliarHorseMap = [];
     public static void ClearFamiliarActives(ulong steamId)
     {
         if (steamId.TryGetFamiliarActives(out var actives))
@@ -435,6 +436,7 @@ internal static class Familiars
         if (hasActive && familiar.Exists())
         {
             familiar.TryApplyBuff(_vanishBuff);
+            familiar.TryApplyBuff(_disableAggroBuff);
             UnbindFamiliarDelayRoutine(user, playerCharacter, familiar, smartBind, index).Start();
         }
         else
@@ -666,7 +668,7 @@ internal static class Familiars
             return;
         }
 
-        FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
+        FamiliarExperienceData xpData = LoadFamiliarExperienceData(steamId);
         FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
 
         if (!prestigeData.FamiliarPrestiges.ContainsKey(data.FamKey))
@@ -726,18 +728,16 @@ internal static class Familiars
 
         KeyValuePair<int, float> newXP = new(++levelsToAdd, Progression.ConvertLevelToXp(++levelsToAdd)); // reset level to 1
         xpData.FamiliarLevels[data.FamKey] = newXP;
-        SaveFamiliarExperience(steamId, xpData);
+        SaveFamiliarExperienceData(steamId, xpData);
 
         int prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key + 1;
         prestigeData.FamiliarPrestiges[data.FamKey] = new(prestigeLevel, stats);
         SaveFamiliarPrestige(steamId, prestigeData);
 
-        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+        Entity familiar = FindPlayerFamiliar(playerCharacter);
 
-        if (ModifyFamiliarImmediate(user, steamId, data.FamKey, playerCharacter, familiar, newXP.Key))
-        {
-            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
-        }
+        ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
+        LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
     }
     static List<int> UnequipFamiliar(Entity familiar)
     {

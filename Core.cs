@@ -45,10 +45,26 @@ internal static class Core
     ];
 
     static readonly PrefabGUID _fallenAngel = new(-76116724);
+
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
 
     static readonly PrefabGUID _wolfBiteCast = new(990205141);
 
+    static readonly PrefabGUID _bearDashAbility = new(1873182450);
+    static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
+
+    static readonly HashSet<PrefabGUID> _bearFormBuffs =
+    [
+        new(-1569370346), // AB_Shapeshift_Bear_Buff
+        new(-858273386)  // AB_Shapeshift_Bear_Skin01_Buff
+    ];
+
+    static readonly HashSet<PrefabGUID> _wolfFormBuffs =
+    [
+        new(-351718282),  // AB_Shapeshift_Wolf_Buff
+        new(-1158884666), // AB_Shapeshift_Wolf_Skin01_Buff
+        new(-1687924191)  // AB_Shapeshift_Wolf_PMK_Skin02
+    ];
     const float DIRECTION_DURATION = 6f; // for making familiars for player two face correct direction until battle starts
 
     const string SANGUIS = "Sanguis";
@@ -159,8 +175,9 @@ internal static class Core
             }
         }
 
-        if (ConfigService.ShapeshiftAbilities)
+        if (ConfigService.BearFormDash)
         {
+            /*
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_wolfBiteCast, out Entity wolfBiteCastPrefab))
             {
                 wolfBiteCastPrefab.With((ref AbilityState abilityState) =>
@@ -169,9 +186,64 @@ internal static class Core
 
                     abilityTypeFlags |= AbilityTypeFlag.Interact;
                     abilityTypeFlags &= ~(AbilityTypeFlag.AbilityKit | AbilityTypeFlag.AbilityKit_BreakStealth);
+
+                    abilityState.AbilityTypeFlag = abilityTypeFlags;
                 });
             }
+            */
+
+            foreach (PrefabGUID bearFormBuff in _bearFormBuffs)
+            {
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(bearFormBuff, out Entity bearFormPrefab)
+                    && bearFormPrefab.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+                {
+                    ReplaceAbilityOnSlotBuff abilityOnSlotBuff = buffer[4];
+                    abilityOnSlotBuff.NewGroupId = _bearDashAbility;
+
+                    buffer[4] = abilityOnSlotBuff;
+                }
+            }
+
+            /*
+            foreach (PrefabGUID wolfFormBuff in _wolfFormBuffs)
+            {
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(wolfFormBuff, out Entity wolfFormPrefab)
+                    && wolfFormPrefab.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
+                {
+                    ReplaceAbilityOnSlotBuff buff = new()
+                    {
+                        Target = ReplaceAbilityTarget.BuffTarget,
+                        Slot = 0,
+                        NewGroupId = _wolfBiteAbility,
+                        CopyCooldown = true,
+                        Priority = 99,
+                        CastBlockType = GroupSlotModificationCastBlockType.WholeCast
+                    };
+
+                    buffer.Insert(0, buff);
+                }
+            }
+            */
         }
+
+        /*
+        if (ConfigService.ExtraRecipes) // -1581189572
+        {
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(-1581189572), out Entity monsterShardPrefab))
+            {
+                monsterShardPrefab.With((ref ItemData itemData) =>
+                {
+                    itemData.ItemCategory |= ItemCategory.Soulshard;
+                    itemData.ItemCategory &= ~ItemCategory.Magic;
+                });
+
+                ItemData itemData = monsterShardPrefab.Read<ItemData>();
+                
+                var itemHashMap = SystemService.GameDataSystem.ItemHashLookupMap;
+                itemHashMap[new(-1581189572)] = itemData;
+            }
+        }
+        */
     }
     static void MiscLogging()
     {

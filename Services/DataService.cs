@@ -1064,10 +1064,16 @@ internal static class DataService
         }
 
         [Serializable]
-        public class FamiliarTraitData(string name, Dictionary<FamiliarStatType, float> modifiers)
+        public class FamiliarTraitData
         {
-            public string Name { get; set; } = name;
-            public Dictionary<FamiliarStatType, float> Modifiers { get; set; } = modifiers;
+            public Dictionary<int, Dictionary<string, Dictionary<FamiliarStatType, float>>> FamiliarTraitModifiers { get; set; } = [];
+        }
+
+        [Serializable]
+        public class FamiliarTrait(string name, Dictionary<FamiliarStatType, float> familiarTraits)
+        {
+            public string Name = name;
+            public Dictionary<FamiliarStatType, float> FamiliarTraits = familiarTraits;
         }
 
         internal static Dictionary<ulong, FamiliarUnlocksData> _unlockedFamiliars = [];
@@ -1075,6 +1081,7 @@ internal static class DataService
         internal static Dictionary<ulong, FamiliarPrestigeData> _familiarPrestiges = [];
         internal static Dictionary<ulong, FamiliarBuffsData> _familiarBuffs = [];
         internal static Dictionary<ulong, FamiliarEquipmentData> _familiarEquipment = [];
+        internal static Dictionary<ulong, FamiliarTraitData> _familiarTraits = [];
         internal static class FamiliarUnlocksManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_unlocks.json");
@@ -1101,14 +1108,14 @@ internal static class DataService
         internal static class FamiliarExperienceManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_experience.json");
-            public static void SaveFamiliarExperience(ulong playerId, FamiliarExperienceData data)
+            public static void SaveFamiliarExperienceData(ulong playerId, FamiliarExperienceData data)
             {
                 string filePath = GetFilePath(playerId);
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string jsonString = JsonSerializer.Serialize(data, options);
                 File.WriteAllText(filePath, jsonString);
             }
-            public static FamiliarExperienceData LoadFamiliarExperience(ulong playerId)
+            public static FamiliarExperienceData LoadFamiliarExperienceData(ulong playerId)
             {
                 string filePath = GetFilePath(playerId);
                 if (!File.Exists(filePath))
@@ -1117,9 +1124,21 @@ internal static class DataService
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
             }
-            public static int GetFamiliarExperienceLevel(FamiliarExperienceData familiarExperienceData, int familiarId)
+            public static KeyValuePair<int, float> LoadFamiliarExperience(ulong playerId, int famKey)
             {
-                return familiarExperienceData.FamiliarLevels.TryGetValue(familiarId, out var experienceData) ? experienceData.Key : 0;
+                var experienceData = LoadFamiliarExperienceData(playerId);
+
+                if (experienceData.FamiliarLevels.TryGetValue(famKey, out var experience))
+                    return experience;
+
+                return new KeyValuePair<int, float>(1, Progression.ConvertLevelToXp(1)); // Default experience value if not found
+            }
+            public static void SaveFamiliarExperience(ulong playerId, int famKey, KeyValuePair<int, float> data)
+            {
+                var experienceData = LoadFamiliarExperienceData(playerId);
+                experienceData.FamiliarLevels[famKey] = data;
+
+                SaveFamiliarExperienceData(playerId, experienceData);
             }
         }
         internal static class FamiliarPrestigeManager
@@ -1225,7 +1244,7 @@ internal static class DataService
             }
         }
 
-        public static readonly List<FamiliarTraitData> FamiliarTraits =
+        public static readonly List<FamiliarTrait> FamiliarTraits =
         [
         // Offensive Traits
         new("Dextrous", new Dictionary<FamiliarStatType, float>

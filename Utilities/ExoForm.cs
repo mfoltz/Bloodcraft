@@ -4,6 +4,7 @@ using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using System.Collections;
+using System.Collections.Concurrent;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -26,6 +27,10 @@ internal static class ExoForm
     static readonly float3 _red = new(1f, 0f, 0f);
 
     static readonly WaitForSeconds _secondDelay = new(1f);
+
+    static readonly PrefabGUID _immortalBloodType = new(2010023718);
+
+    static readonly ConcurrentDictionary<ulong, Blood> _storedPlayerBloods = [];
     public static bool CheckExoFormCharge(User user, ulong steamId)
     {
         UpdateExoFormChargeStored(steamId);
@@ -151,5 +156,43 @@ internal static class ExoForm
     {
         KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, 0f);
         steamId.SetPlayerExoFormData(timeEnergyPair);
+    }
+    public static void HandleExoImmortal(Entity buffEntity, Entity playerCharacter)
+    {
+        Blood blood = playerCharacter.Read<Blood>();
+        ulong steamId = playerCharacter.GetSteamId();
+
+        if (_storedPlayerBloods.TryRemove(steamId, out Blood storedBlood))
+        {
+            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
+            {
+                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
+
+                ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
+
+                changeBloodOnGameplayEvent.BloodValue = storedBlood.Value;
+                changeBloodOnGameplayEvent.BloodQuality = storedBlood.Quality;
+                changeBloodOnGameplayEvent.BloodType = storedBlood.BloodType;
+                changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
+
+                buffer[0] = changeBloodOnGameplayEvent;
+            }
+        }
+        else if (_storedPlayerBloods.TryAdd(steamId, blood))
+        {
+            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
+            {
+                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
+
+                ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
+
+                changeBloodOnGameplayEvent.BloodValue = 100f;
+                changeBloodOnGameplayEvent.BloodQuality = 100f;
+                changeBloodOnGameplayEvent.BloodType = _immortalBloodType;
+                changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
+
+                buffer[0] = changeBloodOnGameplayEvent;
+            }
+        }
     }
 }
