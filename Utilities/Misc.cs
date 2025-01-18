@@ -80,107 +80,152 @@ internal static class Misc
             }
         }
     }
+    public enum ScrollingTextMessage
+    {
+        PlayerExperience,
+        FamiliarExperience,
+        ProfessionExperience,
+        ProfessionYield
+    }
+
+    const string SCT_PLAYER = "PlayerXP";
+    const string SCT_FAMILIAR = "FamiliarXP";
+    const string SCT_PROFESSIONS = "ProfessionXP";
+    const string SCT_YIELD = "BonusYield";
+
+    public static readonly List<string> ScrollingTextNames =
+    [
+        SCT_PLAYER,
+        SCT_FAMILIAR,
+        SCT_PROFESSIONS,
+        SCT_YIELD
+    ];
+
+    public static readonly Dictionary<string, ScrollingTextMessage> ScrollingTextNameMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { SCT_PLAYER, ScrollingTextMessage.PlayerExperience },
+        { SCT_FAMILIAR, ScrollingTextMessage.FamiliarExperience },
+        { SCT_PROFESSIONS, ScrollingTextMessage.ProfessionExperience },
+        { SCT_YIELD, ScrollingTextMessage.ProfessionYield }
+    };
+
+    public static readonly Dictionary<ScrollingTextMessage, string> ScrollingTextBoolKeyMap = new()
+    {
+        { ScrollingTextMessage.PlayerExperience, PlayerBoolsManager.EXPERIENCE_LOG_KEY },
+        { ScrollingTextMessage.FamiliarExperience, PlayerBoolsManager.SCT_FAMILIAR_KEY },
+        { ScrollingTextMessage.ProfessionExperience, PlayerBoolsManager.SCT_PROFESSIONS_KEY },
+        { ScrollingTextMessage.ProfessionYield, PlayerBoolsManager.SCT_YIELD_KEY }
+    };
     public static class PlayerBoolsManager
     {
+        public const string EXPERIENCE_LOG_KEY = "ExperienceLogging";
+        public const string QUEST_LOG_KEY = "QuestLogging";
+        public const string PROFESSION_LOG_KEY = "ProfessionLogging";
+        public const string WEAPON_LOG_KEY = "WeaponLogging";
+        public const string BLOOD_LOG_KEY = "BloodLogging";
+        public const string SPELL_LOCK_KEY = "SpellLock";
+        public const string SHIFT_LOCK_KEY = "ShiftLock";
+        public const string PARTY_INVITE_KEY = "PartyInvite";
+        public const string EMOTE_ACTIONS_KEY = "EmoteActions";
+        public const string STARTER_KIT_KEY = "StarterKit";
+        public const string VBLOOD_EMOTES_KEY = "VBloodEmotes";
+        public const string SHINY_FAMILIARS_KEY = "ShinyFamiliars";
+        public const string REMINDERS_KEY = "Reminders";
+        public const string SCT_PLAYER_KEY = "PlayerExperienceSCT";
+        public const string SCT_FAMILIAR_KEY = "FamiliarExperienceSCT";
+        public const string SCT_PROFESSIONS_KEY = "ProfessionExperienceSCT";
+        public const string SCT_YIELD_KEY = "ProfessionYieldSCT";
+        public const string EXO_FORM_KEY = "ExoForm";
+        public const string SHROUD_KEY = "Shroud";
+
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
-            ["ExperienceLogging"] = false,
-            ["QuestLogging"] = true,
-            ["ProfessionLogging"] = false,
-            ["ExpertiseLogging"] = false,
-            ["BloodLogging"] = false,
-            ["FamiliarLogging"] = false,
-            ["SpellLock"] = false,
-            ["ShiftLock"] = false,
-            ["Grouping"] = false,
-            ["Emotes"] = false,
-            ["Kit"] = false,
-            ["VBloodEmotes"] = true,
-            ["FamiliarVisual"] = true,
-            ["ShinyChoice"] = false,
-            ["Reminders"] = true,
-            ["ScrollingText"] = true,
-            ["ExoForm"] = false,
-            ["Shroud"] = true
+            [EXPERIENCE_LOG_KEY] = false,
+            [QUEST_LOG_KEY] = true,
+            [PROFESSION_LOG_KEY] = false,
+            [WEAPON_LOG_KEY] = false,
+            [BLOOD_LOG_KEY] = false,
+            [SPELL_LOCK_KEY] = false,
+            [SHIFT_LOCK_KEY] = false,
+            [PARTY_INVITE_KEY] = false,
+            [EMOTE_ACTIONS_KEY] = false,
+            [STARTER_KIT_KEY] = false,
+            [VBLOOD_EMOTES_KEY] = true,
+            [SHINY_FAMILIARS_KEY] = true,
+            [REMINDERS_KEY] = true,
+            [SCT_PLAYER_KEY] = true,
+            [SCT_FAMILIAR_KEY] = true,
+            [SCT_PROFESSIONS_KEY] = true,
+            [SCT_YIELD_KEY] = true,
+            [EXO_FORM_KEY] = false,
+            [SHROUD_KEY] = true
+        };
+
+        static readonly Dictionary<string, string> _boolKeyConversionMap = new()
+        {
+            { "Emotes", EMOTE_ACTIONS_KEY },
+            { "FamiliarVisual", SHINY_FAMILIARS_KEY },
+            { "Kit", STARTER_KIT_KEY },
+            { "ExpertiseLogging", WEAPON_LOG_KEY }
         };
         public static bool GetPlayerBool(ulong steamId, string boolKey)
         {
-            // Load player preferences
             var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
 
-            // Check if the key exists
             if (bools.TryGetValue(boolKey, out bool value))
             {
                 return value;
             }
-
-            // If key doesn't exist, use the default value
-            if (DefaultBools.TryGetValue(boolKey, out bool defaultValue))
+            else if (DefaultBools.TryGetValue(boolKey, out bool defaultValue))
             {
-                // Optionally, add the default key to the player's file
                 bools[boolKey] = defaultValue;
                 DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
 
                 return defaultValue;
             }
 
-            // Return false if key is completely unknown
             return false;
         }
-
         public static void SetPlayerBool(ulong steamId, string boolKey, bool value)
         {
             var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
-
-            // Update the value
             bools[boolKey] = value;
 
-            // Save back to file
             DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
         }
-
         public static void TogglePlayerBool(ulong steamId, string boolKey)
         {
             var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
 
-            // Toggle the value if the key exists
             if (bools.ContainsKey(boolKey))
             {
                 bools[boolKey] = !bools[boolKey];
             }
             else
             {
-                // If key doesn't exist, initialize it with default (or true)
                 bools[boolKey] = !DefaultBools.TryGetValue(boolKey, out var defaultValue) || !defaultValue;
             }
 
-            // Save back to file
             DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
         }
-
         public static bool TryGetPlayerBool(ulong steamId, string boolKey, out bool value)
         {
             var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
 
-            // Attempt to get the value
             if (bools.TryGetValue(boolKey, out value))
             {
                 return true;
             }
-
-            // Use default if available
-            if (DefaultBools.TryGetValue(boolKey, out var defaultValue))
+            else if (DefaultBools.TryGetValue(boolKey, out var defaultValue))
             {
                 value = defaultValue;
 
-                // Optionally, update the player's preferences
                 bools[boolKey] = defaultValue;
                 DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
 
                 return true;
             }
 
-            // Key doesn't exist
             value = false;
             return false;
         }
@@ -193,11 +238,13 @@ internal static class Misc
                 foreach (string boolKey in oldBools.Keys)
                 {
                     if (bools.ContainsKey(boolKey)) bools[boolKey] = oldBools[boolKey];
+                    else if (_boolKeyConversionMap.TryGetValue(boolKey, out string convertedKey))
+                    {
+                        bools[convertedKey] = oldBools[boolKey];
+                    }
                 }
 
-                // steamId.SetPlayerBools([]); // delete old bools and save so doesn't try to migrate again
                 DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
-
                 return true;
             }
 
@@ -215,9 +262,11 @@ internal static class Misc
 
         if (_parties)
         {
-            List<ConcurrentList<string>> playerParties = new([.. DataService.PlayerDictionaries._playerParties.Values]);
+            List<List<string>> playerParties = DataService.PlayerDictionaries._playerParties.Values
+                .Select(party => party.ToList())
+                .ToList();
 
-            foreach (ConcurrentList<string> party in playerParties)
+            foreach (List<string> party in playerParties)
             {
                 if (party.Contains(playerName)) // find party with death source player name
                 {

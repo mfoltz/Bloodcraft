@@ -55,7 +55,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     }
                     else if (_shiftSlot && shiftSpell && steamId.TryGetPlayerSpells(out spells))
                     {
-                        HandleShiftSpell(entity, spells, GetPlayerBool(steamId, "ShiftLock"));
+                        HandleShiftSpell(entity, spells, GetPlayerBool(steamId, SHIFT_LOCK_KEY));
                     }
                     else if (!entity.Has<WeaponLevel>() && steamId.TryGetPlayerSpells(out spells))
                     {
@@ -98,7 +98,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        HandleShiftSpell(entity, spells, GetPlayerBool(steamId, "ShiftLock"));
+        HandleShiftSpell(entity, spells, GetPlayerBool(steamId, SHIFT_LOCK_KEY));
     }
     static void HandleShiftSpell(Entity entity, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
     {
@@ -122,7 +122,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     }
     static void SetSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
     {
-        bool lockSpells = GetPlayerBool(steamId, "SpellLock");
+        bool lockSpells = GetPlayerBool(steamId, SPELL_LOCK_KEY);
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
 
         foreach (var buff in buffer)

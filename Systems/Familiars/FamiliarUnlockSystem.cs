@@ -214,6 +214,8 @@ internal static class FamiliarUnlockSystem
         // float roll = (float)_random.NextDouble();
         return _random.NextDouble() < chance;
     }
+
+    /*
     static void HandleModifier(ref float dropChance, Entity player)
     {
         ulong steamId = player.GetSteamId();
@@ -223,4 +225,5 @@ internal static class FamiliarUnlockSystem
             dropChance += modifier;
         }
     }
+    */
 }

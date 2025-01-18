@@ -181,7 +181,7 @@ internal static class PrestigeCommands
 
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>.prestige l</color> to see options.");
             return;
         }
 
@@ -232,7 +232,7 @@ internal static class PrestigeCommands
 
         if (buffs.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, "Prestiging buffs not found.");
+            LocalizationService.HandleReply(ctx, "No prestige buffs configured...");
             return;
         }
 
@@ -294,7 +294,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>.prestige l</color> to see options.");
             return;
         }
 
@@ -307,7 +307,7 @@ internal static class PrestigeCommands
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply($"Couldn't find player.");
+            ctx.Reply($"Couldn't find player...");
             return;
         }
 
@@ -333,7 +333,7 @@ internal static class PrestigeCommands
                     steamId.SetPlayerExoFormData(timeEnergyPair);
                 }
 
-                if (GetPlayerBool(steamId, "ExoForm")) SetPlayerBool(steamId, "ExoForm", false);
+                if (GetPlayerBool(steamId, EXO_FORM_KEY)) SetPlayerBool(steamId, EXO_FORM_KEY, false);
             }
 
             LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color> prestige reset for <color=white>{playerInfo.User.CharacterName.Value}</color>.");
@@ -499,7 +499,7 @@ internal static class PrestigeCommands
         }
 
         var prestigeData = GetPrestigeForType(parsedPrestigeType)
-        .Where(p => p.Value > 0)  // Filter out values of 0
+        .Where(p => p.Value > 0)
         .OrderByDescending(p => p.Value)
         .ToList();
 
@@ -545,8 +545,8 @@ internal static class PrestigeCommands
         Entity character = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
-        TogglePlayerBool(steamId, "Shroud");
-        if (GetPlayerBool(steamId, "Shroud"))
+        TogglePlayerBool(steamId, SHROUD_KEY);
+        if (GetPlayerBool(steamId, SHROUD_KEY))
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
 

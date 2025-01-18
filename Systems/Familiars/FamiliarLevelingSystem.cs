@@ -32,9 +32,9 @@ internal static class FamiliarLevelingSystem
 
     static readonly WaitForSeconds _delay = new(0.75f);
 
-    static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
-    static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
-    static readonly PrefabGUID _familiarSCT = new(1876501183); // SCT resource gain prefabguid, good visibility
+    static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f);
+    static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly PrefabGUID _sctResourceGain = new(1876501183);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         foreach (Entity player in deathEvent.DeathParticipants)
@@ -138,7 +138,7 @@ internal static class FamiliarLevelingSystem
             if (familiar.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiar, newLevel);
         }
 
-        if (GetPlayerBool(steamId, "ScrollingText"))
+        if (GetPlayerBool(steamId, SCT_FAMILIAR_KEY))
         {
             float3 targetPosition = familiar.Read<Translation>().Value;
 
@@ -149,7 +149,7 @@ internal static class FamiliarLevelingSystem
     {
         yield return _delay;
         
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _familiarSCT, userEntity);
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, character, gainedXP, _sctResourceGain, userEntity);
     }
     static float GetXp(ulong steamID, int familiarId)
     {

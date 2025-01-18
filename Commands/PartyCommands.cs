@@ -29,8 +29,8 @@ internal static class PartyCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        TogglePlayerBool(steamId, "Grouping");
-        LocalizationService.HandleReply(ctx, $"Party invites {(GetPlayerBool(steamId, "Grouping") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, PARTY_INVITE_KEY);
+        LocalizationService.HandleReply(ctx, $"Party invites {(GetPlayerBool(steamId, PARTY_INVITE_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "add", shortHand: "a", adminOnly: false, usage: ".party a [Player]", description: "Adds player to party.")]

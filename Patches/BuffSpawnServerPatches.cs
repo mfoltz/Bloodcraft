@@ -213,7 +213,7 @@ internal static class BuffSystemSpawnPatches
                 {
                     ulong steamId = playerCharacter.GetSteamId();
 
-                    if (!GetPlayerBool(steamId, "VBloodEmotes"))
+                    if (!GetPlayerBool(steamId, VBLOOD_EMOTES_KEY))
                     {
                         entity.Destroy();
                     }

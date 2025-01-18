@@ -77,7 +77,7 @@ internal static class EmoteSystemPatch
                 Entity playerCharacter = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
-                if (_exoForm && useEmoteEvent.Action.Equals(_tauntEmote) && GetPlayerBool(steamId, "ExoForm"))
+                if (_exoForm && useEmoteEvent.Action.Equals(_tauntEmote) && GetPlayerBool(steamId, EXO_FORM_KEY))
                 {
                     if (!playerCharacter.HasBuff(_exoFormBuff))
                     {
@@ -100,7 +100,7 @@ internal static class EmoteSystemPatch
                 {
                     if (_matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
                 }
-                else if (_familiars && GetPlayerBool(steamId, "Emotes"))
+                else if (_familiars && GetPlayerBool(steamId, EMOTE_ACTIONS_KEY))
                 {
                     if (ServerGameManager.HasBuff(playerCharacter, _dominateBuff.ToIdentifier()) && EmoteActions.ContainsKey(useEmoteEvent.Action))
                     {
@@ -166,14 +166,14 @@ internal static class EmoteSystemPatch
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found...");
+            LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
         }
     }
     public static void CombatMode(User user, Entity character, ulong steamId) // need to tidy this up at some point
     {
         if (!_familiarCombat)
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat toggling is not enabled.");
+            LocalizationService.HandleServerReply(EntityManager, user, "Familiar combat is not enabled.");
             return;
         }
 
@@ -193,7 +193,7 @@ internal static class EmoteSystemPatch
 
             if (familiar == Entity.Null)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to toggle combat for...");
+                LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
                 return;
             }
 
@@ -222,7 +222,7 @@ internal static class EmoteSystemPatch
         }
         else
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "No active familiar found to toggle combat mode for...");
+            LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
         }
     }
 }

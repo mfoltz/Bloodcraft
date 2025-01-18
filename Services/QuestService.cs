@@ -182,6 +182,7 @@ internal class QuestService
                 {
                     //Core.Log.LogInfo(kvp.Key.LookupName());
                 }
+
                 _targetsLogged = true;
             }
 

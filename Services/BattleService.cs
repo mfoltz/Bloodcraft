@@ -41,8 +41,8 @@ internal class BattleService
         ComponentType.ReadOnly(Il2CppType.Of<UnitTeam>()),
     ];
 
-    static readonly AssetGuid _assetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
-    static readonly PrefabGUID _battleSCT = new(106212079); // InfoWarning SCT, good enough
+    static readonly AssetGuid _valueSecondsAssetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
+    static readonly PrefabGUID _sctInfoWarning = new(106212079);
     static readonly float3 _green = new(0f, 1f, 0f);
 
     public static float3 _battlePosition = float3.zero;
@@ -150,8 +150,6 @@ internal class BattleService
 
             NotifyBothPlayers(playerOne, playerTwo, message);
         }
-
-        // Match end via elimination
         public static void HandleMatchCompletion((ulong, ulong) matchPair, ulong winner)
         {
             QueuedPlayers.Remove(matchPair.Item1);
@@ -333,12 +331,12 @@ internal class BattleService
                 ScrollingCombatTextMessage.Create(
                 EntityManager,
                 EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                _assetGuid,
+                _valueSecondsAssetGuid,
                 _battlePosition,
                 _green,
                 player.CharEntity,
                 countdown,
-                _battleSCT,
+                _sctInfoWarning,
                 player.UserEntity
                 );
 

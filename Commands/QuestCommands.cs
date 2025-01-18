@@ -29,8 +29,8 @@ internal static class QuestCommands
 
         var steamId = ctx.Event.User.PlatformId;
 
-        TogglePlayerBool(steamId, "QuestLogging");
-        LocalizationService.HandleReply(ctx, $"Quest logging is now {(GetPlayerBool(steamId, "QuestLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, QUEST_LOG_KEY);
+        LocalizationService.HandleReply(ctx, $"Quest logging is now {(GetPlayerBool(steamId, QUEST_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "progress", shortHand: "p", adminOnly: false, usage: ".quest p [QuestType]", description: "Display your current quest progress.")]
@@ -245,7 +245,7 @@ internal static class QuestCommands
         PlayerInfo playerInfo = GetPlayerInfo(name);
         if (!playerInfo.UserEntity.Exists())
         {
-            ctx.Reply("Couldn't find player.");
+            ctx.Reply("Couldn't find player...");
             return;
         }
 
@@ -254,7 +254,7 @@ internal static class QuestCommands
 
         if (!steamId.TryGetPlayerQuests(out var questData))
         {
-            ctx.Reply("Player has no active quests.");
+            ctx.Reply("Player has no active quests!");
             return;
         }
 

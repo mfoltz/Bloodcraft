@@ -90,12 +90,10 @@ internal static class DealDamageSystemPatch
                     }
                     else if (_random.NextDouble() <= _onHitProcChance && IsValidDamageType(dealDamageEvent) && IsValidTarget(dealDamageEvent.Target))
                     {
-                        // Core.Log.LogInfo($"Shiny familiar damage roll successful - {entityOwner.Owner.GetPrefabGuid().GetPrefabName()}");
                         PrefabGUID shinyDebuff = _shinyOnHitDebuffs.FirstOrDefault(buff => entityOwner.Owner.HasBuff(buff));
 
                         if (shinyDebuff.HasValue())
                         {
-                            // Core.Log.LogInfo($"Applying {shinyDebuff.GetPrefabName()} to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
                             dealDamageEvent.Target.TryApplyBuffWithOwner(playerCharacter, shinyDebuff);
                         }
                     }

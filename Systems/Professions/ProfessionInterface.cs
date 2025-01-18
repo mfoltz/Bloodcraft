@@ -2,7 +2,7 @@
 using Stunlock.Core;
 using Unity.Mathematics;
 
-namespace Bloodcraft.Systems.Professions;
+namespace Bloodcraft.Systems.Professions; // need the const string treament but later
 public interface IProfessionHandler
 {
     KeyValuePair<int, float> GetProfessionData(ulong steamID);
@@ -29,7 +29,6 @@ public static class ProfessionHandlerFactory
 
         if (prefabGUID.HasValue()) itemTypeName = prefabGUID.GetPrefabName().ToLower();
 
-        // Check conText to decide on a handler
         switch (context)
         {
             case "woodcutting":

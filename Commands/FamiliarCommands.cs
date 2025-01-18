@@ -126,7 +126,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "boxes", shortHand: "box", adminOnly: false, usage: ".fam box", description: "Shows the available familiar boxes.")]
+    [Command(name: "listboxes", shortHand: "box", adminOnly: false, usage: ".fam box", description: "Shows the available familiar boxes.")]
     public static void ListFamiliarSets(ChatCommandContext ctx)
     {
         if (!ConfigService.FamiliarSystem)
@@ -1003,7 +1003,7 @@ internal static class FamiliarCommands
     }
 
     [Command(name: "shinybuff", shortHand: "shiny", adminOnly: false, usage: ".fam shiny [SpellSchool]", description: "Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.")]
-    public static void SetFamiliarVisual(ChatCommandContext ctx, string spellSchool = "")
+    public static void ShinyFamiliarCommand(ChatCommandContext ctx, string spellSchool = "")
     {
         if (!ConfigService.FamiliarSystem)
         {

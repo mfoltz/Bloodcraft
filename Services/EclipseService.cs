@@ -398,7 +398,7 @@ internal class EclipseService
     }
     public static (int Type, int Progress, int Goal, string Target, string IsVBlood) GetQuestData(ulong steamId, Systems.Quests.QuestSystem.QuestType questType)
     {
-        int type = 0; // kill by default
+        int type = 0;
         int progress = 0;
         int goal = 0;
         string target = "";

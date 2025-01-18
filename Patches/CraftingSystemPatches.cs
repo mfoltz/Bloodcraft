@@ -15,7 +15,7 @@ using User = ProjectM.Network.User;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftingSystem
+internal static class CraftingSystemPatches
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -291,7 +291,6 @@ internal static class CraftingSystemPatches // ForgeSystem_Update, UpdateCraftin
                     ulong steamId = fromCharacter.Character.GetSteamId();
 
                     Entity receivingInventory = NetworkIdSystem._NetworkIdLookupMap.TryGetValue(moveItemBetweenInventoriesEvent.ToInventory, out Entity station) ? station : Entity.Null;
-                    //Entity inventoryOwner = receivingInventory.Has<InventoryConnection>() ? receivingInventory.Read<InventoryConnection>().InventoryOwner : Entity.Null;
                     int fromSlot = moveItemBetweenInventoriesEvent.FromSlot;
 
                     PrefabGUID itemPrefabGUID = InventoryUtilities.TryGetInventoryEntity(EntityManager, fromCharacter.Character, out Entity playerInventory)

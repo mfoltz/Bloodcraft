@@ -48,7 +48,7 @@ internal static class Configuration
 
         if (questRewards.Count != rewardAmounts.Count)
         {
-            Core.Log.LogWarning("QuestRewards and QuestRewardAmounts are not the same length, please correct this for proper behaviour when receiving quest rewards!");
+            Core.Log.LogWarning("QuestRewards and QuestRewardAmounts are not the same length, please correct this for predictable behavior when receiving quest rewards!");
         }
 
         for (int i = 0; i < questRewards.Count; i++)
@@ -65,7 +65,7 @@ internal static class Configuration
 
         if (kitPrefabs.Count != kitAmounts.Count)
         {
-            Core.Log.LogWarning("KitPrefabs and KitQuantities are not the same length, please correct this for proper behaviour when using the kit command!");
+            Core.Log.LogWarning("KitPrefabs and KitQuantities are not the same length, please correct this for predictable behavior when using the kit command!");
         }
 
         for (int i = 0; i < kitPrefabs.Count; i++)

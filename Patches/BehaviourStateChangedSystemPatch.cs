@@ -10,7 +10,7 @@ using Unity.Entities;
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
-internal static class BehaviourStateChangedSystemPatch // stops familiars from trying to return to where they spawned when leaving combat
+internal static class BehaviourStateChangedSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
 

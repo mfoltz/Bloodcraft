@@ -9,6 +9,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Utilities.Progression;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using Random = System.Random;
 using User = ProjectM.Network.User;
 
@@ -112,8 +113,8 @@ internal static class ProfessionSystem
 
             if (ServerGameManager.TryAddInventoryItem(playerCharacter, fish, bonusYield))
             {
-                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
-                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
+                if (GetPlayerBool(steamId, SCT_YIELD_KEY))
                 {
                     HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                 }
@@ -121,9 +122,9 @@ internal static class ProfessionSystem
             else
             {
                 InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, fish, bonusYield, new Entity());
-                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
-                
-                if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+
+                if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                if (GetPlayerBool(steamId, SCT_YIELD_KEY))
                 {
                     HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                 }
@@ -161,8 +162,8 @@ internal static class ProfessionSystem
                                 if (bonusYield <= 0) return;
                                 else if (ServerGameManager.TryAddInventoryItem(playerCharacter, dropTableData.ItemGuid, bonusYield))
                                 {
-                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
-                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                                    if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
+                                    if (GetPlayerBool(steamId, SCT_YIELD_KEY))
                                     {
                                         HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                                     }
@@ -173,8 +174,8 @@ internal static class ProfessionSystem
                                 {
                                     InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, dropTableData.ItemGuid, bonusYield, new Entity());
                                     
-                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ProfessionLogging")) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
-                                    if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ScrollingText"))
+                                    if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
+                                    if (GetPlayerBool(steamId, SCT_YIELD_KEY))
                                     {
                                         HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
                                     }
@@ -249,13 +250,13 @@ internal static class ProfessionSystem
             if (newLevel < _maxProfessionLevel) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
         }
 
-        if (Misc.PlayerBoolsManager.GetPlayerBool(steamID, "ProfessionLogging"))
+        if (GetPlayerBool(steamID, PROFESSION_LOG_KEY))
         {
             int levelProgress = GetLevelProgress(steamID, handler);
             LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{(int)gainedXP}</color> <color=#FFC0CB>proficiency</color> in {professionName.ToLower()} (<color=white>{levelProgress}%</color>)");
         }
 
-        if (Misc.PlayerBoolsManager.GetPlayerBool(steamID, "ScrollingText"))
+        if (GetPlayerBool(steamID, SCT_PROFESSIONS_KEY))
         {
             float3 targetPosition = target.GetPosition();
             float3 professionColor = handler.GetProfessionColor();

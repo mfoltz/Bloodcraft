@@ -111,6 +111,10 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 
                 _migrated = true;
             }
+            else
+            {
+                _migrated = true;
+            }
 
             yield return _delay;
         }

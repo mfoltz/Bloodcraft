@@ -80,7 +80,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                     {
                         int index = PrestigeBuffs.IndexOf(prefabGUID);
 
-                        if (prefabGUID.Equals(_shroudBuff) && !GetPlayerBool(steamId, "Shroud")) // allow shroud buff destruction
+                        if (prefabGUID.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) // allow shroud buff destruction
                         {
                             continue;
                         }
@@ -89,7 +89,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                             if (prestigeLevel > index) Buffs.ApplyPermanentBuff(playerCharacter, prefabGUID); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
                     }
-                    else if (_exoPrestige && prefabGUID.Equals(_tauntEmoteBuff) && GetPlayerBool(steamId, "ExoForm"))
+                    else if (_exoPrestige && prefabGUID.Equals(_tauntEmoteBuff) && GetPlayerBool(steamId, EXO_FORM_KEY))
                     {
                         if (EmoteSystemPatch.ExitingForm.Contains(steamId))
                         {
@@ -113,16 +113,14 @@ internal static class UpdateBuffsBufferDestroyPatch
                     }
                 }
 
-                // do log out stuff when travel into coffin buff is destroyed
                 if ((prefabGUID.Equals(_travelStoneBuff) || prefabGUID.Equals(_travelWoodenBuff)) && entity.GetBuffTarget().TryGetPlayer(out playerCharacter))
                 {
-                    //Core.Log.LogInfo("Entering coffin...");
                     User user = playerCharacter.GetUser();
                     ulong steamId = user.PlatformId;
 
                     if (_prestige)
                     {
-                        SetPlayerBool(steamId, "Shroud", false);
+                        SetPlayerBool(steamId, SHROUD_KEY, false);
 
                         if (playerCharacter.HasBuff(_shroudBuff) && playerCharacter.TryGetComponent(out Equipment equipment))
                         {
@@ -146,7 +144,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                     if (_prestige)
                     {
-                        SetPlayerBool(steamId, "Shroud", true);
+                        SetPlayerBool(steamId, SHROUD_KEY, true);
 
                         if (PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                             && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))

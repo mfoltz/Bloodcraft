@@ -216,29 +216,6 @@ internal static class WeaponSystem
             IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
-                /*
-                // Check if the player leveled up
-                var xpData = handler.GetExpertiseData(steamID);
-
-                if (xpData.Key >= MaxExpertiseLevel) return;
-
-                float newExperience = xpData.Value + expertiseValue;
-                int newLevel = ConvertXpToLevel(newExperience);
-                bool leveledUp = false;
-
-                if (newLevel > xpData.Key)
-                {
-                    leveledUp = true;
-                    if (newLevel > MaxExpertiseLevel)
-                    {
-                        newLevel = MaxExpertiseLevel;
-                        newExperience = ConvertLevelToXp(MaxExpertiseLevel);
-                    }
-                }
-
-                var updatedXPData = new KeyValuePair<int, float>(newLevel, newExperience);
-                handler.SetExpertiseData(steamID, updatedXPData);
-                */
                 SaveWeaponExperience(steamID, handler, expertiseValue, out bool leveledUp, out int newLevel);
                 NotifyPlayer(user, weaponType, expertiseValue, leveledUp, newLevel, handler);
             }
@@ -259,9 +236,9 @@ internal static class WeaponSystem
 
         if (currentLevel >= _maxExpertiseLevel)
         {
-            // Already at max level
             leveledUp = false;
             newLevel = currentLevel;
+
             return;
         }
 
@@ -293,44 +270,12 @@ internal static class WeaponSystem
             HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
         }
         else if (newLevel >= _maxExpertiseLevel) return;
-        else if (GetPlayerBool(steamID, "ExpertiseLogging"))
+        else if (GetPlayerBool(steamID, WEAPON_LOG_KEY))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
         }
     }
-
-    /*
-    static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponHandler handler)
-    {
-        ulong steamID = user.PlatformId;
-        gainedXP = (int)gainedXP;
-        int levelProgress = GetLevelProgress(steamID, handler);
-
-        if (leveledUp)
-        {
-            if (newLevel <= MaxExpertiseLevel) LocalizationService.HandleServerReply(EntityManager, user, $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
-            if (Misc.GetPlayerBool(steamID, "Reminders"))
-            {
-                if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
-                {
-                    if (Stats.Count < ExpertiseStatChoices)
-                    {
-                        int choices = ExpertiseStatChoices - Stats.Count;
-                        string bonusString = choices > 1 ? "bonuses" : "bonus";
-
-                        LocalizationService.HandleServerReply(EntityManager, user, $"{choices} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to make your choice and <color=white>'.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.remindme'</color>)");
-                    }
-                }
-            }
-        }
-
-        if (Misc.GetPlayerBool(steamID, "ExpertiseLogging"))
-        {
-            LocalizationService.HandleServerReply(EntityManager, user, $"+<color=yellow>{gainedXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
-        }
-    }
-    */
     static void HandleWeaponLevelUp(User user, WeaponType weaponType, int newLevel, ulong steamID)
     {
         if (newLevel <= _maxExpertiseLevel)
@@ -339,7 +284,7 @@ internal static class WeaponSystem
                 $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
         }
 
-        if (GetPlayerBool(steamID, "Reminders"))
+        if (GetPlayerBool(steamID, REMINDERS_KEY))
         {
             if (steamID.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {

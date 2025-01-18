@@ -22,8 +22,6 @@ internal static class WeaponCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
-    static SystemService SystemService => Core.SystemService;
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
@@ -93,7 +91,7 @@ internal static class WeaponCommands
         }
 
         var steamId = ctx.Event.User.PlatformId;
-        TogglePlayerBool(steamId, "ExpertiseLogging");
+        TogglePlayerBool(steamId, WEAPON_LOG_KEY);
 
         LocalizationService.HandleReply(ctx, $"Expertise logging is now {(GetPlayerBool(steamId, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
@@ -283,7 +281,7 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Available Weapon Expertises: <color=#c0c0c0>{weaponTypes}</color>");
     }
 
-    [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGUID] [Radius]", description: "Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).")]
+    [Command(name: "setspells", shortHand: "spell", adminOnly: true, usage: ".wep spell [Name] [Slot] [PrefabGuid] [Radius]", description: "Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).")]
     public static void SetSpellCommand(ChatCommandContext ctx, string name, int slot, int ability, float radius = 0f)
     {
         if (!ConfigService.UnarmedSlots)

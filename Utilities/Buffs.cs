@@ -29,7 +29,7 @@ internal static class Buffs
         { 4, new(532210332) }, // second weapon skill sword throw
         { 5, new(-1161896955) }, // first spell skill etherial sword
         { 6, new(-7407393) }, // second spell skill ring of blood
-        { 7, new(797450963) } //  ultimate AB_Vampire_Dracula_BloodBoltSwarm_AbilityGroup
+        { 7, new(797450963) } //  ultimate ability lasers + blood bolts... thing
     };
 
     public static readonly Dictionary<int, int> ExoFormAbilityUnlockMap = new()

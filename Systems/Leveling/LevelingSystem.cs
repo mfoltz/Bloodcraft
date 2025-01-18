@@ -45,8 +45,8 @@ internal static class LevelingSystem
     static readonly PrefabGUID _warEventTrash = new(2090187901);
 
     static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
-    static readonly AssetGuid _assetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb"); // experience hexString key
-    static readonly PrefabGUID _familiarSCT = new(1876501183); // SCT resource gain prefabguid, good visibility
+    static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly PrefabGUID _sctResourceGain = new(1876501183);
 
     static readonly HashSet<PrefabGUID> _extraGearLevelBuffs =
     [
@@ -222,7 +222,7 @@ internal static class LevelingSystem
                     $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
 
-            if (GetPlayerBool(steamId, "Reminders") && _classes && !Classes.HasClass(steamId))
+            if (_classes && GetPlayerBool(steamId, REMINDERS_KEY) && !Classes.HasClass(steamId))
             {
                 LocalizationService.HandleServerReply(EntityManager, user,
                     $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
@@ -230,7 +230,7 @@ internal static class LevelingSystem
         }
         else if (newLevel >= _maxPlayerLevel) return;
 
-        if (GetPlayerBool(steamId, "ExperienceLogging"))
+        if (GetPlayerBool(steamId, EXPERIENCE_LOG_KEY))
         {
             int levelProgress = GetLevelProgress(steamId);
             string message = restedXP > 0
@@ -240,18 +240,18 @@ internal static class LevelingSystem
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
-        if (GetPlayerBool(steamId, "ScrollingText"))
+        if (GetPlayerBool(steamId, SCT_PLAYER_KEY))
         {
             float3 targetPosition = character.Read<Translation>().Value;
 
-            DelayedPlayerSCT(player, player.GetUserEntity(), targetPosition, _gold, gainedXP).Start();
+            PlayerExperienceSCTDelayRoutine(player, player.GetUserEntity(), targetPosition, _gold, gainedXP).Start();
         }
     }
-    static IEnumerator DelayedPlayerSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    static IEnumerator PlayerExperienceSCTDelayRoutine(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP) // maybe just have one of these in progression utilities but later
     {
         yield return _delay;
 
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _familiarSCT, userEntity);
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, character, gainedXP, _sctResourceGain, userEntity);
     }
     static float GetXp(ulong steamId)
     {

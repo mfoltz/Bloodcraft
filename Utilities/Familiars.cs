@@ -36,7 +36,7 @@ internal static class Familiars
     const float AGGRO_BUFF_DURATION = 1f;
 
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
-    static readonly PrefabGUID _combatBuff = new(581443919);
+    static readonly PrefabGUID _pveCombatBuff = new(581443919);
     static readonly PrefabGUID _pvpCombatBuff = new(697095869);
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
@@ -206,13 +206,13 @@ internal static class Familiars
     }
     public static void ToggleShinies(ChatCommandContext ctx, ulong steamId)
     {
-        TogglePlayerBool(steamId, "FamiliarVisual");
-        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, "FamiliarVisual") ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
+        TogglePlayerBool(steamId, SHINY_FAMILIARS_KEY);
+        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, SHINY_FAMILIARS_KEY) ? "Shiny familiars <color=green>enabled</color>." : "Shiny familiars <color=red>disabled</color>.");
     }
     public static void ToggleVBloodEmotes(ChatCommandContext ctx, ulong steamId)
     {
-        TogglePlayerBool(steamId, "VBloodEmotes");
-        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, "VBloodEmotes") ? "VBlood Emotes <color=green>enabled</color>." : "VBlood Emotes <color=red>disabled</color>.");
+        TogglePlayerBool(steamId, VBLOOD_EMOTES_KEY);
+        LocalizationService.HandleReply(ctx, GetPlayerBool(steamId, VBLOOD_EMOTES_KEY) ? "VBlood emotes <color=green>enabled</color>." : "VBlood emotes <color=red>disabled</color>.");
     }
     public static bool TryParseFamiliarStat(string statType, out FamiliarStatType parsedStatType)
     {
@@ -284,10 +284,6 @@ internal static class Familiars
         HandleFamiliarMinions(familiar);
         ResetAndDisableAggro(familiar);
 
-        // Follower follower = familiar.ReadRO<Follower>();
-        // follower.Followed._Value = Entity.Null;
-        // familiar.Write(follower);
-
         familiar.With((ref Follower follower) =>
         {
             follower.Followed._Value = Entity.Null;
@@ -313,29 +309,6 @@ internal static class Familiars
     }
     public static void ResetAggro(Entity familiar)
     {
-        /*
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
-        if (familiar.Has<AlertBuffer>()) entityCommandBuffer.SetBuffer<AlertBuffer>(familiar).Clear();
-        if (familiar.Has<AggroDamageHistoryBufferElement>()) entityCommandBuffer.SetBuffer<AggroDamageHistoryBufferElement>(familiar).Clear();
-        if (familiar.Has<AggroCandidateBufferElement>()) entityCommandBuffer.SetBuffer<AggroCandidateBufferElement>(familiar).Clear();
-        if (familiar.Has<ExternalAggroBufferElement>()) entityCommandBuffer.SetBuffer<ExternalAggroBufferElement>(familiar).Clear();
-        
-        if (ServerGameManager.TryGetBuffer<AlertBuffer>(familiar, out var alertBuffer)) alertBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<AggroDamageHistoryBufferElement>(familiar, out var damageHistoryBuffer)) damageHistoryBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<AggroCandidateBufferElement>(familiar, out var aggroCandidateBuffer)) aggroCandidateBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();   
-
-        if (!familiar.Has<AggroConsumer>()) return;
-
-        familiar.With((ref AggroConsumer aggroConsumer) =>
-        {
-            aggroConsumer.AggroTarget = NetworkedEntity.Empty;
-            aggroConsumer.AlertTarget = NetworkedEntity.Empty;
-        });
-        */
-
         if (!familiar.Has<AggroConsumer>()) return;
         else if (familiar.TryApplyBuff(_disableAggroBuff))
         {
@@ -344,55 +317,39 @@ internal static class Familiars
     }
     public static void ResetAndDisableAggro(Entity familiar)
     {
-        /*
-        EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-
-        if (familiar.Has<AlertBuffer>()) entityCommandBuffer.SetBuffer<AlertBuffer>(familiar).Clear();
-        if (familiar.Has<AggroDamageHistoryBufferElement>()) entityCommandBuffer.SetBuffer<AggroDamageHistoryBufferElement>(familiar).Clear();
-        if (familiar.Has<AggroCandidateBufferElement>()) entityCommandBuffer.SetBuffer<AggroCandidateBufferElement>(familiar).Clear();
-        if (familiar.Has<ExternalAggroBufferElement>()) entityCommandBuffer.SetBuffer<ExternalAggroBufferElement>(familiar).Clear();
-
-        
-        if (ServerGameManager.TryGetBuffer<AlertBuffer>(familiar, out var alertBuffer)) alertBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<AggroDamageHistoryBufferElement>(familiar, out var damageHistoryBuffer)) damageHistoryBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<AggroCandidateBufferElement>(familiar, out var aggroCandidateBuffer)) aggroCandidateBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<ExternalAggroBufferElement>(familiar, out var externalAggroBuffer)) externalAggroBuffer.Clear();
-        if (ServerGameManager.TryGetBuffer<AggroBuffer>(familiar, out var aggroBuffer)) aggroBuffer.Clear();
-        */
-
         if (!familiar.Has<AggroConsumer>()) return;
         else
         {
             familiar.TryApplyBuff(_disableAggroBuff);
         }
     }
-    public static void BindFamiliar(User user, Entity character, int boxIndex = -1)
+    public static void BindFamiliar(User user, Entity playerCharacter, int boxIndex = -1)
     {
         ulong steamId = user.PlatformId;
-        Entity familiar = FindPlayerFamiliar(character);
+        Entity familiar = FindPlayerFamiliar(playerCharacter);
 
         if (familiar.Exists())
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You already have an active familiar! Unbind it first.");
             return;
         }
-        else if (character.HasBuff(_combatBuff) || character.HasBuff(_dominateBuff) || character.HasBuff(_takeFlightBuff) || character.HasBuff(_pvpCombatBuff))
+        else if (playerCharacter.HasBuff(_pveCombatBuff) || playerCharacter.HasBuff(_dominateBuff) || playerCharacter.HasBuff(_takeFlightBuff) || playerCharacter.HasBuff(_pvpCombatBuff))
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You can't bind a familiar during combat or when using certain forms! (dominating presence, bat)");
             return;
         }
 
-        string set = steamId.TryGetFamiliarBox(out set) ? set : "";
-        if (string.IsNullOrEmpty(set))
+        string box = steamId.TryGetFamiliarBox(out box) ? box : "";
+        if (string.IsNullOrEmpty(box))
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You don't have a box selected! Use '<color=white>.fam boxes</color>' to see available boxes. Select a box with '<color=white>.fam cb [BoxName]</color>");
+            LocalizationService.HandleServerReply(EntityManager, user, "You don't have a box selected! Use '<color=white>.fam listboxes</color>' to see available boxes. Select a box with '<color=white>.fam cb [BoxName]</color>");
             return;
         }
-        else if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(set, out var famKeys))
+        else if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(box, out var famKeys))
         {
-            if (boxIndex == -1 && steamId.TryGetFamiliarDefault(out boxIndex)) // use preset when invoked without index parameter
+            if (boxIndex == -1 && steamId.TryGetFamiliarDefault(out boxIndex))
             {
-                if (boxIndex < 1 || boxIndex > famKeys.Count) // validate index from default option
+                if (boxIndex < 1 || boxIndex > famKeys.Count)
                 {
                     LocalizationService.HandleServerReply(EntityManager, user, $"Invalid box index for current box, try binding manually again first.");
                     return;
@@ -401,16 +358,16 @@ internal static class Familiars
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
 
-                InstantiateFamiliarImmediate(user, character, famKeys[boxIndex - 1]);
+                InstantiateFamiliarImmediate(user, playerCharacter, famKeys[boxIndex - 1]);
             }
             else if (boxIndex == -1)
             {
                 LocalizationService.HandleServerReply(EntityManager, user, $"Couldn't find binding preset, bind to a familiar via command at least once first!");
                 return;
             }
-            else if (boxIndex < 1 || boxIndex > famKeys.Count) // validate input from user
+            else if (boxIndex < 1 || boxIndex > famKeys.Count)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, $"Invalid choice, please use <color=white>1</color> to <color=white>{famKeys.Count}</color> (Current Box: <color=yellow>{set}</color>)");
+                LocalizationService.HandleServerReply(EntityManager, user, $"Invalid choice, please use <color=white>1</color> to <color=white>{famKeys.Count}</color> (Active Box: <color=yellow>{box}</color>)");
                 return;
             }
             else
@@ -420,7 +377,7 @@ internal static class Familiars
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
 
-                InstantiateFamiliarImmediate(user, character, famKeys[boxIndex - 1]);
+                InstantiateFamiliarImmediate(user, playerCharacter, famKeys[boxIndex - 1]);
             }
         }
         else

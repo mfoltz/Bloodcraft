@@ -371,7 +371,7 @@ internal static class ServerBootstrapSystemPatches
 
             if (_prestige)
             {
-                SetPlayerBool(steamId, "Shroud", true);
+                SetPlayerBool(steamId, SHROUD_KEY, true);
 
                 if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                     && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
@@ -380,7 +380,7 @@ internal static class ServerBootstrapSystemPatches
                 }
                 else
                 {
-                    SetPlayerBool(steamId, "Shroud", false);
+                    SetPlayerBool(steamId, SHROUD_KEY, false);
                 }
             }
         }
@@ -489,7 +489,7 @@ internal static class ServerBootstrapSystemPatches
 
         if (_prestige && playerCharacter.Exists())
         {
-            SetPlayerBool(steamId, "Shroud", false);
+            SetPlayerBool(steamId, SHROUD_KEY, false);
 
             if (playerCharacter.HasBuff(_shroudBuff) && playerCharacter.TryGetComponent(out Equipment equipment))
             {
@@ -534,7 +534,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (_prestige)
                         {
-                            SetPlayerBool(steamId, "Shroud", false);
+                            SetPlayerBool(steamId, SHROUD_KEY, false);
 
                             if (playerInfo.CharEntity.HasBuff(_shroudBuff) && playerInfo.CharEntity.TryGetComponent(out Equipment equipment))
                             {

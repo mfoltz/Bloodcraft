@@ -22,7 +22,7 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
         if (!Core._initialized) return;
         else if (!_expertise) return;
 
-        NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.TempJob);
+        NativeArray<Entity> entities = __instance.__query_1735840491_0.ToEntityArray(Allocator.Temp);
         try
         {
             foreach (var entity in entities)

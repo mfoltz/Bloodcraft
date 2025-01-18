@@ -65,6 +65,7 @@ internal static class Core
         new(-1158884666), // AB_Shapeshift_Wolf_Skin01_Buff
         new(-1687924191)  // AB_Shapeshift_Wolf_PMK_Skin02
     ];
+
     const float DIRECTION_DURATION = 6f; // for making familiars for player two face correct direction until battle starts
 
     const string SANGUIS = "Sanguis";
@@ -225,25 +226,6 @@ internal static class Core
             }
             */
         }
-
-        /*
-        if (ConfigService.ExtraRecipes) // -1581189572
-        {
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(-1581189572), out Entity monsterShardPrefab))
-            {
-                monsterShardPrefab.With((ref ItemData itemData) =>
-                {
-                    itemData.ItemCategory |= ItemCategory.Soulshard;
-                    itemData.ItemCategory &= ~ItemCategory.Magic;
-                });
-
-                ItemData itemData = monsterShardPrefab.Read<ItemData>();
-                
-                var itemHashMap = SystemService.GameDataSystem.ItemHashLookupMap;
-                itemHashMap[new(-1581189572)] = itemData;
-            }
-        }
-        */
     }
     static void MiscLogging()
     {

@@ -34,17 +34,37 @@ internal static class MiscCommands
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
-        TogglePlayerBool(steamId, "Reminders");
-        LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(steamId, "Reminders") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(steamId, REMINDERS_KEY);
+        LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "sct", adminOnly: false, usage: ".sct", description: "Toggles scrolling text.")]
-    public static void ToggleScrollingText(ChatCommandContext ctx)
+    [Command(name: "sct", adminOnly: false, usage: ".sct [Type]", description: "Toggles various scrolling text elements.")]
+    public static void ToggleScrollingText(ChatCommandContext ctx, string sctType = "")
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
-        TogglePlayerBool(steamId, "ScrollingText");
-        LocalizationService.HandleReply(ctx, $"ScrollingText {(GetPlayerBool(steamId, "ScrollingText") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        if (string.IsNullOrWhiteSpace(sctType))
+        {
+            LocalizationService.HandleReply(ctx, "SCT Options: PlayerXP, FamiliarXP, ProfessionXP, ProfessionYield (case-insensitive)");
+            return;
+        }
+
+        if (!Misc.ScrollingTextNameMap.TryGetValue(sctType, out var scrollingTextMessage))
+        {
+            LocalizationService.HandleReply(ctx, "SCT Options: PlayerXP, FamiliarXP, ProfessionXP, ProfessionYield (case-insensitive)");
+            return;
+        }
+
+        if (!Misc.ScrollingTextBoolKeyMap.TryGetValue(scrollingTextMessage, out var boolKey))
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find bool key from scrolling text type...");
+            return;
+        }
+
+        TogglePlayerBool(steamId, boolKey);
+        bool currentState = GetPlayerBool(steamId, boolKey);
+
+        LocalizationService.HandleReply(ctx, $"{scrollingTextMessage} scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -58,9 +78,9 @@ internal static class MiscCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (!GetPlayerBool(steamId, "Kit")) // if true give kit, if not no
+        if (!GetPlayerBool(steamId, STARTER_KIT_KEY)) // if true give kit, if not no
         {
-            SetPlayerBool(steamId, "Kit", true);
+            SetPlayerBool(steamId, STARTER_KIT_KEY, true);
             Entity character = ctx.Event.SenderCharacterEntity;
 
             foreach (var item in StarterKitItemPrefabGUIDs)
@@ -83,7 +103,7 @@ internal static class MiscCommands
         }
         else
         {
-            ctx.Reply("You've already received your starting kit!");
+            ctx.Reply("You've already used your starting kit!");
         }
     }
 

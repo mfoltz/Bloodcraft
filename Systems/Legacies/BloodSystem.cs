@@ -264,11 +264,12 @@ internal static class BloodSystem
                 $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
         }
 
-        if (GetPlayerBool(steamID, "Reminders"))
+        if (GetPlayerBool(steamID, REMINDERS_KEY))
         {
             if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
             {
                 int currentStatCount = stats.Count;
+
                 if (currentStatCount < _legacyStatChoices)
                 {
                     int choicesLeft = _legacyStatChoices - currentStatCount;
@@ -291,7 +292,7 @@ internal static class BloodSystem
             HandleBloodLevelUp(user, bloodType, newLevel, steamID);
         }
         else if (newLevel >= _maxBloodLevel) return;
-        else if (GetPlayerBool(steamID, "BloodLogging"))
+        else if (GetPlayerBool(steamID, BLOOD_LOG_KEY))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");

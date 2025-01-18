@@ -75,7 +75,7 @@ internal static class ScriptSpawnServerPatch
 
                     if (buff.BuffEffectType == BuffEffectType.Debuff && ServerGameManager.IsAllies(player, familiar))
                     {
-                        DestroyUtility.Destroy(EntityManager, entity);
+                        entity.Destroy();
                     }
                 }
 

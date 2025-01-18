@@ -11,6 +11,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Utilities.Progression;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
@@ -55,6 +56,7 @@ internal static class FamiliarSummonSystem
     static readonly PrefabGUID _legionFaction = new(-772044125);
     static readonly PrefabGUID _cursedFaction = new(1522496317);
 
+    // would be nice if could make the HUDs for units colored uniformly like blue vs red for all players viewing but can't of think how to do that atm
     static readonly List<PrefabGUID> _teamFactions =
     [
         _legionFaction,
@@ -106,20 +108,16 @@ internal static class FamiliarSummonSystem
     public static void InstantiateFamiliarImmediate(User user, Entity playerCharacter, int famKey)
     {
         PrefabGUID familiarId = new(famKey);
-        Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);
+        Entity familiar = ServerGameManager.InstantiateEntityImmediate(playerCharacter, familiarId);  
         
-        // if (SpawnTransformSystemOnSpawnPatch.UnitPrefabGuidsToModify.Contains(familiarId)) SpawnTransformSystemOnSpawnPatch.FamiliarsToSkip.Add(familiar);
-
         HandleBindingImmediate(playerCharacter, user, familiar, familiarId, playerCharacter.GetPosition());
     }
-    public static void InstantiateFamiliarDeferred(User user, Entity playerCharacter, int famKey) // good idea in theory but a lot of effort to remake this entirely for ECB instead of EM, will reconsider in future
+    public static void InstantiateFamiliarDeferred(User user, Entity playerCharacter, int famKey) // good idea but a lot of effort to remake this entire flow for ECB instead of EM, will reconsider in the future
     {
-        PrefabGUID familiarId = new(famKey);
-
         EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-        Entity familiar = ServerGameManager.InstantiateEntityDeferred(playerCharacter, familiarId);
 
-        // if (SpawnTransformSystemOnSpawnPatch.UnitPrefabGuidsToModify.Contains(familiarId)) SpawnTransformSystemOnSpawnPatch._familiarsToSkip.Add(familiar); can't add this while deferred, maybe check for owner in patch and see if player to verify shard bearers and such
+        PrefabGUID familiarId = new(famKey);
+        Entity familiar = ServerGameManager.InstantiateEntityDeferred(playerCharacter, familiarId);
 
         HandleBindingDeferred(entityCommandBuffer, playerCharacter, user, familiar, familiarId, playerCharacter.GetPosition());
     }
@@ -153,10 +151,6 @@ internal static class FamiliarSummonSystem
                 familiar.Destroy();
                 LocalizationService.HandleServerReply(EntityManager, user, $"Failed to bind familiar...");
             }
-        }
-        else
-        {
-            Core.Log.LogWarning($"Familiar playback incomplete!");
         }
     }
     static void HandleBindingDeferred(EntityCommandBuffer entityCommandBuffer, Entity playerCharacter, User user, Entity familiar, PrefabGUID familiarId, float3 position) // use commandBuffer instead of entityManager
@@ -330,7 +324,6 @@ internal static class FamiliarSummonSystem
 
         try
         {
-            //int level = familiar.GetUnitLevel();
             int famKey = familiar.GetPrefabGuidHash();
 
             FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
@@ -381,7 +374,7 @@ internal static class FamiliarSummonSystem
 
             if (!_familiarCombat) DisableCombat(familiar);
 
-            if (Misc.PlayerBoolsManager.TryGetPlayerBool(steamId, "FamiliarVisual", out bool value))
+            if (GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
             {
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
                 if (data.FamiliarBuffs.ContainsKey(familiarId))
@@ -494,7 +487,7 @@ internal static class FamiliarSummonSystem
                 Core.Log.LogWarning($"Couldn't find MatchPair to get team indices for familiar battle!");
             }
 
-            if (Misc.PlayerBoolsManager.GetPlayerBool(steamId, "FamiliarVisual"))
+            if (GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
             {
                 FamiliarBuffsData data = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
 
@@ -804,13 +797,16 @@ internal static class FamiliarSummonSystem
     }
     static void ModifyCollision(Entity familiar)
     {
-        DynamicCollision collision = familiar.Read<DynamicCollision>();
-        collision.AgainstPlayers.RadiusOverride = -1f;
-        collision.AgainstPlayers.HardnessThreshold._Value = 0f;
-        collision.AgainstPlayers.PushStrengthMax._Value = 0f;
-        collision.AgainstPlayers.PushStrengthMin._Value = 0f;
-        collision.AgainstPlayers.RadiusVariation = 0f;
-        familiar.Write(collision);
+        if (!familiar.Has<DynamicCollision>()) return;
+
+        familiar.With((ref DynamicCollision dynamicCollision) =>
+        {
+            dynamicCollision.AgainstPlayers.RadiusOverride = 0.1f;
+            dynamicCollision.AgainstPlayers.HardnessThreshold._Value = 0.1f;
+            dynamicCollision.AgainstPlayers.PushStrengthMax._Value = 0.2f;
+            dynamicCollision.AgainstPlayers.PushStrengthMin._Value = 0.1f;
+            dynamicCollision.AgainstPlayers.RadiusVariation = 0.1f;
+        });
     }
     static void ModifyDropTable(Entity familiar)
     {
