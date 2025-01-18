@@ -20,6 +20,8 @@ internal static class FamiliarLevelingSystem
     static SystemService SystemService => Core.SystemService;
     static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
+    static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
+
     static readonly float _unitFamiliarMultiplier = ConfigService.UnitFamiliarMultiplier;
     static readonly float _vBloodFamiliarMultiplier = ConfigService.VBloodFamiliarMultiplier;
     static readonly float _unitSpawnerMultiplier = ConfigService.UnitSpawnerMultiplier;
@@ -48,42 +50,38 @@ internal static class FamiliarLevelingSystem
 
         if (!familiar.IsEligibleForCombat()) return;
 
-        PrefabGUID familiarUnit = familiar.Read<PrefabGUID>();
-        int familiarId = familiarUnit.GuidHash;
-
-        ProcessExperienceGain(source, familiar, target, steamId, familiarId, groupMultiplier);
+        PrefabGUID familiarId = familiar.Read<PrefabGUID>();
+        ProcessExperienceGain(source, familiar, target, steamId, familiarId.GuidHash, groupMultiplier);
     }
-    static void ProcessExperienceGain(Entity player, Entity familiar, Entity target, ulong steamId, int familiarId, float groupMultiplier)
+    static void ProcessExperienceGain(Entity player, Entity familiar, Entity target, ulong steamId, int famKey, float groupMultiplier)
     {
-        UnitLevel victimLevel = target.Read<UnitLevel>();
+        int unitLevel = target.GetUnitLevel();
         bool isVBlood = target.IsVBlood();
 
-        float gainedXP = CalculateExperienceGained(victimLevel.Level, isVBlood);
+        float gainedXP = CalculateExperienceGained(unitLevel, isVBlood);
         gainedXP *= groupMultiplier;
 
         if (_unitSpawnerMultiplier < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
         {
             gainedXP *= _unitSpawnerMultiplier;
-            if (gainedXP == 0) return;
+
+            if (gainedXP <= 0) return;
         }
 
-        if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
+        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestiges.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
-            int exoLevel = prestiges.TryGetValue(PrestigeType.Exo, out var exo) ? exo : 0;
-            float expReductionFactor = 1 - _levelingPrestigeReducer * PrestigeData;
+            int prestiges = prestigeData.Key;
+            float expReductionFactor = 1 - _levelingPrestigeReducer * prestiges;
 
-            if (exoLevel == 0)
-            {
-                gainedXP *= expReductionFactor;
-            }
+            gainedXP *= expReductionFactor;
         }
 
-        KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamId, familiarId);
+        KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamId, famKey);
 
         if (familiarXP.Key >= _maxFamiliarLevel) return;
 
         int currentLevel = ConvertXpToLevel(familiarXP.Value);
-        UpdateFamiliarExperience(player, familiar, familiarId, steamId, familiarXP, gainedXP, currentLevel);
+        UpdateFamiliarExperience(player, familiar, famKey, steamId, familiarXP, gainedXP, currentLevel);
     }
     static float CalculateExperienceGained(int victimLevel, bool isVBlood)
     {

@@ -658,8 +658,6 @@ internal static class FamiliarSummonSystem
             }
         }
 
-
-
         familiar.Write(familiarStats);
 
         familiar.With((ref UnitLevel unitLevel) =>

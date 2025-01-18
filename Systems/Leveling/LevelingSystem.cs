@@ -110,7 +110,8 @@ internal static class LevelingSystem
         if (_unitSpawnerMultiplier < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
         {
             gainedXP *= _unitSpawnerMultiplier;
-            if (gainedXP == 0) return;
+
+            if (gainedXP <= 0) return;
         }
 
         if (_warEventMultiplier < 1 && target.Has<SpawnBuffElement>())

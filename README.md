@@ -108,7 +108,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Lists blood stats available.
   - Shortcut: *.bl lst*
 - `.bloodlegacy setlegacy.bl set [Player] [Blood] [Level]` 🔒
-  - Sets player Blood Legacy level.
+  - Sets player blood legacy level.
   - Shortcut: *.bl set [Player] [Blood] [Level]*
 - `.bloodlegacy list`
   - Lists blood legacies available.
@@ -183,9 +183,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar listprestigestats`
   - Display options for familiar prestige stats.
   - Shortcut: *.fam lst*
-- `.familiar prestige [BonusStat]`
+- `.familiar prestige [PrestigeStat]`
   - Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.
-  - Shortcut: *.fam pr [BonusStat]*
+  - Shortcut: *.fam pr [PrestigeStat]*
 - `.familiar reset`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.fam reset*
@@ -198,9 +198,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar shinybuff [SpellSchool]`
   - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
   - Shortcut: *.fam shiny [SpellSchool]*
-- `.familiar resetshiny [Name]` 🔒
-  - Allows player to make another familiar shiny as if freebie were unused.
-  - Shortcut: *.fam rs [Name]*
 - `.familiar toggleoption [Setting]`
   - Toggles various familiar settings.
   - Shortcut: *.fam option [Setting]*
@@ -587,8 +584,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The maximum level a player can reach in professions.
 - **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)
   The multiplier for profession experience gained.
-- **Extra Recipes**: `ExtraRecipes` (bool, default: False)
-  Enable or disable extra recipes.
+- **Extra Recipes**: `ExtraRecipes` (bool, default: True)
+  Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided.
 
 ### Familiars
 - **Familiar System**: `FamiliarSystem` (bool, default: False)
@@ -627,10 +624,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The chance for a VBlood unlock as a familiar.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
-- **Shiny Cost Item Prefab**: `ShinyCostItemPrefab` (int, default: -77477508)
-  Item PrefabGUID cost for changing shiny visual if one is already unlocked (currently demon fragment by default).
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)
-  Quantity of item required for changing shiny buff.
+  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 2500)
   Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging).
 
