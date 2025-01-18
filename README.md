@@ -150,7 +150,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar list`
   - Lists unlocked familiars from current box.
   - Shortcut: *.fam l*
-- `.familiar boxes`
+- `.familiar listboxes`
   - Shows the available familiar boxes.
   - Shortcut: *.fam box*
 - `.familiar choosebox [Name]`
@@ -239,8 +239,8 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Toggles general reminders for various mod features.
   - Shortcut: *.remindme*
 - `.sct`
-  - Toggles scrolling text.
-  - Shortcut: *.sct*
+  - Toggles various scrolling text elements.
+  - Shortcut: *.sct [Type]*
 - `.starterkit`
   - Provides starting kit.
   - Shortcut: *.kitme*
@@ -374,9 +374,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.weapon list`
   - Lists weapon expertises available.
   - Shortcut: *.wep l*
-- `.weapon setspells [Name] [Slot] [PrefabGUID] [Radius]` 🔒
+- `.weapon setspells [Name] [Slot] [PrefabGuid] [Radius]` 🔒
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
-  - Shortcut: *.wep spell [Name] [Slot] [PrefabGUID] [Radius]*
+  - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
 - `.weapon restorelevels`
   - Fixes weapon levels if they are not correct. Don't use this unless you need to.
   - Shortcut: *.wep restore*
