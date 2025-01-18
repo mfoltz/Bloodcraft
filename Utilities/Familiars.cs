@@ -737,7 +737,7 @@ internal static class Familiars
         Entity familiar = FindPlayerFamiliar(playerCharacter);
 
         ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
-        LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
+        LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!");
     }
     static List<int> UnequipFamiliar(Entity familiar)
     {

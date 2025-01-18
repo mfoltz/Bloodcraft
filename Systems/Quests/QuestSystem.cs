@@ -148,26 +148,26 @@ internal static class QuestSystem
 
                 if (!isVBlood)
                 {
-                    if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80) // account for higher player level values than default
+                    if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80)
                     {
                         prefabs.Add(prefab);
                     }
-                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // within 10 level difference check otherwise
+                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
                     {
                         prefabs.Add(prefab);
                     }
                 }
                 else if (isVBlood)
                 {
-                    if (unitLevel.Level._Value > playerLevel) // skip vbloods higher than player
+                    if (unitLevel.Level._Value > playerLevel)
                     {
                         continue;
                     }
-                    else if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80) // account for higher player level values than default
+                    else if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80)
                     {
                         prefabs.Add(prefab);
                     }
-                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10) // within 10 level difference check otherwise
+                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
                     {
                         prefabs.Add(prefab);
                     }

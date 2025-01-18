@@ -190,15 +190,15 @@ internal static class FamiliarUnlockSystem
             FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
-        else if (chance >= 1f && choice != -1) // guaranteed with choice from shinyChoice
+        else if (chance >= 1f && choice != -1) // guaranteed add or change for respective vampiric dust cost
         {
-            if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
+            if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // add shiny
             {
                 List<int> famBuffs = [];
                 famBuffs.Add(choice);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
-            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // override visual if present in favor of choice
+            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // change shiny
             {
                 buffsData.FamiliarBuffs[famKey][0] = choice;
             }

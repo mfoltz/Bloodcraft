@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Systems.Expertise;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
@@ -18,12 +19,12 @@ using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 namespace Bloodcraft.Services;
 internal class EclipseService
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _shiftSpell = ConfigService.ShiftSlot;
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _legacies = ConfigService.BloodSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
@@ -48,7 +49,7 @@ internal class EclipseService
     public static readonly ConcurrentDictionary<ulong, string> RegisteredUsersAndClientVersions = [];
     public EclipseService()
     {
-        Core.StartCoroutine(ClientUpdateLoop());
+        ClientUpdateLoop().Start();
     }
     public enum NetworkEventSubType
     {
@@ -62,12 +63,7 @@ internal class EclipseService
 
         if (match.Success)
         {
-            // Extract the event type
             int eventType = int.Parse(match.Groups[1].Value);
-
-            // Extract the payload (modVersion and stringId)
-            //string payload = newMatch.Groups["payload"].Value;
-
             string modVersion = match.Groups[2].Value;
 
             if (!ulong.TryParse(match.Groups[3].Value, out ulong steamId))
@@ -89,14 +85,10 @@ internal class EclipseService
             return;
         }
 
-        // If new regex didn't match, try the old regex format
         Match oldMatch = _oldRegex.Match(message);
 
         if (oldMatch.Success)
         {
-            // Extract the event type
-            //int eventType = int.Parse(oldMatch.Groups[1].Value);
-
             int eventType = int.Parse(oldMatch.Groups[1].Value);
 
             if (!ulong.TryParse(oldMatch.Groups[2].Value, out ulong steamId))
@@ -118,13 +110,11 @@ internal class EclipseService
             return;
         }
 
-        // If neither regex matches, log an error
         Core.Log.LogWarning("Failed to parse client registration message from Eclipse!");
     }
     static void RegisterUser(ulong steamId, string version)
     {
         if (RegisteredUsersAndClientVersions.ContainsKey(steamId)) return;
-        //else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
         else if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists())
         {
             if (HandleRegistration(playerInfo, steamId, version))
@@ -132,9 +122,9 @@ internal class EclipseService
                 Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (RegisterUser)");
             }
         }
-        else // delayed registration, wait for cache to update/player to make character
+        else
         {
-            Core.StartCoroutine(DelayedRegistration(steamId, version));
+            DelayedRegistration(steamId, version).Start();
         }
     }
     static bool HandleRegistration(PlayerInfo playerInfo, ulong steamId, string version)
@@ -146,7 +136,6 @@ internal class EclipseService
                 switch (version)
                 {
                     case "1.1.2":
-                        // Handle version 1.1.2
                         IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
 
                         versionHandlerV1_1_2?.SendClientConfig(playerInfo.User);
@@ -154,11 +143,17 @@ internal class EclipseService
 
                         return true;
                     case "1.2.2":
-                        // Handle version 1.2.2
                         IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
 
                         versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+
+                        return true;
+                    case "1.3.2":
+                        IVersionHandler<ProgressDataV1_3_2> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3_2>(version);
+
+                        versionHandlerV1_3_2?.SendClientConfig(playerInfo.User);
+                        versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
                         return true;
                     default:
@@ -423,6 +418,22 @@ internal class EclipseService
 
         return (type, progress, goal, target, isVBlood);
     }
+    public static int GetShiftSpellData(Entity playerCharacter)
+    {
+        int index = -1;
+
+        if (_classes && _shiftSpell)
+        {
+            Entity abilityGroup = ServerGameManager.GetAbilityGroup(playerCharacter, 3);
+
+            if (abilityGroup.Exists())
+            {
+                index = abilityGroup.TryGetComponent(out PrefabGUID prefabGuid) && AbilityRunScriptsSystemPatch.ClassSpells.TryGetValue(prefabGuid, out int spellIndex) ? spellIndex : index;
+            }
+        }
+
+        return index;
+    }
     static IEnumerator DelayedRegistration(ulong steamId, string version)
     {
         int tries = 0;
@@ -480,6 +491,11 @@ internal class EclipseService
                                 // Handle version 1.2.1
                                 IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
                                 versionHandlerV1_2_2.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+
+                                break;
+                            case "1.3.2":
+                                IVersionHandler<ProgressDataV1_3_2> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3_2>(version);
+                                versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
 
                                 break;
                             default:

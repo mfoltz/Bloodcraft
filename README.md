@@ -180,6 +180,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar setlevel [Player] [Level]` 🔒
   - Set current familiar level.
   - Shortcut: *.fam sl [Player] [Level]*
+- `.familiar listprestigestats`
+  - Display options for familiar prestige stats.
+  - Shortcut: *.fam lst*
 - `.familiar prestige [BonusStat]`
   - Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.
   - Shortcut: *.fam pr [BonusStat]*
@@ -196,7 +199,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
   - Shortcut: *.fam shiny [SpellSchool]*
 - `.familiar resetshiny [Name]` 🔒
-  - Allows player to choose another free visual, however, does not erase any visuals they have chosen previously. Mainly for testing.
+  - Allows player to make another familiar shiny as if freebie were unused.
   - Shortcut: *.fam rs [Name]*
 - `.familiar toggleoption [Setting]`
   - Toggles various familiar settings.
@@ -465,7 +468,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884")
   The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.
 - **Prestige Levels To Unlock Class Spells**: `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3,4,5")
-  The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 if you want them unlocked from the start.
+  The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 each if you want them unlocked from the start.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)
   The maximum number of prestiges a player can reach in leveling.
 - **Leveling Prestige Reducer**: `LevelingPrestigeReducer` (float, default: 0.05)

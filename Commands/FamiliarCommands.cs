@@ -33,11 +33,17 @@ internal static class FamiliarCommands
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
+    const int BOX_MAX = 25;
+    const float SHINY_CHANGE = 0.25f;
+
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
     static readonly PrefabGUID _tauntEmote = new(-158502505);
+    static readonly PrefabGUID _pvpCombatBuff = new(697095869);
+    static readonly PrefabGUID _pveCombatBuff = new(581443919);
 
     static readonly PrefabGUID _itemSchematic = new(2085163661);
+    static readonly PrefabGUID _vampiricDust = new(805157024);
 
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> _familiarSettings = new()
     {
@@ -116,7 +122,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't locate box.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar box...");
         }
     }
 
@@ -153,7 +159,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You don't have any unlocked familiars yet.");
+            LocalizationService.HandleReply(ctx, "You don't have any unlocked familiars yet...");
         }
     }
 
@@ -176,7 +182,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find box.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar box...");
         }
     }
 
@@ -211,7 +217,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find box to rename or already an existing box with desired name.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar box to rename or there's an existing box with that name already!");
         }
     }
 
@@ -247,9 +253,13 @@ internal static class FamiliarCommands
                 LocalizationService.HandleReply(ctx, $"<color=green>{PrefabGUID.GetLocalizedName()}</color> moved to <color=white>{name}</color>.");
             }
         }
+        else if (data.UnlockedFamiliars.ContainsKey(name))
+        {
+            LocalizationService.HandleReply(ctx, "Familiar box is full!");
+        }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find box or box is full.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar box...");
         }
     }
 
@@ -273,9 +283,13 @@ internal static class FamiliarCommands
 
             LocalizationService.HandleReply(ctx, $"Deleted familiar box: <color=white>{name}</color>");
         }
+        else if (data.UnlockedFamiliars.ContainsKey(name))
+        {
+            LocalizationService.HandleReply(ctx, "Familiar box is not empty!");
+        }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find box or box is not empty.");
+            LocalizationService.HandleReply(ctx, "Couldn't find familiar box...");
         }
     }
 
@@ -291,17 +305,17 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
-        if (data.UnlockedFamiliars.Count > 0 && data.UnlockedFamiliars.Count < 25)
+        if (data.UnlockedFamiliars.Count > 0 && data.UnlockedFamiliars.Count < BOX_MAX)
         {
             // Add the box
             data.UnlockedFamiliars.Add(name, []);
             SaveUnlockedFamiliars(steamId, data);
 
-            LocalizationService.HandleReply(ctx, $"Added familiar box: <color=white>{name}</color>");
+            LocalizationService.HandleReply(ctx, $"Added familiar box - <color=white>{name}</color>");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Must have at least one unit unlocked and total number of boxes cannot exceed <color=yellow>25</color>.");
+            LocalizationService.HandleReply(ctx, $"Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_MAX}</color>.");
         }
     }
 
@@ -324,20 +338,22 @@ internal static class FamiliarCommands
         User foundUser = playerInfo.User;
         ulong steamId = foundUser.PlatformId;
 
-        if (steamId.TryGetFamiliarBox(out string activeSet) && !string.IsNullOrEmpty(activeSet)) // add to active box if one exists
+        if (steamId.TryGetFamiliarBox(out string activeSet) && !string.IsNullOrEmpty(activeSet))
         {
             Familiars.ParseAddedFamiliar(ctx, steamId, unit, activeSet);
         }
-        else // add to last existing box if one exists or add a new box
+        else
         {
             FamiliarUnlocksData unlocksData = LoadUnlockedFamiliars(steamId);
             string lastListName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
 
-            if (string.IsNullOrEmpty(lastListName)) // add a box if none created yet
+            if (string.IsNullOrEmpty(lastListName))
             {
                 lastListName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
                 unlocksData.UnlockedFamiliars[lastListName] = [];
+
                 SaveUnlockedFamiliars(steamId, unlocksData);
+
                 Familiars.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
             }
             else
@@ -359,24 +375,24 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
-        if (steamId.TryGetFamiliarBox(out var activeSet) && data.UnlockedFamiliars.TryGetValue(activeSet, out var familiarSet))
+        if (steamId.TryGetFamiliarBox(out var activeBox) && data.UnlockedFamiliars.TryGetValue(activeBox, out var familiarSet))
         {
-            // Remove the old set
             if (choice < 1 || choice > familiarSet.Count)
             {
-                LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeSet}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid choice, please use <color=white>1</color> to <color=white>{familiarSet.Count}</color> (Current List:<color=yellow>{activeBox}</color>)");
                 return;
             }
+
             PrefabGUID familiarId = new(familiarSet[choice - 1]);
 
-            // remove from set
             familiarSet.RemoveAt(choice - 1);
             SaveUnlockedFamiliars(steamId, data);
-            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeSet}</color>.");
+
+            LocalizationService.HandleReply(ctx, $"<color=green>{familiarId.GetLocalizedName()}</color> removed from <color=white>{activeBox}</color>.");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find set to remove from.");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar box to remove from...");
         }
     }
 
@@ -389,21 +405,21 @@ internal static class FamiliarCommands
             return;
         }
 
-        ulong platformId = ctx.User.PlatformId;
-        Entity character = ctx.Event.SenderCharacterEntity;
+        ulong steamId = ctx.User.PlatformId;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
 
-        if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(playerCharacter, _dominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't call a familiar when using dominating presence!");
             return;
         }
-        else if (ServerGameManager.HasBuff(character, _takeFlightBuff.ToIdentifier()))
+        else if (ServerGameManager.HasBuff(playerCharacter, _takeFlightBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't call a familiar when using batform!");
             return;
         }
 
-        EmoteSystemPatch.CallDismiss(ctx.Event.User, character, platformId);
+        EmoteSystemPatch.CallDismiss(ctx.Event.User, playerCharacter, steamId);
     }
 
     [Command(name: "togglecombat", shortHand: "c", usage: ".fam c", description: "Enables or disables combat for familiar.", adminOnly: false)]
@@ -415,21 +431,26 @@ internal static class FamiliarCommands
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
 
-        if (ServerGameManager.HasBuff(character, _dominateBuff.ToIdentifier()))
+        if (ServerGameManager.HasBuff(playerCharacter, _dominateBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't toggle combat for a familiar when using dominating presence!");
             return;
         }
-        else if (ServerGameManager.HasBuff(character, _takeFlightBuff.ToIdentifier()))
+        else if (ServerGameManager.HasBuff(playerCharacter, _takeFlightBuff.ToIdentifier()))
         {
             LocalizationService.HandleReply(ctx, "You can't toggle combat for a familiar when using batform!");
             return;
         }
+        else if (playerCharacter.HasBuff(_pveCombatBuff) || playerCharacter.HasBuff(_pvpCombatBuff))
+        {
+            LocalizationService.HandleReply(ctx, "You can't toggle combat for a familiar in PvP/PvE combat!");
+            return;
+        }
 
-        ulong platformId = ctx.User.PlatformId;
-        EmoteSystemPatch.CombatMode(ctx.Event.User, character, platformId);
+        ulong steamId = ctx.User.PlatformId;
+        EmoteSystemPatch.CombatMode(ctx.Event.User, playerCharacter, steamId);
     }
 
     [Command(name: "emotes", shortHand: "e", usage: ".fam e", description: "Toggle emote actions.", adminOnly: false)]
@@ -441,10 +462,10 @@ internal static class FamiliarCommands
             return;
         }
 
-        ulong platformId = ctx.User.PlatformId;
-        Misc.PlayerBoolsManager.TogglePlayerBool(platformId, "Emotes");
+        ulong steamId = ctx.User.PlatformId;
+        Misc.PlayerBoolsManager.TogglePlayerBool(steamId, "Emotes");
 
-        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(Misc.PlayerBoolsManager.GetPlayerBool(platformId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
+        LocalizationService.HandleReply(ctx, $"Emotes for familiars are {(Misc.PlayerBoolsManager.GetPlayerBool(steamId, "Emotes") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}");
     }
 
     [Command(name: "emoteactions", shortHand: "actions", usage: ".fam actions", description: "Shows available emote actions.", adminOnly: false)]
@@ -590,8 +611,30 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr [BonusStat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
-    public static void PrestigeFamiliarCommand(ChatCommandContext ctx, string bonusStat = "")
+    [Command(name: "listprestigestats", shortHand: "lst", adminOnly: false, usage: ".fam lst", description: "Display options for familiar prestige stats.")]
+    public static void ListPrestigeStatsCommand(ChatCommandContext ctx)
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+
+        var prestigeStats = FamiliarPrestigeStats
+            .Select((stat, index) =>
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>")
+            .ToList();
+
+        for (int i = 0; i < prestigeStats.Count; i += 4)
+        {
+            var batch = prestigeStats.Skip(i).Take(4);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, replyMessage);
+        }
+    }
+
+    [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr [PrestigeStat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
+    public static void PrestigeFamiliarCommand(ChatCommandContext ctx, string statType = "")
     {
         if (!ConfigService.FamiliarSystem)
         {
@@ -634,8 +677,23 @@ internal static class FamiliarCommands
 
                 if (stats.Count < FamiliarStatValues.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
-                    if (!Familiars.TryParseFamiliarStat(bonusStat, out var stat))
+                    if (int.TryParse(statType, out int value))
                     {
+                        int length = Enum.GetValues(typeof(FamiliarStatType)).Length;
+
+                        if (value < 1 || value > length)
+                        {
+                            LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
+                            return;
+                        }
+
+                        --value;
+                        statType = value.ToString();
+                    }
+
+                    if (!Familiars.TryParseFamiliarStat(statType, out var stat))
+                    {
+                        /*
                         var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarStatType))
                         .Cast<FamiliarStatType>()
                         .Select(stat =>
@@ -650,6 +708,31 @@ internal static class FamiliarCommands
                         LocalizationService.HandleReply(ctx, "Invalid stat, please choose from the following:");
                         LocalizationService.HandleReply(ctx, $"Available familiar stats (1/2): {familiarStatsLine1}");
                         LocalizationService.HandleReply(ctx, $"Available familiar stats (2/2): {familiarStatsLine2}");
+
+                        var prestigeStats = Enum.GetValues(typeof(FamiliarStatType))
+                            .Cast<FamiliarStatType>()
+                            .Select((stat, index) =>
+                                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>")
+                            .ToList();
+
+                        if (prestigeStats.Count == 0)
+                        {
+                            LocalizationService.HandleReply(ctx, "No familiar prestige stats available at this time.");
+                        }
+                        else
+                        {
+                            for (int i = 0; i < prestigeStats.Count; i += 4)
+                            {
+                                var batch = prestigeStats.Skip(i).Take(4);
+                                string replyMessage = string.Join(", ", batch);
+                                LocalizationService.HandleReply(ctx, replyMessage);
+                            }
+                        }
+
+                        return;
+                        */
+
+                        LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
                         return;
                     }
                     else if (!stats.Contains(stat))
@@ -658,13 +741,13 @@ internal static class FamiliarCommands
                     }
                     else
                     {
-                        LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{stat}</color> as a bonus stat, pick another.");
+                        LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{stat}</color> (<color=yellow>{FamiliarPrestigeStats.IndexOf(stat) + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.");
                         return;
                     }
                 }
-                else if (stats.Count >= FamiliarStatValues.Count && !string.IsNullOrEmpty(bonusStat))
+                else if (stats.Count >= FamiliarStatValues.Count && !string.IsNullOrEmpty(statType))
                 {
-                    LocalizationService.HandleReply(ctx, "Familiar already has max bonus stats, try again without entering a stat.");
+                    LocalizationService.HandleReply(ctx, "Familiar has all possible added stat types from prestiging, use '<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>'.");
                     return;
                 }
 
@@ -679,18 +762,18 @@ internal static class FamiliarCommands
                 Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
                 ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
-                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is back to level <color=white>{newXP.Key}</color>.");
+                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>.");
             }
             else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventory) && ServerGameManager.GetInventoryItemCount(inventory, _itemSchematic) >= ConfigService.PrestigeCostItemQuantity)
             {
                 if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, ConfigService.PrestigeCostItemQuantity))
                 {
-                    Familiars.HandleFamiliarPrestige(ctx, bonusStat, ConfigService.MaxFamiliarLevel);
+                    Familiars.HandleFamiliarPrestige(ctx, statType, ConfigService.MaxFamiliarLevel);
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Prestiging familiar must be at max level (<color=green>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color>x<color=white>{ConfigService.PrestigeCostItemQuantity}</color>.");
+                LocalizationService.HandleReply(ctx, $"Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{ConfigService.PrestigeCostItemQuantity}</color>.");
             }
         }
         else
@@ -726,7 +809,6 @@ internal static class FamiliarCommands
 
         Familiars.ClearFamiliarActives(steamId);
         if (Familiars.AutoCallMap.TryRemove(character, out Entity _))
-            // if (SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.ContainsKey(steamId)) SpawnTransformSystemOnSpawnPatch.PlayerBindingValidation.TryRemove(steamId, out _);
 
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
@@ -929,98 +1011,78 @@ internal static class FamiliarCommands
             return;
         }
 
-        ulong steamId = ctx.User.PlatformId;
 
-        PrefabGUID visual = ShinyBuffColorHexMap.Keys
+        PrefabGUID spellSchoolPrefabGuid = ShinyBuffColorHexMap.Keys
                 .SingleOrDefault(prefab => prefab.GetPrefabName().ToLower().Contains(spellSchool.ToLower()));
 
-        if (!ShinyBuffColorHexMap.ContainsKey(visual))
+        if (!ShinyBuffColorHexMap.ContainsKey(spellSchoolPrefabGuid))
         {
             LocalizationService.HandleReply(ctx, "Couldn't find matching shinyBuff from entered spell school. (options: blood, storm, unholy, chaos, frost, illusion)");
             return;
         }
 
         Entity character = ctx.Event.SenderCharacterEntity;
+        ulong steamId = ctx.User.PlatformId;
+
         Entity familiar = Familiars.FindPlayerFamiliar(character);
         int famKey = familiar.Read<PrefabGUID>().GuidHash;
 
-        if (familiar != Entity.Null)
+        int quantity = ConfigService.ShinyCostItemQuantity;
+
+        if (familiar.Exists())
         {
             FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
-            if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // if no shiny unlocked already use the freebie
+
+            if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
+                /*
                 bool madeShinyChoice = Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ShinyChoice");
 
-                if (!madeShinyChoice && HandleShiny(famKey, steamId, 1f, visual.GuidHash)) // if false use free visual then set to true
+                if (!madeShinyChoice && HandleShiny(famKey, steamId, 1f, schoolPrefabGuid.GuidHash)) // if false use free visual then set to true
                 {
                     Misc.PlayerBoolsManager.SetPlayerBool(steamId, "ShinyChoice", true);
-                    LocalizationService.HandleReply(ctx, "Visual assigned succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
+                    LocalizationService.HandleReply(ctx, "Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).");
                 }
                 else if (madeShinyChoice)
                 {
-                    LocalizationService.HandleReply(ctx, "You've already used your free familiar visual.");
+                    LocalizationService.HandleReply(ctx, $"Shiny freebie already used! (<color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>x<color=white>{quantity}</color> required to change existing shiny familiar buffs)");
                 }
-            }
-            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // if shiny already unlocked use prefab cost and quantity, override shiny visual with choice
-            {
-                if (!ConfigService.ShinyCostItemPrefab.Equals(0))
+                */
+
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, _vampiricDust) >= quantity)
                 {
-                    PrefabGUID item = new(ConfigService.ShinyCostItemPrefab);
-                    int quantity = ConfigService.ShinyCostItemQuantity;
-                    if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, item) >= quantity)
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, _vampiricDust, quantity) && HandleShiny(famKey, steamId, 1f, spellSchoolPrefabGuid.GuidHash))
                     {
-                        if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity) && HandleShiny(famKey, steamId, 1f, visual.GuidHash))
-                        {
-                            LocalizationService.HandleReply(ctx, "Visual assigned for cost succesfully! Rebind familiar for it to take effect. Use '.fam option shiny' to enable/disable familiars showing their visual.");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        LocalizationService.HandleReply(ctx, $"You do not have the required item quantity to change your familiar visual (<color=#ffd9eb>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
+                        LocalizationService.HandleReply(ctx, "Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).");
+                        return;
                     }
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, "No item set for visual cost.");
+                    LocalizationService.HandleReply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{quantity}</color>)");
+                }
+            }
+            else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+            {
+                quantity = (int)(quantity * SHINY_CHANGE);
+
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, _vampiricDust) >= quantity)
+                {
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, _vampiricDust, quantity) && HandleShiny(famKey, steamId, 1f, spellSchoolPrefabGuid.GuidHash))
+                    {
+                        LocalizationService.HandleReply(ctx, "Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).");
+                        return;
+                    }
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{quantity}</color>)");
                 }
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Make sure familiar is active and present before choosing your visual for it.");
-        }
-    }
-
-    [Command(name: "resetshiny", shortHand: "rs", adminOnly: true, usage: ".fam rs [Name]", description: "Allows player to choose another free visual, however, does not erase any visuals they have chosen previously. Mainly for testing.")] // only for testing so commenting out for now
-    public static void ResetFamiliarVisualChoice(ChatCommandContext ctx, string name)
-    {
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        PlayerInfo playerInfo = GetPlayerInfo(name);
-        if (!playerInfo.UserEntity.Exists())
-        {
-            ctx.Reply($"Couldn't find player.");
-            return;
-        }
-
-        ulong steamId = playerInfo.User.PlatformId;
-        string playerName = playerInfo.User.CharacterName.Value;
-
-        bool madeShinyChoice = Misc.PlayerBoolsManager.GetPlayerBool(steamId, "ShinyChoice");
-
-        if (madeShinyChoice)
-        {
-            Misc.PlayerBoolsManager.SetPlayerBool(steamId, "ShinyChoice", false);
-            LocalizationService.HandleReply(ctx, $"Visual choice reset for <color=white>{playerName}</color>. (does not remove previously chosen visuals from player data)");
-        }
-        else if (!madeShinyChoice)
-        {
-            LocalizationService.HandleReply(ctx, "Player is already able to choose a free familiar visual.");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar...");
         }
     }
 
@@ -1097,7 +1159,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find active familiar to add to battle group!");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar...");
         }
     }
 

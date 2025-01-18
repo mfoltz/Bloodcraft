@@ -9,10 +9,8 @@ using Unity.Entities;
 namespace Bloodcraft.Services;
 public class SystemService(World world)
 {
-    // Server world reference
     readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
 
-    // System backing fields with lazy initialization
     DebugEventsSystem _debugEventsSystem;
     public DebugEventsSystem DebugEventsSystem => _debugEventsSystem ??= GetSystem<DebugEventsSystem>();
 

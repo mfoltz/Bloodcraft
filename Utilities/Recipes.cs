@@ -16,6 +16,7 @@ internal static class Recipes // would like to tie this into professions eventua
     static readonly PrefabGUID _advancedFurnace = new(-222851985); // silver ingot
     static readonly PrefabGUID _fabricator = new(-465055967); // copper wires, iron body
 
+    // recipe prefabGuids, not item prefabGuids
     static readonly PrefabGUID _ironBody = new(-1270503528);
     static readonly PrefabGUID _vampiricDust = new(311920560);
     static readonly PrefabGUID _copperWires = new(-2031309726);

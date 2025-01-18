@@ -21,11 +21,8 @@ internal static class Misc
     static readonly float _shareDistance = ConfigService.ExpShareDistance;
 
     static readonly PrefabGUID _draculaVBlood = new(-327335305);
-
-    [Serializable]
     public class ConcurrentList<T> : IEnumerable<T>
     {
-        [NonSerialized]
         readonly object _lock = new();
 
         readonly List<T> _list = [];

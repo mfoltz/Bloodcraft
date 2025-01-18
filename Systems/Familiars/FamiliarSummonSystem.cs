@@ -11,7 +11,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Utilities.Progression;
-using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
@@ -91,6 +90,16 @@ internal static class FamiliarSummonSystem
         {FamiliarStatType.SpellResistance, 0.2f},
         {FamiliarStatType.ShieldAbsorb, 1f}
     };
+
+    public static readonly List<FamiliarStatType> FamiliarPrestigeStats =
+    [
+        FamiliarStatType.PhysicalCritChance,
+        FamiliarStatType.SpellCritChance,
+        FamiliarStatType.HealingReceived,
+        FamiliarStatType.PhysicalResistance,
+        FamiliarStatType.SpellResistance,
+        FamiliarStatType.ShieldAbsorb
+    ];
 
     public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerBattleGroups = [];
     public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];

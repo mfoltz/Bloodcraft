@@ -23,7 +23,7 @@ internal static class ReactToInventoryChangedSystemPatch
     static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
 
     const float BASE_PROFESSION_XP = 50f;
-    const float FAKE_DELAY = 0.75f;
+    const float SCT_DELAY = 0.75f;
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -59,7 +59,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                         Dictionary<ulong, User> clanMembers = [];
                         Entity clanEntity = user.ClanEntity.GetEntityOnServer();
-
+                        
                         PrefabGUID itemPrefabGUID = inventoryChangedEvent.Item;
                         Entity itemPrefab = inventoryChangedEvent.ItemEntity;
                         string itemName = itemPrefabGUID.GetPrefabName();
@@ -99,7 +99,7 @@ internal static class ReactToInventoryChangedSystemPatch
                                 if (_professions)
                                 {
                                     float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
-                                    float delay = FAKE_DELAY;
+                                    float delay = SCT_DELAY;
 
                                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGUID, "");
                                     if (handler != null)

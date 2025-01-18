@@ -81,7 +81,7 @@ internal class QuestService
         });
 
         Configuration.QuestRewardItems();
-        Core.StartCoroutine(QuestUpdateLoop());
+        QuestUpdateLoop().Start();
     }
     static IEnumerator QuestUpdateLoop()
     {

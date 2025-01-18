@@ -238,7 +238,7 @@ internal static class BloodCommands
         }
     }
 
-    [Command(name: "setlegacy", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player Blood Legacy level.")]
+    [Command(name: "setlegacy", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player blood legacy level.")]
     public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
     {
         if (!ConfigService.BloodSystem)

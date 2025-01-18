@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
@@ -22,6 +23,7 @@ internal static class FamiliarLevelingSystem
     static readonly float _unitFamiliarMultiplier = ConfigService.UnitFamiliarMultiplier;
     static readonly float _vBloodFamiliarMultiplier = ConfigService.VBloodFamiliarMultiplier;
     static readonly float _unitSpawnerMultiplier = ConfigService.UnitSpawnerMultiplier;
+    static readonly float _levelingPrestigeReducer = ConfigService.LevelingPrestigeReducer;
     static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
 
     static readonly PrefabGUID _levelUpBuff = new(-1133938228);
@@ -63,6 +65,17 @@ internal static class FamiliarLevelingSystem
         {
             gainedXP *= _unitSpawnerMultiplier;
             if (gainedXP == 0) return;
+        }
+
+        if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var PrestigeData) && PrestigeData > 0)
+        {
+            int exoLevel = prestiges.TryGetValue(PrestigeType.Exo, out var exo) ? exo : 0;
+            float expReductionFactor = 1 - _levelingPrestigeReducer * PrestigeData;
+
+            if (exoLevel == 0)
+            {
+                gainedXP *= expReductionFactor;
+            }
         }
 
         KeyValuePair<int, float> familiarXP = GetFamiliarExperience(steamId, familiarId);
@@ -131,13 +144,13 @@ internal static class FamiliarLevelingSystem
         {
             float3 targetPosition = familiar.Read<Translation>().Value;
 
-            Core.StartCoroutine(DelayedFamiliarSCT(player, userEntity, targetPosition, _gold, gainedXP));
+            FamiliarExperienceSCTDelayRoutine(player, userEntity, targetPosition, _gold, gainedXP).Start();
         }
     }
-    static IEnumerator DelayedFamiliarSCT(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
+    static IEnumerator FamiliarExperienceSCTDelayRoutine(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP)
     {
         yield return _delay;
-
+        
         ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _assetGuid, position, color, character, gainedXP, _familiarSCT, userEntity);
     }
     static float GetXp(ulong steamID, int familiarId)

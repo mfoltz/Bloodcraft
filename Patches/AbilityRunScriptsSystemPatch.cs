@@ -16,6 +16,7 @@ internal static class AbilityRunScriptsSystemPatch
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _exoForm = ConfigService.ExoPrestiging;
 
     public static readonly Dictionary<PrefabGUID, int> ClassSpells = [];
 
@@ -25,14 +26,28 @@ internal static class AbilityRunScriptsSystemPatch
 
     static readonly Dictionary<int, float> _exoFormCooldownMap = new() // not currently setting cooldowns, will consider later
     {
-        { 1, 8f },
-        { 2, 8f },
-        { 3, 8f },
-        { 4, 8f },
+        // { 1, 8f },
+        // { 2, 8f },
+        // { 3, 8f },
+        // { 4, 8f },
         { 5, 10f },
-        { 6, 10f },
-        { 7, 50f }
+        { 6, 20f },
+        { 7, 40f }
     };
+
+    /*
+    public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
+    {
+        { 0, new(-1473399128) }, // primary attack fast shockwaveslash
+        { 1, new(841757706) }, // first weapon skill downswing detonate
+        { 2, new(-1940289109) }, // space dash skill teleport behind target
+        { 3, new(1270706044) }, // shift dash skill veil of bats
+        { 4, new(532210332) }, // second weapon skill sword throw
+        { 5, new(-1161896955) }, // first spell skill etherial sword
+        { 6, new(-7407393) }, // second spell skill ring of blood
+        { 7, new(797450963) } //  ultimate AB_Vampire_Dracula_BloodBoltSwarm_AbilityGroup
+    };
+    */
 
     [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -46,27 +61,24 @@ internal static class AbilityRunScriptsSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out AbilityPostCastFinishedEvent postCast) || !postCast.AbilityGroup.TryGetComponent(out PrefabGUID prefabGUID)) continue;
+                if (!entity.TryGetComponent(out AbilityPostCastFinishedEvent postCast) || !postCast.AbilityGroup.TryGetComponent(out PrefabGUID prefabGuid)) continue;
                 else if (postCast.AbilityGroup.Has<VBloodAbilityData>()) continue;
                 else if (postCast.Character.IsPlayer())
                 {
-                    //Core.Log.LogInfo(postCast.AbilityGroup.GetPrefabGUID().LookupName());
+                    // Core.Log.LogInfo(postCast.AbilityGroup.GetPrefabGUID().LookupName());
 
-                    if (ClassSpells.ContainsKey(prefabGUID))
+                    if (ClassSpells.ContainsKey(prefabGuid))
                     {
-                        float cooldown = ClassSpells[prefabGUID].Equals(0) ? 8f : (ClassSpells[prefabGUID] + 1) * 8f;
-                        ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGUID, cooldown);
+                        float cooldown = ClassSpells[prefabGuid].Equals(0) ? 8f : (ClassSpells[prefabGuid] + 1) * 8f;
+                        ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGuid, cooldown);
                     }
-                    
-                    /*
-                    else if (ConfigService.ExoPrestiging && BuffUtilities.ExoFormAbilityMap.ContainsValue(abilityGroupPrefab))
+                    else if (_exoForm && Buffs.ExoFormAbilityMap.ContainsValue(prefabGuid))
                     {
-                        if (postCast.AbilityGroup.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && ExoFormCooldownMap.TryGetValue(abilityGroupSlot.SlotId, out float cooldown))
+                        if (postCast.AbilityGroup.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && _exoFormCooldownMap.TryGetValue(abilityGroupSlot.SlotId, out float cooldown))
                         {
-                            ServerGameManager.SetAbilityGroupCooldown(postCast.Character, abilityGroupPrefab, cooldown);
+                            ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGuid, cooldown);
                         }
                     }
-                    */
                 }
             }
         }

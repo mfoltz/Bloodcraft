@@ -60,8 +60,9 @@ internal static class ClassCommands
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
-        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+
+        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
         {
             LocalizationService.HandleReply(ctx, "Can't change or activate class spells when inventory is full, need at least one space to safely handle jewels when switching.");
             return;
@@ -82,45 +83,41 @@ internal static class ClassCommands
                     LocalizationService.HandleReply(ctx, "No spells found for class.");
                     return;
                 }
-
-                if (choice < 0 || choice > spells.Count)
+                else if (choice < 0 || choice > spells.Count)
                 {
-                    LocalizationService.HandleReply(ctx, $"Invalid spell choice. (Use 0-{spells.Count})");
+                    LocalizationService.HandleReply(ctx, $"Invalid spell input, use '<color=white>.class lsp</color>' to see options.");
                     return;
                 }
 
                 if (choice == 0) // set default for all classes
                 {
-                    if (prestigeLevel < Configuration.ParseConfigIntegerString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
+                    if (ConfigService.DefaultClassSpell == 0)
+                    {
+                        LocalizationService.HandleReply(ctx, "No default class spell configured.");
+                        return;
+                    }
+                    else if (prestigeLevel < Configuration.ParseConfigIntegerString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                     {
                         LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                         return;
                     }
-
-                    if (steamId.TryGetPlayerSpells(out var data))
+                    else if (steamId.TryGetPlayerSpells(out var data))
                     {
-                        if (ConfigService.DefaultClassSpell == 0)
-                        {
-                            LocalizationService.HandleReply(ctx, "No default spell found for classes.");
-                            return;
-                        }
-
                         PrefabGUID spellPrefabGUID = new(ConfigService.DefaultClassSpell);
                         data.ClassSpell = ConfigService.DefaultClassSpell;
-                        steamId.SetPlayerSpells(data);
 
-                        UpdateShift(ctx, character, spellPrefabGUID);
+                        steamId.SetPlayerSpells(data);
+                        UpdateShift(ctx, playerCharacter, spellPrefabGUID);
+
                         return;
                     }
                 }
-
-                if (prestigeLevel < Configuration.ParseConfigIntegerString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
+                else if (prestigeLevel < Configuration.ParseConfigIntegerString(ConfigService.PrestigeLevelsToUnlockClassSpells)[choice])
                 {
                     LocalizationService.HandleReply(ctx, "You do not have the required prestige level for that spell.");
                     return;
                 }
-
-                if (steamId.TryGetPlayerSpells(out var spellsData))
+                else if (steamId.TryGetPlayerSpells(out var spellsData))
                 {
                     spellsData.ClassSpell = spells[choice - 1];
                     steamId.SetPlayerSpells(spellsData);
@@ -137,8 +134,7 @@ internal static class ClassCommands
                     LocalizationService.HandleReply(ctx, "No spells found for class.");
                     return;
                 }
-
-                if (choice < 0 || choice > spells.Count)
+                else if (choice < 0 || choice > spells.Count)
                 {
                     LocalizationService.HandleReply(ctx, $"Invalid spell choice. (Use 0-{spells.Count})");
                     return;
@@ -156,9 +152,10 @@ internal static class ClassCommands
 
                         PrefabGUID spellPrefabGUID = new(ConfigService.DefaultClassSpell);
                         data.ClassSpell = ConfigService.DefaultClassSpell;
-                        steamId.SetPlayerSpells(data);
 
+                        steamId.SetPlayerSpells(data);
                         UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+
                         return;
                     }
                 }

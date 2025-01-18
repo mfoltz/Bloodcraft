@@ -15,6 +15,8 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
 
+    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
+
     static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
@@ -36,8 +38,6 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
     public static readonly List<PrefabGUID> UnitPrefabGuidsToModify = [_manticore, _dracula, _monster, _solarus, _divineAngel, _fallenAngel];
 
-    static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem.Settings.GameModeType;
-
     public static readonly HashSet<Entity> FamiliarsToSkip = [];
 
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
@@ -53,129 +53,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
-                /*
-                else if (FamiliarsToSkip.Contains(entity))
-                {
-                    FamiliarsToSkip.Remove(entity);
-
-                    continue;
-                }
-                */
                 else if (entity.IsPlayerOwned()) continue;
-
-                /* deprecated but leaving for notes until completely refactored elsewhere
-                int level = unitLevel.Level._Value;
-                int famKey = prefabGUID.GuidHash;
-                bool summon = false;
-
-                if (_familiars && level == 1 && !_prefabGuidsToIgnore.Contains(prefabGUID))
-                {
-                    ulong matchedKey = PlayerBindingValidation
-                        .Where(kv => kv.Value == prefabGUID)
-                        .Select(kv => kv.Key) // Cast to nullable to handle "not found" case
-                        .FirstOrDefault();
-
-                    if (matchedKey == 0)
-                    {
-                        ulong steamId = PlayerFamiliarBattleGroups
-                            .FirstOrDefault(kvp => kvp.Value.Contains(prefabGUID)).Key;
-
-                        if (PlayerSummoningForBattle.TryGetValue(steamId, out bool isSummoning) && isSummoning)
-                        {
-                            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
-                            {
-                                int factionIndex = 0;
-
-                                if (!PlayerBattleFamiliars.ContainsKey(steamId)) PlayerBattleFamiliars[steamId] = [];
-
-                                PlayerFamiliarBattleGroups[steamId].Remove(prefabGUID);
-                                PlayerBattleFamiliars[steamId].Add(entity);
-
-                                if (SetDirectionAndFaction.Contains(steamId))
-                                {
-                                    if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
-                                    {
-                                        factionIndex = 1;
-                                        ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
-
-                                        int pairedIndex = PlayerBattleFamiliars[pairedId].Count - 1;
-                                        Familiars.FaceYourEnemy(entity, PlayerBattleFamiliars[pairedId][pairedIndex]);
-                                    }
-                                    else
-                                    {
-                                        Core.Log.LogWarning($"SetDirectionAndFaction contained {steamId} but couldn't find MatchPair for battle!");
-                                    }
-
-                                    SetDirectionAndFaction.Remove(steamId);
-                                }
-
-                                User user = playerInfo.User;
-                                summon = true;
-
-                                if (FamiliarSummonSystem.HandleFamiliarForBattle(playerInfo.CharEntity, entity, factionIndex))
-                                {
-                                    if (PlayerFamiliarBattleGroups[steamId].Count == 0)
-                                    {
-                                        PlayerSummoningForBattle[steamId] = false;
-
-                                        if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
-                                        {
-                                            ulong pairedId = matchPair.Item1 == steamId ? matchPair.Item2 : matchPair.Item1;
-
-                                            if (PlayerSummoningForBattle.TryGetValue(pairedId, out bool summoning) && !summoning)
-                                            {
-                                                Core.StartCoroutine(BattleService.BattleCountdownRoutine((steamId, pairedId)));
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    DestroyUtility.Destroy(EntityManager, entity);
-                                    LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
-
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-                    else if (matchedKey.TryGetPlayerInfo(out PlayerInfo playerInfo))
-                    {
-                        User user = playerInfo.User;
-                        ulong steamId = user.PlatformId;
-                        summon = true;
-
-                        PlayerBindingValidation.TryRemove(steamId, out _);
-
-                        if (FamiliarSummonSystem.HandleFamiliar(playerInfo.CharEntity, entity))
-                        {
-                            // SetPlayerBool(steamId, "Binding", false);
-
-                            string colorCode = "<color=#FF69B4>";
-                            FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
-
-                            if (buffsData.FamiliarBuffs.ContainsKey(famKey))
-                            {
-                                if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
-                                {
-                                    colorCode = $"<color={hexColor}>";
-                                }
-                            }
-
-                            string message = buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"<color=green>{prefabGUID.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{prefabGUID.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
-                            LocalizationService.HandleServerReply(EntityManager, user, message);
-                        }
-                        else
-                        {
-                            DestroyUtility.Destroy(EntityManager, entity);
-                            LocalizationService.HandleServerReply(EntityManager, user, $"Failed to summon familiar...");
-
-                            continue;
-                        }
-                    }
-
-                    if (summon) continue;
-                */
 
                 if (UnitPrefabGuidsToModify.Contains(prefabGuid))
                 {

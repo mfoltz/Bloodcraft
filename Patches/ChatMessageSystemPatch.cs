@@ -97,4 +97,13 @@ internal static class ChatMessageSystemPatch
 
         return Convert.ToBase64String(hashBytes);
     }
+    public static string GenerateMACV1_3_2(string message)
+    {
+        using var hmac = new HMACSHA256(Core.NEW_SHARED_KEY);
+        byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
+        byte[] hashBytes = hmac.ComputeHash(messageBytes);
+
+        return Convert.ToBase64String(hashBytes);
+    }
 }

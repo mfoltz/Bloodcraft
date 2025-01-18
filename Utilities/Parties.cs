@@ -106,6 +106,38 @@ internal static class PartyUtilities
             LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> not found in party to remove...");
         }
     }
+    public static void ListPartyMembers(ChatCommandContext ctx,
+    ConcurrentDictionary<ulong, ConcurrentList<string>> playerParties)
+    {
+        ulong ownerId = ctx.Event.User.PlatformId;
+        string playerName = ctx.Event.User.CharacterName.Value;
+
+        ConcurrentList<string> members;
+
+        if (playerParties.ContainsKey(ownerId))
+        {
+            // If they're the owner, use that specific party's members
+            members = playerParties[ownerId];
+        }
+        else
+        {
+            // Potentially gather members from multiple parties
+            IEnumerable<string> aggregated = playerParties
+                .Where(groupEntry => groupEntry.Value.Contains(playerName))
+                .SelectMany(groupEntry => groupEntry.Value);
+
+            // Build a brand-new ConcurrentList<string> from those results
+            members = [..aggregated];
+        }
+
+        string replyMessage = members.Count() > 0
+            ? string.Join(", ", members.Select(member => $"<color=green>{member}</color>"))
+            : "No members in party.";
+
+        LocalizationService.HandleReply(ctx, replyMessage);
+    }
+
+    /*
     public static void ListPartyMembers(ChatCommandContext ctx, ConcurrentDictionary<ulong, ConcurrentList<string>> playerParties)
     {
         ulong ownerId = ctx.Event.User.PlatformId;
@@ -116,5 +148,6 @@ internal static class PartyUtilities
 
         LocalizationService.HandleReply(ctx, replyMessage);
     }
+    */
 }
 
