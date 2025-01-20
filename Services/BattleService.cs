@@ -57,6 +57,8 @@ internal class BattleService
     const float SCT_HEIGHT = 15f;
 
     public const int TEAM_SIZE = 3;
+    const int TEAM_ONE = 0;
+    const int TEAM_TWO = 1;
 
     static DateTime _matchPendingStart;
     static bool _serviceActive = false;
@@ -315,17 +317,15 @@ internal class BattleService
         }
 
         float countdown = MATCH_START_COUNTDOWN;
-        List<PlayerInfo> onlineNearbyPlayers = OnlineCache.Values
+        HashSet<PlayerInfo> onlineNearbyPlayers = OnlineCache.Values
             .Where(player => Vector3.Distance(_battlePosition, player.CharEntity.GetPosition()) < SPECTATE_DISTANCE)
-            .ToList();
+            .ToHashSet();
 
         ulong steamIdOne = matchPair.playerOne;
         ulong steamIdTwo = matchPair.playerTwo;
 
         while (countdown > 0f)
-        {
-            // EntityCommandBuffer entityCommandBuffer = EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(); // okay to use same commandBuffer if operations happen in the same frame? haven't had luck with that before so leaving as is unless causes lag or something
-            
+        {            
             foreach (PlayerInfo player in onlineNearbyPlayers)
             {
                 ScrollingCombatTextMessage.Create(
@@ -357,8 +357,8 @@ internal class BattleService
     {
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            SummonFamiliarForBattle(playerOne, playerUserOne, playerOneFamiliars[i], PlayerOneFamiliarPositions[i], 0);
-            SummonFamiliarForBattle(playerTwo, playerUserTwo, playerTwoFamiliars[i], PlayerTwoFamiliarPositions[i], 1);
+            InstantiateFamiliar(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i]);
+            InstantiateFamiliar(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i]);
 
             yield return null;
         }

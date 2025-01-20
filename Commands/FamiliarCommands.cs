@@ -504,7 +504,7 @@ internal static class FamiliarCommands
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
-            var xpData = GetFamiliarExperience(steamId, data.FamKey);
+            var xpData = Systems.Familiars.FamiliarLevelingSystem.GetFamiliarExperience(steamId, data.FamKey);
             int progress = (int)(xpData.Value - ConvertLevelToXp(xpData.Key));
             int percent = GetLevelProgress(steamId, data.FamKey);
 
@@ -529,6 +529,7 @@ internal static class FamiliarCommands
                 // read stats and such here
                 Health health = familiar.Read<Health>();
                 UnitStats unitStats = familiar.Read<UnitStats>();
+                AbilityBar_Shared abilityBar_Shared = familiar.Read<AbilityBar_Shared>();
 
                 float physicalPower = unitStats.PhysicalPower._Value;
                 float spellPower = unitStats.SpellPower._Value;
@@ -543,8 +544,8 @@ internal static class FamiliarCommands
                 string physRes = (physResist * 100).ToString("F0") + "%";
                 float spellResist = unitStats.SpellResistance._Value;
                 string spellRes = (spellResist * 100).ToString("F0") + "%";
-                float ccReduction = unitStats.CCReduction._Value;
-                string ccRed = (ccReduction * 100).ToString("F0") + "%";
+                float primaryAttackSpeed = abilityBar_Shared.PrimaryAttackSpeed._Value;
+                string primaryAttack = (primaryAttackSpeed * 100).ToString("F0") + "%";
                 float shieldAbsorb = unitStats.ShieldAbsorbModifier._Value;
                 string shieldAbs = (shieldAbsorb * 100).ToString("F0") + "%";
 
@@ -554,8 +555,7 @@ internal static class FamiliarCommands
                 );
 
                 LocalizationService.HandleReply(ctx, $"<color=#00FFFF>MaxHealth</color>: <color=white>{(int)maxHealth}</color>, <color=#00FFFF>PhysicalPower</color>: <color=white>{(int)physicalPower}</color>, <color=#00FFFF>SpellPower</color>: <color=white>{(int)spellPower}</color>, <color=#00FFFF>PhysCritChance</color>: <color=white>{physCrit}</color>, <color=#00FFFF>SpellCritChance</color>: <color=white>{spellCrit}</color>");
-                LocalizationService.HandleReply(ctx, $"<color=#00FFFF>HealingReceived</color>: <color=white>{healing}</color>, <color=#00FFFF>PhysResist</color>: <color=white>{physRes}</color>, <color=#00FFFF>SpellResist</color>: <color=white>{spellRes}</color>, <color=#00FFFF>CCReduction</color>: <color=white>{ccRed}</color>, <color=#00FFFF>ShieldAbsorb</color>: <color=white>{shieldAbs}</color>");
-                LocalizationService.HandleReply(ctx, $"Valid options for prestige stat choice (each may only be chosen once): {familiarPrestigeStats}");
+                LocalizationService.HandleReply(ctx, $"<color=#00FFFF>HealingReceived</color>: <color=white>{healing}</color>, <color=#00FFFF>PhysResist</color>: <color=white>{physRes}</color>, <color=#00FFFF>SpellResist</color>: <color=white>{spellRes}</color>, <color=#00FFFF>CCReduction</color>: <color=white>{primaryAttack}</color>, <color=#00FFFF>ShieldAbsorb</color>: <color=white>{shieldAbs}</color>");
             }
         }
         else
@@ -596,11 +596,11 @@ internal static class FamiliarCommands
             int famKey = data.FamKey;
 
             KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
-            FamiliarExperienceData xpData = LoadFamiliarExperienceData(steamId);
+            FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
             xpData.FamiliarLevels[data.FamKey] = newXP;
-            SaveFamiliarExperienceData(steamId, xpData);
+            SaveFamiliarExperience(steamId, xpData);
 
-            if (ModifyFamiliarImmediate(user, steamId, famKey, player, familiar, level))
+            if (ModifyFamiliar(user, steamId, famKey, player, familiar, level))
             {
                 LocalizationService.HandleReply(ctx, $"Active familiar for <color=green>{user.CharacterName.Value}</color> has been set to level <color=white>{level}</color>.");
             }
@@ -655,7 +655,7 @@ internal static class FamiliarCommands
 
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
-            FamiliarExperienceData xpData = LoadFamiliarExperienceData(ctx.Event.User.PlatformId);
+            FamiliarExperienceData xpData = LoadFamiliarExperience(ctx.Event.User.PlatformId);
 
             if (xpData.FamiliarLevels[data.FamKey].Key >= ConfigService.MaxFamiliarLevel)
             {
@@ -753,7 +753,7 @@ internal static class FamiliarCommands
 
                 KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1)); // reset level to 1
                 xpData.FamiliarLevels[data.FamKey] = newXP;
-                SaveFamiliarExperienceData(steamId, xpData);
+                SaveFamiliarExperience(steamId, xpData);
 
                 int prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key + 1;
                 prestigeData.FamiliarPrestiges[data.FamKey] = new(prestigeLevel, stats);

@@ -310,7 +310,7 @@ internal static class Familiars
     public static void ResetAggro(Entity familiar)
     {
         if (!familiar.Has<AggroConsumer>()) return;
-        else if (familiar.TryApplyBuff(_disableAggroBuff))
+        else
         {
             familiar.TryApplyBuffWithLifeTime(_disableAggroBuff, AGGRO_BUFF_DURATION);
         }
@@ -358,7 +358,7 @@ internal static class Familiars
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
 
-                InstantiateFamiliarImmediate(user, playerCharacter, famKeys[boxIndex - 1]);
+                InstantiateFamiliar(user, playerCharacter, famKeys[boxIndex - 1]);
             }
             else if (boxIndex == -1)
             {
@@ -377,7 +377,7 @@ internal static class Familiars
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
 
-                InstantiateFamiliarImmediate(user, playerCharacter, famKeys[boxIndex - 1]);
+                InstantiateFamiliar(user, playerCharacter, famKeys[boxIndex - 1]);
             }
         }
         else
@@ -509,7 +509,7 @@ internal static class Familiars
             string famName = famPrefab.GetLocalizedName();
             string colorCode = "<color=#FF69B4>"; // Default color for the asterisk
 
-            int level = GetFamiliarExperience(steamId, famKey).Key;
+            int level = Systems.Familiars.FamiliarLevelingSystem.GetFamiliarExperience(steamId, famKey).Key;
             int prestiges = 0;
 
             // Check if the familiar has buffs and update the color based on RandomVisuals
@@ -569,7 +569,7 @@ internal static class Familiars
         FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
         FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
 
-        int level = GetFamiliarExperience(steamId, actives.famKey).Key;
+        int level = Systems.Familiars.FamiliarLevelingSystem.GetFamiliarExperience(steamId, actives.famKey).Key;
         if (level == 0) level = 1;
         int prestiges = 0;
 
@@ -625,7 +625,7 @@ internal static class Familiars
             return;
         }
 
-        FamiliarExperienceData xpData = LoadFamiliarExperienceData(steamId);
+        FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
         FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
 
         if (!prestigeData.FamiliarPrestiges.ContainsKey(data.FamKey))
@@ -685,7 +685,7 @@ internal static class Familiars
 
         KeyValuePair<int, float> newXP = new(++levelsToAdd, Progression.ConvertLevelToXp(++levelsToAdd)); // reset level to 1
         xpData.FamiliarLevels[data.FamKey] = newXP;
-        SaveFamiliarExperienceData(steamId, xpData);
+        SaveFamiliarExperience(steamId, xpData);
 
         int prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key + 1;
         prestigeData.FamiliarPrestiges[data.FamKey] = new(prestigeLevel, stats);

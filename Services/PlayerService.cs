@@ -20,11 +20,10 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     ];
 
     static EntityQuery _userQuery;
+    static bool _migrated = false;
 
     public static readonly ConcurrentDictionary<ulong, PlayerInfo> PlayerCache = [];
     public static readonly ConcurrentDictionary<ulong, PlayerInfo> OnlineCache = [];
-
-    static bool _migrated = false;
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -64,9 +63,9 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                 .ToDictionary(group => group.Key, group => group.First().Value)
                 .ForEach(kvp =>
                 {
-                    PlayerCache[kvp.Key] = kvp.Value; // Add to PlayerCache
+                    PlayerCache[kvp.Key] = kvp.Value;
 
-                    if (kvp.Value.User.IsConnected) // Add to OnlinePlayerCache if connected
+                    if (kvp.Value.User.IsConnected)
                     {
                         OnlineCache[kvp.Key] = kvp.Value;
                     }

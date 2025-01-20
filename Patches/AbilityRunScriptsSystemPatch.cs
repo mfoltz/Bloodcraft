@@ -18,6 +18,8 @@ internal static class AbilityRunScriptsSystemPatch
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
 
+    const float COOLDOWN_FACTOR = 8f; // actual cooldown will be divided by 2 after index * COOLDOWN_FACTOR, idk why
+
     public static readonly Dictionary<PrefabGUID, int> ClassSpells = [];
 
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
@@ -30,9 +32,9 @@ internal static class AbilityRunScriptsSystemPatch
         // { 2, 8f },
         // { 3, 8f },
         // { 4, 8f },
-        { 5, 10f },
-        { 6, 20f },
-        { 7, 40f }
+        // { 5, 10f },
+        // { 6, 20f },
+        // { 7, 40f }
     };
 
     /*
@@ -69,9 +71,10 @@ internal static class AbilityRunScriptsSystemPatch
 
                     if (ClassSpells.ContainsKey(prefabGuid))
                     {
-                        float cooldown = ClassSpells[prefabGuid].Equals(0) ? 8f : (ClassSpells[prefabGuid] + 1) * 8f;
+                        float cooldown = ClassSpells[prefabGuid].Equals(0) ? COOLDOWN_FACTOR : (ClassSpells[prefabGuid] + 1) * COOLDOWN_FACTOR;
                         ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGuid, cooldown);
                     }
+                    /*
                     else if (_exoForm && Buffs.ExoFormAbilityMap.ContainsValue(prefabGuid))
                     {
                         if (postCast.AbilityGroup.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && _exoFormCooldownMap.TryGetValue(abilityGroupSlot.SlotId, out float cooldown))
@@ -79,6 +82,7 @@ internal static class AbilityRunScriptsSystemPatch
                             ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGuid, cooldown);
                         }
                     }
+                    */
                 }
             }
         }

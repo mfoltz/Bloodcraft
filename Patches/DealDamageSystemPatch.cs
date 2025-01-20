@@ -94,7 +94,7 @@ internal static class DealDamageSystemPatch
 
                         if (shinyDebuff.HasValue())
                         {
-                            dealDamageEvent.Target.TryApplyBuffWithOwner(playerCharacter, shinyDebuff);
+                            dealDamageEvent.Target.TryApplyBuffWithOwner(entityOwner.Owner, shinyDebuff);
                         }
                     }
                 }

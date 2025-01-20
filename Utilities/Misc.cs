@@ -346,7 +346,7 @@ internal static class Misc
         {
             "integer" => ((int)value).ToString(),
             "decimal" => value.ToString("F2"),
-            "percentage" => (value * 100).ToString("F0") + "%",
+            "percentage" => (value * 100).ToString("F1") + "%",
             _ => value.ToString(),
         };
         return formattedBonus;

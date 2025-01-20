@@ -30,9 +30,11 @@ internal static class ScriptSpawnServerPatch
 
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
     static readonly PrefabGUID _inCombatBuff = new(581443919);
+    static readonly PrefabGUID _castleManCombatBuff = new(731266864);
     static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _fallenAngelDeathBuff = new(-1934189109);
     static readonly PrefabGUID _fallenAngelDespawnBuff = new(1476380301);
+    static readonly PrefabGUID _clearAggroBuff = new(1793107442);
 
     static readonly PrefabGUID _playerFaction = new(1106458752);
 
@@ -55,10 +57,9 @@ internal static class ScriptSpawnServerPatch
                 {
                     Buffs.HandleExoFormBuff(entity, player);
                 }
-
-                if (_familiars && entity.GetBuffTarget().IsFollowingPlayer())
+                else if (_familiars && prefabGuid.Equals(_castleManCombatBuff) && entity.GetBuffTarget().IsFollowingPlayer())
                 {
-                    if (entity.Has<Script_Castleman_AdaptLevel_DataShared>()) // handle simon familiars
+                    if (entity.Has<Script_Castleman_AdaptLevel_DataShared>())
                     {
                         if (entity.Has<ScriptSpawn>()) entity.Remove<ScriptSpawn>();
                         if (entity.Has<ScriptUpdate>()) entity.Remove<ScriptUpdate>();
@@ -68,12 +69,32 @@ internal static class ScriptSpawnServerPatch
                         entity.Remove<Script_Castleman_AdaptLevel_DataShared>(); // need to remove script spawn, update etc first or throws
                     }
                 }
+                /*
+                else if (_familiars && prefabGuid.Equals(_clearAggroBuff) && entity.GetBuffTarget().IsFollowingPlayer())
+                {
+                    if (entity.Has<Script_Buff_MoveToBusStop_DataServer>())
+                    {
+                        if (entity.Has<ScriptSpawn>()) entity.Remove<ScriptSpawn>();
+                        if (entity.Has<ScriptUpdate>()) entity.Remove<ScriptUpdate>();
+                        if (entity.Has<ScriptDestroy>()) entity.Remove<ScriptDestroy>();
+                        if (entity.Has<Script_Buff_ModifyFaction_DataServer>()) entity.Remove<Script_Buff_ModifyFaction_DataServer>();
+
+                        entity.Remove<Script_Buff_MoveToBusStop_DataServer>();
+
+                        entity.AddWith((ref LifeTime lifeTime) =>
+                        {
+                            lifeTime.Duration = 0.5f;
+                            lifeTime.EndAction = LifeTimeEndAction.Destroy;
+                        });
+                    }
+                }
+                */
                 else if (_familiars && entity.GetBuffTarget().IsPlayer() && entityOwner.Owner.TryGetFollowedPlayer(out player))
                 {
                     Entity familiar = entityOwner.Owner;
                     Buff buff = entity.Read<Buff>();
 
-                    if (buff.BuffEffectType == BuffEffectType.Debuff && ServerGameManager.IsAllies(player, familiar))
+                    if (buff.BuffEffectType.Equals(BuffEffectType.Debuff) && ServerGameManager.IsAllies(player, familiar))
                     {
                         entity.Destroy();
                     }

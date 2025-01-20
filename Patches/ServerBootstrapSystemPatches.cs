@@ -402,7 +402,7 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetFamiliarBattleGroup([0, 0, 0]);
             }
 
-            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, FamiliarExperienceManager.LoadFamiliarExperienceData(steamId));
+            FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
             FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
 
             Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
@@ -447,7 +447,7 @@ internal static class ServerBootstrapSystemPatches
     {
         yield return _delay;
 
-        FamiliarSummonSystem.HandleFamiliarImmediate(user, playerCharacter, familiar);
+        FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar);
     }
     static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
     {

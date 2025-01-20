@@ -14,6 +14,8 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class ShapeshiftSystemPatch
 {
+    static EntityManager EntityManager => Core.EntityManager;
+
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
     static readonly PrefabGUID _psychicFormGroup = new(-1908054166);
@@ -34,29 +36,27 @@ internal static class ShapeshiftSystemPatch
                 if (!entity.TryGetComponent(out FromCharacter fromCharacter)) continue;
                 EnterShapeshiftEvent enterShapeshiftEvent = entity.Read<EnterShapeshiftEvent>();
 
+                Entity playerCharacter = fromCharacter.Character;
+                User user = playerCharacter.GetUser();
+                ulong steamId = user.PlatformId;
+
                 if (enterShapeshiftEvent.Shapeshift.Equals(_psychicFormGroup))
                 {
-                    Entity character = fromCharacter.Character;
-                    User user = fromCharacter.User.Read<User>();
-                    ulong steamId = user.PlatformId;
+                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-                    Entity familiar = Familiars.FindPlayerFamiliar(character);
                     if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
                     {
-                        Familiars.DismissFamiliar(character, familiar, user, steamId, data);
+                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId, data);
                     }
                 }
                 else if (enterShapeshiftEvent.Shapeshift.Equals(_batFormGroup))
                 {
-                    Entity character = fromCharacter.Character;
-                    User user = fromCharacter.User.Read<User>();
-                    ulong steamId = user.PlatformId;
+                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
-                    Entity familiar = Familiars.FindPlayerFamiliar(character);
                     if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
                     {
                         Familiars.AutoCallMap[fromCharacter.Character] = familiar;
-                        Familiars.DismissFamiliar(character, familiar, user, steamId, data);
+                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId, data);
                     }
                 }
             }

@@ -68,7 +68,7 @@ internal static class BloodCommands
                 foreach (var stat in stats)
                 {
                     float bonus = CalculateScaledBloodBonus(bloodHandler, steamID, bloodType, stat);
-                    string bonusString = (bonus * 100).ToString("F0") + "%";
+                    string bonusString = (bonus * 100).ToString("F1") + "%";
                     bonusBloodStats.Add(new KeyValuePair<BloodStats.BloodStatType, string>(stat, bonusString));
                 }
 
@@ -191,7 +191,7 @@ internal static class BloodCommands
                     ResetStats(steamId, bloodType);
                     // UpdateBloodStats(character, bloodType);
 
-                    LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>.");
+                    LocalizationService.HandleReply(ctx, $"Your blood stats have been reset for <color=red>{bloodType}</color>!");
                 }
             }
             else

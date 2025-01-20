@@ -426,7 +426,7 @@ internal class EclipseService
         {
             Entity abilityGroup = ServerGameManager.GetAbilityGroup(playerCharacter, 3);
 
-            if (abilityGroup.Exists())
+            if (abilityGroup.Exists() && !abilityGroup.Has<VBloodAbilityData>())
             {
                 index = abilityGroup.TryGetComponent(out PrefabGUID prefabGuid) && AbilityRunScriptsSystemPatch.ClassSpells.TryGetValue(prefabGuid, out int spellIndex) ? spellIndex : index;
             }

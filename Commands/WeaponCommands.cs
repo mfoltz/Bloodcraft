@@ -136,7 +136,7 @@ internal static class WeaponCommands
         if (ChooseStat(steamId, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
-            // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+            // WeaponManager.RefreshWeaponStats(ctx.Event.SenderCharacterEntity);
         }
         else
         {
@@ -175,7 +175,7 @@ internal static class WeaponCommands
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"You do not have the required item to reset your weapon stats (<color=#ffd9eb>{item.GetLocalizedName()}</color> x<color=white>{quantity}</color>)");
+                LocalizationService.HandleReply(ctx, $"You don't have the required item to reset your weapon stats! (<color=#ffd9eb>{item.GetLocalizedName()}</color>x<color=white>{quantity}</color>)");
                 return;
             }
 
@@ -184,7 +184,7 @@ internal static class WeaponCommands
         ResetStats(steamId, weaponType);
         // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
 
-        LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
+        LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
     }
 
     [Command(name: "setexpertise", shortHand: "set", adminOnly: true, usage: ".wep set [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]

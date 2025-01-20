@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Patches;
 
@@ -112,9 +113,9 @@ internal static class BuffSystemSpawnPatches
                     if (entity.Has<SpellTarget>())
                     {
                         Entity spellTarget = entity.GetSpellTarget();
+                        Core.Log.LogInfo($"{spellTarget.Exists()} | {spellTarget.GetPrefabGuid().GetPrefabName()}");
 
-                        if (spellTarget.Exists() && !spellTarget.IsPlayer()) continue;
-                        else
+                        if (!spellTarget.IsVBloodOrGateBoss())
                         {
                             ExoForm.HandleExoImmortal(entity, playerCharacter);
                         }
@@ -234,7 +235,14 @@ internal static class BuffSystemSpawnPatches
 
                         if (familiar.Exists())
                         {
-                            familiar.TryApplyBuff(prefabGuid);
+                            if (entity.Has<HealOnGameplayEvent>() && familiar.IsDisabled())
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                familiar.TryApplyBuff(prefabGuid);
+                            }
                         }
                     }
 
@@ -305,26 +313,6 @@ internal static class BuffSystemSpawnPatches
                             }
                         }
                         /*
-                        else if (prefabGuid.Equals(_hasToadSwallowedBuff))
-                        {
-                            if (entity.Has<LifeTime>())
-                            {
-                                entity.With((ref LifeTime lifeTime) =>
-                                {
-                                    lifeTime.Duration = 0f;
-                                    lifeTime.EndAction = LifeTimeEndAction.None;
-                                });
-                            }
-
-                            Core.Log.LogInfo($"HasToadSwallowedBuff - {familiar.GetPrefabGuid().GetPrefabName()} | {buffTarget.GetPrefabGuid().GetPrefabName()}");
-
-                            if (entity.Has<ForceCastOnGameplayEvent>()) entity.Remove<ForceCastOnGameplayEvent>();
-                            if (entity.Has<CreateGameplayEventsOnDestroy>()) entity.Remove<CreateGameplayEventsOnDestroy>();
-                            if (entity.Has<GameplayEventIdMapping>()) entity.Remove<GameplayEventIdMapping>();
-                            if (entity.Has<GameplayEventListeners>()) entity.Remove<GameplayEventListeners>();
-
-                            // entity.Destroy();
-                        }
                         else if (prefabGuid.Equals(_hasGolemSwallowedBuff))
                         {
                             if (entity.Has<LifeTime>())
@@ -339,6 +327,40 @@ internal static class BuffSystemSpawnPatches
                         */
                     }
                 }
+                else if (prefabGuid.Equals(_targetSwallowedBuff) && buffTarget.GetPrefabGuid().Equals(new PrefabGUID(51737727)))
+                {
+                    if (entity.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
+                    {
+                        ApplyBuffOnGameplayEvent buffOnGameplayEvent = buffer[0];
+                        buffOnGameplayEvent.Buff0 = PrefabGUID.Empty;
+
+                        buffer[0] = buffOnGameplayEvent;
+
+                        Core.Log.LogInfo($"{_targetSwallowedBuff.GetPrefabName()}");
+                    }
+                }
+                /*
+                else if (prefabGuid.Equals(_hasToadSwallowedBuff))
+                {
+                    if (entity.Has<LifeTime>())
+                    {
+                        entity.With((ref LifeTime lifeTime) =>
+                        {
+                            lifeTime.Duration = 0f;
+                            lifeTime.EndAction = LifeTimeEndAction.None;
+                        });
+                    }
+
+                    Core.Log.LogInfo($"HasToadSwallowedBuff - {familiar.GetPrefabGuid().GetPrefabName()} | {buffTarget.GetPrefabGuid().GetPrefabName()}");
+
+                    if (entity.Has<ForceCastOnGameplayEvent>()) entity.Remove<ForceCastOnGameplayEvent>();
+                    if (entity.Has<CreateGameplayEventsOnDestroy>()) entity.Remove<CreateGameplayEventsOnDestroy>();
+                    if (entity.Has<GameplayEventIdMapping>()) entity.Remove<GameplayEventIdMapping>();
+                    if (entity.Has<GameplayEventListeners>()) entity.Remove<GameplayEventListeners>();
+
+                    // entity.Destroy();
+                }
+                */
                 else if (_gameMode.Equals(GameModeType.PvE) && buffTarget.IsPlayer())
                 {
                     Entity owner = entityOwner.Owner;

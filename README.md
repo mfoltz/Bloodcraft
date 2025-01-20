@@ -293,6 +293,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.prestige self [PrestigeType]`
   - Handles player prestiging.
   - Shortcut: *.prestige me [PrestigeType]*
+- `.prestige get [PrestigeType]`
+  - Shows information about player's prestige status.
+  - Shortcut: *.prestige get [PrestigeType]*
 - `.prestige set [Name] [PrestigeType] [Level]` 🔒
   - Sets the specified player to a certain level of prestige in a certain type of prestige.
   - Shortcut: *.prestige set [Name] [PrestigeType] [Level]*
@@ -305,9 +308,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.prestige syncbuffs`
   - Applies prestige buffs appropriately if not present.
   - Shortcut: *.prestige sb*
-- `.prestige get [PrestigeType]`
-  - Shows information about player's prestige status.
-  - Shortcut: *.prestige get [PrestigeType]*
 - `.prestige list`
   - Lists prestiges available.
   - Shortcut: *.prestige l*
@@ -624,7 +624,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The chance for a VBlood unlock as a familiar.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
-- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 1)
+- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 500)
   Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 2500)
   Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging).

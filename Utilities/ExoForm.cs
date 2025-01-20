@@ -19,12 +19,13 @@ internal static class ExoForm
 
     public const float BASE_DURATION = 15f;
     public const float MAX_ADDED_DURATION = 165f;
+    const float DAY_SECONDS = 86400f;
 
     static readonly int _exoPrestiges = ConfigService.ExoPrestiges;
 
     static readonly AssetGuid _assetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
     static readonly PrefabGUID _exoCountdownSCT = new(106212079);
-    static readonly float3 _red = new(1f, 0f, 0f);
+    static readonly float3 _yellow = new(1.0f, 1.0f, 0.0f);
 
     static readonly WaitForSeconds _secondDelay = new(1f);
 
@@ -37,7 +38,7 @@ internal static class ExoForm
 
         if (steamId.TryGetPlayerExoFormData(out var exoFormData) && exoFormData.Value < BASE_DURATION)
         {
-            ReplyNotEnoughCharge(user, steamId);
+            ReplyNotEnoughCharge(user, steamId, exoFormData.Value);
 
             return false;
         }
@@ -48,20 +49,20 @@ internal static class ExoForm
 
         return false;
     }
-    public static void ReplyNotEnoughCharge(User user, ulong steamId)
+    public static void ReplyNotEnoughCharge(User user, ulong steamId, float value)
     {
-        string timeRemaining = GetTimeUntilCharged(steamId);
+        string timeRemaining = GetTimeUntilCharged(steamId, value);
 
         if (!string.IsNullOrEmpty(timeRemaining)) LocalizationService.HandleServerReply(EntityManager, user, $"Not enough energy to maintain form... (<color=yellow>{timeRemaining}</color>)");
     }
-    static string GetTimeUntilCharged(ulong steamId)
+    static string GetTimeUntilCharged(ulong steamId, float value)
     {
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) ? exoPrestiges : 0;
         float totalDuration = CalculateFormDuration(exoLevel);
 
-        float chargeNeeded = BASE_DURATION;
+        float chargeNeeded = BASE_DURATION - value;
         float ratioToTotal = chargeNeeded / totalDuration;
-        float secondsRequired = 86400f * ratioToTotal;
+        float secondsRequired = DAY_SECONDS * ratioToTotal;
 
         TimeSpan timeSpan = TimeSpan.FromSeconds(secondsRequired);
         string timeRemaining;
@@ -90,42 +91,6 @@ internal static class ExoForm
 
         return 0f;
     }
-    public static IEnumerator ExoFormCountdown(Entity buffEntity, Entity playerEntity, Entity userEntity, float countdownDelay)
-    {
-        yield return new WaitForSeconds(countdownDelay);
-
-        float countdown = 5f;
-        bool fullDuration = false;
-
-        // Wait until there are 5 seconds left
-        while (buffEntity.Exists() && countdown > 0f)
-        {
-            float3 targetPosition = playerEntity.Read<Translation>().Value;
-            targetPosition = new float3(targetPosition.x, targetPosition.y + 1.5f, targetPosition.z);
-
-            ScrollingCombatTextMessage.Create(
-                EntityManager,
-                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
-                _assetGuid,
-                targetPosition,
-                _red,
-                playerEntity,
-                countdown,
-                _exoCountdownSCT,
-                userEntity
-            );
-
-            countdown--;
-            yield return _secondDelay;
-
-            if (countdown == 0f)
-            {
-                fullDuration = true;
-            }
-        }
-
-        if (fullDuration) UpdateFullExoFormChargeUsed(playerEntity.GetSteamId());
-    }
     public static void UpdateExoFormChargeStored(ulong steamId)
     {
         if (steamId.TryGetPlayerExoFormData(out var exoFormData))
@@ -151,6 +116,42 @@ internal static class ExoForm
             KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - timeInForm);
             steamId.SetPlayerExoFormData(timeEnergyPair);
         }
+    }
+    public static IEnumerator ExoFormCountdown(Entity buffEntity, Entity playerEntity, Entity userEntity, float countdownDelay)
+    {
+        yield return new WaitForSeconds(countdownDelay);
+
+        float countdown = 5f;
+        bool fullDuration = false;
+
+        // Wait until there are 5 seconds left
+        while (buffEntity.Exists() && countdown > 0f)
+        {
+            float3 targetPosition = playerEntity.Read<Translation>().Value;
+            targetPosition = new float3(targetPosition.x, targetPosition.y + 1.5f, targetPosition.z);
+
+            ScrollingCombatTextMessage.Create(
+                EntityManager,
+                EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(),
+                _assetGuid,
+                targetPosition,
+                _yellow,
+                playerEntity,
+                countdown,
+                _exoCountdownSCT,
+                userEntity
+            );
+
+            countdown--;
+            yield return _secondDelay;
+
+            if (countdown == 0f)
+            {
+                fullDuration = true;
+            }
+        }
+
+        if (fullDuration) UpdateFullExoFormChargeUsed(playerEntity.GetSteamId());
     }
     public static void UpdateFullExoFormChargeUsed(ulong steamId)
     {

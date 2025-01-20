@@ -91,15 +91,15 @@ internal static class FamiliarLevelingSystem
     }
     public static void UpdateFamiliarExperience(Entity player, Entity familiar, int familiarId, ulong playerId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
     {
-        FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperienceData(playerId);
+        FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
         data.FamiliarLevels[familiarId] = new(familiarXP.Key, familiarXP.Value + gainedXP);
 
-        FamiliarExperienceManager.SaveFamiliarExperienceData(playerId, data);
+        FamiliarExperienceManager.SaveFamiliarExperience(playerId, data);
         CheckAndHandleLevelUp(player, familiar, familiarId, playerId, data.FamiliarLevels[familiarId], currentLevel, gainedXP);
     }
     public static KeyValuePair<int, float> GetFamiliarExperience(ulong playerId, int familiarId)
     {
-        FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperienceData(playerId);
+        FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(playerId);
 
         if (data.FamiliarLevels.TryGetValue(familiarId, out var familiarData))
         {
@@ -107,7 +107,7 @@ internal static class FamiliarLevelingSystem
         }
         else
         {
-            return new(0, 0);
+            return new(FamiliarSummonSystem.BASE_LEVEL, ConvertLevelToXp(FamiliarSummonSystem.BASE_LEVEL));
         }
     }
     public static void CheckAndHandleLevelUp(Entity player, Entity familiar, int familiarId, ulong steamId, KeyValuePair<int, float> familiarXP, int currentLevel, float gainedXP)
@@ -120,10 +120,10 @@ internal static class FamiliarLevelingSystem
         if (newLevel > currentLevel)
         {
             leveledUp = true;
-            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
+            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
 
             data.FamiliarLevels[familiarId] = new(newLevel, familiarXP.Value);
-            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, data);
+            FamiliarExperienceManager.SaveFamiliarExperience(steamId, data);
         }
 
         if (leveledUp)

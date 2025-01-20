@@ -64,7 +64,7 @@ internal static class MiscCommands
         TogglePlayerBool(steamId, boolKey);
         bool currentState = GetPlayerBool(steamId, boolKey);
 
-        LocalizationService.HandleReply(ctx, $"{scrollingTextMessage} scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"<color=white>{scrollingTextMessage}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]

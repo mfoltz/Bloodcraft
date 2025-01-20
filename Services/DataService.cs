@@ -508,7 +508,7 @@ internal static class DataService
     }
     internal static class PlayerPersistence
     {
-        static readonly JsonSerializerOptions _jsonOptions = new()
+        public static readonly JsonSerializerOptions _jsonOptions = new()
         {
             WriteIndented = true,
             IncludeFields = true
@@ -819,8 +819,6 @@ internal static class DataService
 
         public static void LoadPlayerBools() => LoadData(ref _playerBools, "PlayerBools");
 
-        // public static void LoadPlayerParties() => LoadData(ref _playerParties, "PlayerParties");
-
         public static void LoadPlayerWoodcutting() => LoadData(ref _playerWoodcutting, "Woodcutting");
 
         public static void LoadPlayerMining() => LoadData(ref _playerMining, "Mining");
@@ -911,8 +909,6 @@ internal static class DataService
 
         public static void SavePlayerBools() => SaveData(_playerBools, "PlayerBools");
 
-        // public static void SavePlayerParties() => SaveData(_playerParties, "PlayerParties");
-
         public static void SavePlayerWoodcutting() => SaveData(_playerWoodcutting, "Woodcutting");
 
         public static void SavePlayerMining() => SaveData(_playerMining, "Mining");
@@ -991,7 +987,7 @@ internal static class DataService
     }
     public static class PlayerBoolsManager
     {
-        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[0], $"{playerId}_bools.json");
+        static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[9], $"{playerId}_bools.json");
         public static void SavePlayerBools(ulong playerId, Dictionary<string, bool> preferences)
         {
             string filePath = GetFilePath(playerId);
@@ -1085,7 +1081,6 @@ internal static class DataService
         internal static class FamiliarUnlocksManager
         {
             static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[8], $"{playerId}_familiar_unlocks.json");
-
             public static void SaveUnlockedFamiliars(ulong playerId, FamiliarUnlocksData data)
             {
                 string filePath = GetFilePath(playerId);
@@ -1107,38 +1102,22 @@ internal static class DataService
 
         internal static class FamiliarExperienceManager
         {
-            static string GetFilePath(ulong playerId) => Path.Combine(DirectoryPaths[7], $"{playerId}_familiar_experience.json");
-            public static void SaveFamiliarExperienceData(ulong playerId, FamiliarExperienceData data)
+            static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[7], $"{steamId}_familiar_experience.json");
+            public static void SaveFamiliarExperience(ulong steamId, FamiliarExperienceData data)
             {
-                string filePath = GetFilePath(playerId);
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(data, options);
+                string filePath = GetFilePath(steamId);
+                string jsonString = JsonSerializer.Serialize(data, _jsonOptions);
+
                 File.WriteAllText(filePath, jsonString);
             }
-            public static FamiliarExperienceData LoadFamiliarExperienceData(ulong playerId)
+            public static FamiliarExperienceData LoadFamiliarExperience(ulong steamId)
             {
-                string filePath = GetFilePath(playerId);
+                string filePath = GetFilePath(steamId);
                 if (!File.Exists(filePath))
                     return new FamiliarExperienceData();
 
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarExperienceData>(jsonString);
-            }
-            public static KeyValuePair<int, float> LoadFamiliarExperience(ulong playerId, int famKey)
-            {
-                var experienceData = LoadFamiliarExperienceData(playerId);
-
-                if (experienceData.FamiliarLevels.TryGetValue(famKey, out var experience))
-                    return experience;
-
-                return new KeyValuePair<int, float>(1, Progression.ConvertLevelToXp(1)); // Default experience value if not found
-            }
-            public static void SaveFamiliarExperience(ulong playerId, int famKey, KeyValuePair<int, float> data)
-            {
-                var experienceData = LoadFamiliarExperienceData(playerId);
-                experienceData.FamiliarLevels[famKey] = data;
-
-                SaveFamiliarExperienceData(playerId, experienceData);
             }
         }
         internal static class FamiliarPrestigeManager
@@ -1151,7 +1130,6 @@ internal static class DataService
                 string jsonString = JsonSerializer.Serialize(data, options);
                 File.WriteAllText(filePath, jsonString);
             }
-
             public static FamiliarPrestigeData LoadFamiliarPrestige(ulong playerId)
             {
                 string filePath = GetFilePath(playerId);
@@ -1244,6 +1222,7 @@ internal static class DataService
             }
         }
 
+        /*
         public static readonly List<FamiliarTrait> FamiliarTraits =
         [
         // Offensive Traits
@@ -1377,6 +1356,7 @@ internal static class DataService
             { FamiliarStatType.AttackSpeed, 1.1f }     // Attack Speed +10%
         })
         ];
+        */
     }
     internal static class PlayerDataInitialization
     {

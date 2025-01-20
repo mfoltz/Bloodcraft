@@ -91,9 +91,9 @@ internal static class EmoteSystemPatch
                     else if (playerCharacter.TryGetBuff(_exoFormBuff, out Entity buffEntity))
                     {
                         ExitingForm.Add(steamId);
-                        ExoForm.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
 
-                        DestroyUtility.Destroy(EntityManager, buffEntity);
+                        ExoForm.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+                        DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                     }
                 }
                 else if (_familiarBattles && BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesEmote) || useEmoteEvent.Action.Equals(_noEmote)))

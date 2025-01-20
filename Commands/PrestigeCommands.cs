@@ -34,7 +34,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>.prestige l</color> to see options.");
             return;
         }
 
@@ -120,6 +120,109 @@ internal static class PrestigeCommands
         else
         {
             LocalizationService.HandleReply(ctx, $"You have not reached the required level to prestige in <color=#90EE90>{parsedPrestigeType}</color> or are at maximum prestige level.");
+        }
+    }
+
+    [Command(name: "get", adminOnly: false, usage: ".prestige get [PrestigeType]", description: "Shows information about player's prestige status.")]
+    public static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
+    {
+        if (!ConfigService.PrestigeSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
+            return;
+        }
+
+        User user = ctx.Event.User;
+        ulong steamId = user.PlatformId;
+
+        if (parsedPrestigeType == PrestigeType.Exo && steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
+        {
+            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)ExoForm.CalculateFormDuration(exoLevel)}</color>s");
+            ExoForm.UpdateExoFormChargeStored(steamId);
+
+            if (steamId.TryGetPlayerExoFormData(out var exoFormData))
+            {
+                if (exoFormData.Value < ExoForm.BASE_DURATION)
+                {
+                    ExoForm.ReplyNotEnoughCharge(user, steamId, exoFormData.Value);
+                }
+                else if (exoFormData.Value >= ExoForm.BASE_DURATION)
+                {
+                    LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
+                }
+
+                /*
+                var exoFormSkills = Buffs.ExoFormAbilityUnlockMap
+                    .Where(pair => pair.Value != 0) // Filter out abilities unlocked at level 0
+                    .Select(pair =>
+                    {
+                        // Get the ability name from ExoFormAbilityMap and remove the "Prefab" suffix
+                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].GetPrefabName();
+                        int prefabIndex = abilityName.IndexOf("Prefab");
+                        if (prefabIndex != -1)
+                        {
+                            abilityName = abilityName[..prefabIndex].TrimEnd();
+                        }
+
+                        // Return formatted ability name with unlock level
+                        return $"<color=white>{abilityName}</color> at <color=#90EE90>Exo</color> level <color=yellow>{pair.Value}</color>";
+                    })
+                    .ToList();
+                */
+
+                var exoFormSkills = Buffs.ExoFormAbilityUnlockMap
+                    .Where(pair => pair.Value != 0)
+                    .Select(pair =>
+                    {
+                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].GetPrefabName();
+                        int prefabIndex = abilityName.IndexOf("Prefab");
+                        if (prefabIndex != -1)
+                        {
+                            abilityName = abilityName[..prefabIndex].TrimEnd();
+                        }
+
+                        return $"<color=yellow>{pair.Value}</color>| <color=white>{abilityName}</color>";
+                    })
+                    .ToList();
+
+                for (int i = 0; i < exoFormSkills.Count; i += 4)
+                {
+                    var batch = exoFormSkills.Skip(i).Take(4);
+                    string replyMessage = string.Join(", ", batch);
+                    LocalizationService.HandleReply(ctx, replyMessage);
+                }
+            }
+
+            return;
+        }
+        else if (parsedPrestigeType == PrestigeType.Exo)
+        {
+            LocalizationService.HandleReply(ctx, "You have not prestiged in <color=#90EE90>Exo</color> yet.");
+            return;
+        }
+
+        IPrestigeHandler handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
+        if (handler == null)
+        {
+            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            return;
+        }
+
+        int maxPrestigeLevel = PrestigeTypeToMaxPrestiges[parsedPrestigeType];
+        if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
+            prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
+        {
+            DisplayPrestigeInfo(ctx, steamId, parsedPrestigeType, prestigeLevel, maxPrestigeLevel);
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
         }
     }
 
@@ -362,94 +465,6 @@ internal static class PrestigeCommands
         else
         {
             LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{PrestigeType.Experience}</color>.");
-        }
-    }
-
-    [Command(name: "get", adminOnly: false, usage: ".prestige get [PrestigeType]", description: "Shows information about player's prestige status.")]
-    public static void GetPrestigeCommand(ChatCommandContext ctx, string prestigeType)
-    {
-        if (!ConfigService.PrestigeSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-            return;
-        }
-
-        if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
-        {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
-            return;
-        }
-
-        User user = ctx.Event.User;
-        ulong steamId = user.PlatformId;
-
-        if (parsedPrestigeType == PrestigeType.Exo && steamId.TryGetPlayerPrestiges(out var exoData) && exoData.TryGetValue(parsedPrestigeType, out var exoLevel) && exoLevel > 0)
-        {
-            LocalizationService.HandleReply(ctx, $"Current <color=#90EE90>Exo</color> Prestige Level: <color=yellow>{exoLevel}</color>/{PrestigeTypeToMaxPrestiges[parsedPrestigeType]} | Max Form Duration: <color=green>{(int)ExoForm.CalculateFormDuration(exoLevel)}</color>s");
-            ExoForm.UpdateExoFormChargeStored(steamId);
-
-            if (steamId.TryGetPlayerExoFormData(out var exoFormData))
-            {
-                if (exoFormData.Value < ExoForm.BASE_DURATION)
-                {
-                    ExoForm.ReplyNotEnoughCharge(user, steamId);
-                }
-                else if (exoFormData.Value >= ExoForm.BASE_DURATION)
-                {
-                    LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
-                }
-
-                // Generate a list of ability unlock messages based on non-zero levels
-                var exoFormSkills = Buffs.ExoFormAbilityUnlockMap
-                    .Where(pair => pair.Value != 0) // Filter out abilities unlocked at level 0
-                    .Select(pair =>
-                    {
-                        // Get the ability name from ExoFormAbilityMap and remove the "Prefab" suffix
-                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].GetPrefabName();
-                        int prefabIndex = abilityName.IndexOf("Prefab");
-                        if (prefabIndex != -1)
-                        {
-                            abilityName = abilityName[..prefabIndex].TrimEnd();
-                        }
-
-                        // Return formatted ability name with unlock level
-                        return $"<color=white>{abilityName}</color> at <color=#90EE90>Exo</color> level <color=yellow>{pair.Value}</color>";
-                    })
-                    .ToList();
-
-                // Group and send the messages in batches of 4
-                for (int i = 0; i < exoFormSkills.Count; i += 4)
-                {
-                    var batch = exoFormSkills.Skip(i).Take(4);
-                    string replyMessage = string.Join(", ", batch);
-                    LocalizationService.HandleReply(ctx, replyMessage);
-                }
-            }
-
-            return;
-        }
-        else if (parsedPrestigeType == PrestigeType.Exo)
-        {
-            LocalizationService.HandleReply(ctx, "You have not prestiged in <color=#90EE90>Exo</color> yet.");
-            return;
-        }
-
-        IPrestigeHandler handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
-        if (handler == null)
-        {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
-            return;
-        }
-
-        int maxPrestigeLevel = PrestigeTypeToMaxPrestiges[parsedPrestigeType];
-        if (steamId.TryGetPlayerPrestiges(out var prestigeData) &&
-            prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) && prestigeLevel > 0)
-        {
-            DisplayPrestigeInfo(ctx, steamId, parsedPrestigeType, prestigeLevel, maxPrestigeLevel);
-        }
-        else
-        {
-            LocalizationService.HandleReply(ctx, $"You have not prestiged in <color=#90EE90>{parsedPrestigeType}</color>.");
         }
     }
 
