@@ -202,7 +202,7 @@ internal static class ServerBootstrapSystemPatches
                 {
                     weaponStats.Add(weaponType, []);
                 }
-                steamId.SetPlayerWeaponStats(weaponStats);  // Assuming the weapon stats are a list or similar collection.
+                steamId.SetPlayerWeaponStats(weaponStats);
             }
             else
             {
@@ -323,6 +323,7 @@ internal static class ServerBootstrapSystemPatches
 
                         steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, currentRestedXP));
                         string message = $"+<color=#FFD700>{roundedXP}</color> <color=green>rested</color> <color=#FFC0CB>experience</color> earned from being logged out in your coffin!";
+
                         LocalizationService.HandleServerReply(EntityManager, user, message);
                     }
                 }

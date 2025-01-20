@@ -394,6 +394,7 @@ internal static class Familiars
         {
             familiar.TryApplyBuff(_vanishBuff);
             familiar.TryApplyBuff(_disableAggroBuff);
+
             UnbindFamiliarDelayRoutine(user, playerCharacter, familiar, smartBind, index).Start();
         }
         else
@@ -406,6 +407,10 @@ internal static class Familiars
         yield return _delay;
 
         PrefabGUID prefabGuid = familiar.GetPrefabGuid();
+        if (prefabGuid.IsEmpty())
+        {
+            yield break;
+        }
 
         ulong steamId = user.PlatformId;
         int famKey = prefabGuid.GuidHash;
@@ -522,14 +527,14 @@ internal static class Familiars
                 }
             }
 
-            if (!prestigeData.FamiliarPrestiges.ContainsKey(famKey))
+            if (!prestigeData.FamiliarPrestige.ContainsKey(famKey))
             {
-                prestigeData.FamiliarPrestiges[famKey] = new(0, []);
+                prestigeData.FamiliarPrestige[famKey] = new(0, []);
                 SaveFamiliarPrestige(steamId, prestigeData);
             }
             else
             {
-                prestiges = prestigeData.FamiliarPrestiges[famKey].Key;
+                prestiges = prestigeData.FamiliarPrestige[famKey].Key;
             }
 
             familiars.Add($"<color=white>{battleGroup.IndexOf(famKey) + 1}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]");
@@ -587,14 +592,14 @@ internal static class Familiars
             }
         }
 
-        if (!prestigeData.FamiliarPrestiges.ContainsKey(actives.famKey))
+        if (!prestigeData.FamiliarPrestige.ContainsKey(actives.famKey))
         {
-            prestigeData.FamiliarPrestiges[actives.famKey] = new(0, []);
+            prestigeData.FamiliarPrestige[actives.famKey] = new(0, []);
             SaveFamiliarPrestige(steamId, prestigeData);
         }
         else
         {
-            prestiges = prestigeData.FamiliarPrestiges[actives.famKey].Key;
+            prestiges = prestigeData.FamiliarPrestige[actives.famKey].Key;
         }
 
         LocalizationService.HandleReply(ctx, $"<color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(actives.famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>] added to battle group (<color=white>{slotIndex + 1}</color>)!");
@@ -628,16 +633,16 @@ internal static class Familiars
         FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
         FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
 
-        if (!prestigeData.FamiliarPrestiges.ContainsKey(data.FamKey))
+        if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
         {
-            prestigeData.FamiliarPrestiges[data.FamKey] = new(0, []);
+            prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
             SaveFamiliarPrestige(steamId, prestigeData);
         }
 
         prestigeData = LoadFamiliarPrestige(steamId);
-        List<FamiliarStatType> stats = prestigeData.FamiliarPrestiges[data.FamKey].Value;
+        List<FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
 
-        if (prestigeData.FamiliarPrestiges[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
+        if (prestigeData.FamiliarPrestige[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
         {
             LocalizationService.HandleReply(ctx, $"Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)");
             return;
@@ -680,15 +685,15 @@ internal static class Familiars
             return;
         }
 
-        int levelsNeeded = ConfigService.MaxFamiliarLevel - xpData.FamiliarLevels[data.FamKey].Key;
+        int levelsNeeded = ConfigService.MaxFamiliarLevel - xpData.FamiliarExperience[data.FamKey].Key;
         int levelsToAdd = levels - levelsNeeded;
 
         KeyValuePair<int, float> newXP = new(++levelsToAdd, Progression.ConvertLevelToXp(++levelsToAdd)); // reset level to 1
-        xpData.FamiliarLevels[data.FamKey] = newXP;
+        xpData.FamiliarExperience[data.FamKey] = newXP;
         SaveFamiliarExperience(steamId, xpData);
 
-        int prestigeLevel = prestigeData.FamiliarPrestiges[data.FamKey].Key + 1;
-        prestigeData.FamiliarPrestiges[data.FamKey] = new(prestigeLevel, stats);
+        int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
+        prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
         SaveFamiliarPrestige(steamId, prestigeData);
 
         Entity familiar = FindPlayerFamiliar(playerCharacter);

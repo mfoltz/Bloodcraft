@@ -19,13 +19,18 @@ internal static class UpdateBuffsBufferDestroyPatch
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
+    static readonly bool _legacies = ConfigService.BloodSystem;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _prestige = ConfigService.PrestigeSystem;
+    static readonly bool _exoForm = ConfigService.ExoPrestiging;
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
 
     static readonly PrefabGUID _combatBuff = new(581443919);
     static readonly PrefabGUID _tauntEmoteBuff = new(-508293388);
     static readonly PrefabGUID _phasingBuff = new(-79611032);
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
     static readonly PrefabGUID _gateBossFeedCompleteBuff = new(-354622715);
+    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     static readonly PrefabGUID _gateBossFeedCompleteGroup = new(-1446310610);
 
@@ -36,10 +41,6 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID _travelWoodenBuff = new(-1194613929);
     static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
-
-    static readonly bool _prestige = ConfigService.PrestigeSystem;
-    static readonly bool _exoForm = ConfigService.ExoPrestiging;
-    static readonly bool _familiars = ConfigService.FamiliarSystem;
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
     public static readonly Dictionary<Classes.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
@@ -74,7 +75,12 @@ internal static class UpdateBuffsBufferDestroyPatch
                     }
                 }
 
-                if (_familiars && prefabGuid.Equals(_combatBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity playerCharacter))
+                if (_legacies && prefabGuid.Equals(_vBloodBloodBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity playerCharacter))
+                {
+
+                }
+
+                if (_familiars && prefabGuid.Equals(_combatBuff) && entity.GetBuffTarget().TryGetPlayer(out playerCharacter))
                 {
                     Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 

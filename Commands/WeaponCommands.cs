@@ -50,7 +50,7 @@ internal static class WeaponCommands
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
-            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{WeaponSystem.GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>");
+            LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!");
 
             if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
             {
@@ -111,7 +111,7 @@ internal static class WeaponCommands
 
             if (value < 1 || value > length)
             {
-                LocalizationService.HandleReply(ctx, $"Invalid integer, please use the corresponding stat number shown when using '<color=white>.wep lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid stat, please use the corresponding stat integer shown when using '<color=white>.wep lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
                 return;
             }
 
@@ -169,7 +169,7 @@ internal static class WeaponCommands
                     ResetStats(steamId, weaponType);
                     // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
 
-                    LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#00FFFF>{weaponType}</color>");
+                    LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
                     return;
                 }
             }

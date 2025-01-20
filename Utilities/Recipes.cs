@@ -69,7 +69,7 @@ internal static class Recipes
             {
                 salvageable.RecipeGUID = PrefabGUID.Empty;
                 salvageable.SalvageFactor = 1f;
-                // salvageable.SalvageTimer = 15f;
+                salvageable.SalvageTimer = 60f;
             });
         }
 
@@ -84,7 +84,7 @@ internal static class Recipes
             {
                 salvageable.RecipeGUID = PrefabGUID.Empty;
                 salvageable.SalvageFactor = 1f;
-                // salvageable.SalvageTimer = 15f;
+                salvageable.SalvageTimer = 30f;
             });
 
             if (!prefabEntity.Has<RecipeRequirementBuffer>())
@@ -107,7 +107,7 @@ internal static class Recipes
             {
                 salvageable.RecipeGUID = PrefabGUID.Empty;
                 salvageable.SalvageFactor = 1f;
-                // salvageable.SalvageTimer = 60f;
+                salvageable.SalvageTimer = 10f;
             });
 
             if (!prefabEntity.Has<RecipeRequirementBuffer>())
@@ -119,8 +119,7 @@ internal static class Recipes
             wiresSalvageBuffer.Add(new RecipeRequirementBuffer { Guid = _batteryCharge, Amount = 1 });
         }
 
-        /*
-        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_extractorInventory, out prefabEntity))
+        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_refinementInventoryLarge, out prefabEntity))
         {
             prefabEntity.With((ref RestrictedInventory restrictedInventory) =>
             {
@@ -131,11 +130,9 @@ internal static class Recipes
 
             InventoryInstanceElement inventoryInstanceElement = inventoryBuffer[0];
             inventoryInstanceElement.RestrictedCategory = (long)ItemCategory.ALL;
-            inventoryInstanceElement.MaxSlots = 1;
 
             inventoryBuffer[0] = inventoryInstanceElement;
         }
-        */
 
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_shardExtractor, out prefabEntity))
         {
@@ -145,6 +142,7 @@ internal static class Recipes
             });
         }
 
+        /*
         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShardRecipe];
 
         if (!recipeEntity.Has<RecipeLinkBuffer>())
@@ -156,6 +154,7 @@ internal static class Recipes
 
         var recipeOutputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
         recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _demonFragment, Amount = 1 }); // if fragment works can try jewel again but need to reduce uncertainty, then link buffer as well
+        */
 
         /*
         var recipeLinkBuffer = recipeEntity.ReadBuffer<RecipeLinkBuffer>();
@@ -174,7 +173,7 @@ internal static class Recipes
             recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });
             recipeLinkBuffer.Add(new RecipeLinkBuffer { Guid = shardRecipe });
         }
-        */
+        
 
         recipeEntity.With((ref RecipeData recipeData) =>
         {
@@ -186,9 +185,10 @@ internal static class Recipes
         });
 
         recipeMap[_extractShardRecipe] = recipeEntity.Read<RecipeData>();
+        */
 
         Entity stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedGrinder];
-        recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_vampiricDustRecipe];
+        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_vampiricDustRecipe];
 
         recipeEntity.With((ref RecipeData recipeData) =>
         {

@@ -10,11 +10,8 @@ using System.Collections.Concurrent;
 using Unity.Entities;
 using Unity.Mathematics;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
-using static Bloodcraft.Utilities.Progression;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
-using Steamworks;
-using System.Reflection.Metadata.Ecma335;
-using static ProjectM.BuffUtility;
+using static Bloodcraft.Utilities.Progression;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarSummonSystem
@@ -228,7 +225,7 @@ internal static class FamiliarSummonSystem
             {
                 familiar.SetPosition(position);
 
-                if (HandleModifications(user, playerCharacter, familiar, battle))
+                if (HandleModifications(user, playerCharacter, familiar, battle, teamIndex))
                 {
                     if (GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
                     {
@@ -260,7 +257,7 @@ internal static class FamiliarSummonSystem
             }
         }
     }
-    public static bool HandleModifications(User user, Entity playerCharacter, Entity familiar, bool battle = false)
+    public static bool HandleModifications(User user, Entity playerCharacter, Entity familiar, bool battle = false, int teamIndex = -1)
     {
         ulong steamId = user.PlatformId;
 
@@ -269,33 +266,46 @@ internal static class FamiliarSummonSystem
             int famKey = familiar.GetPrefabGuidHash();
 
             FamiliarExperienceData familiarExperience = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
-            int level = familiarExperience.FamiliarLevels.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
+            int level = familiarExperience.FamiliarExperience.TryGetValue(famKey, out var xpData) ? xpData.Key : 0;
 
             if (level < BASE_LEVEL)
             {
                 level = BASE_LEVEL;
-                xpData = new(BASE_LEVEL, ConvertLevelToXp(BASE_LEVEL));
 
-                familiarExperience.FamiliarLevels[famKey] = xpData;
+                KeyValuePair<int, float> newXP = new(level, ConvertLevelToXp(level));
+                familiarExperience.FamiliarExperience[famKey] = newXP;
+
                 FamiliarExperienceManager.SaveFamiliarExperience(steamId, familiarExperience);
             }
 
             Core.Log.LogInfo($"{familiar.GetPrefabGuid().GetPrefabName()} - {level}");
 
-            if (ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level))
+            if (!battle)
             {
-                if (!battle)
+                if (ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level))
                 {
                     playerCharacter.TryApplyBuffWithLifeTime(_spawnBuff, SPAWN_BUFF_LIFETIME);
+                    familiar.TryApplyBuff(_hideSpawnBuff);
+
+                    return true;
                 }
-
-                familiar.TryApplyBuff(_hideSpawnBuff);
-
-                return true;
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                return false;
+                if (ModifyFamiliar(user, steamId, famKey, playerCharacter, familiar, level, battle, teamIndex))
+                {
+                    familiar.TryApplyBuff(_hideSpawnBuff);
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
         catch (Exception ex)
@@ -305,14 +315,14 @@ internal static class FamiliarSummonSystem
             return false;
         }
     }
-    public static bool ModifyFamiliar(User user, ulong steamId, int familiarId, Entity playerCharacter, Entity familiar, int level, bool battle = false, int teamIndex = -1)
+    public static bool ModifyFamiliar(User user, ulong steamId, int famKey, Entity playerCharacter, Entity familiar, int level, bool battle = false, int teamIndex = -1)
     {
         try
         {            
             if (battle)
             {
                 ModifyTeamFactionAggro(familiar, teamIndex);
-                ModifyUnitStats(familiar, level, steamId, familiarId, battle);
+                ModifyUnitStats(familiar, level, steamId, famKey, battle);
 
                 RemoveConvertable(familiar);
                 HandleBloodSource(familiar, level);
@@ -346,7 +356,7 @@ internal static class FamiliarSummonSystem
             else
             {
                 ModifyFollowerFactionMinion(playerCharacter, familiar);
-                ModifyUnitStats(familiar, level, steamId, familiarId);
+                ModifyUnitStats(familiar, level, steamId, famKey);
 
                 if (!_familiarCombat) DisableCombat(familiar);
                 else
@@ -483,7 +493,7 @@ internal static class FamiliarSummonSystem
         int prestigeLevel = 0;
         List<FamiliarStatType> familiarPrestigeStats = [];
 
-        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestiges.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
             prestigeLevel = prestigeData.Key;
             familiarPrestigeStats = prestigeData.Value;
@@ -544,16 +554,21 @@ internal static class FamiliarSummonSystem
             unitLevel.HideLevel = false;
         });
 
-        int baseHealth = NORMAL_HEALTH;
-        if (_gameDifficulty.Equals(GameDifficulty.Hard))
+        float maxHealth = _gameDifficulty.Equals(GameDifficulty.Hard) ? HARD_HEALTH : NORMAL_HEALTH;
+
+        if (!level.Equals(BASE_LEVEL))
         {
-            baseHealth = HARD_HEALTH;
+            maxHealth *= healthFactor;
+        }
+        else if (level.Equals(_maxFamiliarLevel))
+        {
+            maxHealth *= HEALTH_MAX;
         }
 
         familiar.With((ref Health health) =>
         {
-            health.MaxHealth._Value = baseHealth * healthFactor;
-            health.Value = health.MaxHealth._Value;
+            health.MaxHealth._Value = maxHealth;
+            health.Value = maxHealth;
         });
 
         if (!battle && !_vBloodDamageMultiplier.Equals(1f))
@@ -602,11 +617,11 @@ internal static class FamiliarSummonSystem
 
         familiar.With((ref DynamicCollision dynamicCollision) =>
         {
-            dynamicCollision.AgainstPlayers.RadiusOverride = 0.1f;
+            // dynamicCollision.AgainstPlayers.RadiusOverride = 0.1f;
             dynamicCollision.AgainstPlayers.HardnessThreshold._Value = 0.1f;
             dynamicCollision.AgainstPlayers.PushStrengthMax._Value = 0.2f;
             dynamicCollision.AgainstPlayers.PushStrengthMin._Value = 0.1f;
-            dynamicCollision.AgainstPlayers.RadiusVariation = 0.1f;
+            // dynamicCollision.AgainstPlayers.RadiusVariation = 0.1f;
         });
     }
     static void RemoveDropTable(Entity familiar)

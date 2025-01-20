@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
+using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
@@ -121,6 +122,10 @@ internal static class BloodManager
             Stats.Clear();
             steamId.SetPlayerBloodStats(bloodStats);
         }
+    }
+    public static void UpdateBloodStats() // call here after catching 
+    {
+
     }
     public static void ApplyBloodStats(ulong steamId, BloodType bloodType, Entity bloodBuff)
     {

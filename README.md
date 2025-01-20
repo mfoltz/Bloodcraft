@@ -603,7 +603,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **Max Familiar Prestiges**: `MaxFamiliarPrestiges` (int, default: 10)
   The maximum number of prestiges a familiar can reach.
 - **Familiar Prestige Stat Multiplier**: `FamiliarPrestigeStatMultiplier` (float, default: 0.1)
-  The multiplier for stats gained from familiar prestiges.
+  The multiplier for applicable stats gained per familiar prestige.
 - **Max Familiar Level**: `MaxFamiliarLevel` (int, default: 90)
   The maximum level a familiar can reach.
 - **Allow V Bloods**: `AllowVBloods` (bool, default: False)

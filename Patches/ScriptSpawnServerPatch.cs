@@ -5,7 +5,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using ProjectM.Shared.Systems;
 using Stunlock.Core;
 using Unity.Collections;
@@ -35,6 +34,7 @@ internal static class ScriptSpawnServerPatch
     static readonly PrefabGUID _fallenAngelDeathBuff = new(-1934189109);
     static readonly PrefabGUID _fallenAngelDespawnBuff = new(1476380301);
     static readonly PrefabGUID _clearAggroBuff = new(1793107442);
+    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     static readonly PrefabGUID _playerFaction = new(1106458752);
 
@@ -146,7 +146,16 @@ internal static class ScriptSpawnServerPatch
                         entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
                     }
 
-                    if (_legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGuid, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
+                    if (_legacies && prefabGuid.Equals(_vBloodBloodBuff)) // applies stat choices to blood types when changed
+                    {
+                        BloodType bloodType = BloodManager.GetCurrentBloodType(player);
+
+                        if (!entity.Has<ModifyUnitStatBuff_DOTS>())
+                        {
+                            BloodManager.ApplyBloodStats(steamId, bloodType, entity);
+                        }
+                    }
+                    else if (_legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGuid, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
                         {

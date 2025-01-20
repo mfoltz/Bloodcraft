@@ -300,19 +300,19 @@ internal class EclipseService
                 return (familiarPercent, familiarLevel, familiarPrestige, familiarName, familiarStats);
             }
 
-            PrefabGUID familiarPrefabGUID = familiar.GetPrefabGuid();
+            PrefabGUID familiarId = familiar.GetPrefabGuid();
 
-            int familiarId = familiarPrefabGUID.GuidHash;
-            familiarName = familiarPrefabGUID.GetLocalizedName();
+            int famKey = familiarId.GuidHash;
+            familiarName = familiarId.GetLocalizedName();
 
-            KeyValuePair<int, float> familiarXP = FamiliarLevelingSystem.GetFamiliarExperience(steamId, familiarId);
+            KeyValuePair<int, float> familiarXP = FamiliarLevelingSystem.GetFamiliarExperience(steamId, famKey);
 
-            familiarPercent = FamiliarLevelingSystem.GetLevelProgress(steamId, familiarId);
+            familiarPercent = FamiliarLevelingSystem.GetLevelProgress(steamId, famKey);
             familiarLevel = familiarXP.Key;
 
             if (_familiarPrestige)
             {
-                familiarPrestige = FamiliarPrestigeManager.GetFamiliarPrestigeLevel(FamiliarPrestigeManager.LoadFamiliarPrestige(steamId), familiarId);
+                familiarPrestige = FamiliarPrestigeManager.LoadFamiliarPrestige(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0 ? prestigeData.Key : familiarPrestige;
             }
 
             UnitStats unitStats = familiar.Read<UnitStats>();

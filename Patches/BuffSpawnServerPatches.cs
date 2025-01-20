@@ -312,21 +312,9 @@ internal static class BuffSystemSpawnPatches
                                 });
                             }
                         }
-                        /*
-                        else if (prefabGuid.Equals(_hasGolemSwallowedBuff))
-                        {
-                            if (entity.Has<LifeTime>())
-                            {
-                                entity.With((ref LifeTime lifeTime) =>
-                                {
-                                    lifeTime.Duration = 0f;
-                                    lifeTime.EndAction = LifeTimeEndAction.None;
-                                });
-                            }
-                        }
-                        */
                     }
                 }
+                /*
                 else if (prefabGuid.Equals(_targetSwallowedBuff) && buffTarget.GetPrefabGuid().Equals(new PrefabGUID(51737727)))
                 {
                     if (entity.TryGetBuffer<ApplyBuffOnGameplayEvent>(out var buffer) && !buffer.IsEmpty)
@@ -336,10 +324,9 @@ internal static class BuffSystemSpawnPatches
 
                         buffer[0] = buffOnGameplayEvent;
 
-                        Core.Log.LogInfo($"{_targetSwallowedBuff.GetPrefabName()}");
+                        Core.Log.LogInfo($"{_targetSwallowedBuff.GetPrefabName()} | {buffTarget.GetPrefabGuid().GetPrefabName()}");
                     }
                 }
-                /*
                 else if (prefabGuid.Equals(_hasToadSwallowedBuff))
                 {
                     if (entity.Has<LifeTime>())

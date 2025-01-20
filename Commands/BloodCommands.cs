@@ -120,7 +120,7 @@ internal static class BloodCommands
 
             if (value < 1 || value > length)
             {
-                LocalizationService.HandleReply(ctx, $"Invalid integer, please use the corresponding stat number shown when using '<color=white>.bl lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
+                LocalizationService.HandleReply(ctx, $"Invalid stat, please use the corresponding stat integer shown when using '<color=white>.bl lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
                 return;
             }
 

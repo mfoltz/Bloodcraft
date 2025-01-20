@@ -194,27 +194,6 @@ internal static class Classes
             string replyMessage = string.Join(", ", batch);
             LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
         }
-
-        /*
-        var classBuffs = perks.Select((perk, index) =>
-        {
-            int level = (index + 1) * step;
-            string prefab = new PrefabGUID(perk).GetPrefabName();
-            int prefabIndex = prefab.IndexOf("Prefab");
-            if (prefabIndex != -1)
-            {
-                prefab = prefab[..prefabIndex].TrimEnd();
-            }
-            return $"<color=white>{prefab}</color> at level <color=yellow>{level}</color>";
-        }).ToList();
-
-        for (int i = 0; i < classBuffs.Count; i += 6)
-        {
-            var batch = classBuffs.Skip(i).Take(6);
-            string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
-        }
-        */
     }
     public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
     {
@@ -720,7 +699,7 @@ internal static class Classes
                         _abilityJewelMap.Add(jewelInstance.OverrideAbilityType, []);
                     }
 
-                    string prefabName = entity.Read<PrefabGUID>().GetPrefabName().Split(" ", 2)[0];
+                    string prefabName = prefab.GetPrefabName().Split(" ", 2)[0];
 
                     if (prefabName.EndsWith("T01") || prefabName.EndsWith("T02") || prefabName.EndsWith("T03") || prefabName.EndsWith("T04")) continue;
                     else _abilityJewelMap[jewelInstance.OverrideAbilityType].Add(entity);
@@ -736,12 +715,12 @@ internal static class Classes
     {
         if (Enum.TryParse(className, true, out parsedClassType))
         {
-            return true; // Successfully parsed
+            return true;
         }
 
         parsedClassType = Enum.GetValues(typeof(PlayerClass))
-                             .Cast<PlayerClass>()
-                             .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
+            .Cast<PlayerClass>()
+            .FirstOrDefault(ct => ct.ToString().Contains(className, StringComparison.OrdinalIgnoreCase));
 
         if (!parsedClassType.Equals(default(PlayerClass)))
         {
