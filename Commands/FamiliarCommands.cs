@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using Bloodcraft.Patches;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -33,7 +34,8 @@ internal static class FamiliarCommands
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    const int BOX_MAX = 25;
+    const int MAX_FAMS_BOX = 10;
+    const int MAX_BOXES = 25;
     const float SHINY_CHANGE = 0.25f;
 
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
@@ -44,6 +46,9 @@ internal static class FamiliarCommands
 
     static readonly PrefabGUID _itemSchematic = new(2085163661);
     static readonly PrefabGUID _vampiricDust = new(805157024);
+
+    static readonly PrefabGUID _cursedMountainBeast = new(-1936575244);
+    static readonly PrefabGUID _vBloodEndGameSpawnBuff = new(-2071666138);
 
     static readonly Dictionary<string, Action<ChatCommandContext, ulong>> _familiarSettings = new()
     {
@@ -245,6 +250,7 @@ internal static class FamiliarCommands
                     {
                         data.UnlockedFamiliars[key].Remove(actives.FamKey);
                         familiarSet.Add(actives.FamKey);
+
                         SaveUnlockedFamiliars(steamId, data);
                     }
                 }
@@ -305,7 +311,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
 
-        if (data.UnlockedFamiliars.Count > 0 && data.UnlockedFamiliars.Count < BOX_MAX)
+        if (data.UnlockedFamiliars.Count > 0 && data.UnlockedFamiliars.Count < MAX_BOXES)
         {
             // Add the box
             data.UnlockedFamiliars.Add(name, []);
@@ -315,7 +321,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{BOX_MAX}</color>.");
+            LocalizationService.HandleReply(ctx, $"Must have at least one unit unlocked to start adding boxes. Additionally, the total number of boxes cannot exceed <color=yellow>{MAX_BOXES}</color>.");
         }
     }
 
@@ -359,6 +365,121 @@ internal static class FamiliarCommands
             else
             {
                 Familiars.ParseAddedFamiliar(ctx, steamId, unit, lastListName);
+            }
+        }
+    }
+    [Command(name: "echoes", adminOnly: false, usage: ".fam echoes [VBloodName]", description: "VBlood purchasing for exo reward with quantity scaling to unit tier.")] // reminding me to deal with werewolves, eventually >_>
+    public static void PurchaseVBloodCommand(ChatCommandContext ctx, string vBlood)
+    {
+        if (!ConfigService.FamiliarSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
+            return;
+        }
+        else if (!ConfigService.AllowVBloods)
+        {
+            LocalizationService.HandleReply(ctx, "VBlood familiars are not enabled.");
+            return;
+        }
+        else if (!ConfigService.PrimalEchoes)
+        {
+            LocalizationService.HandleReply(ctx, "VBlood purchasing is not enabled.");
+            return;
+        }
+
+        List<PrefabGUID> vBloodPrefabGuids = Familiars.VBloodNamePrefabGuidMap
+            .Where(kvp => kvp.Key.Contains(vBlood, StringComparison.OrdinalIgnoreCase))
+            .Select(kvp => kvp.Value)
+            .ToList();
+
+        if (!vBloodPrefabGuids.Any())
+        {
+            LocalizationService.HandleReply(ctx, "Couldn't find matching vBlood!");
+            return;
+        }
+        else if (vBloodPrefabGuids.Count > 1)
+        {
+            LocalizationService.HandleReply(ctx, "Multiple matches, please be more specific!");
+            return;
+        }
+
+        PrefabGUID vBloodPrefabGuid = vBloodPrefabGuids.First();
+
+        if (IsBannedPrefabGuid(vBloodPrefabGuid))
+        {
+            LocalizationService.HandleReply(ctx, $"<color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is not available per configured familiar bans!");
+            return;
+        }
+        else
+        {
+            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(vBloodPrefabGuid, out Entity prefabEntity) && prefabEntity.TryGetBuffer<SpawnBuffElement>(out var buffer) && !buffer.IsEmpty)
+            {
+                ulong steamId = ctx.Event.User.PlatformId;
+                FamiliarUnlocksData unlocksData = LoadUnlockedFamiliars(steamId);
+
+                if (unlocksData.UnlockedFamiliars.Values.Any(list => list.Contains(vBloodPrefabGuid.GuidHash)))
+                {
+                    LocalizationService.HandleReply(ctx, $"<color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!");
+                    return;
+                }
+
+                PrefabGUID spawnBuff = buffer[0].Buff;
+                int tier = 0;
+
+                if (vBloodPrefabGuid.Equals(_cursedMountainBeast))
+                {
+                    Familiars.VBloodSpawnBuffTierMap.TryGetValue(_vBloodEndGameSpawnBuff, out tier);
+                }
+                else
+                {
+                    Familiars.VBloodSpawnBuffTierMap.TryGetValue(spawnBuff, out tier);
+                }
+
+                PrefabGUID exoItem = new(ConfigService.ExoPrestigeReward);
+                int vBloodCost = ConfigService.ExoPrestigeRewardQuantity * tier;
+
+                if (vBloodCost <= 0)
+                {
+                    LocalizationService.HandleReply(ctx, $"Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!");
+                }
+                else if (!PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(exoItem))
+                {
+                    LocalizationService.HandleReply(ctx, $"Unable to verify exo reward item! (<color=yellow>{exoItem}</color>)");
+                }
+                else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.Event.SenderCharacterEntity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, exoItem) >= vBloodCost)
+                {
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, exoItem, vBloodCost))
+                    {
+                        string lastBoxName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
+
+                        if (string.IsNullOrEmpty(lastBoxName) || unlocksData.UnlockedFamiliars.TryGetValue(lastBoxName, out var box) && box.Count >= MAX_FAMS_BOX)
+                        {
+                            lastBoxName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
+
+                            unlocksData.UnlockedFamiliars[lastBoxName] = [];
+                            unlocksData.UnlockedFamiliars[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
+
+                            SaveUnlockedFamiliars(steamId, unlocksData);
+                            LocalizationService.HandleReply(ctx, $"New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>");
+                        }
+                        else if (unlocksData.UnlockedFamiliars.ContainsKey(lastBoxName))
+                        {
+                            unlocksData.UnlockedFamiliars[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
+
+                            SaveUnlockedFamiliars(steamId, unlocksData);
+                            LocalizationService.HandleReply(ctx, $"New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>");
+                        }
+                    }
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color> to verify tier for {vBloodPrefabGuid.GetPrefabName()}!");
+                }
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the dev.");
+                return;
             }
         }
     }
@@ -528,7 +649,132 @@ internal static class FamiliarCommands
             
             if (familiar.Exists())
             {
-                // read stats and such here
+                Health health = familiar.Read<Health>();
+                UnitStats unitStats = familiar.Read<UnitStats>();
+                AbilityBar_Shared abilityBar_Shared = familiar.Read<AbilityBar_Shared>();
+                LifeLeech lifeLeech = new()
+                {
+                    PrimaryLeechFactor = new(0f),
+                    PhysicalLifeLeechFactor = new(0f),
+                    SpellLifeLeechFactor = new(0f),
+                    AffectRecovery = false
+                };
+                
+                if (familiar.Has<LifeLeech>())
+                {
+                    LifeLeech familiarLifeLeech = familiar.Read<LifeLeech>();
+
+                    lifeLeech.PrimaryLeechFactor._Value = familiarLifeLeech.PrimaryLeechFactor._Value;
+                    lifeLeech.PhysicalLifeLeechFactor._Value = familiarLifeLeech.PhysicalLifeLeechFactor._Value;
+                    lifeLeech.SpellLifeLeechFactor._Value = familiarLifeLeech.SpellLifeLeechFactor._Value;
+                }
+
+                List<KeyValuePair<string, string>> statPairs = [];
+
+                foreach (FamiliarStatType statType in Enum.GetValues(typeof(FamiliarStatType)))
+                {
+                    string statName = statType.ToString();
+                    string displayValue;
+
+                    switch (statType)
+                    {
+                        case FamiliarStatType.MaxHealth:
+                            displayValue = ((int)health.MaxHealth._Value).ToString();
+                            break;
+
+                        case FamiliarStatType.PhysicalPower:
+                            displayValue = ((int)unitStats.PhysicalPower._Value).ToString();
+                            break;
+
+                        case FamiliarStatType.SpellPower:
+                            displayValue = ((int)unitStats.SpellPower._Value).ToString();
+                            break;
+
+                        case FamiliarStatType.PrimaryLifeLeech:
+                            displayValue = lifeLeech.PrimaryLeechFactor._Value == 0f
+                                ? string.Empty
+                                : (lifeLeech.PrimaryLeechFactor._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.PhysicalLifeLeech:
+                            displayValue = lifeLeech.PhysicalLifeLeechFactor._Value == 0f
+                                ? string.Empty
+                                : (lifeLeech.PhysicalLifeLeechFactor._Value * 100).ToString("F1") + "%"; 
+                            break;
+
+                        case FamiliarStatType.SpellLifeLeech:
+                            displayValue = lifeLeech.SpellLifeLeechFactor._Value == 0f
+                                ? string.Empty
+                                : (lifeLeech.SpellLifeLeechFactor._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.PhysicalCritChance:
+                            displayValue = unitStats.PhysicalCriticalStrikeChance._Value == 0f
+                                ? string.Empty
+                                : (unitStats.PhysicalCriticalStrikeChance._Value * 100).ToString("F1") + "%"; 
+                            break;
+
+                        case FamiliarStatType.SpellCritChance:
+                            displayValue = unitStats.SpellCriticalStrikeChance._Value == 0f
+                                ? string.Empty
+                                : (unitStats.SpellCriticalStrikeChance._Value * 100).ToString("F1") + "%"; 
+                            break;
+
+                        case FamiliarStatType.HealingReceived:
+                            displayValue = unitStats.HealingReceived._Value == 0f
+                                ? string.Empty
+                                : (unitStats.HealingReceived._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.DamageReduction:
+                            displayValue = unitStats.DamageReduction._Value == 0f
+                                ? string.Empty
+                                : (unitStats.DamageReduction._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.PhysicalResistance:
+                            displayValue = unitStats.PhysicalResistance._Value == 0f
+                                ? string.Empty
+                                : (unitStats.PhysicalResistance._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.SpellResistance:
+                            displayValue = unitStats.SpellResistance._Value == 0f
+                                ? string.Empty
+                                : (unitStats.SpellResistance._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.PrimaryAttackSpeed:
+                            displayValue = (abilityBar_Shared.PrimaryAttackSpeed._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        case FamiliarStatType.CastSpeed:
+                            displayValue = (abilityBar_Shared.AttackSpeed._Value * 100).ToString("F1") + "%";
+                            break;
+
+                        default:
+                            continue;
+                    }
+
+                    if (!string.IsNullOrEmpty(displayValue)) statPairs.Add(new KeyValuePair<string, string>(statName, displayValue));
+                }
+
+                LocalizationService.HandleReply(ctx, $"<color=green>Familiar Stats:</color>");
+
+                for (int i = 0; i < statPairs.Count; i += 4)
+                {
+                    var batch = statPairs.Skip(i).Take(4);
+                    string line = string.Join(
+                        ", ",
+                        batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>")
+                    );
+
+                    LocalizationService.HandleReply(ctx, $"{line}");
+                }
+
+                /*
+                List<FamiliarStatType> familiarStatTypes = Enum.GetValues(typeof(FamiliarStatType)).Cast<FamiliarStatType>().ToList();
+
                 Health health = familiar.Read<Health>();
                 UnitStats unitStats = familiar.Read<UnitStats>();
                 AbilityBar_Shared abilityBar_Shared = familiar.Read<AbilityBar_Shared>();
@@ -551,18 +797,16 @@ internal static class FamiliarCommands
                 float castAnimationSpeed = abilityBar_Shared.AttackSpeed._Value;
                 string castSpeed = (castAnimationSpeed * 100).ToString("F0") + "%";
 
-                string familiarPrestigeStats = string.Join(", ",
-                    Enum.GetNames(typeof(FamiliarStatType))
-                        .Select(name => $"<color=white>{name}</color>")
-                );
+                // string familiarPrestigeStats = string.Join(", ", FamiliarPrestigeStats);
 
                 LocalizationService.HandleReply(ctx, $"<color=#00FFFF>MaxHealth</color>: <color=white>{(int)maxHealth}</color>, <color=#00FFFF>PhysicalPower</color>: <color=white>{(int)physicalPower}</color>, <color=#00FFFF>SpellPower</color>: <color=white>{(int)spellPower}</color>, <color=#00FFFF>PhysCritChance</color>: <color=white>{physCrit}</color>, <color=#00FFFF>SpellCritChance</color>: <color=white>{spellCrit}</color>");
                 LocalizationService.HandleReply(ctx, $"<color=#00FFFF>HealingReceived</color>: <color=white>{healing}</color>, <color=#00FFFF>PhysResist</color>: <color=white>{physRes}</color>, <color=#00FFFF>SpellResist</color>: <color=white>{spellRes}</color>, <color=#00FFFF>AttackSpeed</color>: <color=white>{primaryAttack}</color>, <color=#00FFFF>CastSpeed</color>: <color=white>{castSpeed}</color>");
+                */
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find any experience for familiar.");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar....");
         }
     }
 
@@ -609,7 +853,7 @@ internal static class FamiliarCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find active familiar to set level for.");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar....");
         }
     }
 
@@ -673,15 +917,15 @@ internal static class FamiliarCommands
 
                 if (prestigeData.FamiliarPrestige[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
                 {
-                    LocalizationService.HandleReply(ctx, "Familiar is already at maximum prestiges!");
+                    LocalizationService.HandleReply(ctx, "Familiar is already at maximum number of prestiges!");
                     return;
                 }
 
-                if (stats.Count < FamiliarStatValues.Count) // if less than max stats, parse entry and add if set doesnt already contain
+                if (stats.Count < FamiliarPrestigeStats.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
                     if (int.TryParse(statType, out int value))
                     {
-                        int length = Enum.GetValues(typeof(FamiliarStatType)).Length;
+                        int length = FamiliarPrestigeStats.Count;
 
                         if (value < 1 || value > length)
                         {
@@ -747,7 +991,7 @@ internal static class FamiliarCommands
                         return;
                     }
                 }
-                else if (stats.Count >= FamiliarStatValues.Count && !string.IsNullOrEmpty(statType))
+                else if (stats.Count >= FamiliarPrestigeStats.Count && !string.IsNullOrEmpty(statType))
                 {
                     LocalizationService.HandleReply(ctx, "Familiar has all possible added stat types from prestiging, use '<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>'.");
                     return;

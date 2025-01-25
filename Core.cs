@@ -90,7 +90,7 @@ internal static class Core
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
 
-        if (ConfigService.ExtraRecipes) Recipes.AddExtraRecipes();
+        if (ConfigService.ExtraRecipes) Recipes.ModifyRecipes();
         if (ConfigService.StarterKit) Configuration.StarterKitItems();
         if (ConfigService.PrestigeSystem) Buffs.PrestigeBuffs();
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)

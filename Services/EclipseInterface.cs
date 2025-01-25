@@ -17,9 +17,10 @@ public class EclipseInterface
     public static readonly int MaxLegacyLevel = ConfigService.MaxBloodLevel;
     public static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
     public static readonly int MaxFamiliarLevel = ConfigService.MaxFamiliarLevel;
-    public static readonly int MaxProfessionLevel = ConfigService.MaxProfessionLevel;
     public static readonly float PrestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
     public static readonly float ClassStatMultiplier = ConfigService.StatSynergyMultiplier;
+
+    public const int MAX_PROFESSION_LEVEL = 100;
 }
 public interface IVersionHandler<TProgressData>
 {
@@ -173,7 +174,7 @@ public class VersionHandler_1_2_2 : IVersionHandler<ProgressDataV1_2_2>
         int maxLegacyLevel = MaxLegacyLevel;
         int maxExpertiseLevel = MaxExpertiseLevel;
         int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MaxProfessionLevel;
+        int maxProfessionLevel = MAX_PROFESSION_LEVEL;
 
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
@@ -265,11 +266,12 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
         int maxLegacyLevel = MaxLegacyLevel;
         int maxExpertiseLevel = MaxExpertiseLevel;
         int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MaxProfessionLevel;
+        int maxProfessionLevel = MAX_PROFESSION_LEVEL; // no longer need to send this but changing everything involved that would need to be cut/changed too much extra work atm
 
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel); // Add multipliers to the message
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, 
+            maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel);
 
         sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
             .Append(',');

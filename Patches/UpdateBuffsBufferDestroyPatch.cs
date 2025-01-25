@@ -5,7 +5,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -53,34 +52,28 @@ internal static class UpdateBuffsBufferDestroyPatch
         else if (!(_familiars || _prestige || _classes)) return;
 
         NativeArray<Entity> entities = __instance.__query_401358720_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
 
-                if (_exoForm && prefabGuid.Equals(_exoFormBuff))
+                Entity buffTarget = entity.GetBuffTarget();
+
+                if (!buffTarget.TryGetPlayer(out Entity playerCharacter)) continue;
+                else if (_exoForm && prefabGuid.Equals(_exoFormBuff))
                 {
-                    Entity buffTarget = entity.GetBuffTarget();
-
-                    if (buffTarget.IsPlayer())
-                    {
-                        ulong steamId = buffTarget.GetSteamId();
-
-                        buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
-                        DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
-
-                        ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
-                        continue;
-                    }
+                    // ulong steamId = playerCharacter.GetSteamId();
+                    // playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
+                    // ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
+                    // DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
                 }
-
-                if (_legacies && prefabGuid.Equals(_vBloodBloodBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity playerCharacter))
+                else if (_legacies && prefabGuid.Equals(_vBloodBloodBuff))
                 {
-
+                    playerCharacter.TryApplyBuff(_vBloodBloodBuff);
                 }
-
-                if (_familiars && prefabGuid.Equals(_combatBuff) && entity.GetBuffTarget().TryGetPlayer(out playerCharacter))
+                else if (_familiars && prefabGuid.Equals(_combatBuff))
                 {
                     Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
 
@@ -94,50 +87,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         Familiars.TryReturnFamiliar(playerCharacter, familiar);
                     }
                 }
-
-                if (_prestige && entity.GetBuffTarget().TryGetPlayer(out playerCharacter)) // check if need to reapply prestige buff
-                {
-                    User user = playerCharacter.GetUser();
-                    ulong steamId = user.PlatformId;
-
-                    if (PrestigeBuffs.Contains(prefabGuid)) // check if the buff is for prestige and reapply if so
-                    {
-                        int index = PrestigeBuffs.IndexOf(prefabGuid);
-
-                        if (prefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) // allow shroud buff destruction
-                        {
-                            continue;
-                        }
-                        else if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
-                        {
-                            if (prestigeLevel > index) Buffs.ApplyPermanentBuff(playerCharacter, prefabGuid); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
-                        }
-                    }
-                    else if (_exoForm && prefabGuid.Equals(_tauntEmoteBuff) && GetPlayerBool(steamId, EXO_FORM_KEY))
-                    {
-                        if (EmoteSystemPatch.ExitingForm.Contains(steamId))
-                        {
-                            EmoteSystemPatch.ExitingForm.Remove(steamId);
-
-                            continue;
-                        }
-                        else if (ExoForm.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(playerCharacter); // could maybe try SpawnPrefabOnGameplayEvent or something like that instead of slingshotting this around, will ponder
-                    }
-                }
-
-                if (_classes && entity.GetBuffTarget().TryGetPlayer(out playerCharacter))
-                {
-                    ulong steamId = playerCharacter.GetSteamId();
-
-                    if (Classes.HasClass(steamId))
-                    {
-                        Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
-
-                        if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGuid)) Buffs.ApplyPermanentBuff(playerCharacter, prefabGuid);
-                    }
-                }
-
-                if ((prefabGuid.Equals(_travelStoneBuff) || prefabGuid.Equals(_travelWoodenBuff)) && entity.GetBuffTarget().TryGetPlayer(out playerCharacter))
+                else if (prefabGuid.Equals(_travelStoneBuff) || prefabGuid.Equals(_travelWoodenBuff))
                 {
                     User user = playerCharacter.GetUser();
                     ulong steamId = user.PlatformId;
@@ -162,7 +112,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
                     }
                 }
-                else if ((prefabGuid.Equals(_insideStoneCoffin) || prefabGuid.Equals(_insideWoodenCoffin)) && entity.GetBuffTarget().TryGetPlayer(out playerCharacter)) // do log in stuff when inside coffin buff is destroyed
+                else if (prefabGuid.Equals(_insideStoneCoffin) || prefabGuid.Equals(_insideWoodenCoffin)) // do log in stuff when inside coffin buff is destroyed
                 {
                     ulong steamId = playerCharacter.GetSteamId();
 
@@ -173,8 +123,49 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                             && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
                         {
-                            Buffs.ApplyPermanentBuff(playerCharacter, _shroudBuff);
+                            Buffs.HandlePermanentBuff(playerCharacter, _shroudBuff);
                         }
+                    }
+                }
+                else if (_exoForm && prefabGuid.Equals(_tauntEmoteBuff))
+                {
+                    User user = playerCharacter.GetUser();
+                    ulong steamId = user.PlatformId;
+
+                    if (GetPlayerBool(steamId, EXO_FORM_KEY))
+                    {
+                        if (EmoteSystemPatch.ExitingForm.Contains(steamId))
+                        {
+                            EmoteSystemPatch.ExitingForm.Remove(steamId);
+                        }
+                        else if (ExoForm.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(playerCharacter);
+                    }
+                }
+                else if (_prestige && PrestigeBuffs.Contains(prefabGuid)) // check if need to reapply prestige buff
+                {
+                    User user = playerCharacter.GetUser();
+                    ulong steamId = user.PlatformId;
+
+                    int index = PrestigeBuffs.IndexOf(prefabGuid);
+
+                    if (prefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) // allow shroud buff destruction
+                    {
+                        continue;
+                    }
+                    else if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
+                    {
+                        if (prestigeLevel > index) Buffs.HandlePermanentBuff(playerCharacter, prefabGuid); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                    }
+                }
+                else if (_classes)
+                {
+                    ulong steamId = playerCharacter.GetSteamId();
+
+                    if (Classes.HasClass(steamId))
+                    {
+                        Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+
+                        if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGuid)) Buffs.HandlePermanentBuff(playerCharacter, prefabGuid);
                     }
                 }
             }

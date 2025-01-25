@@ -1,8 +1,10 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
@@ -14,6 +16,8 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
 {
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
+
+    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     [HarmonyPatch(typeof(ModifyUnitStatBuffSystem_Spawn), nameof(ModifyUnitStatBuffSystem_Spawn.OnUpdate))]
     [HarmonyPrefix]
@@ -29,16 +33,17 @@ internal static class ModifyUnitStatBuffSystemSpawnPatch
             {
                 if (!entity.Has<WeaponLevel>() || !entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
 
-                if (entityOwner.Owner.TryGetPlayer(out Entity player))
+                if (entityOwner.Owner.TryGetPlayer(out Entity playerCharacter))
                 {
                     WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
 
                     if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) continue; // handled in weapon level spawn since they shouldn't show up here but just incase
 
-                    ulong steamId = player.GetSteamId();
-
+                    // ulong steamId = player.GetSteamId();
                     //if (ConfigService.ProfessionSystem) EquipmentManager.ApplyEquipmentStats(steamId, weaponEntity);
-                    WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
+                    // WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
+
+                    Buffs.RefreshStats(playerCharacter);
                 }
 
                 /*

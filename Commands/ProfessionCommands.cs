@@ -11,6 +11,8 @@ namespace Bloodcraft.Commands;
 [CommandGroup(name: "profession", "prof")]
 internal static class ProfessionCommands
 {
+    const int MAX_PROFESSION_LEVEL = 100;
+
     [Command(name: "log", adminOnly: false, usage: ".prof log", description: "Toggles profession progress logging.")]
     public static void LogProgessionCommand(ChatCommandContext ctx)
     {
@@ -72,9 +74,9 @@ internal static class ProfessionCommands
             return;
         }
 
-        if (level < 0 || level > ConfigService.MaxProfessionLevel)
+        if (level < 0 || level > MAX_PROFESSION_LEVEL)
         {
-            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxProfessionLevel}.");
+            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {MAX_PROFESSION_LEVEL}.");
             return;
         }
 

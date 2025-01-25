@@ -35,6 +35,7 @@ internal class BattleService
     static readonly WaitForSeconds _timeoutDelay = new(FAMILIAR_LIFETIME - MATCH_START_COUNTDOWN);
 
     static readonly WaitForSeconds _secondDelay = new(1f);
+    static readonly WaitForSeconds _delay = new(0.25f);
 
     static readonly ComponentType[] _unitTeamComponent =
     [
@@ -355,12 +356,21 @@ internal class BattleService
     static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
+        int teamOne = TEAM_ONE;
+        int teamTwo = TEAM_TWO;
+
+        if (!playerOne.IsAllies(playerTwo))
+        {
+            teamOne = -1;
+            teamTwo = -1;
+        }
+
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            InstantiateFamiliar(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i]);
-            InstantiateFamiliar(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i]);
+            InstantiateFamiliar(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, teamOne, PlayerOneFamiliarPositions[i]).Start();
+            InstantiateFamiliar(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, teamTwo, PlayerTwoFamiliarPositions[i]).Start();
 
-            yield return null;
+            yield return _delay;
         }
     }
     public static IEnumerator MatchTimeoutRoutine((ulong, ulong) matchPair)

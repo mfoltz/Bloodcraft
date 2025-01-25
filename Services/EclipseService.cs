@@ -38,7 +38,8 @@ internal class EclipseService
     static readonly WaitForSeconds _newUserDelay = new(15f);
 
     const int MAX_RETRIES = 20;
-    const string LEGACY_VERSION = "1.1.2"; // Default version for old messages
+    const string LEGACY = "1.1.2";
+    const string MODERN = "1.2.2"; 
 
     //static readonly Regex oldRegex = new(@"^\[(\d+)\]:");
     static readonly Regex _oldRegex = new(@"^\[(\d+)\]:(\d+)$");
@@ -100,7 +101,7 @@ internal class EclipseService
             switch (eventType)
             {
                 case (int)NetworkEventSubType.RegisterUser:
-                    RegisterUser(steamId, LEGACY_VERSION);
+                    RegisterUser(steamId, LEGACY);
                     break;
                 default:
                     Core.Log.LogError($"Unknown networkEventSubtype encountered while handling legacy version (<1.2.2) of Eclipse! {eventType}");

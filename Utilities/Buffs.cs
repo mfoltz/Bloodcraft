@@ -5,6 +5,7 @@ using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
@@ -19,6 +20,10 @@ internal static class Buffs
     static ReplaceAbilityOnSlotSystem ReplaceAbilityOnSlotSystem => SystemService.ReplaceAbilityOnSlotSystem;
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
+
+    static readonly PrefabGUID _pveCombatBuff = new(581443919);
+    static readonly PrefabGUID _pvpCombatBuff = new(697095869);
+    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
     {
@@ -43,9 +48,9 @@ internal static class Buffs
         { 6, 60 },
         { 7, 75 }
     };
-    public static bool TryApplyBuff(Entity character, PrefabGUID buffPrefabGuid)
+    public static bool TryApplyBuff(this Entity entity, PrefabGUID buffPrefabGuid)
     {
-        if (!character.HasBuff(buffPrefabGuid))
+        if (!entity.HasBuff(buffPrefabGuid))
         {
             ApplyBuffDebugEvent applyBuffDebugEvent = new()
             {
@@ -54,8 +59,8 @@ internal static class Buffs
 
             FromCharacter fromCharacter = new()
             {
-                Character = character,
-                User = character
+                Character = entity,
+                User = entity
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
@@ -511,9 +516,9 @@ internal static class Buffs
             return;
         }
     }
-    public static void ApplyPermanentBuff(Entity player, PrefabGUID buffPrefab)
+    public static void HandlePermanentBuff(Entity player, PrefabGUID buffPrefab)
     {
-        bool appliedBuff = TryApplyBuff(player, buffPrefab);
+        bool appliedBuff = player.TryApplyBuff(buffPrefab);
 
         if (appliedBuff && ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
         {
@@ -563,7 +568,7 @@ internal static class Buffs
             });
         }
     }
-    public static void ApplyClassBuffs(Entity player, ulong steamId)
+    public static void HandleClassBuffs(Entity player, ulong steamId)
     {
         if (!HasClass(steamId)) return;
 
@@ -598,11 +603,11 @@ internal static class Buffs
 
             for (int i = 0; i < numBuffsToApply; i++)
             {
-                ApplyPermanentBuff(player, classBuffs[i]);
+                HandlePermanentBuff(player, classBuffs[i]);
             }
         }
     }
-    public static void HandleShinyBuff(Entity entity, PrefabGUID buffPrefabGuid) // using this for shardbearer visuals as well but prefer this method name
+    public static void ModifyShinyBuff(Entity entity, PrefabGUID buffPrefabGuid) // using this for shardbearer visuals as well but prefer this method name
     {
         if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
@@ -683,7 +688,7 @@ internal static class Buffs
             UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Add(new PrefabGUID(buff));
         }
     }
-    public static void HandleExoFormBuff(Entity buffEntity, Entity playerCharacter)
+    public static void ModifyExoFormBuff(Entity buffEntity, Entity playerCharacter)
     {
         Entity userEntity = playerCharacter.GetUserEntity();
         User user = userEntity.Read<User>();
@@ -814,5 +819,92 @@ internal static class Buffs
         LocalizationService.HandleServerReply(EntityManager, user, durationMessage);
 
         ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f).Start(); // Start countdown messages 5 seconds before buff expires
+    }
+    public static bool IsPlayerInCombat(this Entity entity)
+    {
+        if (entity.IsPlayer())
+        {
+            return entity.HasBuff(_pveCombatBuff) || entity.HasBuff(_pvpCombatBuff);
+        }
+
+        return false;
+    }
+    public static bool TryGetBuff(this Entity entity, PrefabGUID buffPrefabGUID, out Entity buffEntity)
+    {
+        if (ServerGameManager.TryGetBuff(entity, buffPrefabGUID.ToIdentifier(), out buffEntity))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryRemoveBuff(this Entity entity, PrefabGUID buffPrefabGuid)
+    {
+        if (entity.TryGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryApplyAndGetBuff(this Entity entity, PrefabGUID buffPrefabGuid, out Entity buffEntity)
+    {
+        buffEntity = Entity.Null;
+
+        if (entity.TryApplyBuff(buffPrefabGuid) && entity.TryGetBuff(buffPrefabGuid, out buffEntity))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryApplyBuffWithOwner(this Entity target, Entity owner, PrefabGUID buffPrefabGuid)
+    {
+        if (target.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity) && buffEntity.Has<EntityOwner>())
+        {
+            buffEntity.With((ref EntityOwner entityOwner) =>
+            {
+                entityOwner.Owner = owner;
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+    public static void TryApplyBuffWithLifeTime(this Entity entity, PrefabGUID buffPrefabGuid, float duration)
+    {
+        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            if (!buffEntity.Has<LifeTime>()) buffEntity.Add<LifeTime>();
+
+            buffEntity.With((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = duration;
+                lifeTime.EndAction = LifeTimeEndAction.Destroy;
+            });
+        }
+    }
+    public static bool TryApplyAndGetBuffWithOwner(this Entity target, Entity owner, PrefabGUID buffPrefabGUID, out Entity buffEntity)
+    {
+        buffEntity = Entity.Null;
+
+        if (target.TryApplyAndGetBuff(buffPrefabGUID, out buffEntity))
+        {
+            buffEntity.With((ref EntityOwner entityOwner) =>
+            {
+                entityOwner.Owner = owner;
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+    public static void RefreshStats(Entity playerCharacter)
+    {
+        if (playerCharacter.HasBuff(_vBloodBloodBuff)) playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
     }
 }

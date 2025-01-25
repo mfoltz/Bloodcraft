@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -8,8 +7,9 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using static Bloodcraft.Utilities.Progression;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.Progression;
+using static UnityEngine.ParticleSystem.PlaybackState;
 using Random = System.Random;
 using User = ProjectM.Network.User;
 
@@ -27,7 +27,7 @@ internal static class ProfessionSystem
     const float SCT_DELAY = 0.75f;
 
     static readonly float _professionMultiplier = ConfigService.ProfessionMultiplier;
-    static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
+    const int MAX_PROFESSION_LEVEL = 100;
 
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
     static readonly AssetGuid _bonusYieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
@@ -36,6 +36,40 @@ internal static class ProfessionSystem
     static readonly PrefabGUID _experienceGainSCT = new(1876501183); // SCT resource gain prefabguid
     static readonly PrefabGUID _bonusYieldSCT = new(106212079);
     static readonly float3 _bonusYieldColor = new(0.6f, 0.8f, 1.0f);
+    static readonly float3 _goldOreColor = new(1.0f, 0.8431373f, 0.0f);
+    static readonly float3 _seedColor = new(0.5647059f, 0.9333333f, 0.5647059f);
+    static readonly float3 _saplingColor = new(0.36f, 0.25f, 0.20f);
+
+    static readonly PrefabGUID _goldOre = new(660533034);
+
+    static readonly List<PrefabGUID> _plantSeeds =
+    [
+        new(-1463158090), // Item_Building_Plants_BleedingHeart_Seed
+        new(531984050),   // Item_Building_Plants_BloodRose_Seed
+        new(-1289010178), // Item_Building_Plants_Cotton_Seed
+        new(675013523),   // Item_Building_Plants_FireBlossom_Seed
+        new(1762839393),  // Item_Building_Plants_GhostShroom_Seed
+        new(-1681104075), // Item_Building_Plants_Grapes_Seed
+        new(-1987586694), // Item_Building_Plants_HellsClarion_Seed
+        new(-1495639636), // Item_Building_Plants_Lotus_Seed
+        new(-1386314668), // Item_Building_Plants_MourningLily_Seed
+        new(1985892973),  // Item_Building_Plants_SnowFlower_Seed
+        new(-473351958),  // Item_Building_Plants_Sunflower_Seed
+        new(-1370210913), // Item_Building_Plants_Thistle_Seed
+        new(1915695899),  // Item_Building_Plants_TrippyShroom_Seed
+    ];
+
+    static readonly List<PrefabGUID> _treeSaplings =
+    [
+        new(-1897495615), // Item_Building_Sapling_AppleCursed_Seed
+        new(1226559814),  // Item_Building_Sapling_AppleTree_Seed
+        new(1996361886),  // Item_Building_Sapling_Aspen_Seed
+        new(-2035190786), // Item_Building_Sapling_AspenAutum_Seed
+        new(1552240197),  // Item_Building_Sapling_Birch_Seed
+        new(2000981302),  // Item_Building_Sapling_BirchAutum_Seed
+        new(-1043479168), // Item_Building_Sapling_Cypress_Seed
+        new(-1800289670), // Item_Building_Sapling_GloomTree_Seed
+    ];
     public static void UpdateProfessions(Entity playerCharacter, Entity target)
     {
         Entity userEntity = playerCharacter.GetUserEntity();
@@ -99,35 +133,35 @@ internal static class ProfessionSystem
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity)) return;
 
         int level = GetLevel(steamId, handler);
-        string prefabName = handler.GetProfessionName();
+        string professionName = handler.GetProfessionName();
 
-        if (prefabName.Contains("Fishing"))
+        bool professionLogging = GetPlayerBool(steamId, PROFESSION_LOG_KEY);
+        bool sctYield = GetPlayerBool(steamId, SCT_YIELD_KEY);
+
+        if (professionName.Contains("Fishing"))
         {
             List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefabGuid);
             int bonusYield = level / 20;
 
-            if (bonusYield.Equals(0)) return;
+            if (bonusYield <= 0) return;
 
             int index = _random.Next(fishDrops.Count);
             PrefabGUID fish = fishDrops[index];
 
             if (ServerGameManager.TryAddInventoryItem(playerCharacter, fish, bonusYield))
             {
-                if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
-                if (GetPlayerBool(steamId, SCT_YIELD_KEY))
-                {
-                    HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
-                }
+                HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, fish, professionName, bonusYield, professionLogging, sctYield, ref delay);
+
+                // if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {professionName}");
+                // if (GetPlayerBool(steamId, SCT_YIELD_KEY)) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, ref delay);
             }
             else
             {
                 InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, fish, bonusYield, new Entity());
+                HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, fish, professionName, bonusYield, professionLogging, sctYield, ref delay);
 
-                if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
-                if (GetPlayerBool(steamId, SCT_YIELD_KEY))
-                {
-                    HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
-                }
+                // if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{fishDrops[index].GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {professionName}, but it dropped on the ground since your inventory was full.");
+                // if (GetPlayerBool(steamId, SCT_YIELD_KEY)) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, ref delay);
             }
         }
         else if (prefabEntity.Has<DropTableBuffer>())
@@ -148,7 +182,7 @@ internal static class ProfessionSystem
 
                             if (itemName.Contains("ingredient", StringComparison.OrdinalIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.OrdinalIgnoreCase))
                             {
-                                int bonusYield = 0;
+                                int bonusYield;
 
                                 if (itemName.Contains("plant", StringComparison.OrdinalIgnoreCase) || itemName.Contains("trippyshroom", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -160,12 +194,48 @@ internal static class ProfessionSystem
                                 }
 
                                 if (bonusYield <= 0) return;
-                                else if (ServerGameManager.TryAddInventoryItem(playerCharacter, dropTableData.ItemGuid, bonusYield))
+
+                                if (ServerGameManager.TryAddInventoryItem(playerCharacter, dropTableData.ItemGuid, bonusYield))
                                 {
-                                    if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}");
-                                    if (GetPlayerBool(steamId, SCT_YIELD_KEY))
+                                    HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, dropTableData.ItemGuid, professionName, bonusYield, professionLogging, sctYield, ref delay);
+
+                                    // if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {professionName}");
+                                    // if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, ref delay);
+
+                                    if (professionName.Contains("Mining"))
                                     {
-                                        HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
+                                        int goldOre = GoldOreRoll(level);
+
+                                        if (goldOre > 0)
+                                        {
+                                            HandleGoldOre(user, userEntity, playerCharacter, target, professionName, goldOre, professionLogging, sctYield, ref delay);
+
+                                            /*
+                                            if (ServerGameManager.TryAddInventoryItem(playerCharacter, _goldOre, goldOre))
+                                            {
+                                                if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}");
+
+                                                if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, goldOre, delay);
+                                            }
+                                            else
+                                            {
+                                                InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _goldOre, goldOre, new Entity());
+
+                                                if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}, but it dropped on the ground since your inventory was full.");
+                                                if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, goldOre, delay);
+                                            }
+                                            */
+                                        }
+                                    }
+                                    else if (professionName.Contains("Harvesting"))
+                                    {
+                                        List<PrefabGUID> bonusSeeds = PlantSeedsRoll(level);
+                                        HandlePlantSeeds(user, userEntity, playerCharacter, target, professionName, bonusSeeds, professionLogging, sctYield, ref delay);
+                                    }
+                                    else if (professionName.Contains("Woodcutting"))
+                                    {
+                                        List<PrefabGUID> bonusSaplings = TreeSaplingsRoll(level);
+                                        HandleTreeSaplings(user, userEntity, playerCharacter, target, professionName, bonusSaplings, professionLogging, sctYield, ref delay);
                                     }
 
                                     break;
@@ -173,11 +243,45 @@ internal static class ProfessionSystem
                                 else
                                 {
                                     InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, dropTableData.ItemGuid, bonusYield, new Entity());
-                                    
-                                    if (GetPlayerBool(steamId, PROFESSION_LOG_KEY)) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {handler.GetProfessionName()}, but it dropped on the ground since your inventory was full.");
-                                    if (GetPlayerBool(steamId, SCT_YIELD_KEY))
+                                    HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, dropTableData.ItemGuid, professionName, bonusYield, professionLogging, sctYield, ref delay);
+
+                                    // if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"Bonus <color=green>{dropTableData.ItemGuid.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {professionName}, but it dropped on the ground since your inventory was full.");
+                                    // if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, ref delay);
+
+                                    if (professionName.Contains("Mining"))
                                     {
-                                        HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, delay);
+                                        int goldOre = GoldOreRoll(level);
+
+                                        if (goldOre > 0)
+                                        {
+                                            HandleGoldOre(user, userEntity, playerCharacter, target, professionName,goldOre, professionLogging, sctYield, ref delay);
+
+                                            /*
+                                            if (ServerGameManager.TryAddInventoryItem(playerCharacter, _goldOre, goldOre))
+                                            {
+                                                if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}");
+
+                                                if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, goldOre, delay);
+                                            }
+                                            else
+                                            {
+                                                InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _goldOre, goldOre, new Entity());
+
+                                                if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}, but it dropped on the ground since your inventory was full.");
+                                                if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, goldOre, delay);
+                                            }
+                                            */
+                                        }
+                                    }
+                                    else if (professionName.Contains("Harvesting"))
+                                    {
+                                        List<PrefabGUID> bonusSeeds = PlantSeedsRoll(level);
+                                        HandlePlantSeeds(user, userEntity, playerCharacter, target, professionName, bonusSeeds, professionLogging, sctYield, ref delay);
+                                    }
+                                    else if (professionName.Contains("Woodcutting"))
+                                    {
+                                        List<PrefabGUID> bonusSaplings = TreeSaplingsRoll(level);
+                                        HandleTreeSaplings(user, userEntity, playerCharacter, target, professionName, bonusSaplings, professionLogging, sctYield, ref delay);
                                     }
 
                                     break;
@@ -212,7 +316,7 @@ internal static class ProfessionSystem
     {
         var xpData = handler.GetProfessionData(steamID);
 
-        if (xpData.Key >= _maxProfessionLevel) return;
+        if (xpData.Key >= MAX_PROFESSION_LEVEL) return;
 
         UpdateProfessionExperience(target, source, steamID, xpData, value, handler, ref delay);
     }
@@ -225,10 +329,10 @@ internal static class ProfessionSystem
         if (newLevel > xpData.Key)
         {
             leveledUp = true;
-            if (newLevel > _maxProfessionLevel)
+            if (newLevel > MAX_PROFESSION_LEVEL)
             {
-                newLevel = _maxProfessionLevel;
-                newExperience = ConvertLevelToXp(_maxProfessionLevel);
+                newLevel = MAX_PROFESSION_LEVEL;
+                newExperience = ConvertLevelToXp(MAX_PROFESSION_LEVEL);
             }
         }
 
@@ -247,7 +351,7 @@ internal static class ProfessionSystem
         if (leveledUp)
         {
             int newLevel = ConvertXpToLevel(handler.GetProfessionData(steamID).Value);
-            if (newLevel < _maxProfessionLevel) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
+            if (newLevel < MAX_PROFESSION_LEVEL) LocalizationService.HandleServerReply(EntityManager, user, $"{professionName} improved to [<color=white>{newLevel}</color>]");
         }
 
         if (GetPlayerBool(steamID, PROFESSION_LOG_KEY))
@@ -262,7 +366,7 @@ internal static class ProfessionSystem
             float3 professionColor = handler.GetProfessionColor();
 
             ProfessionSCTDelayRoutine(_experienceGainSCT, _experienceAssetGuid, playerCharacter, userEntity, targetPosition, professionColor, gainedXP, delay).Start();
-            delay *= 2f;
+            delay += SCT_DELAY;
         }
     }
     static IEnumerator ProfessionSCTDelayRoutine(PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 position, float3 color, float value, float delay)
@@ -297,11 +401,183 @@ internal static class ProfessionSystem
         double earnedXP = nextLevelXP - currentXP;
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
     }
-    static void HandleBonusYieldScrollingText(Entity target, PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 color, float bonusYield, float delay)
+    static void HandleBonusYieldScrollingText(Entity target, PrefabGUID sctPrefabGuid, AssetGuid assetGuid, Entity playerCharacter, Entity userEntity, float3 color, float bonusYield, ref float delay)
     {
         float3 targetPosition = target.GetPosition();
 
         ProfessionSCTDelayRoutine(sctPrefabGuid, assetGuid, playerCharacter, userEntity, targetPosition, color, bonusYield, delay).Start();
+        delay += SCT_DELAY;
+    }
+    static void HandleExperienceAndBonusYield(User user, Entity userEntity, Entity playerCharacter, Entity target, PrefabGUID resource, string professionName, float bonusYield, bool professionLogging, bool sctYield, ref float delay)
+    {
+        if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>{resource.GetLocalizedName()}</color>x<color=white>{bonusYield}</color> received from {professionName}");
+        if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _bonusYieldColor, bonusYield, ref delay);
+    }
+    static int GoldOreRoll(int level)
+    {
+        if (level < 20) return 0;
+
+        int maxRolls = Math.Min(5, (level - 20) / 20 + 1);
+        int goldOreCount = 0;
+
+        int[] successChances = [10, 20, 30, 40, 50];
+
+        for (int i = 0; i < maxRolls; i++)
+        {
+            int roll = _random.Next(1, 101); 
+            if (roll <= successChances[i])
+            {
+                goldOreCount++;
+            }
+        }
+
+        return goldOreCount;
+    }
+    static void HandleGoldOre(User user, Entity userEntity, Entity playerCharacter, Entity target, string professionName, int goldOre, bool professionLogging, bool sctYield, ref float delay)
+    {
+        if (ServerGameManager.TryAddInventoryItem(playerCharacter, _goldOre, goldOre))
+        {
+            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}");
+
+            if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _goldOreColor, goldOre, ref delay);
+        }
+        else
+        {
+            InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _goldOre, goldOre, new Entity());
+
+            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Gold Ore</color>x<color=white>{goldOre}</color> received from {professionName}, but it dropped on the ground since your inventory is full.");
+            if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _goldOreColor, goldOre, ref delay);
+        }
+    }
+    static List<PrefabGUID> PlantSeedsRoll(int level)
+    {
+        if (level < 20) return []; // No rolls if below level 20.
+
+        int maxRolls = Math.Min(5, (level - 20) / 20 + 1); // Calculate number of rolls (up to 5).
+        List<PrefabGUID> harvestedSeeds = [];
+        int[] successChances = [5, 10, 15, 20, 25]; // Success chances per roll.
+
+        for (int i = 0; i < maxRolls; i++)
+        {
+            int roll = _random.Next(1, 101); // Random number between 1-100.
+            if (roll <= successChances[i])
+            {
+                int index = _random.Next(0, _plantSeeds.Count); // Random seed selection.
+                harvestedSeeds.Add(_plantSeeds[index]);
+            }
+        }
+
+        return harvestedSeeds;
+    }
+    static void HandlePlantSeeds(User user, Entity userEntity, Entity playerCharacter, Entity target, string professionName, List<PrefabGUID> seeds, bool professionLogging, bool sctYield, ref float delay)
+    {
+        int quantity = seeds.Count;
+        bool fellOnGround = false;
+
+        bool chatMessage = false;
+        bool sctMessage = false;
+
+        foreach (PrefabGUID seed in seeds)
+        {
+            if (ServerGameManager.TryAddInventoryItem(playerCharacter, seed, 1))
+            {
+                chatMessage = true;
+                sctMessage = true;
+            }
+            else
+            {
+                InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, seed, 1, new Entity());
+                fellOnGround = true;
+
+                chatMessage = true;
+                sctMessage = true;
+            }
+        }
+
+        if (chatMessage)
+        {
+            if (professionLogging)
+            {
+                if (!fellOnGround)
+                {
+                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Seed(s)</color>x<color=white>{quantity}</color> received from {professionName}!");
+                }
+                else
+                {
+                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Seed(s)</color>x<color=white>{quantity}</color> received from {professionName}, but some fell on the ground since your inventory is full.");
+                }
+            }
+        }
+
+        if (sctMessage)
+        {
+            if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _seedColor, quantity, ref delay);
+        }
+    }
+    static List<PrefabGUID> TreeSaplingsRoll(int level)
+    {
+        if (level < 20) return []; // No rolls if below level 20.
+
+        int maxRolls = Math.Min(5, (level - 20) / 20 + 1); // Calculate number of rolls (up to 5).
+        List<PrefabGUID> harvestedSaplings = [];
+        int[] successChances = [10, 20, 30, 40, 50]; // Woodcutting-specific success chances.
+
+        for (int i = 0; i < maxRolls; i++)
+        {
+            int roll = _random.Next(1, 101); // Random number between 1-100.
+            if (roll <= successChances[i])
+            {
+                int index = _random.Next(0, _treeSaplings.Count); // Random sapling selection.
+                harvestedSaplings.Add(_treeSaplings[index]);
+            }
+        }
+
+        return harvestedSaplings;
+    }
+    static void HandleTreeSaplings(User user, Entity userEntity, Entity playerCharacter, Entity target, string professionName, List<PrefabGUID> saplings, bool professionLogging, bool sctYield, ref float delay)
+    {
+        int quantity = saplings.Count;
+        bool fellOnGround = false;
+
+        bool chatMessage = false;
+        bool sctMessage = false;
+
+        foreach (PrefabGUID seed in saplings)
+        {
+            if (ServerGameManager.TryAddInventoryItem(playerCharacter, seed, 1))
+            {
+                chatMessage = true;
+                sctMessage = true;
+            }
+            else
+            {
+                InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, seed, 1, new Entity());
+                fellOnGround = true;
+
+                chatMessage = true;
+                sctMessage = true;
+            }
+        }
+
+        if (chatMessage)
+        {
+            if (professionLogging)
+            {
+                if (!fellOnGround)
+                {
+                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Saplings(s)</color>x<color=white>{quantity}</color> received from {professionName}!");
+                }
+                else
+                {
+                    LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Bonus Saplings(s)</color>x<color=white>{quantity}</color> received from {professionName}, but some fell on the ground since your inventory is full.");
+                }
+            }
+        }
+
+        if (sctMessage)
+        {
+            if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _saplingColor, quantity, ref delay);
+        }
     }
 }
 internal static class ProfessionMappings

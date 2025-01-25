@@ -9,6 +9,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
@@ -17,20 +18,43 @@ internal static class ReactToInventoryChangedSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
+    static readonly System.Random _random = new();
+
+    static readonly WaitForSeconds _spawnDelay = new(0.1f);
+
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
+    static readonly bool _extraRecipes = ConfigService.ExtraRecipes;
 
-    static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
-
+    const int MAX_PROFESSION_LEVEL = 100;
     const float BASE_PROFESSION_XP = 50f;
+    const float ALCHEMY_FACTOR = 3f;
+
+    const float BLOOD_POTION_FACTOR = 25f;
+    const float MERLOT_BONUS = 2f;
+    const float MAX_BLOOD_QUALITY = 100f;
+
     const float SCT_DELAY = 0.75f;
+
+    static readonly PrefabGUID _itemJewelTemplate = new(1075994038);
+    static readonly PrefabGUID _gemCuttingTable = new(-21483617);
+
+    static readonly List<PrefabGUID> _jewelTemplates = 
+    [
+        new(1412786604),  // Item_Jewel_Unholy_T04
+        new(2023809276),  // Item_Jewel_Storm_T04
+        new(97169184),    // Item_Jewel_Illusion_T04
+        new(-147757377),  // Item_Jewel_Frost_T04
+        new(-1796954295), // Item_Jewel_Chaos_T04
+        new(271061481)   // Item_Jewel_Blood_T04
+    ];
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ReactToInventoryChangedSystem __instance)
     {
         if (!Core._initialized) return;
-        else if (!_professions && !_quests) return;
+        else if (!_professions && !_quests && !_extraRecipes) return;
 
         NativeArray<InventoryChangedEvent> inventoryChangedEvents = __instance.__query_2096870024_0.ToComponentDataArray<InventoryChangedEvent>(Allocator.Temp);
         try
@@ -54,20 +78,26 @@ internal static class ReactToInventoryChangedSystemPatch
                     }
                     else if (inventoryConnection.InventoryOwner.TryGetComponent(out UserOwner userOwner) && userOwner.Owner.GetEntityOnServer().TryGetComponent(out User user))
                     {
-                        Entity craftingStation = inventoryConnection.InventoryOwner;
+                        Entity castleWorkstation = inventoryConnection.InventoryOwner;
                         ulong steamId = user.PlatformId;
 
                         Dictionary<ulong, User> clanMembers = [];
                         Entity clanEntity = user.ClanEntity.GetEntityOnServer();
                         
-                        PrefabGUID itemPrefabGUID = inventoryChangedEvent.Item;
-                        Entity itemPrefab = inventoryChangedEvent.ItemEntity;
-                        string itemName = itemPrefabGUID.GetPrefabName();
+                        PrefabGUID itemPrefabGuid = inventoryChangedEvent.Item;
+                        Entity itemEntity = inventoryChangedEvent.ItemEntity;
+                        string itemName = itemPrefabGuid.GetPrefabName();
 
-                        if (itemPrefab.Has<UpgradeableLegendaryItem>())
+                        if (_extraRecipes && castleWorkstation.GetPrefabGuid().Equals(_gemCuttingTable) && itemPrefabGuid.Equals(_itemJewelTemplate))
                         {
-                            int tier = itemPrefab.Read<UpgradeableLegendaryItem>().CurrentTier;
-                            itemPrefabGUID = itemPrefab.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
+                            SpawnPrimalJewel(inventory);
+                            continue;
+                        }
+                        
+                        if (itemEntity.Has<UpgradeableLegendaryItem>())
+                        {
+                            int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+                            itemPrefabGuid = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>()[tier].TierPrefab;
                         }
 
                         if (!clanEntity.Exists()) clanMembers.TryAdd(user.PlatformId, user);
@@ -87,65 +117,67 @@ internal static class ReactToInventoryChangedSystemPatch
                             steamId = keyValuePair.Key;
                             user = keyValuePair.Value;
 
-                            if (CraftingSystemPatches.ValidatedCraftingJobs.TryGetValue(steamId, out var craftingStationJobs) && craftingStationJobs.TryGetValue(craftingStation, out var craftingJobs) && craftingJobs.TryGetValue(itemPrefabGUID, out int jobs) && jobs > 0)
+                            if (CraftingSystemPatches.ValidatedCraftingJobs.TryGetValue(steamId, out var craftingStationJobs) && craftingStationJobs.TryGetValue(castleWorkstation, out var craftingJobs) && craftingJobs.TryGetValue(itemPrefabGuid, out int jobs) && jobs > 0)
                             {
                                 --jobs;
 
-                                if (jobs == 0) craftingJobs.Remove(itemPrefabGUID);
-                                else craftingJobs[itemPrefabGUID] = jobs;
+                                if (jobs == 0) craftingJobs.Remove(itemPrefabGuid);
+                                else craftingJobs[itemPrefabGuid] = jobs;
 
-                                if (_quests && steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefabGUID, 1, user);
+                                if (_quests && steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefabGuid, 1, user);
 
                                 if (_professions)
                                 {
-                                    float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGUID);
+                                    float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGuid);
                                     float delay = SCT_DELAY;
 
-                                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGUID, "");
-                                    if (handler != null)
+                                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGuid, "");
+                                    switch (handler)
                                     {
-                                        if (handler.GetProfessionName().Contains("Alchemy")) professionXP *= 3;
-                                        if (itemName.EndsWith("Bloodwine")) professionXP *= 2;
+                                        case BlacksmithingHandler:
 
-                                        ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                        switch (handler)
-                                        {
-                                            case BlacksmithingHandler:
-                                                if (itemPrefab.Has<Durability>())
+                                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
+                                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+
+                                            break;
+                                        case AlchemyHandler:
+
+                                            if (itemEntity.TryGetComponent(out StoredBlood storedBlood))
+                                            {
+                                                bool merlot = itemName.EndsWith("Bloodwine");
+                                                float alchemyMultiplier;
+
+                                                if (merlot)
                                                 {
-                                                    Durability durability = itemPrefab.Read<Durability>();
-                                                    int level = handler.GetProfessionData(steamId).Key;
-                                                    durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
-                                                    durability.Value = durability.MaxDurability;
-                                                    itemPrefab.Write(durability);
+                                                    alchemyMultiplier = Math.Min(1f, storedBlood.BloodQuality / BLOOD_POTION_FACTOR) * MERLOT_BONUS;
                                                 }
-                                                //EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
-                                                break;
-                                            case AlchemyHandler:
-                                                break;
-                                            case EnchantingHandler:
-                                                if (itemPrefab.Has<Durability>())
+                                                else
                                                 {
-                                                    Durability durability = itemPrefab.Read<Durability>();
-                                                    int level = handler.GetProfessionData(steamId).Key;
-                                                    durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
-                                                    durability.Value = durability.MaxDurability;
-                                                    itemPrefab.Write(durability);
+                                                    alchemyMultiplier = Math.Min(1f, storedBlood.BloodQuality / BLOOD_POTION_FACTOR);
                                                 }
-                                                //EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
-                                                break;
-                                            case TailoringHandler:
-                                                if (itemPrefab.Has<Durability>())
-                                                {
-                                                    Durability durability = itemPrefab.Read<Durability>();
-                                                    int level = handler.GetProfessionData(steamId).Key;
-                                                    durability.MaxDurability *= (1 + level / (float)_maxProfessionLevel);
-                                                    durability.Value = durability.MaxDurability;
-                                                    itemPrefab.Write(durability);
-                                                }
-                                                //EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
-                                                break;
-                                        }
+
+                                                professionXP *= alchemyMultiplier;
+                                            }
+
+                                            professionXP *= ALCHEMY_FACTOR;
+                                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
+
+                                            break;
+                                        case EnchantingHandler:
+
+                                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
+                                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+
+                                            break;
+                                        case TailoringHandler:
+
+                                            ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
+                                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+
+                                            break;
+                                        default:
+
+                                            break;
                                     }
                                 }
 
@@ -159,6 +191,14 @@ internal static class ReactToInventoryChangedSystemPatch
         finally
         {
             inventoryChangedEvents.Dispose();
+        }
+    }
+    static void SpawnPrimalJewel(Entity inventory)
+    {
+        if (ServerGameManager.TryRemoveInventoryItem(inventory, _itemJewelTemplate, 1))
+        {
+            PrefabGUID primalJewel = _jewelTemplates.ElementAt(_random.Next(_jewelTemplates.Count));
+            ServerGameManager.TryAddInventoryItem(inventory, primalJewel, 1);
         }
     }
 }

@@ -23,11 +23,11 @@ public static class ProfessionHandlerFactory
         new HarvestingHandler(),
         new EnchantingHandler()
     ];
-    public static IProfessionHandler GetProfessionHandler(PrefabGUID prefabGUID, string context = "")
+    public static IProfessionHandler GetProfessionHandler(PrefabGUID prefabGuid = default, string context = "")
     {
         string itemTypeName = string.Empty;
 
-        if (prefabGUID.HasValue()) itemTypeName = prefabGUID.GetPrefabName().ToLower();
+        if (prefabGuid.HasValue()) itemTypeName = prefabGuid.GetPrefabName().ToLower();
 
         switch (context)
         {

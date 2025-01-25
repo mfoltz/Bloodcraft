@@ -1,5 +1,4 @@
 using Bloodcraft.Services;
-using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -16,7 +15,7 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
-internal static class Extensions // probably need to organize this soon
+internal static class Extensions // probably need to organize this soonTM
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -349,89 +348,6 @@ internal static class Extensions // probably need to organize this soon
     public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGUID)
     {
         return ServerGameManager.HasBuff(entity, buffPrefabGUID.ToIdentifier());
-    }
-    public static bool TryGetBuff(this Entity entity, PrefabGUID buffPrefabGUID, out Entity buffEntity)
-    {
-        if (ServerGameManager.TryGetBuff(entity, buffPrefabGUID.ToIdentifier(), out buffEntity))
-        {
-            return true;
-        }
-
-        return false;
-    }
-    public static bool TryApplyBuff(this Entity entity, PrefabGUID buffPrefabGUID)
-    {
-        if (Buffs.TryApplyBuff(entity, buffPrefabGUID))
-        {
-            return true;
-        }
-
-        return false;
-    }
-    public static bool TryRemoveBuff(this Entity entity, PrefabGUID buffPrefabGuid)
-    {
-        if (entity.TryGetBuff(buffPrefabGuid, out Entity buffEntity))
-        {
-            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-
-            return true;
-        }
-
-        return false;
-    }
-    public static bool TryApplyAndGetBuff(this Entity entity, PrefabGUID buffPrefabGUID, out Entity buffEntity)
-    {
-        buffEntity = Entity.Null;
-
-        if (Buffs.TryApplyBuff(entity, buffPrefabGUID) && entity.TryGetBuff(buffPrefabGUID, out buffEntity))
-        {
-            return true;
-        }
-
-        return false;
-    }
-    public static bool TryApplyBuffWithOwner(this Entity target, Entity owner, PrefabGUID buffPrefabGuid)
-    {
-        if (target.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity) && buffEntity.Has<EntityOwner>())
-        {
-            buffEntity.With((ref EntityOwner entityOwner) =>
-            {
-                entityOwner.Owner = owner;
-            });
-
-            return true;
-        }
-
-        return false;
-    }
-    public static void TryApplyBuffWithLifeTime(this Entity entity, PrefabGUID buffPrefabGuid, float duration)
-    {
-        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
-        {
-            if (!buffEntity.Has<LifeTime>()) buffEntity.Add<LifeTime>();
-
-            buffEntity.With((ref LifeTime lifeTime) =>
-            {
-                lifeTime.Duration = duration;
-                lifeTime.EndAction = LifeTimeEndAction.Destroy;
-            });
-        }
-    }
-    public static bool TryApplyAndGetBuffWithOwner(this Entity target, Entity owner, PrefabGUID buffPrefabGUID, out Entity buffEntity)
-    {
-        buffEntity = Entity.Null;
-
-        if (target.TryApplyAndGetBuff(buffPrefabGUID, out buffEntity))
-        {
-            buffEntity.With((ref EntityOwner entityOwner) =>
-            {
-                entityOwner.Owner = owner;
-            });
-
-            return true;
-        }
-
-        return false;
     }
     public static unsafe bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
     {

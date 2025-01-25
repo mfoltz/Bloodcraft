@@ -123,17 +123,13 @@ internal static class BloodManager
             steamId.SetPlayerBloodStats(bloodStats);
         }
     }
-    public static void UpdateBloodStats() // call here after catching 
-    {
-
-    }
-    public static void ApplyBloodStats(ulong steamId, BloodType bloodType, Entity bloodBuff)
+    public static void ApplyBloodStats(Entity bloodBuff, BloodType bloodType, ulong steamId)
     {
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
 
         if (handler != null && steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
         {
-            if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>()) // add bonuses if doesn't have buffer
+            if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>())
             {
                 EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
             }
@@ -142,8 +138,8 @@ internal static class BloodManager
             foreach (var bloodStatType in bonuses)
             {
                 float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodType, bloodStatType);
-
                 bool found = false;
+
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     ModifyUnitStatBuff_DOTS statBuff = buffer[i];
@@ -175,8 +171,6 @@ internal static class BloodManager
                     buffer.Add(newStatBuff);
                 }
             }
-
-            ModifyUnitStatBuffSystemSpawn.OnUpdate();
         }
     }
     public static float CalculateScaledBloodBonus(IBloodHandler handler, ulong steamId, BloodType bloodType, BloodStatType statType)
@@ -204,8 +198,10 @@ internal static class BloodManager
             }
 
             float scaledBonus = maxBonus * ((float)xpData.Key / _maxLegacyLevel); // Scale bonus up to maxLevel then full effect
+
             return scaledBonus;
         }
+
         return 0; // Return 0 if no handler is found or other error
     }
     public static BloodType GetCurrentBloodType(Entity character)

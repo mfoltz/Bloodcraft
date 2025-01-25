@@ -15,7 +15,6 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsMa
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
-using static Bloodcraft.Systems.Familiars.FamiliarLevelingSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
@@ -62,6 +61,76 @@ internal static class Familiars
         Legs,
         Gloves
     }
+
+    public static readonly Dictionary<string, PrefabGUID> VBloodNamePrefabGuidMap = new()
+    {
+        { "Mairwyn the Elementalist", new(-2013903325) },
+        { "Clive the Firestarter", new(1896428751) },
+        { "Rufus the Foreman", new(2122229952) },
+        { "Grayson the Armourer", new(1106149033) },
+        { "Errol the Stonebreaker", new(-2025101517) },
+        { "Quincey the Bandit King", new(-1659822956) },
+        { "Lord Styx the Night Champion", new(1112948824) },
+        { "Gorecrusher the Behemoth", new(-1936575244) },
+        { "Albert the Duke of Balaton", new(-203043163) },
+        { "Matka the Curse Weaver", new(-910296704) },
+        { "Alpha the White Wolf", new(-1905691330) },
+        { "Terah the Geomancer", new(-1065970933) },
+        { "Morian the Stormwing Matriarch", new(685266977) },
+        { "Talzur the Winged Horror", new(-393555055) },
+        { "Raziel the Shepherd", new(-680831417) },
+        { "Vincent the Frostbringer", new(-29797003) },
+        { "Octavian the Militia Captain", new(1688478381) },
+        { "Meredith the Bright Archer", new(850622034) },
+        { "Ungora the Spider Queen", new(-548489519) },
+        { "Goreswine the Ravager", new(577478542) },
+        { "Leandra the Shadow Priestess", new(939467639) },
+        { "Cyril the Cursed Smith", new(326378955) },
+        { "Bane the Shadowblade", new(613251918) },
+        { "Kriig the Undead General", new(-1365931036) },
+        { "Nicholaus the Fallen", new(153390636) },
+        { "Foulrot the Soultaker", new(-1208888966) },
+        { "Putrid Rat", new(-2039908510) },
+        { "Jade the Vampire Hunter", new(-1968372384) },
+        { "Tristan the Vampire Hunter", new(-1449631170) },
+        { "Ben the Old Wanderer", new(109969450) },
+        { "Beatrice the Tailor", new(-1942352521) },
+        { "Frostmaw the Mountain Terror", new(24378719) },
+        { "Terrorclaw the Ogre", new(-1347412392) },
+        { "Keely the Frost Archer", new(1124739990)},
+        { "Lidia the Chaos Archer", new(763273073)},
+        { "Finn the Fisherman", new(-2122682556)},
+        { "Azariel the Sunbringer", new(114912615)},
+        { "Sir Magnus the Overseer", new(-26105228)},
+        { "Baron du Bouchon the Sommelier", new(192051202)},
+        { "Solarus the Immaculate", new(-740796338)},
+        { "Kodia the Ferocious Bear", new(-1391546313)},
+        { "Ziva the Engineer", new(172235178)},
+        { "Adam the Firstborn", new(1233988687)},
+        { "Angram the Purifier", new(106480588)},
+        { "Voltatia the Power Master", new(2054432370)},
+        { "Henry Blackbrew the Doctor", new(814083983)},
+        { "Domina the Blade Dancer", new(-1101874342)},
+        { "Grethel the Glassblower", new(910988233)},
+        { "Christina the Sun Priestess", new(-99012450)},
+        { "Maja the Dark Savant", new(1945956671)},
+        { "Polora the Feywalker", new(-484556888)},
+        { "Simon Belmont the Vampire Hunter", new(336560131)},
+        { "General Valencia the Depraved", new(495971434)},
+        { "Dracula the Immortal King", new(-327335305)},
+        { "General Cassius the Betrayer", new(-496360395)},
+        { "General Elena the Hollow", new(795262842)}
+    };
+
+    public static readonly Dictionary<PrefabGUID, int> VBloodSpawnBuffTierMap = new()
+    {
+        {new(600470494), 1},   // Buff_General_Spawn_VBlood_AlphaWolf
+        {new(148706785), 4},   // Buff_General_Spawn_VBlood_FirstBandits
+        {new(-703593639), 7},  // Buff_General_Spawn_VBlood_EarlyGame
+        {new(-184730451), 10},  // Buff_General_Spawn_VBlood_MidGame
+        {new(-2071666138), 15}, // Buff_General_Spawn_VBlood_EndGame
+        {new(-1163165749), 25}  // Buff_General_Spawn_VBlood_ShardBosses
+    };
 
     public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];
     public static readonly ConcurrentDictionary<Entity, Entity> FamiliarServantMap = [];
@@ -358,7 +427,7 @@ internal static class Familiars
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
 
-                InstantiateFamiliar(user, playerCharacter, famKeys[boxIndex - 1]);
+                InstantiateFamiliar(user, playerCharacter, famKeys[boxIndex - 1]).Start();
             }
             else if (boxIndex == -1)
             {
@@ -377,7 +446,7 @@ internal static class Familiars
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
 
-                InstantiateFamiliar(user, playerCharacter, famKeys[boxIndex - 1]);
+                InstantiateFamiliar(user, playerCharacter, famKeys[boxIndex - 1]).Start();
             }
         }
         else
@@ -492,7 +561,7 @@ internal static class Familiars
             });
         }
 
-        if (Buffs.TryApplyBuff(familiar, _defaultEmoteBuff) && familiar.TryGetBuff(_defaultEmoteBuff, out Entity buffEntity))
+        if (familiar.TryApplyBuff(_defaultEmoteBuff) && familiar.TryGetBuff(_defaultEmoteBuff, out Entity buffEntity))
         {
             buffEntity.With((ref EntityOwner entityOwner) =>
             {
@@ -648,14 +717,15 @@ internal static class Familiars
             return;
         }
 
-        if (stats.Count < FamiliarStatValues.Count) // if less than max stats, parse entry and add if set doesnt already contain
+        if (stats.Count < FamiliarPrestigeStats.Count) // if less than max stats, parse entry and add if set doesnt already contain
         {
             if (!TryParseFamiliarStat(bonusStat, out var stat))
             {
+                /*
                 var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarStatType))
                 .Cast<FamiliarStatType>()
                 .Select(stat =>
-                    $"<color=#00FFFF>{stat}</color>: <color=white>{FamiliarStatValues[stat]}</color>")
+                    $"<color=#00FFFF>{stat}</color>: <color=white>{FamiliarPrestigeStatValues[stat]}</color>")
                 .ToArray();
 
                 int halfLength = familiarStatsWithCaps.Length / 2;
@@ -666,7 +736,9 @@ internal static class Familiars
                 LocalizationService.HandleReply(ctx, "Invalid stat, please choose from the following:");
                 LocalizationService.HandleReply(ctx, $"Available familiar stats (1/2): {familiarStatsLine1}");
                 LocalizationService.HandleReply(ctx, $"Available familiar stats (2/2): {familiarStatsLine2}");
+                */
 
+                LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
                 return;
             }
             else if (!stats.Contains(stat))
@@ -679,7 +751,7 @@ internal static class Familiars
                 return;
             }
         }
-        else if (stats.Count >= FamiliarStatValues.Count && !string.IsNullOrEmpty(bonusStat))
+        else if (stats.Count >= FamiliarPrestigeStats.Count && !string.IsNullOrEmpty(bonusStat))
         {
             LocalizationService.HandleReply(ctx, "Familiar already has max bonus stats, try again without entering a stat.");
             return;

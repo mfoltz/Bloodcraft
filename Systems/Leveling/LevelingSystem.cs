@@ -203,7 +203,7 @@ internal static class LevelingSystem
 
         if (_classes)
         {
-            Buffs.ApplyClassBuffs(playerCharacter, steamId);
+            Buffs.HandleClassBuffs(playerCharacter, steamId);
         }
     }
     public static void NotifyPlayer(Entity player, ulong steamId, float gainedXP, bool leveledUp, int newLevel, int restedXP = 0)

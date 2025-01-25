@@ -80,6 +80,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - classes have synergies with different blood stats (see Classes section)
 	
 ### Prestige
+- Prestige (reset your progress in leveling, weapons and bloods) for varying benefits that make your vampire more powerful over time.
+  - Leveling prestiges will reduce your leveling experience rates, increase your weapon & blood experience rates, and apply a different permanent buff to your vampire per prestige. 
+  - If classes are enabled, prestiging will also unlock spells that can be 'slotted' on the shift key.
 
 ### Classes
 
@@ -98,16 +101,16 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.bloodlegacy loglegacies.bl log`
   - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
-- `.bloodlegacy choosestat [Blood] [BloodStat]`
+- `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
   - Choose a bonus stat to enhance for your blood legacy.
-  - Shortcut: *.bl cst [Blood] [BloodStat]*
+  - Shortcut: *.bl cst [BloodOrStat] [BloodStat]*
 - `.bloodlegacy resetstats`
   - Reset stats for current blood.
   - Shortcut: *.bl rst*
 - `.bloodlegacy liststats`
   - Lists blood stats available.
   - Shortcut: *.bl lst*
-- `.bloodlegacy setlegacy.bl set [Player] [Blood] [Level]` 🔒
+- `.bloodlegacy setlegacy [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
   - Shortcut: *.bl set [Player] [Blood] [Level]*
 - `.bloodlegacy list`
@@ -171,6 +174,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar add [Name] [PrefabGUID/CHAR_Unit_Name]` 🔒
   - Unit testing.
   - Shortcut: *.fam a [Name] [PrefabGUID/CHAR_Unit_Name]*
+- `.familiar echoes [VBloodName]`
+  - VBlood purchasing for exo reward with quantity scaling to unit tier.
+  - Shortcut: *.fam echoes [VBloodName]*
 - `.familiar remove [#]`
   - Removes familiar from current set permanently.
   - Shortcut: *.fam r [#]*
@@ -477,9 +483,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **Prestige Rate Multiplier**: `PrestigeRateMultiplier` (float, default: 0.1)
   Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling.
 - **Exo Prestiging**: `ExoPrestiging` (bool, default: False)
-  Enable or disable exo prestiges (need to max normal prestiges first).
-- **Exo Prestiges**: `ExoPrestiges` (int, default: 100)
-  The number of exo prestiges available.
+  Enable or disable exo prestiges (need to max normal prestiges first, 100 exo prestiges currently available).
 - **Exo Prestige Reward**: `ExoPrestigeReward` (int, default: 28358550)
   The reward for exo prestiging (tier 3 nether shards by default).
 - **Exo Prestige Reward Quantity**: `ExoPrestigeRewardQuantity` (int, default: 500)
@@ -580,11 +584,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 ### Professions
 - **Profession System**: `ProfessionSystem` (bool, default: False)
   Enable or disable the profession system.
-- **Max Profession Level**: `MaxProfessionLevel` (int, default: 100)
-  The maximum level a player can reach in professions.
 - **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)
   The multiplier for profession experience gained.
-- **Extra Recipes**: `ExtraRecipes` (bool, default: True)
+- **Extra Recipes**: `ExtraRecipes` (bool, default: False)
   Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided.
 
 ### Familiars
@@ -622,11 +624,13 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   The chance for a unit unlock as a familiar.
 - **V Blood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)
   The chance for a VBlood unlock as a familiar.
+- **Primal Echoes**: `PrimalEchoes` (bool, default: False)
+  Enable or disable acquiring vBloods with configured item reward from exo prestiging at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 500)
   Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders.
-- **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 2500)
+- **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 1000)
   Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging).
 
 ### Classes

@@ -124,7 +124,7 @@ internal static class DealDamageSystemPatch
                                         {
                                             if (!playerCharacter.HasBuff(_stormShield01))
                                             {
-                                                playerCharacter.TryApplyBuff(_stormShield01);
+                                                Buffs.TryApplyBuff(playerCharacter, _stormShield01);
                                             }
                                             else if (playerCharacter.TryGetBuff(_stormShield01, out Entity stormShieldFirstBuff))
                                             {
@@ -132,8 +132,7 @@ internal static class DealDamageSystemPatch
                                                 {
                                                     age.Value = 0f;
                                                 });
-
-                                                playerCharacter.TryApplyBuff(_stormShield02);
+                                                Buffs.TryApplyBuff(playerCharacter, _stormShield02);
                                             }
                                         }
                                         else if (playerCharacter.TryGetBuff(_stormShield02, out Entity stormShieldSecondBuff))
@@ -142,8 +141,7 @@ internal static class DealDamageSystemPatch
                                             {
                                                 age.Value = 0f;
                                             });
-
-                                            playerCharacter.TryApplyBuff(_stormShield03);
+                                            Buffs.TryApplyBuff(playerCharacter, _stormShield03);
                                         }
                                     }
                                     else if (playerCharacter.TryGetBuff(_stormShield03, out Entity stormShieldThirdBuff))
@@ -156,7 +154,7 @@ internal static class DealDamageSystemPatch
                                 }
                                 else
                                 {
-                                    playerCharacter.TryApplyBuff(prefabGuid);
+                                    Buffs.TryApplyBuff(playerCharacter, prefabGuid);
                                 }
                             }
                             else
@@ -212,6 +210,11 @@ internal static class DealDamageSystemPatch
         {
             if (!behaviourTreeState.Value.Equals(GenericEnemyState.Combat))
             {
+                familiar.With((ref Follower follower) =>
+                {
+                    follower.ModeModifiable._Value = 1;
+                });
+
                 Familiars.AddToFamiliarAggroBuffer(familiar, entityOwner.Owner);
             }
         }

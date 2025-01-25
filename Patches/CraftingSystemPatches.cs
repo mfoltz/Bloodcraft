@@ -28,10 +28,14 @@ internal static class CraftingSystemPatches
 
     const float CRAFT_THRESHOLD = 0.975f;
     const float SCT_DELAY = 0.75f;
+    const int MAX_PROFESSION_LEVEL = 100;
+
     static readonly float _craftRateModifier = SystemService.ServerGameSettingsSystem._Settings.CraftRateModifier;
 
-    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = []; // guess I'll just start using these if in doubt about the order of operations, so to speak >_>   
+    static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = [];  
     public static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> ValidatedCraftingJobs = [];
+
+    static readonly Dictionary<Entity, bool> _craftFinished = [];
 
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
     [HarmonyPrefix]
@@ -90,7 +94,7 @@ internal static class CraftingSystemPatches
                             float delay = SCT_DELAY;
                             int level = handler.GetProfessionData(steamId).Key;
 
-                            durability.MaxDurability *= (1 + level / (float)ConfigService.MaxProfessionLevel);
+                            durability.MaxDurability *= (1 + level / (float)MAX_PROFESSION_LEVEL);
                             durability.Value = durability.MaxDurability;
                             itemEntity.Write(durability);
 
@@ -105,8 +109,6 @@ internal static class CraftingSystemPatches
             repairEntities.Dispose();
         }
     }
-
-    static readonly Dictionary<Entity, bool> _craftFinished = [];
 
     [HarmonyPatch(typeof(UpdateCraftingSystem), nameof(UpdateCraftingSystem.OnUpdate))]
     [HarmonyPrefix]

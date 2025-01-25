@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -149,7 +150,7 @@ internal static class BloodSystem
         { new PrefabGUID(1934870645), BloodType.Scholar }, // spell bonus
         { new PrefabGUID(1201299233), BloodType.Rogue }, // crit bonus
         { new PrefabGUID(-1266262267), BloodType.Mutant }, // drain bonus
-        { new PrefabGUID(560247144), BloodType.VBlood }, // vblood_0
+        // { new PrefabGUID(560247144), BloodType.VBlood }, // vblood_0
         { new PrefabGUID(1558171501), BloodType.Draculin }, // speed bonus
         { new PrefabGUID(-488475343), BloodType.Immortal }, // phys & spell bonus
         { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
@@ -290,6 +291,7 @@ internal static class BloodSystem
         if (leveledUp)
         {
             HandleBloodLevelUp(user, bloodType, newLevel, steamID);
+            Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
         }
         else if (newLevel >= _maxBloodLevel) return;
         else if (GetPlayerBool(steamID, BLOOD_LOG_KEY))

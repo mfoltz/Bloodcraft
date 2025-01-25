@@ -20,8 +20,7 @@ internal static class ExoForm
     public const float BASE_DURATION = 15f;
     public const float MAX_ADDED_DURATION = 165f;
     const float DAY_SECONDS = 86400f;
-
-    static readonly int _exoPrestiges = ConfigService.ExoPrestiges;
+    const int EXO_PRESTIGES = 100;
 
     static readonly AssetGuid _assetGuid = AssetGuid.FromString("2a1f5c1b-5a50-4ff0-a982-ca37efb8f69d");
     static readonly PrefabGUID _exoCountdownSCT = new(106212079);
@@ -86,7 +85,7 @@ internal static class ExoForm
         }
         else if (prestigeLevel > 1)
         {
-            return 15f + (MAX_ADDED_DURATION / _exoPrestiges) * (prestigeLevel);
+            return 15f + (MAX_ADDED_DURATION / EXO_PRESTIGES) * (prestigeLevel);
         }
 
         return 0f;

@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -268,6 +269,7 @@ internal static class WeaponSystem
         if (leveledUp)
         {
             HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
+            Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
         }
         else if (newLevel >= _maxExpertiseLevel) return;
         else if (GetPlayerBool(steamID, WEAPON_LOG_KEY))

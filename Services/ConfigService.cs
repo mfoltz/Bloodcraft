@@ -144,9 +144,6 @@ public static class ConfigService
     static readonly Lazy<bool> _exoPrestiging = new(() => GetConfigValue<bool>("ExoPrestiging"));
     public static bool ExoPrestiging => _exoPrestiging.Value;
 
-    static readonly Lazy<int> _exoPrestiges = new(() => GetConfigValue<int>("ExoPrestiges"));
-    public static int ExoPrestiges => _exoPrestiges.Value;
-
     static readonly Lazy<int> _exoPrestigeReward = new(() => GetConfigValue<int>("ExoPrestigeReward"));
     public static int ExoPrestigeReward => _exoPrestigeReward.Value;
 
@@ -291,9 +288,6 @@ public static class ConfigService
     static readonly Lazy<bool> _professionSystem = new(() => GetConfigValue<bool>("ProfessionSystem"));
     public static bool ProfessionSystem => _professionSystem.Value;
 
-    static readonly Lazy<int> _maxProfessionLevel = new(() => GetConfigValue<int>("MaxProfessionLevel"));
-    public static int MaxProfessionLevel => _maxProfessionLevel.Value;
-
     static readonly Lazy<float> _professionMultiplier = new(() => GetConfigValue<float>("ProfessionMultiplier"));
     public static float ProfessionMultiplier => _professionMultiplier.Value;
 
@@ -350,6 +344,9 @@ public static class ConfigService
 
     static readonly Lazy<float> _vBloodUnlockChance = new(() => GetConfigValue<float>("VBloodUnlockChance"));
     public static float VBloodUnlockChance => _vBloodUnlockChance.Value;
+
+    static readonly Lazy<bool> _primalEchoes = new(() => GetConfigValue<bool>("PrimalEchoes"));
+    public static bool PrimalEchoes => _primalEchoes.Value;
 
     static readonly Lazy<float> _traitChance = new(() => GetConfigValue<float>("TraitChance"));
     public static float TraitChance => _traitChance.Value;
@@ -544,8 +541,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Prestige", "PrestigeRatesReducer", 0.10f, "Flat factor by which rates are reduced in expertise/legacy per increment of prestige in expertise/legacy."),
             new ConfigEntryDefinition("Prestige", "PrestigeStatMultiplier", 0.10f, "Flat factor by which stats are increased in expertise/legacy bonuses per increment of prestige in expertise/legacy."),
             new ConfigEntryDefinition("Prestige", "PrestigeRateMultiplier", 0.10f, "Flat factor by which rates are increased in expertise/legacy per increment of prestige in leveling."),
-            new ConfigEntryDefinition("Prestige", "ExoPrestiging", false, "Enable or disable exo prestiges (need to max normal prestiges first)."),
-            new ConfigEntryDefinition("Prestige", "ExoPrestiges", 100, "The number of exo prestiges available."),
+            new ConfigEntryDefinition("Prestige", "ExoPrestiging", false, "Enable or disable exo prestiges (need to max normal prestiges first, 100 exo prestiges currently available)."),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default)."),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging."),
             new ConfigEntryDefinition("Prestige", "TrueImmortal", false, "Enable or disable Immortal blood for the duration of exoform."),
@@ -593,9 +589,8 @@ public static class ConfigService
             new ConfigEntryDefinition("Legacies", "ShieldAbsorb", 0.50f, "The base cap for shield absorb."),
             new ConfigEntryDefinition("Legacies", "BloodEfficiency", 0.10f, "The base cap for blood efficiency."),
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
-            new ConfigEntryDefinition("Professions", "MaxProfessionLevel", 100, "The maximum level a player can reach in professions."),
             new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained."),
-            new ConfigEntryDefinition("Professions", "ExtraRecipes", true, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided."),
+            new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided."), // maybe this should be in general >_>
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)."),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars."),
@@ -613,11 +608,12 @@ public static class ConfigService
             new ConfigEntryDefinition("Familiars", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood unlock as a familiar."),
+            new ConfigEntryDefinition("Familiars", "PrimalEchoes", false, "Enable or disable acquiring vBloods with configured item reward from exo prestiging at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable."),
             // new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
             // new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"), // actually maybe vampiricDust
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
             new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 500, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders."),
-            new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 2500, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging)."),
+            new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging)."),
             new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),

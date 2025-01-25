@@ -9,7 +9,7 @@ using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Systems.Leveling.PrestigeSystem;
+using static Bloodcraft.Systems.Leveling.PrestigeManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Commands;
@@ -19,6 +19,8 @@ internal static class PrestigeCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
+    const int EXO_PRESTIGES = 100;
 
     static readonly PrefabGUID _shroudBuff = new(1504279833);
     static readonly PrefabGUID _shroudCloak = new(1063517722);
@@ -38,7 +40,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
         if (ConfigService.ExoPrestiging && parsedPrestigeType.Equals(PrestigeType.Exo))
@@ -50,9 +52,9 @@ internal static class PrestigeCommands
                     LocalizationService.HandleReply(ctx, "You must reach max level before <color=#90EE90>Exo</color> prestiging again.");
                     return;
                 }
-                else if (prestigeData[PrestigeType.Exo] >= ConfigService.ExoPrestiges)
+                else if (prestigeData[PrestigeType.Exo] >= EXO_PRESTIGES)
                 {
-                    LocalizationService.HandleReply(ctx, $"You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{ConfigService.ExoPrestiges}</color>)");
+                    LocalizationService.HandleReply(ctx, $"You have reached the maximum amount of <color=#90EE90>Exo</color> prestiges. (<color=white>{EXO_PRESTIGES}</color>)");
                     return;
                 }
 
@@ -61,7 +63,7 @@ internal static class PrestigeCommands
                 expData = new KeyValuePair<int, float>(0, 0);
                 steamId.SetPlayerExperience(expData);
 
-                LevelingSystem.SetLevel(character);
+                LevelingSystem.SetLevel(playerCharacter);
 
                 int exoPrestiges = ++prestigeData[PrestigeType.Exo];
 
@@ -80,14 +82,14 @@ internal static class PrestigeCommands
                     return;
                 }
 
-                if (ServerGameManager.TryAddInventoryItem(character, exoReward, ConfigService.ExoPrestigeRewardQuantity))
+                if (ServerGameManager.TryAddInventoryItem(playerCharacter, exoReward, ConfigService.ExoPrestigeRewardQuantity))
                 {
                     LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have also been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>!");
                     return;
                 }
                 else
                 {
-                    InventoryUtilitiesServer.CreateDropItem(EntityManager, character, exoReward, ConfigService.ExoPrestigeRewardQuantity, new Entity());
+                    InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, exoReward, ConfigService.ExoPrestigeRewardQuantity, new Entity());
                     LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeReward}</color>! It dropped on the ground becuase your inventory was full though.");
                     return;
                 }
@@ -116,6 +118,7 @@ internal static class PrestigeCommands
         if (CanPrestige(steamId, parsedPrestigeType, xpData.Key))
         {
             PerformPrestige(ctx, steamId, parsedPrestigeType, handler, xpData);
+            Buffs.RefreshStats(playerCharacter);
         }
         else
         {
@@ -568,7 +571,7 @@ internal static class PrestigeCommands
             if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !character.HasBuff(_shroudBuff)
                 && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
             {
-                Buffs.ApplyPermanentBuff(character, _shroudBuff);
+                Buffs.HandlePermanentBuff(character, _shroudBuff);
             }
         }
         else

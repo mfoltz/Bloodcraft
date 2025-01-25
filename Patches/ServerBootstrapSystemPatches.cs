@@ -354,7 +354,7 @@ internal static class ServerBootstrapSystemPatches
 
                 if (_exoform && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
-                    PrestigeSystem.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
+                    PrestigeManager.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
 
                     if (!steamId.TryGetPlayerExoFormData(out var _))
                     {
@@ -377,7 +377,7 @@ internal static class ServerBootstrapSystemPatches
                 if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                     && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
                 {
-                    Buffs.ApplyPermanentBuff(playerCharacter, _shroudBuff);
+                    Buffs.HandlePermanentBuff(playerCharacter, _shroudBuff);
                 }
                 else
                 {

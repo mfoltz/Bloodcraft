@@ -232,7 +232,7 @@ internal static class ClassCommands
                 return;
             }
 
-            Buffs.ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
+            Buffs.HandleClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
             LocalizationService.HandleReply(ctx, $"Class buffs applied for <color=white>{playerClass}</color>");
         }
         else

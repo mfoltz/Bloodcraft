@@ -1,9 +1,11 @@
 ﻿using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -19,6 +21,8 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
+
+    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     static readonly Dictionary<ulong, int> _playerMaxWeaponLevels = [];
 
@@ -60,33 +64,34 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
             {
                 if (!entity.Has<WeaponLevel>() || !entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
 
-                if (_expertise && entityOwner.Owner.TryGetPlayer(out Entity player))
+                if (_expertise && entityOwner.Owner.TryGetPlayer(out Entity playerCharacter))
                 {
-                    ulong steamId = player.GetSteamId();
+                    ulong steamId = playerCharacter.GetSteamId();
 
                     WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
                     if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) // apply it here since it won't appear in the system naturally as it won't have the buffer till added
                     {
-                        WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
-                        ModifyUnitStatBuffSystemSpawn.OnUpdate();
+                        // WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
+
+                        Buffs.RefreshStats(playerCharacter);
                     }
                 }
 
-                if (_leveling && entityOwner.Owner.TryGetPlayer(out player))
+                if (_leveling && entityOwner.Owner.TryGetPlayer(out playerCharacter))
                 {
-                    LevelingSystem.SetLevel(player);
+                    LevelingSystem.SetLevel(playerCharacter);
                 }
-                else if (!_leveling && _expertise && entityOwner.Owner.TryGetPlayer(out player))
+                else if (!_leveling && _expertise && entityOwner.Owner.TryGetPlayer(out playerCharacter))
                 {
-                    ulong steamId = player.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
+                    ulong steamId = playerCharacter.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int weaponLevel = (int)entity.Read<WeaponLevel>().Level;
                     int unarmedWeaponLevel = 0;
 
-                    Equipment equipment = player.Read<Equipment>(); // fix weapon level on equipment if leveling turned off?
+                    Equipment equipment = playerCharacter.Read<Equipment>(); // fix weapon level on equipment if leveling turned off?
                     if (equipment.WeaponLevel._Value != 0)
                     {
                         equipment.WeaponLevel._Value = 0;
-                        player.Write(equipment);
+                        playerCharacter.Write(equipment);
                     }
 
                     if (!_playerMaxWeaponLevels.ContainsKey(steamId))

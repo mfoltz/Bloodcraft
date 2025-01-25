@@ -15,7 +15,7 @@ internal static class ChatMessageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly bool _clientCompanion = ConfigService.ClientCompanion;
+    static readonly bool _eclipse = ConfigService.ClientCompanion;
 
     static readonly Regex _regexMAC = new(@";mac([^;]+)$");
 
@@ -34,9 +34,10 @@ internal static class ChatMessageSystemPatch
                 ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
 
-                if (ConfigService.ClientCompanion && VerifyMAC(message, out string originalMessage))
+                if (_eclipse && CheckMAC(message, out string originalMessage))
                 {
                     EclipseService.HandleClientMessage(originalMessage);
+
                     EntityManager.DestroyEntity(entity);
                 }
             }
@@ -46,7 +47,7 @@ internal static class ChatMessageSystemPatch
             entities.Dispose();
         }
     }
-    public static bool VerifyMAC(string receivedMessage, out string originalMessage)
+    public static bool CheckMAC(string receivedMessage, out string originalMessage)
     {
         Match match = _regexMAC.Match(receivedMessage);
         originalMessage = "";
@@ -56,8 +57,8 @@ internal static class ChatMessageSystemPatch
             string receivedMAC = match.Groups[1].Value;
             string intermediateMessage = _regexMAC.Replace(receivedMessage, "");
 
-            if (CheckMAC(intermediateMessage, receivedMAC, Core.OLD_SHARED_KEY) ||
-                CheckMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
+            if (VerifyMAC(intermediateMessage, receivedMAC, Core.OLD_SHARED_KEY) ||
+                VerifyMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
             {
                 originalMessage = intermediateMessage;
 
@@ -67,7 +68,7 @@ internal static class ChatMessageSystemPatch
 
         return false;
     }
-    static bool CheckMAC(string message, string receivedMAC, byte[] key)
+    static bool VerifyMAC(string message, string receivedMAC, byte[] key)
     {
         using var hmac = new HMACSHA256(key);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);

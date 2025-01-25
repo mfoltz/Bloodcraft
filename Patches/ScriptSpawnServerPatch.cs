@@ -1,4 +1,5 @@
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -18,6 +19,8 @@ internal static class ScriptSpawnServerPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
@@ -53,9 +56,9 @@ internal static class ScriptSpawnServerPatch
             {
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists() || !entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
 
-                if (_exoPrestiging && prefabGuid.Equals(_exoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity player))
+                if (_exoPrestiging && prefabGuid.Equals(_exoFormBuff) && entity.GetBuffTarget().TryGetPlayer(out Entity playerCharacter))
                 {
-                    Buffs.HandleExoFormBuff(entity, player);
+                    Buffs.ModifyExoFormBuff(entity, playerCharacter);
                 }
                 else if (_familiars && prefabGuid.Equals(_castleManCombatBuff) && entity.GetBuffTarget().IsFollowingPlayer())
                 {
@@ -89,27 +92,27 @@ internal static class ScriptSpawnServerPatch
                     }
                 }
                 */
-                else if (_familiars && entity.GetBuffTarget().IsPlayer() && entityOwner.Owner.TryGetFollowedPlayer(out player))
+                else if (_familiars && entity.GetBuffTarget().IsPlayer() && entityOwner.Owner.TryGetFollowedPlayer(out playerCharacter))
                 {
                     Entity familiar = entityOwner.Owner;
                     Buff buff = entity.Read<Buff>();
 
-                    if (buff.BuffEffectType.Equals(BuffEffectType.Debuff) && ServerGameManager.IsAllies(player, familiar))
+                    if (buff.BuffEffectType.Equals(BuffEffectType.Debuff) && ServerGameManager.IsAllies(playerCharacter, familiar))
                     {
                         entity.Destroy();
                     }
                 }
 
                 if (!entity.Has<BloodBuff>()) continue;
-                else if (entityOwner.Owner.TryGetPlayer(out player))
+                else if (entityOwner.Owner.TryGetPlayer(out playerCharacter))
                 {
-                    ulong steamId = player.GetSteamId();
+                    ulong steamId = playerCharacter.GetSteamId();
 
                     if (_classes && entity.Has<BloodBuff_BiteToMutant_DataShared>() && HasClass(steamId))
                     {
                         PlayerClass playerClass = GetPlayerClass(steamId);
 
-                        if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out player))
+                        if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out playerCharacter))
                         {
                             List<PrefabGUID> perks = Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]).Select(x => new PrefabGUID(x)).ToList();
                             int indexOfBuff = perks.IndexOf(_mutantFromBiteBloodBuff);
@@ -117,7 +120,7 @@ internal static class ScriptSpawnServerPatch
                             if (indexOfBuff != -1)
                             {
                                 int step = _maxLevel / perks.Count;
-                                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.Read<Equipment>().GetFullLevel();
+                                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)playerCharacter.Read<Equipment>().GetFullLevel();
 
                                 if (level >= step * (indexOfBuff + 1))
                                 {
@@ -141,20 +144,22 @@ internal static class ScriptSpawnServerPatch
 
                     if (_leveling && entity.Has<BloodBuff_Brute_ArmorLevelBonus_DataShared>()) // brute level bonus -snip-
                     {
-                        BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared = entity.Read<BloodBuff_Brute_ArmorLevelBonus_DataShared>();
-                        bloodBuff_Brute_ArmorLevelBonus_DataShared.GearLevel = 0;
-                        entity.Write(bloodBuff_Brute_ArmorLevelBonus_DataShared);
-                    }
-
-                    if (_legacies && prefabGuid.Equals(_vBloodBloodBuff)) // applies stat choices to blood types when changed
-                    {
-                        BloodType bloodType = BloodManager.GetCurrentBloodType(player);
-
-                        if (!entity.Has<ModifyUnitStatBuff_DOTS>())
+                        entity.With((ref BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared) =>
                         {
-                            BloodManager.ApplyBloodStats(steamId, bloodType, entity);
-                        }
+                            bloodBuff_Brute_ArmorLevelBonus_DataShared.GearLevel = 0;
+                        });
                     }
+
+                    if (_legacies && prefabGuid.Equals(_vBloodBloodBuff))
+                    {
+                        HandleStats(entity, playerCharacter);
+                    }
+                    else if (_legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGuid, out BloodType bloodType))
+                    {
+                        Buffs.RefreshStats(playerCharacter);
+                    }
+
+                    /*
                     else if (_legacies && BloodSystem.BuffToBloodTypeMap.TryGetValue(prefabGuid, out BloodType bloodType) && BloodManager.GetCurrentBloodType(player).Equals(bloodType)) // applies stat choices to blood types when changed
                     {
                         if (!entity.Has<ModifyUnitStatBuff_DOTS>())
@@ -162,6 +167,7 @@ internal static class ScriptSpawnServerPatch
                             BloodManager.ApplyBloodStats(steamId, bloodType, entity);
                         }
                     }
+                    */
                 }
             }
         }
@@ -169,5 +175,30 @@ internal static class ScriptSpawnServerPatch
         {
             entities.Dispose();
         }
+    }
+    static void HandleStats(Entity buffEntity, Entity playerCharacter)
+    {
+        ulong steamId = playerCharacter.GetSteamId();
+
+        buffEntity.With((ref BloodBuff_VBlood_0_DataShared bloodBuff_VBlood_0_DataShared) =>
+        {
+            bloodBuff_VBlood_0_DataShared.DrainIncreaseFactor = 0f;
+            bloodBuff_VBlood_0_DataShared.ModificationId = ModificationIDs.Create().NewModificationId();
+        });
+
+        UpdateBloodStats(buffEntity, playerCharacter, steamId);
+        UpdateWeaponStats(buffEntity, playerCharacter, steamId);
+
+        ModifyUnitStatBuffSystemSpawn.OnUpdate();
+    }
+    static void UpdateBloodStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
+    {
+        BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter);
+        BloodManager.ApplyBloodStats(buffEntity, bloodType, steamId);
+    }
+    static void UpdateWeaponStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
+    {
+        Systems.Expertise.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
+        WeaponManager.ApplyWeaponStats(buffEntity, weaponType, steamId);
     }
 }

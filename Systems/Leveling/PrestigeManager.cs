@@ -11,14 +11,16 @@ using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Bloodcraft.Systems.Leveling;
-internal static class PrestigeSystem
+internal static class PrestigeManager
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly PrefabGUID _experienceVisualBuff = new(104224016);
-    static readonly PrefabGUID _expertiseVisualBuff = new(620130895);
-    static readonly PrefabGUID _legacyVisualBuff = new(-1381763893);
+    const int EXO_PRESTIGES = 100;
+
+    static readonly PrefabGUID _experienceBuff = new(1280015305);
+    static readonly PrefabGUID _expertiseBuff = new(158253791);
+    static readonly PrefabGUID _legacyBuff = new(-1381763893);
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -299,7 +301,7 @@ internal static class PrestigeSystem
     public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxPrestiges = new()
     {
         { PrestigeType.Experience, ConfigService.MaxLevelingPrestiges },
-        { PrestigeType.Exo, ConfigService.ExoPrestiges },
+        { PrestigeType.Exo, EXO_PRESTIGES },
         { PrestigeType.SwordExpertise, ConfigService.MaxExpertisePrestiges },
         { PrestigeType.AxeExpertise, ConfigService.MaxExpertisePrestiges },
         { PrestigeType.MaceExpertise, ConfigService.MaxExpertisePrestiges },
@@ -401,12 +403,14 @@ internal static class PrestigeSystem
     }
     static void HandleExperiencePrestige(ChatCommandContext ctx, int prestigeLevel, KeyValuePair<int, float> xpData)
     {
-        LevelingSystem.SetLevel(ctx.Event.SenderCharacterEntity);
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
+
+        LevelingSystem.SetLevel(playerCharacter);
 
         List<int> buffs = Configuration.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
         PrefabGUID buffPrefab = new(buffs[prestigeLevel - 1]);
-        if (!buffPrefab.GuidHash.Equals(0)) Buffs.ApplyPermanentBuff(ctx.Event.SenderCharacterEntity, buffPrefab);
+        if (!buffPrefab.GuidHash.Equals(0)) Buffs.HandlePermanentBuff(playerCharacter, buffPrefab);
 
         if (ConfigService.RestedXPSystem) LevelingSystem.UpdateMaxRestedXP(steamId, xpData);
 
@@ -416,23 +420,24 @@ internal static class PrestigeSystem
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * prestigeLevel;
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
 
-        Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, _experienceVisualBuff);
-        if (ctx.Event.SenderCharacterEntity.TryGetBuff(_experienceVisualBuff, out Entity buffEntity))
+        if (playerCharacter.TryApplyAndGetBuff(_experienceBuff, out Entity buffEntity))
         {
-            if (!buffEntity.Has<LifeTime>())
+            buffEntity.With((ref LifeTime lifeTime) =>
             {
-                buffEntity.Add<LifeTime>();
-                buffEntity.Write(new LifeTime { Duration = 3f, EndAction = LifeTimeEndAction.Destroy });
-            }
-            if (buffEntity.Has<ServerControlsPositionBuff>()) buffEntity.Remove<ServerControlsPositionBuff>();
-            if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
-            if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
+                lifeTime.Duration = 1.5f;
+            });
+
+            if (buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Remove<ModifyTargetHUDBuff>();
+            // if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
+            // if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
         }
 
         LocalizationService.HandleReply(ctx, $"You have prestiged in <color=#90EE90>Experience</color>[<color=white>{prestigeLevel}</color>]! Growth rates for all expertise/legacies increased by <color=green>{gainPercentage}</color>, growth rates for experience from unit kills reduced by <color=yellow>{reductionPercentage}</color>");
     }
     static void HandleOtherPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel)
     {
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+
         int expPrestige = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Experience, out var xpLevel) ? xpLevel : 0;
 
         float ratesReduction = prestigeLevel * ConfigService.PrestigeRatesReducer; // Example: 0.1 (10%)
@@ -450,14 +455,24 @@ internal static class PrestigeSystem
 
         if (BloodSystem.BloodTypeToPrestigeMap.ContainsValue(parsedPrestigeType))
         {
-            Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, _legacyVisualBuff);
+            Buffs.TryApplyBuff(playerCharacter, _legacyBuff);
         }
         else if (WeaponSystem.WeaponPrestigeMap.ContainsValue(parsedPrestigeType))
         {
-            Buffs.TryApplyBuff(ctx.Event.SenderCharacterEntity, _expertiseVisualBuff);
-        }
+            if (playerCharacter.TryApplyAndGetBuff(_expertiseBuff, out Entity buffEntity))
+            {
+                buffEntity.With((ref LifeTime lifeTime) =>
+                {
+                    lifeTime.Duration = 1.5f;
+                });
 
-        LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+                // if (buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Remove<ModifyTargetHUDBuff>();
+                // if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
+                // if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
+            }
+
+            LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
+        }
     }
     public static void RemovePrestigeBuffs(Entity character, int prestigeLevel)
     {
@@ -478,7 +493,7 @@ internal static class PrestigeSystem
             PrefabGUID buffPrefab = new(buffs[i]);
 
             if (buffPrefab.GuidHash == 0) continue;
-            else Buffs.ApplyPermanentBuff(character, buffPrefab);
+            else Buffs.HandlePermanentBuff(character, buffPrefab);
         }
     }
     public static void ReplyExperiencePrestigeEffects(User user, int level)

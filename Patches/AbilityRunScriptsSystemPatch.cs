@@ -28,13 +28,13 @@ internal static class AbilityRunScriptsSystemPatch
 
     static readonly Dictionary<int, float> _exoFormCooldownMap = new() // not currently setting cooldowns, will consider later
     {
-        // { 1, 8f },
-        // { 2, 8f },
-        // { 3, 8f },
-        // { 4, 8f },
-        // { 5, 10f },
-        // { 6, 20f },
-        // { 7, 40f }
+        { 0, 8f },
+        { 1, 8f },
+        { 2, 8f },
+        { 3, 8f },
+        { 4, 10f },
+        { 5, 20f },
+        { 6, 40f }
     };
 
     /*
@@ -74,7 +74,6 @@ internal static class AbilityRunScriptsSystemPatch
                         float cooldown = ClassSpells[prefabGuid].Equals(0) ? COOLDOWN_FACTOR : (ClassSpells[prefabGuid] + 1) * COOLDOWN_FACTOR;
                         ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGuid, cooldown);
                     }
-                    /*
                     else if (_exoForm && Buffs.ExoFormAbilityMap.ContainsValue(prefabGuid))
                     {
                         if (postCast.AbilityGroup.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && _exoFormCooldownMap.TryGetValue(abilityGroupSlot.SlotId, out float cooldown))
@@ -82,7 +81,6 @@ internal static class AbilityRunScriptsSystemPatch
                             ServerGameManager.SetAbilityGroupCooldown(postCast.Character, prefabGuid, cooldown);
                         }
                     }
-                    */
                 }
             }
         }

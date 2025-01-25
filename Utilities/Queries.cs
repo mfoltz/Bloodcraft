@@ -86,7 +86,7 @@ internal static class Queries
                     {
                         string prefabName = unitPrefab.GetPrefabName();
 
-                        if (!_filteredTargets.Any(part => prefabName.Contains(part))) yield return entity;
+                        if (!_filteredTargets.Any(part => prefabName.Contains(part, StringComparison.OrdinalIgnoreCase))) yield return entity;
                     }
                 }
                 else if (targetType == 1)
@@ -94,7 +94,7 @@ internal static class Queries
                     if (entity.TryGetComponent(out PrefabGUID craftPrefab))
                     {
                         string prefabName = craftPrefab.GetPrefabName();
-                        if (!_filteredCrafts.Any(part => prefabName.Contains(part))) yield return entity;
+                        if (!_filteredCrafts.Any(part => prefabName.Contains(part, StringComparison.OrdinalIgnoreCase))) yield return entity;
                     }
                 }
                 else if (targetType == 2)

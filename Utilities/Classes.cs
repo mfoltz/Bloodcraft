@@ -306,7 +306,7 @@ internal static class Classes
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
         steamId.SetPlayerClasses(classes);
 
-        Buffs.ApplyClassBuffs(character, steamId);
+        Buffs.HandleClassBuffs(character, steamId);
     }
     public static void RemoveShift(Entity character)
     {

@@ -3,7 +3,6 @@ using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -11,7 +10,6 @@ using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
-using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Patches;
 
@@ -35,11 +33,11 @@ internal static class BuffSystemSpawnPatches
     static readonly bool _exoFormImmortal = ConfigService.ExoPrestiging && ConfigService.TrueImmortal;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _familiarPvP = ConfigService.FamiliarPvP;
-    static readonly int _maxProfessionLevel = ConfigService.MaxProfessionLevel;
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
     const float FAMILIAR_TRAVEL_DURATION = 7.5f;
     const float MINION_LIFETIME = 30f;
+    const int MAX_PROFESSION_LEVEL = 100;
 
     static readonly PrefabGUID _fallenAngel = new(-76116724);
     static readonly PrefabGUID _solarus = new(-740796338);
@@ -95,13 +93,13 @@ internal static class BuffSystemSpawnPatches
                 {
                     if (!buffTarget.HasBuff(_holyBeamPowerBuff))
                     {
-                        if (Buffs.TryApplyBuff(buffTarget, _holyBeamPowerBuff) && buffTarget.TryGetBuff(_holyBeamPowerBuff, out Entity buff))
+                        if (buffTarget.TryApplyAndGetBuff(_holyBeamPowerBuff, out Entity buffEntity))
                         {
-                            if (buff.Has<LifeTime>())
+                            if (buffEntity.Has<LifeTime>())
                             {
-                                buff.With((ref LifeTime lifeTime) =>
+                                buffEntity.With((ref LifeTime lifeTime) =>
                                 {
-                                    lifeTime.Duration = -1;
+                                    lifeTime.Duration = 0f;
                                     lifeTime.EndAction = LifeTimeEndAction.None;
                                 });
                             }
@@ -241,7 +239,7 @@ internal static class BuffSystemSpawnPatches
                             }
                             else
                             {
-                                familiar.TryApplyBuff(prefabGuid);
+                                familiar.TryApplyBuff(prefabGuid);            
                             }
                         }
                     }
@@ -251,7 +249,7 @@ internal static class BuffSystemSpawnPatches
                         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(prefabGuid, "alchemy");
 
                         int level = handler.GetProfessionData(steamId).Key;
-                        float bonus = 1 + level / (float)_maxProfessionLevel;
+                        float bonus = 1 + level / (float)MAX_PROFESSION_LEVEL;
 
                         if (entity.Has<LifeTime>())
                         {
@@ -260,12 +258,12 @@ internal static class BuffSystemSpawnPatches
                             entity.Write(lifeTime);
                         }
 
-                        if (entity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var statBuffer) && !statBuffer.IsEmpty)
+                        if (!prefabName.Contains("holyresistance", StringComparison.OrdinalIgnoreCase) && entity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var statBuffer) && !statBuffer.IsEmpty)
                         {
                             for (int i = 0; i < statBuffer.Length; i++)
                             {
                                 ModifyUnitStatBuff_DOTS statBuff = statBuffer[i];
-                                statBuff.Value *= 1 + level / (float)_maxProfessionLevel;
+                                statBuff.Value *= 1 + level / (float)MAX_PROFESSION_LEVEL;
 
                                 statBuffer[i] = statBuff;
                             }
@@ -278,6 +276,15 @@ internal static class BuffSystemSpawnPatches
 
                             tickBuffer[0] = eventsOnTick;
                         }
+                    }
+                }
+                else if (_familiars && prefabName.Contains("UseRelic") && buffTarget.TryGetPlayer(out playerCharacter))
+                {
+                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+
+                    if (familiar.Exists())
+                    {
+                        familiar.TryApplyBuff(prefabGuid);
                     }
                 }
                 else if (_familiars && buffTarget.TryGetFollowedPlayer(out playerCharacter)) // cassius, drac, other weird boss phase stuff. ultimately checking for specific prefabs, chain with the above and just check at the end

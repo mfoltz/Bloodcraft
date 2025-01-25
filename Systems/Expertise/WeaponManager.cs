@@ -69,17 +69,17 @@ internal static class WeaponManager
             steamId.SetPlayerWeaponStats(weaponStats);
         }
     }
-    public static void ApplyWeaponStats(ulong steamId, WeaponType weaponType, Entity weaponEntity)
+    public static void ApplyWeaponStats(Entity buffEntity, WeaponType weaponType, ulong steamId)
     {
         IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
         {
-            if (!weaponEntity.Has<ModifyUnitStatBuff_DOTS>())
+            if (!buffEntity.Has<ModifyUnitStatBuff_DOTS>())
             {
-                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(weaponEntity);
+                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buffEntity);
             }
 
-            var buffer = weaponEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+            var buffer = buffEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
             foreach (WeaponStatType weaponStatType in bonuses)
             {
                 float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, weaponStatType);

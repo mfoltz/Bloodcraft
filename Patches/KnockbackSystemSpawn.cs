@@ -3,7 +3,6 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;

@@ -131,12 +131,13 @@ internal static class WeaponCommands
             return;
         }
 
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
         if (ChooseStat(steamId, WeaponType, StatType))
         {
             LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
-            // WeaponManager.RefreshWeaponStats(ctx.Event.SenderCharacterEntity);
+            Buffs.RefreshStats(playerCharacter);
         }
         else
         {
@@ -153,9 +154,10 @@ internal static class WeaponCommands
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
-        WeaponType weaponType = GetCurrentWeaponType(character);
+
+        WeaponType weaponType = GetCurrentWeaponType(playerCharacter);
 
         if (!ConfigService.ResetExpertiseItem.Equals(0))
         {
@@ -167,7 +169,7 @@ internal static class WeaponCommands
                 if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, item, quantity))
                 {
                     ResetStats(steamId, weaponType);
-                    // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+                    Buffs.RefreshStats(playerCharacter);
 
                     LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
                     return;
@@ -182,7 +184,7 @@ internal static class WeaponCommands
         }
 
         ResetStats(steamId, weaponType);
-        // WeaponManager.UpdateWeaponStats(ctx.Event.SenderCharacterEntity);
+        Buffs.RefreshStats(playerCharacter);
 
         LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
     }
@@ -229,11 +231,13 @@ internal static class WeaponCommands
         if (SetExtensionMap.TryGetValue(weaponType, out var setFunc))
         {
             setFunc(steamId, xpData);
+            Buffs.RefreshStats(playerInfo.CharEntity);
+
             LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{expertiseHandler.GetWeaponType()}</color> expertise set to [<color=white>{level}</color>] for <color=green>{playerInfo.User.CharacterName.Value}</color>");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find matching save method from weapon type...");
+            LocalizationService.HandleReply(ctx, "Couldn't find matching save method for weapon type...");
         }
     }
 

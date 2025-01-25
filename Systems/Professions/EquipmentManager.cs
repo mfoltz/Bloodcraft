@@ -2,30 +2,33 @@
 using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
-using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Systems.Professions;
-internal static class EquipmentManager // for potential professions expansion, no idea how to balance this out for existing server settings and still make it worthwhile to players though
+internal static class EquipmentManager
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     static readonly float _maxDurabilityMultiplier = 1f;
-    static readonly float _maxWeaponMultiplier = 0.25f;
-    static readonly float _maxArmorMultiplier = 0.25f;
-    static readonly float _maxSourceMultiplier = 0.25f;
+    static readonly float _maxWeaponMultiplier = 0.1f;
+    static readonly float _maxArmorMultiplier = 0.1f;
+    static readonly float _maxSourceMultiplier = 0.1f;
+
+    const int MAX_PROFESSION_LEVEL = 100;
     public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.Read<PrefabGUID>());
+        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.GetPrefabGuid());
         float scaledBonus = 0f;
 
         if (equipmentEntity.Has<Durability>())
         {
-            Durability durability = equipmentEntity.Read<Durability>();
             scaledBonus = CalculateDurabilityBonus(handler, steamId);
-            durability.MaxDurability *= scaledBonus;
-            durability.Value = durability.MaxDurability;
-            equipmentEntity.Write(durability);
+
+            equipmentEntity.With((ref Durability durability) =>
+            {
+                durability.MaxDurability *= scaledBonus;
+                durability.Value = durability.MaxDurability;
+            });
         }
 
         if (!ServerGameManager.TryGetBuffer<ModifyUnitStatBuff_DOTS>(equipmentEntity, out var buffer)) return;
@@ -34,8 +37,9 @@ internal static class EquipmentManager // for potential professions expansion, n
         for (int i = 0; i < buffer.Length; i++)
         {
             ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-            statBuff.Value *= scaledBonus; // Modify the value accordingly
-            buffer[i] = statBuff; // Assign the modified struct back to the buffer
+            statBuff.Value *= scaledBonus;
+
+            buffer[i] = statBuff;
         }
     }
     static float CalculateStatBonus(IProfessionHandler handler, ulong steamId)
@@ -59,21 +63,23 @@ internal static class EquipmentManager // for potential professions expansion, n
             }
 
             int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (equipmentMultiplier * (professionLevel / (float)ConfigService.MaxProfessionLevel)); // Scale bonus up to 100%
+            float scaledBonus = 1 + (equipmentMultiplier * (professionLevel / (float)MAX_PROFESSION_LEVEL));
 
             return scaledBonus;
         }
-        return 0; // Return 0 if no handler is found or other error
+
+        return 0;
     }
     static float CalculateDurabilityBonus(IProfessionHandler handler, ulong steamId)
     {
         if (handler != null)
         {
             int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (_maxDurabilityMultiplier * (professionLevel / (float)ConfigService.MaxProfessionLevel)); // Scale bonus up to 100%
+            float scaledBonus = 1 + (_maxDurabilityMultiplier * (professionLevel / (float)MAX_PROFESSION_LEVEL));
 
             return scaledBonus;
         }
+
         return 0;
     }
 }

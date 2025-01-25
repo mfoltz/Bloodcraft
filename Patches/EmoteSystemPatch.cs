@@ -29,24 +29,27 @@ internal static class EmoteSystemPatch
 
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _invulnerableBuff = new(-480024072);
-    static readonly PrefabGUID _combatBuff = new(581443919);
+    static readonly PrefabGUID _pveCombatBuff = new(581443919);
     static readonly PrefabGUID _pvpCombatBuff = new(697095869);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
     static readonly PrefabGUID _phasingBuff = new(-79611032);
+    static readonly PrefabGUID _gateBossFeedCompleteBuff = new(-354622715);
 
-    static readonly PrefabGUID _waveEmote = new(1177797340);
-    static readonly PrefabGUID _saluteEmote = new(-370061286);
-    static readonly PrefabGUID _clapEmote = new(-26826346);
-    static readonly PrefabGUID _tauntEmote = new(-158502505);
-    static readonly PrefabGUID _yesEmote = new(-1525577000);
-    static readonly PrefabGUID _noEmote = new(-53273186);
+    static readonly PrefabGUID _waveEmoteGroup = new(1177797340);
+    static readonly PrefabGUID _saluteEmoteGroup = new(-370061286);
+    static readonly PrefabGUID _clapEmoteGroup = new(-26826346);
+    static readonly PrefabGUID _tauntEmoteGroup = new(-158502505);
+    static readonly PrefabGUID _yesEmoteGroup = new(-1525577000);
+    static readonly PrefabGUID _noEmoteGroup = new(-53273186);
+    static readonly PrefabGUID _beckonEmoteGroup = new(-658066984);
 
     public static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> EmoteActions = new()
     {
         { new(1177797340), CallDismiss }, // Wave
-        { new(-370061286), CombatMode }, // Salute
-        { new(-26826346), BindUnbind } // clap
+        { new(-370061286), CombatMode },  // Salute
+        { new(-26826346), BindUnbind },   // Clap
+        // { new(-658066984), InteractMode } // Beckon
     };
 
     static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> _matchActions = new()
@@ -77,7 +80,7 @@ internal static class EmoteSystemPatch
                 Entity playerCharacter = fromCharacter.Character;
                 ulong steamId = user.PlatformId;
 
-                if (_exoForm && useEmoteEvent.Action.Equals(_tauntEmote) && GetPlayerBool(steamId, EXO_FORM_KEY))
+                if (_exoForm && useEmoteEvent.Action.Equals(_tauntEmoteGroup) && GetPlayerBool(steamId, EXO_FORM_KEY))
                 {
                     if (!playerCharacter.HasBuff(_exoFormBuff))
                     {
@@ -91,12 +94,13 @@ internal static class EmoteSystemPatch
                     else if (playerCharacter.TryGetBuff(_exoFormBuff, out Entity buffEntity))
                     {
                         ExitingForm.Add(steamId);
-
                         ExoForm.UpdatePartialExoFormChargeUsed(buffEntity, steamId);
+
+                        playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
                         DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                     }
                 }
-                else if (_familiarBattles && BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesEmote) || useEmoteEvent.Action.Equals(_noEmote)))
+                else if (_familiarBattles && BattleChallenges.TryGetMatch(steamId, out var match) && (useEmoteEvent.Action.Equals(_yesEmoteGroup) || useEmoteEvent.Action.Equals(_noEmoteGroup)))
                 {
                     if (_matchActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(match);
                 }
@@ -110,6 +114,12 @@ internal static class EmoteSystemPatch
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
+                    /*
+                    else if (useEmoteEvent.Action.Equals(_beckonEmoteGroup) && playerCharacter.IsPlayerInCombat())
+                    {
+                        LocalizationService.HandleServerReply(EntityManager, user, "You can't beckon your familiar during combat!");
+                    }
+                    */
                     else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
                 }
             }
@@ -177,7 +187,7 @@ internal static class EmoteSystemPatch
             return;
         }
 
-        if (character.HasBuff(_combatBuff) || character.HasBuff(_pvpCombatBuff))
+        if (character.HasBuff(_pveCombatBuff) || character.HasBuff(_pvpCombatBuff))
         {
             LocalizationService.HandleServerReply(EntityManager, user, "You can't toggle familiar combat mode during PvE/PvP combat!");
             return;
@@ -191,18 +201,14 @@ internal static class EmoteSystemPatch
                 familiar = data.Familiar;
             }
 
-            if (familiar == Entity.Null)
+            if (!familiar.Exists())
             {
                 LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active familiar...");
                 return;
             }
 
-            if (familiar.HasBuff(_invulnerableBuff)) // remove and enable combat
+            if (familiar.HasBuff(_invulnerableBuff))
             {
-                // BuffUtility.BuffSpawner buffSpawner = BuffUtility.BuffSpawner.Create(ServerGameManager);
-                // EntityCommandBuffer entityCommandBuffer = EntityCommandBufferSystem.CreateCommandBuffer();
-                // BuffUtility.TryRemoveBuff(ref buffSpawner, entityCommandBuffer, _invulnerableBuff, familiar);
-
                 familiar.TryRemoveBuff(_invulnerableBuff);
                 familiar.SetFaction(_playerFaction);
                 familiar.EnableAggro();
