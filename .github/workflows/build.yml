@@ -38,6 +38,17 @@ jobs:
         run: |
           sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
 
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          if [ -n "$(git status --porcelain thunderstore.toml)" ]; then
+            git add thunderstore.toml
+            git commit -m "chore: Update thunderstore.toml version to ${{ env.version }}"
+            git push
+          else
+            echo "No changes to commit in thunderstore.toml"
+          fi
+
       - name: Create secrets.json
         run: |
           mkdir -p /home/runner/work/Bloodcraft/Bloodcraft/Resources
