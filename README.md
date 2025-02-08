@@ -42,7 +42,7 @@ SpellCritDamage // 11
 
 ## Sponsors
 
-Jairon Orellana; Odjit; Jera; Eve Winters; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; RENEGADO;
+Jairon Orellana; Odjit; Jera; Eve Winters; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; RENEGADO; Imperivm Draconis;
 
 ## Features
 
