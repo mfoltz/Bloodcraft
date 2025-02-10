@@ -126,7 +126,7 @@ internal static class FamiliarSummonSystem
         {FamiliarStatType.HealingReceived, 0.5f},
         {FamiliarStatType.PhysicalResistance, 0.2f},
         {FamiliarStatType.SpellResistance, 0.2f},
-        {FamiliarStatType.MovementSpeed, 0.5f},
+        {FamiliarStatType.MovementSpeed, 0.25f},
         {FamiliarStatType.CastSpeed, 0.25f}
     };
 

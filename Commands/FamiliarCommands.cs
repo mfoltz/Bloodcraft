@@ -746,7 +746,7 @@ internal static class FamiliarCommands
                         case FamiliarStatType.MovementSpeed:
                             displayValue = aiMoveSpeeds.Walk._Value == originalMoveSpeeds.Walk._Value
                                 ? string.Empty
-                                : ((aiMoveSpeeds.Walk._Value / originalMoveSpeeds.Walk._Value - 1) * 100).ToString("F1") + "%";
+                                : ((aiMoveSpeeds.Walk._Value / originalMoveSpeeds.Walk._Value) * 100).ToString("F1") + "%";
                             break;
                         case FamiliarStatType.CastSpeed:
                             displayValue = abilityBar_Shared.AttackSpeed._Value == 1f

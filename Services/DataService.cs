@@ -1368,7 +1368,7 @@ internal static class DataService
 
                 if (File.Exists(playerFamiliarActivesJson))
                 {
-                    File.Delete(playerFamiliarActivesJson);
+                    // File.Delete(playerFamiliarActivesJson);
                 }
             }
             catch (Exception ex)

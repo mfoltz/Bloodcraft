@@ -189,11 +189,13 @@ internal static class Classes
             return $"<color=yellow>{index + 1}</color>| <color=white>{prefab}</color> at level <color=green>{level}</color>";
         }).ToList();
 
+        LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} buffs:");
+
         for (int i = 0; i < classBuffs.Count; i += 4) // Using batches of 4 for better readability
         {
             var batch = classBuffs.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{playerClass} buffs: {replyMessage}");
+            LocalizationService.HandleReply(ctx, $"{replyMessage}");
         }
     }
     public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
@@ -213,11 +215,13 @@ internal static class Classes
             allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
             allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
 
+            LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]:");
+
             for (int i = 0; i < allStats.Count; i += 6)
             {
                 var batch = allStats.Skip(i).Take(6);
                 string replyMessage = string.Join(", ", batch);
-                LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]: {replyMessage}");
+                LocalizationService.HandleReply(ctx, $"{replyMessage}");
             }
         }
         else
@@ -251,11 +255,13 @@ internal static class Classes
             classSpells.Insert(0, $"<color=yellow>{0}</color>| <color=white>{spellName}</color>");
         }
 
+        LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} spells:");
+
         for (int i = 0; i < classSpells.Count; i += 4)
         {
             var batch = classSpells.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} spells: {replyMessage}");
+            LocalizationService.HandleReply(ctx, $"{replyMessage}");
         }
     }
     public static bool TryParseClass(string classType, out PlayerClass parsedClassType)
