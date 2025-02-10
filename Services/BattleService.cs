@@ -356,19 +356,12 @@ internal class BattleService
     static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
-        int teamOne = TEAM_ONE;
-        int teamTwo = TEAM_TWO;
-
-        if (!playerOne.IsAllies(playerTwo))
-        {
-            teamOne = -1;
-            teamTwo = -1;
-        }
+        bool allies = playerOne.IsAllied(playerTwo);
 
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            InstantiateFamiliar(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, teamOne, PlayerOneFamiliarPositions[i]).Start();
-            InstantiateFamiliar(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, teamTwo, PlayerTwoFamiliarPositions[i]).Start();
+            InstantiateFamiliar(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i], allies).Start();
+            InstantiateFamiliar(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i], allies).Start();
 
             yield return _delay;
         }

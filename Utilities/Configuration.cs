@@ -91,11 +91,16 @@ internal static class Configuration
     {
         foreach (var keyValuePair in Classes.ClassBuffMap)
         {
-            List<PrefabGUID> buffPrefabs = ParseConfigIntegerString(keyValuePair.Value)
+            HashSet<PrefabGUID> buffPrefabs = ParseConfigIntegerString(keyValuePair.Value)
+                .Select(buffPrefab => new PrefabGUID(buffPrefab))
+                .ToHashSet();
+
+            List<PrefabGUID> orderedBuffs = ParseConfigIntegerString(keyValuePair.Value)
                 .Select(buffPrefab => new PrefabGUID(buffPrefab))
                 .ToList();
 
-            UpdateBuffsBufferDestroyPatch.ClassBuffs.TryAdd(keyValuePair.Key, buffPrefabs);
+            UpdateBuffsBufferDestroyPatch.ClassBuffsSet.TryAdd(keyValuePair.Key, buffPrefabs);
+            UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.Add(keyValuePair.Key, orderedBuffs);
         }
     }
 }

@@ -74,6 +74,8 @@ internal static class DealDamageSystemPatch
         if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+        // NativeArray<DealDamageEvent> dealDamageEvents = __instance._Query.ToComponentDataArray<DealDamageEvent>(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -173,9 +175,9 @@ internal static class DealDamageSystemPatch
                     {
                         if (_gameMode.Equals(GameModeType.PvP) && entityOwner.Owner.TryGetPlayer(out playerCharacter) && dealDamageEvent.Target.IsPlayer())
                         {
-                            Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+                            Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-                            if (_familiarPvP && familiar.IsEligibleForCombat())
+                            if (_familiarPvP && familiar.EligibleForCombat())
                             {
                                 Familiars.AddToFamiliarAggroBuffer(familiar, dealDamageEvent.Target);
                             }
@@ -193,7 +195,6 @@ internal static class DealDamageSystemPatch
             entities.Dispose();
         }
     }
-
     static bool IsValidDamageType(DealDamageEvent dealDamageEvent)
     {
         return dealDamageEvent.MainType.Equals(MainDamageType.Physical) || dealDamageEvent.MainType.Equals(MainDamageType.Spell);
@@ -204,9 +205,9 @@ internal static class DealDamageSystemPatch
     }
     static void ReactToUnitDamage(Entity playerCharacter, EntityOwner entityOwner)
     {
-        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-        if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && familiar.IsEligibleForCombat())
+        if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && familiar.EligibleForCombat())
         {
             if (!behaviourTreeState.Value.Equals(GenericEnemyState.Combat))
             {

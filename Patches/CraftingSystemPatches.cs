@@ -44,21 +44,21 @@ internal static class CraftingSystemPatches
         if (!Core._initialized) return;
         else if (!_professions && !_quests) return;
 
-        NativeArray<Entity> repairEntities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
         try
         {
-            foreach (Entity entity in repairEntities)
+            foreach (Entity entity in entities)
             {
                 Forge_Shared forge_Shared = entity.Read<Forge_Shared>();
                 if (forge_Shared.State == ForgeState.Empty) continue;
 
                 UserOwner userOwner = entity.Read<UserOwner>();
                 Entity userEntity = userOwner.Owner._Entity;
-                User user = userEntity.Read<User>();
+                User user = userEntity.GetUser();
                 ulong steamId = user.PlatformId;
 
                 Entity itemEntity = forge_Shared.ItemEntity._Entity;
-                PrefabGUID itemPrefab = itemEntity.Read<PrefabGUID>();
+                PrefabGUID itemPrefab = itemEntity.GetPrefabGuid();
 
                 if (itemEntity.Has<ShatteredItem>())
                 {
@@ -66,15 +66,16 @@ internal static class CraftingSystemPatches
                 }
                 else if (itemEntity.Has<UpgradeableLegendaryItem>())
                 {
-                    int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
                     var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
+                    int tier = itemEntity.Read<UpgradeableLegendaryItem>().CurrentTier;
+
                     itemPrefab = buffer[tier].TierPrefab;
                 }
 
                 if (forge_Shared.State == ForgeState.Finished)
                 {
                     if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
-                    else if (!ConfigService.ProfessionSystem) continue;
+                    else if (!_professions) continue;
 
                     float ProfessionValue = 50f;
                     ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
@@ -99,6 +100,7 @@ internal static class CraftingSystemPatches
                             itemEntity.Write(durability);
 
                             ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler, ref delay);
+                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity); // need to make sure this works okay for the MUSB_DOTS on legendaries at least, the spell mod parts def not though
                         }
                     }
                 }
@@ -106,7 +108,7 @@ internal static class CraftingSystemPatches
         }
         finally
         {
-            repairEntities.Dispose();
+            entities.Dispose();
         }
     }
 

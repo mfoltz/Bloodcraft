@@ -4,8 +4,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Bloodcraft.Services;
-
-public static class ConfigService
+internal static class ConfigService
 {
     static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
     public static string LanguageLocalization => _languageLocalization.Value;
@@ -24,6 +23,12 @@ public static class ConfigService
 
     static readonly Lazy<bool> _bearFormDash = new(() => GetConfigValue<bool>("BearFormDash"));
     public static bool BearFormDash => _bearFormDash.Value;
+
+    // static readonly Lazy<bool> _performanceAuditing = new(() => GetConfigValue<bool>("PerformanceAuditing"));
+    // public static bool PerformanceAuditing => _performanceAuditing.Value;
+
+    static readonly Lazy<int> _primalJewelCost = new(() => GetConfigValue<int>("PrimalJewelCost"));
+    public static int PrimalJewelCost => _primalJewelCost.Value;
 
     static readonly Lazy<bool> _starterKit = new(() => GetConfigValue<bool>("StarterKit"));
     public static bool StarterKit => _starterKit.Value;
@@ -57,6 +62,7 @@ public static class ConfigService
 
     static readonly Lazy<int> _rerollWeeklyAmount = new(() => GetConfigValue<int>("RerollWeeklyAmount"));
     public static int RerollWeeklyAmount => _rerollWeeklyAmount.Value;
+
     static readonly Lazy<bool> _levelingSystem = new(() => GetConfigValue<bool>("LevelingSystem"));
     public static bool LevelingSystem => _levelingSystem.Value;
 
@@ -462,19 +468,19 @@ public static class ConfigService
         {
             return
         [
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerLeveling"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Quests"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "WeaponExpertise"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "BloodLegacies"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Professions"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks"),
-            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerBools")
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME),                                     // 0
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerLeveling"),                   // 1
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Quests"),                           // 2
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "WeaponExpertise"),                  // 3
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "BloodLegacies"),                    // 4
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Professions"),                      // 5
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars"),                        // 6
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"),    // 7
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks"),     // 8
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerBools"),                      // 9
+            // Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarBattleGroups") // 10
         ];
         });
-
         public static List<string> DirectoryPaths => _directoryPaths.Value;
 
         public static readonly List<string> SectionOrder =
@@ -505,8 +511,10 @@ public static class ConfigService
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
             new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
+            new ConfigEntryDefinition("General", "PrimalJewelCost", -77477508, "If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers)."),
+            // new ConfigEntryDefinition("General", "PerformanceAuditing", false, "(WIP) Enable or disable logging server RAM, CPU, and EntityQuery count. Probably doesn't belong here, fight me."),
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
-            new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "The PrefabGUID hashes for the starter kit."),
+            new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
             new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (currently only kill quests)."),
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
@@ -522,7 +530,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Leveling", "RestedXPMax", 5, "Maximum extra levels worth of rested XP a player can accumulate."),
             new ConfigEntryDefinition("Leveling", "RestedXPTickRate", 120f, "Minutes required to accumulate one tick of Rested XP."),
             new ConfigEntryDefinition("Leveling", "MaxLevel", 90, "The maximum level a player can reach."),
-            new ConfigEntryDefinition("Leveling", "StartingLevel", 0, "Starting level for players if no data is found."),
+            new ConfigEntryDefinition("Leveling", "StartingLevel", 10, "Starting level for players if no data is found."),
             new ConfigEntryDefinition("Leveling", "UnitLevelingMultiplier", 7.5f, "The multiplier for experience gained from units."),
             new ConfigEntryDefinition("Leveling", "VBloodLevelingMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Leveling", "DocileUnitMultiplier", 0.15f, "The multiplier for experience gained from docile units."),
@@ -608,7 +616,7 @@ public static class ConfigService
             new ConfigEntryDefinition("Familiars", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood unlock as a familiar."),
-            new ConfigEntryDefinition("Familiars", "PrimalEchoes", false, "Enable or disable acquiring vBloods with configured item reward from exo prestiging at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable."),
+            new ConfigEntryDefinition("Familiars", "PrimalEchoes", false, "Enable or disable acquiring vBloods with configured item reward from exo prestiging (default primal shards) at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable."),
             // new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
             // new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"), // actually maybe vampiricDust
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),

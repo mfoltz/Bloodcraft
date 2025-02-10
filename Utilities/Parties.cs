@@ -68,13 +68,18 @@ internal static class PartyUtilities
         if (CanAddPlayerToParty(party, playerName))
         {
             party.Add(playerName);
+
+            // PartiedPlayers.Add(playerInfo.User.PlatformId);
+            // PartiedPlayers.Add(ownerId);
+
             ownerId.SetPlayerParties(party);
 
             LocalizationService.HandleReply(ctx, $"<color=green>{playerName}</color> added to party!");
         }
         else if (party.Count() == ConfigService.MaxPartySize)
         {
-            LocalizationService.HandleReply(ctx, $"Party is full, can't add <color=green>{playerName}</color>.");
+            LocalizationService.HandleReply(ctx, $"Party is full, can't add <color=green>{playerName}</color>!");
+            SetPlayerBool(playerInfo.User.PlatformId, PARTY_INVITE_KEY, true);
         }
         else if (party.Contains(playerName))
         {
@@ -97,6 +102,8 @@ internal static class PartyUtilities
         if (playerInfo.UserEntity.Exists() && party.Contains(playerInfo.User.CharacterName.Value))
         {
             party.Remove(playerInfo.User.CharacterName.Value);
+            // if (PartiedPlayers.Contains(playerInfo.User.PlatformId)) PartiedPlayers.Remove(playerInfo.User.PlatformId);
+
             steamId.SetPlayerParties(party);
 
             LocalizationService.HandleReply(ctx, $"<color=green>{char.ToUpper(playerName[0]) + playerName[1..].ToLower()}</color> removed from party!");

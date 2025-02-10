@@ -19,10 +19,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
     static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
-
     static readonly int _shardBearerLevel = ConfigService.ShardBearerLevel;
-
-    const int UNIT_TEAM = 2;
 
     static readonly PrefabGUID _manticore = new(-393555055);
     static readonly PrefabGUID _dracula = new(-327335305);
@@ -36,9 +33,12 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID _monsterVisual = new(-2067402784);
     static readonly PrefabGUID _solarusVisual = new(178225731);
 
-    public static readonly List<PrefabGUID> UnitPrefabGuidsToModify = [_manticore, _dracula, _monster, _solarus, _divineAngel, _fallenAngel];
+    static readonly HashSet<PrefabGUID> _unitPrefabGuidsToModify = [_manticore, _dracula, _monster, _solarus, _divineAngel, _fallenAngel];
 
-    public static readonly HashSet<Entity> FamiliarsToSkip = [];
+    static readonly List<PrefabGUID> _variantBuffs = // #soon
+    [
+        new(-429891372), // AB_Chaos_PowerSurge_Buff
+    ];
 
     [HarmonyPatch(typeof(SpawnTransformSystem_OnSpawn), nameof(SpawnTransformSystem_OnSpawn.OnUpdate))]
     [HarmonyPrefix]
@@ -48,6 +48,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         else if (!_eliteShardBearers) return;
 
         NativeArray<Entity> entities = __instance.__query_565030732_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -55,7 +56,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                 if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
                 else if (entity.IsPlayerOwned()) continue;
 
-                if (UnitPrefabGuidsToModify.Contains(prefabGuid))
+                if (_unitPrefabGuidsToModify.Contains(prefabGuid))
                 {
                     if (prefabGuid.Equals(_manticore))
                     {

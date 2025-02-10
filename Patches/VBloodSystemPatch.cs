@@ -40,15 +40,15 @@ internal static class VBloodSystemPatch
             foreach (VBloodConsumed vBloodConsumed in events)
             {
                 Entity player = vBloodConsumed.Target;
-                User user = player.Read<PlayerCharacter>().UserEntity.Read<User>();
+                User user = player.GetUser();
                 ulong steamId = user.PlatformId;
-
+                
                 if (_lastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
 
                 _lastUpdateCache[steamId] = now;
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
-
+                
                 if (_leveling)
                 {
                     int currentLevel = LevelingSystem.GetLevel(steamId);

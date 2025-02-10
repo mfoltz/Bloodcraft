@@ -56,6 +56,9 @@ internal static class QuestSystem
     static readonly PrefabGUID _reinforcedBoneMace = new(-1998017941);
 
     static readonly PrefabGUID _itemIngredientWood = new(-1593377811);
+    static readonly PrefabGUID _hallowedWood = new(-2014020548);
+    static readonly PrefabGUID _gloomWood = new(-1740500585);
+    static readonly PrefabGUID _cursedWood = new(608397239);
     static readonly PrefabGUID _itemIngredientStone = new(-1531666018);
 
     const int DEFAULT_MAX_LEVEL = 90;
@@ -329,6 +332,8 @@ internal static class QuestSystem
                 List<int> amounts = [500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000];
                 requiredAmount = (int)(amounts.ElementAt(_random.Next(amounts.Count)) * _questMultipliers[questType] * _resourceYieldModifier);
 
+                if (target.Equals(_cursedWood) || target.Equals(_gloomWood) || target.Equals(_hallowedWood)) requiredAmount /= 2;
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest goal type encountered when generating quest objective!");
@@ -358,10 +363,10 @@ internal static class QuestSystem
         HashSet<PrefabGUID> weeklyTargets = GetGoalPrefabsForLevel(weeklyGoal, level);
 
         Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData = new()
-            {
-                { QuestType.Daily, (GenerateQuestObjective(dailyGoal, dailyTargets, QuestType.Daily), 0, DateTime.UtcNow) },
-                { QuestType.Weekly, (GenerateQuestObjective(weeklyGoal, weeklyTargets, QuestType.Weekly), 0, DateTime.UtcNow) }
-            };
+        {
+            { QuestType.Daily, (GenerateQuestObjective(dailyGoal, dailyTargets, QuestType.Daily), 0, DateTime.UtcNow) },
+            { QuestType.Weekly, (GenerateQuestObjective(weeklyGoal, weeklyTargets, QuestType.Weekly), 0, DateTime.UtcNow) }
+        };
 
         steamId.SetPlayerQuests(questData);
     }
@@ -550,7 +555,7 @@ internal static class QuestSystem
                 {
                     quest.Value.Objective.Complete = true;
 
-                    LocalizationService.HandleServerReply(EntityManager, user, $"{colorType} complete!");
+                    // LocalizationService.HandleServerReply(EntityManager, user, $"{colorType} complete!");
                     if (QuestRewards.Any())
                     {
                         HandleItemReward(user, quest.Key, quest.Value.Objective, colorType);
@@ -779,7 +784,7 @@ internal static class QuestSystem
     }
     static string TryGainFamiliarExperience(Entity character, ulong steamId, float percentOfTotalXP, int multiplier)
     {
-        Entity familiar = Utilities.Familiars.FindPlayerFamiliar(character);
+        Entity familiar = Utilities.Familiars.GetActiveFamiliar(character);
 
         if (familiar.TryGetComponent(out PrefabGUID prefabGUID) && !familiar.IsDisabled() && !familiar.HasBuff(_invulnerableBuff))
         {

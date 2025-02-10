@@ -30,8 +30,11 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
     static readonly PrefabGUID _gateBossFeedCompleteBuff = new(-354622715);
     static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
+    static readonly PrefabGUID _werewolfStandardBuff = new(-1598161201);
+    static readonly PrefabGUID _werewolfVBloodBuff = new(-622259665);
 
     static readonly PrefabGUID _gateBossFeedCompleteGroup = new(-1446310610);
+    static readonly PrefabGUID _bloodBoltSwarmGroup = new(797450963);
 
     static readonly PrefabGUID _shroudBuff = new(1504279833);
     static readonly PrefabGUID _shroudCloak = new(1063517722);
@@ -42,7 +45,10 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
-    public static readonly Dictionary<Classes.PlayerClass, List<PrefabGUID>> ClassBuffs = [];
+    public static readonly Dictionary<Classes.PlayerClass, HashSet<PrefabGUID>> ClassBuffsSet = [];
+    public static readonly Dictionary<Classes.PlayerClass, List<PrefabGUID>> ClassBuffsOrdered = [];
+
+    static readonly EntityQuery _query = QueryService.UpdateBuffsBufferDestroyQuery;
 
     [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -51,134 +57,158 @@ internal static class UpdateBuffsBufferDestroyPatch
         if (!Core._initialized) return;
         else if (!(_familiars || _prestige || _classes)) return;
 
-        NativeArray<Entity> entities = __instance.__query_401358720_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);
+        NativeArray<PrefabGUID> prefabGuids = _query.ToComponentDataArray<PrefabGUID>(Allocator.Temp);
+        NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
+
+        ComponentLookup<PlayerCharacter> lookup = __instance.GetComponentLookup<PlayerCharacter>(true);
 
         try
         {
-            foreach (Entity entity in entities)
+            for (int i = 0; i < entities.Length; i++)
             {
-                if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
+                Entity entity = entities[i];
+                Entity buffTarget = buffs[i].Target;
 
-                Entity buffTarget = entity.GetBuffTarget();
+                if (!lookup.HasComponent(buffTarget))
+                    continue;
 
-                if (!buffTarget.TryGetPlayer(out Entity playerCharacter)) continue;
-                else if (_exoForm && prefabGuid.Equals(_exoFormBuff))
+                PrefabGUID buffPrefabGuid = prefabGuids[i];
+                int buffType = GetBuffType(buffPrefabGuid._Value);
+
+                switch (buffType)
                 {
-                    // ulong steamId = playerCharacter.GetSteamId();
-                    // playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
-                    // ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
-                    // DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.TryRemoveBuff);
-                }
-                else if (_legacies && prefabGuid.Equals(_vBloodBloodBuff))
-                {
-                    playerCharacter.TryApplyBuff(_vBloodBloodBuff);
-                }
-                else if (_familiars && prefabGuid.Equals(_combatBuff))
-                {
-                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+                    case 1 when _exoForm: // ExoForm Buff
+                        ulong steamId = buffTarget.GetSteamId();
 
-                    if (familiar.Exists())
-                    {
-                        playerCharacter.With((ref CombatMusicListener_Shared shared) =>
-                        {
-                            shared.UnitPrefabGuid = PrefabGUID.Empty;
-                        });
+                        buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
+                        ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
 
-                        Familiars.TryReturnFamiliar(playerCharacter, familiar);
-                    }
-                }
-                else if (prefabGuid.Equals(_travelStoneBuff) || prefabGuid.Equals(_travelWoodenBuff))
-                {
-                    User user = playerCharacter.GetUser();
-                    ulong steamId = user.PlatformId;
+                        break;
+                    case 2 when _legacies: // VBlood Buff
+                        buffTarget.TryApplyBuff(_vBloodBloodBuff);
 
-                    if (_prestige)
-                    {
-                        SetPlayerBool(steamId, SHROUD_KEY, false);
-
-                        if (playerCharacter.HasBuff(_shroudBuff) && playerCharacter.TryGetComponent(out Equipment equipment))
-                        {
-                            if (!equipment.IsEquipped(_shroudCloak, out var _)) playerCharacter.TryRemoveBuff(_shroudBuff);
-                        }
-                    }
-
-                    if (_familiars)
-                    {
-                        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+                        break;
+                    case 3 when _familiars: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
+                        Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
 
                         if (familiar.Exists())
                         {
-                            Familiars.UnbindFamiliar(user, playerCharacter);
-                        }
-                    }
-                }
-                else if (prefabGuid.Equals(_insideStoneCoffin) || prefabGuid.Equals(_insideWoodenCoffin)) // do log in stuff when inside coffin buff is destroyed
-                {
-                    ulong steamId = playerCharacter.GetSteamId();
+                            buffTarget.With((ref CombatMusicListener_Shared shared) =>
+                            {
+                                shared.UnitPrefabGuid = PrefabGUID.Empty;
+                            });
 
-                    if (_prestige)
-                    {
+                            Familiars.TryReturnFamiliar(buffTarget, familiar);
+                        }
+
+                        break;
+                    case 4 when _exoForm: // Taunt Emote Buff
+                        User user = buffTarget.GetUser();
+                        steamId = user.PlatformId;
+
+                        if (GetPlayerBool(steamId, EXO_FORM_KEY))
+                        {
+                            if (EmoteSystemPatch.ExitingForm.Contains(steamId))
+                            {
+                                EmoteSystemPatch.ExitingForm.Remove(steamId);
+                            }
+                            else if (ExoForm.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(buffTarget);
+                        }
+
+                        break;
+                    case 5: // Entering Coffin
+                        user = buffTarget.GetUser();
+                        steamId = user.PlatformId;
+
+                        if (_prestige) SetPlayerBool(steamId, SHROUD_KEY, false);
+                        if (_familiars)
+                        {
+                            Entity familiarEntity = Familiars.GetActiveFamiliar(buffTarget);
+                            if (familiarEntity.Exists()) Familiars.UnbindFamiliar(user, buffTarget);
+                        }
+
+                        break;
+                    case 6 when _prestige: // Leaving Coffin
+                        steamId = buffTarget.GetSteamId();
+
                         SetPlayerBool(steamId, SHROUD_KEY, true);
 
-                        if (PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
-                            && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
+                        if (PrestigeBuffs.Contains(_shroudBuff) && !buffTarget.HasBuff(_shroudBuff)
+                            && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > PrestigeBuffs.IndexOf(_shroudBuff))
                         {
-                            Buffs.HandlePermanentBuff(playerCharacter, _shroudBuff);
+                            Buffs.TryApplyPermanentBuff(buffTarget, _shroudBuff);
                         }
-                    }
-                }
-                else if (_exoForm && prefabGuid.Equals(_tauntEmoteBuff))
-                {
-                    User user = playerCharacter.GetUser();
-                    ulong steamId = user.PlatformId;
 
-                    if (GetPlayerBool(steamId, EXO_FORM_KEY))
-                    {
-                        if (EmoteSystemPatch.ExitingForm.Contains(steamId))
+                        break;
+                    case 7: // Prestige Buffs
+                        if (_prestige)
                         {
-                            EmoteSystemPatch.ExitingForm.Remove(steamId);
+                            steamId = buffTarget.GetSteamId();
+                            int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
+
+                            if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) // allow shroud buff destruction
+                            {
+                                continue;
+                            }
+                            else if (steamId.TryGetPlayerPrestiges(out prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
+                            {
+                                if (prestigeLevel > index) Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
+                            }
                         }
-                        else if (ExoForm.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(playerCharacter);
-                    }
-                }
-                else if (_prestige && PrestigeBuffs.Contains(prefabGuid)) // check if need to reapply prestige buff
-                {
-                    User user = playerCharacter.GetUser();
-                    ulong steamId = user.PlatformId;
 
-                    int index = PrestigeBuffs.IndexOf(prefabGuid);
+                        break;
+                    case 8 when _familiars:
+                        familiar = Familiars.GetActiveFamiliar(buffTarget);
+                        if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(buffTarget.GetUser(), buffTarget, familiar).Start();
 
-                    if (prefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) // allow shroud buff destruction
-                    {
-                        continue;
-                    }
-                    else if (steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
-                    {
-                        if (prestigeLevel > index) Buffs.HandlePermanentBuff(playerCharacter, prefabGuid); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
-                    }
-                }
-                else if (_classes)
-                {
-                    ulong steamId = playerCharacter.GetSteamId();
+                        break;
+                    default: // class buffs otherwise
+                        if (_classes)
+                        {
+                            steamId = buffTarget.GetSteamId();
 
-                    if (Classes.HasClass(steamId))
-                    {
-                        Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+                            if (Classes.HasClass(steamId))
+                            {
+                                Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
 
-                        if (ClassBuffs.TryGetValue(playerClass, out List<PrefabGUID> classBuffs) && classBuffs.Contains(prefabGuid)) Buffs.HandlePermanentBuff(playerCharacter, prefabGuid);
-                    }
+                                if (ClassBuffsSet.TryGetValue(playerClass, out HashSet<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGuid)) Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid);
+                            }
+                        }
+
+                        break;
                 }
             }
         }
         finally
         {
             entities.Dispose();
+            prefabGuids.Dispose();
+            buffs.Dispose();
         }
+    }
+    static int GetBuffType(int prefabGuid)
+    {
+        if (PrestigeBuffs.Any(buff => buff.GuidHash.Equals(prefabGuid)))
+        {
+            return 7;
+        }
+        else return prefabGuid switch
+        {
+            -31099041 => 1,                 // ExoForm Buff
+            20081801 => 2,                  // VBlood Buff
+            581443919 => 3,                 // Combat Buff
+            -508293388 => 4,                // Taunt Emote Buff
+            -342726392 or -1194613929 => 5, // Travel Buffs
+            569692162 or 381160212 => 6,    // Inside Coffin Buffs
+            -1598161201 or -622259665 => 8, // Werewolf Buffs
+            _ => 0,
+        };
     }
     static void ApplyExoFormBuff(Entity playerCharacter)
     {
         playerCharacter.TryApplyBuff(_exoFormBuff);
-        playerCharacter.TryApplyBuff(_phasingBuff); // check if need this here for the entire visual effect after transforming
+        playerCharacter.TryApplyBuff(_phasingBuff);
         playerCharacter.CastAbility(playerCharacter, _gateBossFeedCompleteGroup);
         playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
     }

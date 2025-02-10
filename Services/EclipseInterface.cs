@@ -11,8 +11,10 @@ using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 
 namespace Bloodcraft.Services;
-public class EclipseInterface
+internal class EclipseInterface
 {
+    public static readonly bool ExtraRecipes = ConfigService.ExtraRecipes;
+    public static readonly int PrimalCost = ConfigService.PrimalJewelCost;
     public static readonly int MaxLevel = ConfigService.MaxLevel;
     public static readonly int MaxLegacyLevel = ConfigService.MaxBloodLevel;
     public static readonly int MaxExpertiseLevel = ConfigService.MaxExpertiseLevel;
@@ -232,28 +234,30 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
 
         LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
     }
-    public void SendClientProgress(Entity character, ulong steamId)
+    public void SendClientProgress(Entity playerCharacter, ulong steamId)
     {
-        Entity userEntity = character.Read<PlayerCharacter>().UserEntity;
+        Entity userEntity = playerCharacter.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
         ProgressDataV1_3_2 data = new()
         {
             ExperienceData = GetExperienceData(steamId),
-            LegacyData = GetLegacyData(character, steamId),
-            ExpertiseData = GetExpertiseData(character, steamId),
-            FamiliarData = GetFamiliarData(character, steamId),
+            LegacyData = GetLegacyData(playerCharacter, steamId),
+            ExpertiseData = GetExpertiseData(playerCharacter, steamId),
+            FamiliarData = GetFamiliarData(playerCharacter, steamId),
             ProfessionData = GetProfessionData(steamId),
             DailyQuestData = GetQuestData(steamId, Systems.Quests.QuestSystem.QuestType.Daily),
             WeeklyQuestData = GetQuestData(steamId, Systems.Quests.QuestSystem.QuestType.Weekly),
-            ShiftSpellData = GetShiftSpellData(character)
+            ShiftSpellData = GetShiftSpellData(playerCharacter)
         };
 
         string message = BuildProgressMessage(data);
         string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_3_2(message)}";
 
         LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
+        // LocalizationService.SendToClient(playerCharacter, userEntity, messageWithMAC);
     }
+    /*
     public string BuildConfigMessage()
     {
         List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
@@ -272,6 +276,52 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
             .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, 
             maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel);
+
+        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
+            .Append(',');
+
+        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2"))))
+            .Append(',');
+
+        foreach (var classEntry in Classes.ClassWeaponBloodEnumMap)
+        {
+            var playerClass = classEntry.Key;
+            var (weaponSynergies, bloodSynergies) = classEntry.Value;
+
+            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
+            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
+            sb.Append(',');
+
+            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2"))));
+            sb.Append(',');
+        }
+
+        if (sb[^1] == ',')
+            sb.Length--;
+
+        return sb.ToString();
+    }
+    */
+    public string BuildConfigMessage()
+    {
+        List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
+        List<float> bloodStatValues = Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatValues[stat]).ToList();
+
+        float prestigeStatMultiplier = PrestigeStatMultiplier;
+        float statSynergyMultiplier = ClassStatMultiplier;
+
+        int maxPlayerLevel = MaxLevel;
+        int maxLegacyLevel = MaxLegacyLevel;
+        int maxExpertiseLevel = MaxExpertiseLevel;
+        int maxFamiliarLevel = MaxFamiliarLevel;
+        int maxProfessionLevel = MAX_PROFESSION_LEVEL; // no longer need to send this but changing everything involved that would need to be cut/changed too much extra work atm
+        bool extraRecipes = ExtraRecipes;
+        int primalCost = PrimalCost;
+
+        var sb = new StringBuilder();
+        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
+            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},{7},{8},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel,
+            maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel, extraRecipes, primalCost);
 
         sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
             .Append(',');

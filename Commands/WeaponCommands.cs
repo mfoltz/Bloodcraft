@@ -23,7 +23,7 @@ internal static class WeaponCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    [Command(name: "getexpertise", shortHand: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
+    [Command(name: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.ExpertiseSystem)
@@ -38,15 +38,15 @@ internal static class WeaponCommands
         IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid weapon.");
+            LocalizationService.HandleReply(ctx, "Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.");
             return;
         }
 
         ulong steamId = ctx.Event.User.PlatformId;
         var ExpertiseData = handler.GetExpertiseData(steamId);
-        int progress = (int)(ExpertiseData.Value - ConvertLevelToXp(ExpertiseData.Key));
 
-        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponSystem.WeaponPrestigeMap[weaponType]] : 0;
+        int progress = (int)(ExpertiseData.Value - ConvertLevelToXp(ExpertiseData.Key));
+        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponPrestigeMap[weaponType]] : 0;
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
@@ -67,7 +67,7 @@ internal static class WeaponCommands
                 {
                     var batch = bonusWeaponStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
-                    LocalizationService.HandleReply(ctx, $"Current weapon stat bonuses: {bonuses}");
+                    LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{weaponType}</color> Stats: {bonuses}");
                 }
             }
             else
@@ -77,11 +77,11 @@ internal static class WeaponCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet.");
+            LocalizationService.HandleReply(ctx, $"You haven't gained any expertise for <color=#c0c0c0>{weaponType}</color> yet!");
         }
     }
 
-    [Command(name: "logexpertise", shortHand: "log", adminOnly: false, usage: ".wep log", description: "Toggles expertise logging.")]
+    [Command(name: "log", adminOnly: false, usage: ".wep log", description: "Toggles expertise logging.")]
     public static void LogExpertiseCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.ExpertiseSystem)
@@ -93,11 +93,11 @@ internal static class WeaponCommands
         var steamId = ctx.Event.User.PlatformId;
         TogglePlayerBool(steamId, WEAPON_LOG_KEY);
 
-        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(GetPlayerBool(steamId, "ExpertiseLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        LocalizationService.HandleReply(ctx, $"Expertise logging is now {(GetPlayerBool(steamId, WEAPON_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [Weapon] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
-    public static void ChooseWeaponStat(ChatCommandContext ctx, string weaponType, string statType)
+    [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [WeaponOrStat] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
+    public static void ChooseWeaponStat(ChatCommandContext ctx, string weaponOrStat, int statType = 0)
     {
         if (!ConfigService.ExpertiseSystem)
         {
@@ -105,43 +105,66 @@ internal static class WeaponCommands
             return;
         }
 
-        if (int.TryParse(statType, out int value))
-        {
-            int length = Enum.GetValues(typeof(WeaponStats.WeaponStatType)).Length;
-
-            if (value < 1 || value > length)
-            {
-                LocalizationService.HandleReply(ctx, $"Invalid stat, please use the corresponding stat integer shown when using '<color=white>.wep lst</color>'. (<color=white>1</color>-<color=white>{length}</color>)");
-                return;
-            }
-
-            --value;
-            statType = value.ToString();
-        }
-
-        if (!Enum.TryParse<WeaponStats.WeaponStatType>(statType, true, out var StatType))
-        {
-            LocalizationService.HandleReply(ctx, "Invalid stat choice, use .wep lst to see options.");
-            return;
-        }
-
-        if (!Enum.TryParse<WeaponType>(weaponType, true, out var WeaponType))
-        {
-            LocalizationService.HandleReply(ctx, "Invalid weapon choice.");
-            return;
-        }
-
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (ChooseStat(steamId, WeaponType, StatType))
+        WeaponType finalWeaponType;
+        WeaponStats.WeaponStatType finalWeaponStat;
+
+        if (int.TryParse(weaponOrStat, out int numericStat))
         {
-            LocalizationService.HandleReply(ctx, $"<color=#00FFFF>{StatType}</color> has been chosen for <color=#c0c0c0>{WeaponType}</color> and will apply after reequiping.");
-            Buffs.RefreshStats(playerCharacter);
+            numericStat--;
+
+            if (!Enum.IsDefined(typeof(WeaponStats.WeaponStatType), numericStat))
+            {
+                LocalizationService.HandleReply(ctx,
+                    "Invalid stat, use '<color=white>.wep lst</color>' to see valid options.");
+                return;
+            }
+
+            finalWeaponStat = (WeaponStats.WeaponStatType)numericStat;
+            finalWeaponType = GetCurrentWeaponType(playerCharacter);
+
+            if (ChooseStat(steamId, finalWeaponType, finalWeaponStat))
+            {
+                Buffs.RefreshStats(playerCharacter);
+                LocalizationService.HandleReply(ctx,
+                    $"<color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!");
+            }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You have already chosen {ConfigService.ExpertiseStatChoices} stats for this expertise, the stat has already been chosen for this expertise, or the stat is not allowed for your class.");
+            if (!Enum.TryParse(weaponOrStat, true, out finalWeaponType))
+            {
+                LocalizationService.HandleReply(ctx,
+                    "Invalid weapon choice, use '<color=white>.wep lst</color>' to see valid options.");
+                return;
+            }
+
+            if (statType <= 0)
+            {
+                LocalizationService.HandleReply(ctx,
+                    "Invalid stat, use '<color=white>.wep lst</color>' to see valid options.");
+                return;
+            }
+
+            int typedStat = --statType;
+
+            if (!Enum.IsDefined(typeof(WeaponStats.WeaponStatType), typedStat))
+            {
+                LocalizationService.HandleReply(ctx,
+                    "Invalid stat, use '<color=white>.wep lst</color>' to see valid options.");
+                return;
+            }
+
+            finalWeaponStat = (WeaponStats.WeaponStatType)typedStat;
+
+            if (ChooseStat(steamId, finalWeaponType, finalWeaponStat))
+            {
+                Buffs.RefreshStats(playerCharacter);
+                LocalizationService.HandleReply(ctx,
+                    $"<color=#00FFFF>{finalWeaponStat}</color> has been chosen for <color=#c0c0c0>{finalWeaponType}</color>!");
+            }
         }
     }
 
@@ -189,7 +212,7 @@ internal static class WeaponCommands
         LocalizationService.HandleReply(ctx, $"Your weapon stats have been reset for <color=#c0c0c0>{weaponType}</color>!");
     }
 
-    [Command(name: "setexpertise", shortHand: "set", adminOnly: true, usage: ".wep set [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
+    [Command(name: "set", adminOnly: true, usage: ".wep set [Name] [Weapon] [Level]", description: "Sets player weapon expertise level.")]
     public static void SetExpertiseCommand(ChatCommandContext ctx, string name, string weapon, int level)
     {
         if (!ConfigService.ExpertiseSystem)
@@ -368,38 +391,4 @@ internal static class WeaponCommands
             }
         }
     }
-
-    /*
-    [Command(name: "restorelevels", shortHand: "restore", adminOnly: false, usage: ".wep restore", description: "Fixes weapon levels if they are not correct. Don't use this unless you need to.")]
-    public static void ResetWeaponLevels(ChatCommandContext ctx)
-    {
-        Entity character = ctx.Event.SenderCharacterEntity;
-
-        if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.TryGetBuffer<InventoryBuffer>(inventoryEntity, out var inventoryBuffer))
-        {
-            for (int i = 0; i < inventoryBuffer.Length; i++)
-            {
-                Entity itemEntity = inventoryBuffer[i].ItemEntity.GetEntityOnServer();
-
-                if (itemEntity.Has<WeaponLevelSource>())
-                {
-                    Entity originalWeapon = PrefabCollectionSystem._PrefabGuidToEntityMap[itemEntity.ReadRO<PrefabGUID>()];
-                    WeaponLevelSource weaponLevelSource = originalWeapon.ReadRO<WeaponLevelSource>();
-
-                    if (itemEntity.Has<UpgradeableLegendaryItem>())
-                    {
-                        var buffer = itemEntity.ReadBuffer<UpgradeableLegendaryItemTiers>();
-                        int tier = itemEntity.ReadRO<UpgradeableLegendaryItem>().CurrentTier;
-
-                        weaponLevelSource = PrefabCollectionSystem._PrefabGuidToEntityMap[buffer[tier].TierPrefab].ReadRO<WeaponLevelSource>();
-                    }
-
-                    itemEntity.Write(weaponLevelSource);
-                }
-            }
-
-            LocalizationService.HandleReply(ctx, "Set weapon levels to original values.");
-        }
-    }
-    */
 }

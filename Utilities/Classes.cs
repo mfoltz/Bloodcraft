@@ -8,14 +8,13 @@ using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
-using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
-using static UnityEngine.Rendering.ProbeReferenceVolume;
 
 namespace Bloodcraft.Utilities;
 internal static class Classes
@@ -34,6 +33,7 @@ internal static class Classes
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
     static readonly WaitForSeconds _secondDelay = new(1f);
+    static readonly Regex _classNameRegex = new("(?<!^)([A-Z])");
 
     static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
 
@@ -43,6 +43,7 @@ internal static class Classes
     static readonly PrefabGUID _playerFaction = new(1106458752);
 
     const float ANGEL_LIFETIME = 12f;
+    const string NO_NAME = "No Name";
 
     static NativeParallelHashMap<PrefabGUID, ItemData> _itemLookup = SystemService.GameDataSystem.ItemHashLookupMap;
     static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
@@ -204,7 +205,7 @@ internal static class Classes
 
             if (weaponStats.Count == 0 && bloodStats.Count == 0)
             {
-                LocalizationService.HandleReply(ctx, "No stat synergies found for class.");
+                LocalizationService.HandleReply(ctx, $"No stat synergies found for {FormatClassName(playerClass)}.");
                 return;
             }
 
@@ -216,62 +217,45 @@ internal static class Classes
             {
                 var batch = allStats.Skip(i).Take(6);
                 string replyMessage = string.Join(", ", batch);
-                LocalizationService.HandleReply(ctx, $"{playerClass} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]: {replyMessage}");
+                LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]: {replyMessage}");
             }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"Couldn't find stat synergies for {playerClass}...");
+            LocalizationService.HandleReply(ctx, $"Couldn't find stat synergies for {FormatClassName(playerClass)}...");
         }
     }
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
-        List<int> perks = Configuration.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
+        List<int> spells = Configuration.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
 
-        if (perks.Count == 0)
+        if (spells.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, $"{playerClass} spells not found.");
+            LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} has no spells configured...");
             return;
         }
 
-        var classSpells = perks.Select((spell, index) =>
+        var classSpells = spells.Select((spell, index) =>
         {
-            PrefabGUID spellGuid = new(spell);
+            PrefabGUID spellPrefabGuid = new(spell);
+            string spellName = GetClassSpellName(spellPrefabGuid);
 
-            string prefabName = spellGuid.GetLocalizedName();
-            int prefabIndex = prefabName.IndexOf("Prefab");
-
-            if (prefabIndex != -1)
-            {
-                prefabName = prefabName[..prefabIndex].TrimEnd();
-            }
-            if (prefabName.Contains("Name"))
-            {
-                prefabName = spellGuid.GetPrefabName();
-            }
-
-            return $"<color=yellow>{index + 1}</color>| <color=white>{prefabName}</color>";
+            return $"<color=yellow>{index + 1}</color>| <color=white>{spellName}</color>";
         }).ToList();
 
         if (!ConfigService.DefaultClassSpell.Equals(0))
         {
-            PrefabGUID spellGuid = new(ConfigService.DefaultClassSpell);
+            PrefabGUID spellPrefabGuid = new(ConfigService.DefaultClassSpell);
+            string spellName = GetClassSpellName(spellPrefabGuid);
 
-            string prefabName = spellGuid.GetLocalizedName();
-
-            if (prefabName.Contains("Name"))
-            {
-                prefabName = spellGuid.GetPrefabName();
-            }
-
-            classSpells.Insert(0, $"<color=yellow>{0}</color>| <color=white>{prefabName}</color>");
+            classSpells.Insert(0, $"<color=yellow>{0}</color>| <color=white>{spellName}</color>");
         }
 
-        for (int i = 0; i < classSpells.Count; i += 4) // Using batches of 4 for better readability
+        for (int i = 0; i < classSpells.Count; i += 4)
         {
             var batch = classSpells.Skip(i).Take(4);
             string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, $"{playerClass} spells: {replyMessage}");
+            LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} spells: {replyMessage}");
         }
     }
     public static bool TryParseClass(string classType, out PlayerClass parsedClassType)
@@ -381,7 +365,7 @@ internal static class Classes
             Entity inventoryEntity = Entity.Null;
             Entity equippedJewelEntity = Entity.Null;
             Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
-            string spellName = spellPrefabGUID.GetLocalizedName();
+            string spellName = GetClassSpellName(spellPrefabGUID);
 
             if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer))
             {
@@ -460,7 +444,7 @@ internal static class Classes
             Entity inventoryEntity = Entity.Null;
             Entity equippedJewelEntity = Entity.Null;
             Entity abilityGroup = ServerGameManager.GetAbilityGroup(character, 3);
-            string spellName = spellPrefabGUID.GetPrefabName();
+            string spellName = GetClassSpellName(spellPrefabGUID);
 
             if (abilityGroup.Exists() && ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var firstBuffer)) // take care of spell if was normal
             {
@@ -598,6 +582,39 @@ internal static class Classes
         replaceBuffer.Add(buff);
         ServerGameManager.ModifyAbilityGroupOnSlot(buffEntity, character, 3, spellPrefabGUID);
     }
+
+    static readonly Dictionary<PlayerClass, string> _classColorMap = new()
+    {
+        { PlayerClass.ShadowBlade, "#A020F0" },
+        { PlayerClass.DemonHunter, "#FFD700" },      
+        { PlayerClass.BloodKnight, "#FF0000" },        
+        { PlayerClass.ArcaneSorcerer, "#008080" },   
+        { PlayerClass.VampireLord, "#00FFFF" },      
+        { PlayerClass.DeathMage, "#00FF00" }   
+    };
+
+    public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexMap = new()
+    {
+        { new(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
+        { new(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
+        { new(-1246704569), "#FF0000" },  // leech red (Hex: FF0000)
+        { new(1723455773), "#008080" },   // weaken teal (Hex: 008080)
+        { new(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
+        { new(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
+    };
+    public static string FormatClassName(PlayerClass classType)
+    {
+        string className = _classNameRegex.Replace(classType.ToString(), " $1");
+
+        if (_classColorMap.TryGetValue(classType, out string classColor))
+        {
+            return $"<color={classColor}>{className}</color>";
+        }
+        else
+        {
+            return className;
+        }
+    }
     public static void HandleDeathMageMutantBuffScriptSpawn(Entity entity, Entity player, ulong steamId)
     {
         PlayerClass playerClass = GetPlayerClass(steamId);
@@ -668,6 +685,16 @@ internal static class Classes
         fallenAngel.SetFaction(_playerFaction);
         fallenAngel.NothingLivesForever(ANGEL_LIFETIME);
     }
+    static string GetClassSpellName(PrefabGUID prefabGuid)
+    {
+        string prefabName = prefabGuid.GetLocalizedName();
+        if (string.IsNullOrEmpty(prefabName) || prefabName.Equals(NO_NAME)) prefabName = prefabGuid.GetPrefabName();
+
+        int prefabIndex = prefabName.IndexOf("PrefabGuid");
+        if (prefabIndex > 0) prefabName = prefabName[..prefabIndex].TrimEnd();
+
+        return prefabName;
+    }
     static IEnumerator PassiveBuffModificationWithDelayRoutine(Entity buffEntity, float chance)
     {
         yield return _secondDelay;
@@ -689,6 +716,7 @@ internal static class Classes
         try
         {
             IEnumerable<Entity> jewelEntities = Queries.GetEntitiesEnumerable(jewelQuery);
+
             foreach (Entity entity in jewelEntities)
             {
                 if (!entity.TryGetComponent(out PrefabGUID prefab)) continue;

@@ -129,7 +129,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
         {
             if (buff.Slot == 5)
             {
-                if (lockSpells) spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot); // then want to check on the spell in shift and get rid of it if the same prefab, same for slot 6 below
+                if (lockSpells) spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot);
             }
 
             if (buff.Slot == 6)

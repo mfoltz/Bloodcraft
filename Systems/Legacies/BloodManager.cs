@@ -1,6 +1,5 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
-using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
@@ -9,8 +8,6 @@ namespace Bloodcraft.Systems.Legacies;
 internal static class BloodManager
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static SystemService SystemService => Core.SystemService;
-    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     static readonly bool _hardSynergies = ConfigService.HardSynergies;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
@@ -182,7 +179,7 @@ internal static class BloodManager
 
             if (_classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
             {
-                var (_, classBloodStats) = classes.First().Value; // get class to check if stat allowed
+                var (_, classBloodStats) = classes.First().Value;
                 List<BloodStatType> bloodStatTypes = classBloodStats.Select(value => (BloodStatType)value).ToList();
 
                 if (bloodStatTypes.Contains(statType))
@@ -197,12 +194,12 @@ internal static class BloodManager
                 maxBonus *= gainFactor;
             }
 
-            float scaledBonus = maxBonus * ((float)xpData.Key / _maxLegacyLevel); // Scale bonus up to maxLevel then full effect
+            float scaledBonus = maxBonus * ((float)xpData.Key / _maxLegacyLevel);
 
             return scaledBonus;
         }
 
-        return 0; // Return 0 if no handler is found or other error
+        return 0;
     }
     public static BloodType GetCurrentBloodType(Entity character)
     {

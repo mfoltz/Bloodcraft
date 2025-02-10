@@ -9,7 +9,6 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
@@ -17,10 +16,10 @@ namespace Bloodcraft.Patches;
 internal static class ReactToInventoryChangedSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static JewelSpawnSystem JewelSpawnSystem => SystemService.JewelSpawnSystem;
 
     static readonly System.Random _random = new();
-
-    static readonly WaitForSeconds _spawnDelay = new(0.1f);
 
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
@@ -37,6 +36,7 @@ internal static class ReactToInventoryChangedSystemPatch
     const float SCT_DELAY = 0.75f;
 
     static readonly PrefabGUID _itemJewelTemplate = new(1075994038);
+    static readonly PrefabGUID _advancedGrinder = new(-178579946);
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);
 
     static readonly List<PrefabGUID> _jewelTemplates = 
@@ -46,7 +46,7 @@ internal static class ReactToInventoryChangedSystemPatch
         new(97169184),    // Item_Jewel_Illusion_T04
         new(-147757377),  // Item_Jewel_Frost_T04
         new(-1796954295), // Item_Jewel_Chaos_T04
-        new(271061481)   // Item_Jewel_Blood_T04
+        new(271061481)    // Item_Jewel_Blood_T04
     ];
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
@@ -74,7 +74,6 @@ internal static class ReactToInventoryChangedSystemPatch
                         {
                             if (questUser.PlatformId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, questUser);
                         }
-                        else continue;
                     }
                     else if (inventoryConnection.InventoryOwner.TryGetComponent(out UserOwner userOwner) && userOwner.Owner.GetEntityOnServer().TryGetComponent(out User user))
                     {
@@ -91,6 +90,7 @@ internal static class ReactToInventoryChangedSystemPatch
                         if (_extraRecipes && castleWorkstation.GetPrefabGuid().Equals(_gemCuttingTable) && itemPrefabGuid.Equals(_itemJewelTemplate))
                         {
                             SpawnPrimalJewel(inventory);
+
                             continue;
                         }
                         
@@ -135,13 +135,11 @@ internal static class ReactToInventoryChangedSystemPatch
                                     switch (handler)
                                     {
                                         case BlacksmithingHandler:
-
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
-
                                             break;
-                                        case AlchemyHandler:
 
+                                        case AlchemyHandler:
                                             if (itemEntity.TryGetComponent(out StoredBlood storedBlood))
                                             {
                                                 bool merlot = itemName.EndsWith("Bloodwine");
@@ -158,25 +156,22 @@ internal static class ReactToInventoryChangedSystemPatch
 
                                                 professionXP *= alchemyMultiplier;
                                             }
+                                            else professionXP *= ALCHEMY_FACTOR;
 
-                                            professionXP *= ALCHEMY_FACTOR;
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-
                                             break;
+
                                         case EnchantingHandler:
-
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
-
                                             break;
+
                                         case TailoringHandler:
-
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
-
                                             break;
-                                        default:
 
+                                        default:
                                             break;
                                     }
                                 }
@@ -198,7 +193,21 @@ internal static class ReactToInventoryChangedSystemPatch
         if (ServerGameManager.TryRemoveInventoryItem(inventory, _itemJewelTemplate, 1))
         {
             PrefabGUID primalJewel = _jewelTemplates.ElementAt(_random.Next(_jewelTemplates.Count));
-            ServerGameManager.TryAddInventoryItem(inventory, primalJewel, 1);
+
+            AddItemResponse addResponse = ServerGameManager.TryAddInventoryItem(inventory, primalJewel, 1);
+            if (addResponse.Success && addResponse.NewEntity.TryGetComponent(out JewelInstance jewelInstance))
+            {
+                Entity jewelEntity = addResponse.NewEntity;
+
+                JewelSpawnSystem.UninitializedJewelAbility uninitializedJewel = new()
+                {
+                    AbilityGuid = jewelInstance.Ability.HasValue() ? jewelInstance.Ability : jewelInstance.OverrideAbilityType,
+                    JewelEntity = jewelEntity,
+                    JewelTier = jewelInstance.TierIndex
+                };
+
+                JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false);
+            }
         }
     }
 }

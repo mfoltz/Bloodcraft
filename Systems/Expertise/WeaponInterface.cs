@@ -17,13 +17,13 @@ public enum WeaponType
     Unarmed,
     FishingPole
 }
-public interface IWeaponHandler
+internal interface IWeaponHandler
 {
     KeyValuePair<int, float> GetExpertiseData(ulong steamID);
     void SetExpertiseData(ulong steamID, KeyValuePair<int, float> xpData);
     WeaponType GetWeaponType();
 }
-public static class ExpertiseHandlerFactory
+internal static class ExpertiseHandlerFactory
 {
     public static IWeaponHandler GetExpertiseHandler(WeaponType weaponType)
     {

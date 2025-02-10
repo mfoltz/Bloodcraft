@@ -3,14 +3,14 @@ using Stunlock.Core;
 using Unity.Mathematics;
 
 namespace Bloodcraft.Systems.Professions; // need the const string treament but later
-public interface IProfessionHandler
+internal interface IProfessionHandler
 {
     KeyValuePair<int, float> GetProfessionData(ulong steamID);
     void SetProfessionData(ulong steamID, KeyValuePair<int, float> xpData);
     string GetProfessionName();
     float3 GetProfessionColor();
 }
-public static class ProfessionHandlerFactory
+internal static class ProfessionHandlerFactory
 {
     static readonly List<BaseProfessionHandler> _professionHandlers =
     [
@@ -178,11 +178,11 @@ public class TailoringHandler : BaseProfessionHandler
     }
     public override string GetProfessionName()
     {
-        return "<color=#F9DEBD>Tailoring</color>";
+        return "<color=#D98C80>Tailoring</color>";
     }
     public override float3 GetProfessionColor()
     {
-        return new float3(0.976f, 0.871f, 0.741f);
+        return new float3(0.85f, 0.55f, 0.50f);
     }
 }
 public class WoodcuttingHandler : BaseProfessionHandler
@@ -235,10 +235,10 @@ public class FishingHandler : BaseProfessionHandler
     }
     public override string GetProfessionName()
     {
-        return "<color=#00FFFF>Fishing</color>";
+        return "<color=#0077AA>Fishing</color>";
     }
     public override float3 GetProfessionColor()
     {
-        return new float3(0.0f, 1.0f, 1.0f);
+        return new float3(0.0f, 0.46f, 0.66f);
     }
 }

@@ -22,8 +22,8 @@ internal static class LevelingCommands
 
         var SteamID = ctx.Event.User.PlatformId;
 
-        TogglePlayerBool(SteamID, "ExperienceLogging");
-        LocalizationService.HandleReply(ctx, $"Leveling experience logging {(GetPlayerBool(SteamID, "ExperienceLogging") ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        TogglePlayerBool(SteamID, EXPERIENCE_LOG_KEY);
+        LocalizationService.HandleReply(ctx, $"Level logging {(GetPlayerBool(SteamID, EXPERIENCE_LOG_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "get", adminOnly: false, usage: ".lvl get", description: "Display current leveling progress.")]
@@ -45,7 +45,7 @@ internal static class LevelingCommands
             int progress = (int)(xpData.Value - ConvertLevelToXp(level));
             int percent = LevelingSystem.GetLevelProgress(steamId);
 
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] and have <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{level}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!");
 
             if (ConfigService.RestedXPSystem && steamId.TryGetPlayerRestedXP(out var restedData) && restedData.Value > 0)
             {
@@ -56,7 +56,7 @@ internal static class LevelingCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "No experience yet.");
+            LocalizationService.HandleReply(ctx, "You haven't earned any experience yet!");
         }
     }
 
@@ -96,7 +96,7 @@ internal static class LevelingCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "No experience found.");
+            LocalizationService.HandleReply(ctx, "You haven't earned any experience yet!");
         }
     }
 }

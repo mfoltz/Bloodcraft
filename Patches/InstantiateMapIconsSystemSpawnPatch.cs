@@ -7,7 +7,7 @@ using Unity.Entities;
 
 namespace Bloodcraft.Patches;
 
-/* this will take longer to deal with than currently want to spend the time on
+/* 
 [HarmonyPatch]
 internal class InstantiateMapIconsSystemSpawnPatch
 {

@@ -13,7 +13,7 @@ using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
-using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager_V2;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
@@ -29,8 +29,8 @@ internal static class Familiars
 
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
-    static readonly WaitForSeconds _smartBindDelay = new(0.1f);
-    static readonly WaitForSeconds _delay = new(1f);
+    static readonly WaitForSeconds _smartBindDelay = new(0.25f);
+    static readonly WaitForSeconds _delay = new(0.5f);
 
     const float AGGRO_BUFF_DURATION = 1f;
 
@@ -124,9 +124,9 @@ internal static class Familiars
 
     public static readonly Dictionary<PrefabGUID, int> VBloodSpawnBuffTierMap = new()
     {
-        {new(600470494), 1},   // Buff_General_Spawn_VBlood_AlphaWolf
-        {new(148706785), 4},   // Buff_General_Spawn_VBlood_FirstBandits
-        {new(-703593639), 7},  // Buff_General_Spawn_VBlood_EarlyGame
+        {new(600470494), 1},    // Buff_General_Spawn_VBlood_AlphaWolf
+        {new(148706785), 4},    // Buff_General_Spawn_VBlood_FirstBandits
+        {new(-703593639), 7},   // Buff_General_Spawn_VBlood_EarlyGame
         {new(-184730451), 10},  // Buff_General_Spawn_VBlood_MidGame
         {new(-2071666138), 15}, // Buff_General_Spawn_VBlood_EndGame
         {new(-1163165749), 25}  // Buff_General_Spawn_VBlood_ShardBosses
@@ -137,20 +137,13 @@ internal static class Familiars
     public static readonly ConcurrentDictionary<Entity, Entity> FamiliarHorseMap = [];
     public static void ClearFamiliarActives(ulong steamId)
     {
-        if (steamId.TryGetFamiliarActives(out var actives))
-        {
-            actives = (Entity.Null, 0);
-            steamId.SetFamiliarActives(actives);
-        }
+        steamId.SetFamiliarActives((Entity.Null, 0));
     }
-    public static Entity FindPlayerFamiliar(Entity character)
+    public static Entity GetActiveFamiliar(Entity playerCharacter)
     {
-        if (!character.Has<FollowerBuffer>()) return Entity.Null;
+        ulong steamId = playerCharacter.GetSteamId();
 
-        var followers = character.ReadBuffer<FollowerBuffer>();
-        ulong steamId = character.GetSteamId();
-
-        if (!followers.IsEmpty)
+        if (playerCharacter.TryGetBuffer<FollowerBuffer>(out var followers) && !followers.IsEmpty)
         {
             foreach (FollowerBuffer follower in followers)
             {
@@ -159,8 +152,8 @@ internal static class Familiars
                 if (familiar.Has<BlockFeedBuff>()) return familiar;
                 else if (steamId.TryGetFamiliarActives(out var actives))
                 {
-                    PrefabGUID prefabGuid = familiar.GetPrefabGuid();
-                    if (actives.FamKey == prefabGuid.GuidHash) return familiar;
+                    PrefabGUID familiarId = familiar.GetPrefabGuid();
+                    if (actives.FamKey == familiarId.GuidHash) return familiar;
                 }
             }
         }
@@ -168,13 +161,13 @@ internal static class Familiars
 
         return Entity.Null;
     }
-    public static void HandleFamiliarMinions(Entity familiar) //  need to see if game will handle familiar minions as player minions without extra effort, that would be neat
+    public static void HandleFamiliarMinions(Entity familiar)
     {
-        if (FamiliarMinions.ContainsKey(familiar) && FamiliarMinions.TryRemove(familiar, out HashSet<Entity> familiarMinions))
+        if (FamiliarMinions.TryRemove(familiar, out HashSet<Entity> familiarMinions))
         {
             foreach (Entity minion in familiarMinions)
             {
-                minion.Destroy();
+                if (minion.Exists()) minion.Destroy();
             }
         }
     }
@@ -185,14 +178,15 @@ internal static class Familiars
         if (steamId.TryGetFamiliarActives(out var actives) && actives.Familiar.Exists())
         {
             familiar = actives.Familiar;
+
             return true;
         }
 
         return false;
     }
-    public static void ParseAddedFamiliar(ChatCommandContext ctx, ulong steamId, string unit, string activeSet = "")
+    public static void ParseAddedFamiliar(ChatCommandContext ctx, ulong steamId, string unit, string activeBox = "")
     {
-        FamiliarUnlocksData data = LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
         if (int.TryParse(unit, out int prefabHash) && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(prefabHash), out Entity prefabEntity))
         {
@@ -203,10 +197,10 @@ internal static class Familiars
                 return;
             }
 
-            data.UnlockedFamiliars[activeSet].Add(prefabHash);
-            SaveUnlockedFamiliars(steamId, data);
+            data.UnlockedFamiliars[activeBox].Add(prefabHash);
+            SaveFamiliarUnlocksData(steamId, data);
 
-            LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeSet}</color>.");
+            LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
         }
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
@@ -234,10 +228,10 @@ internal static class Familiars
                     return;
                 }
 
-                data.UnlockedFamiliars[activeSet].Add(match.GuidHash);
-                SaveUnlockedFamiliars(steamId, data);
+                data.UnlockedFamiliars[activeBox].Add(match.GuidHash);
+                SaveFamiliarUnlocksData(steamId, data);
 
-                LocalizationService.HandleReply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeSet}</color>.");
+                LocalizationService.HandleReply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
             }
             else
             {
@@ -395,32 +389,33 @@ internal static class Familiars
     public static void BindFamiliar(User user, Entity playerCharacter, int boxIndex = -1)
     {
         ulong steamId = user.PlatformId;
-        Entity familiar = FindPlayerFamiliar(playerCharacter);
+        Entity familiar = GetActiveFamiliar(playerCharacter);
 
         if (familiar.Exists())
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You already have an active familiar! Unbind it first.");
+            LocalizationService.HandleServerReply(EntityManager, user, "You already have an active familiar! Unbind that one first.");
             return;
         }
         else if (playerCharacter.HasBuff(_pveCombatBuff) || playerCharacter.HasBuff(_dominateBuff) || playerCharacter.HasBuff(_takeFlightBuff) || playerCharacter.HasBuff(_pvpCombatBuff))
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You can't bind a familiar during combat or when using certain forms! (dominating presence, bat)");
+            LocalizationService.HandleServerReply(EntityManager, user, "You can't bind in combat or when using certain forms! (dominating presence, bat)");
             return;
         }
 
-        string box = steamId.TryGetFamiliarBox(out box) ? box : "";
+        string box = steamId.TryGetFamiliarBox(out box) ? box : string.Empty;
+
         if (string.IsNullOrEmpty(box))
         {
-            LocalizationService.HandleServerReply(EntityManager, user, "You don't have a box selected! Use '<color=white>.fam listboxes</color>' to see available boxes. Select a box with '<color=white>.fam cb [BoxName]</color>");
+            LocalizationService.HandleServerReply(EntityManager, user, "No active box! Use '<color=white>.fam listboxes</color>' and select one with '<color=white>.fam cb [BoxName]</color>");
             return;
         }
-        else if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && LoadUnlockedFamiliars(steamId).UnlockedFamiliars.TryGetValue(box, out var famKeys))
+        else if (steamId.TryGetFamiliarActives(out var data) && !data.Familiar.Exists() && data.FamKey.Equals(0) && LoadFamiliarUnlocksData(steamId).UnlockedFamiliars.TryGetValue(box, out var famKeys))
         {
-            if (boxIndex == -1 && steamId.TryGetFamiliarDefault(out boxIndex))
+            if (boxIndex == -1 && steamId.TryGetFamiliarBoxPreset(out boxIndex))
             {
                 if (boxIndex < 1 || boxIndex > famKeys.Count)
                 {
-                    LocalizationService.HandleServerReply(EntityManager, user, $"Invalid box index for current box, try binding manually again first.");
+                    LocalizationService.HandleServerReply(EntityManager, user, $"Invalid index for active box, try binding or smartbind via command.");
                     return;
                 }
 
@@ -431,17 +426,17 @@ internal static class Familiars
             }
             else if (boxIndex == -1)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, $"Couldn't find binding preset, bind to a familiar via command at least once first!");
+                LocalizationService.HandleServerReply(EntityManager, user, $"Couldn't find binding preset, try binding or smartbind via command.");
                 return;
             }
             else if (boxIndex < 1 || boxIndex > famKeys.Count)
             {
-                LocalizationService.HandleServerReply(EntityManager, user, $"Invalid choice, please use <color=white>1</color> to <color=white>{famKeys.Count}</color> (Active Box: <color=yellow>{box}</color>)");
+                LocalizationService.HandleServerReply(EntityManager, user, $"Invalid index, use <color=white>1</color>-<color=white>{famKeys.Count}</color>! (Active Box - <color=yellow>{box}</color>)");
                 return;
             }
             else
             {
-                steamId.SetFamiliarDefault(boxIndex);
+                steamId.SetFamiliarBoxPreset(boxIndex);
 
                 data = new(Entity.Null, famKeys[boxIndex - 1]);
                 steamId.SetFamiliarActives(data);
@@ -456,7 +451,7 @@ internal static class Familiars
     }
     public static void UnbindFamiliar(User user, Entity playerCharacter, bool smartBind = false, int index = -1)
     {
-        Entity familiar = FindPlayerFamiliar(playerCharacter);
+        Entity familiar = GetActiveFamiliar(playerCharacter);
         bool hasActive = user.PlatformId.TryGetFamiliarActives(out var actives) && !actives.FamKey.Equals(0);
 
         if (hasActive && familiar.Exists())
@@ -484,7 +479,7 @@ internal static class Familiars
         ulong steamId = user.PlatformId;
         int famKey = prefabGuid.GuidHash;
 
-        FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
+        FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
         string shinyHexColor = "";
 
         if (buffsData.FamiliarBuffs.ContainsKey(famKey))
@@ -569,11 +564,11 @@ internal static class Familiars
             });
         }
     }
-    public static bool IsEligibleForCombat(this Entity familiar)
+    public static bool EligibleForCombat(this Entity familiar)
     {
         return familiar.Exists() && !familiar.IsDisabled() && !familiar.HasBuff(_invulnerableBuff);
     }
-    public static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData prestigeData, List<int> battleGroup, ref List<string> familiars)
+    public static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData_V2 prestigeData, List<int> battleGroup, ref List<string> familiars)
     {
         foreach (int famKey in battleGroup)
         {
@@ -599,7 +594,7 @@ internal static class Familiars
             if (!prestigeData.FamiliarPrestige.ContainsKey(famKey))
             {
                 prestigeData.FamiliarPrestige[famKey] = new(0, []);
-                SaveFamiliarPrestige(steamId, prestigeData);
+                SaveFamiliarPrestigeData_V2(steamId, prestigeData);
             }
             else
             {
@@ -611,10 +606,10 @@ internal static class Familiars
     }
     public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, List<int> battleGroup)
     {
-        if (battleGroup.Any())
+        if (battleGroup.Any(x => x != 0))
         {
-            FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
-            FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
+            FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
+            FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
             List<string> familiars = [];
 
             BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup, ref familiars);
@@ -625,7 +620,7 @@ internal static class Familiars
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "No familiars in battle group yet!");
+            LocalizationService.HandleReply(ctx, "No familiars added to battle group!");
             return;
         }
     }
@@ -640,8 +635,8 @@ internal static class Familiars
         battleGroup[slotIndex] = (actives.famKey);
         steamId.SetFamiliarBattleGroup(battleGroup);
 
-        FamiliarBuffsData buffsData = LoadFamiliarBuffs(steamId);
-        FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
+        FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
+        FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
 
         int level = Systems.Familiars.FamiliarLevelingSystem.GetFamiliarExperience(steamId, actives.famKey).Key;
         if (level == 0) level = 1;
@@ -664,7 +659,7 @@ internal static class Familiars
         if (!prestigeData.FamiliarPrestige.ContainsKey(actives.famKey))
         {
             prestigeData.FamiliarPrestige[actives.famKey] = new(0, []);
-            SaveFamiliarPrestige(steamId, prestigeData);
+            SaveFamiliarPrestigeData_V2(steamId, prestigeData);
         }
         else
         {
@@ -686,7 +681,7 @@ internal static class Familiars
 
         return $"<color=green>{familiarId.GetLocalizedName()}</color>";
     }
-    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string bonusStat, int levels = 0)
+    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string statType, int levels = 0)
     {
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         User user = ctx.User;
@@ -695,21 +690,21 @@ internal static class Familiars
 
         if (!steamId.TryGetFamiliarActives(out var data)) // check if familiar is active
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find active familiar for prestiging!");
+            LocalizationService.HandleReply(ctx, "Couldn't find active familiar!");
             return;
         }
 
-        FamiliarExperienceData xpData = LoadFamiliarExperience(steamId);
-        FamiliarPrestigeData prestigeData = LoadFamiliarPrestige(steamId);
+        FamiliarExperienceData xpData = LoadFamiliarExperienceData(steamId);
+        FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
 
         if (!prestigeData.FamiliarPrestige.ContainsKey(data.FamKey))
         {
             prestigeData.FamiliarPrestige[data.FamKey] = new(0, []);
-            SaveFamiliarPrestige(steamId, prestigeData);
+            SaveFamiliarPrestigeData_V2(steamId, prestigeData);
         }
 
-        prestigeData = LoadFamiliarPrestige(steamId);
-        List<FamiliarStatType> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
+        prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+        List<int> stats = prestigeData.FamiliarPrestige[data.FamKey].Value;
 
         if (prestigeData.FamiliarPrestige[data.FamKey].Key >= ConfigService.MaxFamiliarPrestiges)
         {
@@ -717,43 +712,63 @@ internal static class Familiars
             return;
         }
 
+        int value = -1;
+
         if (stats.Count < FamiliarPrestigeStats.Count) // if less than max stats, parse entry and add if set doesnt already contain
         {
-            if (!TryParseFamiliarStat(bonusStat, out var stat))
+            if (int.TryParse(statType, out value))
             {
-                /*
-                var familiarStatsWithCaps = Enum.GetValues(typeof(FamiliarStatType))
-                .Cast<FamiliarStatType>()
-                .Select(stat =>
-                    $"<color=#00FFFF>{stat}</color>: <color=white>{FamiliarPrestigeStatValues[stat]}</color>")
-                .ToArray();
+                int length = FamiliarPrestigeStats.Count;
 
-                int halfLength = familiarStatsWithCaps.Length / 2;
+                if (value < 1 || value > length)
+                {
+                    LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
+                    return;
+                }
 
-                string familiarStatsLine1 = string.Join(", ", familiarStatsWithCaps.Take(halfLength));
-                string familiarStatsLine2 = string.Join(", ", familiarStatsWithCaps.Skip(halfLength));
+                --value;
+                // statType = value.ToString();
+                // FamiliarStatType stat = FamiliarPrestigeStats[value];
 
-                LocalizationService.HandleReply(ctx, "Invalid stat, please choose from the following:");
-                LocalizationService.HandleReply(ctx, $"Available familiar stats (1/2): {familiarStatsLine1}");
-                LocalizationService.HandleReply(ctx, $"Available familiar stats (2/2): {familiarStatsLine2}");
-                */
-
-                LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat type, use '<color=white>.fam lst</color>' to see options.");
-                return;
-            }
-            else if (!stats.Contains(stat))
-            {
-                stats.Add(stat);
+                if (!stats.Contains(value))
+                {
+                    stats.Add(value);
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> (<color=yellow>{value + 1}</color>) from prestiging, use '<color=white>.fam lst</color>' to see options.");
+                    return;
+                }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{stat}</color> as a bonus stat, pick another.");
+                LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
                 return;
             }
+
+            /*
+            if (!int.TryParse(stat, out value))
+            {
+                LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
+                return;
+            }
+
+            --value;
+
+            if (!stats.Contains(value))
+            {
+                stats.Add(value);
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> from prestiging!");
+                return;
+            }
+            */
         }
-        else if (stats.Count >= FamiliarPrestigeStats.Count && !string.IsNullOrEmpty(bonusStat))
+        else if (stats.Count >= FamiliarPrestigeStats.Count && !string.IsNullOrEmpty(statType))
         {
-            LocalizationService.HandleReply(ctx, "Familiar already has max bonus stats, try again without entering a stat.");
+            LocalizationService.HandleReply(ctx, "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')");
             return;
         }
 
@@ -762,16 +777,24 @@ internal static class Familiars
 
         KeyValuePair<int, float> newXP = new(++levelsToAdd, Progression.ConvertLevelToXp(++levelsToAdd)); // reset level to 1
         xpData.FamiliarExperience[data.FamKey] = newXP;
-        SaveFamiliarExperience(steamId, xpData);
+        SaveFamiliarExperienceData(steamId, xpData);
 
         int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
         prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
-        SaveFamiliarPrestige(steamId, prestigeData);
+        SaveFamiliarPrestigeData_V2(steamId, prestigeData);
 
-        Entity familiar = FindPlayerFamiliar(playerCharacter);
+        Entity familiar = GetActiveFamiliar(playerCharacter);
 
         ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
-        LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!");
+
+        if (value == -1)
+        {
+            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
+        }
     }
     static List<int> UnequipFamiliar(Entity familiar)
     {
@@ -821,5 +844,11 @@ internal static class Familiars
                 }
             }
         }
+    }
+    public static IEnumerator HandleFamiliarShapeshiftRoutine(User user, Entity playerCharacter, Entity familiar)
+    {
+        yield return _delay;
+
+        HandleModifications(user, playerCharacter, familiar);
     }
 }

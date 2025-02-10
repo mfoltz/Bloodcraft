@@ -27,7 +27,7 @@ internal static class PlayerTeleportSystemPatch
             {
                 if (entity.Has<PlayerTeleportDebugEvent>() && entity.TryGetComponent(out FromCharacter fromCharacter))
                 {
-                    Entity familiar = Familiars.FindPlayerFamiliar(fromCharacter.Character);
+                    Entity familiar = Familiars.GetActiveFamiliar(fromCharacter.Character);
 
                     if (familiar.Exists())
                     {

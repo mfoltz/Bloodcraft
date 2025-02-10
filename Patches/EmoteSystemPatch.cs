@@ -46,16 +46,16 @@ internal static class EmoteSystemPatch
 
     public static readonly Dictionary<PrefabGUID, Action<User, Entity, ulong>> EmoteActions = new()
     {
-        { new(1177797340), CallDismiss }, // Wave
-        { new(-370061286), CombatMode },  // Salute
-        { new(-26826346), BindUnbind },   // Clap
+        { new(1177797340), CallDismiss },    // Wave
+        { new(-370061286), CombatMode },     // Salute
+        { new(-26826346), BindUnbind },      // Clap
         // { new(-658066984), InteractMode } // Beckon
     };
 
     static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> _matchActions = new()
     {
-        { new(-1525577000), AcceptBattle }, // Yes
-        { new(-53273186), DeclineBattle }  // No
+        { new(-1525577000), AcceptBattle },  // Yes
+        { new(-53273186), DeclineBattle }    // No
     };
 
     public static readonly HashSet<ulong> ExitingForm = [];
@@ -141,7 +141,7 @@ internal static class EmoteSystemPatch
     }
     public static void BindUnbind(User user, Entity playerCharacter, ulong steamId)
     {
-        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
         if (familiar.Exists())
         {
@@ -156,7 +156,7 @@ internal static class EmoteSystemPatch
     {
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = Familiars.FindPlayerFamiliar(character);
+            Entity familiar = Familiars.GetActiveFamiliar(character);
 
             if (familiar.Exists())
             {
@@ -194,7 +194,7 @@ internal static class EmoteSystemPatch
         }
         else if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0)) // 0 means no active familiar
         {
-            Entity familiar = Familiars.FindPlayerFamiliar(character); // return following entity matching Guidhash in FamiliarActives
+            Entity familiar = Familiars.GetActiveFamiliar(character); // return following entity matching Guidhash in FamiliarActives
 
             if (!familiar.Exists() && data.Familiar.Exists())
             {

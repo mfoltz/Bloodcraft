@@ -8,12 +8,12 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Utilities.Misc;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
-
 internal static class MiscCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
@@ -39,32 +39,57 @@ internal static class MiscCommands
     }
 
     [Command(name: "sct", adminOnly: false, usage: ".sct [Type]", description: "Toggles various scrolling text elements.")]
-    public static void ToggleScrollingText(ChatCommandContext ctx, string sctType = "")
+    public static void ToggleScrollingText(ChatCommandContext ctx, string input = "")
     {
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (string.IsNullOrWhiteSpace(sctType))
+        if (string.IsNullOrWhiteSpace(input))
         {
-            LocalizationService.HandleReply(ctx, "SCT Options: PlayerXP, FamiliarXP, ProfessionXP, ProfessionYield (case-insensitive)");
+            ReplySCTDetails(ctx);
             return;
         }
-
-        if (!Misc.ScrollingTextNameMap.TryGetValue(sctType, out var scrollingTextMessage))
+        else if (int.TryParse(input, out int sctEnum))
         {
-            LocalizationService.HandleReply(ctx, "SCT Options: PlayerXP, FamiliarXP, ProfessionXP, ProfessionYield (case-insensitive)");
-            return;
-        }
+            sctEnum--;
 
-        if (!Misc.ScrollingTextBoolKeyMap.TryGetValue(scrollingTextMessage, out var boolKey))
+            if (!Enum.IsDefined(typeof(ScrollingTextMessage), sctEnum))
+            {
+                ReplySCTDetails(ctx);
+                return;
+            }
+
+            ScrollingTextMessage sctType = (ScrollingTextMessage)sctEnum;
+
+            if (!ScrollingTextBoolKeyMap.TryGetValue(sctType, out var boolKey))
+            {
+                LocalizationService.HandleReply(ctx, "Couldn't find bool key from scrolling text type...");
+                return;
+            }
+
+            TogglePlayerBool(steamId, boolKey);
+            bool currentState = GetPlayerBool(steamId, boolKey);
+
+            LocalizationService.HandleReply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
+        }
+        else
         {
-            LocalizationService.HandleReply(ctx, "Couldn't find bool key from scrolling text type...");
-            return;
+            if (!ScrollingTextNameMap.TryGetValue(input, out var sctType))
+            {
+                ReplySCTDetails(ctx);
+                return;
+            }
+
+            if (!ScrollingTextBoolKeyMap.TryGetValue(sctType, out var boolKey))
+            {
+                LocalizationService.HandleReply(ctx, "Couldn't find bool key from scrolling text type...");
+                return;
+            }
+
+            TogglePlayerBool(steamId, boolKey);
+            bool currentState = GetPlayerBool(steamId, boolKey);
+
+            LocalizationService.HandleReply(ctx, $"<color=white>{sctType}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
         }
-
-        TogglePlayerBool(steamId, boolKey);
-        bool currentState = GetPlayerBool(steamId, boolKey);
-
-        LocalizationService.HandleReply(ctx, $"<color=white>{scrollingTextMessage}</color> scrolling text {(currentState ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
     [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
@@ -139,9 +164,9 @@ internal static class MiscCommands
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
 
-        TogglePlayerBool(SteamID, "SpellLock");
+        TogglePlayerBool(SteamID, SPELL_LOCK_KEY);
 
-        if (GetPlayerBool(SteamID, "SpellLock"))
+        if (GetPlayerBool(SteamID, SPELL_LOCK_KEY))
         {
             LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
         }
@@ -176,8 +201,8 @@ internal static class MiscCommands
             return;
         }
 
-        TogglePlayerBool(steamId, "ShiftLock");
-        if (GetPlayerBool(steamId, "ShiftLock"))
+        TogglePlayerBool(steamId, SHIFT_LOCK_KEY);
+        if (GetPlayerBool(steamId, SHIFT_LOCK_KEY))
         {
             if (steamId.TryGetPlayerSpells(out var spellsData))
             {
@@ -258,161 +283,12 @@ internal static class MiscCommands
                 return;
             }
 
-            TogglePlayerBool(steamId, "ExoForm");
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, "ExoForm") ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
+            TogglePlayerBool(steamId, EXO_FORM_KEY);
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, EXO_FORM_KEY) ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
         }
         else
         {
             ctx.Reply("You are not yet worthy...");
         }
     }
-
-    /*
-    static readonly ComponentType[] _disabledFamiliarComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
-        ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
-        ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
-    ];
-
-    static readonly ComponentType[] _spawnSequenceComponent =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<SpawnSequenceForEntity>()),
-    ];
-
-    static readonly PrefabGUID _networkedSequence = new(651179295);
-
-    [Command(name: "cleanupfams", adminOnly: true, usage: ".cleanupfams", description: "Removes disabled, invisible familiars on the map preventing building.")]
-    public static void CleanUpFams(ChatCommandContext ctx)
-    {
-        EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _disabledFamiliarComponents,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        int counter = 0;
-
-        try
-        {
-            Dictionary<ulong, (Entity Familiar, int FamKey)> FamiliarActives = new(DataService.PlayerDictionaries.familiarActives);
-            List<Entity> dismissedFamiliars = FamiliarActives.Values.Select(x => x.Familiar).ToList();
-
-            IEnumerable<Entity> disabledFamiliars = Queries.GetEntitiesEnumerable(familiarsQuery); // need to filter for active/dismissed familiars and not destroy them
-            foreach (Entity entity in disabledFamiliars)
-            {
-                if (dismissedFamiliars.Contains(entity)) continue;
-                else
-                {
-                    if (entity.TryGetTeamEntity(out Entity teamEntity) && teamEntity.Has<UserTeam>() && entity.TryGetBuffer<DropTableBuffer>(out var buffer) && buffer[0].DropTrigger.Equals(DropTriggerType.OnSalvageDestroy))
-                    {
-                        if (entity.Has<Disabled>())
-                        {
-                            entity.Remove<Disabled>();
-                            if (entity.Has<DisableWhenNoPlayersInRange>()) entity.Remove<DisableWhenNoPlayersInRange>();
-                            if (entity.Has<DisabledDueToNoPlayersInRange>()) entity.Remove<DisabledDueToNoPlayersInRange>();
-
-                            EntityManager.DestroyEntity(entity);
-                            counter++;
-                        }
-                    }
-                }
-            }
-        }
-        finally
-        {
-            familiarsQuery.Dispose();
-            LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> disabled familiars...");
-        }
-
-        EntityQuery networkedSequencesQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _spawnSequenceComponent,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        counter = 0;
-
-        try
-        {
-            IEnumerable<Entity> networkedSequences = Queries.GetEntitiesEnumerable(networkedSequencesQuery);
-
-            foreach (Entity entity in networkedSequences)
-            {
-                if (entity.TryGetComponent(out PrefabGUID prefab) && prefab.Equals(_networkedSequence))
-                {
-                    SpawnSequenceForEntity spawnSequenceForEntity = entity.ReadRO<SpawnSequenceForEntity>();
-
-                    Entity target = spawnSequenceForEntity.Target.GetEntityOnServer();
-                    Entity secondaryTarget = spawnSequenceForEntity.SecondaryTarget.GetEntityOnServer();
-
-                    if (secondaryTarget.TryGetComponent(out PrefabGUID secondaryTargetPrefab) && secondaryTarget.Has<BlockFeedBuff>())
-                    {
-                        if (secondaryTarget.Has<Disabled>()) secondaryTarget.Remove<Disabled>();
-                        if (secondaryTarget.Has<DisableWhenNoPlayersInRange>()) secondaryTarget.Remove<DisableWhenNoPlayersInRange>();
-                        if (secondaryTarget.Has<DisabledDueToNoPlayersInRange>()) secondaryTarget.Remove<DisabledDueToNoPlayersInRange>();
-
-                        DestroyUtility.Destroy(EntityManager, secondaryTarget, DestroyDebugReason.None);
-                        counter++;
-                    }
-
-                    DestroyUtility.Destroy(EntityManager, entity, DestroyDebugReason.None);
-                }
-            }
-        }
-        finally
-        {
-            networkedSequencesQuery.Dispose();
-            LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> disabled summons...");
-        }
-
-        Dictionary<ulong, PlayerInfo> playerCache = new(PlayerCache);
-        counter = 0;
-
-        foreach (var keyValuePair in playerCache)
-        {
-            Entity playerCharacter = keyValuePair.Value.CharEntity;
-            User user = keyValuePair.Value.User;
-
-            if (!user.IsConnected && ServerGameManager.TryGetBuffer<FollowerBuffer>(playerCharacter, out var followerBuffer) && ServerGameManager.TryGetBuffer<MinionBuffer>(playerCharacter, out var minionBuffer))
-            {
-                foreach (FollowerBuffer follower in followerBuffer)
-                {
-                    Entity followerEntity = follower.Entity.GetEntityOnServer();
-
-                    if (followerEntity.Exists())
-                    {
-                        if (followerEntity.Has<Disabled>()) followerEntity.Remove<Disabled>();
-                        if (followerEntity.Has<DisableWhenNoPlayersInRange>()) followerEntity.Remove<DisableWhenNoPlayersInRange>();
-                        if (followerEntity.Has<DisabledDueToNoPlayersInRange>()) followerEntity.Remove<DisabledDueToNoPlayersInRange>();
-
-                        DestroyUtility.Destroy(EntityManager, followerEntity);
-                        counter++;
-                    }
-                }
-
-                followerBuffer.Clear();
-
-                foreach (MinionBuffer minion in minionBuffer)
-                {
-                    Entity minionEntity = minion.Entity;
-
-                    if (minionEntity.Exists())
-                    {
-                        if (minionEntity.Has<Disabled>()) minionEntity.Remove<Disabled>();
-                        if (minionEntity.Has<DisableWhenNoPlayersInRange>()) minionEntity.Remove<DisableWhenNoPlayersInRange>();
-                        if (minionEntity.Has<DisabledDueToNoPlayersInRange>()) minionEntity.Remove<DisabledDueToNoPlayersInRange>();
-
-                        DestroyUtility.Destroy(EntityManager, minionEntity);
-                        counter++;
-                    }
-                }
-
-                minionBuffer.Clear();
-            }
-        }
-
-        LocalizationService.HandleReply(ctx, $"Destroyed <color=white>{counter}</color> entities found in player FollowerBuffers and MinionBuffers...");
-    }
-    */
 }

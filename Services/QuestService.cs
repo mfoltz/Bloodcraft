@@ -58,7 +58,6 @@ internal class QuestService
 
     static bool _shardBearersReset = false;
     static bool _craftAndGather = false;
-    static bool _targetsLogged = false;
     public QuestService()
     {
         _unitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
@@ -124,10 +123,6 @@ internal class QuestService
                 }
 
                 _craftAndGather = true;
-                foreach (PrefabGUID prefabGUID in CraftPrefabs)
-                {
-                    //Core.Log.LogInfo(prefabGUID.LookupName());
-                }
 
                 _itemQuery.Dispose();
                 _resourceQuery.Dispose();
@@ -176,18 +171,8 @@ internal class QuestService
                 }
             }
 
-            if (!_targetsLogged)
-            {
-                foreach (var kvp in _targetCache)
-                {
-                    //Core.Log.LogInfo(kvp.Key.LookupName());
-                }
-
-                _targetsLogged = true;
-            }
-
             _lastUpdate = DateTime.UtcNow;
-            yield return _updateDelay; // Wait 60 seconds before processing players/units again
+            yield return _updateDelay;
         }
     }
 }

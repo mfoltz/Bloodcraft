@@ -283,7 +283,7 @@ internal static class WeaponSystem
         if (newLevel <= _maxExpertiseLevel)
         {
             LocalizationService.HandleServerReply(EntityManager, user,
-                $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]");
+                $"<color=#c0c0c0>{weaponType}</color> improved to [<color=white>{newLevel}</color>]!");
         }
 
         if (GetPlayerBool(steamID, REMINDERS_KEY))

@@ -5,18 +5,21 @@ using Stunlock.Core;
 using Unity.Entities;
 
 namespace Bloodcraft.Utilities;
-internal static class Recipes
+internal static class Recipes // pending organization and refactoring, should also make able to be copy and pasted into Eclipse (make sure client does the parts needed on client but not server parts and vice versa)
 {
     static EntityManager EntityManager => Core.EntityManager;
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
+    static readonly PrefabGUID _primalJewelRequirement = new(ConfigService.PrimalJewelCost);
+
     static readonly PrefabGUID _advancedGrinder = new(-178579946); // vampiric dust
     static readonly PrefabGUID _advancedFurnace = new(-222851985); // silver ingot
     static readonly PrefabGUID _fabricator = new(-465055967);      // copper wires, iron body
     static readonly PrefabGUID _shardExtractor = new(1794206684);  // shards, probably :p
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);  // extractor hates being alive so using this instead
+    static readonly PrefabGUID _advancedBloodPress = new(-684391635);
 
     static readonly PrefabGUID _refinementInventoryLarge = new(1436956144);
     static readonly PrefabGUID _refinementInventorySmall = new(-534407618);
@@ -79,6 +82,17 @@ internal static class Recipes
     static readonly PrefabGUID _manticoreShardContainer = new(653759442);
     static readonly PrefabGUID _draculaShardContainer = new(1495743889);
 
+    static readonly PrefabGUID _fakeGemdustRecipe = new(-1105418306);
+
+    static readonly PrefabGUID _bloodCrystalRecipe = new(-597461125);  // using perfect topaz gemdust recipe for this
+    static readonly PrefabGUID _crystal = new(-257494203);
+    static readonly PrefabGUID _bloodCrystal = new(-1913156733);
+    static readonly PrefabGUID _greaterEssence = new(271594022);
+
+    static readonly PrefabGUID _primalStygianRecipe = new(-259193408); // using perfect amethyst gemdust recipe for this
+    static readonly PrefabGUID _greaterStygian = new(576389135);
+    static readonly PrefabGUID _primalStygian = new(28358550);
+
     static readonly List<PrefabGUID> _shardRecipes =
     [
         _solarusShardRecipe,
@@ -110,7 +124,7 @@ internal static class Recipes
         { _manticoreShard, _demonFragment},
         { _draculaShard, _pristineHeart}
     };
-    public static void ModifyRecipes()
+    public static void ModifyRecipes() // this is already difficult to keep track of, definitely merits refactoring before doing more here
     {
         var recipeMap = GameDataSystem.RecipeHashLookupMap;
 
@@ -119,6 +133,79 @@ internal static class Recipes
         var recipeRequirementBuffer = EntityManager.AddBuffer<RecipeRequirementBuffer>(itemEntity);
         recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _depletedBattery, Amount = 5 });
         recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _techScrap, Amount = 25 });
+
+        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_primalStygianRecipe];
+
+        recipeRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
+
+        RecipeRequirementBuffer recipeRequirement = recipeRequirementBuffer[0];
+        recipeRequirement.Guid = _greaterStygian;
+        recipeRequirement.Amount = 8;
+
+        recipeRequirementBuffer[0] = recipeRequirement;
+
+        var recipeOutputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
+
+        RecipeOutputBuffer recipeOutput = recipeOutputBuffer[0];
+        recipeOutput.Guid = _primalStygian;
+        recipeOutput.Amount = 1;
+
+        recipeOutputBuffer[0] = recipeOutput;
+
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.CraftDuration = 10f;
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
+
+        recipeMap[_primalStygianRecipe] = recipeEntity.Read<RecipeData>();
+
+        recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_bloodCrystalRecipe];
+
+        recipeRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
+
+        recipeRequirement = recipeRequirementBuffer[0];
+        recipeRequirement.Guid = _crystal;
+        recipeRequirement.Amount = 100;
+
+        recipeRequirementBuffer[0] = recipeRequirement;
+        recipeRequirement.Guid = _greaterEssence;
+        recipeRequirement.Amount = 1;
+        recipeRequirementBuffer.Add(recipeRequirement);
+
+        recipeOutputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
+
+        recipeOutput = recipeOutputBuffer[0];
+        recipeOutput.Guid = _bloodCrystal;
+        recipeOutput.Amount = 100;
+
+        recipeOutputBuffer[0] = recipeOutput;
+
+        recipeEntity.With((ref RecipeData recipeData) =>
+        {
+            recipeData.CraftDuration = 10f;
+            recipeData.AlwaysUnlocked = true;
+            recipeData.HideInStation = false;
+            recipeData.HudSortingOrder = 0;
+        });
+
+        recipeMap[_bloodCrystalRecipe] = recipeEntity.Read<RecipeData>();
+
+        recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fakeGemdustRecipe];
+
+        var recipeLinkBuffer = recipeEntity.ReadBuffer<RecipeLinkBuffer>();
+
+        for (int i = recipeLinkBuffer.Length - 1; i >= 0; i--)
+        {
+            RecipeLinkBuffer entry = recipeLinkBuffer[i];
+
+            if (entry.Guid.Equals(_primalStygianRecipe) || entry.Guid.Equals(_bloodCrystalRecipe))
+            {
+                recipeLinkBuffer.RemoveAt(i);
+            }
+        }
 
         if (!itemEntity.Has<Salvageable>())
         {
@@ -164,7 +251,7 @@ internal static class Recipes
             {
                 salvageable.RecipeGUID = PrefabGUID.Empty;
                 salvageable.SalvageFactor = 1f;
-                salvageable.SalvageTimer = 10f;
+                salvageable.SalvageTimer = 20f;
             });
 
             if (!prefabEntity.Has<RecipeRequirementBuffer>())
@@ -223,140 +310,44 @@ internal static class Recipes
             recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _goldJewelry, Amount = 2 });
         }
 
-        /*
-        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_refinementInventoryLarge, out prefabEntity))
-        {
-            prefabEntity.With((ref RestrictedInventory restrictedInventory) =>
-            {
-                restrictedInventory.RestrictedItemCategory = ItemCategory.ALL;
-            });
-
-            var inventoryBuffer = prefabEntity.ReadBuffer<InventoryInstanceElement>();
-
-            InventoryInstanceElement inventoryInstanceElement = inventoryBuffer[0];
-            inventoryInstanceElement.RestrictedCategory = (long)ItemCategory.ALL;
-
-            inventoryBuffer[0] = inventoryInstanceElement;
-        }
-        */
-
-        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_refinementInventorySmall, out prefabEntity))
-        {
-            prefabEntity.With((ref RestrictedInventory restrictedInventory) =>
-            {
-                restrictedInventory.RestrictedItemCategory = ItemCategory.ALL;
-            });
-
-            var inventoryBuffer = prefabEntity.ReadBuffer<InventoryInstanceElement>();
-
-            InventoryInstanceElement inventoryInstanceElement = inventoryBuffer[0];
-            inventoryInstanceElement.RestrictedCategory = (long)ItemCategory.ALL;
-
-            inventoryBuffer[0] = inventoryInstanceElement;
-        }     
-
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_batteryCharge, out prefabEntity))
         {
             if (prefabEntity.Has<Salvageable>()) prefabEntity.Remove<Salvageable>();
             if (prefabEntity.Has<RecipeRequirementBuffer>()) prefabEntity.Remove<RecipeRequirementBuffer>();
         }
 
-        Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShardRecipe];
-       
-        if (!recipeEntity.Has<RecipeLinkBuffer>())
+        if (_primalJewelRequirement.HasValue() && PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_primalJewelRequirement, out Entity itemPrefab) && itemPrefab.Has<ItemData>())
         {
-            EntityManager.AddBuffer<RecipeLinkBuffer>(recipeEntity);
-        }
+            Entity extractRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShardRecipe];
 
-        recipeRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
+            recipeRequirementBuffer = extractRecipeEntity.ReadBuffer<RecipeRequirementBuffer>();
 
-        var recipeOutputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-        recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });  
+            RecipeRequirementBuffer extractRequirement = recipeRequirementBuffer[0];
+            extractRequirement.Guid = _primalJewelRequirement;
 
-        var recipeLinkBuffer = recipeEntity.ReadBuffer<RecipeLinkBuffer>();
-        foreach (PrefabGUID shardRecipe in _shardRecipes)
-        {
-            recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[shardRecipe];
+            recipeRequirementBuffer[0] = extractRequirement;
 
-            recipeOutputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
-            recipeRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
-
-            PrefabGUID shardPrefabGuid = recipeOutputBuffer[0].Guid;
-
-            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = recipeOutputBuffer[0].Guid, Amount = 1 });
-            recipeOutputBuffer.RemoveAt(0);     
-            
+            recipeOutputBuffer = extractRecipeEntity.ReadBuffer<RecipeOutputBuffer>();
             recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });
-            recipeLinkBuffer.Add(new RecipeLinkBuffer { Guid = shardRecipe });
         }
-
-        recipeEntity.With((ref RecipeData recipeData) =>
+        else if (_primalJewelRequirement.Equals(_demonFragment))
         {
-            recipeData.AlwaysUnlocked = true;
-            recipeData.HideInStation = false;
-            recipeData.HudSortingOrder = 0;
-            recipeData.IgnoreServerSettings = false;
-            recipeData.CraftDuration = 10f;
-        });
+            Entity extractRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShardRecipe];
 
-        recipeMap[_extractShardRecipe] = recipeEntity.Read<RecipeData>();
-        
-        /*
-        recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_goldIngotRecipe];
+            recipeRequirementBuffer = extractRecipeEntity.ReadBuffer<RecipeRequirementBuffer>();
 
-        if (!recipeEntity.Has<RecipeLinkBuffer>())
-        {
-            recipeLinkBuffer = EntityManager.AddBuffer<RecipeLinkBuffer>(recipeEntity);
+            RecipeRequirementBuffer extractRequirement = recipeRequirementBuffer[0];
+            extractRequirement.Guid = _demonFragment;
 
-            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_silverIngotRecipe, out prefabEntity)
-                && prefabEntity.TryGetBuffer(out recipeRequirementBuffer) 
-                && prefabEntity.TryGetBuffer(out recipeOutputBuffer))
-            {
-                RecipeRequirementBuffer recipeRequirement = recipeRequirementBuffer[0];
+            recipeRequirementBuffer[0] = extractRequirement;
 
-                recipeRequirement.Amount = 4;
-                recipeRequirement.Guid = _goldOre;
-
-                recipeRequirementBuffer[0] = recipeRequirement;
-                recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _processedSulphur, Amount = 1 });
-
-                RecipeOutputBuffer recipeOutput = recipeOutputBuffer[0];
-
-                recipeOutput.Guid = _goldIngot;
-
-                recipeOutputBuffer[0] = recipeOutput;
-            }
+            recipeOutputBuffer = extractRecipeEntity.ReadBuffer<RecipeOutputBuffer>();
+            recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });
         }
-        */
-
-        /*
-        foreach (PrefabGUID soulShard in _soulShards)
+        else if (_primalJewelRequirement.HasValue())
         {
-            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(soulShard, out prefabEntity)
-                && FamiliarSoulBoostItems.TryGetValue(soulShard, out PrefabGUID boostItem))
-            {
-                if (!prefabEntity.Has<Salvageable>())
-                {
-                    prefabEntity.Add<Salvageable>();
-                }
-
-                prefabEntity.With((ref Salvageable salvageable) =>
-                {
-                    salvageable.RecipeGUID = PrefabGUID.Empty;
-                    salvageable.SalvageFactor = 1f;
-                    salvageable.SalvageTimer = 15f;
-                });
-
-                if (!prefabEntity.Has<RecipeRequirementBuffer>())
-                {
-                    prefabEntity.AddBuffer<RecipeRequirementBuffer>();
-                }
-
-                recipeRequirementBuffer = prefabEntity.ReadBuffer<RecipeRequirementBuffer>();
-                recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = boostItem, Amount = 1 });
-            }
+            Core.Log.LogWarning($"Primal Jewel Requirement doesn't appear to be valid (missing itemData component), correct this for the primal jewel recipe to appear when gemCutters are placed!");
         }
-        */
 
         foreach (PrefabGUID shardContainer in _shardContainers)
         {
@@ -386,6 +377,16 @@ internal static class Recipes
 
         var refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _vampiricDustRecipe, Disabled = false, Unlocked = true });
+
+        for (int i = refinementBuffer.Length - 1; i >= 0; i--)
+        {
+            var entry = refinementBuffer[i];
+
+            if (entry.RecipeGuid.Equals(_primalStygianRecipe) || entry.RecipeGuid.Equals(_bloodCrystalRecipe))
+            {
+                refinementBuffer.RemoveAt(i);
+            }
+        }
 
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fabricator];
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_copperWiresRecipe];
@@ -421,7 +422,7 @@ internal static class Recipes
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fakeFlowerRecipe, out Entity recipePrefab) 
             && recipePrefab.TryGetBuffer<RecipeRequirementBuffer>(out var refinementRecipeBuffer) && !refinementRecipeBuffer.IsEmpty)
         {
-            var recipeRequirement = refinementRecipeBuffer[0];
+            recipeRequirement = refinementRecipeBuffer[0];
             recipeRequirement.Guid = _plantThistle;
 
             refinementRecipeBuffer[0] = recipeRequirement;
@@ -429,7 +430,12 @@ internal static class Recipes
 
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_gemCuttingTable];
         refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
+        refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _primalStygianRecipe, Disabled = false, Unlocked = true });
         refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _extractShardRecipe, Disabled = false, Unlocked = true });
+
+        stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_advancedBloodPress];
+        refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
+        refinementBuffer.Add(new RefinementstationRecipesBuffer { RecipeGuid = _bloodCrystalRecipe, Disabled = false, Unlocked = true });
 
         GameDataSystem.RegisterRecipes();
         GameDataSystem.RegisterItems();
@@ -437,3 +443,150 @@ internal static class Recipes
     }
 }
 
+/*
+Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_extractShardRecipe];
+
+if (!recipeEntity.Has<RecipeLinkBuffer>())
+{
+    EntityManager.AddBuffer<RecipeLinkBuffer>(recipeEntity);
+}
+
+recipeRequirementBuffer = recipeEntity.ReadBuffer<RecipeRequirementBuffer>();
+
+RecipeRequirementBuffer extractRequirement = recipeRequirementBuffer[0];
+extractRequirement.Guid = _itemBuildingManticore;
+
+recipeRequirementBuffer[0] = extractRequirement;
+
+var recipeOutputBuffer = recipeEntity.ReadBuffer<RecipeOutputBuffer>();
+recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });  
+
+var recipeLinkBuffer = recipeEntity.ReadBuffer<RecipeLinkBuffer>();
+
+foreach (PrefabGUID shardRecipe in _shardRecipes)
+{
+    Entity shardRecipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[shardRecipe];
+
+    shardRecipeEntity.With((ref RecipeData recipeData) =>
+    {
+        recipeData.AlwaysUnlocked = true;
+        recipeData.HideInStation = true;
+        recipeData.HudSortingOrder = 0;
+        recipeData.IgnoreServerSettings = false;
+        // recipeData.CraftDuration = 10f;
+    });
+
+    recipeMap[shardRecipe] = shardRecipeEntity.Read<RecipeData>();
+
+    recipeOutputBuffer = shardRecipeEntity.ReadBuffer<RecipeOutputBuffer>();
+    recipeRequirementBuffer = shardRecipeEntity.ReadBuffer<RecipeRequirementBuffer>();
+
+    PrefabGUID shardPrefabGuid = recipeOutputBuffer[0].Guid;
+    recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = recipeOutputBuffer[0].Guid, Amount = 1 });
+
+    recipeOutputBuffer.Clear();     
+    recipeOutputBuffer.Add(new RecipeOutputBuffer { Guid = _itemJewelTemplate, Amount = 1 });
+    recipeLinkBuffer.Add(new RecipeLinkBuffer { Guid = shardRecipe });
+}
+
+recipeEntity.With((ref RecipeData recipeData) =>
+{
+    recipeData.AlwaysUnlocked = true;
+    recipeData.HideInStation = false;
+    recipeData.HudSortingOrder = 0;
+    recipeData.IgnoreServerSettings = false;
+    recipeData.CraftDuration = 25f;
+});
+
+recipeMap[_extractShardRecipe] = recipeEntity.Read<RecipeData>();
+*/
+
+/*
+recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_goldIngotRecipe];
+
+if (!recipeEntity.Has<RecipeLinkBuffer>())
+{
+    recipeLinkBuffer = EntityManager.AddBuffer<RecipeLinkBuffer>(recipeEntity);
+
+    if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_silverIngotRecipe, out prefabEntity)
+        && prefabEntity.TryGetBuffer(out recipeRequirementBuffer) 
+        && prefabEntity.TryGetBuffer(out recipeOutputBuffer))
+    {
+        RecipeRequirementBuffer recipeRequirement = recipeRequirementBuffer[0];
+
+        recipeRequirement.Amount = 4;
+        recipeRequirement.Guid = _goldOre;
+
+        recipeRequirementBuffer[0] = recipeRequirement;
+        recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _processedSulphur, Amount = 1 });
+
+        RecipeOutputBuffer recipeOutput = recipeOutputBuffer[0];
+
+        recipeOutput.Guid = _goldIngot;
+
+        recipeOutputBuffer[0] = recipeOutput;
+    }
+}
+*/
+
+/*
+foreach (PrefabGUID soulShard in _soulShards)
+{
+    if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(soulShard, out prefabEntity))
+    {
+        if (!prefabEntity.Has<Salvageable>())
+        {
+            prefabEntity.Add<Salvageable>();
+        }
+
+        prefabEntity.With((ref Salvageable salvageable) =>
+        {
+            salvageable.RecipeGUID = PrefabGUID.Empty;
+            salvageable.SalvageFactor = 1f;
+            salvageable.SalvageTimer = 15f;
+        });           
+
+        if (!prefabEntity.Has<RecipeRequirementBuffer>())
+        {
+            prefabEntity.AddBuffer<RecipeRequirementBuffer>();
+        }
+
+        recipeRequirementBuffer = prefabEntity.ReadBuffer<RecipeRequirementBuffer>();
+        recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _itemJewelTemplate, Amount = 1 });
+    }
+}
+*/
+
+/*
+if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_refinementInventoryLarge, out prefabEntity))
+{
+    prefabEntity.With((ref RestrictedInventory restrictedInventory) =>
+    {
+        restrictedInventory.RestrictedItemCategory = ItemCategory.ALL;
+    });
+
+    var inventoryBuffer = prefabEntity.ReadBuffer<InventoryInstanceElement>();
+
+    InventoryInstanceElement inventoryInstanceElement = inventoryBuffer[0];
+    inventoryInstanceElement.RestrictedCategory = (long)ItemCategory.ALL;
+
+    inventoryBuffer[0] = inventoryInstanceElement;
+}
+*/
+
+/*
+if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_refinementInventorySmall, out prefabEntity))
+{
+    prefabEntity.With((ref RestrictedInventory restrictedInventory) =>
+    {
+        restrictedInventory.RestrictedItemCategory = ItemCategory.ALL;
+    });
+
+    var inventoryBuffer = prefabEntity.ReadBuffer<InventoryInstanceElement>();
+
+    InventoryInstanceElement inventoryInstanceElement = inventoryBuffer[0];
+    inventoryInstanceElement.RestrictedCategory = (long)ItemCategory.ALL;
+
+    inventoryBuffer[0] = inventoryInstanceElement;
+}
+*/

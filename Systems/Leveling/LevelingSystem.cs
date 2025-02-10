@@ -48,6 +48,8 @@ internal static class LevelingSystem
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
     static readonly PrefabGUID _sctResourceGain = new(1876501183);
 
+    // public static readonly HashSet<ulong> PartiedPlayers = [];
+
     static readonly HashSet<PrefabGUID> _extraGearLevelBuffs =
     [
         new(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
@@ -107,10 +109,12 @@ internal static class LevelingSystem
             }
         }
 
-        if (_unitSpawnerMultiplier < 1 && target.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
+        if (_unitSpawnerMultiplier < 1 && target.IsUnitSpawnerSpawned())
         {
-            gainedXP *= _unitSpawnerMultiplier;
+            // bool inParty = PartiedPlayers.Contains(steamId);
+            // if (inParty || gainedXP <= 0) return;
 
+            gainedXP *= _unitSpawnerMultiplier;
             if (gainedXP <= 0) return;
         }
 

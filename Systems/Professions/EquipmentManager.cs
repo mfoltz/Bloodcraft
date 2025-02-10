@@ -1,5 +1,4 @@
-﻿using Bloodcraft.Services;
-using ProjectM;
+﻿using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Unity.Entities;
@@ -9,10 +8,10 @@ internal static class EquipmentManager
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly float _maxDurabilityMultiplier = 1f;
-    static readonly float _maxWeaponMultiplier = 0.1f;
-    static readonly float _maxArmorMultiplier = 0.1f;
-    static readonly float _maxSourceMultiplier = 0.1f;
+    const float MAX_DURABILITY_MULTIPLIER = 1f;
+    const float MAX_WEAPON_MULTIPLIER = 0.1f;
+    const float MAX_ARMOR_MULTIPLIER = 0.1f;
+    const float MAX_SOURCE_MULTIPLIER = 0.1f;
 
     const int MAX_PROFESSION_LEVEL = 100;
     public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
@@ -51,15 +50,15 @@ internal static class EquipmentManager
 
             if (professionName.Contains("Blacksmithing"))
             {
-                equipmentMultiplier = _maxWeaponMultiplier;
+                equipmentMultiplier = MAX_WEAPON_MULTIPLIER;
             }
             else if (professionName.Contains("Tailoring"))
             {
-                equipmentMultiplier = _maxArmorMultiplier;
+                equipmentMultiplier = MAX_ARMOR_MULTIPLIER;
             }
             else if (professionName.Contains("Enchanting"))
             {
-                equipmentMultiplier = _maxSourceMultiplier;
+                equipmentMultiplier = MAX_SOURCE_MULTIPLIER;
             }
 
             int professionLevel = handler.GetProfessionData(steamId).Key;
@@ -75,7 +74,7 @@ internal static class EquipmentManager
         if (handler != null)
         {
             int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (_maxDurabilityMultiplier * (professionLevel / (float)MAX_PROFESSION_LEVEL));
+            float scaledBonus = 1 + (MAX_DURABILITY_MULTIPLIER * (professionLevel / (float)MAX_PROFESSION_LEVEL));
 
             return scaledBonus;
         }

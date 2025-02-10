@@ -97,7 +97,8 @@ internal static class PartyCommands
         }
 
         _playerParties.TryRemove(ownerId, out _);
-        // SavePlayerParties();
+        // if (PartiedPlayers.Contains(ownerId)) PartiedPlayers.Remove(ownerId);
+
         LocalizationService.HandleReply(ctx, "Party disbanded.");
     }
 
@@ -153,7 +154,7 @@ internal static class PartyCommands
         }
 
         // Remove the player from all parties they might be a member of
-        List<ulong> owners = [.. _playerParties.Keys];
+        List<ulong> owners = [.._playerParties.Keys];
         bool removedFromParties = false;
 
         foreach (var ownerId in owners)

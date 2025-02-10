@@ -33,9 +33,9 @@ internal static class PlayerCombatBuffSystemPatch
                 if (!entity.TryGetComponent(out InverseAggroEvents.Added inverseAggroEvent)) continue;
                 else if (inverseAggroEvent.Producer.TryGetPlayer(out Entity playerCharacter))
                 {
-                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+                    Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-                    if (familiar.Exists() && Familiars.IsEligibleForCombat(familiar))
+                    if (familiar.Exists() && Familiars.EligibleForCombat(familiar))
                     {
                         Familiars.AddToFamiliarAggroBuffer(familiar, inverseAggroEvent.Consumer);
                     }
@@ -62,9 +62,9 @@ internal static class PlayerCombatBuffSystemPatch
             {
                 if (ServerGameManager.TryGetBuffer<InverseAggroBufferElement>(entity, out var buffer))
                 {
-                    Entity familiar = Familiars.FindPlayerFamiliar(entity);
+                    Entity familiar = Familiars.GetActiveFamiliar(entity);
 
-                    if (familiar.Exists() && Familiars.IsEligibleForCombat(familiar))
+                    if (familiar.Exists() && Familiars.EligibleForCombat(familiar))
                     {
                         foreach (InverseAggroBufferElement element in buffer)
                         {

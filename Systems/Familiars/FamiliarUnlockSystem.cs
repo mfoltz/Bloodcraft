@@ -3,7 +3,6 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
-using System.Collections.Concurrent;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -33,7 +32,6 @@ internal static class FamiliarUnlockSystem
         "trader",
         "carriage",
         "horse",
-        "werewolf",
         "tombsummon",
         "servant"
     ];
@@ -52,8 +50,6 @@ internal static class FamiliarUnlockSystem
         { new(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
         { new(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
     };
-
-    public static readonly ConcurrentDictionary<ulong, float> Modifiers = [];
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         if (!_shareUnlocks) ProcessUnlock(deathEvent.Source, deathEvent.Target);
@@ -98,8 +94,6 @@ internal static class FamiliarUnlockSystem
     }
     static void HandleRoll(float dropChance, PrefabGUID targetPrefabGuid, Entity playerCharacter)
     {
-        // HandleModifier(ref dropChance, player);
-
         if (RollForChance(dropChance))
         {
             HandleUnlock(targetPrefabGuid, playerCharacter);
@@ -111,7 +105,7 @@ internal static class FamiliarUnlockSystem
         ulong steamId = user.PlatformId;
         int famKey = targetPrefabGuid.GuidHash;
 
-        FamiliarUnlocksData data = FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId);
+        FamiliarUnlocksData data = FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId);
         string lastListName = data.UnlockedFamiliars.Keys.LastOrDefault();
 
         if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
@@ -142,11 +136,11 @@ internal static class FamiliarUnlockSystem
         {
             List<int> currentList = data.UnlockedFamiliars[lastListName];
             currentList.Add(famKey);
-            FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, data);
+            FamiliarUnlocksManager.SaveFamiliarUnlocksData(steamId, data);
 
-            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperience(steamId);
+            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
             famData.FamiliarExperience[famKey] = new(FamiliarSummonSystem.BASE_LEVEL, Progression.ConvertLevelToXp(FamiliarSummonSystem.BASE_LEVEL));
-            FamiliarExperienceManager.SaveFamiliarExperience(steamId, famData);
+            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, famData);
 
             isShiny = HandleShiny(famKey, steamId, _shinyChance);
 
@@ -168,12 +162,12 @@ internal static class FamiliarUnlockSystem
         {
             HandleShinyUnlockBuff(playerCharacter);
 
-            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> visual unlocked for unit: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
+            LocalizationService.HandleServerReply(EntityManager, user, $"<color=#00FFFF>Shiny</color> unlocked: <color=green>{targetPrefabGuid.GetLocalizedName()}</color>");
         }
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)
     {
-        FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffs(steamId);
+        FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffsData(steamId);
         if (chance < 1f && RollForChance(chance)) // roll
         {
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
@@ -182,7 +176,7 @@ internal static class FamiliarUnlockSystem
                 famBuffs.Add(ShinyBuffColorHexMap.ElementAt(_random.Next(ShinyBuffColorHexMap.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
-            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // only one per fam for now, keep first visual unlocked
+            else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 return false;
             }
@@ -190,7 +184,7 @@ internal static class FamiliarUnlockSystem
             FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
-        else if (chance >= 1f && choice == -1) // guaranteed from double unlock
+        else if (chance >= 1f && choice == -1)
         {
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
@@ -198,7 +192,7 @@ internal static class FamiliarUnlockSystem
                 famBuffs.Add(ShinyBuffColorHexMap.ElementAt(_random.Next(ShinyBuffColorHexMap.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
-            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // only one per fam for now, keep first visual unlocked
+            else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 return false;
             }
@@ -206,15 +200,15 @@ internal static class FamiliarUnlockSystem
             FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
-        else if (chance >= 1f && choice != -1) // guaranteed add or change for respective vampiric dust cost
+        else if (chance >= 1f && choice != -1)
         {
-            if (!buffsData.FamiliarBuffs.ContainsKey(famKey)) // add shiny
+            if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
                 famBuffs.Add(choice);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
-            else if (buffsData.FamiliarBuffs.ContainsKey(famKey)) // change shiny
+            else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 buffsData.FamiliarBuffs[famKey][0] = choice;
             }
@@ -247,16 +241,4 @@ internal static class FamiliarUnlockSystem
             if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
         }
     }
-
-    /*
-    static void HandleModifier(ref float dropChance, Entity player)
-    {
-        ulong steamId = player.GetSteamId();
-
-        if (Modifiers.TryGetValue(steamId, out float modifier))
-        {
-            dropChance += modifier;
-        }
-    }
-    */
 }

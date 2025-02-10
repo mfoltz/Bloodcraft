@@ -7,7 +7,7 @@ using ProjectM.Shared.Systems;
 using Unity.Entities;
 
 namespace Bloodcraft.Services;
-public class SystemService(World world)
+internal class SystemService(World world)
 {
     readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
 
@@ -97,6 +97,24 @@ public class SystemService(World world)
 
     SpellModSyncSystem_Server _spellModSyncSystem_Server;
     public SpellModSyncSystem_Server SpellModSyncSystem_Server => _spellModSyncSystem_Server ??= GetSystem<SpellModSyncSystem_Server>();
+
+    JewelSpawnSystem _jewelSpawnSystem;
+    public JewelSpawnSystem JewelSpawnSystem => _jewelSpawnSystem ??= GetSystem<JewelSpawnSystem>();
+
+    TraderPurchaseSystem _traderPurchaseSystem;
+    public TraderPurchaseSystem TraderPurchaseSystem => _traderPurchaseSystem ??= GetSystem<TraderPurchaseSystem>();
+
+    UpdateBuffsBuffer_Destroy _updateBuffsBuffer_Destroy;
+    public UpdateBuffsBuffer_Destroy UpdateBuffsBuffer_Destroy => _updateBuffsBuffer_Destroy ??= GetSystem<UpdateBuffsBuffer_Destroy>();
+
+    BuffSystem_Spawn_Server _buffSystem_Spawn_Server;
+    public BuffSystem_Spawn_Server BuffSystem_Spawn_Server => _buffSystem_Spawn_Server ??= GetSystem<BuffSystem_Spawn_Server>();
+
+    InstantiateMapIconsSystem_Spawn _instantiateMapIconsSystem_Spawn;
+    public InstantiateMapIconsSystem_Spawn InstantiateMapIconsSystem_Spawn => _instantiateMapIconsSystem_Spawn ??= GetSystem<InstantiateMapIconsSystem_Spawn>();
+
+    MapZoneCollectionSystem _mapZoneCollectionSystem;
+    public MapZoneCollectionSystem MapZoneCollectionSystem => _mapZoneCollectionSystem ??= GetSystem<MapZoneCollectionSystem>();
     T GetSystem<T>() where T : ComponentSystemBase
     {
         return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"Failed to get {Il2CppType.Of<T>().FullName} from the Server...");

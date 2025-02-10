@@ -6,6 +6,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
@@ -13,16 +14,16 @@ namespace Bloodcraft.Patches;
 internal static class JewelSpawnSystemPatch
 {
     static SystemService SystemService => Core.SystemService;
-    // static NetworkIdSystem.Singleton NetworkIdSystem => SystemService.NetworkIdSystem;
     static SpellModSyncSystem_Server SpellModSyncSystemServer => SystemService.SpellModSyncSystem_Server;
 
-    static readonly Random _random = new();
+    static readonly System.Random _random = new();
 
     const double SKEW_FACTOR = 0.25;
 
     static readonly bool _extraRecipes = ConfigService.ExtraRecipes;
 
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);
+    static readonly PrefabGUID _advancedGrinder = new(-178579946);
 
     static readonly List<PrefabGUID> _jewelTemplates =
     [
@@ -42,6 +43,7 @@ internal static class JewelSpawnSystemPatch
         else if (!_extraRecipes) return;
 
         NativeArray<Entity> entities = __instance._JewelSpawnQuery.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -82,6 +84,7 @@ internal static class JewelSpawnSystemPatch
                     {
                         PrefabGUID spellModPrefabGUID = newSpellMods[assignedMods];
                         float powerValue = GetPowerValueForSpellMod(spellModPrefabGUID);
+                        // float powerValue = Mathf.Clamp((float)_random.NextDouble(), 0.5f, 1f);
 
                         switch (i)
                         {
@@ -127,15 +130,196 @@ internal static class JewelSpawnSystemPatch
                     spellModSetComponent.SpellMods = spellModSet;
 
                     entity.Write(spellModSetComponent);
+
+                    JewelSpawnSystem.UninitializedJewelAbility uninitializedJewel = new()
+                    {
+                        AbilityGuid = jewelInstance.Ability.HasValue() ? jewelInstance.Ability : jewelInstance.OverrideAbilityType,
+                        JewelEntity = entity,
+                        JewelTier = jewelInstance.TierIndex
+                    };
+                    
                     SpellModSyncSystemServer.OnUpdate();
                 }
             }
-            
         }
         finally
         {
             entities.Dispose();
         }
+
+        /*
+        entities = __instance._LegendaryItemSpawnQuery.ToEntityArray(Allocator.Temp);
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                PrefabGUID prefabGUID = entity.GetPrefabGuid();
+
+                if (entity.Has<LegendaryItemSpellModSetComponent>())
+                {
+                    List<PrefabGUID> statMods = [..StatMods.Values];
+                    List<PrefabGUID> usedStatMods = [];
+                    SpellModSet statModSet = spellModSetComponent.StatMods;
+                    SpellModSet spellModSet = spellModSetComponent.AbilityMods0;
+
+                    if (statMods.Contains(statModSet.Mod0.Id)) usedStatMods.Add(statModSet.Mod0.Id);
+                    if (statMods.Contains(statModSet.Mod1.Id)) usedStatMods.Add(statModSet.Mod1.Id);
+                    if (statMods.Contains(statModSet.Mod2.Id)) usedStatMods.Add(statModSet.Mod2.Id);
+                    if (statMods.Contains(statModSet.Mod3.Id)) usedStatMods.Add(statModSet.Mod3.Id);
+                    if (statMods.Contains(statModSet.Mod4.Id)) usedStatMods.Add(statModSet.Mod4.Id);
+                    if (statMods.Contains(statModSet.Mod5.Id)) usedStatMods.Add(statModSet.Mod5.Id);
+                    if (statMods.Contains(statModSet.Mod6.Id)) usedStatMods.Add(statModSet.Mod6.Id);
+                    if (statMods.Contains(statModSet.Mod7.Id)) usedStatMods.Add(statModSet.Mod7.Id);
+
+                    List<PrefabGUID> unusedStatMods = statMods.Except(usedStatMods).ToList();
+                    unusedStatMods.Shuffle();
+
+                    int availableSlots = 8 - statModSet.Count;
+                    List<PrefabGUID> newStatMods = unusedStatMods.Take(availableSlots).ToList();
+
+                    int assignedMods = 0;
+                    for (int i = 4; i < 8 && assignedMods < newStatMods.Count; i++)
+                    {
+                        PrefabGUID statModPrefabGuid = newStatMods[assignedMods];
+                        // float powerValue = (float)_random.NextDouble();
+                        float powerValue = Mathf.Clamp((float)_random.NextDouble(), 0.5f, 1f);
+
+                        switch (i)
+                        {
+                            case 4:
+                                if (statModSet.Mod4.Id.IsEmpty())
+                                {
+                                    statModSet.Mod4.Id = statModPrefabGuid;
+                                    statModSet.Mod4.Power = powerValue;
+                                    assignedMods++;
+                                }
+                                break;
+                            case 5:
+                                if (statModSet.Mod5.Id.IsEmpty())
+                                {
+                                    statModSet.Mod5.Id = statModPrefabGuid;
+                                    statModSet.Mod5.Power = powerValue;
+                                    assignedMods++;
+                                }
+                                break;
+                            case 6:
+                                if (statModSet.Mod6.Id.IsEmpty())
+                                {
+                                    statModSet.Mod6.Id = statModPrefabGuid;
+                                    statModSet.Mod6.Power = powerValue;
+                                    assignedMods++;
+                                }
+                                break;
+                            case 7:
+                                if (statModSet.Mod7.Id.IsEmpty())
+                                {
+                                    statModSet.Mod7.Id = statModPrefabGuid;
+                                    statModSet.Mod7.Power = powerValue;
+                                    assignedMods++;
+                                }
+                                break;
+                        }
+                    }
+
+                    statModSet.Count += (byte)newStatMods.Count;
+                    if (statModSet.Count > 8) statModSet.Count = 8;
+
+                    SpellModSyncSystemServer.AddSpellMod(ref statModSet);
+                    spellModSetComponent.StatMods = statModSet;
+
+                    entity.Write(spellModSetComponent);
+
+                    LegendaryItemSpellModSetComponent spellModSetComponent = entity.Read<LegendaryItemSpellModSetComponent>();
+
+                    HandleSpellModSet(entity, ref spellModSetComponent, ref spellModSetComponent.StatMods, [..StatMods.Values], 0.5f);
+                    HandleSpellModSet(entity, ref spellModSetComponent, ref spellModSetComponent.AbilityMods0, _weaponInfusions, 1f);
+                    HandleSpellModSet(entity, ref spellModSetComponent, ref spellModSetComponent.AbilityMods1, _weaponInfusions, 1f);
+
+                    __instance.InitializeLegendaryItemData(entity);
+                    SpellModSyncSystemServer.OnUpdate();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogInfo(ex.ToString());
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+        */
+    }
+    static void HandleSpellModSet(Entity entity, ref LegendaryItemSpellModSetComponent spellModSetComponent, ref SpellModSet spellModSet, List<PrefabGUID> setMods, float powerMin = 1f)
+    {
+        List<PrefabGUID> usedMods = [];
+
+        if (setMods.Contains(spellModSet.Mod0.Id)) setMods.Add(spellModSet.Mod0.Id);
+        if (setMods.Contains(spellModSet.Mod1.Id)) setMods.Add(spellModSet.Mod1.Id);
+        if (setMods.Contains(spellModSet.Mod2.Id)) setMods.Add(spellModSet.Mod2.Id);
+        if (setMods.Contains(spellModSet.Mod3.Id)) setMods.Add(spellModSet.Mod3.Id);
+        if (setMods.Contains(spellModSet.Mod4.Id)) setMods.Add(spellModSet.Mod4.Id);
+        if (setMods.Contains(spellModSet.Mod5.Id)) setMods.Add(spellModSet.Mod5.Id);
+        if (setMods.Contains(spellModSet.Mod6.Id)) setMods.Add(spellModSet.Mod6.Id);
+        if (setMods.Contains(spellModSet.Mod7.Id)) setMods.Add(spellModSet.Mod7.Id);
+
+        List<PrefabGUID> unusedMods = setMods.Except(usedMods).ToList();
+        unusedMods.Shuffle();
+
+        int availableSlots = 8 - spellModSet.Count;
+        List<PrefabGUID> newMods = unusedMods.Take(availableSlots).ToList();
+
+        int assignedMods = 0;
+        for (int i = 4; i < 8 && assignedMods < newMods.Count; i++)
+        {
+            PrefabGUID modPrefabGuid = newMods[assignedMods];
+            // float powerValue = (float)_random.NextDouble();
+            float powerValue = Mathf.Clamp((float)_random.NextDouble(), powerMin, 1f);
+
+            switch (i)
+            {
+                case 4:
+                    if (spellModSet.Mod4.Id.IsEmpty())
+                    {
+                        spellModSet.Mod4.Id = modPrefabGuid;
+                        spellModSet.Mod4.Power = powerValue;
+                        assignedMods++;
+                    }
+                    break;
+                case 5:
+                    if (spellModSet.Mod5.Id.IsEmpty())
+                    {
+                        spellModSet.Mod5.Id = modPrefabGuid;
+                        spellModSet.Mod5.Power = powerValue;
+                        assignedMods++;
+                    }
+                    break;
+                case 6:
+                    if (spellModSet.Mod6.Id.IsEmpty())
+                    {
+                        spellModSet.Mod6.Id = modPrefabGuid;
+                        spellModSet.Mod6.Power = powerValue;
+                        assignedMods++;
+                    }
+                    break;
+                case 7:
+                    if (spellModSet.Mod7.Id.IsEmpty())
+                    {
+                        spellModSet.Mod7.Id = modPrefabGuid;
+                        spellModSet.Mod7.Power = powerValue;
+                        assignedMods++;
+                    }
+                    break;
+            }
+        }
+
+        spellModSet.Count += (byte)newMods.Count;
+        if (spellModSet.Count > 8) spellModSet.Count = 8;
+
+        SpellModSyncSystemServer.AddSpellMod(ref spellModSet);
+        spellModSetComponent.StatMods = spellModSet;
+
+        entity.Write(spellModSetComponent);
     }
     static void Shuffle<T>(this IList<T> list)
     {
@@ -162,6 +346,19 @@ internal static class JewelSpawnSystemPatch
 
         return 1f;
     }
+
+    public static readonly Dictionary<string, PrefabGUID> StatMods = [];
+
+    static readonly List<PrefabGUID> _weaponInfusions = 
+    [
+        new(-634479113),  // SpellMod_Weapon_BloodInfused
+        new(-1102157891), // SpellMod_Weapon_ChaosInfused
+        new(-1538516012), // SpellMod_Weapon_FrostInfused
+        new(-1957977808), // SpellMod_Weapon_IllusionInfused
+        new(-1099263242), // SpellMod_Weapon_StormInfused
+        new(-766734228)   // SpellMod_Weapon_UndeadInfused
+    ];
+
     static readonly Dictionary<PrefabGUID, List<PrefabGUID>> _spellModSets = new() // Rianaid already had a lot of this noted in his jewel mod (JewelCreator) which greatly lessened how painful making this was, appreciate him for having that available!
     {
         { new(2067760264), new() { new(306122420), new(-1068750721), new(-1789930630), new(-946443951), new(681330075), new(-209970409), new(-1612403007), new(2051676361), new(1475152083) } }, // blood fountain
@@ -468,4 +665,3 @@ internal static class JewelSpawnSystemPatch
         { new PrefabGUID(1871790882), null },               // Removes all negative effects from self on cast
     };
 }
-

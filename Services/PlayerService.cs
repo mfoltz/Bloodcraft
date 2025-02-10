@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using Unity.Entities;
 using UnityEngine;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Utilities.Misc;
 
 namespace Bloodcraft.Services;
@@ -12,7 +13,10 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly WaitForSeconds _delay = new(60);
+    // static readonly bool _performance = ConfigService.PerformanceAuditing;
+    // static readonly Regex _regex = new(@"^\d+");
+
+    static readonly WaitForSeconds _delay = new(60f);
 
     static readonly ComponentType[] _userComponent =
     [
@@ -20,7 +24,11 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     ];
 
     static EntityQuery _userQuery;
-    static bool _migrated = false;
+    static EntityQuery _allUsersQuery;
+
+    static bool _migratedPlayerBools = false;
+    static bool _migratedFamiliarPrestige = false;
+    static bool _playersCached = false;
 
     public static readonly ConcurrentDictionary<ulong, PlayerInfo> PlayerCache = [];
     public static readonly ConcurrentDictionary<ulong, PlayerInfo> OnlineCache = [];
@@ -32,17 +40,29 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     }
     public PlayerService()
     {
-        _userQuery = EntityManager.CreateEntityQuery(_userComponent);
-        PlayerCacheRoutine().Start();
+        EntityQueryDesc entityQueryDesc = new()
+        {
+            All = _userComponent,
+            Options = EntityQueryOptions.IncludeDisabled
+        };
+
+        _allUsersQuery = EntityManager.CreateEntityQuery(entityQueryDesc);
+
+        entityQueryDesc = new()
+        {
+            All = _userComponent,
+        };
+
+        _userQuery = EntityManager.CreateEntityQuery(entityQueryDesc);
+
+        PlayerServiceRoutine().Start();
     }
-    static IEnumerator PlayerCacheRoutine()
+    static IEnumerator PlayerServiceRoutine()
     {
         while (true)
         {
-            PlayerCache.Clear();
             OnlineCache.Clear();
-
-            var players = Queries.GetEntitiesEnumerable(_userQuery);
+            var players = Queries.GetEntitiesEnumerable(_playersCached ? _userQuery : _allUsersQuery);
 
             players
                 .Select(userEntity =>
@@ -71,7 +91,8 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     }
                 });
 
-            if (!_migrated && File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
+            // should probably organize the migrating stuff elsewhere, just convenient to put here for now since using PlayerInfo for it
+            if (!_migratedPlayerBools && File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
             {
                 List<PlayerInfo> playerCache = new(PlayerCache.Values);
 
@@ -108,12 +129,41 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     }
                 }
 
-                _migrated = true;
+                _migratedPlayerBools = true;
             }
-            else
+            
+            if (!_migratedFamiliarPrestige)
             {
-                _migrated = true;
+                List<PlayerInfo> playerCache = new(PlayerCache.Values);
+
+                foreach (PlayerInfo playerInfo in playerCache)
+                {
+                    var oldPrestigeData = FamiliarPrestigeManager.LoadFamiliarPrestigeData(playerInfo.User.PlatformId);
+                    if (oldPrestigeData != null) FamiliarPrestigeManager_V2.MigrateToV2(oldPrestigeData, playerInfo.User.PlatformId);
+                }
+
+                /*
+                string path = ConfigService.ConfigInitialization.DirectoryPaths[7];
+                foreach (string file in Directory.EnumerateFiles(path, "*.json"))
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    Match match = _regex.Match(fileName);
+
+                    if (match.Success)
+                    {
+                        ulong steamId = ulong.Parse(match.Value);
+                        var oldPrestigeData = FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId);
+
+                        if (oldPrestigeData != null) FamiliarPrestigeManager_V2.MigrateToV2(oldPrestigeData, steamId);
+                    }
+                }
+                */
+
+                _migratedFamiliarPrestige = true;
             }
+
+            // if (_performance) Core.LogPerformanceStats();
+            if (!_playersCached) _playersCached = true;
 
             yield return _delay;
         }

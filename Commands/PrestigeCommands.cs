@@ -36,7 +36,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>.prestige l</color> to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>'.prestige l'</color> to see options.");
             return;
         }
 
@@ -110,7 +110,7 @@ internal static class PrestigeCommands
 
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -137,7 +137,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -160,26 +160,7 @@ internal static class PrestigeCommands
                     LocalizationService.HandleReply(ctx, $"Enough charge to maintain form for <color=white>{(int)exoFormData.Value}</color>s");
                 }
 
-                /*
-                var exoFormSkills = Buffs.ExoFormAbilityUnlockMap
-                    .Where(pair => pair.Value != 0) // Filter out abilities unlocked at level 0
-                    .Select(pair =>
-                    {
-                        // Get the ability name from ExoFormAbilityMap and remove the "Prefab" suffix
-                        string abilityName = Buffs.ExoFormAbilityMap[pair.Key].GetPrefabName();
-                        int prefabIndex = abilityName.IndexOf("Prefab");
-                        if (prefabIndex != -1)
-                        {
-                            abilityName = abilityName[..prefabIndex].TrimEnd();
-                        }
-
-                        // Return formatted ability name with unlock level
-                        return $"<color=white>{abilityName}</color> at <color=#90EE90>Exo</color> level <color=yellow>{pair.Value}</color>";
-                    })
-                    .ToList();
-                */
-
-                var exoFormSkills = Buffs.ExoFormAbilityUnlockMap
+                var exoFormSkills = Buffs.ExoFormUnlockMap
                     .Where(pair => pair.Value != 0)
                     .Select(pair =>
                     {
@@ -213,7 +194,7 @@ internal static class PrestigeCommands
         IPrestigeHandler handler = PrestigeHandlerFactory.GetPrestigeHandler(parsedPrestigeType);
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -240,7 +221,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -287,7 +268,7 @@ internal static class PrestigeCommands
 
         if (handler == null)
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>.prestige l</color> to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -338,7 +319,7 @@ internal static class PrestigeCommands
 
         if (buffs.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, "No prestige buffs configured...");
+            LocalizationService.HandleReply(ctx, "No leveling prestige buffs configured!");
             return;
         }
 
@@ -355,7 +336,7 @@ internal static class PrestigeCommands
 
         if (prestigeBuffs.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, "No prestige buffs available.");
+            LocalizationService.HandleReply(ctx, "No leveling prestige buffs configured!");
         }
         else
         {
@@ -366,27 +347,6 @@ internal static class PrestigeCommands
                 LocalizationService.HandleReply(ctx, replyMessage);
             }
         }
-
-        /*
-        var prestigeBuffs = buffs.Select((buff, index) =>
-        {
-            int level = index + 1;
-            string prefab = new PrefabGUID(buff).GetPrefabName();
-            int prefabIndex = prefab.IndexOf("Prefab");
-            if (prefabIndex != -1)
-            {
-                prefab = prefab[..prefabIndex].TrimEnd();
-            }
-            return $"<color=white>{prefab}</color> at prestige <color=yellow>{level}</color>";
-        }).ToList();
-
-        for (int i = 0; i < prestigeBuffs.Count; i += 4)
-        {
-            var batch = prestigeBuffs.Skip(i).Take(4);
-            string replyMessage = string.Join(", ", batch);
-            LocalizationService.HandleReply(ctx, replyMessage);
-        }
-        */
     }
 
     [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
@@ -400,7 +360,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige type, use <color=white>.prestige l</color> to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -425,7 +385,7 @@ internal static class PrestigeCommands
         {
             if (parsedPrestigeType == PrestigeType.Experience)
             {
-                RemovePrestigeBuffs(character, prestigeLevel);
+                RemovePrestigeBuffs(character);
             }
 
             prestigeData[parsedPrestigeType] = 0;
@@ -463,7 +423,7 @@ internal static class PrestigeCommands
             Entity character = ctx.Event.SenderCharacterEntity;
             ApplyPrestigeBuffs(character, prestigeLevel);
 
-            LocalizationService.HandleReply(ctx, "Prestige buffs applied.");
+            LocalizationService.HandleReply(ctx, "Prestige buffs applied! (if they were missing)");
         }
         else
         {
@@ -486,7 +446,7 @@ internal static class PrestigeCommands
 
         const int maxPerMessage = 6;
 
-        LocalizationService.HandleReply(ctx, $"Available Prestiges:");
+        LocalizationService.HandleReply(ctx, $"Prestiges:");
         for (int i = 0; i < prestigeTypes.Count; i += maxPerMessage)
         {
             var batch = prestigeTypes.Skip(i).Take(maxPerMessage);
@@ -506,7 +466,7 @@ internal static class PrestigeCommands
 
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid prestige, use .prestige l to see options.");
+            LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
             return;
         }
 
@@ -523,7 +483,7 @@ internal static class PrestigeCommands
 
         if (!prestigeData.Any())
         {
-            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet...");
+            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!");
             return;
         }
 
@@ -538,7 +498,7 @@ internal static class PrestigeCommands
 
         if (leaderboard.Count == 0)
         {
-            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet...");
+            LocalizationService.HandleReply(ctx, $"No players have prestiged in <color=#90EE90>{parsedPrestigeType}</color> yet!");
         }
         else
         {
@@ -571,7 +531,7 @@ internal static class PrestigeCommands
             if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !character.HasBuff(_shroudBuff)
                 && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
             {
-                Buffs.HandlePermanentBuff(character, _shroudBuff);
+                Buffs.TryApplyPermanentBuff(character, _shroudBuff);
             }
         }
         else

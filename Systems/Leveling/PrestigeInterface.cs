@@ -28,14 +28,14 @@ public enum PrestigeType
     CreatureLegacy,
     BruteLegacy
 }
-public interface IPrestigeHandler
+internal interface IPrestigeHandler
 {
     void Prestige(ulong steamID);
     int GetPrestigeLevel(ulong steamID);
     KeyValuePair<int, float> GetPrestigeTypeData(ulong steamID);
     PrestigeType GetPrestigeType();
 }
-public static class PrestigeHandlerFactory
+internal static class PrestigeHandlerFactory
 {
     public static IPrestigeHandler GetPrestigeHandler(PrestigeType prestigeType)
     {

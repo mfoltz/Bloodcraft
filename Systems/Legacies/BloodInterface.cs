@@ -16,13 +16,13 @@ public enum BloodType
     Creature,
     Brute
 }
-public interface IBloodHandler
+internal interface IBloodHandler
 {
     KeyValuePair<int, float> GetLegacyData(ulong steamID);
     void SetLegacyData(ulong steamID, KeyValuePair<int, float> xpData);
     BloodType GetBloodType();
 }
-public static class BloodHandlerFactory
+internal static class BloodHandlerFactory
 {
     public static IBloodHandler GetBloodHandler(BloodType bloodType)
     {

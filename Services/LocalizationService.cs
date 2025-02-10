@@ -1,13 +1,15 @@
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
 using System.Reflection;
 using System.Text.Json;
+using Unity.Collections;
 using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Bloodcraft.Services;
-internal class LocalizationService
+internal class LocalizationService // the bones are from KindredCommands
 {
     struct Code
     {
@@ -69,28 +71,28 @@ internal class LocalizationService
     static void LoadPrefabHashesToGuidStrings()
     {
         string resourceName = "Bloodcraft.Localization.Prefabs.json";
-
         Assembly assembly = Assembly.GetExecutingAssembly();
+
         Stream stream = assembly.GetManifestResourceStream(resourceName);
-
         using StreamReader reader = new(stream);
-        string jsonContent = reader.ReadToEnd();
 
+        string jsonContent = reader.ReadToEnd();
         var prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
+
         prefabNames
             .ForEach(kvp => _prefabHashesToGuidStrings[kvp.Key] = kvp.Value);
     }
     static void LoadGuidStringsToLocalizedNames()
     {
         string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Localization.English.json";
-
         Assembly assembly = Assembly.GetExecutingAssembly();
+
         Stream stream = assembly.GetManifestResourceStream(resourceName);
-
         using StreamReader localizationReader = new(stream);
-        string jsonContent = localizationReader.ReadToEnd();
 
+        string jsonContent = localizationReader.ReadToEnd();
         var localizationFile = JsonSerializer.Deserialize<LocalizationFile>(jsonContent);
+
         localizationFile.Nodes
             .ToDictionary(x => x.Guid, x => x.Text)
             .ForEach(kvp => _guidStringsToLocalizedNames[kvp.Key] = kvp.Value);
@@ -98,6 +100,37 @@ internal class LocalizationService
     internal static void HandleReply(ChatCommandContext ctx, string message)
     {
         ctx.Reply(message);
+    }
+
+    static readonly ComponentType[] _networkEventComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<FromCharacter>()),
+        ComponentType.ReadOnly(Il2CppType.Of<NetworkEventType>()),
+        ComponentType.ReadOnly(Il2CppType.Of<SendNetworkEventTag>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ChatMessageServerEvent>())
+    ];
+
+    static readonly NetworkEventType _networkEventType = new()
+    {
+        IsAdminEvent = false,
+        EventId = NetworkEvents.EventId_ChatMessageServerEvent,
+        IsDebugEvent = false,
+    };
+    internal static void SendToClient(Entity playerCharacter, Entity userEntity, string messageWithMAC)
+    {
+        ChatMessageServerEvent chatMessageEvent = new()
+        {
+            MessageText = new FixedString512Bytes(messageWithMAC),
+            MessageType = ServerChatMessageType.System,
+            FromCharacter = playerCharacter.GetNetworkId(),
+            FromUser = userEntity.GetNetworkId(),
+            TimeUTC = DateTime.UtcNow.Ticks
+        };
+
+        Entity networkEntity = Core.EntityManager.CreateEntity(_networkEventComponents);
+        networkEntity.Write(new FromCharacter { Character = playerCharacter, User = userEntity });
+        networkEntity.Write(_networkEventType);
+        networkEntity.Write(chatMessageEvent);
     }
     internal static void HandleServerReply(EntityManager entityManager, User user, string message)
     {
@@ -131,7 +164,7 @@ internal class LocalizationService
         return string.Empty;
     }
 
-    /*
+    /* this works fine for languages without heavy reliance on order of phrases, at some point will refactor responses to use strings from user-made language file but until then this is best bet
     static string GetLocalizedWords(string message)
     {
         StringBuilder result = new();

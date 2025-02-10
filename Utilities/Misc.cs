@@ -4,11 +4,13 @@ using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
+using System.Diagnostics;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
+using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Utilities;
@@ -111,10 +113,10 @@ internal static class Misc
 
     public static readonly Dictionary<ScrollingTextMessage, string> ScrollingTextBoolKeyMap = new()
     {
-        { ScrollingTextMessage.PlayerExperience, PlayerBoolsManager.EXPERIENCE_LOG_KEY },
-        { ScrollingTextMessage.FamiliarExperience, PlayerBoolsManager.SCT_FAMILIAR_KEY },
-        { ScrollingTextMessage.ProfessionExperience, PlayerBoolsManager.SCT_PROFESSIONS_KEY },
-        { ScrollingTextMessage.ProfessionYield, PlayerBoolsManager.SCT_YIELD_KEY }
+        { ScrollingTextMessage.PlayerExperience, SCT_PLAYER_KEY },
+        { ScrollingTextMessage.FamiliarExperience, SCT_FAMILIAR_KEY },
+        { ScrollingTextMessage.ProfessionExperience, SCT_PROFESSIONS_KEY },
+        { ScrollingTextMessage.ProfessionYield, SCT_YIELD_KEY }
     };
     public static class PlayerBoolsManager
     {
@@ -250,17 +252,21 @@ internal static class Misc
 
             return false;
         }
+        public static string GetEnabledDisabledBool(ulong steamId, string boolKey)
+        {
+            return GetPlayerBool(steamId, boolKey) ? "<color=green>enabled</color>" : "<color=red>disabled</color>";
+        }
     }
     public static HashSet<Entity> GetDeathParticipants(Entity source)
     {
-        float3 sourcePosition = source.Read<Translation>().Value;
+        float3 sourcePosition = source.GetPosition();
         User sourceUser = source.GetUser();
         string playerName = sourceUser.CharacterName.Value;
 
         Entity clanEntity = sourceUser.ClanEntity.GetEntityOnServer();
         HashSet<Entity> players = [source]; // use hashset to prevent double gains processing
 
-        if (_parties)
+        if (_parties) // EntitiesInView_Server + ?
         {
             List<List<string>> playerParties = DataService.PlayerDictionaries._playerParties.Values
                 .Select(party => party.ToList())
@@ -335,7 +341,7 @@ internal static class Misc
         string timeString = timeSpan.ToString(@"mm\:ss");
         return timeString;
     }
-    public static string FormatBloodStatValue(float value)
+    public static string FormatPercentStatValue(float value)
     {
         string bonusString = (value * 100).ToString("F0") + "%";
         return bonusString;
@@ -351,6 +357,48 @@ internal static class Misc
         };
         return formattedBonus;
     }
+    public static void ReplySCTDetails(ChatCommandContext ctx)
+    {
+        ulong steamId = ctx.User.PlatformId;
+        int index = 0;
+
+        LocalizationService.HandleReply(ctx, $"<color=#FFC0CB>SCT Options</color>: <color=yellow>{++index}</color>| <color=white>PlayerXP</color> ({GetEnabledDisabledBool(steamId, SCT_PLAYER_KEY)}), <color=yellow>{++index}</color>| <color=white>FamiliarXP</color> ({GetEnabledDisabledBool(steamId, SCT_FAMILIAR_KEY)}), " +
+            $"<color=yellow>{++index}</color>| <color=white>ProfessionXP</color> ({GetEnabledDisabledBool(steamId, SCT_PROFESSIONS_KEY)}), <color=yellow>{++index}</color>| <color=white>ProfessionYield</color> ({GetEnabledDisabledBool(steamId, SCT_YIELD_KEY)})");
+    }
+    public static class PerformanceTimer
+    {
+        static readonly Stopwatch _stopwatch = new();
+        static string _label = "";
+        static int _frameCount = 0;
+        static long _totalElapsedMs = 0;
+        const int AVERAGE_OVER_FRAMES = 60;
+        public static void Start(string label)
+        {
+            _label = label;
+            _stopwatch.Restart();
+
+            Core.Log.LogInfo($"⏳ - {_label}");
+        }
+        public static void StopAndLog()
+        {
+            _stopwatch.Stop();
+
+            long elapsedMs = _stopwatch.ElapsedMilliseconds;
+            _totalElapsedMs += elapsedMs;
+            _frameCount++;
+
+            long avgMs = _totalElapsedMs / _frameCount;
+            string speedIcon = avgMs < 5 ? "🚀" :
+                                avgMs < 20 ? "⚡" :
+                                avgMs < 50 ? "🐢" : "💀";
+
+            Core.Log.LogInfo($"🎌 - {_label} {speedIcon} ({avgMs}ms | {_frameCount}f)");
+
+            // Reset counters
+            _frameCount = 0;
+            _totalElapsedMs = 0;
+        }
+    }
 
     /*
     public static bool EarnedPermaShroud()
@@ -360,26 +408,6 @@ internal static class Misc
         {
             BuffUtilities.ApplyPermanentBuff(character, ShroudBuff);
         }
-    }
-    
-    public static void InitializeChanceModifiers()
-    {
-        List<PlayerInfo> playerInfos = new(PlayerCache.Values);
-
-        foreach (PlayerInfo playerInfo in playerInfos)
-        {
-            if (playerInfo.UserEntity.TryGetComponent(out UserStats userStats))
-            {
-                int vBloodKills = userStats.VBloodKills;
-
-                FamiliarUnlockSystem.Modifiers[playerInfo.User.PlatformId] = CalculateBonusChance(vBloodKills);
-            }
-        }
-    }
-    static float CalculateBonusChance(int vBloodKills)
-    {
-        // WIP
-        return 0f;
     }
     */
 }

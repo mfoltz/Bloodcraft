@@ -21,6 +21,8 @@ internal static class Buffs
     static DebugEventsSystem DebugEventsSystem => SystemService.DebugEventsSystem;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
+    const float EXO_COUNTDOWN = 5f;
+
     static readonly PrefabGUID _pveCombatBuff = new(581443919);
     static readonly PrefabGUID _pvpCombatBuff = new(697095869);
     static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
@@ -31,13 +33,25 @@ internal static class Buffs
         { 1, new(841757706) }, // first weapon skill downswing detonate
         { 2, new(-1940289109) }, // space dash skill teleport behind target
         { 3, new(1270706044) }, // shift dash skill veil of bats
-        { 4, new(532210332) }, // second weapon skill sword throw
+        { 4, new(-2146217789) }, // second weapon skill sword thrust
         { 5, new(-1161896955) }, // first spell skill etherial sword
         { 6, new(-7407393) }, // second spell skill ring of blood
-        { 7, new(797450963) } //  ultimate ability lasers + blood bolts... thing
+        { 7, new(797450963) } //  ultimate spell blood... lasers?
     };
 
-    public static readonly Dictionary<int, int> ExoFormAbilityUnlockMap = new()
+    public static readonly Dictionary<int, float> ExoFormCooldownMap = new()
+    {
+        // { 0, 8f },
+        // { 1, 8f },
+        // { 2, 8f },
+        // { 3, 8f },
+        // { 4, 8f },
+        { 5, 15f },
+        { 6, 30f }
+        //{ 7, 35f }
+    };
+
+    public static readonly Dictionary<int, int> ExoFormUnlockMap = new()
     {
         { 0, 0 },
         { 1, 15 },
@@ -516,11 +530,9 @@ internal static class Buffs
             return;
         }
     }
-    public static void HandlePermanentBuff(Entity player, PrefabGUID buffPrefab)
+    public static void TryApplyPermanentBuff(Entity player, PrefabGUID buffPrefab)
     {
-        bool appliedBuff = player.TryApplyBuff(buffPrefab);
-
-        if (appliedBuff && ServerGameManager.TryGetBuff(player, buffPrefab.ToIdentifier(), out Entity buffEntity))
+        if (player.TryApplyAndGetBuff(buffPrefab, out Entity buffEntity))
         {
             ModifyPermanentBuff(buffEntity);
         }
@@ -572,7 +584,7 @@ internal static class Buffs
     {
         if (!HasClass(steamId)) return;
 
-        if (!UpdateBuffsBufferDestroyPatch.ClassBuffs.TryGetValue(GetPlayerClass(steamId), out List<PrefabGUID> classBuffs)) return;
+        if (!UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(GetPlayerClass(steamId), out List<PrefabGUID> classBuffs)) return;
         else if (classBuffs.Count == 0) return;
 
         int levelStep = ConfigService.MaxLevel / classBuffs.Count;
@@ -603,7 +615,7 @@ internal static class Buffs
 
             for (int i = 0; i < numBuffsToApply; i++)
             {
-                HandlePermanentBuff(player, classBuffs[i]);
+                TryApplyPermanentBuff(player, classBuffs[i]);
             }
         }
     }
@@ -677,7 +689,7 @@ internal static class Buffs
             {
                 buffEntity.Remove<AmplifyBuff>();
             }
-        }
+        }    
     }
     public static void PrestigeBuffs()
     {
@@ -691,7 +703,7 @@ internal static class Buffs
     public static void ModifyExoFormBuff(Entity buffEntity, Entity playerCharacter)
     {
         Entity userEntity = playerCharacter.GetUserEntity();
-        User user = userEntity.Read<User>();
+        User user = userEntity.GetUser();
         ulong steamId = user.PlatformId;
 
         int exoLevel = steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int level) ? level : 0;
@@ -703,6 +715,13 @@ internal static class Buffs
         if (!buffEntity.Has<Script_Buff_Shapeshift_DataShared>()) buffEntity.Add<Script_Buff_Shapeshift_DataShared>();
         //if (!buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Add<ModifyTargetHUDBuff>();
         if (!buffEntity.Has<AmplifyBuff>()) buffEntity.Add<AmplifyBuff>();
+        if (!buffEntity.Has<ChangeKnockbackResistanceBuff>())
+        {
+            buffEntity.AddWith((ref ChangeKnockbackResistanceBuff changeKnockbackResistance) =>
+            {
+                changeKnockbackResistance.KnockbackResistanceIndex = 6;
+            });
+        }
         if (!buffEntity.Has<ModifyUnitStatBuff_DOTS>())
         {
             EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buffEntity);
@@ -804,7 +823,7 @@ internal static class Buffs
             {
                 Target = ReplaceAbilityTarget.BuffTarget,
                 Slot = keyValuePair.Key,
-                NewGroupId = ExoFormAbilityUnlockMap[keyValuePair.Key] <= exoLevel ? keyValuePair.Value : PrefabGUID.Empty,
+                NewGroupId = ExoFormUnlockMap[keyValuePair.Key] <= exoLevel ? keyValuePair.Value : PrefabGUID.Empty,
                 Priority = 99,
                 CopyCooldown = true,
                 CastBlockType = GroupSlotModificationCastBlockType.WholeCast
@@ -818,7 +837,7 @@ internal static class Buffs
         string durationMessage = $"<color=red>Dracula's</color> latent power made manifest... (<color=white>{(int)duration}</color>s)";
         LocalizationService.HandleServerReply(EntityManager, user, durationMessage);
 
-        ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - 5f).Start(); // Start countdown messages 5 seconds before buff expires
+        ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - EXO_COUNTDOWN).Start();
     }
     public static bool IsPlayerInCombat(this Entity entity)
     {
@@ -906,5 +925,19 @@ internal static class Buffs
     public static void RefreshStats(Entity playerCharacter)
     {
         if (playerCharacter.HasBuff(_vBloodBloodBuff)) playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
+    }
+    static void Testing(Entity buffEntity)
+    {    
+        Buff_ApplyBuffOnDamageTypeDealt_DataShared buff_ApplyBuffOnDamageTypeDealt = new()
+        {
+            OnDamageDealtListener = ServerGameManager.AddEventListener<DealDamageEvent>(buffEntity, null),
+        };
+
+        // NativeArray<Entity> entitiesAsync = __instance.__query_401358720_0.ToEntityArrayAsync(Allocator.TempJob, out JobHandle job);
+
+        // while (!job.IsCompleted)
+        {
+
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
@@ -33,7 +32,7 @@ internal static class ServerBootstrapSystemPatches
 
     static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
-    static readonly WaitForSeconds _delay = new(2.5f);
+    static readonly WaitForSeconds _delay = new(1f);
 
     static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
@@ -63,8 +62,11 @@ internal static class ServerBootstrapSystemPatches
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
+        if (!__instance._NetEndPointToApprovedUserIndex.ContainsKey(netConnectionId)) return;
+
         int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
         ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
+
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
@@ -72,7 +74,7 @@ internal static class ServerBootstrapSystemPatches
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         bool exists = playerCharacter.Exists();
 
-        Core.StartCoroutine(UpdatePlayerData(steamId, playerCharacter, userEntity, user, exists));
+        UpdatePlayerData(steamId, playerCharacter, userEntity, user, exists).Start();
     }
     static IEnumerator UpdatePlayerData(ulong steamId, Entity playerCharacter, Entity userEntity, User user, bool exists)
     {
@@ -297,7 +299,7 @@ internal static class ServerBootstrapSystemPatches
                 {
                     steamId.SetPlayerRestedXP(new KeyValuePair<DateTime, float>(DateTime.UtcNow, 0));
                 }
-                else if (exists)
+                else if (exists) // why isn't this a method, shaaaame but later
                 {
                     float restedMultiplier = 0f;
 
@@ -377,7 +379,7 @@ internal static class ServerBootstrapSystemPatches
                 if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                     && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
                 {
-                    Buffs.HandlePermanentBuff(playerCharacter, _shroudBuff);
+                    Buffs.TryApplyPermanentBuff(playerCharacter, _shroudBuff);
                 }
                 else
                 {
@@ -395,7 +397,22 @@ internal static class ServerBootstrapSystemPatches
 
             if (!steamId.TryGetFamiliarBox(out var _))
             {
-                steamId.SetFamiliarBox("");
+                /*
+                string activeBox = string.Empty;
+
+                if (playerCharacter.TryGetComponent(out Energy energy))
+                {
+                    FamiliarUnlocksData familiarBoxes = FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId);
+
+                    if (energy.MaxEnergy._Value <= familiarBoxes.UnlockedFamiliars.Count)
+                    {
+                        List<string> boxes = [..familiarBoxes.UnlockedFamiliars.Keys];
+                        activeBox = boxes[(int)energy.MaxEnergy._Value];
+                    }
+                }
+                */
+
+                steamId.SetFamiliarBox();
             }
 
             if (!steamId.TryGetFamiliarBattleGroup(out var _))
@@ -403,10 +420,10 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetFamiliarBattleGroup([0, 0, 0]);
             }
 
-            FamiliarExperienceManager.SaveFamiliarExperience(steamId, FamiliarExperienceManager.LoadFamiliarExperience(steamId));
-            FamiliarUnlocksManager.SaveUnlockedFamiliars(steamId, FamiliarUnlocksManager.LoadUnlockedFamiliars(steamId));
+            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, FamiliarExperienceManager.LoadFamiliarExperienceData(steamId));
+            FamiliarUnlocksManager.SaveFamiliarUnlocksData(steamId, FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId));
 
-            Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+            Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
             if (!familiar.Exists())
             {
@@ -431,7 +448,7 @@ internal static class ServerBootstrapSystemPatches
             }
         }
 
-        if (_eclipse && exists)
+        if (exists)
         {
             PlayerInfo playerInfo = new()
             {
@@ -440,21 +457,41 @@ internal static class ServerBootstrapSystemPatches
                 User = user
             };
 
-            if (!OnlineCache.ContainsKey(steamId)) OnlineCache.TryAdd(steamId, playerInfo);
-            if (!PlayerCache.ContainsKey(steamId)) PlayerCache.TryAdd(steamId, playerInfo);
+            OnlineCache.TryAdd(steamId, playerInfo);
+            PlayerCache.TryAdd(steamId, playerInfo);
         }
     }
     static IEnumerator UpdateFamiliarDelayRoutine(User user, Entity playerCharacter, Entity familiar)
     {
         yield return _delay;
 
-        FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar);
+        familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
+
+        /*
+        if (FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar))
+        {
+            int famKey = familiar.GetPrefabGuidHash();
+
+            if (!familiar.IsDisabled())
+            {
+                steamId.SetFamiliarActives((Entity.Null, famKey));
+            }
+            else
+            {
+                steamId.SetFamiliarActives((familiar, famKey));
+            }
+        }
+        else
+        {
+            familiar.Destroy();
+        }
+        */
     }
     static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
     {
         yield return _delay;
 
-        Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
         if (familiar.Exists())
         {
@@ -466,10 +503,12 @@ internal static class ServerBootstrapSystemPatches
     [HarmonyPrefix]
     static void OnUserDisconnectedPrefix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
+        if (!__instance._NetEndPointToApprovedUserIndex.ContainsKey(netConnectionId)) return;
         int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
-        ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
 
+        ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
         Entity userEntity = serverClient.UserEntity;
+
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         ulong steamId = user.PlatformId;
@@ -509,6 +548,8 @@ internal static class ServerBootstrapSystemPatches
     static void OnUserDisconnectedPrefix(KickBanSystem_Server __instance)
     {
         NativeArray<Entity> entities = __instance._KickQuery.ToEntityArray(Allocator.Temp);
+        // NativeArray<KickEvent> kickEvents = __instance._KickQuery.ToComponentDataArray<KickEvent>(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)

@@ -8,6 +8,7 @@ using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
+using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Physics;
@@ -21,7 +22,7 @@ using UnityEngine;
 namespace Bloodcraft;
 internal static class Core
 {
-    static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world (yet)...");
+    public static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world (yet)...");
     public static EntityManager EntityManager => Server.EntityManager;
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
@@ -44,26 +45,29 @@ internal static class Core
         new PrefabGUID(-1435372081)  // SolarusReturnBuff
     ];
 
+    // static readonly bool _performance = ConfigService.PerformanceAuditing;
+
     static readonly PrefabGUID _fallenAngel = new(-76116724);
 
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
 
-    static readonly PrefabGUID _wolfBiteCast = new(990205141);
-
     static readonly PrefabGUID _bearDashAbility = new(1873182450);
     static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
+
+    static readonly PrefabGUID _wolfBiteCast = new(990205141);
 
     static readonly HashSet<PrefabGUID> _bearFormBuffs =
     [
         new(-1569370346), // AB_Shapeshift_Bear_Buff
-        new(-858273386)  // AB_Shapeshift_Bear_Skin01_Buff
+        new(-858273386)   // AB_Shapeshift_Bear_Skin01_Buff
     ];
 
-    static readonly HashSet<PrefabGUID> _wolfFormBuffs =
+    static readonly HashSet<PrefabGUID> _soulShardDropTables =
     [
-        new(-351718282),  // AB_Shapeshift_Wolf_Buff
-        new(-1158884666), // AB_Shapeshift_Wolf_Skin01_Buff
-        new(-1687924191)  // AB_Shapeshift_Wolf_PMK_Skin02
+        new(-454715368),  // DT_Unit_Relic_Manticore_Unique
+        new(-1629745461), // DT_Unit_Relic_Paladin_Unique
+        new(492631484),   // DT_Unit_Relic_Monster_Unique
+        new(-191917509)   // DT_Unit_Relic_Dracula_Unique
     ];
 
     const float DIRECTION_DURATION = 6f; // for making familiars for player two face correct direction until battle starts
@@ -85,6 +89,7 @@ internal static class Core
         OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey()); // loading these last causes a bad format exception now... oh computers, you so fun
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
+        // if (_performance) ServerPerformanceLogger();
         _ = new PlayerService();
         _ = new LocalizationService();
 
@@ -114,6 +119,10 @@ internal static class Core
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
             //DetectSanguis(); want to nail the fun factor and make sure no glaring bugs before adding stakes
             _ = new BattleService();
+        }
+        if (ConfigService.ProfessionSystem)
+        {
+
         }
 
         ModifyPrefabs();
@@ -167,7 +176,6 @@ internal static class Core
                 });
             }
         }
-
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fallenAngel, out Entity fallenAngelPrefab))
@@ -175,7 +183,6 @@ internal static class Core
                 if (!fallenAngelPrefab.Has<BlockFeedBuff>()) fallenAngelPrefab.Add<BlockFeedBuff>();
             }
         }
-
         if (ConfigService.BearFormDash)
         {
             /*
@@ -226,26 +233,44 @@ internal static class Core
             }
             */
         }
-    }
-    static void MiscLogging()
-    {
-        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(1649578802), out Entity prefabEntity))
+        if (ConfigService.EliteShardBearers)
         {
-            LogEntity(Server, prefabEntity);
-        }
-    }
-    public static void LogEntity(World world, Entity entity)
-    {
-        Il2CppSystem.Text.StringBuilder sb = new();
+            foreach (PrefabGUID soulShardDropTable in _soulShardDropTables)
+            {
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(soulShardDropTable, out Entity soulShardDropTablePrefab)
+                    && soulShardDropTablePrefab.TryGetBuffer<DropTableDataBuffer>(out var buffer) && !buffer.IsEmpty)
+                {
+                    DropTableDataBuffer dropTableDataBuffer = buffer[0];
 
-        try
-        {
-            EntityDebuggingUtility.DumpEntity(world, entity, true, sb);
-            Log.LogInfo($"Entity Dump:\n{sb.ToString()}");
+                    dropTableDataBuffer.DropRate = 0.6f;
+                    buffer.Add(dropTableDataBuffer);
+
+                    dropTableDataBuffer.DropRate = 0.45f;
+                    buffer.Add(dropTableDataBuffer);
+
+                    dropTableDataBuffer.DropRate = 0.3f;
+                    buffer.Add(dropTableDataBuffer);
+                }
+            }
         }
-        catch (Exception e)
+    }
+
+    static readonly ComponentType[] _prefabGUIDComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+    ];
+
+    const string STAT_MOD = "StatMod";
+    static void GatherStatMods()
+    {
+        var namesToPrefabGuids = SystemService.PrefabCollectionSystem.NameToPrefabGuidDictionary;
+
+        foreach (var kvp in namesToPrefabGuids)
         {
-            Log.LogWarning($"Error dumping entity: {e.Message}");
+            if (kvp.Key.StartsWith(STAT_MOD))
+            {
+                JewelSpawnSystemPatch.StatMods.TryAdd(kvp.Key, kvp.Value);
+            }
         }
     }
     static void DetectSanguis()
@@ -305,10 +330,72 @@ internal static class Core
             Log.LogError($"Error during {SANGUIS} registration: {ex.Message}");
         }
     }
+    public static void LogEntity(World world, Entity entity)
+    {
+        Il2CppSystem.Text.StringBuilder sb = new();
+
+        try
+        {
+            EntityDebuggingUtility.DumpEntity(world, entity, true, sb);
+            Log.LogInfo($"Entity Dump:\n{sb.ToString()}");
+        }
+        catch (Exception e)
+        {
+            Log.LogWarning($"Error dumping entity: {e.Message}");
+        }
+    }
 
     /*
-    static readonly PrefabGUID _sctPrefab = new(-1661525964);
+    static readonly string _performanceAuditPath = Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PerformanceAudits");
+    static int _queries;
+    static string _logFilePath;
+    static TimeSpan _lastCpuTime = TimeSpan.Zero;
 
+    // Generate a unique log file name per session
+    static void ServerPerformanceLogger()
+    {
+        if (!Directory.Exists(_performanceAuditPath))
+        {
+            Directory.CreateDirectory(_performanceAuditPath);
+        }
+
+        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd_HH-mm-ss");
+
+        _queries = EntityManager.CalculateAliveEntityQueryCount();
+        _logFilePath = Path.Combine(_performanceAuditPath, $"PerformanceAudit_{timestamp}.txt");
+    }
+    public static void LogPerformanceStats()
+    {
+        Process currentProcess = Process.GetCurrentProcess();
+
+        float memoryUsedGB = currentProcess.WorkingSet64 / (1024f * 1024f * 1024f);
+        float totalMemoryGB = GetTotalMemoryGB();
+
+        TimeSpan cpuTime = currentProcess.TotalProcessorTime;
+        float cpuUsage = 0;
+
+        if (_lastCpuTime != TimeSpan.Zero)
+        {
+            TimeSpan cpuDelta = cpuTime - _lastCpuTime;
+            cpuUsage = (float)(cpuDelta.TotalMilliseconds / 1000.0); // Approximate percentage
+        }
+
+        _lastCpuTime = cpuTime;
+
+        int queryCount = GetEntityQueryCount();
+        string logEntry = $"[{DateTime.UtcNow:HH:mm:ss}] RAM: {memoryUsedGB:F2} GB / {totalMemoryGB:F2} GB | CPU: {cpuUsage:F2}% | EntityQueries: {queryCount} (+{(queryCount > _queries ? queryCount - _queries: queryCount)})";
+
+        File.AppendAllText(_logFilePath, logEntry + Environment.NewLine);
+    }
+    static float GetTotalMemoryGB()
+    {
+        return SystemInfo.systemMemorySize / 1024f;
+    }
+    static int GetEntityQueryCount()
+    {
+        return EntityManager.CalculateAliveEntityQueryCount();
+    }
+    
     static readonly ComponentType[] _prefabGUIDComponent =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
@@ -318,26 +405,55 @@ internal static class Core
     [
         ComponentType.ReadOnly(Il2CppType.Of<DealDamageOnGameplayEvent>()),
     ];
+    static void MiscLogging()
+    {
+        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(1649578802), out Entity prefabEntity))
+        {
+            LogEntity(Server, prefabEntity);
+        }
+    }
     static void LogEntities()
     {
+        ComponentType[] _cleanupComponent =
+        [
+            ComponentType.ReadOnly(Il2CppType.Of<CleanupEntity>()),
+        ];
+
         EntityQuery entitiesQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            None = Array.Empty<ComponentType>(),  // No excluded components
-            All = Array.Empty<ComponentType>(),  // No required components
-            Any = Array.Empty<ComponentType>(),  // No optional components
+            // None = Array.Empty<ComponentType>(),  // No excluded components
+            // All = Array.Empty<ComponentType>(),  // No required components
+            Any = _cleanupComponent,  // No optional components
             Options = EntityQueryOptions.IncludeAll
         });
 
         NativeArray<Entity> entities = entitiesQuery.ToEntityArray(Allocator.TempJob);
+        Log.LogInfo($"CleanupEntities - ({entities.Length})");
+
+        int minimum = 400;
+        Entity source = Entity.Null;
+
+        if (entities.Length >= minimum)
+        {
+            entities.Dispose();
+            entitiesQuery.Dispose();
+            return;
+        }
+
         try
         {
-            foreach (Entity entity in entities)
+            int needed = minimum - entities.Length;
+            Entity sweeper;
+
+            for (int i = 0; i < needed; i++)
             {
-                if (entity.Exists())
-                {
-                    //PrefabClonerFactory.EntityComponentLogger.LogEntityDetails(Server, entity);
-                }
+                sweeper = EntityManager.CreateEntity();
+
+                sweeper.Add<CleanupEntity>();
+                sweeper.Add<Simulate>();
             }
+
+            Log.LogInfo($"Restored {needed} cleanup entities!");
         }
         catch (Exception e)
         {
@@ -476,87 +592,6 @@ internal static class Core
 
         Log.LogInfo("END ALL SERVER SYSTEMS");
     }
-    static void LogSCTEntities()
-    {
-        EntityQuery prefabGUIDQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _prefabGUIDComponent,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        // Dictionary to track target counts per player, keyed by character prefab name
-        Dictionary<string, Dictionary<string, Dictionary<string, int>>> playerOwnedTargetCounts = [];
-
-        NativeArray<Entity> entities = prefabGUIDQuery.ToEntityArray(Allocator.TempJob);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (!entity.Has<SpawnTag>() && entity.TryGetComponent(out PrefabGUID prefabGUID))
-                {
-                    if (prefabGUID.Equals(_sctPrefab) && entity.TryGetComponent(out ScrollingCombatTextMessage scrollingCombatTextMessage))
-                    {
-                        Entity target = scrollingCombatTextMessage.Target.GetEntityOnServer();
-                        PrefabGUID prefabSCT = scrollingCombatTextMessage.Type; // SCT prefab type
-
-                        if (target.TryGetComponent(out EntityOwner entityOwner)
-                            && entityOwner.Owner.IsPlayer()
-                            && target.TryGetComponent(out PrefabGUID targetPrefabGUID))
-                        {
-                            User user = entityOwner.Owner.GetUser();
-                            string characterPrefabName = targetPrefabGUID.GetPrefabName(); // Character prefab name
-                            string sctPrefabName = prefabSCT.GetPrefabName(); // SCT prefab name
-
-                            // Initialize data structures if not present
-                            if (!playerOwnedTargetCounts.ContainsKey(user.CharacterName.Value))
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value] = [];
-                            }
-
-                            if (!playerOwnedTargetCounts[user.CharacterName.Value].ContainsKey(characterPrefabName))
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName] = [];
-                            }
-
-                            if (!playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName].ContainsKey(sctPrefabName))
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName][sctPrefabName] = 1;
-                            }
-                            else
-                            {
-                                playerOwnedTargetCounts[user.CharacterName.Value][characterPrefabName][sctPrefabName]++;
-                            }
-                        }
-
-                        DestroyUtility.Destroy(EntityManager, entity);
-                    }
-                }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-            prefabGUIDQuery.Dispose();
-
-            // Log the results
-            foreach (var playerEntry in playerOwnedTargetCounts)
-            {
-                Log.LogWarning($"Player: {playerEntry.Key}");
-                Log.LogWarning(new string('-', 20));
-
-                foreach (var characterPrefabEntry in playerEntry.Value)
-                {
-                    Log.LogInfo($"  CharacterPrefabGUID: {characterPrefabEntry.Key}");
-                    foreach (var sctEntry in characterPrefabEntry.Value)
-                    {
-                        Log.LogInfo($"    SCTPrefabName: {sctEntry.Key} | Count: {sctEntry.Value}");
-                    }
-                }
-
-                Log.LogInfo(""); // Blank line for readability
-            }
-        }
-    }
     static void LogDealDamageOnGameplayEvents()
     {
         EntityQuery dealDamageOnGameplayEventQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
@@ -572,7 +607,7 @@ internal static class Core
             {
                 if (entity.TryGetBuffer<DealDamageOnGameplayEvent>(out var buffer))
                 {
-                    Log.LogInfo(entity.GetPrefabGUID().GetPrefabName());
+                    Log.LogInfo(entity.GetPrefabGuid().GetPrefabName());
 
                     for (int i = 0; i < buffer.Length; i++)
                     {

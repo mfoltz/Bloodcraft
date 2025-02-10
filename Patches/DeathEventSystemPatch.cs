@@ -37,6 +37,7 @@ internal static class DeathEventListenerSystemPatch
         if (!Core._initialized) return;
 
         NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
+        
         try
         {
             foreach (DeathEvent deathEvent in deathEvents)

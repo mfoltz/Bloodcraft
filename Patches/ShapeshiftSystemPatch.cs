@@ -29,6 +29,7 @@ internal static class ShapeshiftSystemPatch
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -42,7 +43,7 @@ internal static class ShapeshiftSystemPatch
 
                 if (enterShapeshiftEvent.Shapeshift.Equals(_psychicFormGroup))
                 {
-                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+                    Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
                     if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
                     {
@@ -51,7 +52,7 @@ internal static class ShapeshiftSystemPatch
                 }
                 else if (enterShapeshiftEvent.Shapeshift.Equals(_batFormGroup))
                 {
-                    Entity familiar = Familiars.FindPlayerFamiliar(playerCharacter);
+                    Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
                     if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
                     {

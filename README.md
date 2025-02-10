@@ -1,6 +1,6 @@
 ## Table of Contents
 
-*README under construction, putting these enums here at the top until deciding where to integrate them properly. note that when choosing these via command as stat bonuses in-game use the number shown by the respective list stats command for bloods or weapons*
+*README under construction, putting these enums here for now. note that when selecting via command in-game should use the number shown by the respective 'lst' command for bloods & weapons*
 
 ### BloodStatType
 HealingReceived, // 0
@@ -42,63 +42,95 @@ SpellCritDamage // 11
 
 ## Sponsors
 
-Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
+Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; RENEGADO; Imperivm Draconis; Geoffrey D.;
 
 ## Features
 
-- **Weapon Expertise:** Enhances gameplay by introducing expertise in different weapon types and optionally adds extra spell slots to unarmed. Expertise is gained per kill based on equipped weapon. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
-- **Player Professions:** Adds various professions, allowing players to specialize and gain benefits from leveling the professions they like most. Proficiency is gained per resource broken, item crafted, or succesful catch. Mining/woodcutting/harvesting provide bonus yields per resource harvest, fishing provide bonus fish every 20 levels based on the area fished in, alchemy enhances consumable duration and effects, and blacksmithing/enchanting/tailoring increases durability in armors/weapons crafted. Do note you only receive experience for crafting and extra durability is only applied if you own the station/placed it if in a clan, plan on improving that and revamping these a bit in the future.
-- **Experience Leveling:** Implements a leveling system to replace traditional gearscore and provide a greater sense of progression. Experience for this is gained per kill (should apply to all kills that can be linked back to the player) and can complete level 20 quest to track vbloods with .prepareforthehunt. Still tuning this as needed but the config options should be there to support whatever kind of leveling experience you're looking to provide at this point (within reason :P). Experience sharing in clan or group has a max distance of 25f (4-5 floor lengths). Recently added options to control experience gain from units spawned via vermin nest and other unit spawners along with nerfing rift trash experience if you so desire. Can now tune how much experience higher level players receive from lower level kills as well.
-- **Blood Legacies:** Provides further stat customization for legacies (blood types) similar to expertise with a different set of stats. Experience for this is gained per feed kill/execute for equipped blood type. Old blood quality enhancement option still exists for those who would like to use it, although do note if using prestige as well the quality gain will be based on legacy prestige level in that blood. Number of stat choices is configurable. Resetting choices is free by default but can be made to cost items. Can be further enhanced by activating soft OR hard synergies (classes) to encourage and/or restrict various playstyles.
-- **Prestiging:** Prestige in leveling, expertise, and legacies! Each increment in leveling prestige will reduce experience rate gain for leveling by the leveling rate reducer (separate from the expertise/legacy rate reducer) and increase expertise/legacy rate gains by the rate multiplier. Prestiging in expertise/legacies will increase their max stat bonuses per level by the stat multiplier and will reduce rate gains in that individual prestige category by the rate reducer per increment. Configurable buffs will be permanently applied to the player each prestige level in experience (can skip levels by leaving prefab as 0). Prestiging is also configurably tied to unlocking extra spells for classes to use on shift (you can use any abilityGroup prefabs here but don't use normal player spells unless you like weird weapon cloning bugs when equipping jewels. also, some NPC spells don't really work as expected when used by players so do some testing before swapping these out and make sure they behave. can test spells with '.spell [1/2] [AbilityGroupPrefab]' to manually place them on unarmed). Exo prestiging is also available for those who have already maxed out normal experience prestige options and want more of a NG+ feel, increases damage taken/done by configured amount per level up to 100 times by default with configured item reward per level, trying to emulate a NG+ feel with this one.
-- **Familiars:** Every kill of a valid unit is a chance to unlock that unit as a familiar, now including VBloods and summoners! VBloods can be toggled on/off and unit types can be configurably allowed (humans, demons, beasts, etc) although do note that some category bans will supercede VBlood checks (if humans are banned, Vincent will be banned as well even if VBloods are enabled); there is also a list for individual unit bans. They will level up, fight for you, and you can collect them all. Only one familiar can be summoned at a time. They can be toggled (called/dismissed) without fully unbinding them to quickly use waygates (attempting to use a waygate with a familiar out will dismiss it automatically now and using it will then summon the familiar again so it is there after teleporting) and perform other actions normally prohibited by having a follower like a charmed human. Each set can hold 10 and more sets will be created once the one being added to is full. You can choose the active set by name (default is FamiliarsList1, FamiliarsList2, etc), remove familiars from sets, move familiars between sets, and the sets can be renamed. To summon a familiar from your current set (which can be chosen with .cfs [Name]), .lf to see the units available and use .bind #; to choose a different one, use .unbind, and if it gets weird or buggy at any point .resetfams can be used to clear your active familiar data and followerBuffer. All units have the same stats as usual, however their phys/spell power starts at 10% at level 1 and will scale to 100% again when they reach max level. Base health is 500 and will scale with up to 2500 at max level. Traders, carriages, horses, crystals (looking at you dracula blood crystal thing) and werewolves are unavailable. Werewolves will be in the pool once I add handling for their transformations (ngl completely forgot about this, oops >_>) but the rest will likely stay banned (if you manually add one of them to your unlocks as an admin that's on you :P). Can't bind in combat or pvp combat. Shinies are back! 20% chance to unlock 1 of 6 visuals when first obtaining unit and 100% to unlock one on repeat unlock of same unit, one visual per unit for now. Can toggle visual being applied when familiar is bound using 'yes' if familiar emote actions are enabled. '.fam v [SpellSchool]' is good for one free shiny visual of choice and will apply to your active familiar.
-- **Classes:** Soft synergies allows for the encouragement of stat choices without restricting choices while hard synergies will only allow the stats for that class to be chosen. Both soft or hard will apply the synergy multiplier to the max stat bonuses for that class for weapon expertise/blood legacies. Additionally, each class has a config spot for 4 blood buffs (the correct prefabs for this start with AB_BloodBuff_) that are granted every MaxPlayerLevel/#buffs while leveling up (with 4 buffs and 90 being the max, they'll be applied at 22, 44, 66, and 88) and apply permanently at max strength without regard to the blood quality or type the player possesses (can be skipped with 0 in the spot). They do not stack with buffs from the same blood type (if a player has the scholar free cast proc buff from class and also has 100% scholar blood, those chances will not stack) which maintains a sense of balance while allowing each class to have a persistent theme/identity that can be earned without excessive grinding. Classes also get extra spells to use on shift that are configurable, both the spell and at what level of prestige they are earned at but do keep in mind the considerations mentioned in the prestige section. Will probably be changing at least a few aspects of these new class systems in the future but am overall happy with where they're at in the sense that they allow for a lot of customization and can be made to feel as unique as you'd like. Tried to make decent thematic choices for the default blood buffs and spells per class but no promises :P. Changing classes should properly remove and apply buffs based on level. Also, spell school effects on hit unique to each class if enabled! (will be debuff of spell school for class and if debuff already present will proc respective t08 necklace effect)
-- **Quests:** Daily and weekly kill quests. Configurable reward pool and amounts. Dailies give 2.5% of your total exp as reward, weeklies give 10%. Can track progress and see details with commands.
-
 ### Experience Leveling
+- Gain experience and level up, primarily from slaying enemies.
+  - `.lvl log` (toggle experience gain logging in chat)
+  - `.lvl get` (view current level and experience progress)
+- Rested XP accumulates while logged out in a coffin.
+  - Stone coffins provide full rested gains, wooden coffins provide half
 
 ### Weapon Expertise
 - Gain levels in weapon types when slaying (equipped for final blow) enemies.
-  - .wep log (toggle gains logging in chat) 
-  - .wep get (view weapon progression/stat details)
+  - `.wep log` (toggle gains logging in chat) 
+  - `.wep get` (view weapon progression/stat details)
 - Pick stats to enhance per weapon when equipped.
-  - .wep lst (view weapon bonus stat options)
-  - .wep cst [Weapon] [WeaponStat] (select bonus stat for entered weapon)
-  - .wep rst (reset stat selection for current weapon)
+  - `.wep lst` (view weapon bonus stat options)
+  - `.wep cst` [Weapon] [WeaponStat] (select bonus stat for entered weapon)
+  - `.wep rst` (reset stat selection for current weapon)
 - Stat bonus values scale with player weapon expertise level per weapon.
-  - classes have synergies with different weapon stats (see Classes section)
+  - classes have synergies with different weapon stats (see Classes)
 
 ### Blood Legacies
 - Gain levels in blood types when feeding on (executes and completions) enemies.
-  - .bl log (toggle gains logging in chat) 
-  - .bl get (view blood progression/stat details)
+  - `.bl log` (toggle gains logging in chat) 
+  - `.bl get` (view blood progression/stat details)
 - Pick stats to enhance per blood when using.
-  - .bl lst (view blood bonus stat options)
-  - .bl cst [Blood] [BloodStat] (select bonus stat for entered weapon)
-  - .bl rst (reset stat selection for current weapon)
+  - `.bl lst` (view blood bonus stat options)
+  - `.bl cst` [Blood] [BloodStat] (select bonus stat for entered weapon)
+  - `.bl rst` (reset stat selection for current weapon)
 - Stat bonus values scale with player blood legacy level per blood.
-  - classes have synergies with different blood stats (see Classes section)
-	
-### Prestige
-- Prestige (reset your progress in leveling, weapons and bloods) for varying benefits that make your vampire more powerful over time.
-  - Leveling prestiges will reduce your leveling experience rates, increase your weapon & blood experience rates, and apply a different permanent buff to your vampire per prestige. 
-  - If classes are enabled, prestiging will also unlock spells that can be 'slotted' on the shift key.
+  - classes have synergies with different blood stats (see Classes)
 
 ### Classes
+- Select a class for free when starting and change later for a cost.
+  - `.class l` (list available classes)
+  - `.class c [Class]` (select a class)
+  - `.class change [Class]` (change class, costs configured items)
+- Classes provide:
+  - Permanent Buffs unlocked at specific levels based on class
+  - Weapon & Blood Stat Synergies which increase the effectiveness for specific stats from expertise and legacies
+  - On-Hit Effect debuffs applied at configured chance when the player deals damage (ignite, weaken, chill, etc. and the respective t08 necklace effect if debuff already present on target)
+  - Extra Spells, one of which unlocks every leveling prestige by default, that can be used on Shift
 
 ### Familiars
+- Unlock and summon defeated enemies as your familiar.
+  - `.fam l` (list familiars in current box)
+  - `.fam b [#]` (summon an unlocked familiar)
+  - `.fam ub` (unbind current familiar)
+- Familiars level up with experience like the player, stats scale with level and familiar prestiges.
+  - `.fam gl` (view current familiar stats and level)
+  - `.fam pr [Stat]` (prestige a familiar to gain additional stat bonuses at max or for schematics)
+- Familiar Battles with queue system (must designate an arena, one allowed currently).
+  - `.fam challenge [Player]` (challenge another player to battle, accept by emoting yes and decline by emoting no)
+  - `.fam sba` (set battle arena location, best to enclose so players cannot interfere and view only)
+- Shinies:
+  - 20% chance for random shiny effect on first unit unlock, 100% chance on repeated unit unlock
+  - Chance when dealing damage to apply respective spell school debuff, same proc chance as configured for class onhit effects
+  - `.fam shiny [SpellSchool]` (apply or change shiny, requires vampiric dust)
 
 ### Quests
+- Players can complete daily and weekly quests for XP and rewards.
+  - `.quest log` (toggle quest tracking messages)
+  - `.quest d` (display current daily quest)
+  - `.quest w` (display current weekly quest)
+  - `.quest t [daily/weekly]` (track nearest quest target)
+  - `.quest r [daily/weekly]` (reroll quests for configured cost)
 
 ### Professions
+- Gain profession levels by gathering resources and crafting equipment:
+  - Mining, Woodcutting, Harvesting → bonus resources per broken resource object, scales with profession level
+  - Fishing → bonus fish every 20 levels
+  - Alchemy → increases potion effectiveness & duration (x2 at max)
+  - Blacksmithing, Enchanting, Tailoring → increase base stats (10% at max) and durability (x2 at max) for respective types of crafted gear
+  - `.prof log` (toggle profession XP gain logging)
+  - `.prof get [Profession]` (view profession level)
+
+### Prestige
+- Resets player level, grants a permanent buff, reduces experience gained from units, and increases rate gains for expertise/legacies per prestige.
+  - `.prestige me [Type]` (experience and/or various weapons and bloods, the latter variety will see increased bonus stat caps and reduced rate gains per prestige)
+  - `.prestige get [Type]` (view prestige progress and details)
 
 ## Commands
 
 ### Bloodlegacy Commands
-- `.bloodlegacy getlegacy.bl get [BloodType]`
+- `.bloodlegacy get [BloodType]`
   - Display current blood legacy details.
   - Shortcut: *.bl get [BloodType]*
-- `.bloodlegacy loglegacies.bl log`
+- `.bloodlegacy log`
   - Toggles Legacy progress logging.
   - Shortcut: *.bl log*
 - `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
@@ -110,7 +142,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.bloodlegacy liststats`
   - Lists blood stats available.
   - Shortcut: *.bl lst*
-- `.bloodlegacy setlegacy [Player] [Blood] [Level]` 🔒
+- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
   - Sets player blood legacy level.
   - Shortcut: *.bl set [Player] [Blood] [Level]*
 - `.bloodlegacy list`
@@ -133,12 +165,12 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.class list`
   - Lists classes.
   - Shortcut: *.class l*
-- `.class listbuffs [ClassType]`
+- `.class listbuffs [Class]`
   - Shows perks that can be gained from class.
-  - Shortcut: *.class lb [ClassType]*
-- `.class listspells [ClassType]`
+  - Shortcut: *.class lb [Class]*
+- `.class listspells [Class]`
   - Shows spells that can be gained from class.
-  - Shortcut: *.class lsp [ClassType]*
+  - Shortcut: *.class lsp [Class]*
 - `.class liststats [Class]`
   - Shows weapon and blood stat synergies for a class.
   - Shortcut: *.class lst [Class]*
@@ -171,9 +203,9 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar addbox [BoxName]`
   - Adds empty box with name.
   - Shortcut: *.fam ab [BoxName]*
-- `.familiar add [Name] [PrefabGUID/CHAR_Unit_Name]` 🔒
+- `.familiar add [PlayerName] [PrefabGUID/CHAR_Unit_Name]` 🔒
   - Unit testing.
-  - Shortcut: *.fam a [Name] [PrefabGUID/CHAR_Unit_Name]*
+  - Shortcut: *.fam a [PlayerName] [PrefabGUID/CHAR_Unit_Name]*
 - `.familiar echoes [VBloodName]`
   - VBlood purchasing for exo reward with quantity scaling to unit tier.
   - Shortcut: *.fam echoes [VBloodName]*
@@ -189,18 +221,18 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.familiar listprestigestats`
   - Display options for familiar prestige stats.
   - Shortcut: *.fam lst*
-- `.familiar prestige [PrestigeStat]`
+- `.familiar prestige [Stat]`
   - Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.
-  - Shortcut: *.fam pr [PrestigeStat]*
+  - Shortcut: *.fam pr [Stat]*
 - `.familiar reset`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.fam reset*
 - `.familiar search [Name]`
-  - Searches boxes for unit with entered name.
+  - Searches boxes for familiar(s) with matching name.
   - Shortcut: *.fam s [Name]*
-- `.familiar smartbind [Name] [OptionalIndex]`
+- `.familiar smartbind [Name]`
   - Searches and binds a familiar. If multiple matches are found, returns a list for clarification.
-  - Shortcut: *.fam sb [Name] [OptionalIndex]*
+  - Shortcut: *.fam sb [Name]*
 - `.familiar shinybuff [SpellSchool]`
   - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
   - Shortcut: *.fam shiny [SpellSchool]*
@@ -229,22 +261,10 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Shortcut: *.lvl set [Player] [Level]*
 
 ### Misc Commands
-- `.famservant` 🔒
-  - testing
-  - Shortcut: *.fs*
-- `.famhorse` 🔒
-  - testing
-  - Shortcut: *.fh*
-- `.queuetest` 🔒
-  - Queue testing.
-  - Shortcut: *.qt [PlayerOne] [PlayerTwo]*
-- `.forcechallenge` 🔒
-  - Challenge testing.
-  - Shortcut: *.fc [PlayerName]*
 - `.reminders`
   - Toggles general reminders for various mod features.
   - Shortcut: *.remindme*
-- `.sct`
+- `.sct [Type]`
   - Toggles various scrolling text elements.
   - Shortcut: *.sct [Type]*
 - `.starterkit`
@@ -268,9 +288,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.exoform`
   - Toggles taunting to enter exo form.
   - Shortcut: *.exoform*
-- `.cleanupfams` 🔒
-  - Removes disabled, invisible familiars on the map preventing building.
-  - Shortcut: *.cleanupfams*
 
 ### Party Commands
 - `.party toggleinvites`
@@ -359,19 +376,19 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   - Shortcut: *.quest c [Name] [QuestType]*
 
 ### Weapon Commands
-- `.weapon getexpertise`
+- `.weapon get`
   - Displays current weapon expertise details.
   - Shortcut: *.wep get*
-- `.weapon logexpertise`
+- `.weapon log`
   - Toggles expertise logging.
   - Shortcut: *.wep log*
-- `.weapon choosestat [Weapon] [WeaponStat]`
+- `.weapon choosestat [WeaponOrStat] [WeaponStat]`
   - Choose a weapon stat to enhance based on your expertise.
-  - Shortcut: *.wep cst [Weapon] [WeaponStat]*
+  - Shortcut: *.wep cst [WeaponOrStat] [WeaponStat]*
 - `.weapon resetstats`
   - Reset the stats for current weapon.
   - Shortcut: *.wep rst*
-- `.weapon setexpertise [Name] [Weapon] [Level]` 🔒
+- `.weapon set [Name] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shortcut: *.wep set [Name] [Weapon] [Level]*
 - `.weapon liststats`
@@ -383,9 +400,6 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - `.weapon setspells [Name] [Slot] [PrefabGuid] [Radius]` 🔒
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
-- `.weapon restorelevels`
-  - Fixes weapon levels if they are not correct. Don't use this unless you need to.
-  - Shortcut: *.wep restore*
 
 ## Configuration
 
@@ -402,12 +416,14 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
 - **Bear Form Dash**: `BearFormDash` (bool, default: False)
   Enable or disable bear form dash.
+- **Primal Jewel Cost**: `PrimalJewelCost` (int, default: -77477508)
+  If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers).
 
 ### StarterKit
 - **Starter Kit**: `StarterKit` (bool, default: False)
   Enable or disable the starter kit.
 - **Kit Prefabs**: `KitPrefabs` (string, default: "862477668,-1531666018,-1593377811,1821405450")
-  The PrefabGUID hashes for the starter kit.
+  Item prefabGuids for starting kit.
 - **Kit Quantities**: `KitQuantities` (string, default: "500,1000,1000,250")
   The quantity of each item in the starter kit.
 
@@ -442,7 +458,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   Minutes required to accumulate one tick of Rested XP.
 - **Max Level**: `MaxLevel` (int, default: 90)
   The maximum level a player can reach.
-- **Starting Level**: `StartingLevel` (int, default: 0)
+- **Starting Level**: `StartingLevel` (int, default: 10)
   Starting level for players if no data is found.
 - **Unit Leveling Multiplier**: `UnitLevelingMultiplier` (float, default: 7.5)
   The multiplier for experience gained from units.
@@ -625,7 +641,7 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
 - **V Blood Unlock Chance**: `VBloodUnlockChance` (float, default: 0.01)
   The chance for a VBlood unlock as a familiar.
 - **Primal Echoes**: `PrimalEchoes` (bool, default: False)
-  Enable or disable acquiring vBloods with configured item reward from exo prestiging at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable.
+  Enable or disable acquiring vBloods with configured item reward from exo prestiging (default primal shards) at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 500)
@@ -720,4 +736,4 @@ Jairon Orellana; Odjit; Jera; Eve winters; Kokuren TCG and Gaming Shop;
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
 
 ## Credits
-Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed anybody on a specific change please let me know!
+Do my best to mention/attribute where ideas and bug reports come from in the changelog and commit history, if I've missed something or someone on a specific change please let me know!

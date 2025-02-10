@@ -9,6 +9,7 @@ using Stunlock.Core;
 using System.Collections;
 using System.Runtime.InteropServices;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using static Bloodcraft.Services.LocalizationService;
@@ -224,12 +225,29 @@ internal static class Extensions // probably need to organize this soonTM
     }
     public static bool IsFollowingPlayer(this Entity entity)
     {
-        if (entity.TryGetComponent(out Follower follower))
+        if (entity.Has<BlockFeedBuff>()) // the only time this will be found on a character entity is when they are a familiar and it's been added to them during binding, will return true for buffs that have it as well so... don't use this on buff entities
+        {
+            return true;
+        }
+        else if (entity.TryGetComponent(out Follower follower))
         {
             if (follower.Followed._Value.IsPlayer())
             {
                 return true;
             }
+        }
+
+        return false;
+    }
+    public static bool TryGetAttached(this Entity entity, out Entity attached)
+    {
+        attached = Entity.Null;
+
+        if (entity.TryGetComponent(out Attach attach) && attach.Parent.Exists())
+        {
+            attached = attach.Parent;
+
+            return true;
         }
 
         return false;
@@ -338,6 +356,12 @@ internal static class Extensions // probably need to organize this soonTM
 
         return Entity.Null;
     }
+    public static Entity GetOwner(this Entity character)
+    {
+        if (character.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Exists()) return entityOwner.Owner;
+
+        return Entity.Null;
+    }
     public static User GetUser(this Entity entity)
     {
         if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out User user)) return user;
@@ -389,6 +413,15 @@ internal static class Extensions // probably need to organize this soonTM
 
         return float3.zero;
     }
+    public static int2 GetTilePosition(this Entity entity)
+    {
+        if (entity.TryGetComponent(out TilePosition tilePosition))
+        {
+            return tilePosition.Tile;
+        }
+
+        return int2.zero;
+    }
     public static int GetUnitLevel(this Entity entity)
     {
         if (entity.TryGetComponent(out UnitLevel unitLevel))
@@ -439,7 +472,7 @@ internal static class Extensions // probably need to organize this soonTM
 
         return false;
     }
-    public static bool IsCustomSpawned(this Entity entity)
+    public static bool IsUnitSpawnerSpawned(this Entity entity)
     {
         if (entity.TryGetComponent(out IsMinion isMinion) && isMinion.Value)
         {
@@ -542,7 +575,7 @@ internal static class Extensions // probably need to organize this soonTM
             });
         }
     }
-    public static bool IsAllies(this Entity entity, Entity player)
+    public static bool IsAllied(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }
@@ -576,8 +609,16 @@ internal static class Extensions // probably need to organize this soonTM
     {
         Core.StartCoroutine(routine);
     }
-
-    // note to organize this into ECBExtensions or something
+    public static IEnumerator WaitForCompletion(this JobHandle handle)
+    {
+        return WaitForCompletionRoutine(handle);
+    }
+    static IEnumerator WaitForCompletionRoutine(JobHandle handle)
+    {
+        while (!handle.IsCompleted)
+            yield return null;
+    }
+    // note to organize this into ECBExtensions or something if I actually need to use that for fams at some point
     public static void SetTeam(this Entity entity, EntityCommandBuffer entityCommandBuffer, Entity teamSource)
     {
         if (teamSource.TryGetComponent(out Team sourceTeam) && teamSource.TryGetComponent(out TeamReference sourceTeamReference))

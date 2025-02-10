@@ -1,5 +1,6 @@
 ﻿using ProjectM;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -81,7 +82,7 @@ internal static class Queries
                 if (targetType == 0)
                 {
                     if (entity.Has<DestroyOnSpawn>()) continue;  // filter out locked bosses from KindredCommands
-                    else if (entity.IsCustomSpawned()) continue; // filter units spawned with UnitSpawnerSystem
+                    else if (entity.IsUnitSpawnerSpawned()) continue; // filter units spawned with UnitSpawnerSystem
                     else if (entity.TryGetComponent(out PrefabGUID unitPrefab))
                     {
                         string prefabName = unitPrefab.GetPrefabName();
@@ -94,12 +95,13 @@ internal static class Queries
                     if (entity.TryGetComponent(out PrefabGUID craftPrefab))
                     {
                         string prefabName = craftPrefab.GetPrefabName();
+
                         if (!_filteredCrafts.Any(part => prefabName.Contains(part, StringComparison.OrdinalIgnoreCase))) yield return entity;
                     }
                 }
                 else if (targetType == 2)
                 {
-                    if (entity.TryGetComponent(out PrefabGUID resourcePrefab))
+                    if (entity.Has<PrefabGUID>())
                     {
                         yield return entity;
                     }
@@ -119,5 +121,28 @@ internal static class Queries
     {
         entities = entityQuery.ToEntityArray(allocator);
         return default;
+    }
+    public static IEnumerator QueryAsyncRoutine(EntityQuery entityQuery, IEnumerable<Entity> onResult) //
+    {
+        // Schedule the asynchronous array creation
+        NativeArray<Entity> entities = entityQuery.ToEntityArrayAsync(Allocator.TempJob, out JobHandle jobHandle);
+
+        // Yield until the asynchronous job is finished
+        while (!jobHandle.IsCompleted)
+        {
+            yield return null;
+        }
+
+        // Ensure the job has been completed so we can safely read the entities
+        jobHandle.Complete();
+
+        try
+        {
+            // onResult?.Invoke(entities);
+        }
+        finally
+        {
+            entities.Dispose();
+        }
     }
 }

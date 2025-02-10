@@ -25,8 +25,11 @@ internal static class ChatMessageSystemPatch
     static void OnUpdatePrefix(ChatMessageSystem __instance)
     {
         if (!Core._initialized) return;
+        else if (!_eclipse) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+        // NativeArray<ChatMessageEvent> messages = __instance.EntityQueries[0].ToComponentDataArray<ChatMessageEvent>(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -34,7 +37,7 @@ internal static class ChatMessageSystemPatch
                 ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
                 string message = chatMessageEvent.MessageText.Value;
 
-                if (_eclipse && CheckMAC(message, out string originalMessage))
+                if (CheckMAC(message, out string originalMessage))
                 {
                     EclipseService.HandleClientMessage(originalMessage);
 

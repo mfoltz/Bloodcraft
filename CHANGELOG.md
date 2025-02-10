@@ -1,5 +1,34 @@
 `1.6.4`
-- version changelog WIP
+- Manual aggro handling for familiars now applies for both PvE and PvP
+- Added minor effects to binding and unbinding
+- Added minor effects to unlocking familiars and unlocking shinies
+- Introduced smartbind command ('.fam sb [Name]') to streamline switching and summoning familiars in general, binds to matching familiar and automatically unbinds active familiar if needed
+- Familiars should be brought along with players when teleporting via BloodyPoint
+- Shiny familiars apply spell school debuffs with a chance per hit, similar to class-based onhit debuffs
+- Combat mode for familiars can no longer be toggled while in combat
+- Added unused ability (dash) to bear form, see config option
+- Reduced delay for Eclipse to begin showing information
+- Familiars despawned on logout again instead of just when entering coffin
+- Refactored familiar summoning and modifying for more stability and reduced complexity
+- SCT added for player experience, similar to existing implementation for familiars
+- SCT added for bonus yields from professions when harvesting (general bonus yields and profession specific bonus yields)
+- Config option to enable immortal blood during Exo form
+- Familiar experience from kills now reduced after prestiging and reduced for unit spawner kills according to the same configured values for players
+- Eclipse correctly displays NPC shift spell cooldowns
+- Removed free shiny familiar; players can now use vampiric dust to add or change shiny buffs (costs 25% to change)
+- Holy potions now only extend duration and no longer increase resist from alchemy
+- Professions that enhance durability now provide a 10% equipment stat bonus (this will not show on the tooltip, made an attempt but much more a can of worms than can handle atm)
+- Recipe additions and salvage adjustments; best coordinated with Eclipse for accurate UI visuals, inputs and outputs are controlled by the server though
+- Exo prestiges and max profession level no longer configurable for various design reasons
+- Added werewolf handling for familiars
+- NPC spell cooldowns now set more strictly
+- Miscellaneous improvements to commands and responses
+- Minor adjustments to existing prestige effects
+- Reduced the amount of non-standard wood required for gathering quests
+- Familiars now display allied player icons on the map
+- Replaced CCReduction and ShieldAbsorb with MovementSpeed and CastSpeed for familiar prestige stats
+- Adjusted familiar collision
+- Any issues related to player bools (kits, weird familiar binding bugs, etc) should be fixed
 
 `1.5.3`
 - deprecating '.cleanupfams' and '.wep restore', latter no longer needed former less useful than it used to be and prone to causing crashes

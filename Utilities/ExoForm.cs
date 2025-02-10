@@ -7,7 +7,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace Bloodcraft.Utilities;
@@ -29,6 +28,9 @@ internal static class ExoForm
     static readonly WaitForSeconds _secondDelay = new(1f);
 
     static readonly PrefabGUID _immortalBloodType = new(2010023718);
+    static readonly PrefabGUID _frailedBloodType = new(447918373);
+    static readonly PrefabGUID _gateBossFeedCompleteBuff = new(-354622715);
+    static readonly PrefabGUID _exoFormBuff = new(-31099041);
 
     static readonly ConcurrentDictionary<ulong, Blood> _storedPlayerBloods = [];
     public static bool CheckExoFormCharge(User user, ulong steamId)
@@ -108,15 +110,13 @@ internal static class ExoForm
     }
     public static void UpdatePartialExoFormChargeUsed(Entity buffEntity, ulong steamId)
     {
-        if (steamId.TryGetPlayerExoFormData(out var exoFormData))
+        if (steamId.TryGetPlayerExoFormData(out var exoFormData) && buffEntity.TryGetComponent(out Age age))
         {
-            float timeInForm = buffEntity.Read<Age>().Value;
-
-            KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - timeInForm);
+            KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, exoFormData.Value - age.Value);
             steamId.SetPlayerExoFormData(timeEnergyPair);
         }
     }
-    public static IEnumerator ExoFormCountdown(Entity buffEntity, Entity playerEntity, Entity userEntity, float countdownDelay)
+    public static IEnumerator ExoFormCountdown(Entity buffEntity, Entity playerCharacter, Entity userEntity, float countdownDelay)
     {
         yield return new WaitForSeconds(countdownDelay);
 
@@ -126,7 +126,7 @@ internal static class ExoForm
         // Wait until there are 5 seconds left
         while (buffEntity.Exists() && countdown > 0f)
         {
-            float3 targetPosition = playerEntity.Read<Translation>().Value;
+            float3 targetPosition = playerCharacter.GetPosition();
             targetPosition = new float3(targetPosition.x, targetPosition.y + 1.5f, targetPosition.z);
 
             ScrollingCombatTextMessage.Create(
@@ -135,7 +135,7 @@ internal static class ExoForm
                 _assetGuid,
                 targetPosition,
                 _yellow,
-                playerEntity,
+                playerCharacter,
                 countdown,
                 _exoCountdownSCT,
                 userEntity
@@ -144,13 +144,14 @@ internal static class ExoForm
             countdown--;
             yield return _secondDelay;
 
-            if (countdown == 0f)
+            if (countdown <= 0f)
             {
                 fullDuration = true;
             }
         }
 
-        if (fullDuration) UpdateFullExoFormChargeUsed(playerEntity.GetSteamId());
+        if (fullDuration) UpdateFullExoFormChargeUsed(playerCharacter.GetSteamId());
+        // playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff); don't need here since doing when buff is destroyed more consistent and better catch-all
     }
     public static void UpdateFullExoFormChargeUsed(ulong steamId)
     {
@@ -178,7 +179,7 @@ internal static class ExoForm
                 buffer[0] = changeBloodOnGameplayEvent;
             }
         }
-        else if (_storedPlayerBloods.TryAdd(steamId, blood))
+        else if (playerCharacter.HasBuff(_exoFormBuff) && _storedPlayerBloods.TryAdd(steamId, blood))
         {
             if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
             {
@@ -189,6 +190,22 @@ internal static class ExoForm
                 changeBloodOnGameplayEvent.BloodValue = 100f;
                 changeBloodOnGameplayEvent.BloodQuality = 100f;
                 changeBloodOnGameplayEvent.BloodType = _immortalBloodType;
+                changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
+
+                buffer[0] = changeBloodOnGameplayEvent;
+            }
+        }
+        else // 100% frailed as backup for server crashes or otherwise losing stored blood cache? good enough for devs good enough for me :p might not need this if checking for exoform buff in else if above but will see
+        {
+            if (buffEntity.Has<ChangeBloodOnGameplayEvent>())
+            {
+                var buffer = buffEntity.ReadBuffer<ChangeBloodOnGameplayEvent>();
+
+                ChangeBloodOnGameplayEvent changeBloodOnGameplayEvent = buffer[0];
+
+                changeBloodOnGameplayEvent.BloodValue = 100f;
+                changeBloodOnGameplayEvent.BloodQuality = 100f;
+                changeBloodOnGameplayEvent.BloodType = _frailedBloodType;
                 changeBloodOnGameplayEvent.GainBloodType = GainBloodType.Consumable;
 
                 buffer[0] = changeBloodOnGameplayEvent;
