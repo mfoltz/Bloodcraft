@@ -1129,7 +1129,7 @@ internal static class DataService
                 string oldPath = FamiliarPrestigeManager.GetFilePath(steamId);
                 if (File.Exists(oldPath))
                 {
-                    File.Delete(oldPath);
+                    // File.Delete(oldPath);
                 }
             }
         }
