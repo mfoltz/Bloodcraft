@@ -598,7 +598,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "BloodEfficiency", 0.10f, "The base cap for blood efficiency."),
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
             new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained."),
-            new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided."), // maybe this should be in general >_>
+            new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well."), // maybe this should be in general >_>
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)."),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars."),

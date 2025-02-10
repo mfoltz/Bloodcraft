@@ -1123,8 +1123,8 @@ internal static class DataService
                     newData.FamiliarPrestige[famKey] = new(prestigeLevel, newStatIndices);
                 }
 
-                Core.Log.LogInfo($"Migration to V2 prestige format completed - {steamId}");
-                SaveFamiliarPrestigeData_V2(steamId, newData);
+                if (!File.Exists(GetFilePath(steamId))) SaveFamiliarPrestigeData_V2(steamId, newData);
+                // Core.Log.LogInfo($"Migration to V2 prestige format completed - {steamId}");
 
                 string oldPath = FamiliarPrestigeManager.GetFilePath(steamId);
                 if (File.Exists(oldPath))
