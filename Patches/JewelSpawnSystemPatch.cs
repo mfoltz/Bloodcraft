@@ -35,7 +35,7 @@ internal static class JewelSpawnSystemPatch
         new(271061481)    // Item_Jewel_Blood_T04
     ];
 
-    [HarmonyPatch(typeof(JewelSpawnSystem), nameof(JewelSpawnSystem.OnUpdate))]
+    [HarmonyPatch(typeof(JewelSpawnSystem), nameof(JewelSpawnSystem.OnUpdate))] // KillingTorcher's arena mod (DojoKTArena) was very helpful in constructing this patch, namely the jewel command!
     [HarmonyPostfix]
     static void OnUpdatePostfix(JewelSpawnSystem __instance)
     {
