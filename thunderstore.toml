@@ -12,7 +12,7 @@ v-rising = ["1-0-update", "mods", "server"]
 [package]
 namespace = "zfolmt"
 name = "Bloodcraft"
-versionNumber = "1.5.3"
+versionNumber = "1.6.4"
 description = "Leveling, expertise, legacies, professions, familiars, classes, quests!"
 websiteUrl = "https://github.com/mfoltz/Bloodcraft"
 containsNsfwContent = false
