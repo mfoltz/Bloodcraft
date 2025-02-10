@@ -57,6 +57,7 @@ internal static class ServerBootstrapSystemPatches
 
     static readonly PrefabGUID _shroudBuff = new(1504279833);
     static readonly PrefabGUID _shroudCloak = new(1063517722);
+    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
@@ -459,6 +460,12 @@ internal static class ServerBootstrapSystemPatches
 
             OnlineCache.TryAdd(steamId, playerInfo);
             PlayerCache.TryAdd(steamId, playerInfo);
+
+            if (playerCharacter.HasBuff(_vBloodBloodBuff))
+            {
+                playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
+                // Core.Log.LogInfo($"{buffRemoved} | {user.PlatformId}");
+            }
         }
     }
     static IEnumerator UpdateFamiliarDelayRoutine(User user, Entity playerCharacter, Entity familiar)

@@ -603,7 +603,7 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)
   The multiplier for profession experience gained.
 - **Extra Recipes**: `ExtraRecipes` (bool, default: False)
-  Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided.
+  Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well.
 
 ### Familiars
 - **Familiar System**: `FamiliarSystem` (bool, default: False)

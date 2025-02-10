@@ -420,7 +420,7 @@ internal static class BuffSystemSpawnPatches
                 -79611032 => 8,  // Phasing
                 -6635580 => 9,  // Familiar highlord sword
                 -1584595113 => 10, // Familiar castleman holy buff
-                -952067173 => 14, // Combat stance
+                -952067173 or 581443919 => 14, // Combat stance
                 _ => 0,  // Not found in the numeric set
             };
         }

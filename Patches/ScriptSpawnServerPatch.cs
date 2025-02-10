@@ -95,6 +95,8 @@ internal static class ScriptSpawnServerPatch
                 PrefabGUID prefabGuid = prefabGuids[i];
                 int buffType = GetBuffType(prefabGuid.GuidHash, buffEntity, buffs[i], buffTarget, owner, ref playerCharacterLookup, ref blockFeedBuffLookup, ref bloodBuffLookup);
 
+                // Core.Log.LogInfo($"{prefabGuid.GetPrefabName()} | {buffType}");
+
                 switch (buffType)
                 {
                     case 1 when _exoForm:
