@@ -156,12 +156,14 @@ internal static class GenerateREADME
                 var commandLine = $"- `.{groupName} {name}{commandParameters}`{adminLock}";
 
                 // Handle misc formatting
+                /*
                 if (groupName == "misc")
                 {
                     commandLine = commandLine.Replace("misc ", "");
                     int adjustmentLength = adminOnly ? usage.Length + 4 : usage.Length + 1;
                     commandLine = commandLine[..^adjustmentLength] + (adminOnly ? "` 🔒" : "`");
                 }
+                */
 
                 sb.AppendLine(commandLine);
 

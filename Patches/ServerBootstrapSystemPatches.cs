@@ -464,7 +464,12 @@ internal static class ServerBootstrapSystemPatches
             if (playerCharacter.HasBuff(_vBloodBloodBuff))
             {
                 playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
-                // Core.Log.LogInfo($"{buffRemoved} | {user.PlatformId}");
+                // Core.Log.LogInfo($"{buffRemoved} - {user.PlatformId}");
+            }
+            else
+            {
+                playerCharacter.TryApplyBuff(_vBloodBloodBuff);
+                // Core.Log.LogInfo($"Applied vBloodBuff - {user.PlatformId}");
             }
         }
     }

@@ -511,6 +511,33 @@ internal static class PrestigeCommands
         }
     }
 
+    [Command(name: "exoform", adminOnly: false, usage: ".prestige exoform", description: "Toggles taunting to enter exo form.")]
+    public static void ToggleExoFormEmote(ChatCommandContext ctx)
+    {
+        if (!ConfigService.ExoPrestiging)
+        {
+            ctx.Reply("Exo prestiging is not enabled.");
+        }
+
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
+        {
+            if (!Misc.ConsumedDracula(ctx.Event.SenderUserEntity))
+            {
+                ctx.Reply("You must consume Dracula's essence before manifesting this power...");
+                return;
+            }
+
+            TogglePlayerBool(steamId, EXO_FORM_KEY);
+            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, EXO_FORM_KEY) ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
+        }
+        else
+        {
+            ctx.Reply("You are not yet worthy...");
+        }
+    }
+
     [Command(name: "permashroud", shortHand: "shroud", adminOnly: false, usage: ".prestige shroud", description: "Toggles permashroud if applicable.")]
     public static void PermaShroudToggle(ChatCommandContext ctx)
     {

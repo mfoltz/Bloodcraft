@@ -260,34 +260,31 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   - Sets player level.
   - Shortcut: *.lvl set [Player] [Level]*
 
-### Misc Commands
-- `.reminders`
+### Miscellaneous Commands
+- `.miscellaneous reminders`
   - Toggles general reminders for various mod features.
-  - Shortcut: *.remindme*
-- `.sct [Type]`
+  - Shortcut: *.misc remindme*
+- `.miscellaneous sct [Type]`
   - Toggles various scrolling text elements.
-  - Shortcut: *.sct [Type]*
-- `.starterkit`
+  - Shortcut: *.misc sct [Type]*
+- `.miscellaneous starterkit`
   - Provides starting kit.
-  - Shortcut: *.kitme*
-- `.prepareforthehunt`
+  - Shortcut: *.misc kitme*
+- `.miscellaneous prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed.
-  - Shortcut: *.prepare*
-- `.lockspells`
+  - Shortcut: *.misc prepare*
+- `.miscellaneous lockspells`
   - Locks in the next spells equipped to use in your unarmed slots.
-  - Shortcut: *.locksp*
-- `.lockshift`
+  - Shortcut: *.misc locksp*
+- `.miscellaneous lockshift`
   - Toggle shift spell.
-  - Shortcut: *.shift*
-- `.userstats`
+  - Shortcut: *.misc shift*
+- `.miscellaneous userstats`
   - Shows neat information about the player.
-  - Shortcut: *.userstats*
-- `.silence`
-  - Resets music for player.
-  - Shortcut: *.silence*
-- `.exoform`
-  - Toggles taunting to enter exo form.
-  - Shortcut: *.exoform*
+  - Shortcut: *.misc userstats*
+- `.miscellaneous silence`
+  - Resets stuck combat music if needed.
+  - Shortcut: *.misc silence*
 
 ### Party Commands
 - `.party toggleinvites`
@@ -337,6 +334,9 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.prestige leaderboard [PrestigeType]`
   - Lists prestige leaderboard for type.
   - Shortcut: *.prestige lb [PrestigeType]*
+- `.prestige exoform`
+  - Toggles taunting to enter exo form.
+  - Shortcut: *.prestige exoform*
 - `.prestige permashroud`
   - Toggles permashroud if applicable.
   - Shortcut: *.prestige shroud*

@@ -14,6 +14,8 @@ using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
+
+[CommandGroup(name: "miscellaneous", "misc")]
 internal static class MiscCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
@@ -29,7 +31,7 @@ internal static class MiscCommands
 
     public static readonly Dictionary<PrefabGUID, int> StarterKitItemPrefabGUIDs = [];
 
-    [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".remindme", description: "Toggles general reminders for various mod features.")]
+    [Command(name: "reminders", shortHand: "remindme", adminOnly: false, usage: ".misc remindme", description: "Toggles general reminders for various mod features.")]
     public static void LogExperienceCommand(ChatCommandContext ctx)
     {
         ulong steamId = ctx.Event.User.PlatformId;
@@ -38,7 +40,7 @@ internal static class MiscCommands
         LocalizationService.HandleReply(ctx, $"Reminders {(GetPlayerBool(steamId, REMINDERS_KEY) ? "<color=green>enabled</color>" : "<color=red>disabled</color>")}.");
     }
 
-    [Command(name: "sct", adminOnly: false, usage: ".sct [Type]", description: "Toggles various scrolling text elements.")]
+    [Command(name: "sct", adminOnly: false, usage: ".misc sct [Type]", description: "Toggles various scrolling text elements.")]
     public static void ToggleScrollingText(ChatCommandContext ctx, string input = "")
     {
         ulong steamId = ctx.Event.User.PlatformId;
@@ -92,7 +94,7 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".kitme", description: "Provides starting kit.")]
+    [Command(name: "starterkit", shortHand: "kitme", adminOnly: false, usage: ".misc kitme", description: "Provides starting kit.")]
     public static void KitMe(ChatCommandContext ctx)
     {
         if (!ConfigService.StarterKit)
@@ -132,7 +134,7 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
+    [Command(name: "prepareforthehunt", shortHand: "prepare", adminOnly: false, usage: ".misc prepare", description: "Completes GettingReadyForTheHunt if not already completed.")]
     public static void QuickStartCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.LevelingSystem)
@@ -152,7 +154,7 @@ internal static class MiscCommands
         LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
     }
 
-    [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
+    [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".misc locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
     public static void LockPlayerSpells(ChatCommandContext ctx)
     {
         if (!ConfigService.UnarmedSlots)
@@ -176,7 +178,7 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".shift", description: "Toggle shift spell.")]
+    [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".misc shift", description: "Toggle shift spell.")]
     public static void ShiftPlayerSpells(ChatCommandContext ctx)
     {
         if (!_classes)
@@ -224,7 +226,7 @@ internal static class MiscCommands
         }
     }
 
-    [Command(name: "userstats", adminOnly: false, usage: ".userstats", description: "Shows neat information about the player.")]
+    [Command(name: "userstats", adminOnly: false, usage: ".misc userstats", description: "Shows neat information about the player.")]
     public static void GetUserStats(ChatCommandContext ctx)
     {
         Entity userEntity = ctx.Event.SenderUserEntity;
@@ -246,7 +248,7 @@ internal static class MiscCommands
         LocalizationService.HandleReply(ctx, $"<color=white>VBloods Slain</color>: <color=#FF5733>{VBloodKills}</color> | <color=white>Units Killed</color>: <color=#FFD700>{UnitKills}</color> | <color=white>Deaths</color>: <color=#808080>{Deaths}</color> | <color=white>Time Online</color>: <color=#1E90FF>{OnlineTime}</color>hr | <color=white>Distance Traveled</color>: <color=#32CD32>{DistanceTraveled}</color>kf | <color=white>Blood Consumed</color>: <color=red>{LitresBloodConsumed}</color>L");
     }
 
-    [Command(name: "silence", adminOnly: false, usage: ".silence", description: "Resets music for player.")]
+    [Command(name: "silence", adminOnly: false, usage: ".misc silence", description: "Resets stuck combat music if needed.")]
     public static void ResetMusicCommand(ChatCommandContext ctx)
     {
         Entity character = ctx.Event.SenderCharacterEntity;
@@ -263,32 +265,5 @@ internal static class MiscCommands
 
         CombatMusicSystemServer.OnUpdate();
         ctx.Reply($"Combat music cleared~");
-    }
-
-    [Command(name: "exoform", adminOnly: false, usage: ".exoform", description: "Toggles taunting to enter exo form.")]
-    public static void ToggleExoFormEmote(ChatCommandContext ctx)
-    {
-        if (!ConfigService.ExoPrestiging)
-        {
-            ctx.Reply("Exo prestiging is not enabled.");
-        }
-
-        ulong steamId = ctx.Event.User.PlatformId;
-
-        if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
-        {
-            if (!Misc.ConsumedDracula(ctx.Event.SenderUserEntity))
-            {
-                ctx.Reply("You must consume Dracula's essence before manifesting this power...");
-                return;
-            }
-
-            TogglePlayerBool(steamId, EXO_FORM_KEY);
-            ctx.Reply($"Exo form emote action (<color=white>taunt</color>) {(GetPlayerBool(steamId, EXO_FORM_KEY) ? "<color=green>enabled</color>, the Immortal King's formidable powers are now yours..." : "<color=red>disabled</color>...")}");
-        }
-        else
-        {
-            ctx.Reply("You are not yet worthy...");
-        }
     }
 }
