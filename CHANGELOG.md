@@ -1,7 +1,11 @@
 `1.6.4`
+- lockspells moved to wep group ('.wep locksp'), lockshift moved to class group ('.class shift'), choose class changed to select class ('.class s [Class]'), change class adjusted shorthand ('.class c [Class]')
+- added config option to allow minion unlocks as familiars, do so at own risk
+- command to enable/disable class buffs for players ('.class passives') and global class buff purge for admins when planning on changing configured class buffs which should only be used when players are offline like, launch server with password->run command, wait for autosave->make config changes and save them->boot server without password ('.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen')
+- Moved exoform under prestige command group, misc commands now under 'misc' command group (moved lockspells to wep group and lockshift to class group)
 - Manual aggro handling for familiars now applies for both PvE and PvP
 - Added minor effects to binding and unbinding
-- Added minor effects to unlocking familiars and unlocking shinies
+- Added minor effect when unlocking a new familiar
 - Introduced smartbind command ('.fam sb [Name]') to streamline switching and summoning familiars in general, binds to matching familiar and automatically unbinds active familiar if needed
 - Familiars should be brought along with players when teleporting via BloodyPoint
 - Shiny familiars apply spell school debuffs with a chance per hit, similar to class-based onhit debuffs

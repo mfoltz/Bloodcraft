@@ -4,7 +4,6 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -15,9 +14,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class UpdateBuffsBufferDestroyPatch
 {
-    static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
-
     static readonly bool _legacies = ConfigService.BloodSystem;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
@@ -80,14 +76,11 @@ internal static class UpdateBuffsBufferDestroyPatch
                 {
                     case 1 when _exoForm: // ExoForm Buff
                         ulong steamId = buffTarget.GetSteamId();
-
                         buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
                         ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
-
                         break;
                     case 2 when _legacies: // VBlood Buff
                         buffTarget.TryApplyBuff(_vBloodBloodBuff);
-
                         break;
                     case 3 when _familiars: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
@@ -147,9 +140,9 @@ internal static class UpdateBuffsBufferDestroyPatch
                             steamId = buffTarget.GetSteamId();
                             int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
 
-                            if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) // allow shroud buff destruction
+                            if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) 
                             {
-                                continue;
+                                continue; // allow shroud buff destruction
                             }
                             else if (steamId.TryGetPlayerPrestiges(out prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
                             {
@@ -163,16 +156,19 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(buffTarget.GetUser(), buffTarget, familiar).Start();
 
                         break;
-                    default: // class buffs otherwise
+                    default: // class buffs otherwise, probably merits a case for switch but later
                         if (_classes)
                         {
                             steamId = buffTarget.GetSteamId();
 
-                            if (Classes.HasClass(steamId))
+                            if (GetPlayerBool(steamId, CLASS_BUFFS_KEY) && Classes.HasClass(steamId))
                             {
                                 Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
-
                                 if (ClassBuffsSet.TryGetValue(playerClass, out HashSet<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGuid)) Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid);
+                            }
+                            else
+                            {
+                                continue; // allow class buff destruction
                             }
                         }
 
@@ -199,7 +195,7 @@ internal static class UpdateBuffsBufferDestroyPatch
             20081801 => 2,                  // VBlood Buff
             581443919 => 3,                 // Combat Buff
             -508293388 => 4,                // Taunt Emote Buff
-            -342726392 or -1194613929 => 5, // Travel Buffs
+            -342726392 or -1194613929 => 5, // Travel Coffin Buffs
             569692162 or 381160212 => 6,    // Inside Coffin Buffs
             -1598161201 or -622259665 => 8, // Werewolf Buffs
             _ => 0,

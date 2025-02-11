@@ -16,6 +16,72 @@ internal static class WeaponManager
     static readonly float _prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
     static readonly int _maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
     static readonly int _expertiseStatChoices = ConfigService.ExpertiseStatChoices;
+    public class WeaponStats
+    {
+        public enum WeaponStatType
+        {
+            MaxHealth, // 0
+            MovementSpeed, // 1
+            PrimaryAttackSpeed, // 2
+            PhysicalLifeLeech, // 3
+            SpellLifeLeech, // 4
+            PrimaryLifeLeech, // 5
+            PhysicalPower, // 6
+            SpellPower, // 7
+            PhysicalCritChance, // 8
+            PhysicalCritDamage, // 9
+            SpellCritChance, // 10
+            SpellCritDamage // 11
+        }
+
+        public static readonly Dictionary<WeaponStatType, string> WeaponStatFormats = new()
+        {
+            { WeaponStatType.MaxHealth, "integer" },
+            { WeaponStatType.MovementSpeed, "decimal" },
+            { WeaponStatType.PrimaryAttackSpeed, "percentage" },
+            { WeaponStatType.PhysicalLifeLeech, "percentage" },
+            { WeaponStatType.SpellLifeLeech, "percentage" },
+            { WeaponStatType.PrimaryLifeLeech, "percentage" },
+            { WeaponStatType.PhysicalPower, "integer" },
+            { WeaponStatType.SpellPower, "integer" },
+            { WeaponStatType.PhysicalCritChance, "percentage" },
+            { WeaponStatType.PhysicalCritDamage, "percentage" },
+            { WeaponStatType.SpellCritChance, "percentage" },
+            { WeaponStatType.SpellCritDamage, "percentage" }
+        };
+
+        public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatTypes = new()
+        {
+            { WeaponStatType.MaxHealth, UnitStatType.MaxHealth },
+            { WeaponStatType.MovementSpeed, UnitStatType.MovementSpeed },
+            { WeaponStatType.PrimaryAttackSpeed, UnitStatType.PrimaryAttackSpeed },
+            { WeaponStatType.PhysicalLifeLeech, UnitStatType.PhysicalLifeLeech },
+            { WeaponStatType.SpellLifeLeech, UnitStatType.SpellLifeLeech },
+            { WeaponStatType.PrimaryLifeLeech, UnitStatType.PrimaryLifeLeech },
+            { WeaponStatType.PhysicalPower, UnitStatType.PhysicalPower },
+            { WeaponStatType.SpellPower, UnitStatType.SpellPower },
+            { WeaponStatType.PhysicalCritChance, UnitStatType.PhysicalCriticalStrikeChance },
+            { WeaponStatType.PhysicalCritDamage, UnitStatType.PhysicalCriticalStrikeDamage },
+            { WeaponStatType.SpellCritChance, UnitStatType.SpellCriticalStrikeChance },
+            { WeaponStatType.SpellCritDamage, UnitStatType.SpellCriticalStrikeDamage },
+        };
+
+        public static readonly Dictionary<WeaponStatType, float> WeaponStatValues = new()
+        {
+            {WeaponStatType.MaxHealth, ConfigService.MaxHealth},
+            {WeaponStatType.MovementSpeed, ConfigService.MovementSpeed},
+            {WeaponStatType.PrimaryAttackSpeed, ConfigService.PrimaryAttackSpeed},
+            {WeaponStatType.PhysicalLifeLeech, ConfigService.PhysicalLifeLeech},
+            {WeaponStatType.SpellLifeLeech, ConfigService.SpellLifeLeech},
+            {WeaponStatType.PrimaryLifeLeech, ConfigService.PrimaryLifeLeech},
+            {WeaponStatType.PhysicalPower, ConfigService.PhysicalPower},
+            {WeaponStatType.SpellPower, ConfigService.SpellPower},
+            {WeaponStatType.PhysicalCritChance, ConfigService.PhysicalCritChance},
+            {WeaponStatType.PhysicalCritDamage, ConfigService.PhysicalCritDamage},
+            {WeaponStatType.SpellCritChance, ConfigService.SpellCritChance},
+            {WeaponStatType.SpellCritDamage, ConfigService.SpellCritDamage}
+        };
+    }
     public static bool ChooseStat(ulong steamId, WeaponType weaponType, WeaponStatType statType)
     {
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
@@ -68,6 +134,11 @@ internal static class WeaponManager
             Stats.Clear();
             steamId.SetPlayerWeaponStats(weaponStats);
         }
+    }
+    public static void UpdateWeaponStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
+    {
+        WeaponType weaponType = GetCurrentWeaponType(playerCharacter);
+        ApplyWeaponStats(buffEntity, weaponType, steamId);
     }
     public static void ApplyWeaponStats(Entity buffEntity, WeaponType weaponType, ulong steamId)
     {
@@ -156,71 +227,5 @@ internal static class WeaponManager
     {
         Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
         return WeaponSystem.GetWeaponTypeFromWeaponEntity(weapon);
-    }
-    public class WeaponStats
-    {
-        public enum WeaponStatType
-        {
-            MaxHealth, // 0
-            MovementSpeed, // 1
-            PrimaryAttackSpeed, // 2
-            PhysicalLifeLeech, // 3
-            SpellLifeLeech, // 4
-            PrimaryLifeLeech, // 5
-            PhysicalPower, // 6
-            SpellPower, // 7
-            PhysicalCritChance, // 8
-            PhysicalCritDamage, // 9
-            SpellCritChance, // 10
-            SpellCritDamage // 11
-        }
-
-        public static readonly Dictionary<WeaponStatType, string> WeaponStatFormats = new()
-        {
-            { WeaponStatType.MaxHealth, "integer" },
-            { WeaponStatType.MovementSpeed, "decimal" },
-            { WeaponStatType.PrimaryAttackSpeed, "percentage" },
-            { WeaponStatType.PhysicalLifeLeech, "percentage" },
-            { WeaponStatType.SpellLifeLeech, "percentage" },
-            { WeaponStatType.PrimaryLifeLeech, "percentage" },
-            { WeaponStatType.PhysicalPower, "integer" },
-            { WeaponStatType.SpellPower, "integer" },
-            { WeaponStatType.PhysicalCritChance, "percentage" },
-            { WeaponStatType.PhysicalCritDamage, "percentage" },
-            { WeaponStatType.SpellCritChance, "percentage" },
-            { WeaponStatType.SpellCritDamage, "percentage" }
-        };
-
-        public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatTypes = new()
-        {
-            { WeaponStatType.MaxHealth, UnitStatType.MaxHealth },
-            { WeaponStatType.MovementSpeed, UnitStatType.MovementSpeed },
-            { WeaponStatType.PrimaryAttackSpeed, UnitStatType.PrimaryAttackSpeed },
-            { WeaponStatType.PhysicalLifeLeech, UnitStatType.PhysicalLifeLeech },
-            { WeaponStatType.SpellLifeLeech, UnitStatType.SpellLifeLeech },
-            { WeaponStatType.PrimaryLifeLeech, UnitStatType.PrimaryLifeLeech },
-            { WeaponStatType.PhysicalPower, UnitStatType.PhysicalPower },
-            { WeaponStatType.SpellPower, UnitStatType.SpellPower },
-            { WeaponStatType.PhysicalCritChance, UnitStatType.PhysicalCriticalStrikeChance },
-            { WeaponStatType.PhysicalCritDamage, UnitStatType.PhysicalCriticalStrikeDamage },
-            { WeaponStatType.SpellCritChance, UnitStatType.SpellCriticalStrikeChance },
-            { WeaponStatType.SpellCritDamage, UnitStatType.SpellCriticalStrikeDamage },
-        };
-
-        public static readonly Dictionary<WeaponStatType, float> WeaponStatValues = new()
-        {
-            {WeaponStatType.MaxHealth, ConfigService.MaxHealth},
-            {WeaponStatType.MovementSpeed, ConfigService.MovementSpeed},
-            {WeaponStatType.PrimaryAttackSpeed, ConfigService.PrimaryAttackSpeed},
-            {WeaponStatType.PhysicalLifeLeech, ConfigService.PhysicalLifeLeech},
-            {WeaponStatType.SpellLifeLeech, ConfigService.SpellLifeLeech},
-            {WeaponStatType.PrimaryLifeLeech, ConfigService.PrimaryLifeLeech},
-            {WeaponStatType.PhysicalPower, ConfigService.PhysicalPower},
-            {WeaponStatType.SpellPower, ConfigService.SpellPower},
-            {WeaponStatType.PhysicalCritChance, ConfigService.PhysicalCritChance},
-            {WeaponStatType.PhysicalCritDamage, ConfigService.PhysicalCritDamage},
-            {WeaponStatType.SpellCritChance, ConfigService.SpellCritChance},
-            {WeaponStatType.SpellCritDamage, ConfigService.SpellCritDamage}
-        };
     }
 }

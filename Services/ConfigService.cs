@@ -330,6 +330,9 @@ internal static class ConfigService
     static readonly Lazy<bool> _allowVBloods = new(() => GetConfigValue<bool>("AllowVBloods"));
     public static bool AllowVBloods => _allowVBloods.Value;
 
+    static readonly Lazy<bool> _allowMinions = new(() => GetConfigValue<bool>("AllowMinions"));
+    public static bool AllowMinions => _allowMinions.Value;
+
     static readonly Lazy<string> _bannedUnits = new(() => GetConfigValue<string>("BannedUnits"));
     public static string BannedUnits => _bannedUnits.Value;
 
@@ -609,6 +612,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "FamiliarPrestigeStatMultiplier", 0.10f, "The multiplier for applicable stats gained per familiar prestige."),
             new ConfigEntryDefinition("Familiars", "MaxFamiliarLevel", 90, "The maximum level a familiar can reach."),
             new ConfigEntryDefinition("Familiars", "AllowVBloods", false, "Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list)."),
+            new ConfigEntryDefinition("Familiars", "AllowMinions", false, "Allow Minions to be unlocked as familiars (leaving these excluded by default since some have undesirable behaviour and I am not sifting through them all to correct that, enable at own risk)."),
             new ConfigEntryDefinition("Familiars", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs."),
             new ConfigEntryDefinition("Familiars", "BannedTypes", "", "The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast)."),
             new ConfigEntryDefinition("Familiars", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods)."),

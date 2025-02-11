@@ -11,7 +11,6 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-using static Bloodcraft.Utilities.Classes;
 
 namespace Bloodcraft.Patches;
 
@@ -110,10 +109,10 @@ internal static class ScriptSpawnServerPatch
                         ServerGameManager.SetAbilityGroupCooldown(buffEntity.GetOwner(), _bloodBoltSwarmGroup, BLOODBOLT_SWARM_COOLDOWN);
                         break;
                     case 4 when (_legacies || _expertise):
-                        HandleStats(buffEntity, buffTarget);
+                        ApplyStats(buffEntity, buffTarget);
                         break;
                     case 5 when _classes:
-                        HandleBloodBuffMutant(buffEntity, buffTarget);
+                        Classes.HandleBloodBuffMutant(buffEntity, buffTarget);
                         break;
                     case 6 when _leveling:
                         buffEntity.With((ref BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared) =>
@@ -128,7 +127,7 @@ internal static class ScriptSpawnServerPatch
                         buffEntity.Destroy();
                         break;
                     case 9 when _familiars:
-                        HandleCastleMan(buffEntity);
+                        Familiars.HandleFamiliarCastleMan(buffEntity);
                         break;
                     case 10 when _familiars:
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
@@ -183,7 +182,7 @@ internal static class ScriptSpawnServerPatch
         }
         else return 0;
     }
-    static void HandleStats(Entity buffEntity, Entity playerCharacter)
+    static void ApplyStats(Entity buffEntity, Entity playerCharacter)
     {
         ulong steamId = playerCharacter.GetSteamId();
 
@@ -193,65 +192,9 @@ internal static class ScriptSpawnServerPatch
             bloodBuff_VBlood_0_DataShared.ModificationId = ModificationIDs.Create().NewModificationId();
         });
 
-        UpdateBloodStats(buffEntity, playerCharacter, steamId);
-        UpdateWeaponStats(buffEntity, playerCharacter, steamId);
+        BloodManager.UpdateBloodStats(buffEntity, playerCharacter, steamId);
+        WeaponManager.UpdateWeaponStats(buffEntity, playerCharacter, steamId);
 
         ModifyUnitStatBuffSystemSpawn.OnUpdate();
-    }
-    static void UpdateBloodStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
-    {
-        BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter);
-        BloodManager.ApplyBloodStats(buffEntity, bloodType, steamId);
-    }
-    static void UpdateWeaponStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
-    {
-        Systems.Expertise.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
-        WeaponManager.ApplyWeaponStats(buffEntity, weaponType, steamId);
-    }
-    static void HandleBloodBuffMutant(Entity buffEntity, Entity playerCharacter)
-    {
-        ulong steamId = playerCharacter.GetSteamId();
-
-        if (!HasClass(steamId)) return;
-        PlayerClass playerClass = GetPlayerClass(steamId);
-
-        if (playerClass.Equals(PlayerClass.DeathMage) && UpdateBuffsBufferDestroyPatch.ClassBuffsSet[playerClass].Contains(_mutantFromBiteBloodBuff))
-        {
-            List<PrefabGUID> perks = UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered[playerClass];
-            int indexOfBuff = perks.IndexOf(_mutantFromBiteBloodBuff);
-
-            if (indexOfBuff != -1)
-            {
-                int step = _maxLevel / perks.Count;
-                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience))
-                    ? playerExperience.Key
-                    : (int)playerCharacter.Read<Equipment>().GetFullLevel();
-
-                if (level >= step * (indexOfBuff + 1))
-                {
-                    var buffer = buffEntity.ReadBuffer<RandomMutant>();
-
-                    RandomMutant randomMutant = buffer[0];
-                    randomMutant.Mutant = _fallenAngel;
-                    buffer[0] = randomMutant;
-
-                    buffer.RemoveAt(1);
-
-                    buffEntity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff) =>
-                    {
-                        bloodBuff.MaxBonus = 1;
-                        bloodBuff.MinBonus = 1;
-                    });
-                }
-            }
-        }
-    }
-    static void HandleCastleMan(Entity buffEntity)
-    {
-        buffEntity.Remove<ScriptSpawn>();
-        buffEntity.Remove<ScriptUpdate>();
-        buffEntity.Remove<ScriptDestroy>();
-        buffEntity.Remove<Script_Buff_ModifyDynamicCollision_DataServer>();
-        buffEntity.Remove<Script_Castleman_AdaptLevel_DataShared>();
     }
 }

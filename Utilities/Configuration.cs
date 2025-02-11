@@ -41,7 +41,7 @@ internal static class Configuration
     }
     public static void QuestRewardItems()
     {
-        List<int> rewardAmounts = [.. ParseConfigIntegerString(ConfigService.QuestRewardAmounts)];
+        List<int> rewardAmounts = [..ParseConfigIntegerString(ConfigService.QuestRewardAmounts)];
         List<PrefabGUID> questRewards = ParseConfigIntegerString(ConfigService.QuestRewards)
             .Select(itemPrefab => new PrefabGUID(itemPrefab))
             .ToList();
@@ -58,7 +58,7 @@ internal static class Configuration
     }
     public static void StarterKitItems()
     {
-        List<int> kitAmounts = [.. ParseConfigIntegerString(ConfigService.KitQuantities)];
+        List<int> kitAmounts = [..ParseConfigIntegerString(ConfigService.KitQuantities)];
         List<PrefabGUID> kitPrefabs = ParseConfigIntegerString(ConfigService.KitPrefabs)
             .Select(itemPrefab => new PrefabGUID(itemPrefab))
             .ToList();

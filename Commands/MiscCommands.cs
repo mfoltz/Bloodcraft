@@ -1,6 +1,4 @@
 ﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
-using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
@@ -11,21 +9,17 @@ using VampireCommandFramework;
 using static Bloodcraft.Utilities.Misc;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static VCF.Core.Basics.RoleCommands;
-using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
 
 [CommandGroup(name: "miscellaneous", "misc")]
 internal static class MiscCommands
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
     static CombatMusicSystem_Server CombatMusicSystemServer => SystemService.CombatMusicSystem_Server;
     static ClaimAchievementSystem ClaimAchievementSystem => SystemService.ClaimAchievementSystem;
     static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
-
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     static readonly PrefabGUID _combatBuff = new(581443919);
 
@@ -152,78 +146,6 @@ internal static class MiscCommands
 
         ClaimAchievementSystem.CompleteAchievement(entityCommandBuffer, achievementPrefabGUID, userEntity, characterEntity, achievementOwnerEntity, false, true);
         LocalizationService.HandleReply(ctx, "You are now prepared for the hunt!");
-    }
-
-    [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".misc locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
-    public static void LockPlayerSpells(ChatCommandContext ctx)
-    {
-        if (!ConfigService.UnarmedSlots)
-        {
-            LocalizationService.HandleReply(ctx, "Extra spell slots for unarmed are not enabled.");
-            return;
-        }
-
-        User user = ctx.Event.User;
-        ulong SteamID = user.PlatformId;
-
-        TogglePlayerBool(SteamID, SPELL_LOCK_KEY);
-
-        if (GetPlayerBool(SteamID, SPELL_LOCK_KEY))
-        {
-            LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
-        }
-        else
-        {
-            LocalizationService.HandleReply(ctx, "Spells set.");
-        }
-    }
-
-    [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".misc shift", description: "Toggle shift spell.")]
-    public static void ShiftPlayerSpells(ChatCommandContext ctx)
-    {
-        if (!_classes)
-        {
-            LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
-            return;
-        }
-
-        if (!ConfigService.ShiftSlot)
-        {
-            LocalizationService.HandleReply(ctx, "Shift slots are not enabled.");
-            return;
-        }
-
-        User user = ctx.Event.User;
-        ulong steamId = user.PlatformId;
-
-        Entity character = ctx.Event.SenderCharacterEntity;
-        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
-        {
-            LocalizationService.HandleReply(ctx, "Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.");
-            return;
-        }
-
-        TogglePlayerBool(steamId, SHIFT_LOCK_KEY);
-        if (GetPlayerBool(steamId, SHIFT_LOCK_KEY))
-        {
-            if (steamId.TryGetPlayerSpells(out var spellsData))
-            {
-                PrefabGUID spellPrefabGUID = new(spellsData.ClassSpell);
-
-                if (spellPrefabGUID.HasValue())
-                {
-                    Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
-                }
-            }
-
-            LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>.");
-        }
-        else
-        {
-            Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
-
-            LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>.");
-        }
     }
 
     [Command(name: "userstats", adminOnly: false, usage: ".misc userstats", description: "Shows neat information about the player.")]

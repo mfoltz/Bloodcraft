@@ -115,7 +115,6 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
                     {
                         // File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
-
                         // Core.Log.LogInfo($"No entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
                     }
                 }

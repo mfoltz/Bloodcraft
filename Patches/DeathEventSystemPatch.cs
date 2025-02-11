@@ -1,5 +1,8 @@
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -14,16 +17,18 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class DeathEventListenerSystemPatch
 {
+    static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _legacies = ConfigService.BloodSystem;
     static readonly bool _professions = ConfigService.ProfessionSystem;
+    static readonly bool _allowMinions = ConfigService.FamiliarSystem && ConfigService.AllowMinions;
     public class DeathEventArgs : EventArgs
     {
         public Entity Source { get; set; }
         public Entity Target { get; set; }
         public HashSet<Entity> DeathParticipants { get; set; }
     }
-
     public static event EventHandler<DeathEventArgs> OnDeathEventHandler;
     static void RaiseDeathEvent(DeathEventArgs deathEvent)
     {
@@ -37,15 +42,25 @@ internal static class DeathEventListenerSystemPatch
         if (!Core._initialized) return;
 
         NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
-        
+
+        ComponentLookup<Movement> movementLookup = __instance.GetComponentLookup<Movement>(true);
+        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
+        ComponentLookup<Trader> traderLookup = __instance.GetComponentLookup<Trader>(true);
+        ComponentLookup<UnitLevel> unitLevelLookup = __instance.GetComponentLookup<UnitLevel>(true);
+        ComponentLookup<Minion> minionLookup = __instance.GetComponentLookup<Minion>(true);
+        ComponentLookup<VBloodConsumeSource> vBloodConsumeSourceLookup = __instance.GetComponentLookup<VBloodConsumeSource>(true);
+
         try
         {
             foreach (DeathEvent deathEvent in deathEvents)
             {
-                if (!ValidateTarget(deathEvent)) continue;
-                else if (deathEvent.Died.Has<Movement>())
+                if (!ValidateTarget(deathEvent, ref blockFeedBuffLookup, ref traderLookup, ref unitLevelLookup, ref vBloodConsumeSourceLookup)) continue;
+                else if (movementLookup.HasComponent(deathEvent.Died))
                 {
                     Entity deathSource = ValidateSource(deathEvent.Killer);
+
+                    bool isFeedKill = deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11);
+                    bool isMinion = minionLookup.HasComponent(deathEvent.Died);
 
                     if (deathSource.Exists())
                     {
@@ -56,10 +71,19 @@ internal static class DeathEventListenerSystemPatch
                             DeathParticipants = Misc.GetDeathParticipants(deathSource)
                         };
 
+                        if (isMinion)
+                        {
+                            if (_allowMinions)
+                            {
+                                FamiliarUnlockSystem.OnUpdate(null, deathArgs);
+                            }
+
+                            continue;
+                        }
+
                         RaiseDeathEvent(deathArgs);
 
-                        if (!_legacies) continue;
-                        else if (deathEvent.StatChangeReason.Equals(StatChangeReason.HandleGameplayEventsBase_11)) BloodSystem.ProcessLegacy(deathArgs.Source, deathArgs.Target);
+                        if (_legacies && isFeedKill) BloodSystem.ProcessLegacy(deathArgs.Source, deathArgs.Target);
                     }
                 }
                 else if (_professions && deathEvent.Killer.IsPlayer())
@@ -84,26 +108,30 @@ internal static class DeathEventListenerSystemPatch
 
         return deathSource;
     }
-    static bool ValidateTarget(DeathEvent deathEvent)
+    static bool ValidateTarget(DeathEvent deathEvent, ref ComponentLookup<BlockFeedBuff> blockFeedBuffLookup, 
+        ref ComponentLookup<Trader> traderLookup, ref ComponentLookup<UnitLevel> unitLevelLookup, 
+        ref ComponentLookup<VBloodConsumeSource> vBloodConsumeSourceLookup)
     {
-        if (_familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
+        // if (deathEvent.Killer.IsPlayer()) Core.Log.LogInfo($"DeathEvent died - {deathEvent.Died.GetPrefabGuid()}");
+
+        if (deathEvent.Killer == deathEvent.Died) return false;
+        else if (_familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
         {
             ulong steamId = player.GetSteamId();
 
-            if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.Read<PrefabGUID>().GuidHash))
+            if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.GetPrefabGuidHash()))
             {
                 Familiars.ClearFamiliarActives(steamId);
-
-                return false;
             }
+
+            return false;
         }
-        else if (PlayerBattleFamiliars.FirstOrDefault(kvp => kvp.Value.Contains(deathEvent.Died)) is var match && match.Key != default)
+        else if (PlayerBattleFamiliars.Any() && PlayerBattleFamiliars.FirstOrDefault(kvp => kvp.Value.Contains(deathEvent.Died)) is var match && match.Key != default)
         {
             ulong ownerId = match.Key;
             PlayerBattleFamiliars[ownerId].Remove(deathEvent.Died);
 
             if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(deathEvent.Died)) Familiars.HandleFamiliarMinions(deathEvent.Died);
-
             if (!PlayerBattleFamiliars[ownerId].Any() && BattleService.Matchmaker.MatchPairs.TryGetMatch(ownerId, out var matchPair))
             {
                 ulong pairedId = matchPair.Item1 == ownerId ? matchPair.Item2 : matchPair.Item1;
@@ -123,9 +151,10 @@ internal static class DeathEventListenerSystemPatch
 
             return false;
         }
-        else if (deathEvent.Died.Has<VBloodConsumeSource>() || deathEvent.Killer == deathEvent.Died) return false;
-        else if (deathEvent.Died.Has<Minion>() || deathEvent.Died.Has<Trader>() || deathEvent.Died.Has<BlockFeedBuff>()) return false;
-        else if (!deathEvent.Died.Has<UnitLevel>()) return false;
+        else if (vBloodConsumeSourceLookup.HasComponent(deathEvent.Died) 
+            || blockFeedBuffLookup.HasComponent(deathEvent.Died) 
+            || traderLookup.HasComponent(deathEvent.Died) 
+            || !unitLevelLookup.HasComponent(deathEvent.Died)) return false;
 
         return true;
     }

@@ -7,6 +7,8 @@ using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Utilities.Classes;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static VCF.Core.Basics.RoleCommands;
+using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Commands;
 
@@ -17,8 +19,8 @@ internal static class ClassCommands
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
-    [Command(name: "choose", shortHand: "c", adminOnly: false, usage: ".class c [Class]", description: "Choose class.")]
-    public static void ClassChoiceCommand(ChatCommandContext ctx, string className)
+    [Command(name: "select", shortHand: "s", adminOnly: false, usage: ".class s [Class]", description: "Select class.")]
+    public static void SelectClassCommand(ChatCommandContext ctx, string className)
     {
         if (!_classes)
         {
@@ -28,7 +30,7 @@ internal static class ClassCommands
 
         if (!TryParseClassName(className, out var parsedClassType))
         {
-            LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see valid options.");
+            LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
             return;
         }
 
@@ -136,7 +138,7 @@ internal static class ClassCommands
                 }
                 else if (choice < 0 || choice > spells.Count)
                 {
-                    LocalizationService.HandleReply(ctx, $"Invalid spell, use <color=white>'.class lsp'</color> to see valid options.");
+                    LocalizationService.HandleReply(ctx, $"Invalid spell, use <color=white>'.class lsp'</color> to see options.");
                     return;
                 }
 
@@ -171,12 +173,12 @@ internal static class ClassCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class or shift spells aren't enabled! (<color=white>'.class c [Class]'</color> | <color=white>'.shift'</color>)");
+            LocalizationService.HandleReply(ctx, "You haven't selected a class or shift spells aren't enabled! (<color=white>'.class c [Class]'</color> | <color=white>'.class shift'</color>)");
         }
     }
 
-    [Command(name: "change", adminOnly: false, usage: ".class change [Class]", description: "Change classes.")]
-    public static void ClassChangeCommand(ChatCommandContext ctx, string className)
+    [Command(name: "change", shortHand:"c", adminOnly: false, usage: ".class c [Class]", description: "Change classes.")]
+    public static void ChangeClassCommand(ChatCommandContext ctx, string className)
     {
         if (!_classes)
         {
@@ -195,7 +197,7 @@ internal static class ClassCommands
 
         if (steamId.TryGetPlayerClasses(out var classes) && !HasClass(steamId))
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class to change from yet, use <color=white>'.class c [Class]'</color> instead.");
+            LocalizationService.HandleReply(ctx, "You haven't selected a class yet, use <color=white>'.class c [Class]'</color> instead.");
             return;
         }
 
@@ -204,7 +206,7 @@ internal static class ClassCommands
             return;
         }
 
-        RemoveClassBuffs(ctx, steamId);
+        RemoveClassBuffs(character, steamId);
         UpdateClassData(character, parsedClassType, classes, steamId);
 
         LocalizationService.HandleReply(ctx, $"Class changed to {FormatClassName(parsedClassType)}!");
@@ -224,20 +226,19 @@ internal static class ClassCommands
         if (HasClass(steamId))
         {
             PlayerClass playerClass = GetPlayerClass(steamId);
-            List<int> perks = GetClassBuffs(steamId);
+            List<PrefabGUID> perks = GetClassBuffs(steamId);
 
             if (perks.Count == 0)
             {
                 LocalizationService.HandleReply(ctx, $"No buffs for {FormatClassName(playerClass)} configured!");
                 return;
             }
-
-            Buffs.HandleClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
+            Classes.ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
             LocalizationService.HandleReply(ctx, $"Class buffs applied (if they were missing) for {FormatClassName(playerClass)}!");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class!");
+            LocalizationService.HandleReply(ctx, "You haven't selected a class yet!");
         }
     }
 
@@ -255,7 +256,7 @@ internal static class ClassCommands
     }
 
     [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".class lb [Class]", description: "Shows perks that can be gained from class.")]
-    public static void ClassPerks(ChatCommandContext ctx, string classType = "")
+    public static void ListClassBuffsCommand(ChatCommandContext ctx, string classType = "")
     {
         if (!_classes)
         {
@@ -290,7 +291,7 @@ internal static class ClassCommands
     }
 
     [Command(name: "listspells", shortHand: "lsp", adminOnly: false, usage: ".class lsp [Class]", description: "Shows spells that can be gained from class.")]
-    public static void ListClassSpells(ChatCommandContext ctx, string classType = "")
+    public static void ListClassSpellsCommand(ChatCommandContext ctx, string classType = "")
     {
         if (!_classes)
         {
@@ -325,7 +326,7 @@ internal static class ClassCommands
     }
 
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".class lst [Class]", description: "Shows weapon and blood stat synergies for a class.")]
-    public static void ListClassStats(ChatCommandContext ctx, string classType = "")
+    public static void ListClassStatsCommand(ChatCommandContext ctx, string classType = "")
     {
         if (!_classes)
         {
@@ -357,5 +358,90 @@ internal static class ClassCommands
                 LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
             }
         }
+    }
+
+    [Command(name: "lockshift", shortHand: "shift", adminOnly: false, usage: ".class shift", description: "Toggle shift spell.")]
+    public static void ShiftSlotToggleCommand(ChatCommandContext ctx)
+    {
+        if (!_classes)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled and spells can't be set to shift.");
+            return;
+        }
+
+        if (!ConfigService.ShiftSlot)
+        {
+            LocalizationService.HandleReply(ctx, "Shift slots are not enabled.");
+            return;
+        }
+
+        User user = ctx.Event.User;
+        ulong steamId = user.PlatformId;
+
+        Entity character = ctx.Event.SenderCharacterEntity;
+        if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
+        {
+            LocalizationService.HandleReply(ctx, "Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.");
+            return;
+        }
+
+        TogglePlayerBool(steamId, SHIFT_LOCK_KEY);
+        if (GetPlayerBool(steamId, SHIFT_LOCK_KEY))
+        {
+            if (steamId.TryGetPlayerSpells(out var spellsData))
+            {
+                PrefabGUID spellPrefabGUID = new(spellsData.ClassSpell);
+
+                if (spellPrefabGUID.HasValue())
+                {
+                    Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                }
+            }
+
+            LocalizationService.HandleReply(ctx, "Shift spell <color=green>enabled</color>!");
+        }
+        else
+        {
+            Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
+
+            LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>!");
+        }
+    }
+
+    [Command(name: "passivebuffs", shortHand: "passives", adminOnly: false, usage: ".class passives", description: "Toggles class passives (buffs only, other class effects remain active).")]
+    public static void ClassBuffsToggleCommand(ChatCommandContext ctx)
+    {
+        if (!_classes)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        ulong steamId = ctx.Event.User.PlatformId;
+
+        TogglePlayerBool(steamId, CLASS_BUFFS_KEY);
+        if (GetPlayerBool(steamId, CLASS_BUFFS_KEY))
+        {
+            LocalizationService.HandleReply(ctx, "Class passive buffs <color=green>enabled</color>!");
+            ApplyClassBuffs(playerCharacter, steamId);
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Class passive buffs <color=red>disabled</color>!");
+            RemoveClassBuffs(playerCharacter, steamId);
+        }
+    }
+
+    [Command(name: "iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", description: "Globally removes class buffs from players to then facilitate changing class buffs in config.")]
+    public static void ClassBuffsPurgeCommand(ChatCommandContext ctx)
+    {
+        if (!_classes)
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+
+        PurgeClassBuffs();
     }
 }

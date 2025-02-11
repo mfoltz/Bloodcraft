@@ -120,6 +120,11 @@ internal static class BloodManager
             steamId.SetPlayerBloodStats(bloodStats);
         }
     }
+    public static void UpdateBloodStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
+    {
+        BloodType bloodType = GetCurrentBloodType(playerCharacter);
+        ApplyBloodStats(buffEntity, bloodType, steamId);
+    }
     public static void ApplyBloodStats(Entity bloodBuff, BloodType bloodType, ulong steamId)
     {
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
@@ -132,6 +137,7 @@ internal static class BloodManager
             }
 
             var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+
             foreach (var bloodStatType in bonuses)
             {
                 float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodType, bloodStatType);
@@ -140,12 +146,13 @@ internal static class BloodManager
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     ModifyUnitStatBuff_DOTS statBuff = buffer[i];
+
                     if (statBuff.StatType.Equals(BloodStatTypes[bloodStatType]))
                     {
                         statBuff.Value += scaledBonus; // Modify the value accordingly
                         buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                        found = true;
 
+                        found = true;
                         break;
                     }
                 }
@@ -153,6 +160,7 @@ internal static class BloodManager
                 if (!found)
                 {
                     UnitStatType statType = BloodStatTypes[bloodStatType];
+
                     ModifyUnitStatBuff_DOTS newStatBuff = new()
                     {
                         StatType = statType,

@@ -171,7 +171,7 @@ internal static class BuffSystemSpawnPatches
                     case 6 when _classes: // Death mage second passive buff; should probably make some of those hard-coded and some optional, this was effort >_>
                         if (buffTarget.TryGetPlayer(out playerCharacter))
                         {
-                            Classes.HandleDeathMageBiteTriggerBuffSpawnServer(playerCharacter, steamId);
+                            Classes.HandleBiteTriggerBuff(playerCharacter, steamId);
                         }
                         else if (buffTarget.GetPrefabGuid().Equals(_fallenAngel) && DeathMagePlayerAngelSpawnOrder.TryDequeue(out playerCharacter))
                         {

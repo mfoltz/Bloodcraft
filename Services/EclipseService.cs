@@ -507,8 +507,10 @@ internal class EclipseService
                         Core.Log.LogWarning($"Failed sending progress in EclipseService! {steamId}:Eclipse{version}, Error - {ex}");
                     }
 
-                    yield return null;
+                    // yield return null; think this makes more sense outside the loop below but noting in case horribly wrong
                 }
+
+                yield return null;
             }
 
             yield return _delay;

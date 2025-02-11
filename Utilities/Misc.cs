@@ -139,6 +139,7 @@ internal static class Misc
         public const string SCT_YIELD_KEY = "ProfessionYieldSCT";
         public const string EXO_FORM_KEY = "ExoForm";
         public const string SHROUD_KEY = "Shroud";
+        public const string CLASS_BUFFS_KEY = "Passives";
 
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
@@ -160,7 +161,8 @@ internal static class Misc
             [SCT_PROFESSIONS_KEY] = true,
             [SCT_YIELD_KEY] = true,
             [EXO_FORM_KEY] = false,
-            [SHROUD_KEY] = true
+            [SHROUD_KEY] = true,
+            [CLASS_BUFFS_KEY] = true
         };
 
         static readonly Dictionary<string, string> _boolKeyConversionMap = new()

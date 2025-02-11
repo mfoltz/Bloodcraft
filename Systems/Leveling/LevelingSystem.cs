@@ -54,9 +54,11 @@ internal static class LevelingSystem
     [
         new(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
         new(244750581),   // SetBonus_GearLevel_02
-        new(-1469378405), // SetBonus_GearLevel_01
-        new(-1596803256)  // AB_BloodBuff_Brute_GearLevelBonus
+        new(-1469378405) // SetBonus_GearLevel_01
+        // new(-1596803256)  // AB_BloodBuff_Brute_GearLevelBonus
     ];
+
+    static readonly PrefabGUID _bruteGearLevelBuff = new(-1596803256);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         ProcessExperience(deathEvent.Target, deathEvent.DeathParticipants);
@@ -207,7 +209,7 @@ internal static class LevelingSystem
 
         if (_classes)
         {
-            Buffs.HandleClassBuffs(playerCharacter, steamId);
+            Classes.ApplyClassBuffs(playerCharacter, steamId);
         }
     }
     public static void NotifyPlayer(Entity player, ulong steamId, float gainedXP, bool leveledUp, int newLevel, int restedXP = 0)
@@ -307,10 +309,7 @@ internal static class LevelingSystem
         {
             int playerLevel = xpData.Key;
 
-            if (_extraGearLevelBuffs.Any(buff => playerCharacter.HasBuff(buff)))
-            {
-                playerLevel++;
-            }
+            HandleExtraLevels(playerCharacter, ref playerLevel);
 
             playerCharacter.With((ref Equipment equipment) =>
             {
@@ -318,6 +317,18 @@ internal static class LevelingSystem
                 equipment.SpellLevel._Value = 0f;
                 equipment.WeaponLevel._Value = playerLevel;
             });
+        }
+    }
+    static void HandleExtraLevels(Entity playerCharacter, ref int playerLevel)
+    {
+        if (playerCharacter.HasBuff(_bruteGearLevelBuff))
+        {
+            playerLevel++;
+        }
+
+        if (_extraGearLevelBuffs.Any(buff => playerCharacter.HasBuff(buff)))
+        {
+            playerLevel++;
         }
     }
     public static void UpdateMaxRestedXP(ulong steamId, KeyValuePair<int, float> expData)

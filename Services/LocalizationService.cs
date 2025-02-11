@@ -9,7 +9,7 @@ using Unity.Entities;
 using VampireCommandFramework;
 
 namespace Bloodcraft.Services;
-internal class LocalizationService // the bones are from KindredCommands
+internal class LocalizationService // the bones are from KindredCommands, ty Odjit c:
 {
     struct Code
     {
@@ -57,7 +57,7 @@ internal class LocalizationService // the bones are from KindredCommands
         {"Brazilian", "Bloodcraft.Localization.Brazilian.json"}
     };
 
-    static readonly Dictionary<int, string> _prefabHashesToGuidStrings = [];
+    static readonly Dictionary<int, string> _guidHashesToGuidStrings = [];
     static readonly Dictionary<string, string> _guidStringsToLocalizedNames = [];
     public LocalizationService()
     {
@@ -80,7 +80,7 @@ internal class LocalizationService // the bones are from KindredCommands
         var prefabNames = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonContent);
 
         prefabNames
-            .ForEach(kvp => _prefabHashesToGuidStrings[kvp.Key] = kvp.Value);
+            .ForEach(kvp => _guidHashesToGuidStrings[kvp.Key] = kvp.Value);
     }
     static void LoadGuidStringsToLocalizedNames()
     {
@@ -116,7 +116,7 @@ internal class LocalizationService // the bones are from KindredCommands
         EventId = NetworkEvents.EventId_ChatMessageServerEvent,
         IsDebugEvent = false,
     };
-    internal static void SendToClient(Entity playerCharacter, Entity userEntity, string messageWithMAC)
+    internal static void SendToClient(Entity playerCharacter, Entity userEntity, string messageWithMAC) // for later
     {
         ChatMessageServerEvent chatMessageEvent = new()
         {
@@ -138,7 +138,7 @@ internal class LocalizationService // the bones are from KindredCommands
     }
     public static string GetAssetGuidString(PrefabGUID prefabGUID)
     {
-        if (_prefabHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out var guidString))
+        if (_guidHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out var guidString))
         {
             return guidString;
         }
@@ -147,7 +147,7 @@ internal class LocalizationService // the bones are from KindredCommands
     }
     public static string GetGuidString(PrefabGUID prefabGUID)
     {
-        if (_prefabHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out string guidString))
+        if (_guidHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out string guidString))
         {
             return guidString;
         }

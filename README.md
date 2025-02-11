@@ -150,15 +150,15 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   - Shortcut: *.bl l*
 
 ### Class Commands
-- `.class choose [Class]`
-  - Choose class.
-  - Shortcut: *.class c [Class]*
+- `.class select [Class]`
+  - Select class.
+  - Shortcut: *.class s [Class]*
 - `.class choosespell [#]`
   - Sets shift spell for class if prestige level is high enough.
   - Shortcut: *.class csp [#]*
 - `.class change [Class]`
   - Change classes.
-  - Shortcut: *.class change [Class]*
+  - Shortcut: *.class c [Class]*
 - `.class syncbuffs`
   - Applies class buffs appropriately if not present.
   - Shortcut: *.class sb*
@@ -174,6 +174,15 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.class liststats [Class]`
   - Shows weapon and blood stat synergies for a class.
   - Shortcut: *.class lst [Class]*
+- `.class lockshift`
+  - Toggle shift spell.
+  - Shortcut: *.class shift*
+- `.class passivebuffs`
+  - Toggles class passives (buffs only, other class effects remain active).
+  - Shortcut: *.class passives*
+- `.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen` 🔒
+  - Globally removes class buffs from players to then facilitate changing class buffs in config.
+  - Shortcut: *.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen*
 
 ### Familiar Commands
 - `.familiar bind [#]`
@@ -273,12 +282,6 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.miscellaneous prepareforthehunt`
   - Completes GettingReadyForTheHunt if not already completed.
   - Shortcut: *.misc prepare*
-- `.miscellaneous lockspells`
-  - Locks in the next spells equipped to use in your unarmed slots.
-  - Shortcut: *.misc locksp*
-- `.miscellaneous lockshift`
-  - Toggle shift spell.
-  - Shortcut: *.misc shift*
 - `.miscellaneous userstats`
   - Shows neat information about the player.
   - Shortcut: *.misc userstats*
@@ -400,6 +403,9 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.weapon setspells [Name] [Slot] [PrefabGuid] [Radius]` 🔒
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
+- `.weapon lockspells`
+  - Locks in the next spells equipped to use in your unarmed slots.
+  - Shortcut: *.wep locksp*
 
 ## Configuration
 
@@ -626,6 +632,8 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   The maximum level a familiar can reach.
 - **Allow V Bloods**: `AllowVBloods` (bool, default: False)
   Allow VBloods to be unlocked as familiars (this includes shardbearers, if you want those excluded use the bannedUnits list).
+- **Allow Minions**: `AllowMinions` (bool, default: False)
+  Allow Minions to be unlocked as familiars (leaving these excluded by default since some have undesirable behaviour and I am not sifting through them all to correct that, enable at own risk).
 - **Banned Units**: `BannedUnits` (string, default: "")
   The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.
 - **Banned Types**: `BannedTypes` (string, default: "")

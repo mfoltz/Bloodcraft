@@ -13,6 +13,8 @@ using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
+using static VCF.Core.Basics.RoleCommands;
+using User = ProjectM.Network.User;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Commands;
@@ -22,6 +24,8 @@ internal static class WeaponCommands
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+
+    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [Command(name: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
@@ -360,7 +364,7 @@ internal static class WeaponCommands
         }
         else if (radius < 0f)
         {
-            LocalizationService.HandleReply(ctx, "Radius must be positive if entering a value!");
+            LocalizationService.HandleReply(ctx, "Radius must be positive!");
             return;
         }
         else
@@ -389,6 +393,30 @@ internal static class WeaponCommands
 
                 steamId.SetPlayerSpells(spells);
             }
+        }
+    }
+
+    [Command(name: "lockspells", shortHand: "locksp", adminOnly: false, usage: ".wep locksp", description: "Locks in the next spells equipped to use in your unarmed slots.")]
+    public static void LockPlayerSpells(ChatCommandContext ctx)
+    {
+        if (!ConfigService.UnarmedSlots)
+        {
+            LocalizationService.HandleReply(ctx, "Extra spell slots for unarmed are not enabled.");
+            return;
+        }
+
+        User user = ctx.Event.User;
+        ulong SteamID = user.PlatformId;
+
+        TogglePlayerBool(SteamID, SPELL_LOCK_KEY);
+
+        if (GetPlayerBool(SteamID, SPELL_LOCK_KEY))
+        {
+            LocalizationService.HandleReply(ctx, "Change spells to the ones you want in your unarmed slots. When done, toggle this again.");
+        }
+        else
+        {
+            LocalizationService.HandleReply(ctx, "Spells set.");
         }
     }
 }

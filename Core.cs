@@ -70,7 +70,7 @@ internal static class Core
         new(-191917509)   // DT_Unit_Relic_Dracula_Unique
     ];
 
-    const float DIRECTION_DURATION = 6f; // for making familiars for player two face correct direction until battle starts
+    const float DIRECTION_DURATION = 6f; // for making familiars on team two face correct direction until battle starts
 
     const string SANGUIS = "Sanguis";
     const string SANGUIS_DATA_CLASS = "Sanguis.Core+DataStructures";
@@ -122,7 +122,7 @@ internal static class Core
         }
         if (ConfigService.ProfessionSystem)
         {
-
+            // uhh definitely remember what I was going to put here? hrm
         }
 
         ModifyPrefabs();
@@ -233,7 +233,7 @@ internal static class Core
             }
             */
         }
-        if (ConfigService.EliteShardBearers)
+        if (ConfigService.EliteShardBearers) // should probably just modify their stats on the base prefabs instead of in the spawnTransformSystem >_>
         {
             foreach (PrefabGUID soulShardDropTable in _soulShardDropTables)
             {

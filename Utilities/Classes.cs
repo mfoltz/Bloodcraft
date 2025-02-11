@@ -1,5 +1,6 @@
 ﻿using Bloodcraft.Patches;
 using Bloodcraft.Services;
+using Bloodcraft.Systems.Leveling;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -13,8 +14,11 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
+using static Bloodcraft.Systems.Leveling.LevelingSystem;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Utilities;
 internal static class Classes
@@ -32,7 +36,7 @@ internal static class Classes
 
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
-    static readonly WaitForSeconds _secondDelay = new(1f);
+    static readonly WaitForSeconds _delay = new(1f);
     static readonly Regex _classNameRegex = new("(?<!^)([A-Z])");
 
     static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
@@ -44,6 +48,7 @@ internal static class Classes
 
     const float ANGEL_LIFETIME = 12f;
     const string NO_NAME = "No Name";
+    const string PRIMARY_ATTACK = "Primary Attack";
 
     static NativeParallelHashMap<PrefabGUID, ItemData> _itemLookup = SystemService.GameDataSystem.ItemHashLookupMap;
     static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
@@ -105,13 +110,22 @@ internal static class Classes
         { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererSpells },
         { PlayerClass.DeathMage, ConfigService.DeathMageSpells }
     };
-    public static List<int> GetClassBuffs(ulong steamId)
+    public static List<PrefabGUID> GetClassBuffs(ulong steamId)
     {
+        if (HasClass(steamId))
+        {
+            PlayerClass playerClass = GetPlayerClass(steamId);
+            return UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(playerClass, out var classBuffs) ? 
+                classBuffs : [];
+        }
+
+        /*
         if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
         {
             var playerClass = classes.Keys.FirstOrDefault();
             return Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]);
         }
+        */
 
         return [];
     }
@@ -147,23 +161,30 @@ internal static class Classes
     {
         return steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0;
     }
-    public static void RemoveClassBuffs(ChatCommandContext ctx, ulong steamId)
+    public static void RemoveClassBuffs(Entity playerCharacter, ulong steamId)
     {
-        List<int> buffs = GetClassBuffs(steamId);
+        List<PrefabGUID> buffs = GetClassBuffs(steamId);
 
-        if (buffs.Count == 0) return;
+        foreach (PrefabGUID buff in buffs)
+        {
+            playerCharacter.TryRemoveBuff(buff);
+        }
 
+        /*
         for (int i = 0; i < buffs.Count; i++)
         {
             if (buffs[i] == 0) continue;
 
             PrefabGUID buffPrefab = new(buffs[i]);
 
-            if (ServerGameManager.TryGetBuff(ctx.Event.SenderCharacterEntity, buffPrefab.ToIdentifier(), out Entity buffEntity))
+            playerCharacter.TryRemoveBuff(buffPrefab);
+
+            if (ServerGameManager.TryGetBuff(playerCharacter, buffPrefab.ToIdentifier(), out Entity buffEntity))
             {
                 DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
             }
         }
+        */
     }
     public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClass playerClass)
     {
@@ -295,8 +316,7 @@ internal static class Classes
 
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
         steamId.SetPlayerClasses(classes);
-
-        Buffs.HandleClassBuffs(character, steamId);
+        Classes.ApplyClassBuffs(character, steamId);
     }
     public static void RemoveShift(Entity character)
     {
@@ -598,16 +618,6 @@ internal static class Classes
         { PlayerClass.VampireLord, "#00FFFF" },      
         { PlayerClass.DeathMage, "#00FF00" }   
     };
-
-    public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexMap = new()
-    {
-        { new(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
-        { new(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
-        { new(-1246704569), "#FF0000" },  // leech red (Hex: FF0000)
-        { new(1723455773), "#008080" },   // weaken teal (Hex: 008080)
-        { new(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
-        { new(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
-    };
     public static string FormatClassName(PlayerClass classType)
     {
         string className = _classNameRegex.Replace(classType.ToString(), " $1");
@@ -621,23 +631,28 @@ internal static class Classes
             return className;
         }
     }
-    public static void HandleDeathMageMutantBuffScriptSpawn(Entity entity, Entity player, ulong steamId)
+    public static void HandleBloodBuffMutant(Entity buffEntity, Entity playerCharacter)
     {
+        ulong steamId = playerCharacter.GetSteamId();
+
+        if (!HasClass(steamId)) return;
         PlayerClass playerClass = GetPlayerClass(steamId);
 
-        if (playerClass.Equals(PlayerClass.DeathMage) && entity.GetBuffTarget().TryGetPlayer(out player))
+        if (playerClass.Equals(PlayerClass.DeathMage) && UpdateBuffsBufferDestroyPatch.ClassBuffsSet[playerClass].Contains(_mutantFromBiteBloodBuff))
         {
-            List<PrefabGUID> perks = Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]).Select(x => new PrefabGUID(x)).ToList();
+            List<PrefabGUID> perks = UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered[playerClass];
             int indexOfBuff = perks.IndexOf(_mutantFromBiteBloodBuff);
 
             if (indexOfBuff != -1)
             {
                 int step = _maxLevel / perks.Count;
-                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience)) ? playerExperience.Key : (int)player.Read<Equipment>().GetFullLevel();
+                int level = (_leveling && steamId.TryGetPlayerExperience(out var playerExperience))
+                    ? playerExperience.Key
+                    : (int)playerCharacter.Read<Equipment>().GetFullLevel();
 
                 if (level >= step * (indexOfBuff + 1))
                 {
-                    var buffer = entity.ReadBuffer<RandomMutant>();
+                    var buffer = buffEntity.ReadBuffer<RandomMutant>();
 
                     RandomMutant randomMutant = buffer[0];
                     randomMutant.Mutant = _fallenAngel;
@@ -645,16 +660,16 @@ internal static class Classes
 
                     buffer.RemoveAt(1);
 
-                    entity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff_BiteToMutant_DataShared) =>
+                    buffEntity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff) =>
                     {
-                        bloodBuff_BiteToMutant_DataShared.MaxBonus = 1f;
-                        bloodBuff_BiteToMutant_DataShared.MinBonus = 1f;
+                        bloodBuff.MaxBonus = 1;
+                        bloodBuff.MinBonus = 1;
                     });
                 }
             }
         }
     }
-    public static void HandleDeathMageBiteTriggerBuffSpawnServer(Entity player, ulong steamId)
+    public static void HandleBiteTriggerBuff(Entity player, ulong steamId)
     {
         if (player.TryGetBuff(_mutantFromBiteBloodBuff, out Entity buffEntity) && buffEntity.TryGetBuffer<RandomMutant>(out var buffer))
         {
@@ -673,37 +688,37 @@ internal static class Classes
                     {
                         BuffSystemSpawnPatches.DeathMagePlayerAngelSpawnOrder.Enqueue(player);
 
-                        Core.StartCoroutine(PassiveBuffModificationWithDelayRoutine(buffEntity, 0f));
+                        PassiveBuffModificationDelayRoutine(buffEntity, 0f).Start();
                     }
                 }
                 else if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] >= 2)
                 {
                     BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] = 0;
 
-                    Core.StartCoroutine(PassiveBuffModificationWithDelayRoutine(buffEntity, 1f));
+                    PassiveBuffModificationDelayRoutine(buffEntity, 1f).Start();
                 }
             }
         }
     }
-    public static void ModifyFallenAngelForDeathMage(Entity fallenAngel, Entity player)
+    public static void ModifyFallenAngelForDeathMage(Entity fallenAngel, Entity playerCharacter)
     {
-        fallenAngel.SetTeam(player);
+        fallenAngel.SetTeam(playerCharacter);
         fallenAngel.SetFaction(_playerFaction);
         fallenAngel.NothingLivesForever(ANGEL_LIFETIME);
     }
     static string GetClassSpellName(PrefabGUID prefabGuid)
     {
         string prefabName = prefabGuid.GetLocalizedName();
-        if (string.IsNullOrEmpty(prefabName) || prefabName.Equals(NO_NAME)) prefabName = prefabGuid.GetPrefabName();
+        if (string.IsNullOrEmpty(prefabName) || prefabName.Equals(NO_NAME) || prefabName.Equals(PRIMARY_ATTACK)) prefabName = prefabGuid.GetPrefabName();
 
         int prefabIndex = prefabName.IndexOf("PrefabGuid");
         if (prefabIndex > 0) prefabName = prefabName[..prefabIndex].TrimEnd();
 
         return prefabName;
     }
-    static IEnumerator PassiveBuffModificationWithDelayRoutine(Entity buffEntity, float chance)
+    static IEnumerator PassiveBuffModificationDelayRoutine(Entity buffEntity, float chance)
     {
-        yield return _secondDelay;
+        yield return _delay;
 
         buffEntity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff_BiteToMutant_DataShared) =>
         {
@@ -763,5 +778,56 @@ internal static class Classes
 
         parsedClassType = default;
         return false;
+    }
+    public static void ApplyClassBuffs(Entity player, ulong steamId)
+    {
+        if (!HasClass(steamId)) return;
+
+        if (!UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(GetPlayerClass(steamId), out List<PrefabGUID> classBuffs)) return;
+        else if (!classBuffs.Any()) return;
+
+        int levelStep = ConfigService.MaxLevel / classBuffs.Count;
+        int playerLevel;
+
+        if (ConfigService.LevelingSystem)
+        {
+            playerLevel = GetLevel(steamId);
+        }
+        else
+        {
+            Equipment equipment = player.Read<Equipment>();
+            playerLevel = (int)equipment.GetFullLevel();
+        }
+
+        if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData[PrestigeType.Experience] > 0)
+        {
+            playerLevel = ConfigService.MaxLevel;
+        }
+
+        if (levelStep <= 0) return;
+
+        int numBuffsToApply = playerLevel / levelStep;
+
+        if (numBuffsToApply > 0 && numBuffsToApply <= classBuffs.Count)
+        {
+            numBuffsToApply = Math.Min(numBuffsToApply, classBuffs.Count); // Limit to available buffs
+
+            for (int i = 0; i < numBuffsToApply; i++)
+            {
+                Buffs.TryApplyPermanentBuff(player, classBuffs[i]);
+            }
+        }
+    }
+    public static void PurgeClassBuffs() // global class buff purge if method name isn't descriptive enough
+    {
+        List<PlayerInfo> playerCache = new(PlayerCache.Values);
+
+        foreach (PlayerInfo playerInfo in playerCache)
+        {
+            ulong steamId = playerInfo.User.PlatformId;
+
+            SetPlayerBool(steamId, CLASS_BUFFS_KEY, false);
+            RemoveClassBuffs(playerInfo.CharEntity, steamId);
+        }
     }
 }

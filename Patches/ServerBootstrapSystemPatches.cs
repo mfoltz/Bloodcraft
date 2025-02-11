@@ -3,6 +3,7 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
+using Lidgren.Network;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -45,7 +46,7 @@ internal static class ServerBootstrapSystemPatches
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
     static readonly bool _eclipse = ConfigService.ClientCompanion;
-    static readonly bool _exoform = ConfigService.ExoPrestiging;
+    static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _restedXP = ConfigService.RestedXPSystem;
     static readonly bool _professions = ConfigService.ProfessionSystem;
 
@@ -355,7 +356,7 @@ internal static class ServerBootstrapSystemPatches
                     if (!prestiges.ContainsKey(prestigeType)) prestiges.Add(prestigeType, 0);
                 }
 
-                if (_exoform && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
+                if (_exoForm && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
                     PrestigeManager.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
 
@@ -366,7 +367,7 @@ internal static class ServerBootstrapSystemPatches
                     }
                 }
 
-                if (_exoform && !steamId.TryGetPlayerExoFormData(out var _))
+                if (_exoForm && !steamId.TryGetPlayerExoFormData(out var _))
                 {
                     KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.MaxValue, 0f);
                     steamId.SetPlayerExoFormData(timeEnergyPair);
@@ -476,7 +477,7 @@ internal static class ServerBootstrapSystemPatches
     static IEnumerator UpdateFamiliarDelayRoutine(User user, Entity playerCharacter, Entity familiar)
     {
         yield return _delay;
-
+        
         familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
 
         /*

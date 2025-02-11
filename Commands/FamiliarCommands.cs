@@ -957,7 +957,7 @@ internal static class FamiliarCommands
             {
                 if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, ConfigService.PrestigeCostItemQuantity))
                 {
-                    Familiars.HandleFamiliarPrestige(ctx, statType, ConfigService.MaxFamiliarLevel);
+                    Familiars.HandleFamiliarPrestige(ctx, statType, ConfigService.MaxFamiliarLevel - 1);
                 }
             }
             else

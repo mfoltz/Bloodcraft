@@ -66,7 +66,7 @@ internal static class VBloodSystemPatch
         }
         catch (Exception e)
         {
-            Core.Log.LogInfo($"Error in VBloodSystemPatch: {e}");
+            Core.Log.LogWarning($"Error in VBloodSystemPatch: {e}");
         }
     }
 }

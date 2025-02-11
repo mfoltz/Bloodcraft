@@ -29,11 +29,9 @@ internal static class QueryService
             [ComponentType.ReadOnly(Il2CppType.Of<Buff>()), ComponentType.ReadOnly(Il2CppType.Of<EntityOwner>())]
         );
     }
-
     public static EntityQuery UpdateBuffsBufferDestroyQuery => _updateBuffsBufferDestroyQuery;
     public static EntityQuery BuffSpawnServerQuery => _buffSpawnServerQuery;
     public static EntityQuery ScriptSpawnServerQuery => _scriptSpawnServerQuery;
-
     static EntityQuery AddComponentsToQuery(EntityQuery originalQuery, ComponentType[] additionalAllComponents = null, ComponentType[] additionalNoneComponents = null)
     {
         EntityQueryDesc queryDesc = originalQuery.GetEntityQueryDesc();

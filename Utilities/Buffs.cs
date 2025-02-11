@@ -580,45 +580,6 @@ internal static class Buffs
             });
         }
     }
-    public static void HandleClassBuffs(Entity player, ulong steamId)
-    {
-        if (!HasClass(steamId)) return;
-
-        if (!UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(GetPlayerClass(steamId), out List<PrefabGUID> classBuffs)) return;
-        else if (classBuffs.Count == 0) return;
-
-        int levelStep = ConfigService.MaxLevel / classBuffs.Count;
-        int playerLevel;
-
-        if (ConfigService.LevelingSystem)
-        {
-            playerLevel = GetLevel(steamId);
-        }
-        else
-        {
-            Equipment equipment = player.Read<Equipment>();
-            playerLevel = (int)equipment.GetFullLevel();
-        }
-
-        if (ConfigService.PrestigeSystem && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData[PrestigeType.Experience] > 0)
-        {
-            playerLevel = ConfigService.MaxLevel;
-        }
-
-        if (levelStep <= 0) return;
-
-        int numBuffsToApply = playerLevel / levelStep;
-
-        if (numBuffsToApply > 0 && numBuffsToApply <= classBuffs.Count)
-        {
-            numBuffsToApply = Math.Min(numBuffsToApply, classBuffs.Count); // Limit to available buffs
-
-            for (int i = 0; i < numBuffsToApply; i++)
-            {
-                TryApplyPermanentBuff(player, classBuffs[i]);
-            }
-        }
-    }
     public static void ModifyShinyBuff(Entity entity, PrefabGUID buffPrefabGuid) // using this for shardbearer visuals as well but prefer this method name
     {
         if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
@@ -792,7 +753,6 @@ internal static class Buffs
         buffEntity.Write(modifyTargetHUDBuff);
         */
 
-        // change to block buff to prevent other replaceAbilityOnSlotBuffers from overriding for the duration? 
         buffEntity.With((ref Buff buff) =>
         {
             buff.BuffType = BuffType.Block;

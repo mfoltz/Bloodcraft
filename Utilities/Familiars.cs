@@ -1,6 +1,8 @@
 ﻿using Bloodcraft.Services;
 using ProjectM;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -29,7 +31,7 @@ internal static class Familiars
 
     static readonly bool _familiarCombat = ConfigService.FamiliarCombat;
 
-    static readonly WaitForSeconds _smartBindDelay = new(0.25f);
+    static readonly WaitForSeconds _bindingDelay = new(0.25f);
     static readonly WaitForSeconds _delay = new(0.5f);
 
     const float AGGRO_BUFF_DURATION = 1f;
@@ -134,7 +136,7 @@ internal static class Familiars
 
     public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];
     public static readonly ConcurrentDictionary<Entity, Entity> FamiliarServantMap = [];
-    public static readonly ConcurrentDictionary<Entity, Entity> FamiliarHorseMap = [];
+    // public static readonly ConcurrentDictionary<Entity, Entity> FamiliarHorseMap = [];
     public static void ClearFamiliarActives(ulong steamId)
     {
         steamId.SetFamiliarActives((Entity.Null, 0));
@@ -504,7 +506,7 @@ internal static class Familiars
 
         if (smartBind)
         {
-            yield return _smartBindDelay;
+            yield return _bindingDelay;
 
             BindFamiliar(user, playerCharacter, index);
         }
@@ -537,7 +539,7 @@ internal static class Familiars
         };
 
         aggroBuffer.Add(aggroBufferElement);
-    }
+    } // should try using the native utility for this by ref for the aggroBuffer but also laterrrrrr
     public static void FaceYourEnemy(Entity familiar, Entity target)
     {
         if (familiar.Has<EntityInput>())
@@ -681,7 +683,7 @@ internal static class Familiars
 
         return $"<color=green>{familiarId.GetLocalizedName()}</color>";
     }
-    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string statType, int levels = 0)
+    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string statType, int levels = 0) // need to replace first block in command with this method but laterrrr
     {
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         User user = ctx.User;
@@ -727,8 +729,6 @@ internal static class Familiars
                 }
 
                 --value;
-                // statType = value.ToString();
-                // FamiliarStatType stat = FamiliarPrestigeStats[value];
 
                 if (!stats.Contains(value))
                 {
@@ -745,26 +745,6 @@ internal static class Familiars
                 LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
                 return;
             }
-
-            /*
-            if (!int.TryParse(stat, out value))
-            {
-                LocalizationService.HandleReply(ctx, $"Invalid familiar prestige stat, use '<color=white>.fam lst</color>' to see options.");
-                return;
-            }
-
-            --value;
-
-            if (!stats.Contains(value))
-            {
-                stats.Add(value);
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"Familiar already has <color=#00FFFF>{FamiliarPrestigeStats[value]}</color> from prestiging!");
-                return;
-            }
-            */
         }
         else if (stats.Count >= FamiliarPrestigeStats.Count && !string.IsNullOrEmpty(statType))
         {
@@ -850,5 +830,13 @@ internal static class Familiars
         yield return _delay;
 
         HandleModifications(user, playerCharacter, familiar);
+    }
+    public static void HandleFamiliarCastleMan(Entity buffEntity)
+    {
+        buffEntity.Remove<ScriptSpawn>();
+        buffEntity.Remove<ScriptUpdate>();
+        buffEntity.Remove<ScriptDestroy>();
+        buffEntity.Remove<Script_Buff_ModifyDynamicCollision_DataServer>();
+        buffEntity.Remove<Script_Castleman_AdaptLevel_DataShared>();
     }
 }

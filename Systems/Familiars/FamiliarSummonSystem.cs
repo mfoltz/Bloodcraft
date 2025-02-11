@@ -501,18 +501,6 @@ internal static class FamiliarSummonSystem
         int prestigeLevel = 0;
         List<FamiliarStatType> familiarPrestigeStats = [];
 
-        /*
-        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
-        {
-            prestigeLevel = prestigeData.Key;
-            List<int> prestigeStatEnums = prestigeData.Value.Cast<int>().ToList(); //  *slaps on bandaid* not ideal but really need to move past this for now >_>
-
-            familiarPrestigeStats = prestigeStatEnums
-                .Select(index => FamiliarPrestigeStats[index])
-                .ToList();
-        }
-        */
-
         if (_familiarPrestige && FamiliarPrestigeManager_V2.LoadFamiliarPrestigeData_V2(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
         {
             prestigeLevel = prestigeData.Key;
@@ -542,12 +530,9 @@ internal static class FamiliarSummonSystem
         AiMoveSpeeds aiMoveSpeeds = original.Read<AiMoveSpeeds>();
         AiMoveSpeeds familiarAiMoveSpeeds = familiar.Read<AiMoveSpeeds>();
 
-        familiarUnitStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * powerFactor; // scaling these with prestige not a great idea in retrospect, but holding off on changing that till adding equipment and perma boost items or whatever
+        familiarUnitStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * powerFactor; // scaling these with prestige not a great idea in retrospect, nerfed that a bit but they also start at higher base power per prestige
         familiarUnitStats.SpellPower._Value = unitStats.SpellPower._Value * powerFactor;
         
-        // familiarStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * scalingFactor;
-        // familiarStats.SpellPower._Value = unitStats.SpellPower._Value * scalingFactor;
-
         foreach (FamiliarStatType prestigeStat in familiarPrestigeStats)
         {
             switch (prestigeStat)
@@ -738,6 +723,46 @@ internal static class FamiliarSummonSystem
     }
     static void HandleShiny(User user, ulong steamId, Entity familiar, PrefabGUID familiarId, bool battle = false)
     {
+        if (battle && GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
+        {
+            int famKey = familiarId.GuidHash;
+            FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffsData(steamId);
+
+            if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+            {
+                PrefabGUID shinyBuff = new(buffsData.FamiliarBuffs[famKey].First());
+                Buffs.ModifyShinyBuff(familiar, shinyBuff);
+            }
+        }
+        else if (GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
+        {
+            string colorCode = SHINY_DEFAULT;
+            bool isShiny = false;
+
+            if (GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
+            {
+                int famKey = familiarId.GuidHash;
+                FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffsData(steamId);
+
+                if (buffsData.FamiliarBuffs.ContainsKey(famKey))
+                {
+                    PrefabGUID shinyBuff = new(buffsData.FamiliarBuffs[famKey].First());
+                    Buffs.ModifyShinyBuff(familiar, shinyBuff);
+
+                    if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
+                    {
+                        colorCode = $"<color={hexColor}>";
+                    }
+
+                    isShiny = true;
+                }
+            }
+
+            string message = isShiny ? $"<color=green>{familiarId.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{familiarId.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+
+        /*
         if (!battle)
         {
             string colorCode = SHINY_DEFAULT;
@@ -776,6 +801,7 @@ internal static class FamiliarSummonSystem
                 Buffs.ModifyShinyBuff(familiar, shinyBuff);
             }
         }
+        */
     }
     static void HandleMapIcon(Entity playerCharacter, Entity familiar)
     {
