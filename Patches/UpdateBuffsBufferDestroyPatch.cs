@@ -117,8 +117,9 @@ internal static class UpdateBuffsBufferDestroyPatch
                         if (_prestige) SetPlayerBool(steamId, SHROUD_KEY, false);
                         if (_familiars)
                         {
-                            Entity familiarEntity = Familiars.GetActiveFamiliar(buffTarget);
-                            if (familiarEntity.Exists()) Familiars.UnbindFamiliar(user, buffTarget);
+                            // Entity familiarEntity = Familiars.GetActiveFamiliar(buffTarget);
+                            // if (familiarEntity.Exists()) Familiars.UnbindFamiliar(user, buffTarget);
+                            ServerBootstrapSystemPatches.UnbindFamiliarDelayRoutine(user, buffTarget).Start();
                         }
 
                         break;
