@@ -992,7 +992,7 @@ internal static class FamiliarCommands
         User user = ctx.Event.User;
         ulong steamId = user.PlatformId;
 
-        var buffer = ctx.Event.SenderCharacterEntity.ReadBuffer<FollowerBuffer>();
+        var buffer = playerCharacter.ReadBuffer<FollowerBuffer>();
 
         for (int i = 0; i < buffer.Length; i++)
         {
@@ -1006,7 +1006,7 @@ internal static class FamiliarCommands
         }
 
         Familiars.ClearFamiliarActives(steamId);
-        Familiars.AutoCallMap.TryRemove(character, out Entity _);
+        Familiars.AutoCallMap.TryRemove(playerCharacter, out Entity _);
 
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
