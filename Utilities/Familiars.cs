@@ -456,12 +456,16 @@ internal static class Familiars
         Entity familiar = GetActiveFamiliar(playerCharacter);
         bool hasActive = user.PlatformId.TryGetFamiliarActives(out var actives) && !actives.FamKey.Equals(0);
 
-        if (hasActive && familiar.Exists())
+        if (hasActive && familiar.Exists() && !familiar.IsDisabled())
         {
             familiar.TryApplyBuff(_vanishBuff);
             familiar.TryApplyBuff(_disableAggroBuff);
 
             UnbindFamiliarDelayRoutine(user, playerCharacter, familiar, smartBind, index).Start();
+        }
+        else if (familiar.IsDisabled())
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "Can't unbind familiar when dismissed!");
         }
         else
         {
