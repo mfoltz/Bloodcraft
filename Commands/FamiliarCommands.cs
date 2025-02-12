@@ -980,19 +980,28 @@ internal static class FamiliarCommands
             return;
         }
 
-        ulong steamId = ctx.Event.User.PlatformId;
-        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+        if (familiar.Exists())
+        {
+            ctx.Reply("Looks like your familiar is still able to be found; unbind it normally after calling if needed instead.");
+            return;
+        }
+
+        User user = ctx.Event.User;
+        ulong steamId = user.PlatformId;
 
         var buffer = ctx.Event.SenderCharacterEntity.ReadBuffer<FollowerBuffer>();
+
         for (int i = 0; i < buffer.Length; i++)
         {
             Entity follower = buffer[i].Entity.GetEntityOnServer();
 
             if (follower.Exists())
             {
-                if (follower.IsDisabled()) follower.Remove<Disabled>();
-
-                DestroyUtility.Destroy(EntityManager, follower);
+                follower.TryRemoveComponent<Disabled>();
+                follower.Destroy();
             }
         }
 
