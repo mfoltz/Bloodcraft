@@ -412,7 +412,7 @@ internal static class ProfessionSystem
 
         int maxRolls = Math.Min(5, (level - 20) / 20 + 1); // Calculate number of rolls (up to 5).
         List<PrefabGUID> harvestedSeeds = [];
-        int[] successChances = [4, 8, 12, 16, 20]; // Success chances per roll.
+        int[] successChances = [2, 4, 6, 8, 10]; // Success chances per roll.
 
         for (int i = 0; i < maxRolls; i++)
         {
