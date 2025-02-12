@@ -506,7 +506,15 @@ internal static class ServerBootstrapSystemPatches
 
         Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-        if (familiar.Exists())
+        if (familiar.Exists() && familiar.IsDisabled() && user.PlatformId.TryGetFamiliarActives(out var actives))
+        {
+            Familiars.CallFamiliar(playerCharacter, familiar, user, user.PlatformId, actives);
+
+            yield return _delay;
+
+            Familiars.UnbindFamiliar(user, playerCharacter);
+        }
+        else if (familiar.Exists() && !familiar.IsDisabled())
         {
             Familiars.UnbindFamiliar(user, playerCharacter);
         }
