@@ -478,7 +478,7 @@ internal static class ServerBootstrapSystemPatches
     {
         yield return _delay;
         
-        familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
+        if (!familiar.IsDisabled()) familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
 
         /*
         if (FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar))
@@ -500,7 +500,7 @@ internal static class ServerBootstrapSystemPatches
         }
         */
     }
-    static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
+    public static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
     {
         yield return _delay;
 
