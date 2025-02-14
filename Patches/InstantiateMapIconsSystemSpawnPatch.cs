@@ -8,13 +8,13 @@ using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
-
+/*
 [HarmonyPatch]
 internal class InstantiateMapIconsSystemSpawnPatch
 {
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
-    /*
+    
     [HarmonyPatch(typeof(InstantiateMapIconsSystem_Spawn), nameof(InstantiateMapIconsSystem_Spawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(InstantiateMapIconsSystem_Spawn __instance)
@@ -44,7 +44,7 @@ internal class InstantiateMapIconsSystemSpawnPatch
             entities.Dispose();
         }
     }
-    */
+    
 
     const string MAP_ICON_ERROR = "PlayerMapIcon requires the creator to have the PlayerCharacter component.";
 
@@ -64,3 +64,4 @@ internal class InstantiateMapIconsSystemSpawnPatch
         return true;
     }
 }
+*/
