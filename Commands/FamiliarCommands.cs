@@ -5,11 +5,11 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 using VampireCommandFramework;
 using static Bloodcraft.Services.BattleService;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -36,7 +36,14 @@ internal static class FamiliarCommands
 
     const int MAX_FAMS_BOX = 10;
     const int MAX_BOXES = 25;
-    const float SHINY_CHANGE = 0.25f;
+
+    const float SHINY_CHANGE_COST = 0.25f;
+    const int SCHEMATICS_MIN = 500;
+    const int SCHEMATICS_MAX = 2000;
+    const int VAMPIRIC_DUST_MIN = 100;
+    const int VAMPIRIC_DUST_MAX = 400;
+    const int ECHOES_MIN = 1;
+    const int ECHOES_MAX = 4;
 
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
@@ -138,7 +145,7 @@ internal static class FamiliarCommands
         }
     }
 
-    [Command(name: "listboxes", shortHand: "box", adminOnly: false, usage: ".fam box", description: "Shows the available familiar boxes.")]
+    [Command(name: "listboxes", shortHand: "boxes", adminOnly: false, usage: ".fam boxes", description: "Shows the available familiar boxes.")]
     public static void ListFamiliarSets(ChatCommandContext ctx)
     {
         if (!ConfigService.FamiliarSystem)
@@ -443,19 +450,23 @@ internal static class FamiliarCommands
                 }
 
                 PrefabGUID exoItem = new(ConfigService.ExoPrestigeReward);
-                int vBloodCost = ConfigService.ExoPrestigeRewardQuantity * tier;
 
-                if (vBloodCost <= 0)
+                int baseCost = ConfigService.ExoPrestigeRewardQuantity * tier;
+                int clampedFactor = Mathf.Clamp(ConfigService.EchoesFactor, ECHOES_MIN, ECHOES_MAX);
+
+                int factoredCost = clampedFactor * baseCost;
+
+                if (factoredCost <= 0)
                 {
                     LocalizationService.HandleReply(ctx, $"Unable to verify cost for {vBloodPrefabGuid.GetPrefabName()}!");
                 }
                 else if (!PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(exoItem))
                 {
-                    LocalizationService.HandleReply(ctx, $"Unable to verify exo reward item! (<color=yellow>{exoItem}</color>)");
+                    LocalizationService.HandleReply(ctx, $"Unable to verify exo prestige reward item! (<color=yellow>{exoItem}</color>)");
                 }
-                else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.Event.SenderCharacterEntity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, exoItem) >= vBloodCost)
+                else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, ctx.Event.SenderCharacterEntity, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, exoItem) >= factoredCost)
                 {
-                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, exoItem, vBloodCost))
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, exoItem, factoredCost))
                     {
                         string lastBoxName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
 
@@ -652,7 +663,7 @@ internal static class FamiliarCommands
                 prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key;
             }
 
-            LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>) ");
+            LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!");
             
             if (familiar.Exists())
             {
@@ -872,6 +883,7 @@ internal static class FamiliarCommands
         if (steamId.TryGetFamiliarActives(out var data) && !data.FamKey.Equals(0))
         {
             FamiliarExperienceData xpData = LoadFamiliarExperienceData(ctx.Event.User.PlatformId);
+            int clampedCost = Mathf.Clamp(ConfigService.PrestigeCostItemQuantity, SCHEMATICS_MIN, SCHEMATICS_MAX);
 
             if (xpData.FamiliarExperience[data.FamKey].Key >= ConfigService.MaxFamiliarLevel)
             {
@@ -907,8 +919,6 @@ internal static class FamiliarCommands
                         }
                         
                         --value;
-                        // statType = value.ToString();
-                        // FamiliarStatType stat = FamiliarPrestigeStats[value];
 
                         if (!stats.Contains(value))
                         {
@@ -941,7 +951,6 @@ internal static class FamiliarCommands
                 SaveFamiliarPrestigeData_V2(steamId, prestigeData);
 
                 Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
-
                 ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
 
                 if (value == -1)
@@ -953,9 +962,9 @@ internal static class FamiliarCommands
                     LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
                 }
             }
-            else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventory) && ServerGameManager.GetInventoryItemCount(inventory, _itemSchematic) >= ConfigService.PrestigeCostItemQuantity)
+            else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventory) && ServerGameManager.GetInventoryItemCount(inventory, _itemSchematic) >= clampedCost)
             {
-                if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, ConfigService.PrestigeCostItemQuantity))
+                if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, clampedCost))
                 {
                     Familiars.HandleFamiliarPrestige(ctx, statType, ConfigService.MaxFamiliarLevel - 1);
                 }
@@ -980,24 +989,33 @@ internal static class FamiliarCommands
             return;
         }
 
-        ulong steamId = ctx.Event.User.PlatformId;
-        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+        if (familiar.Exists())
+        {
+            ctx.Reply("Looks like your familiar is still able to be found; unbind it normally after calling if it's dismissed instead.");
+            return;
+        }
+
+        User user = ctx.Event.User;
+        ulong steamId = user.PlatformId;
 
         var buffer = ctx.Event.SenderCharacterEntity.ReadBuffer<FollowerBuffer>();
+
         for (int i = 0; i < buffer.Length; i++)
         {
             Entity follower = buffer[i].Entity.GetEntityOnServer();
 
             if (follower.Exists())
             {
-                if (follower.IsDisabled()) follower.Remove<Disabled>();
-
-                DestroyUtility.Destroy(EntityManager, follower);
+                follower.TryRemoveComponent<Disabled>();
+                follower.Destroy();
             }
         }
 
         Familiars.ClearFamiliarActives(steamId);
-        Familiars.AutoCallMap.TryRemove(character, out Entity _);
+        Familiars.AutoCallMap.TryRemove(playerCharacter, out Entity _);
 
         LocalizationService.HandleReply(ctx, "Familiar actives and followers cleared.");
     }
@@ -1203,9 +1221,9 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
 
         Entity familiar = Familiars.GetActiveFamiliar(character);
-        int famKey = familiar.Read<PrefabGUID>().GuidHash;
+        int famKey = familiar.GetPrefabGuidHash();
 
-        int quantity = ConfigService.ShinyCostItemQuantity;
+        int clampedCost = Mathf.Clamp(ConfigService.ShinyCostItemQuantity, VAMPIRIC_DUST_MIN, VAMPIRIC_DUST_MAX);
 
         if (familiar.Exists())
         {
@@ -1213,9 +1231,9 @@ internal static class FamiliarCommands
 
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
-                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, _vampiricDust) >= quantity)
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, _vampiricDust) >= clampedCost)
                 {
-                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, _vampiricDust, quantity) && HandleShiny(famKey, steamId, 1f, spellSchoolPrefabGuid.GuidHash))
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, _vampiricDust, clampedCost) && HandleShiny(famKey, steamId, 1f, spellSchoolPrefabGuid.GuidHash))
                     {
                         LocalizationService.HandleReply(ctx, "Shiny added! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).");
                         return;
@@ -1223,16 +1241,16 @@ internal static class FamiliarCommands
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{quantity}</color>)");
+                    LocalizationService.HandleReply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{clampedCost}</color>)");
                 }
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
-                quantity = (int)(quantity * SHINY_CHANGE);
+                int changeQuantity = (int)(clampedCost * SHINY_CHANGE_COST);
 
-                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, _vampiricDust) >= quantity)
+                if (InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) && ServerGameManager.GetInventoryItemCount(inventoryEntity, _vampiricDust) >= changeQuantity)
                 {
-                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, _vampiricDust, quantity) && HandleShiny(famKey, steamId, 1f, spellSchoolPrefabGuid.GuidHash))
+                    if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, _vampiricDust, changeQuantity) && HandleShiny(famKey, steamId, 1f, spellSchoolPrefabGuid.GuidHash))
                     {
                         LocalizationService.HandleReply(ctx, "Shiny changed! Rebind familiar to see effects. Use '<color=white>.fam option shiny</color>' to toggle (no chance to apply spell school debuff on hit if shiny buffs are disabled).");
                         return;
@@ -1240,7 +1258,7 @@ internal static class FamiliarCommands
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{quantity}</color>)");
+                    LocalizationService.HandleReply(ctx, $"You don't have the required amount of <color=#ffd9eb>{_vampiricDust.GetLocalizedName()}</color>! (x<color=white>{changeQuantity}</color>)");
                 }
             }
         }
@@ -1344,7 +1362,7 @@ internal static class FamiliarCommands
 
         ulong steamId = ctx.Event.User.PlatformId;
 
-        if (name.ToLower() == "cancel")
+        if (name.Contains("cancel", StringComparison.OrdinalIgnoreCase))
         {
             foreach (var matchPairs in Matchmaker.MatchPairs)
             {

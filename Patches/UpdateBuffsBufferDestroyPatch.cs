@@ -57,7 +57,7 @@ internal static class UpdateBuffsBufferDestroyPatch
         NativeArray<PrefabGUID> prefabGuids = _query.ToComponentDataArray<PrefabGUID>(Allocator.Temp);
         NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
 
-        ComponentLookup<PlayerCharacter> lookup = __instance.GetComponentLookup<PlayerCharacter>(true);
+        ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>(true);
 
         try
         {
@@ -66,23 +66,23 @@ internal static class UpdateBuffsBufferDestroyPatch
                 Entity entity = entities[i];
                 Entity buffTarget = buffs[i].Target;
 
-                if (!lookup.HasComponent(buffTarget))
-                    continue;
+                // if (!playerCharacterLookup.HasComponent(buffTarget)) continue;
+                bool isPlayerTarget = playerCharacterLookup.HasComponent(buffTarget);
 
                 PrefabGUID buffPrefabGuid = prefabGuids[i];
                 int buffType = GetBuffType(buffPrefabGuid._Value);
 
                 switch (buffType)
                 {
-                    case 1 when _exoForm: // ExoForm Buff
+                    case 1 when _exoForm && isPlayerTarget: // ExoForm Buff
                         ulong steamId = buffTarget.GetSteamId();
                         buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
                         ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
                         break;
-                    case 2 when _legacies: // VBlood Buff
+                    case 2 when _legacies && isPlayerTarget: // VBlood Buff
                         buffTarget.TryApplyBuff(_vBloodBloodBuff);
                         break;
-                    case 3 when _familiars: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
+                    case 3 when _familiars && isPlayerTarget: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
 
                         if (familiar.Exists())
@@ -96,7 +96,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
 
                         break;
-                    case 4 when _exoForm: // Taunt Emote Buff
+                    case 4 when _exoForm && isPlayerTarget: // Taunt Emote Buff
                         User user = buffTarget.GetUser();
                         steamId = user.PlatformId;
 
@@ -110,19 +110,27 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
 
                         break;
-                    case 5: // Entering Coffin
+                    case 5 when isPlayerTarget: // Entering Coffin
                         user = buffTarget.GetUser();
                         steamId = user.PlatformId;
 
-                        if (_prestige) SetPlayerBool(steamId, SHROUD_KEY, false);
+                        if (_prestige)
+                        {
+                            SetPlayerBool(steamId, SHROUD_KEY, false);
+
+                            if (buffTarget.HasBuff(_shroudBuff) && buffTarget.TryGetComponent(out Equipment equipment))
+                            {
+                                if (!equipment.IsEquipped(_shroudCloak, out var _)) buffTarget.TryRemoveBuff(_shroudBuff);
+                            }
+                        }
+
                         if (_familiars)
                         {
-                            Entity familiarEntity = Familiars.GetActiveFamiliar(buffTarget);
-                            if (familiarEntity.Exists()) Familiars.UnbindFamiliar(user, buffTarget);
+                            ServerBootstrapSystemPatches.UnbindFamiliarDelayRoutine(user, buffTarget).Start();
                         }
 
                         break;
-                    case 6 when _prestige: // Leaving Coffin
+                    case 6 when _prestige && isPlayerTarget: // Leaving Coffin
                         steamId = buffTarget.GetSteamId();
 
                         SetPlayerBool(steamId, SHROUD_KEY, true);
@@ -134,30 +142,30 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
 
                         break;
-                    case 7: // Prestige Buffs
-                        if (_prestige)
-                        {
-                            steamId = buffTarget.GetSteamId();
-                            int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
+                    case 7 when _prestige && isPlayerTarget: // Prestige Buffs
+                        steamId = buffTarget.GetSteamId();
+                        int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
 
-                            if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) 
-                            {
-                                continue; // allow shroud buff destruction
-                            }
-                            else if (steamId.TryGetPlayerPrestiges(out prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
-                            {
-                                if (prestigeLevel > index) Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
-                            }
+                        if (buffPrefabGuid.Equals(_shroudBuff) && !GetPlayerBool(steamId, SHROUD_KEY)) 
+                        {
+                            continue; // allow shroud buff destruction
+                        }
+                        else if (steamId.TryGetPlayerPrestiges(out prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var prestigeLevel))
+                        {
+                            if (prestigeLevel > index) Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid); // at 0 will not be greater than index of 0 so won't apply buffs, if greater than 0 will apply if allowed based on order of prefabs
                         }
 
                         break;
                     case 8 when _familiars:
-                        familiar = Familiars.GetActiveFamiliar(buffTarget);
-                        if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(buffTarget.GetUser(), buffTarget, familiar).Start();
+                        if (buffTarget.TryGetFollowedPlayer(out Entity playerCharacter))
+                        {
+                            familiar = Familiars.GetActiveFamiliar(playerCharacter);
+                            if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(playerCharacter.GetUser(), playerCharacter, familiar).Start();
+                        }
 
                         break;
                     default: // class buffs otherwise, probably merits a case for switch but later
-                        if (_classes)
+                        if (_classes && isPlayerTarget)
                         {
                             steamId = buffTarget.GetSteamId();
 

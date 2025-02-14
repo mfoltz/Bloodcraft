@@ -42,7 +42,7 @@ SpellCritDamage // 11
 
 ## Sponsors
 
-Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.;
+Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.;
 
 ## Features
 
@@ -111,10 +111,10 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   - `.quest r [daily/weekly]` (reroll quests for configured cost)
 
 ### Professions
-- Gain profession levels by gathering resources and crafting equipment:
-  - Mining, Woodcutting, Harvesting → bonus resources per broken resource object, scales with profession level
+- Gain profession levels by gathering resources and crafting equipment.
+  - Mining, Woodcutting, Harvesting → bonus resources per broken resource object, scales with profession level (additional resources of what was broken and profession specific bonus drops; gold ore, random saplings, and random seeds respectively)
   - Fishing → bonus fish every 20 levels
-  - Alchemy → increases potion effectiveness & duration (x2 at max)
+  - Alchemy → increases potion effectiveness & duration (x2 at max, holy pots do not benefit from increased effectiveness but will have longer duration)
   - Blacksmithing, Enchanting, Tailoring → increase base stats (10% at max) and durability (x2 at max) for respective types of crafted gear
   - `.prof log` (toggle profession XP gain logging)
   - `.prof get [Profession]` (view profession level)
@@ -196,7 +196,7 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   - Shortcut: *.fam l*
 - `.familiar listboxes`
   - Shows the available familiar boxes.
-  - Shortcut: *.fam box*
+  - Shortcut: *.fam boxes*
 - `.familiar choosebox [Name]`
   - Choose active box of familiars.
   - Shortcut: *.fam cb [Name]*
@@ -435,11 +435,11 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 
 ### Quests
 - **Quest System**: `QuestSystem` (bool, default: False)
-  Enable or disable quests (currently only kill quests).
+  Enable or disable quests (kill, gather, and crafting).
 - **Infinite Dailies**: `InfiniteDailies` (bool, default: False)
   Enable or disable infinite dailies.
 - **Quest Rewards**: `QuestRewards` (string, default: "28358550,576389135,-257494203")
-  The PrefabGUID hashes for quest reward pool.
+  Item prefabs for quest reward pool.
 - **Quest Reward Amounts**: `QuestRewardAmounts` (string, default: "50,250,50")
   The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3).
 - **Reroll Daily Prefab**: `RerollDailyPrefab` (int, default: -949672483)
@@ -650,12 +650,14 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   The chance for a VBlood unlock as a familiar.
 - **Primal Echoes**: `PrimalEchoes` (bool, default: False)
   Enable or disable acquiring vBloods with configured item reward from exo prestiging (default primal shards) at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable.
+- **Echoes Factor**: `EchoesFactor` (int, default: 1)
+  Increase to multiply costs for vBlood purchases. Valid values are integers between 1-4, if outside that range in either direction it will be clamped.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
-- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 500)
-  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders.
+- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 250)
+  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 100-250, if outside that range in either direction it will be clamped.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 1000)
-  Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging).
+  Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2500, if outside that range in either direction it will be clamped.
 
 ### Classes
 - **Soft Synergies**: `SoftSynergies` (bool, default: False)

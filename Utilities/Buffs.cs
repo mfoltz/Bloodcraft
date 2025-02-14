@@ -799,7 +799,7 @@ internal static class Buffs
 
         ExoForm.ExoFormCountdown(buffEntity, playerCharacter, userEntity, duration - EXO_COUNTDOWN).Start();
     }
-    public static bool IsPlayerInCombat(this Entity entity)
+    public static bool PlayerInCombat(this Entity entity)
     {
         if (entity.IsPlayer())
         {
@@ -853,13 +853,39 @@ internal static class Buffs
 
         return false;
     }
-    public static void TryApplyBuffWithLifeTime(this Entity entity, PrefabGUID buffPrefabGuid, float duration)
+    public static void TryApplyBuffInteractMode(this Entity entity, PrefabGUID buffPrefabGuid)
     {
         if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
-            if (!buffEntity.Has<LifeTime>()) buffEntity.Add<LifeTime>();
+            buffEntity.AddWith((ref BuffModificationFlagData buffFlagData) =>
+            {
+                buffFlagData.ModificationId = ModificationIDs.Create().NewModificationId();
+                buffFlagData.ModificationTypes = (long)BuffModificationTypes.MovementImpair;
+            });
 
-            buffEntity.With((ref LifeTime lifeTime) =>
+            buffEntity.AddWith((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = 0f;
+                lifeTime.EndAction = LifeTimeEndAction.None;
+            });
+        }
+    }
+    public static void TryApplyBuffWithLifeTimeNone(this Entity entity, PrefabGUID buffPrefabGuid)
+    {
+        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            buffEntity.AddWith((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = 0f;
+                lifeTime.EndAction = LifeTimeEndAction.None;
+            });
+        }
+    }
+    public static void TryApplyBuffWithLifeTimeDestroy(this Entity entity, PrefabGUID buffPrefabGuid, float duration)
+    {
+        if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
+        {
+            buffEntity.AddWith((ref LifeTime lifeTime) =>
             {
                 lifeTime.Duration = duration;
                 lifeTime.EndAction = LifeTimeEndAction.Destroy;
@@ -885,19 +911,5 @@ internal static class Buffs
     public static void RefreshStats(Entity playerCharacter)
     {
         if (playerCharacter.HasBuff(_vBloodBloodBuff)) playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
-    }
-    static void Testing(Entity buffEntity)
-    {    
-        Buff_ApplyBuffOnDamageTypeDealt_DataShared buff_ApplyBuffOnDamageTypeDealt = new()
-        {
-            OnDamageDealtListener = ServerGameManager.AddEventListener<DealDamageEvent>(buffEntity, null),
-        };
-
-        // NativeArray<Entity> entitiesAsync = __instance.__query_401358720_0.ToEntityArrayAsync(Allocator.TempJob, out JobHandle job);
-
-        // while (!job.IsCompleted)
-        {
-
-        }
     }
 }

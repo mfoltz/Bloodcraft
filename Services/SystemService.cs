@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Gameplay.WarEvents;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;

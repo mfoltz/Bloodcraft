@@ -5,8 +5,10 @@ using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Utilities.Classes;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Il2CppSystem.Xml.Schema.XsdDuration;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -28,22 +30,49 @@ internal static class ClassCommands
             return;
         }
 
-        if (!TryParseClassName(className, out var parsedClassType))
-        {
-            LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
-            return;
-        }
-
         ulong steamId = ctx.Event.User.PlatformId;
+        PlayerClass playerClass;
 
-        if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
+        if (int.TryParse(className, out int value))
         {
-            UpdateClassData(ctx.Event.SenderCharacterEntity, parsedClassType, classes, steamId);
-            LocalizationService.HandleReply(ctx, $"You have chosen {FormatClassName(parsedClassType)}!");
+            --value;
+
+            if (!Enum.IsDefined(typeof(PlayerClass), value))
+            {
+                LocalizationService.HandleReply(ctx,
+                    "Invalid class, use '<color=white>.class l</color>' to see options.");
+                return;
+            }
+
+            playerClass = (PlayerClass)value;
+
+            if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
+            {
+                UpdateClassData(ctx.Event.SenderCharacterEntity, playerClass, classes, steamId);
+                LocalizationService.HandleReply(ctx, $"You've selected {FormatClassName(playerClass)}!");
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"You've already selected {FormatClassName(GetPlayerClass(steamId))}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)");
+            }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"You have already chosen {FormatClassName(parsedClassType)}, use <color=white>'.class change [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)");
+            if (!TryParseClassName(className, out playerClass))
+            {
+                LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
+                return;
+            }
+
+            if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
+            {
+                UpdateClassData(ctx.Event.SenderCharacterEntity, playerClass, classes, steamId);
+                LocalizationService.HandleReply(ctx, $"You've selected {FormatClassName(playerClass)}!");
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"You've already selected {FormatClassName(GetPlayerClass(steamId))}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)");
+            }
         }
     }
 
@@ -173,7 +202,7 @@ internal static class ClassCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class or shift spells aren't enabled! (<color=white>'.class c [Class]'</color> | <color=white>'.class shift'</color>)");
+            LocalizationService.HandleReply(ctx, "You haven't selected a class or shift spells aren't enabled! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)");
         }
     }
 
@@ -197,7 +226,7 @@ internal static class ClassCommands
 
         if (steamId.TryGetPlayerClasses(out var classes) && !HasClass(steamId))
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class yet, use <color=white>'.class c [Class]'</color> instead.");
+            LocalizationService.HandleReply(ctx, "You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.");
             return;
         }
 
@@ -233,7 +262,8 @@ internal static class ClassCommands
                 LocalizationService.HandleReply(ctx, $"No buffs for {FormatClassName(playerClass)} configured!");
                 return;
             }
-            Classes.ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
+
+            ApplyClassBuffs(ctx.Event.SenderCharacterEntity, steamId);
             LocalizationService.HandleReply(ctx, $"Class buffs applied (if they were missing) for {FormatClassName(playerClass)}!");
         }
         else
@@ -251,7 +281,12 @@ internal static class ClassCommands
             return;
         }
 
-        string classTypes = string.Join(", ", Enum.GetValues(typeof(PlayerClass)).Cast<PlayerClass>().Select(FormatClassName));
+        var classes = Enum.GetValues(typeof(PlayerClass)).Cast<PlayerClass>().Select((playerClass, index) =>
+        {
+            return $"<color=yellow>{index + 1}</color>| {FormatClassName(playerClass, false)}";
+        }).ToList();
+
+        string classTypes = string.Join(", ", classes);
         LocalizationService.HandleReply(ctx, $"Classes: {classTypes}");
     }
 
@@ -375,10 +410,11 @@ internal static class ClassCommands
             return;
         }
 
+        Entity character = ctx.Event.SenderCharacterEntity;
         User user = ctx.Event.User;
+
         ulong steamId = user.PlatformId;
 
-        Entity character = ctx.Event.SenderCharacterEntity;
         if (!InventoryUtilities.TryGetInventoryEntity(EntityManager, character, out Entity inventoryEntity) || InventoryUtilities.IsInventoryFull(EntityManager, inventoryEntity))
         {
             LocalizationService.HandleReply(ctx, "Can't change or active class spells when inventory is full, need at least one space to safely handle jewels when switching.");
@@ -394,7 +430,7 @@ internal static class ClassCommands
 
                 if (spellPrefabGUID.HasValue())
                 {
-                    Classes.UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
+                    UpdateShift(ctx, ctx.Event.SenderCharacterEntity, spellPrefabGUID);
                 }
             }
 
@@ -402,7 +438,7 @@ internal static class ClassCommands
         }
         else
         {
-            Classes.RemoveShift(ctx.Event.SenderCharacterEntity);
+            RemoveShift(ctx.Event.SenderCharacterEntity);
 
             LocalizationService.HandleReply(ctx, "Shift spell <color=red>disabled</color>!");
         }

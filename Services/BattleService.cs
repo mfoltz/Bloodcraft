@@ -341,7 +341,7 @@ internal class BattleService
                 player.UserEntity
                 );
 
-                Core.Log.LogInfo($"Countdown SCT created for {player.User.CharacterName.Value} - {countdown}s");
+                // Core.Log.LogInfo($"Countdown SCT created for {player.User.CharacterName.Value} - {countdown}s");
             }
 
             --countdown;

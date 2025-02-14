@@ -11,6 +11,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Patches;
 
@@ -21,7 +22,7 @@ internal static class ScriptSpawnServerPatch
     static SystemService SystemService => Core.SystemService;
     static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
-    static readonly WaitForSeconds _delay = new(0.2f);
+    static readonly WaitForSeconds _delay = new(1f); // previous 0.2f
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
@@ -127,11 +128,18 @@ internal static class ScriptSpawnServerPatch
                         buffEntity.Destroy();
                         break;
                     case 9 when _familiars:
-                        Familiars.HandleFamiliarCastleMan(buffEntity);
+                        if (buffTarget.TryGetFollowedPlayer(out Entity playerCharacter))
+                        {
+                            Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+                            if (familiar.Exists()) Familiars.HandleFamiliarCastleMan(buffEntity);
+                        }
                         break;
                     case 10 when _familiars:
-                        Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
-                        if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(buffTarget.GetUser(), buffTarget, familiar).Start();
+                        if (buffTarget.TryGetFollowedPlayer(out playerCharacter))
+                        {
+                            Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+                            if (familiar.Exists()) Familiars.HandleFamiliarShapeshiftRoutine(playerCharacter.GetUser(), playerCharacter, familiar).Start();
+                        }
                         break;
                     default:
                         break;
@@ -171,7 +179,7 @@ internal static class ScriptSpawnServerPatch
                 _ => 0
             };
         }
-        else if (blockFeedBuffLookup.HasComponent(buffTarget))
+        else
         {
             return prefabGuid switch
             {
@@ -179,8 +187,7 @@ internal static class ScriptSpawnServerPatch
                 -1598161201 or -622259665 => 10,
                 _ => 0
             };
-        }
-        else return 0;
+        }      
     }
     static void ApplyStats(Entity buffEntity, Entity playerCharacter)
     {

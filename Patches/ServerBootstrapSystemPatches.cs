@@ -358,7 +358,7 @@ internal static class ServerBootstrapSystemPatches
 
                 if (_exoForm && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
-                    PrestigeManager.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
+                    // PrestigeManager.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
 
                     if (!steamId.TryGetPlayerExoFormData(out var _))
                     {
@@ -478,7 +478,7 @@ internal static class ServerBootstrapSystemPatches
     {
         yield return _delay;
         
-        familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
+        if (!familiar.IsDisabled()) familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
 
         /*
         if (FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar))
@@ -500,13 +500,21 @@ internal static class ServerBootstrapSystemPatches
         }
         */
     }
-    static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
+    public static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
     {
         yield return _delay;
 
         Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
-        if (familiar.Exists())
+        if (familiar.Exists() && familiar.IsDisabled() && user.PlatformId.TryGetFamiliarActives(out var actives))
+        {
+            Familiars.CallFamiliar(playerCharacter, familiar, user, user.PlatformId, actives);
+
+            yield return _delay;
+
+            Familiars.UnbindFamiliar(user, playerCharacter);
+        }
+        else if (familiar.Exists() && !familiar.IsDisabled())
         {
             Familiars.UnbindFamiliar(user, playerCharacter);
         }

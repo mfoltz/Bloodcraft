@@ -120,7 +120,8 @@ internal static class DeathEventListenerSystemPatch
             ulong steamId = player.GetSteamId();
 
             if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.GetPrefabGuidHash()))
-            {
+            { 
+                // Familiars.UnequipFamiliar(deathEvent.Died);
                 Familiars.ClearFamiliarActives(steamId);
             }
 

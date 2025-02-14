@@ -988,7 +988,7 @@ internal static class DataService
         [Serializable]
         public class FamiliarBuffsData
         {
-            public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = []; // can use actual perma buffs or just musb_dots from traits
+            public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = []; // can use actual perma buffs or just musb_dots from traits I guess maybe?
         }
 
         [Serializable]
@@ -1163,7 +1163,7 @@ internal static class DataService
         }
         public static class FamiliarEquipmentManager
         {
-            static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[8], $"{steamId}_familiar_equipment.json");
+            static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[10], $"{steamId}_familiar_equipment.json");
             public static void SaveFamiliarEquipmentData(ulong steamId, FamiliarEquipmentData data)
             {
                 string filePath = GetFilePath(steamId);
@@ -1186,7 +1186,7 @@ internal static class DataService
 
                 if (!equipmentData.FamiliarEquipment.TryGetValue(famKey, out var equipment))
                 {
-                    equipment = [0, 0, 0, 0, 0, 0];
+                    equipment = [0, 0, 0, 0, 0, 0, 0];
                     equipmentData.FamiliarEquipment[famKey] = equipment;
 
                     SaveFamiliarEquipmentData(steamId, equipmentData);

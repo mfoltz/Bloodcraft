@@ -618,9 +618,9 @@ internal static class Classes
         { PlayerClass.VampireLord, "#00FFFF" },      
         { PlayerClass.DeathMage, "#00FF00" }   
     };
-    public static string FormatClassName(PlayerClass classType)
+    public static string FormatClassName(PlayerClass classType, bool withSpaces = true)
     {
-        string className = _classNameRegex.Replace(classType.ToString(), " $1");
+        string className = withSpaces ? _classNameRegex.Replace(classType.ToString(), " $1") : classType.ToString();
 
         if (_classColorMap.TryGetValue(classType, out string classColor))
         {

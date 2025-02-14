@@ -357,6 +357,9 @@ internal static class ConfigService
     static readonly Lazy<bool> _primalEchoes = new(() => GetConfigValue<bool>("PrimalEchoes"));
     public static bool PrimalEchoes => _primalEchoes.Value;
 
+    static readonly Lazy<int> _echoesFactor = new(() => GetConfigValue<int>("EchoesFactor"));
+    public static int EchoesFactor => _echoesFactor.Value;
+
     static readonly Lazy<float> _traitChance = new(() => GetConfigValue<float>("TraitChance"));
     public static float TraitChance => _traitChance.Value;
 
@@ -481,6 +484,7 @@ internal static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarLeveling"),    // 7
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks"),     // 8
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerBools"),                      // 9
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarEquipment"),   // 10
             // Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarBattleGroups") // 10
         ];
         });
@@ -519,9 +523,9 @@ internal static class ConfigService
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
-            new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (currently only kill quests)."),
+            new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (kill, gather, and crafting)."),
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
-            new ConfigEntryDefinition("Quests", "QuestRewards", "28358550,576389135,-257494203", "The PrefabGUID hashes for quest reward pool."),
+            new ConfigEntryDefinition("Quests", "QuestRewards", "28358550,576389135,-257494203", "Item prefabs for quest reward pool."),
             new ConfigEntryDefinition("Quests", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3)."),
             new ConfigEntryDefinition("Quests", "RerollDailyPrefab", -949672483, "Prefab item for rerolling daily."),
             new ConfigEntryDefinition("Quests", "RerollDailyAmount", 50, "Cost of prefab for rerolling daily."),
@@ -621,11 +625,12 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "PrimalEchoes", false, "Enable or disable acquiring vBloods with configured item reward from exo prestiging (default primal shards) at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable."),
+            new ConfigEntryDefinition("Familiars", "EchoesFactor", 1, "Increase to multiply costs for vBlood purchases. Valid values are integers between 1-4, if outside that range in either direction it will be clamped."),
             // new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
             // new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"), // actually maybe vampiricDust
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
-            new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 500, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders."),
-            new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging)."),
+            new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 250, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 100-250, if outside that range in either direction it will be clamped."),
+            new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2500, if outside that range in either direction it will be clamped."),
             new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),

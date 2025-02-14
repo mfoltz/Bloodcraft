@@ -16,6 +16,8 @@ internal class QuestService
 {
     static EntityManager EntityManager => Core.EntityManager;
 
+    static readonly bool _leveling = ConfigService.LevelingSystem;
+
     static readonly WaitForSeconds _updateDelay = new(60);
 
     static readonly ComponentType[] _unitComponents =
@@ -86,9 +88,10 @@ internal class QuestService
     {
         while (true)
         {
-            if (ConfigService.EliteShardBearers && !_shardBearersReset) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
+            if (!_shardBearersReset && ConfigService.EliteShardBearers) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
             {
                 IEnumerable<Entity> vBloods = Queries.GetEntitiesEnumerable(_unitQuery);
+
                 foreach (Entity entity in vBloods)
                 {
                     PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
@@ -153,19 +156,20 @@ internal class QuestService
             if (_targetCache.ContainsKey(_solarus)) _targetCache.Remove(_solarus);
 
             Dictionary<ulong, PlayerInfo> players = new(PlayerCache);
+
             foreach (PlayerInfo playerInfo in players.Values)
             {
                 User user = playerInfo.User;
                 ulong steamId = playerInfo.User.PlatformId;
 
-                if (!ConfigService.LevelingSystem)
+                if (!_leveling)
                 {
                     Entity character = playerInfo.CharEntity.Has<Equipment>() ? playerInfo.CharEntity : Entity.Null;
                     if (!character.Exists()) continue;
 
                     RefreshQuests(user, steamId, (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel());
                 }
-                else if (ConfigService.LevelingSystem && steamId.TryGetPlayerExperience(out var xpData))
+                else if (_leveling && steamId.TryGetPlayerExperience(out var xpData))
                 {
                     RefreshQuests(user, steamId, xpData.Key);
                 }

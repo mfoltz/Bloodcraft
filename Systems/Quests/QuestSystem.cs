@@ -42,7 +42,7 @@ internal static class QuestSystem
     static readonly float _resourceYieldModifier = SystemService.ServerGameSettingsSystem._Settings.MaterialYieldModifier_Global;
 
     static readonly Random _random = new();
-    static readonly Regex _regex = new(@"T\d{2}");
+    static readonly Regex _regex = new(@"T\d{2}", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     public static readonly HashSet<PrefabGUID> CraftPrefabs = [];
     public static readonly HashSet<PrefabGUID> ResourcePrefabs = [];
@@ -140,12 +140,13 @@ internal static class QuestSystem
     static readonly WaitForSeconds _questMessageDelay = new(0.1f);
     static HashSet<PrefabGUID> GetKillPrefabsForLevel(int playerLevel)
     {
-        Dictionary<PrefabGUID, HashSet<Entity>> TargetPrefabs = new(QuestService._targetCache);
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+        PrefabGUID[] prefabGuids = [..QuestService._targetCache.Keys];
         HashSet<PrefabGUID> prefabs = [];
 
-        foreach (PrefabGUID prefab in TargetPrefabs.Keys)
+        foreach (PrefabGUID prefab in prefabGuids)
         {
-            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
+            if (prefabMap.TryGetValue(prefab, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
             {
                 bool isVBlood = targetEntity.Has<VBloodUnit>();
 
@@ -180,13 +181,36 @@ internal static class QuestSystem
 
         return prefabs;
     }
+    static IEnumerable<PrefabGUID> GetKillPrefabsForLevelEnumerable(int playerLevel)
+    {
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+        PrefabGUID[] prefabGuids = [..QuestService._targetCache.Keys];
+
+        foreach (PrefabGUID prefabGuid in prefabGuids)
+        {
+            if (prefabMap.TryGetValue(prefabGuid, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
+            {
+                bool isVBlood = targetEntity.Has<VBloodUnit>();
+                int level = unitLevel.Level._Value;
+
+                if (isVBlood && level > playerLevel) continue;
+
+                bool isHighLevel = (playerLevel > DEFAULT_MAX_LEVEL && level > 80);
+                bool isWithinRange = (Math.Abs(level - playerLevel) <= 10);
+
+                if (isHighLevel || isWithinRange) yield return prefabGuid;
+            }
+        }
+    }
     static HashSet<PrefabGUID> GetCraftPrefabsForLevel(int playerLevel)
     {
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
         HashSet<PrefabGUID> prefabs = [];
 
         foreach (PrefabGUID prefabGuid in CraftPrefabs)
         {
-            if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefab) || !prefab.TryGetComponent(out ItemData itemData)) continue;
+            if (!prefabMap.TryGetValue(prefabGuid, out Entity prefab) || !prefab.TryGetComponent(out ItemData itemData)) continue;
 
             string prefabName = prefabGuid.GetPrefabName();
             string tier;
@@ -214,13 +238,41 @@ internal static class QuestSystem
 
         return prefabs;
     }
+    static IEnumerable<PrefabGUID> GetCraftPrefabsForLevelEnumerable(int playerLevel)
+    {
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
+        foreach (PrefabGUID prefabGuid in CraftPrefabs)
+        {
+            if (prefabMap.TryGetValue(prefabGuid, out Entity prefab) && prefab.TryGetComponent(out ItemData itemData))
+            {
+                string prefabName = prefabGuid.GetPrefabName();
+
+                Match match = _regex.Match(prefabName);
+                if (!match.Success) continue;
+
+                string tier = match.Value;
+
+                if (itemData.ItemType == ItemType.Equippable)
+                {
+                    if (IsWithinLevelRange(tier, playerLevel, _equipmentTierLevelRangeMap)) yield return prefabGuid;
+                }
+                else if (itemData.ItemType == ItemType.Consumable)
+                {
+                    if (IsConsumableWithinLevelRange(prefabName, playerLevel, _consumableTierLevelRangeMap)) yield return prefabGuid;
+                }
+            }
+        }
+    }
     static HashSet<PrefabGUID> GetGatherPrefabsForLevel(int playerLevel)
     {
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
         HashSet<PrefabGUID> prefabs = [];
 
         foreach (PrefabGUID prefab in ResourcePrefabs)
         {
-            if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefab, out Entity prefabEntity) && prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
+            if (prefabMap.TryGetValue(prefab, out Entity prefabEntity) && prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
             {
                 var buffer = prefabEntity.ReadBuffer<DropTableBuffer>();
 
@@ -228,7 +280,7 @@ internal static class QuestSystem
                 {
                     if (drop.DropTrigger == DropTriggerType.YieldResourceOnDamageTaken)
                     {
-                        Entity dropTable = PrefabCollectionSystem._PrefabGuidToEntityMap[drop.DropTableGuid];
+                        Entity dropTable = prefabMap[drop.DropTableGuid];
                         if (!dropTable.Has<DropTableDataBuffer>()) continue;
 
                         var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
@@ -251,6 +303,40 @@ internal static class QuestSystem
         }
 
         return prefabs;
+    }
+    static IEnumerable<PrefabGUID> GetGatherPrefabsForLevelEnumerable(int playerLevel)
+    {
+        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
+
+        foreach (PrefabGUID prefabGuid in ResourcePrefabs)
+        {
+            if (prefabMap.TryGetValue(prefabGuid, out Entity prefabEntity) && prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
+            {
+                var buffer = prefabEntity.ReadBuffer<DropTableBuffer>();
+
+                foreach (DropTableBuffer drop in buffer)
+                {
+                    if (drop.DropTrigger == DropTriggerType.YieldResourceOnDamageTaken)
+                    {
+                        Entity dropTable = prefabMap[drop.DropTableGuid];
+                        if (!dropTable.TryGetBuffer<DropTableDataBuffer>(out var dropTableDataBuffer)) continue;
+
+                        foreach (DropTableDataBuffer dropTableData in dropTableDataBuffer)
+                        {
+                            string prefabName = dropTableData.ItemGuid.GetPrefabName();
+
+                            if (prefabName.Contains("Item_Ingredient") && !_filteredResources.Any(part => prefabName.Contains(part)))
+                            {
+                                yield return dropTableData.ItemGuid;
+                                break;
+                            }
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
     }
     static bool IsWithinLevelRange(string tier, int playerLevel, Dictionary<string, (int MinLevel, int MaxLevel)> tierMap)
     {
@@ -282,7 +368,7 @@ internal static class QuestSystem
         {
             case TargetType.Kill:
 
-                if (targets.Count != 0)
+                if (targets.Any())
                 {
                     target = targets.ElementAt(_random.Next(targets.Count));
                     targets.Remove(target);
@@ -308,7 +394,7 @@ internal static class QuestSystem
                 break;
             case TargetType.Craft:
 
-                if (targets.Count != 0)
+                if (targets.Any())
                 {
                     target = targets.ElementAt(_random.Next(targets.Count));
                     targets.Remove(target);
@@ -317,11 +403,10 @@ internal static class QuestSystem
                 else if (questType.Equals(QuestType.Weekly)) target = _reinforcedBoneMace;
 
                 requiredAmount = _random.Next(2, 4) * _questMultipliers[questType];
-
                 break;
             case TargetType.Gather:
 
-                if (targets.Count != 0)
+                if (targets.Any())
                 {
                     target = targets.ElementAt(_random.Next(targets.Count));
                     targets.Remove(target);
@@ -333,7 +418,6 @@ internal static class QuestSystem
                 requiredAmount = (int)(amounts.ElementAt(_random.Next(amounts.Count)) * _questMultipliers[questType] * _resourceYieldModifier);
 
                 if (target.Equals(_cursedWood) || target.Equals(_gloomWood) || target.Equals(_hallowedWood)) requiredAmount /= 2;
-
                 break;
             default:
                 throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest goal type encountered when generating quest objective!");
@@ -352,6 +436,18 @@ internal static class QuestSystem
 
         return prefabs;
     }
+    static IEnumerable<PrefabGUID> GetGoalPrefabsForLevelEnumerable(TargetType goal, int level)
+    {
+        return goal switch
+        {
+            TargetType.Kill => GetKillPrefabsForLevelEnumerable(level),
+            TargetType.Craft => GetCraftPrefabsForLevelEnumerable(level),
+            TargetType.Gather => GetGatherPrefabsForLevelEnumerable(level),
+            _ => throw new ArgumentOutOfRangeException(
+                goal.ToString(), 
+                "Unknown quest goal type encountered when generating quest objective!")
+        };
+    }
     public static void InitializePlayerQuests(ulong steamId, int level)
     {
         List<TargetType> targetTypes = GetRandomQuestTypes();
@@ -359,8 +455,8 @@ internal static class QuestSystem
         TargetType dailyGoal = targetTypes.First();
         TargetType weeklyGoal = targetTypes.Last();
 
-        HashSet<PrefabGUID> dailyTargets = GetGoalPrefabsForLevel(dailyGoal, level);
-        HashSet<PrefabGUID> weeklyTargets = GetGoalPrefabsForLevel(weeklyGoal, level);
+        HashSet<PrefabGUID> dailyTargets = GetGoalPrefabsForLevelEnumerable(dailyGoal, level).ToHashSet();
+        HashSet<PrefabGUID> weeklyTargets = GetGoalPrefabsForLevelEnumerable(weeklyGoal, level).ToHashSet();
 
         Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData = new()
         {
@@ -395,13 +491,13 @@ internal static class QuestSystem
                     List<TargetType> targetTypes = GetRandomQuestTypes();
 
                     goal = targetTypes.First();
-                    targets = GetGoalPrefabsForLevel(goal, level);
+                    targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
 
                     goal = targetTypes.Last();
-                    targets = GetGoalPrefabsForLevel(goal, level);
+                    targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
@@ -409,7 +505,7 @@ internal static class QuestSystem
                 else if (refreshDaily)
                 {
                     goal = GetRandomQuestType();
-                    targets = GetGoalPrefabsForLevel(goal, level);
+                    targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
 
                     questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#00FFFF>Daily Quest</color> has been refreshed!");
@@ -417,7 +513,7 @@ internal static class QuestSystem
                 else if (refreshWeekly)
                 {
                     goal = GetUniqueQuestType(questData, QuestType.Daily);
-                    targets = GetGoalPrefabsForLevel(goal, level);
+                    targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
 
                     questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, now);
                     LocalizationService.HandleServerReply(EntityManager, user, "Your <color=#BF40BF>Weekly Quest</color> has been refreshed!");
@@ -439,10 +535,10 @@ internal static class QuestSystem
 
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(dailyGoal, level);
+            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevelEnumerable(dailyGoal, level).ToHashSet();
             questData[QuestType.Daily] = (GenerateQuestObjective(dailyGoal, targets, QuestType.Daily), 0, DateTime.UtcNow);
 
-            targets = GetGoalPrefabsForLevel(weeklyGoal, level);
+            targets = GetGoalPrefabsForLevelEnumerable(weeklyGoal, level).ToHashSet();
             questData[QuestType.Weekly] = (GenerateQuestObjective(weeklyGoal, targets, QuestType.Weekly), 0, DateTime.UtcNow);
 
             steamId.SetPlayerQuests(questData);
@@ -457,7 +553,7 @@ internal static class QuestSystem
         if (steamId.TryGetPlayerQuests(out var questData))
         {
             TargetType goal = GetRandomQuestType();
-            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
 
             questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
             steamId.SetPlayerQuests(questData);
@@ -467,8 +563,8 @@ internal static class QuestSystem
     {
         if (steamId.TryGetPlayerQuests(out var questData))
         {
-            TargetType goal = GetUniqueQuestType(questData, QuestType.Daily); // get unique goal different from daily
-            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+            TargetType goal = GetUniqueQuestType(questData, QuestType.Daily);
+            HashSet<PrefabGUID> targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
 
             questData[QuestType.Weekly] = (GenerateQuestObjective(goal, targets, QuestType.Weekly), 0, DateTime.UtcNow);
             steamId.SetPlayerQuests(questData);
@@ -511,7 +607,7 @@ internal static class QuestSystem
         foreach (Entity player in participants)
         {
             User user = player.GetUser();
-            ulong steamId = player.GetSteamId(); // participants are character entities
+            ulong steamId = player.GetSteamId();
 
             if (steamId.TryGetPlayerQuests(out var questData))
             {
@@ -555,7 +651,6 @@ internal static class QuestSystem
                 {
                     quest.Value.Objective.Complete = true;
 
-                    // LocalizationService.HandleServerReply(EntityManager, user, $"{colorType} complete!");
                     if (QuestRewards.Any())
                     {
                         HandleItemReward(user, quest.Key, quest.Value.Objective, colorType);
@@ -571,7 +666,7 @@ internal static class QuestSystem
                         int level = (_leveling && steamId.TryGetPlayerExperience(out var data)) ? data.Key : (int)user.LocalCharacter._Entity.Read<Equipment>().GetFullLevel();
                         TargetType goal = GetRandomQuestType();
 
-                        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevel(goal, level);
+                        HashSet<PrefabGUID> targets = GetGoalPrefabsForLevelEnumerable(goal, level).ToHashSet();
                         questData[QuestType.Daily] = (GenerateQuestObjective(goal, targets, QuestType.Daily), 0, DateTime.UtcNow);
 
                         var dailyQuest = questData[QuestType.Daily];

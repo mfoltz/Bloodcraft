@@ -50,6 +50,7 @@ internal static class Core
     static readonly PrefabGUID _fallenAngel = new(-76116724);
 
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
+    static readonly PrefabGUID _mapIconCharmed = new(-1491648886);
 
     static readonly PrefabGUID _bearDashAbility = new(1873182450);
     static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
@@ -175,6 +176,16 @@ internal static class Core
                     modifyRotation.Type = RotationModificationType.Set;
                 });
             }
+
+            /*
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_mapIconCharmed, out Entity mapIconCharmedPrefab))
+            {
+                mapIconCharmedPrefab.With((ref LocalTransform localTransform) =>
+                {
+                    localTransform.Scale = 0.25f;
+                });
+            }
+            */
         }
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {

@@ -286,9 +286,22 @@ internal static class Extensions // probably need to organize this soonTM
     {
         return EntityManager.Exists(entity);
     }
+    public static bool HasValue(this Entity entity)
+    {
+        return entity != Entity.Null;
+    }
     public static bool IsDisabled(this Entity entity)
     {
         return entity.Has<Disabled>();
+    }
+    public static bool IsImmobile(this Entity entity)
+    {
+        if (entity.TryGetComponent(out DynamicCollision dynamicCollision))
+        {
+            return dynamicCollision.Immobile;
+        }
+
+        return false;
     }
     public static bool IsVBlood(this Entity entity)
     {
@@ -581,7 +594,7 @@ internal static class Extensions // probably need to organize this soonTM
     }
     public static bool IsPlayerOwned(this Entity entity)
     {
-        if (entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Exists())
+        if (entity.TryGetComponent(out EntityOwner entityOwner))
         {
             return entityOwner.Owner.IsPlayer();
         }
@@ -590,6 +603,8 @@ internal static class Extensions // probably need to organize this soonTM
     }
     public static void CastAbility(this Entity entity, Entity target, PrefabGUID abilityGroup) // 1292896032 swallow, 509296401
     {
+        bool isPlayer = entity.IsPlayer();
+
         CastAbilityServerDebugEvent castAbilityServerDebugEvent = new()
         {
             AbilityGroup = abilityGroup,
@@ -599,10 +614,10 @@ internal static class Extensions // probably need to organize this soonTM
         FromCharacter fromCharacter = new()
         {
             Character = entity,
-            User = entity.IsPlayer() ? entity.GetUserEntity() : entity
+            User = isPlayer ? entity.GetUserEntity() : entity
         };
 
-        int userIndex = entity.IsPlayer() ? entity.GetUser().Index : 0;
+        int userIndex = isPlayer ? entity.GetUser().Index : 0;
         DebugEventsSystem.CastAbilityServerDebugEvent(userIndex, ref castAbilityServerDebugEvent, ref fromCharacter);
     }
     public static void Start(this IEnumerator routine)
@@ -618,7 +633,8 @@ internal static class Extensions // probably need to organize this soonTM
         while (!handle.IsCompleted)
             yield return null;
     }
-    // note to organize this into ECBExtensions or something if I actually need to use that for fams at some point
+
+    // note to organize this into ECBExtensions or something if I actually need to use it for fams at some point
     public static void SetTeam(this Entity entity, EntityCommandBuffer entityCommandBuffer, Entity teamSource)
     {
         if (teamSource.TryGetComponent(out Team sourceTeam) && teamSource.TryGetComponent(out TeamReference sourceTeamReference))
