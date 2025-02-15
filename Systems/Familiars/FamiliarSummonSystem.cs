@@ -91,6 +91,7 @@ internal static class FamiliarSummonSystem
     static readonly PrefabGUID _mapIconBuff = new(-1476191492);
 
     static readonly PrefabGUID _externalInventory = new(1183666186);
+    static readonly PrefabGUID _golemAwakeGroup = new(-793376955);
 
     static readonly List<PrefabGUID> _teamFactions =
     [
@@ -240,7 +241,7 @@ internal static class FamiliarSummonSystem
                     HandleShiny(user, steamId, familiar, familiarId);
                     HandleMapIcon(playerCharacter, familiar);
 
-                    // Utilities.Familiars.EquipFamiliar(steamId, familiarId.GuidHash, HandleFamiliarServant(familiar));
+                    // Utilities.Familiars.EquipFamiliar(steamId, playerCharacter, familiarId.GuidHash, HandleFamiliarServant(familiar));
 
                     return true;
                 }
@@ -723,13 +724,45 @@ internal static class FamiliarSummonSystem
                 if (buffer[i].SpawnPrefab.Equals(_monsterFakePos))
                 {
                     familiar.Remove<SpawnPrefabOnGameplayEvent>();
+                    break;
                 }
                 else if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.OrdinalIgnoreCase))
                 {
                     familiar.Remove<SpawnPrefabOnGameplayEvent>();
+                    break;
                 }
             }
         }
+
+        /*
+        if (familiar.Has<ForceCastOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
+        {
+            var buffer = familiar.ReadBuffer<ForceCastOnGameplayEvent>();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (buffer[i].ForceCastAbility.Equals(_golemAwakeGroup))
+                {
+                    Core.Log.LogWarning($"Removing ForceCastOnGameplayEvent - {familiarId.GetPrefabName()}");
+                    familiar.Remove<ForceCastOnGameplayEvent>();
+
+                    if (familiar.TryGetBuffer<AbilityGroupSlotBuffer>(out var abilityBuffer))
+                    {
+                        for (int j = 0; j < abilityBuffer.Length; j++)
+                        {
+                            if (abilityBuffer[j].BaseAbilityGroupOnSlot.Equals(_golemAwakeGroup))
+                            {
+                                Core.Log.LogWarning($"Removing ability from abilityGroupSlotBuffer - {familiarId.GetPrefabName()}");
+                                abilityBuffer.RemoveAt(j);
+                                break;
+                            }
+                        }
+                    }
+
+                    break;
+                }
+            }
+        }
+        */
 
         if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
         {

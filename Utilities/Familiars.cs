@@ -55,6 +55,8 @@ internal static class Familiars
     static readonly PrefabGUID _spiritDouble = new(-935560085);
     static readonly PrefabGUID _highlordGroundSword = new(-1266036232);
 
+    static readonly PrefabGUID _itemSchematic = new(2085163661);
+
     static readonly float3 _southFloat3 = new(0f, 0f, -1f);
     public enum FamiliarEquipmentType
     {
@@ -747,7 +749,7 @@ internal static class Familiars
 
         return $"<color=green>{familiarId.GetLocalizedName()}</color>";
     }
-    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string statType, int levels = 0) // need to replace first block in command with this method but laterrrr
+    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string statType, int clampedCost, int levels = 0) // need to replace first block in command with this method but laterrrr
     {
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         User user = ctx.User;
@@ -819,25 +821,32 @@ internal static class Familiars
         int levelsNeeded = ConfigService.MaxFamiliarLevel - xpData.FamiliarExperience[data.FamKey].Key;
         int levelsToAdd = levels - levelsNeeded;
 
-        KeyValuePair<int, float> newXP = new(++levelsToAdd, Progression.ConvertLevelToXp(++levelsToAdd)); // reset level to 1
-        xpData.FamiliarExperience[data.FamKey] = newXP;
-        SaveFamiliarExperienceData(steamId, xpData);
-
-        int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
-        prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
-        SaveFamiliarPrestigeData_V2(steamId, prestigeData);
-
-        Entity familiar = GetActiveFamiliar(playerCharacter);
-
-        ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
-
-        if (value == -1)
+        if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, clampedCost))
         {
-            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!");
+            KeyValuePair<int, float> newXP = new(++levelsToAdd, Progression.ConvertLevelToXp(++levelsToAdd)); // reset level to 1
+            xpData.FamiliarExperience[data.FamKey] = newXP;
+            SaveFamiliarExperienceData(steamId, xpData);
+
+            int prestigeLevel = prestigeData.FamiliarPrestige[data.FamKey].Key + 1;
+            prestigeData.FamiliarPrestige[data.FamKey] = new(prestigeLevel, stats);
+            SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+
+            Entity familiar = GetActiveFamiliar(playerCharacter);
+
+            ModifyUnitStats(familiar, newXP.Key, steamId, data.FamKey);
+
+            if (value == -1)
+            {
+                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!");
+            }
+            else
+            {
+                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
+            }
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
+            LocalizationService.HandleReply(ctx, "Failed to remove schematics from your inventory! This shouldn't happen at this point and you may want to inform the developer.");
         }
     }
     public static List<int> UnequipFamiliar(Entity familiar)
@@ -867,12 +876,25 @@ internal static class Familiars
 
         return [0, 0, 0, 0, 0, 0, 0];
     }
-    public static void EquipFamiliar(ulong steamId, int famKey, Entity servant)
+    public static void EquipFamiliar(ulong steamId, Entity playerCharacter, int famKey, Entity servant)
     {
         // Entity servant = GetFamiliarServant(familiar);
         if (!servant.TryGetComponent(out ServantEquipment servantEquipment)) return;
 
         List<PrefabGUID> familiarEquipment = FamiliarEquipmentManager.GetFamiliarEquipment(steamId, famKey).Select(item => new PrefabGUID(item)).ToList();
+
+        FromCharacter fromCharacter = new()
+        {
+            Character = playerCharacter,
+            User = playerCharacter.GetUserEntity()
+        };
+
+        NetworkEventType networkEventType = new()
+        {
+            EventId = NetworkEvents.EventId_EquipServantItemEvent,
+            IsAdminEvent = false,
+            IsDebugEvent = false
+        };
 
         for (int i = 0; i < familiarEquipment.Count; i++)
         {
@@ -892,12 +914,35 @@ internal static class Familiars
                     if (addItemResponse.Success) // NetworkEvents.EventId_EquipServantItemFromInventoryEvent
                     {
                         // [Info   :Bloodcraft]  All: ProjectM.Network.FromCharacter,ProjectM.Network.EquipServantItemFromInventoryEvent
- 
+                        int slotIndex = InventoryUtilities.TryGetItemSlot(EntityManager, servant, addItemResponse.NewEntity, out int slotId) ? slotId : -1;
+
+                        Entity entity = Core.EntityManager.CreateEntity(
+                        [
+                            ComponentType.ReadOnly<NetworkEventType>(),
+                            ComponentType.ReadOnly<FromCharacter>(),
+                            ComponentType.ReadOnly<EquipServantItemEvent>()
+                        ]);
+
+                        EquipServantItemEvent equipServantItemEvent = new()
+                        {
+                            SlotIndex = slotIndex,
+                            ToEntity = servant.GetNetworkId(),
+                        };
+
+                        entity.Write(fromCharacter);
+                        entity.Write(networkEventType);
+                        entity.Write(equipServantItemEvent);
+
+                        Core.Log.LogInfo($"Slot equipped - {slotIndex}");
                     }
                     else
                     {
                         Core.Log.LogInfo($"Failed to equip familiar, addItemResponse not a success! {familiarEquipment[i]} | {addItemResponse.Result}");
                     }
+                }
+                else
+                {
+                    Core.Log.LogInfo($"Failed to equip familiar, equipment type not found! {familiarEquipmentType}");
                 }
             }
         }
@@ -916,8 +961,6 @@ internal static class Familiars
         {
             Core.Log.LogWarning(ex);
         }
-
-        // Core.Log.LogInfo($"Handling werewolf!");
     }
     public static void HandleFamiliarCastleMan(Entity buffEntity)
     {

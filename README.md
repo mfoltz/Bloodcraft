@@ -655,9 +655,9 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 250)
-  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 100-250, if outside that range in either direction it will be clamped.
+  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 100-400, if outside that range in either direction it will be clamped.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 1000)
-  Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2500, if outside that range in either direction it will be clamped.
+  Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped.
 
 ### Classes
 - **Soft Synergies**: `SoftSynergies` (bool, default: False)

@@ -491,12 +491,12 @@ internal static class FamiliarCommands
                 }
                 else
                 {
-                    LocalizationService.HandleReply(ctx, $"Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color> to verify tier for {vBloodPrefabGuid.GetPrefabName()}!");
+                    LocalizationService.HandleReply(ctx, $"Not enough <color=#ffd9eb>{exoItem.GetLocalizedName()}</color>x<color=white>{factoredCost}</color> for {vBloodPrefabGuid.GetPrefabName()}!");
                 }
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the dev.");
+                LocalizationService.HandleReply(ctx, $"Unable to verify tier for {vBloodPrefabGuid.GetPrefabName()}! Shouldn't really happen at this point and may want to inform the developer.");
                 return;
             }
         }
@@ -964,14 +964,11 @@ internal static class FamiliarCommands
             }
             else if (InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventory) && ServerGameManager.GetInventoryItemCount(inventory, _itemSchematic) >= clampedCost)
             {
-                if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, clampedCost))
-                {
-                    Familiars.HandleFamiliarPrestige(ctx, statType, ConfigService.MaxFamiliarLevel - 1);
-                }
+                Familiars.HandleFamiliarPrestige(ctx, statType, clampedCost, ConfigService.MaxFamiliarLevel - 1);
             }
             else
             {
-                LocalizationService.HandleReply(ctx, $"Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{ConfigService.PrestigeCostItemQuantity}</color>.");
+                LocalizationService.HandleReply(ctx, $"Familiar attempting to prestige must be at max level (<color=white>{ConfigService.MaxFamiliarLevel}</color>) or requires <color=#ffd9eb>{_itemSchematic.GetLocalizedName()}</color><color=yellow>x</color><color=white>{clampedCost}</color>.");
             }
         }
         else

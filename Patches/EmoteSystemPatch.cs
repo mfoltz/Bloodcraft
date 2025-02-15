@@ -53,7 +53,7 @@ internal static class EmoteSystemPatch
         { new(1177797340), CallDismiss },    // Wave
         { new(-370061286), CombatMode },     // Salute
         { new(-26826346), BindUnbind },      // Clap
-        { new(-658066984), InteractMode } // Beckon
+        // { new(-658066984), InteractMode } // Beckon
     };
 
     static readonly Dictionary<PrefabGUID, Action<(ulong, ulong)>> _matchActions = new()
@@ -118,10 +118,12 @@ internal static class EmoteSystemPatch
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't use emote actions when using bat form!");
                     }
+                    /*
                     else if (useEmoteEvent.Action.Equals(_beckonEmoteGroup) && playerCharacter.PlayerInCombat())
                     {
                         LocalizationService.HandleServerReply(EntityManager, user, "You can't interact with your familiar's inventory during combat!");
                     }
+                    */
                     else if (EmoteActions.TryGetValue(useEmoteEvent.Action, out var action)) action.Invoke(user, playerCharacter, steamId);
                 }
             }
