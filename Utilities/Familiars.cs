@@ -875,6 +875,8 @@ internal static class Familiars
 
         return [0, 0, 0, 0, 0, 0, 0];
     }
+
+    /*
     public static void EquipFamiliar(ulong steamId, Entity playerCharacter, int famKey, Entity servant)
     {
         // Entity servant = GetFamiliarServant(familiar);
@@ -948,6 +950,7 @@ internal static class Familiars
 
         servant.Add<Disabled>();
     }
+    */
     public static IEnumerator HandleFamiliarShapeshiftRoutine(User user, Entity playerCharacter, Entity familiar)
     {
         yield return _delay;
