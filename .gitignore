@@ -302,3 +302,4 @@ secrets.json
 DevCommands.cs
 TestPatches.cs
 DebugLoggerPatch.cs
+/Patches/DebugLoggerPatch.cs
