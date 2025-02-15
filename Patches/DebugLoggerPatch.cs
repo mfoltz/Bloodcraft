@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
-/*
 [HarmonyPatch]
 internal class DebugLoggerPatch
 {
@@ -27,4 +26,3 @@ internal class DebugLoggerPatch
         return true;
     }
 }
-*/
