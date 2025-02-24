@@ -7,7 +7,7 @@
 - added another class command with a long name, now there is one for changing configurations entirely and one for resyncing all existing buffs if needed (best used while server has password under a small maintenance period before then changing class buffs in config then rebooting, can use the global sync after rebooting but still with password or players can just use the personal '.class sb' command)
 - small service to keep disabled familiars with their owners instead of where they were last left
 - death mage bite stuff removed, you will need to change that buff accordingly if were making use of it
-- clearing drop tables more thoroughly to prevent any drops when lingering fams are cleared on server restarts
+- clearing drop tables more thoroughly to prevent any drops when lingering fams are cleared on server restarts (this may still need touching up for some stickier drops)
 - handling for various instances of observed stat doubling
 - fixed alchemy experience from blood potions and merlots, scales with quality of prisoner
 - familar and player experience scrolling text staggered to prevent overlap and improved origination
