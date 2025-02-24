@@ -1,8 +1,11 @@
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
+using ProjectM;
 using ProjectM.Network;
 using System.Collections;
 using System.Collections.Concurrent;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -13,7 +16,6 @@ internal class PlayerService // this is basically a worse version of the PlayerS
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    // static readonly bool _performance = ConfigService.PerformanceAuditing;
     // static readonly Regex _regex = new(@"^\d+");
 
     static readonly WaitForSeconds _delay = new(60f);
@@ -23,11 +25,19 @@ internal class PlayerService // this is basically a worse version of the PlayerS
         ComponentType.ReadOnly(Il2CppType.Of<User>()),
     ];
 
+    static readonly ComponentType[] _familiarComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
+        ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
+        ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>())
+    ];
+
     static EntityQuery _userQuery;
     static EntityQuery _allUsersQuery;
 
     static bool _migratedPlayerBools = false;
     static bool _migratedFamiliarPrestige = false;
+    static bool _purgedRemaining = false;
     static bool _playersCached = false;
 
     public static readonly ConcurrentDictionary<ulong, PlayerInfo> PlayerCache = [];
@@ -91,7 +101,7 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                     }
                 });
 
-            // should probably organize the migrating stuff elsewhere, just convenient to put here for now since using PlayerInfo for it
+            // should probably organize elsewhere, just convenient to put here for now since using PlayerInfo for it
             if (!_migratedPlayerBools && File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
             {
                 List<PlayerInfo> playerCache = new(PlayerCache.Values);
@@ -161,7 +171,43 @@ internal class PlayerService // this is basically a worse version of the PlayerS
                 _migratedFamiliarPrestige = true;
             }
 
-            // if (_performance) Core.LogPerformanceStats();
+            if (!_purgedRemaining)
+            {
+                EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+                {
+                    All = _familiarComponents,
+                    Options = EntityQueryOptions.IncludeDisabled
+                });
+
+                NativeArray<Entity> entities = familiarsQuery.ToEntityArray(Allocator.TempJob);
+                Entity killer = PlayerCache.Values.FirstOrDefault().CharEntity;
+
+                try
+                {
+                    if (killer.Exists())
+                    {
+                        foreach (Entity entity in entities)
+                        {
+                            if (!entity.Exists()) continue;
+
+                            FamiliarSummonSystem.RemoveDropTable(entity);
+                            StatChangeUtility.KillOrDestroyEntity(EntityManager, entity, killer, killer, Core.ServerTime, StatChangeReason.Default, true);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Core.Log.LogWarning($"Error cleaning remaining familiars: {e}");
+                }
+                finally
+                {
+                    entities.Dispose();
+                    familiarsQuery.Dispose();
+
+                    _purgedRemaining = true;
+                }
+            }
+
             if (!_playersCached) _playersCached = true;
 
             yield return _delay;

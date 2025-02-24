@@ -132,45 +132,44 @@ internal static class ReactToInventoryChangedSystemPatch
                                     float delay = SCT_DELAY;
 
                                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGuid, "");
+
                                     switch (handler)
                                     {
                                         case BlacksmithingHandler:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                                             break;
-
                                         case AlchemyHandler:
                                             if (itemEntity.TryGetComponent(out StoredBlood storedBlood))
                                             {
-                                                bool merlot = itemName.EndsWith("Bloodwine");
+                                                bool merlot = itemName.Contains("Bloodwine");
                                                 float alchemyMultiplier;
 
                                                 if (merlot)
                                                 {
-                                                    alchemyMultiplier = Math.Min(1f, storedBlood.BloodQuality / BLOOD_POTION_FACTOR) * MERLOT_BONUS;
+                                                    alchemyMultiplier = 5f;
                                                 }
                                                 else
                                                 {
-                                                    alchemyMultiplier = Math.Min(1f, storedBlood.BloodQuality / BLOOD_POTION_FACTOR);
+                                                    alchemyMultiplier = 2.5f;
                                                 }
+
+                                                float bloodQualityBonus = 1f + (storedBlood.BloodQuality / 100f);
+                                                alchemyMultiplier += bloodQualityBonus;
 
                                                 professionXP *= alchemyMultiplier;
                                             }
                                             else professionXP *= ALCHEMY_FACTOR;
-
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             break;
-
                                         case EnchantingHandler:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                                             break;
-
                                         case TailoringHandler:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                                             break;
-
                                         default:
                                             break;
                                     }

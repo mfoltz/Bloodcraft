@@ -186,7 +186,5 @@ internal static class PartyCommands
         {
             LocalizationService.HandleReply(ctx, $"No parties found that you own or are a member in.");
         }
-
-        // SavePlayerParties();
     }
 }

@@ -307,7 +307,7 @@ internal static class DataService
     }
     public static void SetPlayerGreatSwordExpertise(this ulong steamId, KeyValuePair<int, float> data)
     {
-        PlayerDictionaries._playerGreatSwordExpertise[steamId] = data;
+        _playerGreatSwordExpertise[steamId] = data;
         SavePlayerGreatSwordExpertise();
     }
     public static void SetPlayerSlashersExpertise(this ulong steamId, KeyValuePair<int, float> data)
@@ -322,7 +322,7 @@ internal static class DataService
     }
     public static void SetPlayerReaperExpertise(this ulong steamId, KeyValuePair<int, float> data)
     {
-        PlayerDictionaries._playerReaperExpertise[steamId] = data;
+        _playerReaperExpertise[steamId] = data;
         SavePlayerReaperExpertise();
     }
     public static void SetPlayerLongbowExpertise(this ulong steamId, KeyValuePair<int, float> data)
@@ -424,8 +424,13 @@ internal static class DataService
 
             if (playerCharacter.TryGetComponent(out Energy energy) && energy.MaxEnergy._Value <= familiarBoxes.UnlockedFamiliars.Count)
             {
-                List<string> boxes = [.. familiarBoxes.UnlockedFamiliars.Keys];
-                data = boxes[(int)energy.MaxEnergy._Value];
+                int index = (int)energy.MaxEnergy._Value;
+                List<string> boxes = [..familiarBoxes.UnlockedFamiliars.Keys];
+
+                if (index < boxes.Count)
+                {
+                    data = boxes[index];
+                }
             }
         }
         else if (!string.IsNullOrEmpty(data) && familiarBoxes.UnlockedFamiliars.ContainsKey(data) && steamId.TryGetPlayerInfo(out playerInfo))

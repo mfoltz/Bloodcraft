@@ -186,6 +186,6 @@ internal static class MiscCommands
         character.Write(combatMusicListener_Shared);
 
         CombatMusicSystemServer.OnUpdate();
-        ctx.Reply($"Combat music cleared~");
+        ctx.Reply($"Combat music cleared!");
     }
 }

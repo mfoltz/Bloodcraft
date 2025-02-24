@@ -4,11 +4,10 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
+using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
-using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Utilities.Classes;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
-using static Il2CppSystem.Xml.Schema.XsdDuration;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -22,7 +21,7 @@ internal static class ClassCommands
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
 
     [Command(name: "select", shortHand: "s", adminOnly: false, usage: ".class s [Class]", description: "Select class.")]
-    public static void SelectClassCommand(ChatCommandContext ctx, string className)
+    public static void SelectClassCommand(ChatCommandContext ctx, string input)
     {
         if (!_classes)
         {
@@ -30,25 +29,19 @@ internal static class ClassCommands
             return;
         }
 
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
-        PlayerClass playerClass;
+        PlayerClass? nullablePlayerClass = ParseClassFromInput(ctx, input);
 
-        if (int.TryParse(className, out int value))
+        if (nullablePlayerClass.HasValue)
         {
-            --value;
-
-            if (!Enum.IsDefined(typeof(PlayerClass), value))
-            {
-                LocalizationService.HandleReply(ctx,
-                    "Invalid class, use '<color=white>.class l</color>' to see options.");
-                return;
-            }
-
-            playerClass = (PlayerClass)value;
+            PlayerClass playerClass = nullablePlayerClass.Value;
 
             if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
             {
-                UpdateClassData(ctx.Event.SenderCharacterEntity, playerClass, classes, steamId);
+                UpdatePlayerClass(playerClass, classes, steamId);
+                ApplyClassBuffs(playerCharacter, steamId);
+
                 LocalizationService.HandleReply(ctx, $"You've selected {FormatClassName(playerClass)}!");
             }
             else
@@ -58,21 +51,7 @@ internal static class ClassCommands
         }
         else
         {
-            if (!TryParseClassName(className, out playerClass))
-            {
-                LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
-                return;
-            }
-
-            if (!HasClass(steamId) && steamId.TryGetPlayerClasses(out var classes)) // retrieval methods here could use improving but this is fine for now
-            {
-                UpdateClassData(ctx.Event.SenderCharacterEntity, playerClass, classes, steamId);
-                LocalizationService.HandleReply(ctx, $"You've selected {FormatClassName(playerClass)}!");
-            }
-            else
-            {
-                LocalizationService.HandleReply(ctx, $"You've already selected {FormatClassName(GetPlayerClass(steamId))}, use <color=white>'.class c [Class]'</color> to change. (<color=#ffd9eb>{new PrefabGUID(ConfigService.ChangeClassItem).GetLocalizedName()}</color>x<color=white>{ConfigService.ChangeClassQuantity}</color>)");
-            }
+            LocalizationService.HandleReply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
         }
     }
 
@@ -207,7 +186,7 @@ internal static class ClassCommands
     }
 
     [Command(name: "change", shortHand:"c", adminOnly: false, usage: ".class c [Class]", description: "Change classes.")]
-    public static void ChangeClassCommand(ChatCommandContext ctx, string className)
+    public static void ChangeClassCommand(ChatCommandContext ctx, string input)
     {
         if (!_classes)
         {
@@ -215,30 +194,39 @@ internal static class ClassCommands
             return;
         }
 
-        if (!TryParseClassName(className, out var parsedClassType))
-        {
-            LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
-            return;
-        }
-
+        Entity playerCharacter = ctx.Event.SenderUserEntity;
         ulong steamId = ctx.Event.User.PlatformId;
-        Entity character = ctx.Event.SenderUserEntity;
 
-        if (steamId.TryGetPlayerClasses(out var classes) && !HasClass(steamId))
+        PlayerClass? nullablePlayerClass = ParseClassFromInput(ctx, input);
+
+        if (nullablePlayerClass.HasValue)
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.");
-            return;
-        }
+            PlayerClass playerClass = nullablePlayerClass.Value;
 
-        if (ConfigService.ChangeClassItem != 0 && !HandleClassChangeItem(ctx))
+            if (steamId.TryGetPlayerClasses(out Dictionary<PlayerClass, (List<int>, List<int>)> classes) && !HasClass(steamId))
+            {
+                LocalizationService.HandleReply(ctx, "You haven't selected a class yet, use <color=white>'.class s [Class]'</color> instead.");
+                return;
+            }
+
+            if (GetPlayerBool(steamId, CLASS_BUFFS_KEY))
+            {
+                LocalizationService.HandleReply(ctx, "You have class buffs enabled, use <color=white>'.class passives'</color> to disable them before changing classes!");
+                return;
+            }
+
+            if (ConfigService.ChangeClassItem != 0 && !HandleClassChangeItem(ctx))
+            {
+                return;
+            }
+
+            UpdatePlayerClass(playerClass, classes, steamId);
+            LocalizationService.HandleReply(ctx, $"Class changed to {FormatClassName(playerClass)}! Use <color=white>'.class sb'</color> at least once after changing.");
+        }
+        else
         {
-            return;
+            LocalizationService.HandleReply(ctx, "Invalid class, use '<color=white>.class l</color>' to see options.");
         }
-
-        RemoveClassBuffs(character, steamId);
-        UpdateClassData(character, parsedClassType, classes, steamId);
-
-        LocalizationService.HandleReply(ctx, $"Class changed to {FormatClassName(parsedClassType)}!");
     }
 
     [Command(name: "syncbuffs", shortHand: "sb", adminOnly: false, usage: ".class sb", description: "Applies class buffs appropriately if not present.")]
@@ -251,6 +239,8 @@ internal static class ClassCommands
         }
 
         var steamId = ctx.Event.User.PlatformId;
+
+        SetPlayerBool(steamId, CLASS_BUFFS_KEY, true);
 
         if (HasClass(steamId))
         {
@@ -459,18 +449,33 @@ internal static class ClassCommands
         TogglePlayerBool(steamId, CLASS_BUFFS_KEY);
         if (GetPlayerBool(steamId, CLASS_BUFFS_KEY))
         {
-            LocalizationService.HandleReply(ctx, "Class passive buffs <color=green>enabled</color>!");
             ApplyClassBuffs(playerCharacter, steamId);
+
+            LocalizationService.HandleReply(ctx, "Class passive buffs <color=green>enabled</color>!");
         }
         else
         {
+            List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
+            RemoveClassBuffs(playerCharacter, classBuffs);
+
             LocalizationService.HandleReply(ctx, "Class passive buffs <color=red>disabled</color>!");
-            RemoveClassBuffs(playerCharacter, steamId);
         }
     }
 
+    [Command(name: "iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen", description: "Globally syncs class buffs (removes all then applies from current class) for players if needed.")]
+    public static void GlobalClassSyncCommand(ChatCommandContext ctx)
+    {
+        if (!_classes) 
+        {
+            LocalizationService.HandleReply(ctx, "Classes are not enabled.");
+            return;
+        }
+
+        GlobalSyncClassBuffs(ctx).Start();
+    }
+
     [Command(name: "iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", description: "Globally removes class buffs from players to then facilitate changing class buffs in config.")]
-    public static void ClassBuffsPurgeCommand(ChatCommandContext ctx)
+    public static void GlobalClassPurgeCommand(ChatCommandContext ctx)
     {
         if (!_classes)
         {
@@ -478,6 +483,6 @@ internal static class ClassCommands
             return;
         }
 
-        PurgeClassBuffs();
+        GlobalPurgeClassBuffs(ctx);
     }
 }

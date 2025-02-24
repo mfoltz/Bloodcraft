@@ -15,6 +15,7 @@ namespace Bloodcraft.Patches;
 internal static class UpdateBuffsBufferDestroyPatch
 {
     static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
@@ -28,6 +29,7 @@ internal static class UpdateBuffsBufferDestroyPatch
     static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
     static readonly PrefabGUID _werewolfStandardBuff = new(-1598161201);
     static readonly PrefabGUID _werewolfVBloodBuff = new(-622259665);
+    static readonly PrefabGUID _bossFeedCompleteBuff = new(1233405326);
 
     static readonly PrefabGUID _gateBossFeedCompleteGroup = new(-1446310610);
     static readonly PrefabGUID _bloodBoltSwarmGroup = new(797450963);
@@ -79,7 +81,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
                         ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
                         break;
-                    case 2 when _legacies && isPlayerTarget: // VBlood Buff
+                    case 2 when (_legacies || _expertise) && isPlayerTarget: // VBlood Buff
                         buffTarget.TryApplyBuff(_vBloodBloodBuff);
                         break;
                     case 3 when _familiars && isPlayerTarget: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
@@ -93,6 +95,12 @@ internal static class UpdateBuffsBufferDestroyPatch
                             });
 
                             Familiars.TryReturnFamiliar(buffTarget, familiar);
+                        }
+
+                        if (_legacies || _expertise)
+                        {
+                            // Core.Log.LogInfo($"Refreshing stats for {buffTarget.GetSteamId()} after combat...");
+                            // Buffs.RefreshStats(buffTarget); // doubling not happening with that patch commented out, interesting...
                         }
 
                         break;
@@ -110,7 +118,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                         }
 
                         break;
-                    case 5 when isPlayerTarget: // Entering Coffin
+                    case 5 when isPlayerTarget: // Entering Coffin, cutting for now to see if causing destroy burst error via enter coffin->log out and routine interferes with destruction?
                         user = buffTarget.GetUser();
                         steamId = user.PlatformId;
 
@@ -126,7 +134,7 @@ internal static class UpdateBuffsBufferDestroyPatch
 
                         if (_familiars)
                         {
-                            ServerBootstrapSystemPatches.UnbindFamiliarDelayRoutine(user, buffTarget).Start();
+                            // ServerBootstrapSystemPatches.UnbindFamiliarDelayRoutine(user, buffTarget).Start();
                         }
 
                         break;
@@ -172,7 +180,12 @@ internal static class UpdateBuffsBufferDestroyPatch
                             if (GetPlayerBool(steamId, CLASS_BUFFS_KEY) && Classes.HasClass(steamId))
                             {
                                 Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
-                                if (ClassBuffsSet.TryGetValue(playerClass, out HashSet<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGuid)) Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid);
+
+                                if (ClassBuffsSet.TryGetValue(playerClass, out HashSet<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGuid))
+                                {
+                                    // Core.Log.LogInfo($"Preventing destruction for {playerClass} - {buffPrefabGuid.GetPrefabName()}");
+                                    Buffs.TryApplyPermanentBuff(buffTarget, buffPrefabGuid);
+                                }
                             }
                             else
                             {
@@ -203,7 +216,7 @@ internal static class UpdateBuffsBufferDestroyPatch
             20081801 => 2,                  // VBlood Buff
             581443919 => 3,                 // Combat Buff
             -508293388 => 4,                // Taunt Emote Buff
-            -342726392 or -1194613929 => 5, // Travel Coffin Buffs
+            // -342726392 or -1194613929 => 5, // Travel Coffin Buffs
             569692162 or 381160212 => 6,    // Inside Coffin Buffs
             -1598161201 or -622259665 => 8, // Werewolf Buffs
             _ => 0,

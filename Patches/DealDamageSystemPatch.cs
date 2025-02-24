@@ -4,6 +4,7 @@ using HarmonyLib;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
@@ -15,6 +16,7 @@ namespace Bloodcraft.Patches;
 internal static class DealDamageSystemPatch
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
 
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
@@ -59,6 +61,9 @@ internal static class DealDamageSystemPatch
     static readonly PrefabGUID _garlicDebuff = new(-1701323826);
     static readonly PrefabGUID _silverDebuff = new(853298599);
 
+    static readonly PrefabGUID _slashersHit03 = new(-130408903);
+    static readonly PrefabGUID _vargulfBleedBuff = new(1581496399);
+
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _onHitEffects = ConfigService.ClassSpellSchoolOnHitEffects;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
@@ -66,6 +71,8 @@ internal static class DealDamageSystemPatch
     static readonly bool _quests = ConfigService.QuestSystem;
 
     static readonly float _onHitProcChance = ConfigService.OnHitProcChance;
+
+    const float SHINY_DEBUFF_CHANCE = 0.1f;
 
     [HarmonyPatch(typeof(DealDamageSystem), nameof(DealDamageSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -80,8 +87,8 @@ internal static class DealDamageSystemPatch
         {
             foreach (Entity entity in entities)
             {
-                if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent) || !dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGUID) || !dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner)) continue;
-                else if (sourcePrefabGUID.Equals(_silverDebuff) || sourcePrefabGUID.Equals(_garlicDebuff)) continue; // these both count for physical damage so need to check damage source
+                if (!entity.TryGetComponent(out DealDamageEvent dealDamageEvent) || !dealDamageEvent.SpellSource.TryGetComponent(out PrefabGUID sourcePrefabGuid) || !dealDamageEvent.SpellSource.TryGetComponent(out EntityOwner entityOwner)) continue;
+                else if (sourcePrefabGuid.Equals(_silverDebuff) || sourcePrefabGuid.Equals(_garlicDebuff)) continue; // these both count for physical damage so need to check damage source
                 else if (!dealDamageEvent.Target.Exists() || !dealDamageEvent.SpellSource.Exists()) continue; // checks are kind of excessive here but null entities here do weird things I don't want to have to figure out, like, ever >_>
 
                 if (_familiars && entityOwner.Owner.TryGetFollowedPlayer(out Entity playerCharacter))
@@ -90,7 +97,7 @@ internal static class DealDamageSystemPatch
                     {
                         EntityManager.DestroyEntity(entity); // need to destroy with main entityManager, destroy event too late/ineffective here for Raziel's holy damage against player owner
                     }
-                    else if (_random.NextDouble() <= _onHitProcChance && IsValidDamageType(dealDamageEvent) && IsValidTarget(dealDamageEvent.Target))
+                    else if (_random.NextDouble() <= SHINY_DEBUFF_CHANCE && IsValidDamageType(dealDamageEvent) && IsValidTarget(dealDamageEvent.Target))
                     {
                         PrefabGUID shinyDebuff = _shinyOnHitDebuffs.FirstOrDefault(buff => entityOwner.Owner.HasBuff(buff));
 
@@ -110,6 +117,25 @@ internal static class DealDamageSystemPatch
                     else if (_onHitEffects && IsValidTarget(dealDamageEvent.Target) && entityOwner.Owner.TryGetPlayer(out playerCharacter))
                     {
                         ulong steamId = playerCharacter.GetSteamId();
+
+                        // Core.Log.LogInfo($"Player: {steamId} | Source: {dealDamageEvent.SpellSource.GetPrefabGuid().GetPrefabName()}");
+                        
+                        if (sourcePrefabGuid.Equals(_slashersHit03))
+                        {
+                            if (!dealDamageEvent.Target.HasBuff(_vargulfBleedBuff))
+                            {
+                                // Core.Log.LogInfo($"Applying Vargulf Bleed to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
+                                ServerGameManager.InstantiateBuffEntityImmediate(playerCharacter, dealDamageEvent.Target, _vargulfBleedBuff);
+                            }
+                            else if (dealDamageEvent.Target.TryGetBuff(_vargulfBleedBuff, out Entity buffEntity) && buffEntity.TryGetComponent(out Buff buff))
+                            {
+                                int stacks = buff.Stacks + 1;
+                                int newStacks = stacks > buff.MaxStacks ? buff.MaxStacks : stacks;
+
+                                ServerGameManager.InstantiateBuffEntityImmediate(playerCharacter, dealDamageEvent.Target, _vargulfBleedBuff, null, newStacks);
+                                // Core.Log.LogInfo($"Adding Vargulf Bleed stack to {dealDamageEvent.Target.GetPrefabGuid().GetPrefabName()}");
+                            }
+                        }
 
                         if (!HasClass(steamId)) continue;
                         PlayerClass playerClass = GetPlayerClass(steamId);

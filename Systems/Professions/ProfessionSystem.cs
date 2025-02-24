@@ -26,6 +26,9 @@ internal static class ProfessionSystem
     const float SCT_DELAY = 0.75f; // trying 1f instead of 0.75f actually 0.5f then add more manually
     const float SCT_DELAY_ADD = 1f;
 
+    const int FISH_STEP = 20;
+    const int GREASE_STEP = 4;
+
     static readonly float _professionMultiplier = ConfigService.ProfessionMultiplier;
     const int MAX_PROFESSION_LEVEL = 100;
 
@@ -33,14 +36,16 @@ internal static class ProfessionSystem
     static readonly AssetGuid _bonusYieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
     // static readonly AssetGuid _yieldAssetGuid = AssetGuid.FromString("5a8b7a32-c3e3-4794-bd62-ace36c10e89e");
 
-    static readonly PrefabGUID _experienceGainSCT = new(1876501183); // SCT resource gain prefabguid
+    static readonly PrefabGUID _experienceGainSCT = new(1876501183); // resource gain
     static readonly PrefabGUID _bonusYieldSCT = new(106212079);
-    static readonly float3 _bonusYieldColor = new(0.6f, 0.8f, 1.0f);
-    static readonly float3 _goldOreColor = new(1.0f, 0.8431373f, 0.0f);
-    static readonly float3 _seedColor = new(0.5647059f, 0.9333333f, 0.5647059f);
-    static readonly float3 _saplingColor = new(0.36f, 0.25f, 0.20f);
+    static readonly float3 _bonusYieldColor = new(0.6f, 0.8f, 1f);
+    static readonly float3 _mutantGreaseColor = new(0.8f, 1.0f, 0.1f);
+    static readonly float3 _goldOreColor = new(1f, 0.84f, 0f);
+    static readonly float3 _seedColor = new(0.56f, 0.93f, 0.56f);
+    static readonly float3 _saplingColor = new(0.36f, 0.25f, 0.2f);
 
     static readonly PrefabGUID _goldOre = new(660533034);
+    static readonly PrefabGUID _mutantGrease = new(-1527315816);
 
     static readonly List<PrefabGUID> _plantSeeds =
     [
@@ -140,22 +145,32 @@ internal static class ProfessionSystem
 
         if (professionName.Contains("Fishing"))
         {
+            int bonusYield = level / FISH_STEP;
+            int mutantGrease = level / GREASE_STEP;
+
+            if (bonusYield <= 0 && mutantGrease <= 0) return;
+
             List<PrefabGUID> fishDrops = ProfessionMappings.GetFishingAreaDrops(prefabGuid);
-            int bonusYield = level / 20;
-
-            if (bonusYield <= 0) return;
-
             int index = _random.Next(fishDrops.Count);
             PrefabGUID fish = fishDrops[index];
 
-            if (ServerGameManager.TryAddInventoryItem(playerCharacter, fish, bonusYield))
+            if (bonusYield > 0)
             {
-                HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, fish, professionName, bonusYield, professionLogging, sctYield, ref delay);
+                if (ServerGameManager.TryAddInventoryItem(playerCharacter, fish, bonusYield))
+                {
+                    HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, fish, professionName, bonusYield, professionLogging, sctYield, ref delay);
+                }
+                else
+                {
+                    InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, fish, bonusYield, new Entity());
+                    HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, fish, professionName, bonusYield, professionLogging, sctYield, ref delay);
+                }
+
+                HandleMutantGrease(user, userEntity, playerCharacter, target, professionName, mutantGrease, professionLogging, sctYield, ref delay);
             }
             else
             {
-                InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, fish, bonusYield, new Entity());
-                HandleExperienceAndBonusYield(user, userEntity, playerCharacter, target, fish, professionName, bonusYield, professionLogging, sctYield, ref delay);
+                HandleMutantGrease(user, userEntity, playerCharacter, target, professionName, mutantGrease, professionLogging, sctYield, ref delay);
             }
         }
         else if (prefabEntity.Has<DropTableBuffer>())
@@ -528,6 +543,22 @@ internal static class ProfessionSystem
             {
                 HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _saplingColor, quantity, ref delay);
             }
+        }
+    }
+    static void HandleMutantGrease(User user, Entity userEntity, Entity playerCharacter, Entity target, string professionName, int mutantGrease, bool professionLogging, bool sctYield, ref float delay)
+    {
+        if (ServerGameManager.TryAddInventoryItem(playerCharacter, _mutantGrease, mutantGrease))
+        {
+            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Mutant Grease</color>x<color=white>{mutantGrease}</color> received from {professionName}");
+
+            if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _mutantGreaseColor, mutantGrease, ref delay);
+        }
+        else
+        {
+            InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, _mutantGrease, mutantGrease, new Entity());
+
+            if (professionLogging) LocalizationService.HandleServerReply(EntityManager, user, $"<color=green>Mutant Grease</color>x<color=white>{mutantGrease}</color> received from {professionName}, but it dropped on the ground since your inventory is full.");
+            if (sctYield) HandleBonusYieldScrollingText(target, _bonusYieldSCT, _bonusYieldAssetGuid, playerCharacter, userEntity, _mutantGreaseColor, mutantGrease, ref delay);
         }
     }
 }

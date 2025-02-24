@@ -783,7 +783,7 @@ internal static class QuestSystem
             if (!maxExpertise && maxLegacy && expertiseHandler != null)
             {
                 gainedXP = ConvertLevelToXp(expertiseLevel) * percentOfTotalXP * multiplier;
-                progressString = GainWeaponExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
+                progressString = GainExpertiseExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
                 return progressString;
             }
 
@@ -799,7 +799,7 @@ internal static class QuestSystem
                 if (expertiseHandler != null)
                 {
                     gainedXP = ConvertLevelToXp(expertiseLevel) * percentOfTotalXP * multiplier;
-                    expertiseString = GainWeaponExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
+                    expertiseString = GainExpertiseExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
                 }
 
                 if (bloodHandler != null)
@@ -832,7 +832,7 @@ internal static class QuestSystem
                 expertiseLevel = expertiseData.Key;
 
                 gainedXP = ConvertLevelToXp(expertiseLevel) * percentOfTotalXP * multiplier;
-                progressString = GainWeaponExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
+                progressString = GainExpertiseExperience(user, steamId, weaponType, expertiseHandler, gainedXP);
                 return progressString;
             }
         }
@@ -860,9 +860,9 @@ internal static class QuestSystem
         LevelingSystem.NotifyPlayer(character, steamId, gainedXP, leveledUp, newLevel);
         return "<color=#FFC0CB>experience</color>";
     }
-    static string GainWeaponExperience(User user, ulong steamId, Expertise.WeaponType weaponType, IWeaponHandler handler, float gainedXP)
+    static string GainExpertiseExperience(User user, ulong steamId, Expertise.WeaponType weaponType, IWeaponHandler handler, float gainedXP)
     {
-        WeaponSystem.SaveWeaponExperience(steamId, handler, gainedXP, out bool leveledUp, out int newLevel);
+        WeaponSystem.SaveExpertiseExperience(steamId, handler, gainedXP, out bool leveledUp, out int newLevel);
         WeaponSystem.NotifyPlayer(user, weaponType, gainedXP, leveledUp, newLevel, handler);
         return "<color=#FFC0CB>expertise</color>";
     }

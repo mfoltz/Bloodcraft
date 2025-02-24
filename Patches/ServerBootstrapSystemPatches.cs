@@ -399,21 +399,6 @@ internal static class ServerBootstrapSystemPatches
 
             if (!steamId.TryGetFamiliarBox(out var _))
             {
-                /*
-                string activeBox = string.Empty;
-
-                if (playerCharacter.TryGetComponent(out Energy energy))
-                {
-                    FamiliarUnlocksData familiarBoxes = FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId);
-
-                    if (energy.MaxEnergy._Value <= familiarBoxes.UnlockedFamiliars.Count)
-                    {
-                        List<string> boxes = [..familiarBoxes.UnlockedFamiliars.Keys];
-                        activeBox = boxes[(int)energy.MaxEnergy._Value];
-                    }
-                }
-                */
-
                 steamId.SetFamiliarBox();
             }
 
@@ -425,6 +410,7 @@ internal static class ServerBootstrapSystemPatches
             FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, FamiliarExperienceManager.LoadFamiliarExperienceData(steamId));
             FamiliarUnlocksManager.SaveFamiliarUnlocksData(steamId, FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId));
 
+            /*
             Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
             if (!familiar.Exists())
@@ -435,6 +421,7 @@ internal static class ServerBootstrapSystemPatches
             {
                 UpdateFamiliarDelayRoutine(user, playerCharacter, familiar).Start();
             }
+            */
         }
 
         if (_classes)
@@ -479,6 +466,10 @@ internal static class ServerBootstrapSystemPatches
         yield return _delay;
         
         if (!familiar.IsDisabled()) familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
+        else
+        {
+
+        }
 
         /*
         if (FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar))
@@ -500,7 +491,7 @@ internal static class ServerBootstrapSystemPatches
         }
         */
     }
-    public static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter)
+    public static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter) // phasing this out since instant destruction seems more generally favorable 
     {
         yield return _delay;
 
@@ -516,6 +507,22 @@ internal static class ServerBootstrapSystemPatches
         }
         else if (familiar.Exists() && !familiar.IsDisabled())
         {
+            Familiars.UnbindFamiliar(user, playerCharacter);
+        }
+    }
+    public static void UnbindFamiliarOnUserDisconnected(User user, Entity playerCharacter)
+    {
+        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+        if (familiar.Exists() && familiar.IsDisabled() && user.PlatformId.TryGetFamiliarActives(out var actives))
+        {
+            // Core.Log.LogInfo($"Unbinding familiar after enabling on user disconnect - {user.PlatformId}");
+            Familiars.CallFamiliar(playerCharacter, familiar, user, user.PlatformId, actives);
+            Familiars.UnbindFamiliar(user, playerCharacter);
+        }
+        else if (familiar.Exists() && !familiar.IsDisabled())
+        {
+            // Core.Log.LogInfo($"Unbinding familiar after on user disconnect - {user.PlatformId}");
             Familiars.UnbindFamiliar(user, playerCharacter);
         }
     }
@@ -560,7 +567,7 @@ internal static class ServerBootstrapSystemPatches
 
         if (_familiars && playerCharacter.Exists())
         {
-            UnbindFamiliarDelayRoutine(user, playerCharacter).Start();
+            UnbindFamiliarOnUserDisconnected(user, playerCharacter); // need to yeet immediately to account for server restarts where no time after everyone 'logs out'
         }
     }
 
@@ -607,7 +614,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (_familiars && playerInfo.CharEntity.Exists())
                         {
-                            UnbindFamiliarDelayRoutine(playerInfo.User, playerInfo.CharEntity).Start();
+                            UnbindFamiliarOnUserDisconnected(playerInfo.User, playerInfo.CharEntity);
                         }
                     }
                 }

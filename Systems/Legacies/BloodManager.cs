@@ -143,7 +143,7 @@ internal static class BloodManager
                 float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodType, bloodStatType);
                 bool found = false;
 
-                for (int i = 0; i < buffer.Length; i++)
+                for (int i = 0; i < buffer.Length; i++) // can probably remove this now but later
                 {
                     ModifyUnitStatBuff_DOTS statBuff = buffer[i];
 
@@ -160,12 +160,12 @@ internal static class BloodManager
                 if (!found)
                 {
                     UnitStatType statType = BloodStatTypes[bloodStatType];
-
+                    
                     ModifyUnitStatBuff_DOTS newStatBuff = new()
                     {
                         StatType = statType,
-                        ModificationType = ModificationType.AddToBase,
-                        Value = scaledBonus,
+                        ModificationType = !statType.Equals(UnitStatType.BloodDrain) ? ModificationType.AddToBase : ModificationType.Multiply,
+                        Value = !statType.Equals(UnitStatType.BloodDrain) ? scaledBonus : 1f - scaledBonus,
                         Modifier = 1,
                         IncreaseByStacks = false,
                         ValueByStacks = 0,

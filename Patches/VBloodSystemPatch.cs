@@ -9,6 +9,7 @@ using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace Bloodcraft.Patches;
 
@@ -17,6 +18,8 @@ internal static class VBloodSystemPatch
 {
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
+
+    static readonly WaitForSeconds _delay = new(5f);
 
     static readonly Dictionary<ulong, DateTime> _lastUpdateCache = [];
 
@@ -39,8 +42,8 @@ internal static class VBloodSystemPatch
         {
             foreach (VBloodConsumed vBloodConsumed in events)
             {
-                Entity player = vBloodConsumed.Target;
-                User user = player.GetUser();
+                Entity playerCharacter = vBloodConsumed.Target;
+                User user = playerCharacter.GetUser();
                 ulong steamId = user.PlatformId;
                 
                 if (_lastUpdateCache.TryGetValue(steamId, out DateTime lastUpdate) && (now - lastUpdate).TotalSeconds < 5) continue;
@@ -49,24 +52,26 @@ internal static class VBloodSystemPatch
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
                 
+                // Core.Log.LogInfo($"Processing vBlood for {playerCharacter.GetSteamId()}"); // this patch is somehow triggering the double stats? odd, but need to either figure that out or move to deathEventSystem
+
                 if (_leveling)
                 {
                     int currentLevel = LevelingSystem.GetLevel(steamId);
-                    LevelingSystem.ProcessExperienceGain(player, vBlood, steamId, currentLevel);
+                    LevelingSystem.ProcessExperienceGain(playerCharacter, vBlood, steamId, currentLevel);
                 }
-                if (_expertise) WeaponSystem.ProcessExpertise(player, vBlood);
-                if (_legacies) BloodSystem.ProcessLegacy(player, vBlood);
+                if (_expertise) WeaponSystem.ProcessExpertise(playerCharacter, vBlood);
+                if (_legacies) BloodSystem.ProcessLegacy(playerCharacter, vBlood);
                 if (_familiars)
                 {
-                    FamiliarLevelingSystem.ProcessFamiliarExperience(player, vBlood, steamId, 1f);
-                    FamiliarUnlockSystem.ProcessUnlock(player, vBlood);
+                    FamiliarLevelingSystem.ProcessFamiliarExperience(playerCharacter, vBlood, steamId, 1f);
+                    FamiliarUnlockSystem.ProcessUnlock(playerCharacter, vBlood);
                 }
                 if (_quests && steamId.TryGetPlayerQuests(out var questData)) QuestSystem.ProcessQuestProgress(questData, vBloodConsumed.Source, 1, user);
             }
         }
         catch (Exception e)
         {
-            Core.Log.LogWarning($"Error in VBloodSystemPatch: {e}");
+            Core.Log.LogWarning($"Error in VBloodSystemPatch Prefix: {e}");
         }
     }
 }

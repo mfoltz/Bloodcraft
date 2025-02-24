@@ -180,6 +180,9 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.class passivebuffs`
   - Toggles class passives (buffs only, other class effects remain active).
   - Shortcut: *.class passives*
+- `.class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen` 🔒
+  - Globally syncs class buffs (removes all then applies from current class) for players if needed.
+  - Shortcut: *.class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen*
 - `.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen` 🔒
   - Globally removes class buffs from players to then facilitate changing class buffs in config.
   - Shortcut: *.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen*
@@ -720,7 +723,7 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   The PrefabGUID hashes for arcane leveling blood buffs.
 - **Arcane Sorcerer Spells**: `ArcaneSorcererSpells` (string, default: "247896794,268059675,-242769430,-2053450457,1650878435")
   Arcane Sorcerer shift spells, granted at levels of prestige.
-- **Death Mage Buffs**: `DeathMageBuffs` (string, default: "-901503997,-491525099,1934870645,1201299233")
+- **Death Mage Buffs**: `DeathMageBuffs` (string, default: "-901503997,-804597757,1934870645,1201299233")
   The PrefabGUID hashes for death mage leveling blood buffs.
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.

@@ -90,14 +90,11 @@ internal static class CraftingSystemPatches
                             Durability durability = itemEntity.Read<Durability>();
                             Durability originalDurability = originalItem.Read<Durability>();
 
+                            // Core.Log.LogInfo($"Legendary Weapon Durabilities: {itemEntity.GetPrefabGuid().GetPrefabName()}/{durability.MaxDurability} | {originalItem.GetPrefabGuid().GetPrefabName()}/{originalDurability.MaxDurability}");
+
                             if (durability.MaxDurability > originalDurability.MaxDurability) continue; // already handled
 
                             float delay = SCT_DELAY;
-                            int level = handler.GetProfessionData(steamId).Key;
-
-                            durability.MaxDurability *= (1 + level / (float)MAX_PROFESSION_LEVEL);
-                            durability.Value = durability.MaxDurability;
-                            itemEntity.Write(durability);
 
                             ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler, ref delay);
                             EquipmentManager.ApplyEquipmentStats(steamId, itemEntity); // need to make sure this works okay for the MUSB_DOTS on legendaries at least, the spell mod parts def not though

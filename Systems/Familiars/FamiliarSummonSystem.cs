@@ -29,6 +29,7 @@ internal static class FamiliarSummonSystem
     static readonly bool _familiarPrestige = ConfigService.FamiliarPrestige;
 
     static readonly WaitForSeconds _delay = new(0.25f);
+    static readonly WaitForSeconds _shinyDelay = new(1f);
 
     public const float FAMILIAR_LIFETIME = 240f;
 
@@ -620,15 +621,12 @@ internal static class FamiliarSummonSystem
         bloodConsumeSource.CanBeConsumed = false;
         familiar.Write(bloodConsumeSource);
     }
-    static void PreventDisableFamiliar(Entity familiar)
+    public static void PreventDisableFamiliar(Entity familiar)
     {
-        // one of the relics from the inception of familiars, might be better off not doing this in the long run
-        // but hasn't caused issues (that I'm aware of, at least) and need to get out of current rabbit hole before entering another so leaving note for later >_>
-
-        ModifiableBool modifiableBool = new() { _Value = false };
-        CanPreventDisableWhenNoPlayersInRange canPreventDisable = new() { CanDisable = modifiableBool };
-
-        EntityManager.AddComponentData(familiar, canPreventDisable);
+        familiar.AddWith((ref CanPreventDisableWhenNoPlayersInRange canPreventDisable) =>
+        {
+            canPreventDisable.CanDisable = new ModifiableBool(false);
+        });
     }
     static void RemoveConvertable(Entity familiar)
     {
@@ -652,13 +650,14 @@ internal static class FamiliarSummonSystem
         familiar.With((ref DynamicCollision dynamicCollision) =>
         {
             // okay only changing hardness threshold might have stopped undesirable behaviour without familiars getting people stuck in corners, as funny as the latter was and former is xP well sorta, hrm
-            dynamicCollision.AgainstPlayers.RadiusOverride = 0.05f;
-            dynamicCollision.AgainstPlayers.HardnessThreshold._Value = 0.05f;
-            dynamicCollision.AgainstPlayers.PushStrengthMax._Value = 0.05f;
-            dynamicCollision.AgainstPlayers.PushStrengthMin._Value = 0.05f;
-            dynamicCollision.AgainstPlayers.RadiusVariation = 0.05f;
+            dynamicCollision.AgainstPlayers.RadiusOverride = -1f; // hmmm
+            dynamicCollision.AgainstPlayers.HardnessThreshold._Value = 0.1f;
+            dynamicCollision.AgainstPlayers.PushStrengthMax._Value = 0f;
+            dynamicCollision.AgainstPlayers.PushStrengthMin._Value = 0f;
+            // dynamicCollision.AgainstPlayers.RadiusVariation = 0.05f;
         });
 
+        /*
         if (!familiar.Has<MapCollision>()) return;
 
         familiar.With((ref MapCollision mapCollision) =>
@@ -672,17 +671,26 @@ internal static class FamiliarSummonSystem
         {
             collisionRadius.Radius = 0.35f;
         });
+        */
     }
-    static void RemoveDropTable(Entity familiar)
+    public static void RemoveDropTable(Entity familiar)
     {
         if (!familiar.Has<DropTableBuffer>()) return;
+
         var buffer = familiar.ReadBuffer<DropTableBuffer>();
+
         for (int i = 0; i < buffer.Length; i++)
         {
             var item = buffer[i];
+
+            item.DropTableGuid = PrefabGUID.Empty;
             item.DropTrigger = DropTriggerType.OnSalvageDestroy;
+            item.RelicType = RelicType.None;
+
             buffer[i] = item;
         }
+
+        buffer.Clear();
     }
     static void ModifyAggro(Entity familiar)
     {
@@ -719,41 +727,31 @@ internal static class FamiliarSummonSystem
         if (familiar.Has<SpawnPrefabOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
         {
             var buffer = familiar.ReadBuffer<SpawnPrefabOnGameplayEvent>();
+
             for (int i = 0; i < buffer.Length; i++)
             {
-                if (buffer[i].SpawnPrefab.Equals(_monsterFakePos))
+                // Core.Log.LogInfo($"Checking SpawnPrefabOnGameplayEvent - {familiarId.GetPrefabName()} | {buffer[i].SpawnPrefab.GetPrefabName()}");
+
+                if (buffer[i].SpawnPrefab.Equals(_monsterFakePos)) // bounds error console spam culprit
                 {
-                    familiar.Remove<SpawnPrefabOnGameplayEvent>();
+                    // familiar.Remove<SpawnPrefabOnGameplayEvent>();
+                    SpawnPrefabOnGameplayEvent spawnPrefabOnGameplayEvent = buffer[i];
+                    spawnPrefabOnGameplayEvent.SpawnPrefab = PrefabGUID.Empty;
+                    buffer[i] = spawnPrefabOnGameplayEvent;
+
                     break;
                 }
                 else if (buffer[i].SpawnPrefab.GetPrefabName().Contains("pilot", StringComparison.OrdinalIgnoreCase))
                 {
-                    familiar.Remove<SpawnPrefabOnGameplayEvent>();
-                    break;
-                }
-            }
-        }
+                    // Core.Log.LogInfo($"Removing Pilot for {familiarId.GetPrefabName()}");
 
-        /*
-        if (familiar.Has<ForceCastOnGameplayEvent>()) // stop pilots spawning from gloomrot mechs
-        {
-            var buffer = familiar.ReadBuffer<ForceCastOnGameplayEvent>();
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                if (buffer[i].ForceCastAbility.Equals(_golemAwakeGroup))
-                {
-                    Core.Log.LogWarning($"Removing ForceCastOnGameplayEvent - {familiarId.GetPrefabName()}");
-                    familiar.Remove<ForceCastOnGameplayEvent>();
-
-                    if (familiar.TryGetBuffer<AbilityGroupSlotBuffer>(out var abilityBuffer))
+                    if (familiar.TryGetBuffer<MinionBuffer>(out var minions))
                     {
-                        for (int j = 0; j < abilityBuffer.Length; j++)
+                        foreach (MinionBuffer minion in minions)
                         {
-                            if (abilityBuffer[j].BaseAbilityGroupOnSlot.Equals(_golemAwakeGroup))
+                            if (minion.Entity.Exists())
                             {
-                                Core.Log.LogWarning($"Removing ability from abilityGroupSlotBuffer - {familiarId.GetPrefabName()}");
-                                abilityBuffer.RemoveAt(j);
-                                break;
+                                minion.Entity.Destroy();
                             }
                         }
                     }
@@ -762,9 +760,8 @@ internal static class FamiliarSummonSystem
                 }
             }
         }
-        */
 
-        if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>())
+        if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>()) // don't want these to spawn fallen angels on death as familiars
         {
             familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
             {
@@ -784,7 +781,7 @@ internal static class FamiliarSummonSystem
             if (buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 PrefabGUID shinyBuff = new(buffsData.FamiliarBuffs[famKey].First());
-                Buffs.ModifyShinyBuff(familiar, shinyBuff);
+                Buffs.HandleShinyBuff(familiar, shinyBuff);
             }
         }
         else if (GetPlayerBool(steamId, SHINY_FAMILIARS_KEY))
@@ -800,7 +797,9 @@ internal static class FamiliarSummonSystem
                 if (buffsData.FamiliarBuffs.ContainsKey(famKey))
                 {
                     PrefabGUID shinyBuff = new(buffsData.FamiliarBuffs[famKey].First());
-                    Buffs.ModifyShinyBuff(familiar, shinyBuff);
+
+                    HandleResistanceBuffForShiny(familiar);
+                    Buffs.HandleShinyBuff(familiar, shinyBuff);
 
                     if (FamiliarUnlockSystem.ShinyBuffColorHexMap.TryGetValue(new(buffsData.FamiliarBuffs[famKey].First()), out var hexColor))
                     {
@@ -813,6 +812,28 @@ internal static class FamiliarSummonSystem
 
             string message = isShiny ? $"<color=green>{familiarId.GetLocalizedName()}</color>{colorCode}*</color> <color=#00FFFF>bound</color>!" : $"<color=green>{familiarId.GetLocalizedName()}</color> <color=#00FFFF>bound</color>!";
             LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+    }
+    static void HandleResistanceBuffForShiny(Entity familiar)
+    {
+        string familiarName = familiar.GetPrefabGuid().GetPrefabName();
+
+        if (!familiarName.Contains("golem", StringComparison.OrdinalIgnoreCase) && !familiarName.Contains("spidertank", StringComparison.OrdinalIgnoreCase)) return;
+        else if (familiar.TryGetComponent(out BuffResistances buffResistances))
+        {
+            Entity resistanceBuff = buffResistances.SettingsEntity._Value;
+
+            if (resistanceBuff.Has<BuffResistanceElement>())
+            {
+                var buffer = resistanceBuff.ReadBuffer<BuffResistanceElement>();
+
+                if (!buffer.IsEmpty)
+                {
+                    BuffResistanceElement buffResistanceElement = buffer[0];
+                    buffResistanceElement.BuffCategory = 536871313;
+                    buffer[0] = buffResistanceElement;
+                }
+            }
         }
     }
     static void HandleMapIcon(Entity playerCharacter, Entity familiar)

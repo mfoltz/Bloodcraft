@@ -36,7 +36,8 @@ internal static class Classes
 
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
-    static readonly WaitForSeconds _delay = new(1f);
+    static readonly WaitForSeconds _delay = new(0.5f);
+    static readonly WaitForSeconds _longDelay = new(10f);
     static readonly Regex _classNameRegex = new("(?<!^)([A-Z])");
 
     static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
@@ -119,14 +120,6 @@ internal static class Classes
                 classBuffs : [];
         }
 
-        /*
-        if (steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0)
-        {
-            var playerClass = classes.Keys.FirstOrDefault();
-            return Configuration.ParseConfigIntegerString(ClassBuffMap[playerClass]);
-        }
-        */
-
         return [];
     }
     public static PlayerClass GetPlayerClass(ulong steamId)
@@ -161,30 +154,26 @@ internal static class Classes
     {
         return steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0;
     }
-    public static void RemoveClassBuffs(Entity playerCharacter, ulong steamId)
+    public static void RemoveClassBuffs(Entity playerCharacter, List<PrefabGUID> classBuffs)
     {
-        List<PrefabGUID> buffs = GetClassBuffs(steamId);
-
-        foreach (PrefabGUID buff in buffs)
+        foreach (PrefabGUID buff in classBuffs)
         {
+            // Core.Log.LogInfo($"Removing buff for {playerCharacter.GetSteamId()} - {buff.GetPrefabName()}");
             playerCharacter.TryRemoveBuff(buff);
         }
+    }
+    public static void RemoveAllClassBuffs(Entity playerCharacter)
+    {
+        // Core.Log.LogInfo("Removing all class buffs...");
 
-        /*
-        for (int i = 0; i < buffs.Count; i++)
+        foreach (List<PrefabGUID> classBuffs in UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.Values)
         {
-            if (buffs[i] == 0) continue;
-
-            PrefabGUID buffPrefab = new(buffs[i]);
-
-            playerCharacter.TryRemoveBuff(buffPrefab);
-
-            if (ServerGameManager.TryGetBuff(playerCharacter, buffPrefab.ToIdentifier(), out Entity buffEntity))
+            foreach (PrefabGUID buff in classBuffs)
             {
-                DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+                // Core.Log.LogInfo($"Removing buff - {buff.GetPrefabName()}");
+                playerCharacter.TryRemoveBuff(buff);
             }
         }
-        */
     }
     public static void ReplyClassBuffs(ChatCommandContext ctx, PlayerClass playerClass)
     {
@@ -304,7 +293,26 @@ internal static class Classes
         parsedClassType = default;
         return false;
     }
-    public static void UpdateClassData(Entity character, PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
+    public static void RemoveAndUpdatePlayerClass(Entity character, PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
+    {
+        List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
+        classes.Clear();
+
+        var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
+        var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
+
+        var classWeaponStats = Configuration.ParseConfigIntegerString(weaponConfigEntry);
+        var classBloodStats = Configuration.ParseConfigIntegerString(bloodConfigEntry);
+
+        classes[parsedClassType] = (classWeaponStats, classBloodStats);
+        steamId.SetPlayerClasses(classes);
+
+        // yield return _delay;
+
+        RemoveClassBuffs(character, classBuffs);
+        ApplyClassBuffs(character, steamId);
+    }
+    public static void UpdatePlayerClass(PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
     {
         classes.Clear();
 
@@ -316,7 +324,6 @@ internal static class Classes
 
         classes[parsedClassType] = (classWeaponStats, classBloodStats);
         steamId.SetPlayerClasses(classes);
-        Classes.ApplyClassBuffs(character, steamId);
     }
     public static void RemoveShift(Entity character)
     {
@@ -631,6 +638,31 @@ internal static class Classes
             return className;
         }
     }
+    public static PlayerClass? ParseClassFromInput(ChatCommandContext ctx, string input)
+    {
+        if (int.TryParse(input, out int value))
+        {
+            if (!Enum.IsDefined(typeof(PlayerClass), value))
+            {
+                LocalizationService.HandleReply(ctx,
+                    "Invalid class, use '<color=white>.class l</color>' to see options.");
+                return null;
+            }
+
+            PlayerClass playerClass = (PlayerClass)(value - 1);
+            return playerClass;
+        }
+        else
+        {
+            if (!TryParseClassName(input, out PlayerClass playerClass))
+            {
+                LocalizationService.HandleReply(ctx, "Invalid class, use <color=white>'.class l'</color> to see options.");
+                return null;
+            }
+
+            return playerClass;
+        }
+    }
     public static void HandleBloodBuffMutant(Entity buffEntity, Entity playerCharacter)
     {
         ulong steamId = playerCharacter.GetSteamId();
@@ -684,18 +716,18 @@ internal static class Classes
                 {
                     BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] += 1;
 
-                    if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] == 1)
+                    if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] == 2)
                     {
-                        BuffSystemSpawnPatches.DeathMagePlayerAngelSpawnOrder.Enqueue(player);
-
-                        PassiveBuffModificationDelayRoutine(buffEntity, 0f).Start();
+                        // PassiveBuffModificationDelayRoutine(buffEntity, 1f).Start();
+                        PassiveBuffModification(buffEntity, 1f);
                     }
                 }
                 else if (BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] >= 2)
                 {
                     BuffSystemSpawnPatches.DeathMageMutantTriggerCounts[steamId] = 0;
+                    BuffSystemSpawnPatches.DeathMagePlayerAngelSpawnOrder.Enqueue(player);
 
-                    PassiveBuffModificationDelayRoutine(buffEntity, 1f).Start();
+                    PassiveBuffModificationDelayRoutine(buffEntity, 0f).Start();
                 }
             }
         }
@@ -720,6 +752,14 @@ internal static class Classes
     {
         yield return _delay;
 
+        buffEntity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff_BiteToMutant_DataShared) =>
+        {
+            bloodBuff_BiteToMutant_DataShared.MaxBonus = chance;
+            bloodBuff_BiteToMutant_DataShared.MinBonus = chance;
+        });
+    }
+    static void PassiveBuffModification(Entity buffEntity, float chance)
+    {
         buffEntity.With((ref BloodBuff_BiteToMutant_DataShared bloodBuff_BiteToMutant_DataShared) =>
         {
             bloodBuff_BiteToMutant_DataShared.MaxBonus = chance;
@@ -781,10 +821,18 @@ internal static class Classes
     }
     public static void ApplyClassBuffs(Entity player, ulong steamId)
     {
-        if (!HasClass(steamId)) return;
+        if (!HasClass(steamId))
+        {
+            // Core.Log.LogInfo($"No player class found - {steamId}");
+            return;
+        }
 
-        if (!UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(GetPlayerClass(steamId), out List<PrefabGUID> classBuffs)) return;
-        else if (!classBuffs.Any()) return;
+        List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
+        if (!classBuffs.Any())
+        {
+            // Core.Log.LogInfo($"No class buffs found - {steamId}!");
+            return;
+        }
 
         int levelStep = ConfigService.MaxLevel / classBuffs.Count;
         int playerLevel;
@@ -804,7 +852,11 @@ internal static class Classes
             playerLevel = ConfigService.MaxLevel;
         }
 
-        if (levelStep <= 0) return;
+        if (levelStep <= 0)
+        {
+            // Core.Log.LogInfo($"Level step invalid - {steamId}");
+            return;
+        }
 
         int numBuffsToApply = playerLevel / levelStep;
 
@@ -814,20 +866,44 @@ internal static class Classes
 
             for (int i = 0; i < numBuffsToApply; i++)
             {
+                // Core.Log.LogInfo($"Applying buff {classBuffs[i].GetPrefabName()} - ");
                 Buffs.TryApplyPermanentBuff(player, classBuffs[i]);
             }
         }
     }
-    public static void PurgeClassBuffs() // global class buff purge if method name isn't descriptive enough
+    public static IEnumerator GlobalSyncClassBuffs(ChatCommandContext ctx) // global class buff purge if method name isn't descriptive enough
     {
         List<PlayerInfo> playerCache = new(PlayerCache.Values);
 
         foreach (PlayerInfo playerInfo in playerCache)
         {
             ulong steamId = playerInfo.User.PlatformId;
-
             SetPlayerBool(steamId, CLASS_BUFFS_KEY, false);
-            RemoveClassBuffs(playerInfo.CharEntity, steamId);
+            RemoveAllClassBuffs(playerInfo.CharEntity);
         }
+
+        yield return _longDelay;
+
+        foreach (PlayerInfo playerInfo in playerCache)
+        {
+            ulong steamId = playerInfo.User.PlatformId;
+            SetPlayerBool(steamId, CLASS_BUFFS_KEY, true);
+            ApplyClassBuffs(playerInfo.CharEntity, steamId);
+        }
+
+        ctx.Reply("Removed all class buffs then applied current class buffs for all players.");
+    }
+    public static void GlobalPurgeClassBuffs(ChatCommandContext ctx) // global class buff purge if method name isn't descriptive enough
+    {
+        List<PlayerInfo> playerCache = new(PlayerCache.Values);
+
+        foreach (PlayerInfo playerInfo in playerCache)
+        {
+            ulong steamId = playerInfo.User.PlatformId;
+            SetPlayerBool(steamId, CLASS_BUFFS_KEY, false);
+            RemoveAllClassBuffs(playerInfo.CharEntity);
+        }
+
+        ctx.Reply("Removed all class buffs for all players.");
     }
 }

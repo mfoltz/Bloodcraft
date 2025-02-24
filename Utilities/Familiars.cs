@@ -1,5 +1,7 @@
 ﻿using Bloodcraft.Services;
+using Bloodcraft.Systems.Familiars;
 using ProjectM;
+using ProjectM.Behaviours;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -258,13 +260,14 @@ internal static class Familiars
             LocalizationService.HandleReply(ctx, "Invalid prefab (not an integer) or name (does not start with CHAR/char).");
         }
     }
-    public static void TryReturnFamiliar(Entity player, Entity familiar)
+    public static void TryReturnFamiliar(Entity playerCharacter, Entity familiar)
     {
-        float3 playerPosition = player.GetPosition();
+        float3 playerPosition = playerCharacter.GetPosition();
         float distance = Vector3.Distance(familiar.GetPosition(), playerPosition);
 
         if (distance >= 25f)
         {
+            PreventDisableFamiliar(familiar);
             ReturnFamiliar(playerPosition, familiar);
         }
     }
@@ -296,13 +299,13 @@ internal static class Familiars
     {
         parsedStatType = default;
 
-        if (System.Enum.TryParse(statType, true, out parsedStatType))
+        if (Enum.TryParse(statType, true, out parsedStatType))
         {
             return true;
         }
         else
         {
-            parsedStatType = System.Enum.GetValues(typeof(FamiliarStatType))
+            parsedStatType = Enum.GetValues(typeof(FamiliarStatType))
                 .Cast<FamiliarStatType>()
                 .FirstOrDefault(pt => pt.ToString().Contains(statType, System.StringComparison.OrdinalIgnoreCase));
 
@@ -317,7 +320,6 @@ internal static class Familiars
     public static void CallFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId, (Entity Familiar, int FamKey) data)
     {
         if (familiar.IsDisabled()) familiar.Remove<Disabled>();
-        if (familiar.Has<GetTranslationOnUpdate>()) familiar.Remove<GetTranslationOnUpdate>();
 
         float3 position = playerCharacter.GetPosition();
         familiar.SetPosition(position);
@@ -327,10 +329,18 @@ internal static class Familiars
             follower.Followed._Value = playerCharacter;
         });
 
+        PreventDisableFamiliar(familiar);
+        // ResetAggro(familiar);
+
         if (_familiarCombat && !familiar.HasBuff(_invulnerableBuff))
         {
             familiar.TryRemoveBuff(_disableAggroBuff);
         }
+
+        familiar.With((ref AggroConsumer aggroConsumer) =>
+        {
+            aggroConsumer.PreCombatPosition = position;
+        });
 
         data = (Entity.Null, data.FamKey);
         steamId.SetFamiliarActives(data);
@@ -360,17 +370,19 @@ internal static class Familiars
     }
     public static void DismissFamiliar(Entity playerCharacter, Entity familiar, User user, ulong steamId, (Entity Familiar, int FamKey) data)
     {
+        if (familiar.HasBuff(_vanishBuff))
+        {
+            LocalizationService.HandleServerReply(EntityManager, user, "Can't do that while familiar is binding/unbinding!");
+           
+            return;
+        }
+
         HandleFamiliarMinions(familiar);
-        // ResetAndDisableAggro(familiar);
+        PreventDisableFamiliar(familiar);
 
         familiar.With((ref Follower follower) =>
         {
             follower.Followed._Value = Entity.Null;
-        });
-
-        familiar.AddWith((ref GetTranslationOnUpdate updateTranslation) =>
-        {
-            updateTranslation.Source = GetTranslationSource.Creator;
         });
 
         var buffer = playerCharacter.ReadBuffer<FollowerBuffer>();
@@ -434,9 +446,43 @@ internal static class Familiars
     public static void ResetAggro(Entity familiar)
     {
         if (!familiar.Has<AggroConsumer>()) return;
-        else
+        else if (familiar.TryGetBuffer<BuffBuffer>(out var buffer))
         {
-            familiar.TryApplyBuffWithLifeTimeDestroy(_disableAggroBuff, AGGRO_BUFF_DURATION);
+            foreach (BuffBuffer buff in buffer)
+            {
+                Entity buffEntity = buff.Entity;
+
+                if (buffEntity.Has<InCombatBuff>())
+                {
+                    familiar.TryRemoveBuff(buff.PrefabGuid);
+                    Core.Log.LogInfo($"Removed in combat buff {buff.PrefabGuid.GetPrefabName()} from familiar {familiar.GetPrefabGuid().GetPrefabName()}!");
+
+                    break;
+                }
+            }
+
+            /* don't really think this did anything, maybe try removing in combat buff
+            try
+            {
+                if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && AiUtility.IsInCombat(behaviourTreeState.Value))
+                {
+                    ServerGameManager serverGameManager = ServerGameManager;
+                    ExtendedGameManager.SetBehaviourTreeState(ref serverGameManager, familiar, GenericEnemyState.Follow);
+
+                    Core.Log.LogInfo($"Reset familiar behaviour state to follow on returning!");
+                }
+                else
+                {
+                    Core.Log.LogInfo($"Familiar not in combat, no need to reset!");
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Log.LogWarning($"Error resetting familiar behaviour state: {e}");
+            }
+
+            // familiar.TryApplyBuffWithLifeTimeDestroy(_disableAggroBuff, AGGRO_BUFF_DURATION);
+            */
         }
     }
     public static void ResetAndDisableAggro(Entity familiar)
@@ -444,7 +490,7 @@ internal static class Familiars
         if (!familiar.Has<AggroConsumer>()) return;
         else
         {
-            familiar.TryApplyBuff(_disableAggroBuff);
+            // familiar.TryApplyBuff(_disableAggroBuff);
         }
     }
     public static void BindFamiliar(User user, Entity playerCharacter, int boxIndex = -1)
@@ -572,7 +618,6 @@ internal static class Familiars
         if (smartBind)
         {
             yield return _bindingDelay;
-
             BindFamiliar(user, playerCharacter, index);
         }
     }
@@ -854,9 +899,9 @@ internal static class Familiars
         {
             List<int> familiarEquipment = [];
 
-            foreach (FamiliarEquipmentType familiarEquipmentType in System.Enum.GetValues(typeof(FamiliarEquipmentType)))
+            foreach (FamiliarEquipmentType familiarEquipmentType in Enum.GetValues(typeof(FamiliarEquipmentType)))
             {
-                if (System.Enum.TryParse(familiarEquipmentType.ToString(), true, out EquipmentType equipmentType) && servantEquipment.IsEquipped(equipmentType))
+                if (Enum.TryParse(familiarEquipmentType.ToString(), true, out EquipmentType equipmentType) && servantEquipment.IsEquipped(equipmentType))
                 {
                     PrefabGUID equipmentPrefabGuid = servantEquipment.GetEquipmentItemId(equipmentType);
                     familiarEquipment.Add(equipmentPrefabGuid.GuidHash);
@@ -919,7 +964,7 @@ internal static class Familiars
 
                         Entity entity = Core.EntityManager.CreateEntity(
                         [
-                            ComponentType.ReadOnly<NetworkEventType>(),
+                            ComponentType.ReadOnly<NetworkEventType>(), // readwrite?
                             ComponentType.ReadOnly<FromCharacter>(),
                             ComponentType.ReadOnly<EquipServantItemEvent>()
                         ]);

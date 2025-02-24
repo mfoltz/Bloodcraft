@@ -105,7 +105,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetPower(entity);
         SetMoveSpeed(entity, 5f, 6.5f);
 
-        Buffs.ModifyShinyBuff(entity, _manticoreVisual);
+        Buffs.HandleShinyBuff(entity, _manticoreVisual);
     }
     static void HandleMonster(Entity entity)
     {
@@ -117,7 +117,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetPower(entity);
         SetMoveSpeed(entity, 2.5f, 5.5f);
 
-        Buffs.ModifyShinyBuff(entity, _monsterVisual);
+        Buffs.HandleShinyBuff(entity, _monsterVisual);
     }
     static void HandleSolarus(Entity entity)
     {
@@ -129,7 +129,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetPower(entity);
         SetMoveSpeed(entity, 4f);
 
-        Buffs.ModifyShinyBuff(entity, _solarusVisual);
+        Buffs.HandleShinyBuff(entity, _solarusVisual);
     }
     static void HandleDracula(Entity entity)
     {
@@ -141,7 +141,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetPower(entity);
         SetMoveSpeed(entity, 2.5f, 3.5f);
 
-        Buffs.ModifyShinyBuff(entity, _draculaVisual);
+        Buffs.HandleShinyBuff(entity, _draculaVisual);
     }
     static void HandleAngel(Entity entity)
     {
@@ -150,7 +150,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
         SetPower(entity);
         SetMoveSpeed(entity, 5f, 7.5f);
 
-        Buffs.ModifyShinyBuff(entity, _solarusVisual);
+        Buffs.HandleShinyBuff(entity, _solarusVisual);
     }
     static void HandleFallenAngel(Entity entity)
     {

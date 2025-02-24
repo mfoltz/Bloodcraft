@@ -25,6 +25,8 @@ internal static class BuffSystemSpawnPatches
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
+    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _exoFormImmortal = ConfigService.ExoPrestiging && ConfigService.TrueImmortal;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
@@ -125,7 +127,7 @@ internal static class BuffSystemSpawnPatches
                             }
                         }
                         break;
-                    case 3 when _familiars && isPlayerTarget: // Familiar PvE Combat Buff
+                    case 3 when _familiars && isPlayerTarget: // Familiar and player has PvE Combat Buff
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
                         if (familiar.Exists())
                         {
@@ -133,7 +135,7 @@ internal static class BuffSystemSpawnPatches
                             Familiars.TryReturnFamiliar(buffTarget, familiar);
                         }
                         break;
-                    case 4 when _familiars && isPlayerTarget: // Familiar PvP Combat Buff
+                    case 4 when _familiars && isPlayerTarget: // Familiars and player has PvP Combat Buff
                         familiar = Familiars.GetActiveFamiliar(buffTarget);
                         if (familiar.Exists())
                         {
@@ -170,6 +172,7 @@ internal static class BuffSystemSpawnPatches
                             }
                         }
                         break;
+                    /*
                     case 6 when _classes: // Death mage second passive buff; should probably make some of those hard-coded and some optional, this was effort >_>
                         if (buffTarget.GetPrefabGuid().Equals(_fallenAngel) && DeathMagePlayerAngelSpawnOrder.TryDequeue(out Entity playerCharacter))
                         {
@@ -180,17 +183,23 @@ internal static class BuffSystemSpawnPatches
                             Classes.HandleBiteTriggerBuff(buffTarget, steamId);
                         }
                         break;
+                    */
                     case 7 when _familiars && buffTarget.IsVBloodOrGateBoss(): // Witch pig transformation buff
                         buffEntity.Destroy();
                         break;
-                    case 8 when _familiars && isPlayerTarget:
-                        if (steamId.TryGetFamiliarActives(out var data) && Familiars.AutoCallMap.TryRemove(buffTarget, out familiar) && familiar.Exists())
+                    case 8 when isPlayerTarget:
+                        if (_familiars && steamId.TryGetFamiliarActives(out var data) && Familiars.AutoCallMap.TryRemove(buffTarget, out familiar) && familiar.Exists())
                         {
                             Familiars.CallFamiliar(buffTarget, familiar, buffTarget.GetUser(), steamId, data);
                         }
+                        if (_legacies || _expertise)
+                        {
+                            // Core.Log.LogInfo($"Refreshing stats on phasing buff - {steamId}");
+                            Buffs.RefreshStats(buffTarget);
+                        }
                         break;
                     case 9 when _familiars:
-                        if (buffTarget.TryGetFollowedPlayer(out playerCharacter))
+                        if (buffTarget.TryGetFollowedPlayer(out Entity playerCharacter))
                         {
                             familiar = Familiars.GetActiveFamiliar(playerCharacter);
 
@@ -402,7 +411,7 @@ internal static class BuffSystemSpawnPatches
                 581443919 => 3,  // Familiar PvE
                 697095869 => 4,  // Familiar PvP
                 -89195359 => 5,  // Vampiric curse
-                -651661301 or 366323518 => 6,  // Death mage secondary case
+                // -651661301 or 366323518 => 6,  // Death mage secondary case
                 1356064917 => 7,  // Witch pig transformation
                 -79611032 => 8,  // Phasing
                 -6635580 => 9,  // Familiar highlord sword

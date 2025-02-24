@@ -57,6 +57,8 @@ internal static class Core
 
     static readonly PrefabGUID _wolfBiteCast = new(990205141);
 
+    static readonly PrefabGUID _vargulfBleedBuff = new(1581496399);
+
     static readonly HashSet<PrefabGUID> _bearFormBuffs =
     [
         new(-1569370346), // AB_Shapeshift_Bear_Buff
@@ -90,7 +92,6 @@ internal static class Core
         OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey()); // loading these last causes a bad format exception now... oh computers, you so fun
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
-        // if (_performance) ServerPerformanceLogger();
         _ = new PlayerService();
         _ = new LocalizationService();
 
@@ -120,6 +121,7 @@ internal static class Core
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
             //DetectSanguis(); want to nail the fun factor and make sure no glaring bugs before adding stakes
             _ = new BattleService();
+            _ = new FamiliarService();
         }
         if (ConfigService.ProfessionSystem)
         {
@@ -127,6 +129,8 @@ internal static class Core
         }
 
         ModifyPrefabs();
+
+        SlashersBleedTest();
         // MiscLogging();
 
         _initialized = true;
@@ -176,7 +180,7 @@ internal static class Core
                     modifyRotation.Type = RotationModificationType.Set;
                 });
             }
-
+            
             /*
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_mapIconCharmed, out Entity mapIconCharmedPrefab))
             {
@@ -263,6 +267,17 @@ internal static class Core
                     buffer.Add(dropTableDataBuffer);
                 }
             }
+        }
+    }
+    static void SlashersBleedTest()
+    {
+        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_vargulfBleedBuff, out Entity bleedBuffPrefab))
+        {
+            bleedBuffPrefab.With((ref Buff buff) =>
+            {
+                buff.MaxStacks = 5;
+                buff.IncreaseStacks = true;
+            });
         }
     }
 

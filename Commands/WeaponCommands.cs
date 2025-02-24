@@ -25,7 +25,7 @@ internal static class WeaponCommands
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly PrefabGUID _exoFormBuff = new(-31099041);
 
     [Command(name: "get", adminOnly: false, usage: ".wep get", description: "Displays current weapon expertise details.")]
     public static void GetExpertiseCommand(ChatCommandContext ctx)
@@ -405,8 +405,15 @@ internal static class WeaponCommands
             return;
         }
 
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         User user = ctx.Event.User;
         ulong SteamID = user.PlatformId;
+
+        if (playerCharacter.HasBuff(_exoFormBuff))
+        {
+            LocalizationService.HandleReply(ctx, "Spells cannot be locked when using exoform.");
+            return;
+        }
 
         TogglePlayerBool(SteamID, SPELL_LOCK_KEY);
 
@@ -416,7 +423,7 @@ internal static class WeaponCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Spells set.");
+            LocalizationService.HandleReply(ctx, "Spells locked.");
         }
     }
 }

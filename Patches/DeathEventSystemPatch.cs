@@ -130,9 +130,10 @@ internal static class DeathEventListenerSystemPatch
         else if (PlayerBattleFamiliars.Any() && PlayerBattleFamiliars.FirstOrDefault(kvp => kvp.Value.Contains(deathEvent.Died)) is var match && match.Key != default)
         {
             ulong ownerId = match.Key;
-            PlayerBattleFamiliars[ownerId].Remove(deathEvent.Died);
 
+            PlayerBattleFamiliars[ownerId].Remove(deathEvent.Died);
             if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(deathEvent.Died)) Familiars.HandleFamiliarMinions(deathEvent.Died);
+
             if (!PlayerBattleFamiliars[ownerId].Any() && BattleService.Matchmaker.MatchPairs.TryGetMatch(ownerId, out var matchPair))
             {
                 ulong pairedId = matchPair.Item1 == ownerId ? matchPair.Item2 : matchPair.Item1;

@@ -21,6 +21,7 @@ internal static class PlayerTeleportSystemPatch
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[1].ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)

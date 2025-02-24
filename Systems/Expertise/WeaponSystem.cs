@@ -217,7 +217,7 @@ internal static class WeaponSystem
             IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
-                SaveWeaponExperience(steamID, handler, expertiseValue, out bool leveledUp, out int newLevel);
+                SaveExpertiseExperience(steamID, handler, expertiseValue, out bool leveledUp, out int newLevel);
                 NotifyPlayer(user, weaponType, expertiseValue, leveledUp, newLevel, handler);
             }
         }
@@ -229,7 +229,7 @@ internal static class WeaponSystem
         if (isVBlood) return ExpertiseValue * _vBloodExpertiseMultiplier;
         else return ExpertiseValue * _unitExpertiseMultiplier;
     }
-    public static void SaveWeaponExperience(ulong steamID, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
+    public static void SaveExpertiseExperience(ulong steamID, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
     {
         var xpData = handler.GetExpertiseData(steamID);
         int currentLevel = xpData.Key;
@@ -266,13 +266,15 @@ internal static class WeaponSystem
         int gainedIntXP = (int)gainedXP;
         int levelProgress = GetLevelProgress(steamID, handler);
 
+        if (newLevel >= _maxExpertiseLevel) return;
+
         if (leveledUp)
         {
             HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
             Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
         }
-        else if (newLevel >= _maxExpertiseLevel) return;
-        else if (GetPlayerBool(steamID, WEAPON_LOG_KEY))
+
+        if (GetPlayerBool(steamID, WEAPON_LOG_KEY))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
@@ -297,7 +299,7 @@ internal static class WeaponSystem
                     string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
 
                     LocalizationService.HandleServerReply(EntityManager, user,
-                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to choose and '<color=white>.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.remindme'</color>)");
+                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=#c0c0c0>{weaponType.ToString().ToLower()}</color>; use '<color=white>.wep cst {weaponType} [Stat]</color>' to choose and '<color=white>.wep lst'</color> to view expertise stat options. (toggle reminders with <color=white>'.misc remindme'</color>)");
                 }
             }
         }

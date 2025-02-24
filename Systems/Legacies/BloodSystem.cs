@@ -276,7 +276,7 @@ internal static class BloodSystem
                     string bonusString = choicesLeft > 1 ? "bonuses" : "bonus";
 
                     LocalizationService.HandleServerReply(EntityManager, user,
-                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst [Stat]</color>' to choose and '<color=white>.bl lst</color>' to see options. (toggle reminders with <color=white>'.remindme'</color>)");
+                        $"{choicesLeft} <color=white>stat</color> <color=#00FFFF>{bonusString}</color> available for <color=red>{bloodType.ToString().ToLower()}</color>; use '<color=white>.bl cst [Stat]</color>' to choose and '<color=white>.bl lst</color>' to see options. (toggle reminders with <color=white>'.misc remindme'</color>)");
                 }
             }
         }
@@ -287,14 +287,16 @@ internal static class BloodSystem
 
         int gainedIntXP = (int)gainedXP;
         int levelProgress = GetLevelProgress(steamID, handler);
-        
+
+        if (newLevel >= _maxBloodLevel) return;
+
         if (leveledUp)
         {
             HandleBloodLevelUp(user, bloodType, newLevel, steamID);
             Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
         }
-        else if (newLevel >= _maxBloodLevel) return;
-        else if (GetPlayerBool(steamID, BLOOD_LOG_KEY))
+
+        if (GetPlayerBool(steamID, BLOOD_LOG_KEY))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");

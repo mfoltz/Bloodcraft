@@ -14,11 +14,12 @@ internal static class Recipes // pending organization and refactoring, should al
 
     static readonly PrefabGUID _primalJewelRequirement = new(ConfigService.PrimalJewelCost);
 
-    static readonly PrefabGUID _advancedGrinder = new(-178579946); // vampiric dust
-    static readonly PrefabGUID _advancedFurnace = new(-222851985); // silver ingot
-    static readonly PrefabGUID _fabricator = new(-465055967);      // copper wires, iron body
-    static readonly PrefabGUID _shardExtractor = new(1794206684);  // shards, probably :p
-    static readonly PrefabGUID _gemCuttingTable = new(-21483617);  // extractor hates being alive so using this instead
+    static readonly PrefabGUID _advancedGrinder = new(-178579946);
+    static readonly PrefabGUID _primitiveGrinder = new(-600683642);
+    static readonly PrefabGUID _advancedFurnace = new(-222851985);
+    static readonly PrefabGUID _fabricator = new(-465055967);      
+    static readonly PrefabGUID _shardExtractor = new(1794206684);
+    static readonly PrefabGUID _gemCuttingTable = new(-21483617);
     static readonly PrefabGUID _advancedBloodPress = new(-684391635);
 
     static readonly PrefabGUID _refinementInventoryLarge = new(1436956144);
@@ -131,8 +132,18 @@ internal static class Recipes // pending organization and refactoring, should al
         Entity itemEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_itemBuildingEMP];
 
         var recipeRequirementBuffer = EntityManager.AddBuffer<RecipeRequirementBuffer>(itemEntity);
-        recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _depletedBattery, Amount = 5 });
+        recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _depletedBattery, Amount = 1 });
         recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = _techScrap, Amount = 25 });
+
+        if (!itemEntity.Has<Salvageable>())
+        {
+            itemEntity.AddWith((ref Salvageable salvageable) =>
+            {
+                salvageable.RecipeGUID = PrefabGUID.Empty;
+                salvageable.SalvageFactor = 1f;
+                salvageable.SalvageTimer = 10f;
+            });
+        }
 
         Entity recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_primalStygianRecipe];
 
@@ -205,16 +216,6 @@ internal static class Recipes // pending organization and refactoring, should al
             {
                 recipeLinkBuffer.RemoveAt(i);
             }
-        }
-
-        if (!itemEntity.Has<Salvageable>())
-        {
-            itemEntity.AddWith((ref Salvageable salvageable) =>
-            {
-                salvageable.RecipeGUID = PrefabGUID.Empty;
-                salvageable.SalvageFactor = 1f;
-                salvageable.SalvageTimer = 60f;
-            });
         }
 
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_primalEssence, out Entity prefabEntity))
@@ -388,6 +389,19 @@ internal static class Recipes // pending organization and refactoring, should al
             }
         }
 
+        stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_primitiveGrinder];
+        refinementBuffer = stationEntity.ReadBuffer<RefinementstationRecipesBuffer>();
+
+        for (int i = refinementBuffer.Length - 1; i >= 0; i--)
+        {
+            var entry = refinementBuffer[i];
+
+            if (entry.RecipeGuid.Equals(_primalStygianRecipe) || entry.RecipeGuid.Equals(_bloodCrystalRecipe))
+            {
+                refinementBuffer.RemoveAt(i);
+            }
+        }
+
         stationEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_fabricator];
         recipeEntity = PrefabCollectionSystem._PrefabGuidToEntityMap[_copperWiresRecipe];
 
@@ -408,6 +422,7 @@ internal static class Recipes // pending organization and refactoring, should al
         
         recipeEntity.With((ref RecipeData recipeData) =>
         {
+            recipeData.CraftDuration = 180f;
             recipeData.AlwaysUnlocked = true;
             recipeData.HideInStation = false;
             recipeData.HudSortingOrder = 0;

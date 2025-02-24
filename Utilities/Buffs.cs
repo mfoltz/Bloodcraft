@@ -530,10 +530,11 @@ internal static class Buffs
             return;
         }
     }
-    public static void TryApplyPermanentBuff(Entity player, PrefabGUID buffPrefab)
+    public static void TryApplyPermanentBuff(Entity playerCharacter, PrefabGUID buffPrefab)
     {
-        if (player.TryApplyAndGetBuff(buffPrefab, out Entity buffEntity))
+        if (playerCharacter.TryApplyAndGetBuff(buffPrefab, out Entity buffEntity))
         {
+            // Core.Log.LogInfo($"Applying permanent buff {buffPrefab.GetPrefabName()} to {playerCharacter.GetSteamId()}");
             ModifyPermanentBuff(buffEntity);
         }
     }
@@ -580,7 +581,7 @@ internal static class Buffs
             });
         }
     }
-    public static void ModifyShinyBuff(Entity entity, PrefabGUID buffPrefabGuid) // using this for shardbearer visuals as well but prefer this method name
+    public static void HandleShinyBuff(Entity entity, PrefabGUID buffPrefabGuid) // using this for shardbearer visuals as well but prefer this method name
     {
         if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
@@ -910,6 +911,12 @@ internal static class Buffs
     }
     public static void RefreshStats(Entity playerCharacter)
     {
-        if (playerCharacter.HasBuff(_vBloodBloodBuff)) playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
+        if ()
+        {
+
+        }
+
+        playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
+        // else playerCharacter.TryApplyBuff(_vBloodBloodBuff);
     }
 }

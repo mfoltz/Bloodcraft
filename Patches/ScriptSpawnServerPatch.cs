@@ -11,7 +11,6 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-using static Il2CppSystem.Data.Common.ObjectStorage;
 
 namespace Bloodcraft.Patches;
 
@@ -112,9 +111,11 @@ internal static class ScriptSpawnServerPatch
                     case 4 when (_legacies || _expertise):
                         ApplyStats(buffEntity, buffTarget);
                         break;
+                    /*
                     case 5 when _classes:
                         Classes.HandleBloodBuffMutant(buffEntity, buffTarget);
                         break;
+                    */
                     case 6 when _leveling:
                         buffEntity.With((ref BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared) =>
                         {
@@ -172,7 +173,7 @@ internal static class ScriptSpawnServerPatch
                 1615225381 or 832491730 or -622814018 => 2,
                 136816739 => 3,
                 20081801 => 4,
-                -491525099 => 5,
+                // -491525099 => 5,
                 -1596803256 => 6,
                 _ when bloodBuffLookup.HasComponent(buffEntity) => 7,
                 _ when blockFeedBuffLookup.HasComponent(owner) && buff.BuffEffectType.Equals(BuffEffectType.Debuff) => 8,

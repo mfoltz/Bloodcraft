@@ -70,24 +70,24 @@ internal static class LevelingSystem
 
         if (inGroup) groupMultiplier = _groupMultiplier; // if more than 1 participant, apply group multiplier
 
-        foreach (Entity player in deathParticipants)
+        foreach (Entity playerCharacter in deathParticipants)
         {
-            ulong steamId = player.GetSteamId();
+            ulong steamId = playerCharacter.GetSteamId();
 
-            if (_familiars) FamiliarLevelingSystem.ProcessFamiliarExperience(player, target, steamId, groupMultiplier);
+            if (_familiars) FamiliarLevelingSystem.ProcessFamiliarExperience(playerCharacter, target, steamId, groupMultiplier);
 
             int currentLevel = steamId.TryGetPlayerExperience(out var xpData) ? xpData.Key : 0;
             bool maxLevel = currentLevel >= _maxPlayerLevel;
 
             if (maxLevel && inGroup) // if at max level, prestige or no, and in a group (party or clan) get expertise exp instead
             {
-                WeaponSystem.ProcessExpertise(player, target, groupMultiplier);
+                WeaponSystem.ProcessExpertise(playerCharacter, target, groupMultiplier);
             }
             else if (maxLevel) return;
-            else ProcessExperienceGain(player, target, steamId, currentLevel, groupMultiplier);
+            else ProcessExperienceGain(playerCharacter, target, steamId, currentLevel, groupMultiplier);
         }
     }
-    public static void ProcessExperienceGain(Entity player, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
+    public static void ProcessExperienceGain(Entity playerCharacter, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
     {
         UnitLevel victimLevel = target.Read<UnitLevel>();
         Health health = target.Read<Health>();
@@ -148,8 +148,8 @@ internal static class LevelingSystem
         if (_restedXPSystem) gainedXP = AddRestedXP(steamId, gainedXP, ref rested);
         SaveLevelingExperience(steamId, gainedXP, out bool leveledUp, out int newLevel);
 
-        if (leveledUp) HandlePlayerLevelUpEffects(player, steamId);
-        NotifyPlayer(player, steamId, (int)gainedXP, leveledUp, newLevel, rested);
+        if (leveledUp) HandlePlayerLevelUpEffects(playerCharacter, steamId);
+        NotifyPlayer(playerCharacter, steamId, (int)gainedXP, leveledUp, newLevel, rested);
     }
     static float AddRestedXP(ulong steamId, float gainedXP, ref int rested)
     {
@@ -212,15 +212,18 @@ internal static class LevelingSystem
             Classes.ApplyClassBuffs(playerCharacter, steamId);
         }
     }
-    public static void NotifyPlayer(Entity player, ulong steamId, float gainedXP, bool leveledUp, int newLevel, int restedXP = 0)
+    public static void NotifyPlayer(Entity playerCharacter, ulong steamId, float gainedXP, bool leveledUp, int newLevel, int restedXP = 0)
     {
         int gainedIntXP = (int)gainedXP;
-        User user = player.GetUser();
-        Entity character = user.LocalCharacter.GetEntityOnServer();
+
+        Entity userEntity = playerCharacter.GetUserEntity();
+        User user = userEntity.GetUser();
+
+        if (newLevel >= _maxPlayerLevel) return;
 
         if (leveledUp)
         {
-            SetLevel(character);
+            SetLevel(playerCharacter);
 
             if (newLevel <= _maxPlayerLevel)
             {
@@ -231,10 +234,9 @@ internal static class LevelingSystem
             if (_classes && GetPlayerBool(steamId, REMINDERS_KEY) && !Classes.HasClass(steamId))
             {
                 LocalizationService.HandleServerReply(EntityManager, user,
-                    $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.remindme'</color>)");
+                    $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.misc remindme'</color>)");
             }
         }
-        else if (newLevel >= _maxPlayerLevel) return;
 
         if (GetPlayerBool(steamId, EXPERIENCE_LOG_KEY))
         {
@@ -248,16 +250,16 @@ internal static class LevelingSystem
 
         if (GetPlayerBool(steamId, SCT_PLAYER_KEY))
         {
-            float3 targetPosition = character.Read<Translation>().Value;
-
-            PlayerExperienceSCTDelayRoutine(player, player.GetUserEntity(), targetPosition, _gold, gainedXP).Start();
+            // float3 targetPosition = character.Read<Translation>().Value;
+            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, _gold, gainedXP).Start();
         }
     }
-    static IEnumerator PlayerExperienceSCTDelayRoutine(Entity character, Entity userEntity, float3 position, float3 color, float gainedXP) // maybe just have one of these in progression utilities but later
+    static IEnumerator PlayerExperienceSCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP) // maybe just have one of these in progression utilities but later
     {
         yield return _delay;
 
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, character, gainedXP, _sctResourceGain, userEntity);
+        float3 position = playerCharacter.GetPosition();
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctResourceGain, userEntity);
     }
     static float GetXp(ulong steamId)
     {
