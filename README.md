@@ -112,7 +112,7 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 
 ### Professions
 - Gain profession levels by gathering resources and crafting equipment.
-  - Mining, Woodcutting, Harvesting → bonus resources per broken resource object, scales with profession level (additional resources of what was broken and profession specific bonus drops; gold ore, random saplings, and random seeds respectively)
+  - Mining, Woodcutting, Harvesting → bonus resources per broken resource object, scales with profession level (additional resources of what was broken and profession specific bonus drops; gold ore (salvage to jewelry), random saplings, and random seeds respectively)
   - Fishing → bonus fish every 20 levels
   - Alchemy → increases potion effectiveness & duration (x2 at max, holy pots do not benefit from increased effectiveness but will have longer duration)
   - Blacksmithing, Enchanting, Tailoring → increase base stats (10% at max) and durability (x2 at max) for respective types of crafted gear
