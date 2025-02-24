@@ -911,11 +911,6 @@ internal static class Buffs
     }
     public static void RefreshStats(Entity playerCharacter)
     {
-        if ()
-        {
-
-        }
-
         playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
         // else playerCharacter.TryApplyBuff(_vBloodBloodBuff);
     }
