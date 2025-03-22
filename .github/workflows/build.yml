@@ -16,7 +16,15 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 7.0.x
-      
+          
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0        
+        
+      - name: Restore dependencies
+        run: dotnet restore
+        
       - name: Discover .csproj
         id: discover_csproj
         run: |
@@ -34,9 +42,6 @@ jobs:
           csproj="${{ steps.discover_csproj.outputs.csproj_file }}"
           dll_name=$(basename "$csproj" .csproj)
           echo "dll_name=$dll_name" >> $GITHUB_OUTPUT
-        
-      - name: Restore dependencies
-        run: dotnet restore "${{ steps.discover_csproj.outputs.csproj_file }}"
 
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -62,8 +67,8 @@ jobs:
             echo "No changes to commit in thunderstore.toml"
           fi
           
-      - name: Build project
-        run: dotnet build "${{ steps.discover_csproj.outputs.csproj_file }}" --configuration Release
+      - name: Build (Release)
+        run: dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
@@ -71,11 +76,11 @@ jobs:
         with:
           body: Manual pre-release of ${{ env.version }}
           name: v${{ env.version }}
+          fail_on_unmatched_files: true
           prerelease: true
           tag_name: v${{ env.version }}
-          fail_on_unmatched_files: true
           files: |
-            ./bin/Release/net7.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
+            ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
