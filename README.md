@@ -36,6 +36,7 @@ SpellCritDamage // 11
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
+- [Extra Recipes](#recipes)
 - [Recommended Mods](#recommended)
 
 ## Sponsor this project
@@ -729,7 +730,49 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   The PrefabGUID hashes for death mage leveling blood buffs.
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
+  
+## Recipes
 
+### Salvageable
+- **EMPs**
+	- 2x Depleted Battery  
+	- 15x Tech Scrap
+- **Bat Hide**
+	- 3x Lesser Stygians
+	- 5x Blood Essence
+- **Primal Blood Essence**
+	- 5x Electricity
+- **Copper Wires**
+	- 1x Electricity
+- **Gold Ore**
+	- 2x Gold Jewelry
+
+### Refinable
+- **Primal Jewel** (T04s with additional modifiers, random however spell school can be influenced via accompanying respective perfect gem which are awarded randomly from dailies/weeklies)
+	- Inputs: x1 Demon Fragment (default, configurable)
+	- Outputs: x1 Primal Jewel
+	- Station: Gem Cutting Table
+- **Primal Stygian Shard** (default currency for '.fam echoes', see config option for details)
+	- Inputs: x8 Greater Stygian Shards
+	- Outputs: x1 Primal Stygian Shard
+	- Station: Gem Cutting Table
+- **Charged Battery**
+	- Inputs: x1 Depleted Battery, x1 Electricity
+	- Outputs: x1 Charged Battery
+	- Station: Fabricator
+- **Blood Crystal**
+	- Inputs: x100 Crystals, 1x Greater Blood Essence
+	- Outputs: x100 Blood Crystal
+	- Station: Advanced Blood Press
+- **Copper Wires**
+	- Inputs: x3 Copper Ingots
+	- Outputs: x1 Copper Wires
+	- Station: Fabricator
+- **Vampiric Dust** (used to apply/change shiny buffs for familiars)
+	- Inputs: x8 Bleeding Hearts, x40 Blood Crystals
+	- Outputs: x1 Vampiric Dust
+	- Station: Advanced Grinder
+   
 ## Recommended
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
   Highly recommend getting this if you plan on using Bloodcraft or any other mods for V Rising in general. Invaluable set of tools and options that will greatly improve your modding experience.
