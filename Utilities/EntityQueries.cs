@@ -3177,4 +3177,129 @@ internal static class ComponentRegistry
         _initialized = true;
     }
 }
+/*
+    static EntityQuery _targetUnitQuery;
+
+    static readonly ComponentType[] _targetUnitAllComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Movement>())
+    ];
+    
+    static readonly ComponentType[] _targetUnitNoneComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<SpawnTag>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Minion>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>())
+    ];
+    
+    static readonly int[] _typeIndices = [0];
+
+    public QuestService()
+    {
+        _targetUnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = _targetUnitAllComponents,
+            None = _targetUnitNoneComponents,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+
+        QuestServiceRoutine().Start();
+    }
+
+    static IEnumerator QuestServiceRoutine()
+    {
+        if (_shouldReset) ResetShardBearers().Start();
+        if (_craftables) InitializeCraftables().Start();
+        if (_harvestables) InitializeHarvestables().Start();
+
+        while (true)
+        {
+            yield return QueryResultStreamAsync(
+                _targetUnitQuery,
+                _targetUnitAllComponents,
+                _typeIndices,
+                stream =>
+                {
+                    try
+                    {
+                        Dictionary<PrefabGUID, HashSet<Entity>> prefabGuidEntityGroups = [];
+
+                        using (stream)
+                        {
+                            foreach (QueryResult result in stream.GetResults())
+                            {
+                                PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
+                                string prefabName = prefabGuid.GetPrefabName();
+
+                                if (_filteredTargetUnits.Any(unit => prefabName.Contains(unit, StringComparison.OrdinalIgnoreCase)))
+                                    continue;
+
+                                if (!prefabGuidEntityGroups.TryGetValue(prefabGuid, out var entities))
+                                {
+                                    entities = [];
+                                    prefabGuidEntityGroups[prefabGuid] = entities;
+                                }
+
+                                entities.Add(result.Entity);
+                            }
+
+                            foreach (var keyValuePair in prefabGuidEntityGroups)
+                            {
+                                _targetCache.AddOrUpdate(
+                                    keyValuePair.Key,
+                                    _ => keyValuePair.Value,
+                                    (_, existingSet) =>
+                                    {
+                                        existingSet.Clear();
+                                        existingSet.UnionWith(keyValuePair.Value);
+                                        return existingSet;
+                                    }
+                                );
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogWarning($"[QuestService] QuestServiceRoutine() - {ex}");
+                    }
+                }
+            );
+
+            foreach (PrefabGUID prefabGuid in _shardBearers)
+            {
+                _targetCache.TryRemove(prefabGuid, out var _);
+            }
+
+            foreach (var playerInfoPair in SteamIdPlayerInfoCache)
+            {
+                ulong steamId = playerInfoPair.Key;
+                PlayerInfo playerInfo = playerInfoPair.Value;
+
+                Entity userEntity = playerInfo.CharEntity;
+                User user = playerInfo.User;
+
+                if (!_leveling)
+                {
+                    RefreshQuests(user, steamId, Progression.GetSimulatedLevel(userEntity));
+                }
+                else if (_leveling && steamId.TryGetPlayerExperience(out var xpData))
+                {
+                    RefreshQuests(user, steamId, xpData.Key);
+                }
+
+                yield return null;
+            }
+
+            _lastUpdate = DateTime.UtcNow;
+            yield return _routineDelay;
+        }
+    }
+    
+    public static void Start(this IEnumerator routine)
+    {
+        Core.StartCoroutine(routine);
+    }
+*/
 
