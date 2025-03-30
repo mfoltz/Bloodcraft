@@ -9,20 +9,25 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.Injection;
 using ProjectM;
+using ProjectM.Behaviours;
+using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
+using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Unity.Entities;
 using UnityEngine;
 
 namespace Bloodcraft;
-internal static class Core
+internal static class Core // probably about time to tidy this up again >_>
 {
-    public static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world (yet)...");
+    public static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world!");
     public static EntityManager EntityManager => Server.EntityManager;
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
@@ -45,12 +50,20 @@ internal static class Core
         new PrefabGUID(-1435372081)  // SolarusReturnBuff
     ];
 
+    static readonly List<PrefabGUID> _shardNecklaces =
+    [
+        Prefabs.Item_MagicSource_SoulShard_Manticore,
+        Prefabs.Item_MagicSource_SoulShard_Solarus,
+        Prefabs.Item_MagicSource_SoulShard_Dracula,
+        Prefabs.Item_MagicSource_SoulShard_Monster
+    ];
+
     // static readonly bool _performance = ConfigService.PerformanceAuditing;
 
     static readonly PrefabGUID _fallenAngel = new(-76116724);
 
     static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
-    static readonly PrefabGUID _mapIconCharmed = new(-1491648886);
+    static readonly PrefabGUID _bonusStatsBuff = new(737485591);
 
     static readonly PrefabGUID _bearDashAbility = new(1873182450);
     static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
@@ -74,6 +87,7 @@ internal static class Core
     ];
 
     const float DIRECTION_DURATION = 6f; // for making familiars on team two face correct direction until battle starts
+    const int BLEED_STACKS = 3;
 
     const string SANGUIS = "Sanguis";
     const string SANGUIS_DATA_CLASS = "Sanguis.Core+DataStructures";
@@ -92,19 +106,34 @@ internal static class Core
         OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey()); // loading these last causes a bad format exception now... oh computers, you so fun
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
+        if (!ComponentRegistry._initialized) ComponentRegistry.Initialize();
+
         _ = new PlayerService();
         _ = new LocalizationService();
 
         if (ConfigService.ClientCompanion) _ = new EclipseService();
 
         if (ConfigService.ExtraRecipes) Recipes.ModifyRecipes();
-        if (ConfigService.StarterKit) Configuration.StarterKitItems();
+        if (ConfigService.StarterKit) Configuration.InitializeStarterKitItems();
         if (ConfigService.PrestigeSystem) Buffs.PrestigeBuffs();
         if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
         {
-            Configuration.ClassPassiveBuffsMap();
-            Configuration.ClassSpellCooldownMap();
-            Classes.GenerateAbilityJewelMap();
+            Configuration.InitializeClassPassiveBuffs();
+            Configuration.InitializeClassSpellCooldowns();
+            Classes.InitializeJewels();
+
+            /*
+            foreach (List<PrefabGUID> passiveBuffs in Classes.ClassPassiveStatBuffs.Values)
+            {
+                foreach (PrefabGUID buffPrefabGuid in passiveBuffs)
+                {
+                    if (Classes.BuffStatBonuses.TryGetValue(buffPrefabGuid, out var statValuePair))
+                    {
+                        Classes.HandleModifyUnitStatBufferPrefabs(buffPrefabGuid, statValuePair);
+                    }
+                }
+            }
+            */
         }
 
         if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += LevelingSystem.OnUpdate;
@@ -116,7 +145,7 @@ internal static class Core
         }
         if (ConfigService.FamiliarSystem)
         {
-            Configuration.FamiliarBans();
+            Configuration.InitializeBannedFamiliarUnits();
             if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
             //DetectSanguis(); want to nail the fun factor and make sure no glaring bugs before adding stakes
@@ -125,15 +154,14 @@ internal static class Core
         }
         if (ConfigService.ProfessionSystem)
         {
-            // uhh definitely remember what I was going to put here? hrm
+            GatherStatMods();
         }
 
         ModifyPrefabs();
-
-        SlashersBleedTest();
         // MiscLogging();
 
         _initialized = true;
+        DebugLoggerPatch._initialized = true;
     }
     static World GetServerWorld()
     {
@@ -148,6 +176,28 @@ internal static class Core
         }
 
         _monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    }
+    public unsafe static AddItemSettings GetAddItemSettings()
+    {
+        AddItemSettings addItemSettings = new()
+        {
+            EntityManager = EntityManager,
+            EquipIfPossible = true
+        };
+
+        GCHandle handle = GCHandle.Alloc(ServerGameManager.ItemLookupMap, GCHandleType.Pinned);
+
+        try
+        {
+            IntPtr address = handle.AddrOfPinnedObject();
+            addItemSettings.ItemDataMap = Marshal.ReadIntPtr(address);
+        }
+        finally
+        {
+            if (handle.IsAllocated) handle.Free();
+        }
+
+        return addItemSettings;
     }
     static void ModifyPrefabs()
     {
@@ -166,6 +216,22 @@ internal static class Core
                 }
             }
 
+            foreach (PrefabGUID shardNecklace in _shardNecklaces)
+            {
+                var itemDataHashMap = SystemService.GameDataSystem.ItemHashLookupMap;
+                
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(shardNecklace, out Entity shardNecklacePrefab))
+                {
+                    ItemData itemData = shardNecklacePrefab.Read<ItemData>();
+
+                    itemData.ItemCategory &= ~ItemCategory.Soulshard; // Remove Soulshard
+                    itemData.ItemCategory |= ItemCategory.BloodBound | ItemCategory.Magic; // Add BloodBound and Magic
+                    shardNecklacePrefab.Write(itemData);
+
+                    itemDataHashMap[shardNecklace] = itemData;
+                }
+            }
+
             if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_defaultEmoteBuff, out Entity defaultEmotePrefab))
             {
                 defaultEmotePrefab.With((ref LifeTime lifeTime) =>
@@ -179,23 +245,6 @@ internal static class Core
                     modifyRotation.SnapToDirection = true;
                     modifyRotation.Type = RotationModificationType.Set;
                 });
-            }
-            
-            /*
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_mapIconCharmed, out Entity mapIconCharmedPrefab))
-            {
-                mapIconCharmedPrefab.With((ref LocalTransform localTransform) =>
-                {
-                    localTransform.Scale = 0.25f;
-                });
-            }
-            */
-        }
-        if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
-        {
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_fallenAngel, out Entity fallenAngelPrefab))
-            {
-                if (!fallenAngelPrefab.Has<BlockFeedBuff>()) fallenAngelPrefab.Add<BlockFeedBuff>();
             }
         }
         if (ConfigService.BearFormDash)
@@ -248,7 +297,7 @@ internal static class Core
             }
             */
         }
-        if (ConfigService.EliteShardBearers) // should probably just modify their stats on the base prefabs instead of in the spawnTransformSystem >_>
+        if (ConfigService.EliteShardBearers) // should probably just modify their stats on the base prefabs instead of in the spawnTransformSystem >_> actually no then that would make more work to then correct fams, hrm
         {
             foreach (PrefabGUID soulShardDropTable in _soulShardDropTables)
             {
@@ -268,16 +317,46 @@ internal static class Core
                 }
             }
         }
-    }
-    static void SlashersBleedTest()
-    {
-        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_vargulfBleedBuff, out Entity bleedBuffPrefab))
+        if (ConfigService.BleedingEdge)
         {
-            bleedBuffPrefab.With((ref Buff buff) =>
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_vargulfBleedBuff, out Entity bleedBuffPrefab))
             {
-                buff.MaxStacks = 5;
-                buff.IncreaseStacks = true;
-            });
+                bleedBuffPrefab.With((ref Buff buff) =>
+                {
+                    buff.MaxStacks = BLEED_STACKS;
+                    buff.IncreaseStacks = true;
+                });
+            }
+        }
+        if (ConfigService.HeavyFrame)
+        {
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Prefabs.AB_Vampire_Crossbow_Primary_Projectile, out Entity crossbowProjectilePrefab))
+            {
+                crossbowProjectilePrefab.With((ref RagdollForceSource ragdollForceSource) =>
+                {
+                    ragdollForceSource.ForceModifier = 2f;
+                });
+
+                crossbowProjectilePrefab.With((ref Projectile projectile) =>
+                {
+                    projectile.Speed = 100f;
+                });
+            }
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Prefabs.AB_Vampire_Crossbow_Primary_Cast, out Entity crossbowCastPrefab))
+            {
+                crossbowCastPrefab.With((ref AbilityCastTimeData abilityCastTimeData) =>
+                {
+                    // abilityCastTimeData.MaxCastTime._Value = 1.2f; made animation look odd
+                });
+            }
+        }
+        if (ConfigService.LegacySystem || ConfigService.ExpertiseSystem)
+        {
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_bonusStatsBuff, out Entity bonusStatsBuffPrefab) 
+                && bonusStatsBuffPrefab.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
+            {
+                buffer.Clear();
+            }
         }
     }
 
@@ -368,6 +447,32 @@ internal static class Core
         catch (Exception e)
         {
             Log.LogWarning($"Error dumping entity: {e.Message}");
+        }
+    }
+    static void LogServerSystems()
+    {
+        foreach (var systemBase in Server.Systems)
+        {
+            Il2CppSystem.Type systemType = systemBase.GetIl2CppType();
+
+            if (systemBase.EntityQueries.Length == 0)
+            {
+                Log.LogInfo($"{systemType.FullName}: No queries!");
+
+                continue;
+            }
+
+            Log.LogInfo("=============================");
+            Log.LogInfo(systemType.FullName);
+
+            foreach (EntityQuery query in systemBase.EntityQueries)
+            {
+                EntityQueryDesc entityQueryDesc = query.GetEntityQueryDesc();
+                Log.LogInfo($" All: {string.Join(",", entityQueryDesc.All)}");
+                Log.LogInfo($" Any: {string.Join(",", entityQueryDesc.Any)}");
+                Log.LogInfo($" Absent: {string.Join(",", entityQueryDesc.Absent)}");
+                Log.LogInfo($" None: {string.Join(",", entityQueryDesc.None)}");
+            }
         }
     }
 

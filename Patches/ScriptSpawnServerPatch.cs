@@ -11,6 +11,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using static Bloodcraft.Utilities.EntityQueries;
 
 namespace Bloodcraft.Patches;
 
@@ -26,7 +27,7 @@ internal static class ScriptSpawnServerPatch
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
-    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly int _maxLevel = ConfigService.MaxLevel;
@@ -38,8 +39,6 @@ internal static class ScriptSpawnServerPatch
 
     static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _fallenAngel = new(-76116724);
-
-    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     static readonly PrefabGUID _werewolfStandardBuff = new(-1598161201);
     static readonly PrefabGUID _werewolfVBloodBuff = new(-622259665);
@@ -75,12 +74,13 @@ internal static class ScriptSpawnServerPatch
         if (!Core._initialized) return;
 
         NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);
+
         NativeArray<PrefabGUID> prefabGuids = _query.ToComponentDataArray<PrefabGUID>(Allocator.Temp);
         NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
         NativeArray<EntityOwner> entityOwners = _query.ToComponentDataArray<EntityOwner>(Allocator.Temp);
 
-        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
         ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>(true);
+        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
         ComponentLookup<BloodBuff> bloodBuffLookup = __instance.GetComponentLookup<BloodBuff>(true);
 
         try
@@ -94,8 +94,6 @@ internal static class ScriptSpawnServerPatch
                 PrefabGUID prefabGuid = prefabGuids[i];
                 int buffType = GetBuffType(prefabGuid.GuidHash, buffEntity, buffs[i], buffTarget, owner, ref playerCharacterLookup, ref blockFeedBuffLookup, ref bloodBuffLookup);
 
-                // Core.Log.LogInfo($"{prefabGuid.GetPrefabName()} | {buffType}");
-
                 switch (buffType)
                 {
                     case 1 when _exoForm:
@@ -108,14 +106,6 @@ internal static class ScriptSpawnServerPatch
                     case 3 when _exoForm:
                         ServerGameManager.SetAbilityGroupCooldown(buffEntity.GetOwner(), _bloodBoltSwarmGroup, BLOODBOLT_SWARM_COOLDOWN);
                         break;
-                    case 4 when (_legacies || _expertise):
-                        ApplyStats(buffEntity, buffTarget);
-                        break;
-                    /*
-                    case 5 when _classes:
-                        Classes.HandleBloodBuffMutant(buffEntity, buffTarget);
-                        break;
-                    */
                     case 6 when _leveling:
                         buffEntity.With((ref BloodBuff_Brute_ArmorLevelBonus_DataShared bloodBuff_Brute_ArmorLevelBonus_DataShared) =>
                         {
@@ -125,8 +115,8 @@ internal static class ScriptSpawnServerPatch
                     case 7 when _legacies && BloodSystem.BuffToBloodTypeMap.ContainsKey(prefabGuid):
                         Buffs.RefreshStats(buffTarget);
                         break;
-                    case 8 when _familiars && owner.IsAllied(buffTarget):
-                        buffEntity.Destroy();
+                    case 8 when _familiars && owner.IsAllies(buffTarget):
+                        buffEntity.TryDestroy();
                         break;
                     case 9 when _familiars:
                         if (buffTarget.TryGetFollowedPlayer(out Entity playerCharacter))
@@ -172,8 +162,6 @@ internal static class ScriptSpawnServerPatch
                 -31099041 => 1,
                 1615225381 or 832491730 or -622814018 => 2,
                 136816739 => 3,
-                20081801 => 4,
-                // -491525099 => 5,
                 -1596803256 => 6,
                 _ when bloodBuffLookup.HasComponent(buffEntity) => 7,
                 _ when blockFeedBuffLookup.HasComponent(owner) && buff.BuffEffectType.Equals(BuffEffectType.Debuff) => 8,

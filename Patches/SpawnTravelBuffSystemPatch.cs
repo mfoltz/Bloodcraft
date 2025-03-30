@@ -41,9 +41,9 @@ internal static class SpawnTravelBuffSystemPatch
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
-                    if (Familiars.AutoCallMap.TryRemove(player, out Entity familiar) && familiar.Exists() && steamId.TryGetFamiliarActives(out var data))
+                    if (Familiars.AutoCallMap.TryRemove(player, out Entity familiar) && familiar.Exists())
                     {
-                        Familiars.CallFamiliar(player, familiar, user, steamId, data);
+                        Familiars.CallFamiliar(player, familiar, user, steamId);
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Bloodcraft.Utilities;
+using ProjectM.Behaviours;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -9,8 +10,6 @@ namespace Bloodcraft.Services;
 internal class FamiliarService
 {
     static readonly WaitForSeconds _delay = new(10f);
-
-    static readonly Entity _nullCheck = Entity.Null;
     public FamiliarService()
     {
         DisabledFamiliarPositionUpdateRoutine().Start();
@@ -21,23 +20,20 @@ internal class FamiliarService
         {
             yield return _delay;
 
-            foreach (var kvp in DataService.PlayerDictionaries._familiarActives)
+            foreach (var kvp in Familiars.ActiveFamiliarManager.ActiveFamiliars)
             {
                 ulong steamId = kvp.Key;
                 Entity familiar = kvp.Value.Familiar;
 
-                if (familiar.Equals(_nullCheck))
+                if (!familiar.HasValue())
                 {
                     yield return null;
-
-                    continue;
                 }
-                else if (familiar.IsDisabled() && steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                else if (kvp.Value.Dismissed && steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                 {
                     Familiars.TryReturnFamiliar(playerInfo.CharEntity, familiar);
+                    yield return null;
                 }
-
-                yield return null;
             }
         }
     }

@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Bloodcraft</AssemblyName>
-		<Version>1.6.6</Version>
+		<Version>1.7.7</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<RestoreSources>
 				https://api.nuget.org/v3/index.json;
@@ -21,24 +21,24 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<EmbeddedResource Include="Localization\Prefabs.json" />
-		<EmbeddedResource Include="Localization\English.json" />
-		<EmbeddedResource Include="Localization\Brazilian.json" />
-		<EmbeddedResource Include="Localization\French.json" />
-		<EmbeddedResource Include="Localization\German.json" />
-		<EmbeddedResource Include="Localization\Hungarian.json" />
-		<EmbeddedResource Include="Localization\Italian.json" />
-		<EmbeddedResource Include="Localization\Japanese.json" />
-		<EmbeddedResource Include="Localization\Koreana.json" />
-		<EmbeddedResource Include="Localization\Latam.json" />
-		<EmbeddedResource Include="Localization\Polish.json" />
-		<EmbeddedResource Include="Localization\Russian.json" />
-		<EmbeddedResource Include="Localization\SChinese.json" />
-		<EmbeddedResource Include="Localization\TChinese.json" />
-		<EmbeddedResource Include="Localization\Thai.json" />
-		<EmbeddedResource Include="Localization\Turkish.json" />
-		<EmbeddedResource Include="Localization\Spanish.json" />
-		<EmbeddedResource Include="Localization\Vietnamese.json" />
+		<EmbeddedResource Include="Resources\Localization\Prefabs.json" />
+		<EmbeddedResource Include="Resources\Localization\English.json" />
+		<EmbeddedResource Include="Resources\Localization\Brazilian.json" />
+		<EmbeddedResource Include="Resources\Localization\French.json" />
+		<EmbeddedResource Include="Resources\Localization\German.json" />
+		<EmbeddedResource Include="Resources\Localization\Hungarian.json" />
+		<EmbeddedResource Include="Resources\Localization\Italian.json" />
+		<EmbeddedResource Include="Resources\Localization\Japanese.json" />
+		<EmbeddedResource Include="Resources\Localization\Koreana.json" />
+		<EmbeddedResource Include="Resources\Localization\Latam.json" />
+		<EmbeddedResource Include="Resources\Localization\Polish.json" />
+		<EmbeddedResource Include="Resources\Localization\Russian.json" />
+		<EmbeddedResource Include="Resources\Localization\SChinese.json" />
+		<EmbeddedResource Include="Resources\Localization\TChinese.json" />
+		<EmbeddedResource Include="Resources\Localization\Thai.json" />
+		<EmbeddedResource Include="Resources\Localization\Turkish.json" />
+		<EmbeddedResource Include="Resources\Localization\Spanish.json" />
+		<EmbeddedResource Include="Resources\Localization\Vietnamese.json" />
 		<EmbeddedResource Include="Resources\secrets.json" />
 	</ItemGroup>
 

@@ -17,11 +17,13 @@ internal static class EquipmentManager
     public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
         IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.GetPrefabGuid());
+
+        int professionLevel = handler.GetProfessionData(steamId).Key;
         float scaledBonus = 0f;
 
         if (equipmentEntity.Has<Durability>())
         {
-            scaledBonus = CalculateDurabilityBonus(handler, steamId);
+            scaledBonus = CalculateDurabilityBonus(professionLevel);
 
             equipmentEntity.With((ref Durability durability) =>
             {
@@ -31,7 +33,8 @@ internal static class EquipmentManager
         }
 
         if (!ServerGameManager.TryGetBuffer<ModifyUnitStatBuff_DOTS>(equipmentEntity, out var buffer)) return;
-        scaledBonus = CalculateStatBonus(handler, steamId);
+
+        scaledBonus = CalculateStatBonus(handler, professionLevel);
 
         for (int i = 0; i < buffer.Length; i++)
         {
@@ -41,44 +44,63 @@ internal static class EquipmentManager
             buffer[i] = statBuff;
         }
     }
-    static float CalculateStatBonus(IProfessionHandler handler, ulong steamId)
+    public static void ApplyEquipmentStats(int professionLevel, Entity equipmentEntity)
     {
-        if (handler != null)
+        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.GetPrefabGuid());
+        float scaledBonus = 0f;
+
+        if (equipmentEntity.Has<Durability>())
         {
-            float equipmentMultiplier = 0;
-            string professionName = handler.GetProfessionName();
+            scaledBonus = CalculateDurabilityBonus(professionLevel);
 
-            if (professionName.Contains("Blacksmithing"))
+            equipmentEntity.With((ref Durability durability) =>
             {
-                equipmentMultiplier = MAX_WEAPON_MULTIPLIER;
-            }
-            else if (professionName.Contains("Tailoring"))
-            {
-                equipmentMultiplier = MAX_ARMOR_MULTIPLIER;
-            }
-            else if (professionName.Contains("Enchanting"))
-            {
-                equipmentMultiplier = MAX_SOURCE_MULTIPLIER;
-            }
-
-            int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (equipmentMultiplier * (professionLevel / (float)MAX_PROFESSION_LEVEL));
-
-            return scaledBonus;
+                durability.MaxDurability *= scaledBonus;
+                durability.Value = durability.MaxDurability;
+            });
         }
 
-        return 0;
+        if (!ServerGameManager.TryGetBuffer<ModifyUnitStatBuff_DOTS>(equipmentEntity, out var buffer)) return;
+
+        scaledBonus = CalculateStatBonus(handler, professionLevel);
+
+        for (int i = 0; i < buffer.Length; i++)
+        {
+            ModifyUnitStatBuff_DOTS statBuff = buffer[i];
+            statBuff.Value *= scaledBonus;
+
+            buffer[i] = statBuff;
+        }
     }
-    static float CalculateDurabilityBonus(IProfessionHandler handler, ulong steamId)
+    static float CalculateStatBonus(IProfessionHandler handler, int professionLevel)
     {
-        if (handler != null)
+        if (handler == null)
+            return 0;
+
+        float equipmentMultiplier = handler switch
         {
-            int professionLevel = handler.GetProfessionData(steamId).Key;
-            float scaledBonus = 1 + (MAX_DURABILITY_MULTIPLIER * (professionLevel / (float)MAX_PROFESSION_LEVEL));
+            BlacksmithingHandler => MAX_WEAPON_MULTIPLIER,
+            TailoringHandler => MAX_ARMOR_MULTIPLIER,
+            EnchantingHandler => MAX_SOURCE_MULTIPLIER,
+            _ => 0
+        };
 
-            return scaledBonus;
-        }
+        return 1 + (equipmentMultiplier * (professionLevel / (float)MAX_PROFESSION_LEVEL));
+    }
+    static float CalculateDurabilityBonus(int professionLevel)
+    {
+        return 1 + (MAX_DURABILITY_MULTIPLIER * (professionLevel / (float)MAX_PROFESSION_LEVEL));
+    }
+    public static int CalculateProfessionLevelOfEquipmentFromMaxDurability(Entity equipmentEntity)
+    {
+        Entity prefabEntity = equipmentEntity.GetPrefabEntity();
 
-        return 0;
+        float equipmentMaxDurability = equipmentEntity.GetMaxDurability();
+        float prefabMaxDurability = prefabEntity.GetMaxDurability();
+
+        float durabilityRatio = equipmentMaxDurability / prefabMaxDurability - 1f;
+        int professionLevel = (int)(durabilityRatio * MAX_PROFESSION_LEVEL / MAX_DURABILITY_MULTIPLIER);
+
+        return Math.Clamp(professionLevel, 0, MAX_PROFESSION_LEVEL);
     }
 }

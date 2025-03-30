@@ -35,7 +35,7 @@ internal static class Quests
 
         if (questData.TryGetValue(questType, out var questObjective) && questObjective.Objective.Goal.Equals(TargetType.Kill) && !questObjective.Objective.Complete)
         {
-            if (!QuestService._targetCache.TryGetValue(questObjective.Objective.Target, out HashSet<Entity> entities))
+            if (!QuestService.TargetCache.TryGetValue(questObjective.Objective.Target, out HashSet<Entity> entities))
             {
                 LocalizationService.HandleReply(ctx, $"Targets have all been killed, give them a chance to respawn! If this doesn't seem right consider rerolling your {QuestTypeColor[questType]}.");
             }
@@ -69,10 +69,10 @@ internal static class Quests
                 float distance = math.distance(userPosition, targetPosition);
 
                 float3 direction = math.normalize(targetPosition - userPosition);
-                string cardinalDirection = $"<color=white>{GetCardinalDirection(direction)}</color>";
+                string cardinalDirection = $"<color=yellow>{GetCardinalDirection(direction)}</color>";
                 double seconds = (DateTime.UtcNow - QuestService._lastUpdate).TotalSeconds;
 
-                LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the <color=yellow>{cardinalDirection}</color> <color=#F88380>{(int)seconds}</color>s ago.");
+                LocalizationService.HandleReply(ctx, $"Nearest <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color> was <color=#00FFFF>{(int)distance}</color>f away to the {cardinalDirection} <color=#F88380>{(int)seconds}</color>s ago.");
             }
             else if (entities.Count == 0)
             {
@@ -88,38 +88,67 @@ internal static class Quests
     {
         if (questData.TryGetValue(questType, out var questObjective) && !questObjective.Objective.Complete)
         {
-            DateTime lastReset = questObjective.LastReset;
-            DateTime nextReset = questType.Equals(QuestType.Daily) ? lastReset.AddDays(1) : lastReset.AddDays(7);
-            DateTime now = DateTime.UtcNow;
-            TimeSpan untilReset = nextReset - now;
-
-            string timeLeft = "";
-            if (questType.Equals(QuestType.Daily))
-            {
-                timeLeft = string.Format("{0:D2}:{1:D2}:{2:D2}",
-                                untilReset.Hours,
-                                untilReset.Minutes,
-                                untilReset.Seconds);
-            }
-            else if (questType.Equals(QuestType.Weekly))
-            {
-                timeLeft = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}",
-                                untilReset.Days,
-                                untilReset.Hours,
-                                untilReset.Minutes,
-                                untilReset.Seconds);
-            }
-
+            string timeLeft = GetTimeUntilReset(questObjective, questType);
             LocalizationService.HandleReply(ctx, $"{QuestTypeColor[questType]}: <color=green>{questObjective.Objective.Goal}</color> <color=white>{questObjective.Objective.Target.GetLocalizedName()}</color>x<color=#FFC0CB>{questObjective.Objective.RequiredAmount}</color> [<color=white>{questObjective.Progress}</color>/<color=yellow>{questObjective.Objective.RequiredAmount}</color>]");
-            LocalizationService.HandleReply(ctx, $"Time until {questType} reset: <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
+            LocalizationService.HandleReply(ctx, $"Time until {questType} reset - <color=yellow>{timeLeft}</color> | {_questTargetType[questObjective.Objective.Goal]} Prefab: <color=white>{questObjective.Objective.Target.GetPrefabName()}</color>");
         }
         else if (questObjective.Objective.Complete)
         {
-            LocalizationService.HandleReply(ctx, $"You've already completed your {QuestTypeColor[questType]}. Check back after reset!");
+            string timeLeft = GetTimeUntilReset(questObjective, questType);
+            LocalizationService.HandleReply(ctx, $"You've already completed your {QuestTypeColor[questType]}! Time until {questType} reset - <color=yellow>{timeLeft}</color>");
         }
         else
         {
             LocalizationService.HandleReply(ctx, $"You don't have a {QuestTypeColor[questType]}.");
         }
+    }
+    static string GetTimeUntilReset((QuestObjective Objective, int Progress, DateTime LastReset) questObjective, QuestType questType)
+    {
+        DateTime lastReset = questObjective.LastReset;
+        DateTime nextReset = questType.Equals(QuestType.Daily) ? lastReset.AddDays(1) : lastReset.AddDays(7);
+
+        DateTime now = DateTime.UtcNow;
+        TimeSpan untilReset = nextReset - now;
+
+        string timeLeft = "";
+        if (questType.Equals(QuestType.Daily))
+        {
+            timeLeft = string.Format("{0:D2}:{1:D2}:{2:D2}",
+                            untilReset.Hours,
+                            untilReset.Minutes,
+                            untilReset.Seconds);
+        }
+        else if (questType.Equals(QuestType.Weekly))
+        {
+            timeLeft = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}",
+                            untilReset.Days,
+                            untilReset.Hours,
+                            untilReset.Minutes,
+                            untilReset.Seconds);
+        }
+
+        return timeLeft;
+    }
+    static string GetCardinalDirection(float3 direction)
+    {
+        float angle = math.degrees(math.atan2(direction.z, direction.x));
+        if (angle < 0) angle += 360;
+
+        if (angle >= 337.5 || angle < 22.5)
+            return "East";
+        else if (angle >= 22.5 && angle < 67.5)
+            return "Northeast";
+        else if (angle >= 67.5 && angle < 112.5)
+            return "North";
+        else if (angle >= 112.5 && angle < 157.5)
+            return "Northwest";
+        else if (angle >= 157.5 && angle < 202.5)
+            return "West";
+        else if (angle >= 202.5 && angle < 247.5)
+            return "Southwest";
+        else if (angle >= 247.5 && angle < 292.5)
+            return "South";
+        else
+            return "Southeast";
     }
 }

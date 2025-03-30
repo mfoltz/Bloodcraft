@@ -48,7 +48,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     bool slotSpells = prefabName.Contains("unarmed", StringComparison.OrdinalIgnoreCase) || prefabName.Contains("fishingpole", StringComparison.OrdinalIgnoreCase);
                     bool shiftSpell = prefabName.Contains("weapon", StringComparison.OrdinalIgnoreCase);
 
-                    (int FirstSlot, int SecondSlot, int ShiftSlot) spells;
+                    (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells;
                     if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
                     {
                         HandleExtraSpells(entity, steamId, spells);
@@ -69,15 +69,16 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             entities.Dispose();
         }
     }
-    static void HandleExtraSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void HandleExtraSpells(Entity entity, ulong steamId, (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells)
     {
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
-        if (!spells.FirstSlot.Equals(0))
+
+        if (!spells.FirstUnarmed.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 1,
-                NewGroupId = new(spells.FirstSlot),
+                NewGroupId = new(spells.FirstUnarmed),
                 CopyCooldown = true,
                 Priority = 0,
             };
@@ -85,12 +86,12 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
 
-        if (!spells.SecondSlot.Equals(0))
+        if (!spells.SecondUnarmed.Equals(0))
         {
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 4,
-                NewGroupId = new(spells.SecondSlot),
+                NewGroupId = new(spells.SecondUnarmed),
                 CopyCooldown = true,
                 Priority = 0,
             };
@@ -100,9 +101,9 @@ internal static class ReplaceAbilityOnSlotSystemPatch
 
         HandleShiftSpell(entity, spells, GetPlayerBool(steamId, SHIFT_LOCK_KEY));
     }
-    static void HandleShiftSpell(Entity entity, (int FirstSlot, int SecondSlot, int ShiftSlot) spells, bool shiftLock)
+    static void HandleShiftSpell(Entity entity, (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells, bool shiftLock)
     {
-        PrefabGUID spellPrefabGUID = new(spells.ShiftSlot);
+        PrefabGUID spellPrefabGUID = new(spells.ClassSpell);
 
         if (!shiftLock) return;
         else if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(spellPrefabGUID, out Entity ability) && ability.Has<VBloodAbilityData>()) return;
@@ -112,7 +113,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             ReplaceAbilityOnSlotBuff buff = new()
             {
                 Slot = 3,
-                NewGroupId = new(spells.ShiftSlot),
+                NewGroupId = new(spells.ClassSpell),
                 CopyCooldown = true,
                 Priority = 0,
             };
@@ -120,7 +121,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
             buffer.Add(buff);
         }
     }
-    static void SetSpells(Entity entity, ulong steamId, (int FirstSlot, int SecondSlot, int ShiftSlot) spells)
+    static void SetSpells(Entity entity, ulong steamId, (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells)
     {
         bool lockSpells = GetPlayerBool(steamId, SPELL_LOCK_KEY);
         var buffer = entity.ReadBuffer<ReplaceAbilityOnSlotBuff>();
@@ -129,12 +130,12 @@ internal static class ReplaceAbilityOnSlotSystemPatch
         {
             if (buff.Slot == 5)
             {
-                if (lockSpells) spells = (buff.NewGroupId.GuidHash, spells.SecondSlot, spells.ShiftSlot);
+                if (lockSpells) spells = (buff.NewGroupId.GuidHash, spells.SecondUnarmed, spells.ClassSpell);
             }
 
             if (buff.Slot == 6)
             {
-                if (lockSpells) spells = (spells.FirstSlot, buff.NewGroupId.GuidHash, spells.ShiftSlot);
+                if (lockSpells) spells = (spells.FirstUnarmed, buff.NewGroupId.GuidHash, spells.ClassSpell);
             }
         }
 

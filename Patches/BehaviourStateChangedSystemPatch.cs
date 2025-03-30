@@ -50,6 +50,14 @@ internal static class BehaviourStateChangedSystemPatch
                     {
                         Familiars.TryReturnFamiliar(player, familiar);
                     }
+                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Relocate_Unstuck))
+                    {
+                        Core.Log.LogWarning($"[BehaviourStateChangedSystem] Relocate_Unstuck: {familiar.GetPrefabGuid()}");
+                    }
+                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Relocate_CombatArea))
+                    {
+                        Core.Log.LogWarning($"[BehaviourStateChangedSystem] Relocate_CombatArea: {familiar.GetPrefabGuid()}");
+                    }
                 }
             }
         }

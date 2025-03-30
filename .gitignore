@@ -300,3 +300,5 @@ dist/
 *.env
 secrets.json
 DevCommands.cs
+SystemTesting.cs
+TestPatches.cs

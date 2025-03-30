@@ -7,7 +7,6 @@ using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
@@ -40,13 +39,14 @@ internal static class LevelingSystem
     static readonly float _levelingPrestigeReducer = ConfigService.LevelingPrestigeReducer;
 
     static readonly WaitForSeconds _delay = new(0.75f);
+    const float DELAY_ADD = 1f;
 
     static readonly PrefabGUID _levelUpBuff = new(-1133938228);
     static readonly PrefabGUID _warEventTrash = new(2090187901);
 
-    static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f); // Bright Gold
+    static readonly float3 _gold = new(1f, 0.75f, 0f); // Rich Gold
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
-    static readonly PrefabGUID _sctResourceGain = new(1876501183);
+    static readonly PrefabGUID _sctGeneric = new(-1687715009);
 
     // public static readonly HashSet<ulong> PartiedPlayers = [];
 
@@ -55,19 +55,21 @@ internal static class LevelingSystem
         new(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
         new(244750581),   // SetBonus_GearLevel_02
         new(-1469378405) // SetBonus_GearLevel_01
-        // new(-1596803256)  // AB_BloodBuff_Brute_GearLevelBonus
     ];
 
     static readonly PrefabGUID _bruteGearLevelBuff = new(-1596803256);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        ProcessExperience(deathEvent.Target, deathEvent.DeathParticipants);
+        ProcessExperience(deathEvent);
     }
-    public static void ProcessExperience(Entity target, HashSet<Entity> deathParticipants)
+    public static void ProcessExperience(DeathEventArgs deathEvent)
     {
+        Entity target = deathEvent.Target;
+        HashSet<Entity> deathParticipants = deathEvent.DeathParticipants;
+
         float groupMultiplier = 1f;
         bool inGroup = deathParticipants.Count > 1;
-
+        
         if (inGroup) groupMultiplier = _groupMultiplier; // if more than 1 participant, apply group multiplier
 
         foreach (Entity playerCharacter in deathParticipants)
@@ -81,13 +83,18 @@ internal static class LevelingSystem
 
             if (maxLevel && inGroup) // if at max level, prestige or no, and in a group (party or clan) get expertise exp instead
             {
-                WeaponSystem.ProcessExpertise(playerCharacter, target, groupMultiplier);
+                WeaponSystem.ProcessExpertise(deathEvent, groupMultiplier);
+                deathEvent.ScrollingTextDelay += DELAY_ADD;
             }
             else if (maxLevel) return;
-            else ProcessExperienceGain(playerCharacter, target, steamId, currentLevel, groupMultiplier);
+            else
+            {
+                ProcessExperienceGain(playerCharacter, target, steamId, currentLevel, deathEvent.ScrollingTextDelay, groupMultiplier);
+                deathEvent.ScrollingTextDelay += DELAY_ADD;
+            }
         }
     }
-    public static void ProcessExperienceGain(Entity playerCharacter, Entity target, ulong steamId, int currentLevel, float groupMultiplier = 1f)
+    public static void ProcessExperienceGain(Entity playerCharacter, Entity target, ulong steamId, int currentLevel, float delay, float groupMultiplier = 1f)
     {
         UnitLevel victimLevel = target.Read<UnitLevel>();
         Health health = target.Read<Health>();
@@ -149,7 +156,7 @@ internal static class LevelingSystem
         SaveLevelingExperience(steamId, gainedXP, out bool leveledUp, out int newLevel);
 
         if (leveledUp) HandlePlayerLevelUpEffects(playerCharacter, steamId);
-        NotifyPlayer(playerCharacter, steamId, (int)gainedXP, leveledUp, newLevel, rested);
+        NotifyPlayer(playerCharacter, steamId, (int)gainedXP, leveledUp, newLevel, delay, rested);
     }
     static float AddRestedXP(ulong steamId, float gainedXP, ref int rested)
     {
@@ -212,7 +219,7 @@ internal static class LevelingSystem
             Classes.ApplyClassBuffs(playerCharacter, steamId);
         }
     }
-    public static void NotifyPlayer(Entity playerCharacter, ulong steamId, float gainedXP, bool leveledUp, int newLevel, int restedXP = 0)
+    public static void NotifyPlayer(Entity playerCharacter, ulong steamId, float gainedXP, bool leveledUp, int newLevel, float delay, int restedXP = 0)
     {
         int gainedIntXP = (int)gainedXP;
 
@@ -220,6 +227,7 @@ internal static class LevelingSystem
         User user = userEntity.GetUser();
 
         if (newLevel >= _maxPlayerLevel) return;
+        else if (gainedXP <= 0) return;
 
         if (leveledUp)
         {
@@ -248,18 +256,18 @@ internal static class LevelingSystem
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
-        if (GetPlayerBool(steamId, SCT_PLAYER_KEY))
+        if (GetPlayerBool(steamId, SCT_PLAYER_LVL_KEY))
         {
-            // float3 targetPosition = character.Read<Translation>().Value;
-            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, _gold, gainedXP).Start();
+            PlayerExperienceSCTDelayRoutine(playerCharacter, userEntity, _gold, gainedXP, delay).Start();
         }
     }
-    static IEnumerator PlayerExperienceSCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP) // maybe just have one of these in progression utilities but later
+    static IEnumerator PlayerExperienceSCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later
     {
-        yield return _delay;
+        yield return new WaitForSeconds(delay);
 
         float3 position = playerCharacter.GetPosition();
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctResourceGain, userEntity);
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctGeneric, userEntity);
+        // delay += DELAY_ADD;
     }
     static float GetXp(ulong steamId)
     {
@@ -311,6 +319,7 @@ internal static class LevelingSystem
         {
             int playerLevel = xpData.Key;
 
+            PlayerProgressionCacheManager.UpdatePlayerProgressionLevel(steamId, playerLevel);
             HandleExtraLevels(playerCharacter, ref playerLevel);
 
             playerCharacter.With((ref Equipment equipment) =>

@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
+using static Bloodcraft.Utilities.EntityQueries;
 
 namespace Bloodcraft.Patches;
 
@@ -25,7 +26,7 @@ internal static class BuffSystemSpawnPatches
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
     static readonly bool _eliteShardBearers = ConfigService.EliteShardBearers;
-    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _exoFormImmortal = ConfigService.ExoPrestiging && ConfigService.TrueImmortal;
@@ -42,7 +43,6 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID _fallenAngel = new(-76116724);
     static readonly PrefabGUID _solarus = new(-740796338);
     static readonly PrefabGUID _holyBubbleBuff = new(358972271);
-    static readonly PrefabGUID _draculaReturnBuff = new(404387047);
     static readonly PrefabGUID _gateBossFeedCompleteBuff = new(-354622715);
     static readonly PrefabGUID _holyBeamPowerBuff = new(-1584595113);
     static readonly PrefabGUID _pvpProtectedBuff = new(1111481396);
@@ -54,13 +54,11 @@ internal static class BuffSystemSpawnPatches
     static readonly PrefabGUID _highlordSwordSpawnBuff = new(-6635580);
     static readonly PrefabGUID _highlordSwordBossPermaBuff = new(-916946628);
     static readonly PrefabGUID _vampiricCurse = new(-89195359);
-    static readonly PrefabGUID _spawnMutantBiteBuff = new(-651661301);
-    static readonly PrefabGUID _feedBiteAbortTriggerBuff = new(366323518);
-    static readonly PrefabGUID _mutantFromBiteBloodBuff = new(-491525099);
     static readonly PrefabGUID _inkCrawlerDeathBuff = new(1273155981);
     static readonly PrefabGUID _targetSwallowedBuff = new(-915145807);
     static readonly PrefabGUID _combatStanceBuff = new(-952067173);
     static readonly PrefabGUID _exoFormBuff = new(-31099041);
+    static readonly PrefabGUID _draculaReturnHideBuff = new(404387047);
 
     static readonly PrefabGUID _summonBuff = new(1947371829);
 
@@ -76,10 +74,11 @@ internal static class BuffSystemSpawnPatches
         if (!Core._initialized) return;
 
         NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);
+
         NativeArray<PrefabGUID> prefabGuids = _query.ToComponentDataArray<PrefabGUID>(Allocator.Temp);
         NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
 
-        ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>();
+        ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>(true);
 
         try
         {
@@ -131,27 +130,22 @@ internal static class BuffSystemSpawnPatches
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
                         if (familiar.Exists())
                         {
-                            familiar.With((ref Follower follower) => follower.ModeModifiable._Value = 1);
-                            Familiars.TryReturnFamiliar(buffTarget, familiar);
+                            Familiars.HandleFamiliarEnteringCombat(buffTarget, familiar);
                         }
                         break;
                     case 4 when _familiars && isPlayerTarget: // Familiars and player has PvP Combat Buff
-                        familiar = Familiars.GetActiveFamiliar(buffTarget);
-                        if (familiar.Exists())
+                        if (steamId.HasActiveFamiliar())
                         {
-                            familiar.With((ref Follower follower) => follower.ModeModifiable._Value = 1);
-                            Familiars.TryReturnFamiliar(buffTarget, familiar);
+                            familiar = Familiars.GetActiveFamiliar(buffTarget);
 
-                            // if (!_familiarPvP) Familiars.UnbindFamiliar(buffTarget.GetUser(), buffTarget);
                             if (!_familiarPvP)
                             {
                                 User user = buffTarget.GetUser();
-                                steamId = user.PlatformId;
-
-                                if (steamId.TryGetFamiliarActives(out var actives))
-                                {
-                                    Familiars.DismissFamiliar(buffTarget, familiar, user, steamId, actives);
-                                }
+                                Familiars.DismissFamiliar(buffTarget, familiar, user, steamId);
+                            }
+                            else
+                            {
+                                Familiars.HandleFamiliarEnteringCombat(buffTarget, familiar);
                             }
                         }
                         break;
@@ -172,29 +166,16 @@ internal static class BuffSystemSpawnPatches
                             }
                         }
                         break;
-                    /*
-                    case 6 when _classes: // Death mage second passive buff; should probably make some of those hard-coded and some optional, this was effort >_>
-                        if (buffTarget.GetPrefabGuid().Equals(_fallenAngel) && DeathMagePlayerAngelSpawnOrder.TryDequeue(out Entity playerCharacter))
-                        {
-                            Classes.ModifyFallenAngelForDeathMage(buffTarget, playerCharacter);
-                        }
-                        else if (isPlayerTarget)
-                        {
-                            Classes.HandleBiteTriggerBuff(buffTarget, steamId);
-                        }
-                        break;
-                    */
                     case 7 when _familiars && buffTarget.IsVBloodOrGateBoss(): // Witch pig transformation buff
-                        buffEntity.Destroy();
+                        buffEntity.TryDestroy();
                         break;
                     case 8 when isPlayerTarget:
-                        if (_familiars && steamId.TryGetFamiliarActives(out var data) && Familiars.AutoCallMap.TryRemove(buffTarget, out familiar) && familiar.Exists())
+                        if (_familiars && steamId.HasDismissedFamiliar() && Familiars.AutoCallMap.TryRemove(buffTarget, out familiar))
                         {
-                            Familiars.CallFamiliar(buffTarget, familiar, buffTarget.GetUser(), steamId, data);
+                            Familiars.CallFamiliar(buffTarget, familiar, buffTarget.GetUser(), steamId);
                         }
                         if (_legacies || _expertise)
                         {
-                            // Core.Log.LogInfo($"Refreshing stats on phasing buff - {steamId}");
                             Buffs.RefreshStats(buffTarget);
                         }
                         break;
@@ -209,7 +190,7 @@ internal static class BuffSystemSpawnPatches
                                 {
                                     amplifyBuff.AmplifyModifier = -0.75f;
                                 });
-
+                                
                                 buffEntity.AddWith((ref LifeTime lifeTime) =>
                                 {
                                     lifeTime.Duration = MINION_LIFETIME;
@@ -221,18 +202,13 @@ internal static class BuffSystemSpawnPatches
                     case 10 when _familiars:
                         if (buffTarget.TryGetFollowedPlayer(out playerCharacter))
                         {
-                            familiar = Familiars.GetActiveFamiliar(playerCharacter);
-
-                            if (familiar.Exists() && familiar.TryGetBuff(_holyBeamPowerBuff, out buffEntity))
+                            if (buffEntity.Has<LifeTime>())
                             {
-                                if (buffEntity.Has<LifeTime>())
+                                buffEntity.With((ref LifeTime lifeTime) =>
                                 {
-                                    buffEntity.With((ref LifeTime lifeTime) =>
-                                    {
-                                        lifeTime.Duration = 30f;
-                                        lifeTime.EndAction = LifeTimeEndAction.Destroy;
-                                    });
-                                }
+                                    lifeTime.Duration = 30f;
+                                    lifeTime.EndAction = LifeTimeEndAction.Destroy;
+                                });
                             }
                         }
                         break;
@@ -325,7 +301,7 @@ internal static class BuffSystemSpawnPatches
                     case 12 when _familiars:
                         if (buffTarget.TryGetFollowedPlayer(out playerCharacter) && !GetPlayerBool(playerCharacter.GetSteamId(), VBLOOD_EMOTES_KEY))
                         {
-                            buffEntity.Destroy();
+                            buffEntity.TryDestroy();
                         }
                         break;
                     case 13 when _familiars && isPlayerTarget:
@@ -337,6 +313,12 @@ internal static class BuffSystemSpawnPatches
                         break;
                     case 14 when _exoForm && isPlayerTarget && buffTarget.HasBuff(_exoFormBuff):
                         if (buffEntity.Has<SetOwnerRotateTowardsMouse>()) buffEntity.Remove<SetOwnerRotateTowardsMouse>();
+                        break;
+                    case 15 when _familiars:
+                        if (buffTarget.IsFollowingPlayer())
+                        {
+                            buffEntity.TryDestroy();
+                        }
                         break;
                     default:
                         if (isPlayerTarget)
@@ -411,13 +393,13 @@ internal static class BuffSystemSpawnPatches
                 581443919 => 3,  // Familiar PvE
                 697095869 => 4,  // Familiar PvP
                 -89195359 => 5,  // Vampiric curse
-                // -651661301 or 366323518 => 6,  // Death mage secondary case
                 1356064917 => 7,  // Witch pig transformation
                 -79611032 => 8,  // Phasing
                 -6635580 => 9,  // Familiar highlord sword
                 -1584595113 => 10, // Familiar castleman holy buff
                 -952067173 or 581443919 => 14, // Combat stance
-                _ => 0,  // Not found in the numeric set
+                404387047 => 15, // Dracula return hide
+                _ => 0
             };
         }
     }
@@ -425,7 +407,7 @@ internal static class BuffSystemSpawnPatches
     {
         if (buffEntity.TryGetComponent(out Buff buff) && buff.BuffEffectType.Equals(BuffEffectType.Debuff))
         {
-            buffEntity.Destroy();
+            buffEntity.TryDestroy();
         }
     }
 }

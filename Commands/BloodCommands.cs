@@ -25,15 +25,15 @@ internal static class BloodCommands
     [Command(name: "get", adminOnly: false, usage: ".bl get [BloodType]", description: "Display current blood legacy details.")]
     public static void GetLegacyCommand(ChatCommandContext ctx, string blood = null)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
-        Blood playerBlood = character.Read<Blood>();
-        BloodType bloodType = GetCurrentBloodType(character);
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        Blood playerBlood = playerCharacter.Read<Blood>();
+        BloodType bloodType = GetCurrentBloodType(playerBlood);
 
         if (string.IsNullOrEmpty(blood))
         {
@@ -95,7 +95,7 @@ internal static class BloodCommands
     [Command(name: "log", adminOnly: false, usage: ".bl log", description: "Toggles Legacy progress logging.")]
     public static void LogLegacyCommand(ChatCommandContext ctx)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
             return;
@@ -108,15 +108,16 @@ internal static class BloodCommands
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".bl cst [BloodOrStat] [BloodStat]", description: "Choose a bonus stat to enhance for your blood legacy.")]
-    public static void ChooseBloodStat(ChatCommandContext ctx, string bloodOrStat, int statType = 0)
+    public static void ChooseBloodStat(ChatCommandContext ctx, string bloodOrStat, int statType = default)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
             return;
         }
 
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        Blood blood = playerCharacter.Read<Blood>();
         ulong steamId = ctx.Event.User.PlatformId;
 
         BloodType finalBloodType;
@@ -135,7 +136,7 @@ internal static class BloodCommands
 
             finalBloodStat = (BloodStatType)numericStat;
 
-            finalBloodType = GetCurrentBloodType(playerCharacter);
+            finalBloodType = GetCurrentBloodType(blood);
 
             if (ChooseStat(steamId, finalBloodType, finalBloodStat))
             {
@@ -190,17 +191,18 @@ internal static class BloodCommands
     [Command(name: "resetstats", shortHand: "rst", adminOnly: false, usage: ".bl rst", description: "Reset stats for current blood.")]
     public static void ResetBloodStats(ChatCommandContext ctx)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
             return;
         }
 
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        Blood blood = playerCharacter.Read<Blood>();
         User user = ctx.Event.User;
 
         ulong steamId = user.PlatformId;
-        BloodType bloodType = GetCurrentBloodType(playerCharacter);
+        BloodType bloodType = GetCurrentBloodType(blood);
 
         if (bloodType.Equals(BloodType.GateBoss) || bloodType.Equals(BloodType.None) || bloodType.Equals(BloodType.VBlood))
         {
@@ -240,7 +242,7 @@ internal static class BloodCommands
     [Command(name: "liststats", shortHand: "lst", adminOnly: false, usage: ".bl lst", description: "Lists blood stats available.")]
     public static void ListBloodStatsAvailable(ChatCommandContext ctx)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Legacies are not enabled.");
             return;
@@ -270,7 +272,7 @@ internal static class BloodCommands
     [Command(name: "set", adminOnly: true, usage: ".bl set [Player] [Blood] [Level]", description: "Sets player blood legacy level.")]
     public static void SetBloodLegacyCommand(ChatCommandContext ctx, string name, string blood, int level)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
             return;
@@ -314,7 +316,7 @@ internal static class BloodCommands
     [Command(name: "list", shortHand: "l", adminOnly: false, usage: ".bl l", description: "Lists blood legacies available.")]
     public static void ListBloodTypesCommand(ChatCommandContext ctx)
     {
-        if (!ConfigService.BloodSystem)
+        if (!ConfigService.LegacySystem)
         {
             LocalizationService.HandleReply(ctx, "Blood Legacies are not enabled.");
             return;

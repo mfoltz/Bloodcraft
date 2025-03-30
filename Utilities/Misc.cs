@@ -3,118 +3,126 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
-using System.Collections;
 using System.Diagnostics;
+using System.Text;
+using System.Text.RegularExpressions;
 using Unity.Entities;
-using Unity.Mathematics;
 using VampireCommandFramework;
-using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
-using User = ProjectM.Network.User;
 
 namespace Bloodcraft.Utilities;
 internal static class Misc
 {
+    static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
+    static SystemService SystemService => Core.SystemService;
+    static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
-    static readonly bool _parties = ConfigService.PlayerParties;
-
-    static readonly float _shareDistance = ConfigService.ExpShareDistance;
-
-    static readonly PrefabGUID _draculaVBlood = new(-327335305);
-    public class ConcurrentList<T> : IEnumerable<T>
+    static readonly Random _random = new();
+    public enum SpellSchool
     {
-        readonly object _lock = new();
-
-        readonly List<T> _list = [];
-        public void Add(T item)
+        Shadow = 0,
+        Blood = 1,
+        Chaos = 2,
+        Unholy = 3,
+        Illusion = 4,
+        Frost = 5,
+        Storm = 6
+    }
+    public class BiDictionary<T1, T2> : IEnumerable<KeyValuePair<T1, T2>>
+    {
+        readonly Dictionary<T1, T2> _forward = [];
+        readonly Dictionary<T2, T1> _reverse = [];
+        public BiDictionary() { }
+        public BiDictionary(IEnumerable<KeyValuePair<T1, T2>> pairs)
         {
-            lock (_lock)
+            foreach (var (key, value) in pairs)
             {
-                _list.Add(item);
+                Add(key, value);
             }
         }
-        public void Remove(T item)
+        public void Add(T1 key, T2 value)
         {
-            lock (_lock)
-            {
-                _list.Remove(item);
-            }
+            _forward[key] = value;
+            _reverse[value] = key;
         }
-        public bool Contains(T item)
+        public T2 this[T1 key] => _forward[key];
+        public T1 this[T2 key] => _reverse[key];
+        public bool TryGetByFirst(T1 key, out T2 value) => _forward.TryGetValue(key, out value);
+        public bool TryGetBySecond(T2 key, out T1 value) => _reverse.TryGetValue(key, out value);
+        public IEnumerable<T1> Keys => _forward.Keys;
+        public IEnumerable<T2> Values => _forward.Values;
+        public IEnumerator<KeyValuePair<T1, T2>> GetEnumerator() => _forward.GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+    public static class SpellSchoolInfusionMap
+    {
+        public static readonly BiDictionary<SpellSchool, PrefabGUID> SpellSchoolInfusions = [];
+        static SpellSchoolInfusionMap()
         {
-            lock (_lock)
-            {
-                return _list.Contains(item);
-            }
-        }
-        public IEnumerator<T> GetEnumerator()
-        {
-            lock (_lock)
-            {
-                return _list.ToList().GetEnumerator();
-            }
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-        public bool Any(Func<T, bool> predicate)
-        {
-            lock (_lock)
-            {
-                return _list.Any(predicate);
-            }
-        }
-        public List<T> ToList()
-        {
-            lock (_lock)
-            {
-                return new List<T>(_list);
-            }
-        }
-        public int Count()
-        {
-            lock (_lock)
-            {
-                return _list.Count;
-            }
+            SpellSchoolInfusions.Add(SpellSchool.Blood, Prefabs.SpellMod_Weapon_BloodInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Chaos, Prefabs.SpellMod_Weapon_ChaosInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Shadow, Prefabs.SpellMod_Weapon_UndeadInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Illusion, Prefabs.SpellMod_Weapon_IllusionInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Frost, Prefabs.SpellMod_Weapon_FrostInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Storm, Prefabs.SpellMod_Weapon_StormInfused);
         }
     }
+
+    static readonly Dictionary<PrefabGUID, PrefabGUID> _infusionShinyBuffs = new()
+    {
+        { Prefabs.SpellMod_Weapon_BloodInfused, new(348724578) },     // ignite 
+        { Prefabs.SpellMod_Weapon_ChaosInfused, new (-1576512627) },  // static
+        { Prefabs.SpellMod_Weapon_UndeadInfused, new (-1246704569) }, // leech
+        { Prefabs.SpellMod_Weapon_IllusionInfused, new(1723455773) }, // weaken
+        { Prefabs.SpellMod_Weapon_FrostInfused, new(27300215) },      // chill
+        { Prefabs.SpellMod_Weapon_StormInfused, new(-325758519) }     // condemn
+    };
+    public static IReadOnlyDictionary<PrefabGUID, PrefabGUID> InfusionShinyBuffs => _infusionShinyBuffs;
     public enum ScrollingTextMessage
     {
         PlayerExperience,
+        PlayerExpertise,
+        PlayerLegacy,
         FamiliarExperience,
         ProfessionExperience,
         ProfessionYield
     }
 
-    const string SCT_PLAYER = "PlayerXP";
-    const string SCT_FAMILIAR = "FamiliarXP";
+    const string SCT_PLAYER_LVL = "PlayerXP";
+    const string SCT_PLAYER_WEP = "ExpertiseXP";
+    const string SCT_PLAYER_BL = "LegacyXP";
+    const string SCT_FAMILIAR_LVL = "FamiliarXP";
     const string SCT_PROFESSIONS = "ProfessionXP";
     const string SCT_YIELD = "BonusYield";
 
     public static readonly List<string> ScrollingTextNames =
     [
-        SCT_PLAYER,
-        SCT_FAMILIAR,
+        SCT_PLAYER_LVL,
+        SCT_PLAYER_WEP,
+        SCT_PLAYER_BL,
+        SCT_FAMILIAR_LVL,
         SCT_PROFESSIONS,
         SCT_YIELD
     ];
 
     public static readonly Dictionary<string, ScrollingTextMessage> ScrollingTextNameMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        { SCT_PLAYER, ScrollingTextMessage.PlayerExperience },
-        { SCT_FAMILIAR, ScrollingTextMessage.FamiliarExperience },
+        { SCT_PLAYER_LVL, ScrollingTextMessage.PlayerExperience },
+        { SCT_PLAYER_WEP, ScrollingTextMessage.PlayerExpertise },
+        { SCT_PLAYER_BL, ScrollingTextMessage.PlayerLegacy },
+        { SCT_FAMILIAR_LVL, ScrollingTextMessage.FamiliarExperience },
         { SCT_PROFESSIONS, ScrollingTextMessage.ProfessionExperience },
         { SCT_YIELD, ScrollingTextMessage.ProfessionYield }
     };
 
     public static readonly Dictionary<ScrollingTextMessage, string> ScrollingTextBoolKeyMap = new()
     {
-        { ScrollingTextMessage.PlayerExperience, SCT_PLAYER_KEY },
-        { ScrollingTextMessage.FamiliarExperience, SCT_FAMILIAR_KEY },
+        { ScrollingTextMessage.PlayerExperience, SCT_PLAYER_LVL_KEY },
+        { ScrollingTextMessage.PlayerExpertise, SCT_PLAYER_WEP_KEY },
+        { ScrollingTextMessage.PlayerLegacy, SCT_PLAYER_BL_KEY },
+        { ScrollingTextMessage.FamiliarExperience, SCT_FAMILIAR_LVL_KEY },
         { ScrollingTextMessage.ProfessionExperience, SCT_PROFESSIONS_KEY },
         { ScrollingTextMessage.ProfessionYield, SCT_YIELD_KEY }
     };
@@ -133,13 +141,16 @@ internal static class Misc
         public const string VBLOOD_EMOTES_KEY = "VBloodEmotes";
         public const string SHINY_FAMILIARS_KEY = "ShinyFamiliars";
         public const string REMINDERS_KEY = "Reminders";
-        public const string SCT_PLAYER_KEY = "PlayerExperienceSCT";
-        public const string SCT_FAMILIAR_KEY = "FamiliarExperienceSCT";
+        public const string SCT_PLAYER_LVL_KEY = "PlayerExperienceSCT";
+        public const string SCT_PLAYER_WEP_KEY = "ExpertiseSCT";
+        public const string SCT_PLAYER_BL_KEY = "LegacySCT";
+        public const string SCT_FAMILIAR_LVL_KEY = "FamiliarExperienceSCT";
         public const string SCT_PROFESSIONS_KEY = "ProfessionExperienceSCT";
         public const string SCT_YIELD_KEY = "ProfessionYieldSCT";
         public const string EXO_FORM_KEY = "ExoForm";
         public const string SHROUD_KEY = "Shroud";
         public const string CLASS_BUFFS_KEY = "Passives";
+        public const string PRESTIGE_BUFFS_KEY = "PrestigeBuffs";
 
         public static readonly Dictionary<string, bool> DefaultBools = new()
         {
@@ -156,21 +167,16 @@ internal static class Misc
             [VBLOOD_EMOTES_KEY] = true,
             [SHINY_FAMILIARS_KEY] = true,
             [REMINDERS_KEY] = true,
-            [SCT_PLAYER_KEY] = true,
-            [SCT_FAMILIAR_KEY] = true,
+            [SCT_PLAYER_LVL_KEY] = true,
+            [SCT_PLAYER_WEP_KEY] = true,
+            [SCT_PLAYER_BL_KEY] = true,
+            [SCT_FAMILIAR_LVL_KEY] = true,
             [SCT_PROFESSIONS_KEY] = true,
             [SCT_YIELD_KEY] = true,
             [EXO_FORM_KEY] = false,
             [SHROUD_KEY] = true,
-            [CLASS_BUFFS_KEY] = true
-        };
-
-        static readonly Dictionary<string, string> _boolKeyConversionMap = new()
-        {
-            { "Emotes", EMOTE_ACTIONS_KEY },
-            { "FamiliarVisual", SHINY_FAMILIARS_KEY },
-            { "Kit", STARTER_KIT_KEY },
-            { "ExpertiseLogging", WEAPON_LOG_KEY }
+            [CLASS_BUFFS_KEY] = true,
+            [PRESTIGE_BUFFS_KEY] = true
         };
         public static bool GetPlayerBool(ulong steamId, string boolKey)
         {
@@ -233,110 +239,10 @@ internal static class Misc
             value = false;
             return false;
         }
-        public static bool TryMigrateBools(ulong steamId)
-        {
-            var bools = DataService.PlayerBoolsManager.LoadPlayerBools(steamId);
-
-            if (DataService.PlayerDictionaries._playerBools.TryRemove(steamId, out var oldBools))
-            {
-                foreach (string boolKey in oldBools.Keys)
-                {
-                    if (bools.ContainsKey(boolKey)) bools[boolKey] = oldBools[boolKey];
-                    else if (_boolKeyConversionMap.TryGetValue(boolKey, out string convertedKey))
-                    {
-                        bools[convertedKey] = oldBools[boolKey];
-                    }
-                }
-
-                DataService.PlayerBoolsManager.SavePlayerBools(steamId, bools);
-                return true;
-            }
-
-            return false;
-        }
         public static string GetEnabledDisabledBool(ulong steamId, string boolKey)
         {
             return GetPlayerBool(steamId, boolKey) ? "<color=green>enabled</color>" : "<color=red>disabled</color>";
         }
-    }
-    public static HashSet<Entity> GetDeathParticipants(Entity source)
-    {
-        float3 sourcePosition = source.GetPosition();
-        User sourceUser = source.GetUser();
-        string playerName = sourceUser.CharacterName.Value;
-
-        Entity clanEntity = sourceUser.ClanEntity.GetEntityOnServer();
-        HashSet<Entity> players = [source]; // use hashset to prevent double gains processing
-
-        if (_parties) // EntitiesInView_Server + ?
-        {
-            List<List<string>> playerParties = DataService.PlayerDictionaries._playerParties.Values
-                .Select(party => party.ToList())
-                .ToList();
-
-            foreach (List<string> party in playerParties)
-            {
-                if (party.Contains(playerName)) // find party with death source player name
-                {
-                    foreach (string partyMember in party)
-                    {
-                        PlayerInfo playerInfo = GetPlayerInfo(partyMember);
-
-                        if (playerInfo.User.IsConnected && playerInfo.CharEntity.TryGetPosition(out float3 targetPosition))
-                        {
-                            float distance = UnityEngine.Vector3.Distance(sourcePosition, targetPosition);
-
-                            if (distance > _shareDistance) continue;
-                            else players.Add(playerInfo.CharEntity);
-                        }
-                    }
-
-                    break; // break to avoid cases where there might be more than one party with same character name to account for checks that would prevent that happening failing
-                }
-            }
-        }
-
-        if (!clanEntity.Exists()) return players;
-        else if (ServerGameManager.TryGetBuffer<SyncToUserBuffer>(clanEntity, out var clanUserBuffer) && !clanUserBuffer.IsEmpty)
-        {
-            foreach (SyncToUserBuffer clanUser in clanUserBuffer)
-            {
-                if (clanUser.UserEntity.TryGetComponent(out User user))
-                {
-                    Entity player = user.LocalCharacter.GetEntityOnServer();
-
-                    if (user.IsConnected && player.TryGetPosition(out float3 targetPosition))
-                    {
-                        float distance = UnityEngine.Vector3.Distance(sourcePosition, targetPosition);
-
-                        if (distance > _shareDistance) continue;
-                        else players.Add(player);
-                    }
-                }
-            }
-        }
-
-        return players;
-    }
-    public static bool ConsumedDracula(Entity userEntity)
-    {
-        if (userEntity.TryGetComponent(out ProgressionMapper progressionMapper))
-        {
-            Entity progressionEntity = progressionMapper.ProgressionEntity.GetEntityOnServer();
-
-            if (progressionEntity.TryGetBuffer<UnlockedVBlood>(out var buffer))
-            {
-                foreach (UnlockedVBlood unlockedVBlood in buffer)
-                {
-                    if (unlockedVBlood.VBlood.Equals(_draculaVBlood))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
     public static string FormatTimespan(TimeSpan timeSpan)
     {
@@ -348,6 +254,155 @@ internal static class Misc
         string bonusString = (value * 100).ToString("F0") + "%";
         return bonusString;
     }
+
+    static readonly Dictionary<PrefabGUID, float> _statModPresetValues = new()
+    {
+        { new(-1545133628), 0.25f },
+        { new(1448170922), 0.15f },
+        { new(-1700712765), 0.25f },
+        { new(523084427), 0.15f },
+        { new(1179205309), 0.15f },
+        { new(-2004879548), 0.10f }, 
+        { new(539854831), 0.15f },
+        { new(-1274939577), 0.10f },
+        { new(1032018140), 0.15f },
+        { new(1842448780), 0.15f }
+    };
+    public static bool TryGetStatTypeFromPrefabName(PrefabGUID prefabGuid, float originalValue, out UnitStatType statType, out float resolvedValue)
+    {
+        statType = default;
+        resolvedValue = originalValue;
+
+        string rawPrefabString = prefabGuid.GetPrefabName();
+        string baseName = rawPrefabString.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        if (baseName is null) return false;
+
+        baseName = baseName.Replace("StatMod_", "", StringComparison.OrdinalIgnoreCase)
+                           .Replace("Unique_", "", StringComparison.OrdinalIgnoreCase);
+
+        string[] tierSuffixes = ["_Low", "_Mid", "_High"];
+        foreach (var suffix in tierSuffixes)
+        {
+            if (baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+            {
+                baseName = baseName[..^suffix.Length];
+                break;
+            }
+        }
+
+        if (_statModPresetValues.TryGetValue(prefabGuid, out float presetValue))
+        {
+            resolvedValue = presetValue;
+        }
+
+        if (Enum.TryParse(baseName, ignoreCase: true, out statType)) return true;
+
+        switch (baseName.ToLowerInvariant())
+        {
+            case "attackspeed":
+                statType = UnitStatType.PrimaryAttackSpeed;
+                return true;
+            case "criticalstrikephysical":
+                statType = UnitStatType.PhysicalCriticalStrikeChance;
+                return true;
+            case "criticalstrikephysicalpower":
+                statType = UnitStatType.PhysicalCriticalStrikeDamage;
+                return true;
+            case "criticalstrikespellpower":
+                statType = UnitStatType.SpellCriticalStrikeDamage;
+                return true;
+            case "criticalstrikespells":
+                statType = UnitStatType.SpellCriticalStrikeChance;
+                return true;
+            case "criticalstrikespell":
+                statType = UnitStatType.SpellCriticalStrikeChance;
+                return true;
+            case "spellcooldownreduction":
+                statType = UnitStatType.SpellCooldownRecoveryRate;
+                return true;
+            case "weaponcooldownreduction":
+                statType = UnitStatType.WeaponCooldownRecoveryRate;
+                return true;
+            case "spellleech":
+                statType = UnitStatType.SpellLifeLeech;
+                return true;
+        }
+
+        Core.Log.LogWarning($"Unmapped stat mod prefab: '{rawPrefabString}' → parsed '{baseName}'");
+        return false;
+    }
+
+    /*
+    public static bool TryGetStatTypeFromPrefabName(string rawPrefabString, out UnitStatType statType)
+    {
+        statType = default;
+
+        if (string.IsNullOrWhiteSpace(rawPrefabString))
+            return false;
+
+        // Step 1: Extract the filename portion (remove 'PrefabGuid(...)' etc.)
+        string baseName = rawPrefabString.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        if (baseName is null)
+            return false;
+
+        // Step 2: Strip known prefixes and suffixes
+        baseName = baseName.Replace("StatMod_", "", StringComparison.OrdinalIgnoreCase)
+                           .Replace("Unique_", "", StringComparison.OrdinalIgnoreCase);
+
+        // Remove suffixes like "_Low", "_Mid", "_High"
+        string[] tierSuffixes = ["_Low", "_Mid", "_High"];
+        foreach (var suffix in tierSuffixes)
+        {
+            if (baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+            {
+                baseName = baseName[..^suffix.Length];
+                break;
+            }
+        }
+
+        // Step 3: Try to parse directly
+        if (Enum.TryParse(baseName, ignoreCase: true, out statType))
+            return true;
+
+        // Step 4: Fallback alias matching
+        switch (baseName.ToLowerInvariant())
+        {
+            case "attackspeed":
+                statType = UnitStatType.PrimaryAttackSpeed;
+                return true;
+            case "criticalstrikephysical":
+                statType = UnitStatType.PhysicalCriticalStrikeChance;
+                return true;
+            case "criticalstrikephysicalpower":
+                statType = UnitStatType.PhysicalCriticalStrikeDamage;
+                return true;
+            case "criticalstrikespellpower":
+                statType = UnitStatType.SpellCriticalStrikeDamage;
+                return true;
+            case "criticalstrikespells":
+                statType = UnitStatType.SpellCriticalStrikeChance;
+                return true;
+            case "criticalstrikespell":
+                statType = UnitStatType.SpellCriticalStrikeChance;
+                return true;
+            case "spellcooldownreduction":
+                statType = UnitStatType.SpellCooldownRecoveryRate;
+                return true;
+            case "weaponcooldownreduction":
+                statType = UnitStatType.WeaponCooldownRecoveryRate;
+                return true;
+            case "spellleech":
+                statType = UnitStatType.SpellLifeLeech;
+                return true;
+            case "vampiredamage":
+                statType = UnitStatType.DamageVsVampires;
+                return true;
+            default:
+                Core.Log.LogWarning($"Unmapped stat mod prefab! ('{rawPrefabString}' → parsed '{baseName}')");
+                return false;
+        }
+    }
+    */
     public static string FormatWeaponStatValue(WeaponStats.WeaponStatType statType, float value)
     {
         string formattedBonus = WeaponStats.WeaponStatFormats[statType] switch
@@ -357,50 +412,125 @@ internal static class Misc
             "percentage" => (value * 100).ToString("F1") + "%",
             _ => value.ToString(),
         };
+
         return formattedBonus;
     }
     public static void ReplySCTDetails(ChatCommandContext ctx)
     {
         ulong steamId = ctx.User.PlatformId;
-        int index = 0;
 
-        LocalizationService.HandleReply(ctx, $"<color=#FFC0CB>SCT Options</color>: <color=yellow>{++index}</color>| <color=white>PlayerXP</color> ({GetEnabledDisabledBool(steamId, SCT_PLAYER_KEY)}), <color=yellow>{++index}</color>| <color=white>FamiliarXP</color> ({GetEnabledDisabledBool(steamId, SCT_FAMILIAR_KEY)}), " +
-            $"<color=yellow>{++index}</color>| <color=white>ProfessionXP</color> ({GetEnabledDisabledBool(steamId, SCT_PROFESSIONS_KEY)}), <color=yellow>{++index}</color>| <color=white>ProfessionYield</color> ({GetEnabledDisabledBool(steamId, SCT_YIELD_KEY)})");
+        StringBuilder sb = new();
+        sb.AppendLine("<color=#FFC0CB>SCT Options</color>:");
+
+        int index = 0;
+        foreach (var entry in ScrollingTextNameMap)
+        {
+            string name = entry.Key;
+            ScrollingTextMessage message = entry.Value;
+
+            if (ScrollingTextBoolKeyMap.TryGetValue(message, out string boolKey))
+            {
+                string status = GetEnabledDisabledBool(steamId, boolKey);
+                sb.AppendLine($"<color=yellow>{++index}</color>| <color=white>{name}</color> ({status})");
+            }
+        }
+
+        LocalizationService.HandleReply(ctx, sb.ToString());
+    }
+    public static void GiveOrDropItem(User user, Entity playerCharacter, PrefabGUID itemType, int amount)
+    {
+        var itemDataHashMap = GameDataSystem.ItemHashLookupMap;
+        bool hasSpace = InventoryUtilities.HasFreeStackSpaceOfType(EntityManager, playerCharacter, itemDataHashMap, itemType, amount);
+
+        if (hasSpace && ServerGameManager.TryAddInventoryItem(playerCharacter, itemType, amount))
+        {
+            string message = "Your bag feels slightly heavier...";
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+        else
+        {
+            string message = "Something fell out of your bag!";
+            InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, itemType, amount, new Entity()); // does this create multiple drops to account for excessive stacks? noting for later
+            LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+    }
+    public static bool RollForChance(float chance)
+    {
+        return _random.NextDouble() < chance;
     }
     public static class PerformanceTimer
     {
         static readonly Stopwatch _stopwatch = new();
         static string _label = "";
-        static int _frameCount = 0;
-        static long _totalElapsedMs = 0;
-        const int AVERAGE_OVER_FRAMES = 60;
+        static long _totalElapsedTicks = 0;
         public static void Start(string label)
         {
             _label = label;
             _stopwatch.Restart();
-
-            Core.Log.LogInfo($"⏳ - {_label}");
+            Core.Log.LogInfo($"[TIMER] Start - {_label}");
         }
-        public static void StopAndLog()
+        public static void Stop()
         {
             _stopwatch.Stop();
 
-            long elapsedMs = _stopwatch.ElapsedMilliseconds;
-            _totalElapsedMs += elapsedMs;
-            _frameCount++;
+            long elapsedTicks = _stopwatch.ElapsedTicks;
+            _totalElapsedTicks += elapsedTicks;
 
-            long avgMs = _totalElapsedMs / _frameCount;
-            string speedIcon = avgMs < 5 ? "🚀" :
-                                avgMs < 20 ? "⚡" :
-                                avgMs < 50 ? "🐢" : "💀";
+            double elapsedMilliseconds = _stopwatch.Elapsed.TotalMilliseconds;
 
-            Core.Log.LogInfo($"🎌 - {_label} {speedIcon} ({avgMs}ms | {_frameCount}f)");
+            Core.Log.LogInfo($"[TIMER] Stop - {_label} ({_totalElapsedTicks}t | {elapsedMilliseconds:F3}ms)");
 
-            // Reset counters
-            _frameCount = 0;
-            _totalElapsedMs = 0;
+            // Reset
+            _totalElapsedTicks = 0;
         }
     }
+
+    /*
+    public static class PerformanceTimer
+    {
+        class TimerData
+        {
+            public Stopwatch Stopwatch = new();
+            public long TotalElapsedTicks = 0;
+        }
+
+        static readonly Dictionary<string, TimerData> _timers = [];
+        public static void Start(string label)
+        {
+            if (!_timers.TryGetValue(label, out var timerData))
+            {
+                timerData = new TimerData();
+                _timers[label] = timerData;
+            }
+
+            timerData.Stopwatch.Restart();
+            Core.Log.LogInfo($"[TIMER] Start - {label}");
+        }
+        public static void Stop(string label)
+        {
+            if (!_timers.TryGetValue(label, out var timerData))
+            {
+                Core.Log.LogWarning($"[TIMER] Attempted to stop unknown timer: {label}");
+                return;
+            }
+
+            timerData.Stopwatch.Stop();
+            long elapsedTicks = timerData.Stopwatch.ElapsedTicks;
+            timerData.TotalElapsedTicks += elapsedTicks;
+            double elapsedMilliseconds = timerData.Stopwatch.Elapsed.TotalMilliseconds;
+
+            Core.Log.LogInfo($"[TIMER] Stop - {label} ({timerData.TotalElapsedTicks}t | {elapsedMilliseconds:F3}ms)");
+        }
+        public static void Reset(string label)
+        {
+            _timers.Remove(label);
+        }
+        public static void ResetAll()
+        {
+            _timers.Clear();
+        }
+    }
+    */
 
     /*
     public static bool EarnedPermaShroud()

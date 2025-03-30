@@ -19,13 +19,13 @@ internal static class VBloodSystemPatch
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly WaitForSeconds _delay = new(5f);
+    const float DELAY_ADD = 1.25f;
 
     static readonly Dictionary<ulong, DateTime> _lastUpdateCache = [];
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
-    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
 
@@ -51,16 +51,31 @@ internal static class VBloodSystemPatch
                 _lastUpdateCache[steamId] = now;
 
                 Entity vBlood = PrefabCollectionSystem._PrefabGuidToEntityMap[vBloodConsumed.Source];
-                
+
                 // Core.Log.LogInfo($"Processing vBlood for {playerCharacter.GetSteamId()}"); // this patch is somehow triggering the double stats? odd, but need to either figure that out or move to deathEventSystem
+
+                DeathEventListenerSystemPatch.DeathEventArgs deathEventArgs = new()
+                {
+                    Source = playerCharacter,
+                    Target = vBlood,
+                    ScrollingTextDelay = 0f,
+                    // RefreshStats = false
+                };
 
                 if (_leveling)
                 {
                     int currentLevel = LevelingSystem.GetLevel(steamId);
-                    LevelingSystem.ProcessExperienceGain(playerCharacter, vBlood, steamId, currentLevel);
+                    LevelingSystem.ProcessExperienceGain(playerCharacter, vBlood, steamId, currentLevel, deathEventArgs.ScrollingTextDelay);
+                    deathEventArgs.ScrollingTextDelay += DELAY_ADD;
                 }
-                if (_expertise) WeaponSystem.ProcessExpertise(playerCharacter, vBlood);
-                if (_legacies) BloodSystem.ProcessLegacy(playerCharacter, vBlood);
+                if (_expertise)
+                {
+                    WeaponSystem.ProcessExpertise(deathEventArgs);
+                }
+                if (_legacies)
+                {
+                    BloodSystem.ProcessLegacy(deathEventArgs);
+                }
                 if (_familiars)
                 {
                     FamiliarLevelingSystem.ProcessFamiliarExperience(playerCharacter, vBlood, steamId, 1f);

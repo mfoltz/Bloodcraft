@@ -9,11 +9,9 @@ using Stunlock.Core;
 namespace Bloodcraft.Utilities;
 internal static class Configuration
 {
-    public static void FamiliarBans()
+    public static void InitializeBannedFamiliarUnits()
     {
-        List<PrefabGUID> unitBans = ParseConfigIntegerString(ConfigService.BannedUnits)
-            .Select(unit => new PrefabGUID(unit))
-            .ToList();
+        List<PrefabGUID> unitBans = [..ParseConfigIntegerString(ConfigService.BannedUnits).Select(unit => new PrefabGUID(unit))];
 
         foreach (PrefabGUID unit in unitBans)
         {
@@ -37,14 +35,12 @@ internal static class Configuration
             return [];
         }
 
-        return configString.Split(',').Select(int.Parse).ToList();
+        return [..configString.Split(',').Select(int.Parse)];
     }
-    public static void QuestRewardItems()
+    public static void InitializeQuestRewardItems()
     {
         List<int> rewardAmounts = [..ParseConfigIntegerString(ConfigService.QuestRewardAmounts)];
-        List<PrefabGUID> questRewards = ParseConfigIntegerString(ConfigService.QuestRewards)
-            .Select(itemPrefab => new PrefabGUID(itemPrefab))
-            .ToList();
+        List<PrefabGUID> questRewards = [..ParseConfigIntegerString(ConfigService.QuestRewards).Select(itemPrefab => new PrefabGUID(itemPrefab))];
 
         if (questRewards.Count != rewardAmounts.Count)
         {
@@ -56,12 +52,10 @@ internal static class Configuration
             QuestSystem.QuestRewards.TryAdd(questRewards[i], rewardAmounts[i]);
         }
     }
-    public static void StarterKitItems()
+    public static void InitializeStarterKitItems()
     {
         List<int> kitAmounts = [..ParseConfigIntegerString(ConfigService.KitQuantities)];
-        List<PrefabGUID> kitPrefabs = ParseConfigIntegerString(ConfigService.KitPrefabs)
-            .Select(itemPrefab => new PrefabGUID(itemPrefab))
-            .ToList();
+        List<PrefabGUID> kitPrefabs = [..ParseConfigIntegerString(ConfigService.KitPrefabs).Select(itemPrefab => new PrefabGUID(itemPrefab))];
 
         if (kitPrefabs.Count != kitAmounts.Count)
         {
@@ -73,13 +67,11 @@ internal static class Configuration
             MiscCommands.StarterKitItemPrefabGUIDs.TryAdd(kitPrefabs[i], kitAmounts[i]);
         }
     }
-    public static void ClassSpellCooldownMap()
+    public static void InitializeClassSpellCooldowns()
     {
         foreach (var keyValuePair in Classes.ClassSpellsMap)
         {
-            List<PrefabGUID> spellPrefabs = ParseConfigIntegerString(keyValuePair.Value)
-                .Select(x => new PrefabGUID(x))
-                .ToList();
+            List<PrefabGUID> spellPrefabs = [..ParseConfigIntegerString(keyValuePair.Value).Select(x => new PrefabGUID(x))];
 
             foreach (PrefabGUID spell in spellPrefabs)
             {
@@ -87,17 +79,13 @@ internal static class Configuration
             }
         }
     }
-    public static void ClassPassiveBuffsMap()
+    public static void InitializeClassPassiveBuffs()
     {
         foreach (var keyValuePair in Classes.ClassBuffMap)
         {
-            HashSet<PrefabGUID> buffPrefabs = ParseConfigIntegerString(keyValuePair.Value)
-                .Select(buffPrefab => new PrefabGUID(buffPrefab))
-                .ToHashSet();
+            HashSet<PrefabGUID> buffPrefabs = [..ParseConfigIntegerString(keyValuePair.Value).Select(buffPrefab => new PrefabGUID(buffPrefab))];
 
-            List<PrefabGUID> orderedBuffs = ParseConfigIntegerString(keyValuePair.Value)
-                .Select(buffPrefab => new PrefabGUID(buffPrefab))
-                .ToList();
+            List<PrefabGUID> orderedBuffs = [..ParseConfigIntegerString(keyValuePair.Value).Select(buffPrefab => new PrefabGUID(buffPrefab))];
 
             UpdateBuffsBufferDestroyPatch.ClassBuffsSet.TryAdd(keyValuePair.Key, buffPrefabs);
             UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.Add(keyValuePair.Key, orderedBuffs);

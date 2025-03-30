@@ -12,10 +12,10 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Services.BattleService.Matchmaker;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
-using static Bloodcraft.Utilities.Misc;
+using static Bloodcraft.Systems.Familiars.FamiliarBindingSystem;
 
 namespace Bloodcraft.Services;
 internal class BattleService
@@ -73,7 +73,7 @@ internal class BattleService
     public static Dictionary<ulong, (int Tokens, (DateTime Start, DateTime DailyLogin) TimeData)> _playerTokens;
     public BattleService()
     {
-        Initialize();
+        // Initialize();
     }
     public static void Initialize()
     {
@@ -128,7 +128,6 @@ internal class BattleService
         public static readonly HashSet<(ulong, ulong)> MatchPairs = [];
         public static readonly HashSet<ulong> QueuedPlayers = [];
         public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> QueuedBattleGroups = new();
-        public static readonly ConcurrentList<(ulong, ulong)> CancelledPairs = []; // list to handle multiple cancels
         public static void QueueMatch((ulong, ulong) match)
         {
             ulong playerOne = match.Item1;
@@ -150,6 +149,7 @@ internal class BattleService
 
             var (position, timeRemaining) = GetQueuePositionAndTime(playerOne);
             string message = $"Queued successfully! Position in queue: <color=white>{position}</color> (<color=yellow>{Misc.FormatTimespan(timeRemaining)}</color>)";
+            Core.Log.LogWarning($"{playerOne} & {playerTwo} | {message}");
 
             NotifyBothPlayers(playerOne, playerTwo, message);
         }
@@ -159,50 +159,43 @@ internal class BattleService
             QueuedPlayers.Remove(matchPair.Item2);
             MatchPairs.Remove(matchPair);
 
-            foreach (Entity familiar in PlayerBattleFamiliars[matchPair.Item1])
+            if (PlayerBattleFamiliars.TryRemove(matchPair.Item1, out List<Entity> playerOneFamiliars)
+                && PlayerBattleFamiliars.TryRemove(matchPair.Item2, out List<Entity> playerTwoFamiliars))
             {
-                if (familiar.Exists()) familiar.Destroy();
-            }
-
-            foreach (Entity familiar in PlayerBattleFamiliars[matchPair.Item2])
-            {
-                if (familiar.Exists()) familiar.Destroy();
-            }
-
-            PlayerBattleFamiliars[matchPair.Item1].Clear();
-            PlayerBattleFamiliars[matchPair.Item2].Clear();
-
-            if (matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
-            {
-                // other logic after match ends, inform players of outcome handle rewards or whatever
-                PlayerInfo winnerInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item1 : matchPairInfo.Item2;
-                PlayerInfo loserInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item2 : matchPairInfo.Item1;
-
-                string loserName = loserInfo.User.CharacterName.Value;
-                string loserNameWithSuffix = loserName.EndsWith("s", StringComparison.OrdinalIgnoreCase)
-                ? $"{loserName}’"
-                : $"{loserName}’s";
-                string formattedLoserName = $"<color=#808080>{loserNameWithSuffix}</color>";
-
-                NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
-
-                /*
-                if (_awardSanguis)
+                foreach (Entity familiar in playerOneFamiliars)
                 {
-                    try
-                    {
-                        TransferTokensAndSave(winnerInfo.User.PlatformId, loserInfo.User.PlatformId, _tokensTransferred);
-                        NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Log.LogError($"Error transferring tokens and saving - {ex}");
-                    }
+                    if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
+                    if (familiar.Exists()) familiar.TryDestroy();
+                }
+
+                foreach (Entity familiar in playerTwoFamiliars)
+                {
+                    if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
+                    if (familiar.Exists()) familiar.TryDestroy();
+                }
+
+                if (matchPair.TryGetMatchPairInfo(out (PlayerInfo, PlayerInfo) matchPairInfo))
+                {
+                    // other logic after match ends, inform players of outcome handle rewards or whatever
+                    PlayerInfo winnerInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item1 : matchPairInfo.Item2;
+                    PlayerInfo loserInfo = winner == matchPairInfo.Item1.User.PlatformId ? matchPairInfo.Item2 : matchPairInfo.Item1;
+
+                    string loserName = loserInfo.User.CharacterName.Value;
+                    string loserNameWithSuffix = loserName.EndsWith("s", StringComparison.OrdinalIgnoreCase)
+                    ? $"{loserName}’"
+                    : $"{loserName}’s";
+                    string formattedLoserName = $"<color=#808080>{loserNameWithSuffix}</color>";
+
+                    NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
                 }
                 else
                 {
+                    Core.Log.LogWarning("Failed to get match pair info during battle completion...");
                 }
-                */
+            }
+            else
+            {
+                Core.Log.LogWarning("Failed to remove one or both players from PlayerBattleFamiliars during match completion...");
             }
         }
         public static void HandleMatchTimeout((ulong, ulong) matchPair)
@@ -235,20 +228,24 @@ internal class BattleService
                 }
                 else
                 {
-                    NotifyBothPlayers(matchPair.Item1, matchPair.Item2, "Match timeout, result is a tie! Better luck next time.");
+                    Core.Log.LogWarning("Failed to get match pair info during match timeout completion...");
                 }
 
                 foreach (Entity familiar in playerOneFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.Destroy();
+                    if (familiar.Exists()) familiar.TryDestroy();
                 }
 
                 foreach (Entity familiar in playerTwoFamiliars)
                 {
                     if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                    if (familiar.Exists()) familiar.Destroy();
+                    if (familiar.Exists()) familiar.TryDestroy();
                 }
+            }
+            else
+            {
+                Core.Log.LogWarning("Failed to remove one or both players from PlayerBattleFamiliars during match timeout...");
             }
         }
     }
@@ -273,31 +270,25 @@ internal class BattleService
                 {
                     Core.Log.LogInfo("Starting match from queue...");
 
-                    // Check if the match is in the cancelled pairs
-                    if (CancelledPairs.Contains(match))
+                    ulong playerOne = match.Item1;
+                    ulong playerTwo = match.Item2;
+
+                    // Validate the players
+                    if (playerOne.TryGetPlayerInfo(out PlayerInfo playerOneInfo) &&
+                        playerTwo.TryGetPlayerInfo(out PlayerInfo playerTwoInfo))
                     {
-                        // Skip this match
-                        CancelledPairs.Remove(match);
-                        continue;
+                        // Found a valid match
+                        Core.Log.LogInfo("PlayerInfo acquired, invoking HandleBattleSummoning...");
+
+                        HandleBattleSummoning(playerOneInfo, playerTwoInfo, playerOne, playerTwo);
+                        _matchPending = false;
+
+                        break;
                     }
                     else
                     {
-                        ulong playerOne = match.Item1;
-                        ulong playerTwo = match.Item2;
-
-                        // Validate the players
-                        if (playerOne.TryGetPlayerInfo(out PlayerInfo playerOneInfo) &&
-                            playerTwo.TryGetPlayerInfo(out PlayerInfo playerTwoInfo))
-                        {
-                            // Found a valid match
-                            Core.Log.LogInfo("PlayerInfo acquired, invoking HandleBattleSummoning...");
-
-                            // SetDirectionAndFaction.Add(playerTwo);
-                            HandleBattleSummoning(playerOneInfo, playerTwoInfo, playerOne, playerTwo);
-                            _matchPending = false;
-
-                            break;
-                        }
+                        Core.Log.LogWarning("Failed to get PlayerInfo for one or both players for match start, skipping to next and removing pair from queue...");
+                        RemovePairFromQueue(match);
                     }
                 }
             }
@@ -318,9 +309,7 @@ internal class BattleService
         }
 
         float countdown = MATCH_START_COUNTDOWN;
-        HashSet<PlayerInfo> onlineNearbyPlayers = OnlineCache.Values
-            .Where(player => Vector3.Distance(_battlePosition, player.CharEntity.GetPosition()) < SPECTATE_DISTANCE)
-            .ToHashSet();
+        List<PlayerInfo> onlineNearbyPlayers = Progression.GetUsersNearPosition(_battlePosition, SPECTATE_DISTANCE);
 
         ulong steamIdOne = matchPair.playerOne;
         ulong steamIdTwo = matchPair.playerTwo;
@@ -340,8 +329,6 @@ internal class BattleService
                 _sctInfoWarning,
                 player.UserEntity
                 );
-
-                // Core.Log.LogInfo($"Countdown SCT created for {player.User.CharacterName.Value} - {countdown}s");
             }
 
             --countdown;
@@ -356,13 +343,12 @@ internal class BattleService
     static IEnumerator BattleSummoningRoutine(Entity playerOne, User playerUserOne, Entity playerTwo, User playerUserTwo,
     List<PrefabGUID> playerOneFamiliars, List<PrefabGUID> playerTwoFamiliars)
     {
-        bool allies = playerOne.IsAllied(playerTwo);
+        bool allies = playerOne.IsAllies(playerTwo);
 
         for (int i = 0; i < TEAM_SIZE; i++)
         {
-            InstantiateFamiliar(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i], allies).Start();
-            InstantiateFamiliar(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i], allies).Start();
-
+            InstantiateFamiliarRoutine(playerUserOne, playerOne, playerOneFamiliars[i].GuidHash, true, TEAM_ONE, PlayerOneFamiliarPositions[i], allies).Start();
+            InstantiateFamiliarRoutine(playerUserTwo, playerTwo, playerTwoFamiliars[i].GuidHash, true, TEAM_TWO, PlayerTwoFamiliarPositions[i], allies).Start();
             yield return _delay;
         }
     }
@@ -370,8 +356,13 @@ internal class BattleService
     {
         yield return _timeoutDelay;
 
-        if (!MatchPairs.Contains(matchPair)) yield break;
-        Core.Log.LogInfo($"Match timeout reached, invoking HandleMatchTimeout...");
+        if (!MatchPairs.Contains(matchPair))
+        {
+            Core.Log.LogWarning("Match timeout reached, unable to retrieve active matchPair...");
+            yield break;
+        }
+
+        Core.Log.LogInfo($"Match timeout reached, proceeding to HandleMatchTimeout...");
 
         bool remainingOne = PlayerBattleFamiliars[matchPair.Item1].Any();
         bool remainingTwo = PlayerBattleFamiliars[matchPair.Item2].Any();
@@ -379,6 +370,32 @@ internal class BattleService
         if (remainingOne && remainingTwo && MatchPairs.Contains(matchPair))
         {
             HandleMatchTimeout(matchPair);
+        }
+        else if ((remainingOne || remainingTwo) && MatchPairs.Contains(matchPair)) // cleanup if needed?
+        {
+            HandleMatchTimeout(matchPair);
+        }
+        else if (remainingOne || remainingTwo)
+        {
+            Core.Log.LogWarning("One or both player has remaining familiars but is not part of an active matchPair, cleaning up...");
+
+            if (remainingOne && PlayerBattleFamiliars.TryRemove(matchPair.Item1, out List<Entity> playerOneFamiliars))
+            {
+                foreach (Entity familiar in playerOneFamiliars)
+                {
+                    if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
+                    if (familiar.Exists()) familiar.TryDestroy();
+                }
+            }
+
+            if (remainingTwo && PlayerBattleFamiliars.TryRemove(matchPair.Item2, out List<Entity> playerTwoFamiliars))
+            {
+                foreach (Entity familiar in playerTwoFamiliars)
+                {
+                    if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
+                    if (familiar.Exists()) familiar.TryDestroy();
+                }
+            }
         }
     }
     public static IEnumerator ChallengeExpiredRoutine((ulong, ulong) matchPair)
@@ -402,7 +419,7 @@ internal class BattleService
 
             BattleSummoningRoutine(playerOneInfo.CharEntity, playerOneInfo.User,
                 playerTwoInfo.CharEntity, playerTwoInfo.User,
-                new(battleGroupOne), new(battleGroupTwo)).Start();
+                [..battleGroupOne], [..battleGroupTwo]).Start();
         }
         else
         {
@@ -418,30 +435,16 @@ internal class BattleService
 
             return false;
         }
-        else if (playerOne.TryGetFamiliarBattleGroup(out var battleGroupOne) && playerTwo.TryGetFamiliarBattleGroup(out var battleGroupTwo))
+        else
         {
-            bool groupOneValid = battleGroupOne.Count == 3;
-            bool groupTwoValid = battleGroupTwo.Count == 3;
+            var battleGroupOne = FamiliarBattleGroupsManager.GetFamiliarBattleGroup(playerOne, FamiliarBattleGroupsManager.GetActiveBattleGroupName(playerOne));
+            var battleGroupTwo = FamiliarBattleGroupsManager.GetFamiliarBattleGroup(playerTwo, FamiliarBattleGroupsManager.GetActiveBattleGroupName(playerTwo));
 
-            foreach (int entry in battleGroupOne)
-            {
-                if (entry == 0)
-                {
-                    groupOneValid = false;
-                    break;
-                }
-            }
+            bool groupOneValid = !battleGroupOne.Familiars.Contains(0);
+            bool groupTwoValid = !battleGroupTwo.Familiars.Contains(0);
+            bool battleGroupsValid = groupOneValid && groupTwoValid;
 
-            foreach (int entry in battleGroupTwo)
-            {
-                if (entry == 0)
-                {
-                    groupTwoValid = false;
-                    break;
-                }
-            }
-
-            if (!groupOneValid || !groupTwoValid)
+            if (!battleGroupsValid)
             {
                 string message = !groupOneValid && !groupTwoValid
                     ? $"Both players have less than <color=white>{TEAM_SIZE}</color> familiars in their battle groups!"
@@ -449,45 +452,26 @@ internal class BattleService
                         ? $"Player One has less than <color=white>{TEAM_SIZE}</color> familiars in their battle group!"
                         : $"Player Two has less than <color=white>{TEAM_SIZE}</color> familiars in their battle group!";
                 NotifyPlayer(playerOne, message);
+                Core.Log.LogWarning(message);
 
                 return false;
             }
             else
             {
-                string battleGroupOneString = string.Join(", ", battleGroupOne);
-                string battleGroupTwoString = string.Join(", ", battleGroupTwo);
+                string battleGroupOneString = string.Join(", ", battleGroupOne.Familiars);
+                string battleGroupTwoString = string.Join(", ", battleGroupTwo.Familiars);
 
-                QueuedBattleGroups[playerOne] = battleGroupOne.Select(x => new PrefabGUID(x)).ToList();
-                QueuedBattleGroups[playerTwo] = battleGroupTwo.Select(x => new PrefabGUID(x)).ToList();
+                QueuedBattleGroups[playerOne] = [..battleGroupOne.Familiars.Select(x => new PrefabGUID(x))];
+                QueuedBattleGroups[playerTwo] = [..battleGroupTwo.Familiars.Select(x => new PrefabGUID(x))];
 
                 Core.Log.LogInfo($"Battle groups for {playerOne} & {playerTwo} verified and added to queue: {battleGroupOneString} | {battleGroupTwoString}");
 
                 return true;
             }
         }
-        else
-        {
-            string message = "Couldn't find battle group for one or both players!";
-            NotifyBothPlayers(playerOne, playerTwo, message);
-
-            return false;
-        }
     }
     public static (int position, TimeSpan timeRemaining) GetQueuePositionAndTime(ulong steamId)
     {
-        int pendingCancels = 0;
-
-        if (CancelledPairs.Any())
-        {
-            foreach (var cancelledPair in CancelledPairs)
-            {
-                if (cancelledPair.Item1 == steamId || cancelledPair.Item2 == steamId)
-                {
-                    pendingCancels++;
-                }
-            }
-        }
-
         int index = 0;
 
         foreach (var match in MatchQueue)
@@ -496,18 +480,12 @@ internal class BattleService
 
             if (match.Item1 == steamId || match.Item2 == steamId)
             {
-                if (pendingCancels > 0)
-                {
-                    pendingCancels--;
-                    continue;
-                }
-
                 DateTime now = DateTime.UtcNow;
-
                 TimeSpan currentLoopRemaining = _matchPendingStart.AddSeconds(BATTLE_INTERVAL) - now;
+
                 if (currentLoopRemaining < TimeSpan.Zero)
                 {
-                    currentLoopRemaining = TimeSpan.Zero; // Ensure no negative values
+                    currentLoopRemaining = TimeSpan.Zero;
                 }
 
                 TimeSpan additionalWaitTime = TimeSpan.FromSeconds((index - 1) * BATTLE_INTERVAL);
@@ -519,7 +497,7 @@ internal class BattleService
 
         return (0, TimeSpan.Zero);
     }
-    public static void CancelAndRemovePairFromQueue((ulong, ulong) matchPair)
+    public static void RemovePairFromQueue((ulong, ulong) matchPair)
     {
         QueuedPlayers.Remove(matchPair.Item1);
         QueuedPlayers.Remove(matchPair.Item2);
@@ -528,7 +506,6 @@ internal class BattleService
         QueuedBattleGroups.TryRemove(matchPair.Item2, out _);
 
         MatchPairs.Remove(matchPair);
-        CancelledPairs.Add(matchPair);
     }
     static void EnableAggro(List<Entity> familiars)
     {
@@ -598,3 +575,21 @@ internal class BattleService
         }
     }
 }
+
+/*
+if (_awardSanguis)
+{
+    try
+    {
+        TransferTokensAndSave(winnerInfo.User.PlatformId, loserInfo.User.PlatformId, _tokensTransferred);
+        NotifyBothPlayers(matchPair.Item1, matchPair.Item2, $"{formattedLoserName} familiars have been defeated! Winner: <color=#E5B800>{winnerInfo.User.CharacterName.Value}</color>");
+    }
+    catch (Exception ex)
+    {
+        Core.Log.LogError($"Error transferring tokens and saving - {ex}");
+    }
+}
+else
+{
+}
+*/

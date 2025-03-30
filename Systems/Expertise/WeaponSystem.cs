@@ -4,7 +4,10 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
@@ -13,6 +16,8 @@ namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     static readonly int _maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
     static readonly int _expertiseStatChoices = ConfigService.ExpertiseStatChoices;
@@ -22,6 +27,13 @@ internal static class WeaponSystem
     static readonly float _prestigeRatesReducer = ConfigService.PrestigeRatesReducer;
     static readonly float _prestigeRateMultiplier = ConfigService.PrestigeRateMultiplier;
     static readonly float _unitSpawnerExpertiseFactor = ConfigService.UnitSpawnerExpertiseFactor;
+
+    static readonly WaitForSeconds _delay = new(1f);
+    const float DELAY_ADD = 1.25f;
+
+    static readonly float3 _grey = new(0.75f, 0.75f, 0.75f); // Soft Silver Grey
+    static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly PrefabGUID _sctGeneric = new(-1687715009);
 
     public static readonly Dictionary<WeaponType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -177,16 +189,20 @@ internal static class WeaponSystem
     };
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
-        ProcessExpertise(deathEvent.Source, deathEvent.Target);
+        ProcessExpertise(deathEvent, 1f);
     }
-    public static void ProcessExpertise(Entity source, Entity target, float groupMultiplier = 1f)
+    public static void ProcessExpertise(DeathEventArgs deathEvent, float groupMultiplier = 1f)
     {
+        Entity playerCharacter = deathEvent.Source;
+        Entity target = deathEvent.Target;
+
         if (target.Has<Minion>()) return;
 
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-        ulong steamID = user.PlatformId;
-        WeaponType weaponType = WeaponManager.GetCurrentWeaponType(source);
+        Entity userEntity = playerCharacter.GetUserEntity();
+        User user = userEntity.GetUser();
+        ulong steamId = user.PlatformId;
+
+        WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
 
         if (target.TryGetComponent(out UnitStats unitStats))
         {
@@ -199,7 +215,7 @@ internal static class WeaponSystem
                 if (expertiseValue == 0) return;
             }
 
-            if (steamID.TryGetPlayerPrestiges(out var prestiges))
+            if (steamId.TryGetPlayerPrestiges(out var prestiges))
             {
                 if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige))
                 {
@@ -217,8 +233,9 @@ internal static class WeaponSystem
             IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
             if (handler != null)
             {
-                SaveExpertiseExperience(steamID, handler, expertiseValue, out bool leveledUp, out int newLevel);
-                NotifyPlayer(user, weaponType, expertiseValue, leveledUp, newLevel, handler);
+                SaveExpertiseExperience(steamId, handler, expertiseValue, out bool leveledUp, out int newLevel);
+                NotifyPlayer(playerCharacter, userEntity, user, steamId, weaponType, expertiseValue, leveledUp, newLevel, handler, deathEvent.ScrollingTextDelay);
+                deathEvent.ScrollingTextDelay += DELAY_ADD;
             }
         }
     }
@@ -229,9 +246,9 @@ internal static class WeaponSystem
         if (isVBlood) return ExpertiseValue * _vBloodExpertiseMultiplier;
         else return ExpertiseValue * _unitExpertiseMultiplier;
     }
-    public static void SaveExpertiseExperience(ulong steamID, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
+    public static void SaveExpertiseExperience(ulong steamId, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
     {
-        var xpData = handler.GetExpertiseData(steamID);
+        var xpData = handler.GetExpertiseData(steamId);
         int currentLevel = xpData.Key;
         float currentXP = xpData.Value;
 
@@ -257,27 +274,32 @@ internal static class WeaponSystem
             }
         }
 
-        handler.SetExpertiseData(steamID, new KeyValuePair<int, float>(newLevel, newExperience));
+        handler.SetExpertiseData(steamId, new KeyValuePair<int, float>(newLevel, newExperience));
     }
-    public static void NotifyPlayer(User user, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponHandler handler)
+    public static void NotifyPlayer(Entity playerCharacter, Entity userEntity, User user, ulong steamId, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponHandler handler, float delay)
     {
-        ulong steamID = user.PlatformId;
-
         int gainedIntXP = (int)gainedXP;
-        int levelProgress = GetLevelProgress(steamID, handler);
+        int levelProgress = GetLevelProgress(steamId, handler);
 
         if (newLevel >= _maxExpertiseLevel) return;
+        else if (gainedXP <= 0) return;
 
         if (leveledUp)
         {
-            HandleWeaponLevelUp(user, weaponType, newLevel, steamID);
+            HandleWeaponLevelUp(user, weaponType, newLevel, steamId);
             Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
         }
 
-        if (GetPlayerBool(steamID, WEAPON_LOG_KEY))
+        if (GetPlayerBool(steamId, WEAPON_LOG_KEY))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=#c0c0c0>{weaponType.ToString().ToLower()}</color> <color=#FFC0CB>expertise</color> (<color=white>{levelProgress}%</color>)");
+        }
+
+        if (GetPlayerBool(steamId, SCT_PLAYER_WEP_KEY))
+        {
+            // Core.Log.LogInfo($"Expertise SCT for {user.CharacterName.Value} with gainedXP: {gainedXP} and delay: {delay}");
+            PlayerExpertiseSCTDelayRoutine(playerCharacter, userEntity, _grey, gainedXP, delay).Start();
         }
     }
     static void HandleWeaponLevelUp(User user, WeaponType weaponType, int newLevel, ulong steamID)
@@ -303,6 +325,14 @@ internal static class WeaponSystem
                 }
             }
         }
+    }
+    static IEnumerator PlayerExpertiseSCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later
+    {
+        yield return new WaitForSeconds(delay);
+
+        float3 position = playerCharacter.GetPosition();
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctGeneric, userEntity);
+        // delay += DELAY_ADD;
     }
     public static int GetLevelProgress(ulong steamID, IWeaponHandler handler)
     {

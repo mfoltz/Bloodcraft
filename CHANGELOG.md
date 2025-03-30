@@ -1,3 +1,27 @@
+`1.7.7`
+- quest progress command replies with time remaining till reset if already completed
+- Simon familiar holy rain lasts for 30s again, Dracula should no longer try to return/hide
+- changed buff bonus stats hitch a ride on, should prevent stats from being able to stack as was sometimes the case for various reasons
+- onyx tears give alchemy profession experience
+- Familiar battles under renovation, not hard-disabling incase they work well enough with new group storage for people to find enjoyable but not really expecting that to be the case atm. Needs a lot of refactoring for later plans and ease of testing which is very hard to do with current implementation
+- support for storing multiple familiar battle groups, naming, adding, deleting etc.
+- fixed drop tables not always being fully cleared for remaining familiars when killed/destroyed on server restarts
+- added command to ignore players on prestige leaderboard ('.prestige ignore [Player]', ty Odjit c:)
+- added expertise and legacy experience to available SCT options
+- smartbind works for primal blood souls ('.fam sb "Primal Frostmaw"', '.fam sb "Primal Polora"', etc.)
+- added prestige command with long name for changing config buffs similar to the class version recently added
+- experience share without parties, distance/level range are configurable and need to be in combat for credit, can also ban people from being eligible for bad behavior if needed (.lvl ignore [Player]), see further details in config description
+- primal echoes cost scaling uses unit level instead of spawn tier buff for better consistency
+- default value lines in config are now the correct originals and do not show as whatever they have been changed to
+- familiars ignore units with blood quality higher than 90%, prioritize vBlood targets, and somewhat factor in distance of enemy from the player
+- active box name shows when using '.fam l'
+- preventing damage to charmed units for PvE
+- perfect gems worked into quest rewards, can control spell school of rolled primal jewels in gemcutter
+- familiar equipment! Beckon (emote) to interact with familiar menu and equip gear, beckon again when finished; equipment is per familiar and will be retained when unbinding (will even retain profession quality bonus :p), stats are applied as shown on gear like they are for the player (they may benefit from magic source unique effect buffs as well, ancestral/legendary weapons are tentatively WIP and unable to be equipped on them right now)
+- config option for prestige leaderboard enable/disable
+- if leveling system is inactive with quests enabled players get a simulated level based on number of vBloods killed for quest goal generation instead of using gear score
+- various bug fixes and optimizations
+
 `1.6.6`
 - shinies for golems and robots working again
 - reverted changes to familiar collision and should no longer sometimes prevent batform/waygate usage in weird disable loop

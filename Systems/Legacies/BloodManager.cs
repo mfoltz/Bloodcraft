@@ -80,7 +80,7 @@ internal static class BloodManager
 
                 var classes = steamId.TryGetPlayerClasses(out var classData) ? classData : [];
                 var (_, BloodStats) = classes.First().Value; // get class to check if stat allowed
-                List<BloodStatType> bloodStatTypes = BloodStats.Select(value => (BloodStatType)value).ToList();
+                List<BloodStatType> bloodStatTypes = [..BloodStats.Select(value => (BloodStatType)value)];
 
                 if (!bloodStatTypes.Contains(statType)) // hard synergy stat check
                 {
@@ -122,7 +122,7 @@ internal static class BloodManager
     }
     public static void UpdateBloodStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
     {
-        BloodType bloodType = GetCurrentBloodType(playerCharacter);
+        BloodType bloodType = GetCurrentBloodType(playerCharacter.Read<Blood>());
         ApplyBloodStats(buffEntity, bloodType, steamId);
     }
     public static void ApplyBloodStats(Entity bloodBuff, BloodType bloodType, ulong steamId)
@@ -141,40 +141,21 @@ internal static class BloodManager
             foreach (var bloodStatType in bonuses)
             {
                 float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodType, bloodStatType);
-                bool found = false;
+                UnitStatType statType = BloodStatTypes[bloodStatType];
 
-                for (int i = 0; i < buffer.Length; i++) // can probably remove this now but later
+                ModifyUnitStatBuff_DOTS newStatBuff = new()
                 {
-                    ModifyUnitStatBuff_DOTS statBuff = buffer[i];
+                    StatType = statType,
+                    ModificationType = !statType.Equals(UnitStatType.BloodDrain) ? ModificationType.AddToBase : ModificationType.Multiply,
+                    Value = !statType.Equals(UnitStatType.BloodDrain) ? scaledBonus : 1f - scaledBonus,
+                    Modifier = 1,
+                    IncreaseByStacks = false,
+                    ValueByStacks = 0,
+                    Priority = 0,
+                    Id = ModificationIDs.Create().NewModificationId()
+                };
 
-                    if (statBuff.StatType.Equals(BloodStatTypes[bloodStatType]))
-                    {
-                        statBuff.Value += scaledBonus; // Modify the value accordingly
-                        buffer[i] = statBuff; // Assign the modified struct back to the buffer
-
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    UnitStatType statType = BloodStatTypes[bloodStatType];
-                    
-                    ModifyUnitStatBuff_DOTS newStatBuff = new()
-                    {
-                        StatType = statType,
-                        ModificationType = !statType.Equals(UnitStatType.BloodDrain) ? ModificationType.AddToBase : ModificationType.Multiply,
-                        Value = !statType.Equals(UnitStatType.BloodDrain) ? scaledBonus : 1f - scaledBonus,
-                        Modifier = 1,
-                        IncreaseByStacks = false,
-                        ValueByStacks = 0,
-                        Priority = 0,
-                        Id = ModificationIDs.Create().NewModificationId()
-                    };
-
-                    buffer.Add(newStatBuff);
-                }
+                buffer.Add(newStatBuff);
             }
         }
     }
@@ -188,7 +169,7 @@ internal static class BloodManager
             if (_classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
             {
                 var (_, classBloodStats) = classes.First().Value;
-                List<BloodStatType> bloodStatTypes = classBloodStats.Select(value => (BloodStatType)value).ToList();
+                List<BloodStatType> bloodStatTypes = [..classBloodStats.Select(value => (BloodStatType)value)];
 
                 if (bloodStatTypes.Contains(statType))
                 {
@@ -209,9 +190,8 @@ internal static class BloodManager
 
         return 0;
     }
-    public static BloodType GetCurrentBloodType(Entity character)
+    public static BloodType GetCurrentBloodType(Blood blood)
     {
-        Blood blood = character.Read<Blood>();
         return GetBloodTypeFromPrefab(blood.BloodType);
     }
 }

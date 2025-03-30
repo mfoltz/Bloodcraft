@@ -15,6 +15,7 @@ using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
@@ -39,7 +40,7 @@ internal static class ServerBootstrapSystemPatches
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
-    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
@@ -59,6 +60,7 @@ internal static class ServerBootstrapSystemPatches
     static readonly PrefabGUID _shroudBuff = new(1504279833);
     static readonly PrefabGUID _shroudCloak = new(1063517722);
     static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
+    static readonly PrefabGUID _bonusStatsBuff = new(737485591);
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
@@ -392,9 +394,9 @@ internal static class ServerBootstrapSystemPatches
 
         if (_familiars)
         {
-            if (!steamId.TryGetFamiliarActives(out var _))
+            if (!steamId.HasActiveFamiliar())
             {
-                steamId.SetFamiliarActives(new(Entity.Null, 0));
+                ActiveFamiliarManager.ResetActiveFamiliarData(steamId);
             }
 
             if (!steamId.TryGetFamiliarBox(out var _))
@@ -402,26 +404,8 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetFamiliarBox();
             }
 
-            if (!steamId.TryGetFamiliarBattleGroup(out var _))
-            {
-                steamId.SetFamiliarBattleGroup([0, 0, 0]);
-            }
-
             FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, FamiliarExperienceManager.LoadFamiliarExperienceData(steamId));
             FamiliarUnlocksManager.SaveFamiliarUnlocksData(steamId, FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId));
-
-            /*
-            Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
-
-            if (!familiar.Exists())
-            {
-                Familiars.ClearFamiliarActives(steamId);
-            }
-            else
-            {
-                UpdateFamiliarDelayRoutine(user, playerCharacter, familiar).Start();
-            }
-            */
         }
 
         if (_classes)
@@ -446,84 +430,36 @@ internal static class ServerBootstrapSystemPatches
                 User = user
             };
 
-            OnlineCache.TryAdd(steamId, playerInfo);
-            PlayerCache.TryAdd(steamId, playerInfo);
+            HandleConnection(steamId, playerInfo);
 
             if (playerCharacter.HasBuff(_vBloodBloodBuff))
             {
-                playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
-                // Core.Log.LogInfo($"{buffRemoved} - {user.PlatformId}");
+                playerCharacter.TryRemoveBuff(buffPrefabGuid: _vBloodBloodBuff);
             }
-            else
+
+            if (!playerCharacter.HasBuff(_bonusStatsBuff))
             {
-                playerCharacter.TryApplyBuff(_vBloodBloodBuff);
-                // Core.Log.LogInfo($"Applied vBloodBuff - {user.PlatformId}");
+                playerCharacter.TryApplyBuff(_bonusStatsBuff);
             }
-        }
-    }
-    static IEnumerator UpdateFamiliarDelayRoutine(User user, Entity playerCharacter, Entity familiar)
-    {
-        yield return _delay;
-        
-        if (!familiar.IsDisabled()) familiar.Destroy(); // do this without delay if no issues, which it shouldn't? or just update since that should be fine? ehh just destroy for now
-        else
-        {
-
-        }
-
-        /*
-        if (FamiliarSummonSystem.HandleModifications(user, playerCharacter, familiar))
-        {
-            int famKey = familiar.GetPrefabGuidHash();
-
-            if (!familiar.IsDisabled())
-            {
-                steamId.SetFamiliarActives((Entity.Null, famKey));
-            }
-            else
-            {
-                steamId.SetFamiliarActives((familiar, famKey));
-            }
-        }
-        else
-        {
-            familiar.Destroy();
-        }
-        */
-    }
-    public static IEnumerator UnbindFamiliarDelayRoutine(User user, Entity playerCharacter) // phasing this out since instant destruction seems more generally favorable 
-    {
-        yield return _delay;
-
-        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
-
-        if (familiar.Exists() && familiar.IsDisabled() && user.PlatformId.TryGetFamiliarActives(out var actives))
-        {
-            Familiars.CallFamiliar(playerCharacter, familiar, user, user.PlatformId, actives);
-
-            yield return _delay;
-
-            Familiars.UnbindFamiliar(user, playerCharacter);
-        }
-        else if (familiar.Exists() && !familiar.IsDisabled())
-        {
-            Familiars.UnbindFamiliar(user, playerCharacter);
         }
     }
     public static void UnbindFamiliarOnUserDisconnected(User user, Entity playerCharacter)
     {
-        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+        ulong steamId = user.PlatformId;
 
-        if (familiar.Exists() && familiar.IsDisabled() && user.PlatformId.TryGetFamiliarActives(out var actives))
+        bool hasActive = steamId.HasActiveFamiliar();
+        bool hasDismissed = steamId.HasDismissedFamiliar();
+
+        if (hasActive && hasDismissed)
         {
-            // Core.Log.LogInfo($"Unbinding familiar after enabling on user disconnect - {user.PlatformId}");
-            Familiars.CallFamiliar(playerCharacter, familiar, user, user.PlatformId, actives);
-            Familiars.UnbindFamiliar(user, playerCharacter);
+            Entity familiar = GetActiveFamiliar(playerCharacter);
+
+            CallFamiliar(playerCharacter, familiar, user, user.PlatformId);
+            UnbindFamiliar(user, playerCharacter); // maybe also statChangeUtility?
         }
-        else if (familiar.Exists() && !familiar.IsDisabled())
+        else if (hasActive && !hasDismissed)
         {
-            // Core.Log.LogInfo($"Unbinding familiar after on user disconnect - {user.PlatformId}");
-            Familiars.UnbindFamiliar(user, playerCharacter);
+            UnbindFamiliar(user, playerCharacter);
         }
     }
 
@@ -552,7 +488,7 @@ internal static class ServerBootstrapSystemPatches
 
         if (_eclipse)
         {
-            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
+            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.UnregisterUser(steamId);
         }
 
         if (_prestige && playerCharacter.Exists())
@@ -561,7 +497,7 @@ internal static class ServerBootstrapSystemPatches
 
             if (playerCharacter.HasBuff(_shroudBuff) && playerCharacter.TryGetComponent(out Equipment equipment))
             {
-                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerCharacter.TryRemoveBuff(_shroudBuff);
+                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerCharacter.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
             }
         }
 
@@ -569,11 +505,13 @@ internal static class ServerBootstrapSystemPatches
         {
             UnbindFamiliarOnUserDisconnected(user, playerCharacter); // need to yeet immediately to account for server restarts where no time after everyone 'logs out'
         }
+
+        if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId);
     }
 
     [HarmonyPatch(typeof(KickBanSystem_Server), nameof(KickBanSystem_Server.OnUpdate))] // treat this an OnUserDisconnected to account for player swaps
     [HarmonyPrefix]
-    static void OnUserDisconnectedPrefix(KickBanSystem_Server __instance)
+    static void OnUpdatePrefix(KickBanSystem_Server __instance)
     {
         NativeArray<Entity> entities = __instance._KickQuery.ToEntityArray(Allocator.Temp);
         // NativeArray<KickEvent> kickEvents = __instance._KickQuery.ToComponentDataArray<KickEvent>(Allocator.Temp);
@@ -599,7 +537,7 @@ internal static class ServerBootstrapSystemPatches
 
                         if (_eclipse)
                         {
-                            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
+                            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.UnregisterUser(steamId);
                         }
 
                         if (_prestige)
@@ -608,7 +546,7 @@ internal static class ServerBootstrapSystemPatches
 
                             if (playerInfo.CharEntity.HasBuff(_shroudBuff) && playerInfo.CharEntity.TryGetComponent(out Equipment equipment))
                             {
-                                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerInfo.CharEntity.TryRemoveBuff(_shroudBuff);
+                                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerInfo.CharEntity.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
                             }
                         }
 
@@ -616,6 +554,8 @@ internal static class ServerBootstrapSystemPatches
                         {
                             UnbindFamiliarOnUserDisconnected(playerInfo.User, playerInfo.CharEntity);
                         }
+
+                        if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId);
                     }
                 }
             }

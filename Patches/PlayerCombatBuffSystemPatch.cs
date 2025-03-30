@@ -37,7 +37,7 @@ internal static class PlayerCombatBuffSystemPatch
 
                     if (familiar.Exists() && Familiars.EligibleForCombat(familiar))
                     {
-                        Familiars.AddToFamiliarAggroBuffer(familiar, inverseAggroEvent.Consumer);
+                        Familiars.AddToFamiliarAggroBuffer(playerCharacter, familiar, inverseAggroEvent.Consumer);
                     }
                 }
             }
@@ -68,7 +68,7 @@ internal static class PlayerCombatBuffSystemPatch
                     {
                         foreach (InverseAggroBufferElement element in buffer)
                         {
-                            Familiars.AddToFamiliarAggroBuffer(familiar, element.Entity);
+                            Familiars.AddToFamiliarAggroBuffer(entity, familiar, element.Entity);
                         }
                     }
                 }

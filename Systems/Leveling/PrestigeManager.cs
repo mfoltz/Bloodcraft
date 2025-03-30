@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
@@ -6,22 +7,22 @@ using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Services.PlayerService;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Systems.Leveling;
 internal static class PrestigeManager
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
     const int EXO_PRESTIGES = 100;
 
     static readonly PrefabGUID _experienceBuff = new(1280015305); // AB_BatVampire_BatStorm_ProjectileSpawnerBuff
-    static readonly PrefabGUID _expertiseBuff = new(2114888655); // AB_VHunter_Leader_Whirlwind_Channel
-    static readonly PrefabGUID _legacyBuff = new(-1381763893);   // AB_Blood_BloodStorm_PostBuffAttack
+    static readonly PrefabGUID _expertiseBuff = new(2114888655);  // AB_VHunter_Leader_Whirlwind_Channel
+    static readonly PrefabGUID _legacyBuff = new(-1381763893);    // AB_Blood_BloodStorm_PostBuffAttack
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -348,8 +349,13 @@ internal static class PrestigeManager
 
             ctx.Reply($"<color=#90EE90>{parsedPrestigeType}</color> Prestige Info:");
             ctx.Reply($"Current Prestige Level: <color=yellow>{prestigeLevel}</color>/{maxPrestigeLevel}");
-            ctx.Reply($"Growth rate improvement for expertise and legacies: <color=green>{gainPercentage}</color>");
+            ctx.Reply($"Growth rate increase for expertise and legacies: <color=green>{gainPercentage}</color>");
             ctx.Reply($"Growth rate reduction for experience: <color=yellow>{reductionPercentage}</color>");
+
+            if (prestigeData.TryGetValue(PrestigeType.Exo, out var exoData) && exoData > 0)
+            {
+                ctx.Reply($"Experience rate reduction for leveling no longer applies for exo prestiging.");
+            }
         }
         else
         {
@@ -396,6 +402,7 @@ internal static class PrestigeManager
         if (parsedPrestigeType == PrestigeType.Experience)
         {
             HandleExperiencePrestige(ctx, updatedPrestigeLevel, xpData);
+            Progression.PlayerProgressionCacheManager.UpdatePlayerProgressionPrestige(steamId, true);
         }
         else
         {
@@ -446,7 +453,7 @@ internal static class PrestigeManager
 
         float combinedFactor = ratesMultiplier - ratesReduction;
 
-        string percentageReductionString = (ratesReduction * 100).ToString("F0") + "%";
+        string percentageReductionString = (ratesReduction * 100).ToString("F2") + "%";
 
         // Fixed additive stat gain increase based on base value
         float statGainIncrease = ConfigService.PrestigeStatMultiplier * prestigeLevel;
@@ -466,35 +473,27 @@ internal static class PrestigeManager
                 {
                     lifeTime.Duration = 2f;
                 });
-
-                // if (buffEntity.Has<ModifyTargetHUDBuff>()) buffEntity.Remove<ModifyTargetHUDBuff>();
-                // if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
-                // if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
             }
-
-            LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
         }
+
+        LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{prestigeLevel}</color>] prestiged successfully! Growth rate reduced by <color=red>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
     }
     public static void RemovePrestigeBuffs(Entity character)
     {
-        var buffs = Configuration.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
+        List<PrefabGUID> prestigeBuffs = UpdateBuffsBufferDestroyPatch.PrestigeBuffs;
 
-        for (int i = 0; i < buffs.Count; i++)
+        foreach (PrefabGUID buffPrefab in prestigeBuffs)
         {
-            RemoveBuff(character, buffs[i]);
+            character.TryRemoveBuff(buffPrefabGuid: buffPrefab);
         }
     }
     public static void ApplyPrestigeBuffs(Entity character, int prestigeLevel)
     {
-        List<int> buffs = Configuration.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
-        if (buffs.Count == 0) return;
+        List<PrefabGUID> prestigeBuffs = UpdateBuffsBufferDestroyPatch.PrestigeBuffs;
 
         for (int i = 0; i < prestigeLevel; i++)
         {
-            PrefabGUID buffPrefab = new(buffs[i]);
-
-            if (buffPrefab.GuidHash == 0) continue;
-            else Buffs.TryApplyPermanentBuff(character, buffPrefab);
+            Buffs.TryApplyPermanentBuff(character, prestigeBuffs[i]);
         }
     }
     public static void ReplyExperiencePrestigeEffects(User user, int level)
@@ -502,7 +501,6 @@ internal static class PrestigeManager
         float levelingReducer = ConfigService.LevelingPrestigeReducer * level;
 
         string reductionPercentage = (levelingReducer * 100).ToString("F2") + "%";
-
         float gainMultiplier = ConfigService.PrestigeRateMultiplier * level;
 
         string gainPercentage = (gainMultiplier * 100).ToString("F2") + "%";
@@ -524,15 +522,6 @@ internal static class PrestigeManager
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
         LocalizationService.HandleServerReply(EntityManager, user, $"Player <color=green>{user.CharacterName.Value}</color> has prestiged in <color=#90EE90>{parsedPrestigeType}</color>[<color=white>{level}</color>]! Growth rate reduced by <color=yellow>{percentageReductionString}</color> and stat bonuses improved by <color=green>{statGainString}</color>. The total change in growth rate with leveling prestige bonus is <color=yellow>{totalEffectString}</color>.");
-    }
-    static void RemoveBuff(Entity character, int buffId)
-    {
-        var buffPrefab = new PrefabGUID(buffId);
-
-        if (ServerGameManager.TryGetBuff(character, buffPrefab.ToIdentifier(), out Entity buffEntity))
-        {
-            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
-        }
     }
     public static bool TryParsePrestigeType(string prestigeType, out PrestigeType parsedPrestigeType)
     {
@@ -557,6 +546,7 @@ internal static class PrestigeManager
     {
         return DataService.PlayerDictionaries._playerPrestiges
             .Where(p => p.Value.ContainsKey(prestigeType))
+            .Where(p => !DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Contains(p.Key))
             .Select(p => new
             {
                 SteamId = p.Key,
@@ -564,41 +554,28 @@ internal static class PrestigeManager
             })
             .Select(p => new
             {
-                PlayerName = PlayerService.PlayerCache.FirstOrDefault(pc => pc.Key == p.SteamId).Value.User.CharacterName.Value,
+                PlayerName = SteamIdPlayerInfoCache.FirstOrDefault(pc => pc.Key == p.SteamId).Value.User.CharacterName.Value,
                 p.Prestige
             })
             .Where(p => !string.IsNullOrEmpty(p.PlayerName))
             .ToDictionary(p => p.PlayerName, p => p.Prestige);
     }
-    public static void ResetDamageResistCategoryStats(Entity character)
+    public static void GlobalPurgePrestigeBuffs(ChatCommandContext ctx)
     {
-        AdjustResistStats(character);
-        AdjustDamageStats(character);
+        List<PlayerInfo> playerCache = [..SteamIdPlayerInfoCache.Values];
+
+        foreach (PlayerInfo playerInfo in playerCache)
+        {
+            ulong steamId = playerInfo.User.PlatformId;
+            SetPlayerBool(steamId, PRESTIGE_BUFFS_KEY, false);
+
+            RemovePrestigeBuffs(playerInfo.CharEntity);
+        }
+
+        ctx.Reply("Removed prestige buffs from all players.");
     }
-    static void AdjustResistStats(Entity character)
+    public static bool HasPrestiged(ulong steamId)
     {
-        ResistCategoryStats resistCategoryStats = character.Read<ResistCategoryStats>();
-
-        resistCategoryStats.ResistVsBeasts._Value = 0;
-        resistCategoryStats.ResistVsHumans._Value = 0;
-        resistCategoryStats.ResistVsUndeads._Value = 0;
-        resistCategoryStats.ResistVsDemons._Value = 0;
-        resistCategoryStats.ResistVsMechanical._Value = 0;
-        resistCategoryStats.ResistVsVampires._Value = 0;
-
-        character.Write(resistCategoryStats);
-    }
-    static void AdjustDamageStats(Entity character)
-    {
-        DamageCategoryStats damageCategoryStats = character.Read<DamageCategoryStats>();
-
-        damageCategoryStats.DamageVsBeasts._Value = 1;
-        damageCategoryStats.DamageVsHumans._Value = 1;
-        damageCategoryStats.DamageVsUndeads._Value = 1;
-        damageCategoryStats.DamageVsDemons._Value = 1;
-        damageCategoryStats.DamageVsMechanical._Value = 1;
-        damageCategoryStats.DamageVsVampires._Value = 1;
-
-        character.Write(damageCategoryStats);
+        return steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out int prestiges) && prestiges > 0;
     }
 }

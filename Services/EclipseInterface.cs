@@ -37,7 +37,7 @@ public static class VersionHandler
     {
         { "1.1.2", new VersionHandler_1_1_2() },
         { "1.2.2", new VersionHandler_1_2_2() },
-        { "1.3.2", new VersionHandler_1_3_2() }
+        { "1.3.2", new VersionHandler_1_3() }
     };
 
 #nullable enable
@@ -225,7 +225,7 @@ public class VersionHandler_1_2_2 : IVersionHandler<ProgressDataV1_2_2>
         return sb.ToString();
     }
 }
-public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
+public class VersionHandler_1_3 : IVersionHandler<ProgressDataV1_3>
 {
     public void SendClientConfig(User user)
     {
@@ -239,7 +239,7 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
         Entity userEntity = playerCharacter.Read<PlayerCharacter>().UserEntity;
         User user = userEntity.Read<User>();
 
-        ProgressDataV1_3_2 data = new()
+        ProgressDataV1_3 data = new()
         {
             ExperienceData = GetExperienceData(steamId),
             LegacyData = GetLegacyData(playerCharacter, steamId),
@@ -255,9 +255,7 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
         string messageWithMAC = $"{message};mac{ChatMessageSystemPatch.GenerateMACV1_3_2(message)}";
 
         LocalizationService.HandleServerReply(Core.EntityManager, user, messageWithMAC);
-        // LocalizationService.SendToClient(playerCharacter, userEntity, messageWithMAC);
     }
-    /*
     public string BuildConfigMessage()
     {
         List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
@@ -270,51 +268,7 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
         int maxLegacyLevel = MaxLegacyLevel;
         int maxExpertiseLevel = MaxExpertiseLevel;
         int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MAX_PROFESSION_LEVEL; // no longer need to send this but changing everything involved that would need to be cut/changed too much extra work atm
-
-        var sb = new StringBuilder();
-        sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ConfigsToClient)
-            .AppendFormat(CultureInfo.InvariantCulture, "{0:F2},{1:F2},{2},{3},{4},{5},{6},", prestigeStatMultiplier, statSynergyMultiplier, maxPlayerLevel, maxLegacyLevel, 
-            maxExpertiseLevel, maxFamiliarLevel, maxProfessionLevel);
-
-        sb.Append(string.Join(",", weaponStatValues.Select(val => val.ToString("F2"))))
-            .Append(',');
-
-        sb.Append(string.Join(",", bloodStatValues.Select(val => val.ToString("F2"))))
-            .Append(',');
-
-        foreach (var classEntry in Classes.ClassWeaponBloodEnumMap)
-        {
-            var playerClass = classEntry.Key;
-            var (weaponSynergies, bloodSynergies) = classEntry.Value;
-
-            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:D2},", (int)playerClass + 1);
-            sb.Append(string.Join("", weaponSynergies.Select(s => (s + 1).ToString("D2"))));
-            sb.Append(',');
-
-            sb.Append(string.Join("", bloodSynergies.Select(s => (s + 1).ToString("D2"))));
-            sb.Append(',');
-        }
-
-        if (sb[^1] == ',')
-            sb.Length--;
-
-        return sb.ToString();
-    }
-    */
-    public string BuildConfigMessage()
-    {
-        List<float> weaponStatValues = Enum.GetValues(typeof(WeaponStatType)).Cast<WeaponStatType>().Select(stat => WeaponStatValues[stat]).ToList();
-        List<float> bloodStatValues = Enum.GetValues(typeof(BloodStatType)).Cast<BloodStatType>().Select(stat => BloodStatValues[stat]).ToList();
-
-        float prestigeStatMultiplier = PrestigeStatMultiplier;
-        float statSynergyMultiplier = ClassStatMultiplier;
-
-        int maxPlayerLevel = MaxLevel;
-        int maxLegacyLevel = MaxLegacyLevel;
-        int maxExpertiseLevel = MaxExpertiseLevel;
-        int maxFamiliarLevel = MaxFamiliarLevel;
-        int maxProfessionLevel = MAX_PROFESSION_LEVEL; // no longer need to send this but changing everything involved that would need to be cut/changed too much extra work atm
+        int maxProfessionLevel = MAX_PROFESSION_LEVEL;
         bool extraRecipes = ExtraRecipes;
         int primalCost = PrimalCost;
 
@@ -347,7 +301,7 @@ public class VersionHandler_1_3_2 : IVersionHandler<ProgressDataV1_3_2>
 
         return sb.ToString();
     }
-    public string BuildProgressMessage(ProgressDataV1_3_2 data)
+    public string BuildProgressMessage(ProgressDataV1_3 data)
     {
         var sb = new StringBuilder();
         sb.AppendFormat(CultureInfo.InvariantCulture, "[{0}]:", (int)NetworkEventSubType.ProgressToClient)
@@ -390,7 +344,7 @@ public class ProgressDataV1_2_2
     public (int Type, int Progress, int Goal, string Target, string IsVBlood) DailyQuestData { get; set; }
     public (int Type, int Progress, int Goal, string Target, string IsVBlood) WeeklyQuestData { get; set; }
 }
-public class ProgressDataV1_3_2
+public class ProgressDataV1_3
 {
     public (int Percent, int Level, int Prestige, int Class) ExperienceData { get; set; }
     public (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) LegacyData { get; set; }

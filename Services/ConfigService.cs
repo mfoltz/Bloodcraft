@@ -1,4 +1,8 @@
 ﻿using BepInEx.Configuration;
+using Lidgren.Network;
+using ProjectM.Network;
+using ProjectM.Terrain;
+using Stunlock.Network;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -24,8 +28,11 @@ internal static class ConfigService
     static readonly Lazy<bool> _bearFormDash = new(() => GetConfigValue<bool>("BearFormDash"));
     public static bool BearFormDash => _bearFormDash.Value;
 
-    // static readonly Lazy<bool> _performanceAuditing = new(() => GetConfigValue<bool>("PerformanceAuditing"));
-    // public static bool PerformanceAuditing => _performanceAuditing.Value;
+    static readonly Lazy<bool> _bleedingEdge = new(() => GetConfigValue<bool>("BleedingEdge"));
+    public static bool BleedingEdge => _bleedingEdge.Value;
+
+    static readonly Lazy<bool> _heavyFrame = new(() => GetConfigValue<bool>("HeavyFrame"));
+    public static bool HeavyFrame => _heavyFrame.Value;
 
     static readonly Lazy<int> _primalJewelCost = new(() => GetConfigValue<int>("PrimalJewelCost"));
     public static int PrimalJewelCost => _primalJewelCost.Value;
@@ -44,6 +51,9 @@ internal static class ConfigService
 
     static readonly Lazy<bool> _infiniteDailies = new(() => GetConfigValue<bool>("InfiniteDailies"));
     public static bool InfiniteDailies => _infiniteDailies.Value;
+
+    static readonly Lazy<float> _dailyPerfectChance = new(() => GetConfigValue<float>("DailyPerfectChance"));
+    public static float DailyPerfectChance => _dailyPerfectChance.Value;
 
     static readonly Lazy<string> _questRewards = new(() => GetConfigValue<string>("QuestRewards"));
     public static string QuestRewards => _questRewards.Value;
@@ -114,11 +124,11 @@ internal static class ConfigService
     static readonly Lazy<float> _levelScalingMultiplier = new(() => GetConfigValue<float>("LevelScalingMultiplier"));
     public static float LevelScalingMultiplier => _levelScalingMultiplier.Value;
 
-    static readonly Lazy<bool> _playerParties = new(() => GetConfigValue<bool>("PlayerParties"));
-    public static bool PlayerParties => _playerParties.Value;
+    static readonly Lazy<bool> _expShare = new(() => GetConfigValue<bool>("ExpShare"));
+    public static bool ExpShare => _expShare.Value;
 
-    static readonly Lazy<int> _maxPartySize = new(() => GetConfigValue<int>("MaxPartySize"));
-    public static int MaxPartySize => _maxPartySize.Value;
+    static readonly Lazy<int> _expShareLevelRange = new(() => GetConfigValue<int>("ExpShareLevelRange"));
+    public static int ExpShareLevelRange => _expShareLevelRange.Value;
 
     static readonly Lazy<float> _expShareDistance = new(() => GetConfigValue<float>("ExpShareDistance"));
     public static float ExpShareDistance => _expShareDistance.Value;
@@ -158,6 +168,9 @@ internal static class ConfigService
 
     static readonly Lazy<bool> _trueImmortal = new(() => GetConfigValue<bool>("TrueImmortal"));
     public static bool TrueImmortal => _trueImmortal.Value;
+
+    static readonly Lazy<bool> _prestigeLeaderboard = new(() => GetConfigValue<bool>("Leaderboard"));
+    public static bool PrestigeLeaderboard => _prestigeLeaderboard.Value;
 
     static readonly Lazy<bool> _expertiseSystem = new(() => GetConfigValue<bool>("ExpertiseSystem"));
     public static bool ExpertiseSystem => _expertiseSystem.Value;
@@ -226,7 +239,7 @@ internal static class ConfigService
     public static float SpellCritDamage => _spellCritDamage.Value;
 
     static readonly Lazy<bool> _bloodSystem = new(() => GetConfigValue<bool>("BloodSystem"));
-    public static bool BloodSystem => _bloodSystem.Value;
+    public static bool LegacySystem => _bloodSystem.Value;
 
     static readonly Lazy<int> _maxLegacyPrestiges = new(() => GetConfigValue<int>("MaxLegacyPrestiges"));
     public static int MaxLegacyPrestiges => _maxLegacyPrestiges.Value;
@@ -485,7 +498,7 @@ internal static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarUnlocks"),     // 8
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerBools"),                      // 9
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarEquipment"),   // 10
-            // Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarBattleGroups") // 10
+            Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarBattleGroups") // 11
         ];
         });
         public static List<string> DirectoryPaths => _directoryPaths.Value;
@@ -513,18 +526,21 @@ internal static class ConfigService
         public static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
-            new ConfigEntryDefinition("General", "ClientCompanion", false, "Enable if using the client companion mod, can configure what's displayed in the client config."),
+            new ConfigEntryDefinition("General", "ClientCompanion", true, "Enable if using the client companion mod, can configure what's displayed in the client config."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
-            new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
+            new ConfigEntryDefinition("General", "BearFormDash", true, "Enable or disable bear form dash."),
+            new ConfigEntryDefinition("General", "BleedingEdge", true, "Enable or disable stacking bleed on the final primary attack for slashers."),
+            new ConfigEntryDefinition("General", "HeavyFrame", true, "Enable or disable a heavier feel for the crossbow with faster projectiles."),
+            // new ConfigEntryDefinition("General", "TwilightArsenal", true, "Enable or disable experimental ability replacements on shadow matter weapons."),
             new ConfigEntryDefinition("General", "PrimalJewelCost", -77477508, "If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers)."),
-            // new ConfigEntryDefinition("General", "PerformanceAuditing", false, "(WIP) Enable or disable logging server RAM, CPU, and EntityQuery count. Probably doesn't belong here, fight me."),
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
             new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (kill, gather, and crafting)."),
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
+            new ConfigEntryDefinition("Quests", "DailyPerfectChance", 0.1f, "Chance to receive a random perfect gem (can be used to control spell school for primal jewels in gemcutter) when completing daily quests."),
             new ConfigEntryDefinition("Quests", "QuestRewards", "28358550,576389135,-257494203", "Item prefabs for quest reward pool."),
             new ConfigEntryDefinition("Quests", "QuestRewardAmounts", "50,250,50", "The amount of each reward in the pool. Will be multiplied accordingly for weeklies (*5) and vblood kill quests (*3)."),
             new ConfigEntryDefinition("Quests", "RerollDailyPrefab", -949672483, "Prefab item for rerolling daily."),
@@ -545,8 +561,8 @@ internal static class ConfigService
             new ConfigEntryDefinition("Leveling", "UnitSpawnerMultiplier", 0f, "The multiplier for experience gained from unit spawners (vermin nests, tombs). Applies to familiar experience as well."),
             new ConfigEntryDefinition("Leveling", "GroupLevelingMultiplier", 1f, "The multiplier for experience gained from group kills."),
             new ConfigEntryDefinition("Leveling", "LevelScalingMultiplier", 0.05f, "Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove."),
-            new ConfigEntryDefinition("Leveling", "PlayerParties", false, "Enable or disable the ability to group with players not in your clan for experience/familiar unlock sharing."),
-            new ConfigEntryDefinition("Leveling", "MaxPartySize", 5, "The maximum number of players that can share experience in a group."),
+            new ConfigEntryDefinition("Leveling", "ExpShare", true, "Enable or disable sharing experience with nearby players (ExpShareDistance) in combat that are within level range (ExpShareLevelRange, this does not apply to players that have prestiged at least once on PvE servers or clan members of the player that does the final blow) along with familiar unlock sharing if enabled (on PvP servers will only apply to clan members)."),
+            new ConfigEntryDefinition("Leveling", "ExpShareLevelRange", 10, "Maximum level difference between players allowed for ExpShare, players who have prestiged at least once are exempt from this. Use 0 for no level diff restrictions."),
             new ConfigEntryDefinition("Leveling", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths."),
             new ConfigEntryDefinition("Prestige", "PrestigeSystem", false, "Enable or disable the prestige system (requires leveling to be enabled as well)."),
             new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level."),
@@ -560,6 +576,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Prestige", "ExoPrestigeReward", 28358550, "The reward for exo prestiging (tier 3 nether shards by default)."),
             new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging."),
             new ConfigEntryDefinition("Prestige", "TrueImmortal", false, "Enable or disable Immortal blood for the duration of exoform."),
+            new ConfigEntryDefinition("Prestige", "Leaderboard", true, "Enable or disable the various prestige leaderboard rankings."),
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
@@ -605,7 +622,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "BloodEfficiency", 0.10f, "The base cap for blood efficiency."),
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
             new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained."),
-            new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well."), // maybe this should be in general >_>
+            new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes."), // maybe this should be in general >_>
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)."),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars."),
@@ -629,7 +646,7 @@ internal static class ConfigService
             // new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
             // new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"), // actually maybe vampiricDust
             new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
-            new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 250, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 100-400, if outside that range in either direction it will be clamped."),
+            new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 100, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 50-200, if outside that range in either direction it will be clamped."),
             new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped."),
             new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)."),
             new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)."),
@@ -896,50 +913,114 @@ internal static class ConfigService
                 Directory.CreateDirectory(path);
             }
         }
+
+        const string DEFAULT_VALUE_LINE = "# Default value: ";
         static void CleanAndOrganizeConfig(string configFile)
         {
-            Dictionary<string, List<string>> OrderedSections = [];
-            string currentSection = "";
-
-            string[] lines = File.ReadAllLines(configFile);
-            string[] fileHeader = lines[0..3];
-
-            foreach (var line in lines)
+            try
             {
-                string trimmedLine = line.Trim();
-                var match = _regex.Match(trimmedLine);
+                Dictionary<string, List<string>> OrderedSections = [];
+                string currentSection = "";
 
-                if (match.Success)
+                string[] lines = File.ReadAllLines(configFile);
+                string[] fileHeader = lines[0..3];
+
+                foreach (var line in lines)
                 {
-                    currentSection = match.Groups[1].Value;
-                    if (!OrderedSections.ContainsKey(currentSection))
+                    string trimmedLine = line.Trim();
+                    var match = _regex.Match(trimmedLine);
+
+                    if (match.Success)
                     {
-                        OrderedSections[currentSection] = [];
+                        currentSection = match.Groups[1].Value;
+                        if (!OrderedSections.ContainsKey(currentSection))
+                        {
+                            OrderedSections[currentSection] = [];
+                        }
+                    }
+                    else if (SectionOrder.Contains(currentSection))
+                    {
+                        OrderedSections[currentSection].Add(trimmedLine);
                     }
                 }
-                else if (SectionOrder.Contains(currentSection))
+
+                using StreamWriter writer = new(configFile, false);
+
+                foreach (var header in fileHeader)
                 {
-                    OrderedSections[currentSection].Add(trimmedLine);
+                    writer.WriteLine(header);
                 }
-            }
 
-            using StreamWriter writer = new(configFile, false);
-
-            foreach (var header in fileHeader)
-            {
-                writer.WriteLine(header);
-            }
-
-            foreach (var section in SectionOrder)
-            {
-                if (OrderedSections.ContainsKey(section))
+                foreach (var section in SectionOrder)
                 {
-                    writer.WriteLine($"[{section}]");
-                    foreach (var line in OrderedSections[section])
+                    if (OrderedSections.ContainsKey(section))
                     {
-                        writer.WriteLine(line);
+                        writer.WriteLine($"[{section}]");
+
+                        List<string> sectionLines = OrderedSections[section];
+
+                        // Extract keys from the config file
+                        List<string> sectionKeys = [..sectionLines
+                            .Where(line => line.Contains('='))
+                            .Select(line => line.Split('=')[0].Trim())];
+
+                        // Create a dictionary of default values directly from ConfigEntries
+                        Dictionary<string, object> defaultValuesMap = ConfigEntries
+                            .Where(entry => entry.Section == section)
+                            .ToDictionary(entry => entry.Key, entry => entry.DefaultValue);
+
+                        int keyIndex = 0;
+                        bool previousLineSkipped = false; // Track whether the last line was skipped
+
+                        foreach (var line in sectionLines)
+                        {
+                            if (line.Contains('='))
+                            {
+                                string key = line.Split('=')[0].Trim();
+
+                                // Skip obsolete keys that are not in ConfigEntries
+                                if (!defaultValuesMap.ContainsKey(key))
+                                {
+                                    Core.Log.LogWarning($"Skipping obsolete config entry: {key}");
+                                    previousLineSkipped = true;
+                                    continue;
+                                }
+                            }
+
+                            // Prevent consecutive blank lines by skipping extra ones
+                            if (string.IsNullOrWhiteSpace(line) && previousLineSkipped)
+                            {
+                                continue;
+                            }
+
+                            if (line.Contains(DEFAULT_VALUE_LINE))
+                            {
+                                ConfigEntryDefinition entry = ConfigEntries.FirstOrDefault(e => e.Key == sectionKeys[keyIndex] && e.Section == section);
+
+                                if (entry != null)
+                                {
+                                    writer.WriteLine(DEFAULT_VALUE_LINE + entry.DefaultValue.ToString());
+                                    keyIndex++;
+                                }
+                                else
+                                {
+                                    Core.Log.LogWarning($"Config entry for key '{sectionKeys[keyIndex]}' not found in ConfigEntries!");
+                                    writer.WriteLine(line);
+                                }
+                            }
+                            else
+                            {
+                                writer.WriteLine(line);
+                            }
+
+                            previousLineSkipped = false; // Reset flag since we wrote a valid line
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError($"Failed to clean and organize config file: {ex.Message}");
             }
         }
     }
@@ -948,10 +1029,6 @@ internal static class ConfigService
         if (ConfigInitialization.FinalConfigValues.TryGetValue(key, out var val))
         {
             return (T)Convert.ChangeType(val, typeof(T));
-        }
-        else
-        {
-            Core.Log.LogInfo($"Using default config value...");
         }
 
         var entry = ConfigInitialization.ConfigEntries.FirstOrDefault(e => e.Key == key);

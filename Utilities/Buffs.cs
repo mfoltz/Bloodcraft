@@ -5,11 +5,8 @@ using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using Unity.Entities;
-using static Bloodcraft.Systems.Leveling.LevelingSystem;
-using static Bloodcraft.Utilities.Classes;
 
 namespace Bloodcraft.Utilities;
 internal static class Buffs
@@ -26,6 +23,7 @@ internal static class Buffs
     static readonly PrefabGUID _pveCombatBuff = new(581443919);
     static readonly PrefabGUID _pvpCombatBuff = new(697095869);
     static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
+    static readonly PrefabGUID _bonusStatsBuff = new(737485591); // SetBonus_DamageReduction_T09, trying unused set bonus buff instead of the above to see if it averts stacking issues
 
     public static readonly Dictionary<int, PrefabGUID> ExoFormAbilityMap = new()
     {
@@ -78,7 +76,6 @@ internal static class Buffs
             };
 
             DebugEventsSystem.ApplyBuff(fromCharacter, applyBuffDebugEvent);
-
             return true;
         }
 
@@ -585,12 +582,25 @@ internal static class Buffs
     {
         if (entity.TryApplyAndGetBuff(buffPrefabGuid, out Entity buffEntity))
         {
-            if (buffEntity.Has<Buff>())
+            buffEntity.HasWith((ref Buff buff) =>
             {
-                BuffCategory component = buffEntity.Read<BuffCategory>();
-                component.Groups = BuffCategoryFlag.None;
-                buffEntity.Write(component);
-            }
+                buff.MaxStacks = 3;
+                buff.IncreaseStacks = true;
+                buff.Stacks = 1;
+            });
+
+            buffEntity.HasWith((ref BuffCategory buffCategory) =>
+            {
+                buffCategory.Groups = BuffCategoryFlag.None;
+            });
+
+            buffEntity.HasWith((ref LifeTime lifeTime) =>
+            {
+                lifeTime.Duration = 0f;
+                lifeTime.EndAction = LifeTimeEndAction.None;
+            });
+
+            /*
             if (buffEntity.Has<CreateGameplayEventsOnSpawn>())
             {
                 buffEntity.Remove<CreateGameplayEventsOnSpawn>();
@@ -598,14 +608,6 @@ internal static class Buffs
             if (buffEntity.Has<GameplayEventListeners>())
             {
                 buffEntity.Remove<GameplayEventListeners>();
-            }
-            if (buffEntity.Has<LifeTime>())
-            {
-                buffEntity.With((ref LifeTime lifeTime) =>
-                {
-                    lifeTime.Duration = 0f;
-                    lifeTime.EndAction = LifeTimeEndAction.None;
-                });
             }
             if (buffEntity.Has<RemoveBuffOnGameplayEvent>())
             {
@@ -651,6 +653,21 @@ internal static class Buffs
             {
                 buffEntity.Remove<AmplifyBuff>();
             }
+            */
+
+            buffEntity.TryRemove<CreateGameplayEventsOnSpawn>();
+            buffEntity.TryRemove<GameplayEventListeners>();
+            buffEntity.TryRemove<RemoveBuffOnGameplayEvent>();
+            buffEntity.TryRemove<RemoveBuffOnGameplayEventEntry>();
+            buffEntity.TryRemove<DealDamageOnGameplayEvent>();
+            buffEntity.TryRemove<HealOnGameplayEvent>();
+            buffEntity.TryRemove<BloodBuffScript_ChanceToResetCooldown>();
+            buffEntity.TryRemove<ModifyMovementSpeedBuff>();
+            buffEntity.TryRemove<ApplyBuffOnGameplayEvent>();
+            buffEntity.TryRemove<DestroyOnGameplayEvent>();
+            buffEntity.TryRemove<WeakenBuff>();
+            buffEntity.TryRemove<ReplaceAbilityOnSlotBuff>();
+            buffEntity.TryRemove<AmplifyBuff>();
         }    
     }
     public static void PrestigeBuffs()
@@ -818,12 +835,30 @@ internal static class Buffs
 
         return false;
     }
-    public static bool TryRemoveBuff(this Entity entity, PrefabGUID buffPrefabGuid)
+    public static bool TryGetBuffStacks(this Entity entity, PrefabGUID buffPrefabGUID, out int stacks)
     {
-        if (entity.TryGetBuff(buffPrefabGuid, out Entity buffEntity))
-        {
-            DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
+        stacks = 0;
 
+        if (ServerGameManager.TryGetBuff(entity, buffPrefabGUID.ToIdentifier(), out Entity buffEntity) 
+            && buffEntity.TryGetComponent(out Buff buff))
+        {
+            stacks = buff.Stacks;
+            return true;
+        }
+
+        return false;
+    }
+    public static bool TryRemoveBuff(this Entity entity, Entity buffEntity = default, PrefabGUID buffPrefabGuid = default)
+    {
+        if (buffEntity.HasValue())
+        {
+            buffEntity.TryDestroyBuff();
+            return true;
+        }
+
+        if (entity.TryGetBuff(buffPrefabGuid, out buffEntity))
+        {
+            buffEntity.TryDestroyBuff();
             return true;
         }
 
@@ -909,9 +944,8 @@ internal static class Buffs
 
         return false;
     }
-    public static void RefreshStats(Entity playerCharacter)
+    public static void RefreshStats(Entity character)
     {
-        playerCharacter.TryRemoveBuff(_vBloodBloodBuff);
-        // else playerCharacter.TryApplyBuff(_vBloodBloodBuff);
+        if (character.Exists()) character.TryRemoveBuff(buffPrefabGuid: _bonusStatsBuff);
     }
 }

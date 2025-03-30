@@ -5,11 +5,12 @@ using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
+using System.Collections.Concurrent;
 using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Quests.QuestSystem;
+using static Bloodcraft.Utilities.EntityQueries;
 
 namespace Bloodcraft.Services;
 internal class QuestService
@@ -18,166 +19,368 @@ internal class QuestService
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
 
-    static readonly WaitForSeconds _updateDelay = new(60);
+    const float START_DELAY = 30f;
+    const float ROUTINE_DELAY = 60f;
 
-    static readonly ComponentType[] _unitComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
-        ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Team>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Translation>())
-    ];
+    static readonly WaitForSeconds _startDelay = new(START_DELAY);
+    static readonly WaitForSeconds _routineDelay = new(ROUTINE_DELAY);
 
-    static readonly ComponentType[] _craftingComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<InventoryItem>()),
-        ComponentType.ReadOnly(Il2CppType.Of<ItemData>())
-    ];
-
-    static readonly ComponentType[] _resourceComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<YieldResourcesOnDamageTaken>()),
-        ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>())
-    ];
-
-    static readonly ComponentType[] _noneComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<SpawnTag>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Minion>())
-    ];
-
-    static EntityQuery _unitQuery;
-    static EntityQuery _itemQuery;
-    static EntityQuery _resourceQuery;
-
-    public static Dictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
     public static DateTime _lastUpdate;
 
-    static readonly PrefabGUID _manticore = new(-393555055);
-    static readonly PrefabGUID _dracula = new(-327335305);
-    static readonly PrefabGUID _monster = new(1233988687);
-    static readonly PrefabGUID _solarus = new(-740796338);
+    static readonly ComponentType[] _vBloodUnitAllComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<VBloodConsumeSource>()),
+        ComponentType.ReadOnly(Il2CppType.Of<VBloodUnit>())
+    ];
 
-    static bool _shardBearersReset = false;
-    static bool _craftAndGather = false;
+    static readonly ComponentType[] _targetUnitAllComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Movement>())
+    ];
+
+    static readonly ComponentType[] _craftableItemAllComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ItemData>()),
+        ComponentType.ReadOnly(Il2CppType.Of<InventoryItem>())
+    ];
+
+    static readonly ComponentType[] _harvestableResourceAllComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Health>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DurabilityTarget>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DropTable>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DropTableBuffer>()),
+        ComponentType.ReadOnly(Il2CppType.Of<YieldResourcesOnDamageTaken>())
+    ];
+
+    static readonly ComponentType[] _targetUnitNoneComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<SpawnTag>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Minion>()),
+        ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>())
+    ];
+
+    static readonly ComponentType[] _craftableItemNoneComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<ShatteredItem>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UpgradeableLegendaryItem>())
+    ];
+
+    static EntityQuery _vBloodUnitQuery;
+    static EntityQuery _targetUnitQuery;
+    static EntityQuery _craftableItemQuery;
+    static EntityQuery _harvestableResourceQuery;
+
+    static readonly ConcurrentDictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
+    public static IReadOnlyDictionary<PrefabGUID, HashSet<Entity>> TargetCache => _targetCache;
+
+    static readonly List<PrefabGUID> _shardBearers = 
+    [
+        Prefabs.CHAR_Manticore_VBlood,
+        Prefabs.CHAR_ChurchOfLight_Paladin_VBlood,
+        Prefabs.CHAR_Gloomrot_Monster_VBlood,
+        Prefabs.CHAR_Vampire_Dracula_VBlood
+    ];
+
+    static readonly HashSet<string> _filteredTargetUnits =
+    [
+        "Trader",
+            "HostileVillager",
+            "TombSummon",
+            "StatueSpawn",
+            "SmiteOrb",
+            "CardinalAide",
+            "GateBoss",
+            "DraculaMinion",
+            "Summon",
+            "Minion",
+            "Chieftain",
+            "ConstrainingPole",
+            "Horse",
+            "EnchantedCross",
+            "DivineAngel",
+            "FallenAngel",
+            "FarbaneSuprise",
+            "Withered",
+            "Servant",
+            "Spider_Melee",
+            "Spider_Range",
+            "GroundSword",
+            "FloatingWeapon",
+            "Airborne"
+    ];
+
+    static readonly HashSet<string> _filteredCraftableItems =
+    [
+        "Item_Cloak",
+        "BloodKey_T01",
+        "NewBag",
+        "Miners",
+        "WoodCutter",
+        "ShadowMatter",
+        "T0X",
+        "Heart_T",
+        "Water_T",
+        "FakeItem",
+        "PrisonPotion",
+        "Dracula",
+        "Consumable_Empty",
+        "Reaper_T02",
+        "Slashers_T02",
+        "FishingPole",
+        "Disguise",
+        "Canister",
+        "Trippy",
+        "Eat_Rat",
+        "Irradiant",
+        "Slashers_T01",
+        "Slashers_T03",
+        "Slashers_T04",
+        "Reaper_T03",
+        "Reaper_T04",
+        "Reaper_T01",
+        "GarlicResistance",
+        "T01_Bone"
+    ];
+
+    static readonly HashSet<string> _filteredHarvestableResources =
+    [
+        "Item_Ingredient_Crystal",
+        "Coal",
+        "Thistle"
+    ];
+
+    static bool _shouldReset = ConfigService.EliteShardBearers;
+    static bool _craftables = true;
+    static bool _harvestables = true;
     public QuestService()
     {
-        _unitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        _vBloodUnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = _unitComponents,
-            None = _noneComponents,
+            All = _vBloodUnitAllComponents,
+            None = _targetUnitNoneComponents,
             Options = EntityQueryOptions.IncludeDisabled
         });
 
-        _itemQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        _targetUnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = _craftingComponents,
-            Options = EntityQueryOptions.IncludeAll
+            All = _targetUnitAllComponents,
+            None = _targetUnitNoneComponents,
+            Options = EntityQueryOptions.IncludeDisabled
         });
 
-        _resourceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        _craftableItemQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
-            All = _resourceComponents,
-            Options = EntityQueryOptions.IncludeAll
+            All = _craftableItemAllComponents,
+            None = _craftableItemNoneComponents,
+            Options = EntityQueryOptions.IncludeSpawnTag
         });
 
-        Configuration.QuestRewardItems();
-        QuestUpdateLoop().Start();
+        _harvestableResourceQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = _harvestableResourceAllComponents,
+            Options = EntityQueryOptions.IncludeSpawnTag
+        });
+
+        Configuration.InitializeQuestRewardItems();
+        QuestServiceRoutine().Start();
     }
-    static IEnumerator QuestUpdateLoop()
+
+    static readonly int[] _typeIndices = [0];
+    static IEnumerator QuestServiceRoutine()
     {
+        if (_shouldReset) ResetShardBearers().Start();
+        if (_craftables) InitializeCraftables().Start();
+        if (_harvestables) InitializeHarvestables().Start();
+
         while (true)
         {
-            if (!_shardBearersReset && ConfigService.EliteShardBearers) // makes sure server doesn't un-elite shard bearers on restarts by forcing them to spawn again
-            {
-                IEnumerable<Entity> vBloods = Queries.GetEntitiesEnumerable(_unitQuery);
-
-                foreach (Entity entity in vBloods)
+            yield return QueryResultStreamAsync(
+                _targetUnitQuery,
+                _targetUnitAllComponents,
+                _typeIndices,
+                stream =>
                 {
-                    PrefabGUID vBloodPrefab = entity.Read<PrefabGUID>();
-                    if (vBloodPrefab == _manticore || vBloodPrefab == _dracula || vBloodPrefab == _monster || vBloodPrefab == _solarus)
+                    try
                     {
-                        DestroyUtility.Destroy(EntityManager, entity);
-                    }
-                }
+                        Dictionary<PrefabGUID, HashSet<Entity>> prefabGuidEntityGroups = [];
 
-                _shardBearersReset = true;
-            }
-
-            if (!_craftAndGather)
-            {
-                IEnumerable<Entity> entities = Queries.GetEntitiesEnumerable(_itemQuery, (int)TargetType.Craft);
-                foreach (Entity entity in entities)
-                {
-                    if (entity.TryGetComponent(out PrefabGUID prefab) && !entity.Has<ShatteredItem>() && !entity.Has<UpgradeableLegendaryItem>())
-                    {
-                        if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salveageable) && salveageable.RecipeGUID.HasValue()) CraftPrefabs.Add(prefab); // checking for non-empty salvage recipes for equipment craft targets
-                        else if (entity.Has<ConsumableCondition>()) CraftPrefabs.Add(prefab); // checking for consumableCondition for consumable craft targets
-                    }
-                }
-
-                entities = Queries.GetEntitiesEnumerable(_resourceQuery, (int)TargetType.Gather);
-                foreach (Entity entity in entities)
-                {
-                    if (entity.TryGetComponent(out PrefabGUID prefab))
-                    {
-                        ResourcePrefabs.Add(prefab);
-                    }
-                }
-
-                _craftAndGather = true;
-
-                _itemQuery.Dispose();
-                _resourceQuery.Dispose();
-            }
-
-            _targetCache = Queries.GetEntitiesEnumerable(_unitQuery, (int)TargetType.Kill)
-                .GroupBy(entity => entity.Read<PrefabGUID>())
-                .ToDictionary(
-                    group => group.Key,
-                    group =>
-                    {
-                        if (_targetCache.TryGetValue(group.Key, out var existingSet))
+                        using (stream)
                         {
-                            existingSet.Clear();
-                            existingSet.UnionWith(group);
-                            return existingSet;
-                        }
-                        else
-                        {
-                            return new HashSet<Entity>(group);
+                            foreach (QueryResult result in stream.GetResults())
+                            {
+                                PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
+                                string prefabName = prefabGuid.GetPrefabName();
+
+                                if (_filteredTargetUnits.Any(unit => prefabName.Contains(unit, StringComparison.OrdinalIgnoreCase)))
+                                    continue;
+
+                                if (!prefabGuidEntityGroups.TryGetValue(prefabGuid, out var entities))
+                                {
+                                    entities = [];
+                                    prefabGuidEntityGroups[prefabGuid] = entities;
+                                }
+
+                                entities.Add(result.Entity);
+                            }
+
+                            foreach (var keyValuePair in prefabGuidEntityGroups)
+                            {
+                                _targetCache.AddOrUpdate(
+                                    keyValuePair.Key,
+                                    _ => keyValuePair.Value,
+                                    (_, existingSet) =>
+                                    {
+                                        existingSet.Clear();
+                                        existingSet.UnionWith(keyValuePair.Value);
+                                        return existingSet;
+                                    }
+                                );
+                            }
                         }
                     }
-                );
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogWarning($"[QuestService] QuestServiceRoutine() - {ex}");
+                    }
+                }
+            );
 
-            if (_targetCache.ContainsKey(_manticore)) _targetCache.Remove(_manticore);
-            if (_targetCache.ContainsKey(_dracula)) _targetCache.Remove(_dracula);
-            if (_targetCache.ContainsKey(_monster)) _targetCache.Remove(_monster);
-            if (_targetCache.ContainsKey(_solarus)) _targetCache.Remove(_solarus);
-
-            Dictionary<ulong, PlayerInfo> players = new(PlayerCache);
-
-            foreach (PlayerInfo playerInfo in players.Values)
+            foreach (PrefabGUID prefabGuid in _shardBearers)
             {
+                _targetCache.TryRemove(prefabGuid, out var _);
+            }
+
+            foreach (var playerInfoPair in SteamIdPlayerInfoCache)
+            {
+                ulong steamId = playerInfoPair.Key;
+                PlayerInfo playerInfo = playerInfoPair.Value;
+
+                Entity userEntity = playerInfo.CharEntity;
                 User user = playerInfo.User;
-                ulong steamId = playerInfo.User.PlatformId;
 
                 if (!_leveling)
                 {
-                    Entity character = playerInfo.CharEntity.Has<Equipment>() ? playerInfo.CharEntity : Entity.Null;
-                    if (!character.Exists()) continue;
-
-                    RefreshQuests(user, steamId, (int)playerInfo.CharEntity.Read<Equipment>().GetFullLevel());
+                    RefreshQuests(user, steamId, Progression.GetSimulatedLevel(userEntity));
                 }
                 else if (_leveling && steamId.TryGetPlayerExperience(out var xpData))
                 {
                     RefreshQuests(user, steamId, xpData.Key);
                 }
+
+                yield return null;
             }
 
             _lastUpdate = DateTime.UtcNow;
-            yield return _updateDelay;
+            yield return _routineDelay;
         }
     }
-}
+    static IEnumerator ResetShardBearers()
+    {
+        yield return QueryResultStreamAsync(
+            _vBloodUnitQuery,
+            _vBloodUnitAllComponents,
+            _typeIndices,
+            stream =>
+            {
+                try
+                {
+                    using (stream)
+                    {
+                        foreach (QueryResult result in stream.GetResults())
+                        {
+                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
 
+                            if (_shardBearers.Contains(prefabGuid)) result.Entity.TryDestroy();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogWarning($"[QuestService] ResetShardBearers() - {ex}");
+                }
+            }
+        );
+
+        _shouldReset = false;
+    }
+    static IEnumerator InitializeCraftables()
+    {
+        yield return QueryResultStreamAsync(
+            _craftableItemQuery,
+            _craftableItemAllComponents,
+            _typeIndices,
+            stream =>
+            {
+                try
+                {
+                    using (stream)
+                    {
+                        foreach (QueryResult result in stream.GetResults())
+                        {
+                            Entity entity = result.Entity;
+                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
+                            string prefabName = prefabGuid.GetPrefabName();
+
+                            if (_filteredCraftableItems.Any(item => prefabName.Contains(item, StringComparison.OrdinalIgnoreCase))) continue;
+
+                            if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salvageable))
+                            {
+                                if (salvageable.RecipeGUID.HasValue()) CraftPrefabs.Add(prefabGuid);
+                            }
+                            else if (entity.Has<ConsumableCondition>())
+                            {
+                                CraftPrefabs.Add(prefabGuid);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {ex}");
+                }
+            }
+        );
+
+        _craftables = false;
+    }
+    static IEnumerator InitializeHarvestables()
+    {
+        yield return QueryResultStreamAsync(
+            _harvestableResourceQuery,
+            _harvestableResourceAllComponents,
+            _typeIndices,
+            stream =>
+            {
+                try
+                {
+                    using (stream)
+                    {
+                        foreach (QueryResult result in stream.GetResults())
+                        {
+                            Entity entity = result.Entity;
+                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
+                            string prefabName = prefabGuid.GetPrefabName();
+
+                            if (!entity.Has<DropTableBuffer>()) continue;
+                            else if (_filteredHarvestableResources.Any(resource => prefabName.Contains(resource, StringComparison.OrdinalIgnoreCase))) continue;
+                            else if (prefabGuid.HasValue()) ResourcePrefabs.Add(prefabGuid);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogWarning($"[QuestService] InitializeHarvestables() - {ex}");
+                }
+            }
+        );
+
+        _harvestables = false;
+    }
+}

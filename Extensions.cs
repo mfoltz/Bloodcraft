@@ -16,7 +16,7 @@ using static Bloodcraft.Services.LocalizationService;
 using static Bloodcraft.Services.PlayerService;
 
 namespace Bloodcraft;
-internal static class Extensions // probably need to organize this soonTM
+internal static class Extensions // probably need to organize this soonTM and at least separate out Bloodcraft specific ones so easier to copy and paste around
 {
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
@@ -34,7 +34,7 @@ internal static class Extensions // probably need to organize this soonTM
 
         EntityManager.SetComponentData(entity, item);
     }
-    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct // need to make sure this works but don't really want to atm
+    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
     {
         if (!entity.Has<T>())
         {
@@ -42,6 +42,13 @@ internal static class Extensions // probably need to organize this soonTM
         }
 
         entity.With(action);
+    }
+    public static void HasWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+    {
+        if (entity.Has<T>())
+        {
+            entity.With(action);
+        }
     }
     public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
     {
@@ -93,32 +100,6 @@ internal static class Extensions // probably need to organize this soonTM
     {
         return EntityManager.AddBuffer<T>(entity);
     }
-    public unsafe static void AddComponent<T>(this EntityCommandBuffer entityCommandBuffer, Entity entity, T componentData) where T : struct
-    {
-        ComponentType componentType = new(Il2CppType.Of<T>());
-        TypeIndex typeIndex = componentType.TypeIndex;
-
-        byte[] byteArray = StructureToByteArray(componentData);
-        int size = Marshal.SizeOf<T>();
-
-        fixed (byte* byteData = byteArray)
-        {
-            entityCommandBuffer.UnsafeAddComponent(entity, typeIndex, size, byteData);
-        }
-    }
-    public unsafe static void SetComponent<T>(this EntityCommandBuffer entityCommandBuffer, Entity entity, T componentData) where T : struct
-    {
-        ComponentType componentType = new(Il2CppType.Of<T>());
-        TypeIndex typeIndex = componentType.TypeIndex;
-
-        byte[] byteArray = StructureToByteArray(componentData);
-        int size = Marshal.SizeOf<T>();
-
-        fixed (byte* byteData = byteArray)
-        {
-            entityCommandBuffer.UnsafeSetComponent(entity, typeIndex, size, byteData);
-        }
-    }
     public static bool TryGetComponent<T>(this Entity entity, out T componentData) where T : struct
     {
         componentData = default;
@@ -126,13 +107,12 @@ internal static class Extensions // probably need to organize this soonTM
         if (entity.Has<T>())
         {
             componentData = entity.Read<T>();
-
             return true;
         }
 
         return false;
     }
-    public static bool TryRemoveComponent<T>(this Entity entity) where T : struct
+    public static bool TryRemove<T>(this Entity entity) where T : struct
     {
         if (entity.Has<T>())
         {
@@ -155,9 +135,9 @@ internal static class Extensions // probably need to organize this soonTM
     {
         return PrefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(prefabGUID, out string prefabName) ? $"{prefabName} {prefabGUID}" : "String.Empty";
     }
-    public static string GetLocalizedName(this PrefabGUID prefabGUID)
+    public static string GetLocalizedName(this PrefabGUID prefabGuid)
     {
-        string localizedName = GetNameFromGuidString(GetGuidString(prefabGUID));
+        string localizedName = GetNameFromPrefabGuid(prefabGuid);
 
         if (!string.IsNullOrEmpty(localizedName))
         {
@@ -169,10 +149,6 @@ internal static class Extensions // probably need to organize this soonTM
     public static void Add<T>(this Entity entity)
     {
         EntityManager.AddComponent(entity, new(Il2CppType.Of<T>()));
-    }
-    public static void Add(this Entity entity, ComponentType componentType)
-    {
-        EntityManager.AddComponent(entity, componentType);
     }
     public static void Remove<T>(this Entity entity)
     {
@@ -207,16 +183,7 @@ internal static class Extensions // probably need to organize this soonTM
     }
     public static bool IsPlayer(this Entity entity)
     {
-        if (entity.Has<VampireTag>())
-        {
-            return true;
-        }
-
-        return false;
-    }
-    public static bool IsDifferentPlayer(this Entity entity, Entity target)
-    {
-        if (entity.IsPlayer() && target.IsPlayer() && !entity.Equals(target))
+        if (entity.Has<PlayerCharacter>())
         {
             return true;
         }
@@ -225,7 +192,7 @@ internal static class Extensions // probably need to organize this soonTM
     }
     public static bool IsFollowingPlayer(this Entity entity)
     {
-        if (entity.Has<BlockFeedBuff>()) // the only time this will be found on a character entity is when they are a familiar and it's been added to them during binding, will return true for buffs that have it as well so... don't use this on buff entities
+        if (entity.Has<BlockFeedBuff>() && !entity.Has<Buff>() && !entity.Has<ServantEquipment>())
         {
             return true;
         }
@@ -246,7 +213,6 @@ internal static class Extensions // probably need to organize this soonTM
         if (entity.TryGetComponent(out Attach attach) && attach.Parent.Exists())
         {
             attached = attach.Parent;
-
             return true;
         }
 
@@ -259,6 +225,10 @@ internal static class Extensions // probably need to organize this soonTM
     public static Entity GetPrefabEntity(this Entity entity)
     {
         return ServerGameManager.GetPrefabEntity(entity.Read<PrefabGUID>());
+    }
+    public static Entity GetPrefabEntity(this PrefabGUID prefabGuid)
+    {
+        return ServerGameManager.GetPrefabEntity(prefabGuid);
     }
     public static Entity GetSpellTarget(this Entity entity)
     {
@@ -275,7 +245,6 @@ internal static class Extensions // probably need to organize this soonTM
             if (teamReferenceEntity.Exists())
             {
                 teamEntity = teamReferenceEntity;
-
                 return true;
             }
         }
@@ -284,7 +253,7 @@ internal static class Extensions // probably need to organize this soonTM
     }
     public static bool Exists(this Entity entity)
     {
-        return EntityManager.Exists(entity);
+        return entity.HasValue() && EntityManager.Exists(entity);
     }
     public static bool HasValue(this Entity entity)
     {
@@ -293,15 +262,6 @@ internal static class Extensions // probably need to organize this soonTM
     public static bool IsDisabled(this Entity entity)
     {
         return entity.Has<Disabled>();
-    }
-    public static bool IsImmobile(this Entity entity)
-    {
-        if (entity.TryGetComponent(out DynamicCollision dynamicCollision))
-        {
-            return dynamicCollision.Immobile;
-        }
-
-        return false;
     }
     public static bool IsVBlood(this Entity entity)
     {
@@ -315,18 +275,34 @@ internal static class Extensions // probably need to organize this soonTM
     {
         return entity.Has<VBloodUnit>();
     }
+    public static bool IsLegendary(this Entity entity)
+    {
+        return entity.Has<LegendaryItemInstance>();
+    }
+    public static bool IsAncestralWeapon(this Entity entity)
+    {
+        return entity.Has<LegendaryItemInstance>() && !entity.IsMagicSource();
+    }
+    public static bool IsShardNecklace(this Entity entity)
+    {
+        return entity.Has<LegendaryItemInstance>() && entity.IsMagicSource();
+    }
+    public static bool IsMagicSource(this Entity entity)
+    {
+        return entity.TryGetComponent(out EquippableData equippableData) && equippableData.EquipmentType.Equals(EquipmentType.MagicSource);
+    }
     public static ulong GetSteamId(this Entity entity)
     {
         if (entity.TryGetComponent(out PlayerCharacter playerCharacter))
         {
-            return playerCharacter.UserEntity.Read<User>().PlatformId;
+            return playerCharacter.UserEntity.GetUser().PlatformId;
         }
         else if (entity.TryGetComponent(out User user))
         {
             return user.PlatformId;
         }
 
-        return 0;
+        return 0; // maybe this should be -1 instead since steamId 0 sneaks in to weird places sometimes? noting for later
     }
     public static NetworkId GetNetworkId(this Entity entity)
     {
@@ -337,54 +313,55 @@ internal static class Extensions // probably need to organize this soonTM
 
         return NetworkId.Empty;
     }
-    public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+    public static void ForEach<T>(this IEnumerable<T> collection, Action<T> action)
     {
-        foreach (var item in source)
+        foreach (var item in collection)
         {
             action(item);
         }
     }
     public static bool TryGetPlayerInfo(this ulong steamId, out PlayerInfo playerInfo)
     {
-        if (PlayerCache.TryGetValue(steamId, out playerInfo)) return true;
-        else if (OnlineCache.TryGetValue(steamId, out playerInfo)) return true;
+        if (SteamIdPlayerInfoCache.TryGetValue(steamId, out playerInfo)) return true;
+        else if (SteamIdOnlinePlayerInfoCache.TryGetValue(steamId, out playerInfo)) return true;
 
         return false;
     }
     public static PrefabGUID GetPrefabGuid(this Entity entity)
     {
-        if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID;
+        if (entity.TryGetComponent(out PrefabGUID prefabGuid)) return prefabGuid;
 
         return PrefabGUID.Empty;
     }
-    public static int GetPrefabGuidHash(this Entity entity)
+    public static int GetGuidHash(this Entity entity)
     {
         if (entity.TryGetComponent(out PrefabGUID prefabGUID)) return prefabGUID.GuidHash;
 
         return PrefabGUID.Empty.GuidHash;
     }
-    public static Entity GetUserEntity(this Entity character)
+    public static Entity GetUserEntity(this Entity entity)
     {
-        if (character.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
+        if (entity.TryGetComponent(out PlayerCharacter playerCharacter)) return playerCharacter.UserEntity;
+        else if (entity.Has<User>()) return entity;
 
         return Entity.Null;
     }
-    public static Entity GetOwner(this Entity character)
+    public static Entity GetOwner(this Entity entity)
     {
-        if (character.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Exists()) return entityOwner.Owner;
+        if (entity.TryGetComponent(out EntityOwner entityOwner) && entityOwner.Owner.Exists()) return entityOwner.Owner;
 
         return Entity.Null;
     }
     public static User GetUser(this Entity entity)
     {
-        if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out User user)) return user;
-        else if (entity.TryGetComponent(out user)) return user;
+        if (entity.TryGetComponent(out User user)) return user;
+        else if (entity.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.UserEntity.TryGetComponent(out user)) return user;
 
         return User.Empty;
     }
-    public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGUID)
+    public static bool HasBuff(this Entity entity, PrefabGUID buffPrefabGuid)
     {
-        return ServerGameManager.HasBuff(entity, buffPrefabGUID.ToIdentifier());
+        return ServerGameManager.HasBuff(entity, buffPrefabGuid.ToIdentifier());
     }
     public static unsafe bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> dynamicBuffer) where T : struct
     {
@@ -404,19 +381,6 @@ internal static class Extensions // probably need to organize this soonTM
 
         return float3.zero;
     }
-    public static bool TryGetPosition(this Entity entity, out float3 position)
-    {
-        position = float3.zero;
-
-        if (entity.TryGetComponent(out Translation translation))
-        {
-            position = translation.Value;
-
-            return true;
-        }
-
-        return false;
-    }
     public static float3 GetPosition(this Entity entity)
     {
         if (entity.TryGetComponent(out Translation translation))
@@ -426,7 +390,7 @@ internal static class Extensions // probably need to organize this soonTM
 
         return float3.zero;
     }
-    public static int2 GetTilePosition(this Entity entity)
+    public static int2 GetTileCoord(this Entity entity)
     {
         if (entity.TryGetComponent(out TilePosition tilePosition))
         {
@@ -444,46 +408,41 @@ internal static class Extensions // probably need to organize this soonTM
 
         return 0;
     }
-    public static float3 GetOffset(this Entity source, Entity target)
+    public static float GetMaxDurability(this Entity entity)
     {
-        if (source.TryGetPosition(out float3 sourcePosition) && target.TryGetPosition(out float3 targetPosition))
+        if (entity.TryGetComponent(out Durability maxDurability))
         {
-            return sourcePosition - targetPosition;
+            return maxDurability.Value;
         }
 
-        return float3.zero;
+        return 0;
     }
-    public static bool TryGetMatch(this HashSet<(ulong, ulong)> hashSet, ulong value, out (ulong, ulong) matchingPair)
+    public static float GetMaxHealth(this Entity entity)
     {
-        matchingPair = default;
-
-        foreach (var pair in hashSet)
+        if (entity.TryGetComponent(out Health health))
         {
-            if (pair.Item1 == value || pair.Item2 == value)
-            {
-                matchingPair = pair;
-
-                return true;
-            }
+            return health.MaxHealth._Value;
         }
 
-        return false;
+        return 0;
     }
-    public static bool TryGetMatchPairInfo(this (ulong, ulong) matchPair, out (PlayerInfo, PlayerInfo) matchPairInfo)
+    public static Blood GetBlood(this Entity entity)
     {
-        matchPairInfo = default;
-
-        ulong playerOne = matchPair.Item1;
-        ulong playerTwo = matchPair.Item2;
-
-        if (playerOne.TryGetPlayerInfo(out PlayerInfo playerOneInfo) && playerTwo.TryGetPlayerInfo(out PlayerInfo playerTwoInfo))
+        if (entity.TryGetComponent(out Blood blood))
         {
-            matchPairInfo = (playerOneInfo, playerTwoInfo);
-
-            return true;
+            return blood;
         }
 
-        return false;
+        throw new InvalidOperationException("Entity does not have Blood!");
+    }
+    public static (float physicalPower, float spellPower) GetPowerTuple(this Entity entity)
+    {
+        if (entity.TryGetComponent(out UnitStats unitStats))
+        {
+            return (unitStats.PhysicalPower._Value, unitStats.SpellPower._Value);
+        }
+
+        return (0f, 0f);
     }
     public static bool IsUnitSpawnerSpawned(this Entity entity)
     {
@@ -494,9 +453,13 @@ internal static class Extensions // probably need to organize this soonTM
 
         return false;
     }
-    public static void Destroy(this Entity entity)
+    public static void TryDestroy(this Entity entity)
     {
         if (entity.Exists()) DestroyUtility.Destroy(EntityManager, entity);
+    }
+    public static void TryDestroyBuff(this Entity buffEntity)
+    {
+        if (buffEntity.Exists()) DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
     }
     public static void SetTeam(this Entity entity, Entity teamSource)
     {
@@ -534,61 +497,17 @@ internal static class Extensions // probably need to organize this soonTM
             });
         }
     }
-    public static void SetFaction(this Entity entity, PrefabGUID factionPrefabGUID)
+    public static void SetFaction(this Entity entity, PrefabGUID factionPrefabGuid)
     {
         if (entity.Has<FactionReference>())
         {
             entity.With((ref FactionReference factionReference) =>
             {
-                factionReference.FactionGuid._Value = factionPrefabGUID;
+                factionReference.FactionGuid._Value = factionPrefabGuid;
             });
         }
     }
-    public static void EnableAggro(this Entity entity)
-    {
-        if (entity.Has<AggroConsumer>())
-        {
-            entity.With((ref AggroConsumer aggroConsumer) =>
-            {
-                aggroConsumer.Active._Value = true;
-            });
-        }
-    }
-    public static void DisableAggro(this Entity entity)
-    {
-        if (entity.Has<AggroConsumer>())
-        {
-            entity.With((ref AggroConsumer aggroConsumer) =>
-            {
-                aggroConsumer.Active._Value = false;
-            });
-        }
-    }
-    public static void EnableAggroable(this Entity entity)
-    {
-        if (entity.Has<Aggroable>())
-        {
-            entity.With((ref Aggroable aggroable) =>
-            {
-                aggroable.Value._Value = true;
-                aggroable.DistanceFactor._Value = 1f;
-                aggroable.AggroFactor._Value = 1f;
-            });
-        }
-    }
-    public static void DisableAggroable(this Entity entity)
-    {
-        if (entity.Has<Aggroable>())
-        {
-            entity.With((ref Aggroable aggroable) =>
-            {
-                aggroable.Value._Value = false;
-                aggroable.DistanceFactor._Value = 0f;
-                aggroable.AggroFactor._Value = 0f;
-            });
-        }
-    }
-    public static bool IsAllied(this Entity entity, Entity player)
+    public static bool IsAllies(this Entity entity, Entity player)
     {
         return ServerGameManager.IsAllies(entity, player);
     }
@@ -601,7 +520,7 @@ internal static class Extensions // probably need to organize this soonTM
 
         return false;
     }
-    public static void CastAbility(this Entity entity, Entity target, PrefabGUID abilityGroup) // 1292896032 swallow, 509296401
+    public static void CastAbility(this Entity entity, Entity target, PrefabGUID abilityGroup)
     {
         bool isPlayer = entity.IsPlayer();
 
@@ -631,28 +550,32 @@ internal static class Extensions // probably need to organize this soonTM
     static IEnumerator WaitForCompletionRoutine(JobHandle handle)
     {
         while (!handle.IsCompleted)
-            yield return null;
-    }
-
-    // note to organize this into ECBExtensions or something if I actually need to use it for fams at some point
-    public static void SetTeam(this Entity entity, EntityCommandBuffer entityCommandBuffer, Entity teamSource)
-    {
-        if (teamSource.TryGetComponent(out Team sourceTeam) && teamSource.TryGetComponent(out TeamReference sourceTeamReference))
         {
-            Entity teamRefEntity = sourceTeamReference.Value._Value;
-            int teamId = sourceTeam.Value;
-
-            entityCommandBuffer.SetComponent(entity, new TeamReference { Value = new ModifiableEntity { _Value = teamRefEntity } });
-            entityCommandBuffer.SetComponent(entity, new Team { Value = teamId });
+            yield return null;
         }
     }
-    public static void SetPosition(this Entity entity, EntityCommandBuffer entityCommandBuffer, float3 position)
+}
+
+/*
+// note to organize this into ECBExtensions or something if I actually need to use it for familiars or anything else at some point
+public static void SetTeam(this Entity entity, EntityCommandBuffer entityCommandBuffer, Entity teamSource)
+{
+    if (teamSource.TryGetComponent(out Team sourceTeam) && teamSource.TryGetComponent(out TeamReference sourceTeamReference))
     {
-        entityCommandBuffer.SetComponent(entity, new Translation { Value = position });
-        entityCommandBuffer.SetComponent(entity, new LastTranslation { Value = position });
-    }
-    public static void SetFaction(this Entity entity, EntityCommandBuffer entityCommandBuffer, PrefabGUID factionPrefabGUID)
-    {
-        entityCommandBuffer.SetComponent(entity, new FactionReference { FactionGuid = new ModifiablePrefabGUID { _Value = factionPrefabGUID } });
+        Entity teamRefEntity = sourceTeamReference.Value._Value;
+        int teamId = sourceTeam.Value;
+
+        entityCommandBuffer.SetComponent(entity, new TeamReference { Value = new ModifiableEntity { _Value = teamRefEntity } });
+        entityCommandBuffer.SetComponent(entity, new Team { Value = teamId });
     }
 }
+public static void SetPosition(this Entity entity, EntityCommandBuffer entityCommandBuffer, float3 position)
+{
+    entityCommandBuffer.SetComponent(entity, new Translation { Value = position });
+    entityCommandBuffer.SetComponent(entity, new LastTranslation { Value = position });
+}
+public static void SetFaction(this Entity entity, EntityCommandBuffer entityCommandBuffer, PrefabGUID factionPrefabGUID)
+{
+    entityCommandBuffer.SetComponent(entity, new FactionReference { FactionGuid = new ModifiablePrefabGUID { _Value = factionPrefabGUID } });
+}
+*/

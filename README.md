@@ -34,6 +34,7 @@ SpellCritDamage // 11
 - [Features](#features)
 - [Commands](#commands)
 - [Configuration](#configuration)
+- [Recipes](#recipes)
 - [Recommended Mods](#recommended)
 
 ## Sponsor this project
@@ -42,7 +43,7 @@ SpellCritDamage // 11
 
 ## Sponsors
 
-Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; Jason R.;
+Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; ;
 
 ## Features
 
@@ -181,10 +182,10 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   - Toggles class passives (buffs only, other class effects remain active).
   - Shortcut: *.class passives*
 - `.class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen` 🔒
-  - Globally syncs class buffs (removes all then applies from current class) for players if needed.
+  - Globally syncs class buffs (removes all currently configured class buffs if found then applies buffs for current class) for players if needed.
   - Shortcut: *.class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen*
 - `.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen` 🔒
-  - Globally removes class buffs from players to then facilitate changing class buffs in config.
+  - Globally removes class buffs from players to facilitate changing class buffs in config.
   - Shortcut: *.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen*
 
 ### Familiar Commands
@@ -215,9 +216,9 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.familiar addbox [BoxName]`
   - Adds empty box with name.
   - Shortcut: *.fam ab [BoxName]*
-- `.familiar add [PlayerName] [PrefabGUID/CHAR_Unit_Name]` 🔒
+- `.familiar add [PlayerName] [PrefabGuid/CHAR_Unit_Name]` 🔒
   - Unit testing.
-  - Shortcut: *.fam a [PlayerName] [PrefabGUID/CHAR_Unit_Name]*
+  - Shortcut: *.fam a [PlayerName] [PrefabGuid/CHAR_Unit_Name]*
 - `.familiar echoes [VBloodName]`
   - VBlood purchasing for exo reward with quantity scaling to unit tier.
   - Shortcut: *.fam echoes [VBloodName]*
@@ -251,12 +252,27 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.familiar toggleoption [Setting]`
   - Toggles various familiar settings.
   - Shortcut: *.fam option [Setting]*
-- `.familiar battlegroup.bg [1/2/3]`
-  - Set active familiar to battle group slot or list group if no slot entered.
-  - Shortcut: *.bg [1/2/3]*
-- `.familiar challenge [PlayerName/cancel]`
-  - Challenges player if found, use cancel to exit queue after entering if needed.
-  - Shortcut: *.fam challenge [PlayerName/cancel]*
+- `.familiar listbattlegroups`
+  - Lists available battle groups.
+  - Shortcut: *.fam bgs*
+- `.familiar listbattlegroup [BattleGroup]`
+  - Displays details of the specified battle group, or the active one if none is given.
+  - Shortcut: *.fam bg [BattleGroup]*
+- `.familiar choosebattlegroup [BattleGroup]`
+  - Sets active battle group.
+  - Shortcut: *.fam cbg [BattleGroup]*
+- `.familiar addbattlegroup [BattleGroup]`
+  - Creates new battle group.
+  - Shortcut: *.fam abg [BattleGroup]*
+- `.familiar slotbattlegroup [BattleGroupOrSlot] [Slot]`
+  - Assigns active familiar to a battle group slot. If no battle group is specified, assigns to active group.
+  - Shortcut: *.fam sbg [BattleGroupOrSlot] [Slot]*
+- `.familiar deletebattlegroup [BattleGroup]`
+  - Deletes a battle group.
+  - Shortcut: *.fam dbg [BattleGroup]*
+- `.familiar challenge [PlayerName]`
+  - Challenges a player to battle or displays queue details.
+  - Shortcut: *.fam challenge [PlayerName]*
 - `.familiar setbattlearena` 🔒
   - Set current position as the center for the familiar battle arena.
   - Shortcut: *.fam sba*
@@ -271,6 +287,9 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.level set [Player] [Level]` 🔒
   - Sets player level.
   - Shortcut: *.lvl set [Player] [Level]*
+- `.level ignoresharedexperience [Player]` 🔒
+  - Adds (or removes) player to list of those who are not eligible to receive shared experience.
+  - Shortcut: *.lvl ignore [Player]*
 
 ### Miscellaneous Commands
 - `.miscellaneous reminders`
@@ -292,29 +311,6 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   - Resets stuck combat music if needed.
   - Shortcut: *.misc silence*
 
-### Party Commands
-- `.party toggleinvites`
-  - Toggles being able to be invited to parties, prevents damage and share exp.
-  - Shortcut: *.party inv*
-- `.party add [Player]`
-  - Adds player to party.
-  - Shortcut: *.party a [Player]*
-- `.party remove [Player]`
-  - Removes player from party.
-  - Shortcut: *.party r [Player]*
-- `.party listmembers`
-  - Lists party members of your active party.
-  - Shortcut: *.party lm*
-- `.party disband`
-  - Disbands party.
-  - Shortcut: *.party end*
-- `.party leave`
-  - Leaves party if in one.
-  - Shortcut: *.party drop*
-- `.party reset`
-  - Removes a player from all parties they are in and disbands any party they own.
-  - Shortcut: *.party r*
-
 ### Prestige Commands
 - `.prestige self [PrestigeType]`
   - Handles player prestiging.
@@ -322,15 +318,15 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.prestige get [PrestigeType]`
   - Shows information about player's prestige status.
   - Shortcut: *.prestige get [PrestigeType]*
-- `.prestige set [Name] [PrestigeType] [Level]` 🔒
+- `.prestige set [Player] [PrestigeType] [Level]` 🔒
   - Sets the specified player to a certain level of prestige in a certain type of prestige.
-  - Shortcut: *.prestige set [Name] [PrestigeType] [Level]*
+  - Shortcut: *.prestige set [Player] [PrestigeType] [Level]*
 - `.prestige listbuffs`
   - Lists prestige buff names.
   - Shortcut: *.prestige lb*
-- `.prestige reset [Name] [PrestigeType]` 🔒
+- `.prestige reset [Player] [PrestigeType]` 🔒
   - Handles resetting prestiging.
-  - Shortcut: *.prestige r [Name] [PrestigeType]*
+  - Shortcut: *.prestige r [Player] [PrestigeType]*
 - `.prestige syncbuffs`
   - Applies prestige buffs appropriately if not present.
   - Shortcut: *.prestige sb*
@@ -343,9 +339,15 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - `.prestige exoform`
   - Toggles taunting to enter exo form.
   - Shortcut: *.prestige exoform*
+- `.prestige ignoreleaderboard [Player]` 🔒
+  - Adds (or removes) player to list of those who will not appear on prestige leaderboards. Intended for admin-duties only accounts.
+  - Shortcut: *.prestige ignore [Player]*
 - `.prestige permashroud`
   - Toggles permashroud if applicable.
   - Shortcut: *.prestige shroud*
+- `.prestige iacknowledgethiswillremoveallprestigebuffsfromplayersandwantthattohappen` 🔒
+  - Globally removes prestige buffs from players to facilitate changing prestige buffs in config.
+  - Shortcut: *.prestige iacknowledgethiswillremoveallprestigebuffsfromplayersandwantthattohappen*
 
 ### Profession Commands
 - `.profession log`
@@ -415,7 +417,7 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: "English")
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
-- **Client Companion**: `ClientCompanion` (bool, default: False)
+- **Client Companion**: `ClientCompanion` (bool, default: True)
   Enable if using the client companion mod, can configure what's displayed in the client config.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
@@ -423,8 +425,12 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
   Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
-- **Bear Form Dash**: `BearFormDash` (bool, default: False)
+- **Bear Form Dash**: `BearFormDash` (bool, default: True)
   Enable or disable bear form dash.
+- **Bleeding Edge**: `BleedingEdge` (bool, default: True)
+  Enable or disable stacking bleed on the final primary attack for slashers.
+- **Heavy Frame**: `HeavyFrame` (bool, default: True)
+  Enable or disable a heavier feel for the crossbow with faster projectiles.
 - **Primal Jewel Cost**: `PrimalJewelCost` (int, default: -77477508)
   If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers).
 
@@ -441,6 +447,8 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   Enable or disable quests (kill, gather, and crafting).
 - **Infinite Dailies**: `InfiniteDailies` (bool, default: False)
   Enable or disable infinite dailies.
+- **Daily Perfect Chance**: `DailyPerfectChance` (float, default: 0.1)
+  Chance to receive a random perfect gem (can be used to control spell school for primal jewels in gemcutter) when completing daily quests.
 - **Quest Rewards**: `QuestRewards` (string, default: "28358550,576389135,-257494203")
   Item prefabs for quest reward pool.
 - **Quest Reward Amounts**: `QuestRewardAmounts` (string, default: "50,250,50")
@@ -483,10 +491,10 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   The multiplier for experience gained from group kills.
 - **Level Scaling Multiplier**: `LevelScalingMultiplier` (float, default: 0.05)
   Reduces experience gained from kills with a large level gap between player and unit, increase to make harsher decrease or set to 0 to remove.
-- **Player Parties**: `PlayerParties` (bool, default: False)
-  Enable or disable the ability to group with players not in your clan for experience/familiar unlock sharing.
-- **Max Party Size**: `MaxPartySize` (int, default: 5)
-  The maximum number of players that can share experience in a group.
+- **Exp Share**: `ExpShare` (bool, default: True)
+  Enable or disable sharing experience with nearby players (ExpShareDistance) in combat that are within level range (ExpShareLevelRange, this does not apply to players that have prestiged at least once on PvE servers or clan members of the player that does the final blow) along with familiar unlock sharing if enabled (on PvP servers will only apply to clan members).
+- **Exp Share Level Range**: `ExpShareLevelRange` (int, default: 10)
+  Maximum level difference between players allowed for ExpShare, players who have prestiged at least once are exempt from this. Use 0 for no level diff restrictions.
 - **Exp Share Distance**: `ExpShareDistance` (float, default: 25)
   Default is ~5 floor tile lengths.
 
@@ -515,6 +523,8 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   The quantity of the reward for exo prestiging.
 - **True Immortal**: `TrueImmortal` (bool, default: False)
   Enable or disable Immortal blood for the duration of exoform.
+- **Leaderboard**: `Leaderboard` (bool, default: True)
+  Enable or disable the various prestige leaderboard rankings.
 
 ### Expertise
 - **Expertise System**: `ExpertiseSystem` (bool, default: False)
@@ -612,7 +622,7 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)
   The multiplier for profession experience gained.
 - **Extra Recipes**: `ExtraRecipes` (bool, default: False)
-  Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well.
+  Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes.
 
 ### Familiars
 - **Familiar System**: `FamiliarSystem` (bool, default: False)
@@ -657,8 +667,8 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
   Increase to multiply costs for vBlood purchases. Valid values are integers between 1-4, if outside that range in either direction it will be clamped.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
   The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
-- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 250)
-  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 100-400, if outside that range in either direction it will be clamped.
+- **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 100)
+  Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 50-200, if outside that range in either direction it will be clamped.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 1000)
   Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped.
 
@@ -728,7 +738,54 @@ Jairon O.; Odjit; Jera; Eve W.; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; 
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
 
+## Recipes
+
+### Salvageable
+- **EMPs** (20s)
+	- x2 Depleted Battery  
+	- x15 Tech Scrap
+- **Bat Hide** (15s)
+	- x3 Lesser Stygians
+	- x5 Blood Essence
+- **Copper Wires** (15s)
+	- x1 Electricity
+- **Primal Blood Essence** (10s)
+	- x5 Electricity
+- **Gold Ore** (10s)
+	- x2 Gold Jewelry
+- **Radiant Fiber** (10s)
+	- x8 Gem Dust
+	- x16 Plant Fiber
+	- x24 Pollen
+
+### Refinable
+- **Primal Jewel** (T04s with additional modifiers, random however spell school can be influenced via accompanying respective perfect gem which are awarded randomly from dailies/weeklies)
+	- Inputs: x1 Demon Fragment (default, configurable)
+	- Outputs: x1 Primal Jewel
+	- Station: Gem Cutting Table
+- **Primal Stygian Shard** (default currency for '.fam echoes', see config option for details)
+	- Inputs: x8 Greater Stygian Shards
+	- Outputs: x1 Primal Stygian Shard
+	- Station: Gem Cutting Table
+- **Charged Battery**
+	- Inputs: x1 Depleted Battery, x1 Electricity
+	- Outputs: x1 Charged Battery
+	- Station: Fabricator
+- **Blood Crystal**
+	- Inputs: x100 Crystals, 1x Greater Blood Essence
+	- Outputs: x100 Blood Crystal
+	- Station: Advanced Blood Press
+- **Copper Wires**
+	- Inputs: x3 Copper Ingots
+	- Outputs: x1 Copper Wires
+	- Station: Fabricator
+- **Vampiric Dust** (used to apply/change shiny buffs for familiars)
+	- Inputs: x8 Bleeding Hearts, x40 Blood Crystals
+	- Outputs: x1 Vampiric Dust
+	- Station: Advanced Grinder
+
 ## Recommended
+
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
   Highly recommend getting this if you plan on using Bloodcraft or any other mods for V Rising in general. Invaluable set of tools and options that will greatly improve your modding experience.
 - [KindredLogistics](https://thunderstore.io/c/v-rising/p/Kindred/KindredLogistics/) 

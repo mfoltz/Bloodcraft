@@ -26,7 +26,7 @@ internal class EclipseService
     static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
     static readonly bool _shiftSpell = ConfigService.ShiftSlot;
     static readonly bool _leveling = ConfigService.LevelingSystem;
-    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
@@ -40,15 +40,16 @@ internal class EclipseService
     const int MAX_RETRIES = 20;
     const string V1_1_2 = "1.1.2";
     const string V1_2_2 = "1.2.2";
-    const string V1_3_2 = "1.3.2";
+    // const string V1_3_2 = "1.3.2";
 
     static readonly Regex _oldRegex = new(@"^\[(\d+)\]:(\d+)$");
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
 
-    public static readonly ConcurrentDictionary<ulong, string> RegisteredUsersAndClientVersions = [];
+    static readonly ConcurrentDictionary<ulong, string> _registeredUsersAndClientVersions = [];
+    public static IReadOnlyDictionary<ulong, string> RegisteredUsersAndClientVersions => _registeredUsersAndClientVersions;
     public EclipseService()
     {
-        ClientUpdateLoop().Start();
+        EclipseServiceRoutine().Start();
     }
     public enum NetworkEventSubType
     {
@@ -123,12 +124,12 @@ internal class EclipseService
         }
         else
         {
-            DelayedRegistration(steamId, version).Start();
+            DelayedRegistrationRoutine(steamId, version).Start();
         }
     }
     static bool HandleRegistration(PlayerInfo playerInfo, ulong steamId, string version)
     {
-        if (RegisteredUsersAndClientVersions.TryAdd(steamId, version))
+        if (_registeredUsersAndClientVersions.TryAdd(steamId, version))
         {
             try
             {
@@ -136,26 +137,29 @@ internal class EclipseService
                 {
                     case V1_1_2:
                         IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
-
                         versionHandlerV1_1_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-
                         return true;
                     case V1_2_2:
                         IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
-
                         versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-
                         return true;
+                    /*
                     case V1_3_2:
                         IVersionHandler<ProgressDataV1_3_2> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3_2>(version);
-
                         versionHandlerV1_3_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-
                         return true;
+                    */
                     default:
+                        if (IsVersion1_3(version))
+                        {
+                            IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>("1.3.2");
+                            versionHandler13X?.SendClientConfig(playerInfo.User);
+                            versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                            return true;
+                        }
                         Core.Log.LogWarning($"Unsupported client version! {steamId}:Eclipse{version}");
                         return false;
                 }
@@ -171,6 +175,97 @@ internal class EclipseService
             Core.Log.LogWarning($"Failed to add {steamId}:Eclipse{version} to RegisteredUsersAndClientVersions dictionary!");
             return false;
         }
+    }
+    static IEnumerator DelayedRegistrationRoutine(ulong steamId, string version)
+    {
+        int tries = 0;
+
+        while (tries <= MAX_RETRIES)
+        {
+            yield return _newUserDelay;
+
+            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
+            {
+                if (HandleRegistration(playerInfo, steamId, version))
+                {
+                    Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (DelayedRegistration)");
+                }
+
+                yield break;
+            }
+            else
+            {
+                tries++;
+            }
+        }
+    }
+    static IEnumerator EclipseServiceRoutine()
+    {
+        while (true)
+        {
+            if (!RegisteredUsersAndClientVersions.Any())
+            {
+                yield return _delay;
+
+                continue;
+            }
+
+            foreach (PlayerInfo playerInfo in SteamIdOnlinePlayerInfoCache.Values)
+            {
+                ulong steamId = playerInfo.User.PlatformId;
+
+                if (RegisteredUsersAndClientVersions.TryGetValue(steamId, out string version))
+                {
+                    try
+                    {
+                        switch (version)
+                        {
+                            case V1_1_2:
+                                IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
+                                versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                break;
+                            case V1_2_2:
+                                IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
+                                versionHandlerV1_2_2.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                break;
+                            /*
+                            case V1_3_2:
+                                IVersionHandler<ProgressDataV1_3> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3>(version);
+                                versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                break;
+                            */
+                            default:
+                                if (IsVersion1_3(version))
+                                {
+                                    IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>("1.3.2");
+                                    versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                                    break;
+                                }
+                                else
+                                {
+                                    Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}, unregistering user to avoid console spam...");
+                                    // _registeredUsersAndClientVersions.TryRemove(steamId, out var _);
+                                    UnregisterUser(steamId);
+                                    break;
+                                }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogWarning($"Failed sending progress in EclipseService! {steamId}:Eclipse{version}, Error - {ex}");
+                    }
+                }
+
+                yield return null;
+            }
+
+            yield return _delay;
+        }
+    }
+    static bool IsVersion1_3(string version) => version.StartsWith("1.3.");
+    public static void UnregisterUser(ulong steamId)
+    {
+        _registeredUsersAndClientVersions.TryRemove(steamId, out var _);
     }
     public static (int Percent, int Level, int Prestige, int Class) GetExperienceData(ulong steamId)
     {
@@ -198,7 +293,7 @@ internal class EclipseService
 
         return (experiencePercent, experienceLevel, experiencePrestige, classEnum);
     }
-    public static (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) GetLegacyData(Entity character, ulong steamId) // add bonus stats as enums for one 
+    public static (int Percent, int Level, int Prestige, int Enum, int LegacyBonusStats) GetLegacyData(Entity character, ulong steamId)
     {
         int legacyPercent = 0;
         int legacyLevel = 0;
@@ -430,90 +525,5 @@ internal class EclipseService
         }
 
         return index;
-    }
-    static IEnumerator DelayedRegistration(ulong steamId, string version)
-    {
-        int tries = 0;
-
-        while (tries <= MAX_RETRIES)
-        {
-            yield return _newUserDelay;
-
-            if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo) && playerInfo.CharEntity.Exists() && playerInfo.User.IsConnected)
-            {
-                if (HandleRegistration(playerInfo, steamId, version))
-                {
-                    Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache | (DelayedRegistration)");
-                }
-
-                yield break;
-            }
-            else
-            {
-                tries++;
-            }
-        }
-    }
-    static IEnumerator ClientUpdateLoop()
-    {
-        while (true)
-        {
-            if (RegisteredUsersAndClientVersions.IsEmpty)
-            {
-                yield return _delay;
-
-                continue;
-            }
-
-            HashSet<PlayerInfo> playerInfos = [..OnlineCache.Values];
-            Dictionary<ulong, string> registeredUsers = new(RegisteredUsersAndClientVersions);
-
-            foreach (PlayerInfo playerInfo in playerInfos)
-            {
-                ulong steamId = playerInfo.User.PlatformId;
-
-                if (registeredUsers.TryGetValue(steamId, out string version))
-                {
-                    try
-                    {
-                        switch (version)
-                        {
-                            case V1_1_2:
-                                // Handle version 1.1.1
-                                IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
-                                versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-
-                                break;
-                            case V1_2_2:
-                                // Handle version 1.2.1
-                                IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
-                                versionHandlerV1_2_2.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-
-                                break;
-                            case V1_3_2:
-                                IVersionHandler<ProgressDataV1_3_2> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3_2>(version);
-                                versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-
-                                break;
-                            default:
-                                Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}, unregistering user to avoid console spam...");
-                                RegisteredUsersAndClientVersions.TryRemove(steamId, out var _);
-
-                                break;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Log.LogWarning($"Failed sending progress in EclipseService! {steamId}:Eclipse{version}, Error - {ex}");
-                    }
-
-                    // yield return null; think this makes more sense outside the loop below but noting in case horribly wrong
-                }
-
-                yield return null;
-            }
-
-            yield return _delay;
-        }
     }
 }

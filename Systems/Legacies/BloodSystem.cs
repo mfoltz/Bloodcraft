@@ -4,8 +4,11 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using System.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
+using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 
@@ -13,11 +16,19 @@ namespace Bloodcraft.Systems.Legacies;
 internal static class BloodSystem
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
     static readonly int _maxBloodLevel = ConfigService.MaxBloodLevel;
     static readonly int _legacyStatChoices = ConfigService.LegacyStatChoices;
     static readonly float _vBloodLegacyMultiplier = ConfigService.VBloodLegacyMultiplier;
     static readonly float _unitLegacyMultiplier = ConfigService.UnitLegacyMultiplier;
+
+    static readonly WaitForSeconds _delay = new(1.5f);
+
+    static readonly float3 _red = new(0.9f, 0f, 0.1f); // Vibrant Red
+    static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
+    static readonly PrefabGUID _sctGeneric = new(-1687715009);
 
     const int BASE_BLOOD_FACTOR = 10;
     const float BLOOD_TYPE_FACTOR = 3f;
@@ -183,15 +194,17 @@ internal static class BloodSystem
         { BloodType.Immortal, new PrefabGUID(55100532) }, // CHAR_Dracula_BloodSoul_heart
         { BloodType.Brute, new PrefabGUID(2005508157) } // CHAR_Militia_Heavy
     };
-    public static void ProcessLegacy(Entity source, Entity target)
+    public static void ProcessLegacy(DeathEventArgs deathEvent)
     {
-        if (!target.Has<BloodConsumeSource>()) return;
+        Entity playerCharacter = deathEvent.Source;
+        Entity target = deathEvent.Target;
 
-        BloodConsumeSource bloodConsumeSource = target.Read<BloodConsumeSource>();
+        if (!target.TryGetComponent(out BloodConsumeSource bloodConsumeSource)) return;
+
         BloodType targetBloodType = GetBloodTypeFromPrefab(bloodConsumeSource.UnitBloodType._Value);
-
         int unitLevel = target.Read<UnitLevel>().Level;
-        float bloodValue = 0;
+
+        float bloodValue;
 
         if (target.Has<VBloodConsumeSource>())
         {
@@ -202,12 +215,13 @@ internal static class BloodSystem
             bloodValue = bloodConsumeSource.BloodQuality / BASE_BLOOD_FACTOR * unitLevel * _unitLegacyMultiplier;
         }
 
-        Entity userEntity = source.Read<PlayerCharacter>().UserEntity;
-        User user = userEntity.Read<User>();
-        ulong steamID = user.PlatformId;
+        Entity userEntity = playerCharacter.GetUserEntity();
+        User user = userEntity.GetUser();
+        ulong steamId = user.PlatformId;
 
-        BloodType bloodType = BloodManager.GetCurrentBloodType(source);
-        float bloodQuality = source.Read<Blood>().Quality;
+        Blood blood = playerCharacter.Read<Blood>();
+        BloodType bloodType = BloodManager.GetCurrentBloodType(blood);
+        float bloodQuality = blood.Quality;
 
         if (bloodType.Equals(BloodType.None)) return;
         else if (targetBloodType.Equals(bloodType))
@@ -222,8 +236,8 @@ internal static class BloodSystem
         IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
         if (handler != null)
         {
-            SaveBloodExperience(steamID, handler, bloodValue, out bool leveledUp, out int newLevel);
-            NotifyPlayer(user, bloodType, bloodValue, leveledUp, newLevel, handler);
+            SaveBloodExperience(steamId, handler, bloodValue, out bool leveledUp, out int newLevel);
+            NotifyPlayer(playerCharacter, userEntity, user, steamId, bloodType, bloodValue, leveledUp, newLevel, handler, deathEvent.ScrollingTextDelay);
         }
     }
     public static void SaveBloodExperience(ulong steamID, IBloodHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
@@ -261,7 +275,7 @@ internal static class BloodSystem
         if (newLevel <= _maxBloodLevel)
         {
             LocalizationService.HandleServerReply(EntityManager, user,
-                $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]");
+                $"<color=red>{bloodType}</color> legacy improved to [<color=white>{newLevel}</color>]!");
         }
 
         if (GetPlayerBool(steamID, REMINDERS_KEY))
@@ -281,26 +295,38 @@ internal static class BloodSystem
             }
         }
     }
-    public static void NotifyPlayer(User user, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler)
+    public static void NotifyPlayer(Entity playerCharacter, Entity userEntity, User user, ulong steamId, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler, float delay)
     {
-        ulong steamID = user.PlatformId;
-
         int gainedIntXP = (int)gainedXP;
-        int levelProgress = GetLevelProgress(steamID, handler);
+        int levelProgress = GetLevelProgress(steamId, handler);
 
         if (newLevel >= _maxBloodLevel) return;
+        else if (gainedXP <= 0) return;
 
         if (leveledUp)
         {
-            HandleBloodLevelUp(user, bloodType, newLevel, steamID);
+            HandleBloodLevelUp(user, bloodType, newLevel, steamId);
             Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
         }
 
-        if (GetPlayerBool(steamID, BLOOD_LOG_KEY))
+        if (GetPlayerBool(steamId, BLOOD_LOG_KEY))
         {
             LocalizationService.HandleServerReply(EntityManager, user,
                 $"+<color=yellow>{gainedIntXP}</color> <color=red>{bloodType}</color> <color=#FFC0CB>essence</color> (<color=white>{levelProgress}%</color>)");
         }
+
+        if (GetPlayerBool(steamId, SCT_PLAYER_BL_KEY))
+        {
+            // Core.Log.LogInfo($"Legacy SCT for {user.CharacterName.Value} with gainedXP: {gainedXP} and delay: {delay}");
+            PlayerLegacySCTDelayRoutine(playerCharacter, userEntity, _red, gainedXP, delay).Start();
+        }
+    }
+    static IEnumerator PlayerLegacySCTDelayRoutine(Entity playerCharacter, Entity userEntity, float3 color, float gainedXP, float delay) // maybe just have one of these in progression utilities but later
+    {
+        yield return new WaitForSeconds(delay);
+
+        float3 position = playerCharacter.GetPosition();
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctGeneric, userEntity);
     }
     public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
     {

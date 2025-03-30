@@ -101,7 +101,7 @@ internal static class WeaponCommands
     }
 
     [Command(name: "choosestat", shortHand: "cst", adminOnly: false, usage: ".wep cst [WeaponOrStat] [WeaponStat]", description: "Choose a weapon stat to enhance based on your expertise.")]
-    public static void ChooseWeaponStat(ChatCommandContext ctx, string weaponOrStat, int statType = 0)
+    public static void ChooseWeaponStat(ChatCommandContext ctx, string weaponOrStat, int statType = default)
     {
         if (!ConfigService.ExpertiseSystem)
         {
@@ -321,7 +321,7 @@ internal static class WeaponCommands
             return;
         }
 
-        if (slot < 1 || slot > 2)
+        if (slot < 1 || slot > 7)
         {
             LocalizationService.HandleReply(ctx, "Invalid slot (<color=white>1</color> for Q or <color=white>2</color> for E)");
             return;
@@ -333,9 +333,8 @@ internal static class WeaponCommands
             float3 charPosition = character.Read<Translation>().Value;
 
             HashSet<PlayerInfo> processed = [];
-            Dictionary<ulong, PlayerInfo> players = new(OnlineCache);
 
-            foreach (PlayerInfo playerInfo in players.Values)
+            foreach (PlayerInfo playerInfo in SteamIdOnlinePlayerInfoCache.Values)
             {
                 if (processed.Contains(playerInfo)) continue;
                 else if (playerInfo.CharEntity.TryGetComponent(out Translation translation) && math.distance(charPosition, translation.Value) <= radius)

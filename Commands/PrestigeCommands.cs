@@ -90,7 +90,7 @@ internal static class PrestigeCommands
                 else
                 {
                     InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, exoReward, ConfigService.ExoPrestigeRewardQuantity, new Entity());
-                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeReward}</color>! It dropped on the ground becuase your inventory was full though.");
+                    LocalizationService.HandleReply(ctx, $"<color=#90EE90>{parsedPrestigeType}</color>[<color=white>{exoPrestiges}</color>] prestige complete! You have been awarded with <color=#ffd9eb>{exoReward.GetLocalizedName()}</color>x<color=white>{ConfigService.ExoPrestigeRewardQuantity}</color>! It dropped on the ground becuase your inventory was full though.");
                     return;
                 }
             }
@@ -210,7 +210,7 @@ internal static class PrestigeCommands
         }
     }
 
-    [Command(name: "set", adminOnly: true, usage: ".prestige set [Name] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
+    [Command(name: "set", adminOnly: true, usage: ".prestige set [Player] [PrestigeType] [Level]", description: "Sets the specified player to a certain level of prestige in a certain type of prestige.")]
     public static void SetPlayerPrestigeCommand(ChatCommandContext ctx, string name, string prestigeType, int level)
     {
         if (!ConfigService.PrestigeSystem)
@@ -297,6 +297,7 @@ internal static class PrestigeCommands
         {
             ApplyPrestigeBuffs(character, level);
             ReplyExperiencePrestigeEffects(playerInfo.User, level);
+            Progression.PlayerProgressionCacheManager.UpdatePlayerProgressionPrestige(steamId, true);
         }
         else
         {
@@ -349,7 +350,7 @@ internal static class PrestigeCommands
         }
     }
 
-    [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Name] [PrestigeType]", description: "Handles resetting prestiging.")]
+    [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Player] [PrestigeType]", description: "Handles resetting prestiging.")]
     public static void ResetPrestige(ChatCommandContext ctx, string name, string prestigeType)
     {
         if (!ConfigService.PrestigeSystem)
@@ -440,9 +441,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        List<string> prestigeTypes = Enum.GetNames(typeof(PrestigeType))
-                .Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")
-                .ToList();
+        List<string> prestigeTypes = [..Enum.GetNames(typeof(PrestigeType)).Select(prestigeType => $"<color=#90EE90>{prestigeType}</color>")];
 
         const int maxPerMessage = 6;
 
@@ -464,6 +463,12 @@ internal static class PrestigeCommands
             return;
         }
 
+        if (!ConfigService.PrestigeLeaderboard)
+        {
+            LocalizationService.HandleReply(ctx, "Leaderboards are not enabled.");
+            return;
+        }
+
         if (!TryParsePrestigeType(prestigeType, out var parsedPrestigeType))
         {
             LocalizationService.HandleReply(ctx, "Invalid prestige, use <color=white>'.prestige l'</color> to see valid options.");
@@ -477,9 +482,9 @@ internal static class PrestigeCommands
         }
 
         var prestigeData = GetPrestigeForType(parsedPrestigeType)
-        .Where(p => p.Value > 0)
-        .OrderByDescending(p => p.Value)
-        .ToList();
+            .Where(p => p.Value > 0)
+            .OrderByDescending(p => p.Value)
+            .ToList();
 
         if (!prestigeData.Any())
         {
@@ -491,7 +496,7 @@ internal static class PrestigeCommands
             .Take(10)
             .Select((p, index) =>
             {
-                var playerName = PlayerCache.Values.FirstOrDefault(x => x.User.CharacterName.Value == p.Key).User.CharacterName.Value ?? "Unknown";
+                var playerName = SteamIdPlayerInfoCache.Values.FirstOrDefault(x => x.User.CharacterName.Value == p.Key).User.CharacterName.Value ?? "Unknown";
                 return $"<color=yellow>{index + 1}</color>| <color=green>{playerName}</color>, <color=#90EE90>{parsedPrestigeType}</color>: <color=white>{p.Value}</color>";
             })
             .ToList();
@@ -506,6 +511,7 @@ internal static class PrestigeCommands
             {
                 var batch = leaderboard.Skip(i).Take(4);
                 string replyMessage = string.Join(", ", batch);
+
                 LocalizationService.HandleReply(ctx, replyMessage);
             }
         }
@@ -517,13 +523,14 @@ internal static class PrestigeCommands
         if (!ConfigService.ExoPrestiging)
         {
             ctx.Reply("Exo prestiging is not enabled.");
+            return;
         }
 
         ulong steamId = ctx.Event.User.PlatformId;
 
         if (steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(PrestigeType.Exo, out int exoPrestiges) && exoPrestiges > 0)
         {
-            if (!Misc.ConsumedDracula(ctx.Event.SenderUserEntity))
+            if (!Progression.ConsumedDracula(ctx.Event.SenderUserEntity))
             {
                 ctx.Reply("You must consume Dracula's essence before manifesting this power...");
                 return;
@@ -538,6 +545,38 @@ internal static class PrestigeCommands
         }
     }
 
+    [Command(name: "ignoreleaderboard", shortHand: "ignore", adminOnly: true, usage: ".prestige ignore [Player]", description: "Adds (or removes) player to list of those who will not appear on prestige leaderboards. Intended for admin-duties only accounts.")]
+    public static void IgnorePrestigeLeaderboardPlayerCommand(ChatCommandContext ctx, string name)
+    {
+        if (!ConfigService.PrestigeSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        PlayerInfo playerInfo = GetPlayerInfo(name);
+        if (!playerInfo.UserEntity.Exists())
+        {
+            ctx.Reply($"Couldn't find player...");
+            return;
+        }
+
+        if (!DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Contains(playerInfo.User.PlatformId))
+        {
+            DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Add(playerInfo.User.PlatformId);
+            DataService.PlayerPersistence.SaveIgnoredPrestigeLeaderboard();
+
+            ctx.Reply($"<color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore prestige leaderboard list!");
+        }
+        else if (DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Contains(playerInfo.User.PlatformId))
+        {
+            DataService.PlayerDictionaries._ignorePrestigeLeaderboard.Remove(playerInfo.User.PlatformId);
+            DataService.PlayerPersistence.SaveIgnoredPrestigeLeaderboard();
+
+            ctx.Reply($"<color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore prestige leaderboard list!");
+        }
+    }
+
     [Command(name: "permashroud", shortHand: "shroud", adminOnly: false, usage: ".prestige shroud", description: "Toggles permashroud if applicable.")]
     public static void PermaShroudToggle(ChatCommandContext ctx)
     {
@@ -547,7 +586,7 @@ internal static class PrestigeCommands
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         ulong steamId = ctx.Event.User.PlatformId;
 
         TogglePlayerBool(steamId, SHROUD_KEY);
@@ -555,21 +594,33 @@ internal static class PrestigeCommands
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=green>enabled</color>!");
 
-            if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !character.HasBuff(_shroudBuff)
+            if (UpdateBuffsBufferDestroyPatch.PrestigeBuffs.Contains(_shroudBuff) && !playerCharacter.HasBuff(_shroudBuff)
                 && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(PrestigeType.Experience, out var experiencePrestiges) && experiencePrestiges > UpdateBuffsBufferDestroyPatch.PrestigeBuffs.IndexOf(_shroudBuff))
             {
-                Buffs.TryApplyPermanentBuff(character, _shroudBuff);
+                Buffs.TryApplyPermanentBuff(playerCharacter, _shroudBuff);
             }
         }
         else
         {
             LocalizationService.HandleReply(ctx, "Permashroud <color=red>disabled</color>!");
-            Equipment equipment = character.Read<Equipment>();
+            Equipment equipment = playerCharacter.Read<Equipment>();
 
-            if (!equipment.IsEquipped(_shroudCloak, out var _) && character.TryGetBuff(_shroudBuff, out Entity shroudBuff))
+            if (!equipment.IsEquipped(_shroudCloak, out var _) && playerCharacter.HasBuff(_shroudBuff))
             {
-                character.TryRemoveBuff(_shroudBuff);
+                playerCharacter.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
             }
         }
+    }
+
+    [Command(name: "iacknowledgethiswillremoveallprestigebuffsfromplayersandwantthattohappen", adminOnly: true, usage: ".prestige iacknowledgethiswillremoveallprestigebuffsfromplayersandwantthattohappen", description: "Globally removes prestige buffs from players to facilitate changing prestige buffs in config.")]
+    public static void GlobalClassPurgeCommand(ChatCommandContext ctx)
+    {
+        if (!ConfigService.PrestigeSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
+            return;
+        }
+
+        GlobalPurgePrestigeBuffs(ctx);
     }
 }

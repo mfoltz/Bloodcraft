@@ -21,6 +21,8 @@ internal static class ShapeshiftSystemPatch
     static readonly PrefabGUID _psychicFormGroup = new(-1908054166);
     static readonly PrefabGUID _batFormGroup = new(-104327922);
 
+    static readonly PrefabGUID _vanishBuff = new(1595547018);           // AB_Bandit_Thief_Rush_Buff
+
     [HarmonyPatch(typeof(ShapeshiftSystem), nameof(ShapeshiftSystem.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(ShapeshiftSystem __instance)
@@ -43,21 +45,37 @@ internal static class ShapeshiftSystemPatch
 
                 if (enterShapeshiftEvent.Shapeshift.Equals(_psychicFormGroup))
                 {
-                    Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+                    bool hasActive = steamId.HasActiveFamiliar();
+                    bool isDismissed = steamId.HasDismissedFamiliar();
 
-                    if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
+                    if (hasActive && !isDismissed)
                     {
-                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId, data);
+                        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+                        if (familiar.HasBuff(_vanishBuff))
+                        {
+                            continue;
+                        }
+
+                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId);
                     }
                 }
                 else if (enterShapeshiftEvent.Shapeshift.Equals(_batFormGroup))
                 {
-                    Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+                    bool hasActive = steamId.HasActiveFamiliar();
+                    bool isDismissed = steamId.HasDismissedFamiliar();
 
-                    if (steamId.TryGetFamiliarActives(out var data) && familiar.Exists() && !familiar.IsDisabled())
+                    if (hasActive && !isDismissed)
                     {
+                        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+                        if (familiar.HasBuff(_vanishBuff))
+                        {
+                            continue;
+                        }
+
                         Familiars.AutoCallMap[fromCharacter.Character] = familiar;
-                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId, data);
+                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId);
                     }
                 }
             }

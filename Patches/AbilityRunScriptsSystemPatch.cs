@@ -26,6 +26,7 @@ internal static class AbilityRunScriptsSystemPatch
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _useWaypointAbilityGroup = new(695067846);
     static readonly PrefabGUID _useCastleWaypointAbilityGroup = new(893332545);
+    static readonly PrefabGUID _vanishBuff = new(1595547018);                   // AB_Bandit_Thief_Rush_Buff
 
     [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -81,16 +82,38 @@ internal static class AbilityRunScriptsSystemPatch
             foreach (AbilityCastStartedEvent castStartedEvent in castStartedEvents)
             {
                 if (!castStartedEvent.AbilityGroup.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if ((prefabGUID.Equals(_useCastleWaypointAbilityGroup) || prefabGUID.Equals(_useWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity player))
+                else if ((prefabGUID.Equals(_useCastleWaypointAbilityGroup) || prefabGUID.Equals(_useWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity playerCharacter))
                 {
+                    /*
                     User user = player.GetUser();
                     ulong steamId = user.PlatformId;
 
                     Entity familiar = Familiars.GetActiveFamiliar(player);
-                    if (familiar.Exists() && !familiar.IsDisabled() && steamId.TryGetFamiliarActives(out var data))
+
+                    if (familiar.Exists() && !familiar.IsDisabled() && !familiar.HasBuff(_vanishBuff) && steamId.TryGetFamiliarActives(out var data))
                     {
                         Familiars.AutoCallMap[player] = familiar;
-                        Familiars.DismissFamiliar(player, familiar, user, steamId, data);
+                        Familiars.DismissFamiliar(player, familiar, user, steamId);
+                    }
+                    */
+
+                    User user = playerCharacter.GetUser();
+                    ulong steamId = user.PlatformId;
+
+                    bool hasActive = steamId.HasActiveFamiliar();
+                    bool isDismissed = steamId.HasDismissedFamiliar();
+
+                    if (hasActive && !isDismissed)
+                    {
+                        Entity familiar = Familiars.GetActiveFamiliar(playerCharacter);
+
+                        if (familiar.HasBuff(_vanishBuff))
+                        {
+                            continue;
+                        }
+
+                        Familiars.AutoCallMap[playerCharacter] = familiar;
+                        Familiars.DismissFamiliar(playerCharacter, familiar, user, steamId);
                     }
                 }
             }

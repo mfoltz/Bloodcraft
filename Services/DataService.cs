@@ -1,40 +1,38 @@
 ﻿using Bloodcraft.Systems.Expertise;
+using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using ProjectM;
+using ProjectM.Network;
+using ProjectM.Scripting;
+using ProjectM.Shared;
+using Stunlock.Core;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Unity.Entities;
+using VampireCommandFramework;
 using static Bloodcraft.Services.ConfigService;
 using static Bloodcraft.Services.ConfigService.ConfigInitialization;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager_V2;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 using static Bloodcraft.Services.DataService.PlayerDictionaries;
 using static Bloodcraft.Services.DataService.PlayerPersistence;
 using static Bloodcraft.Services.DataService.PlayerPersistence.JsonFilePaths;
 using static Bloodcraft.Services.PlayerService;
-using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
+using static Bloodcraft.Systems.Familiars.FamiliarBindingSystem;
+using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc;
 using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
 
 namespace Bloodcraft.Services;
 internal static class DataService
 {
-    /* old, pending removal
-    public static bool TryGetPlayerBools(this ulong steamId, out ConcurrentDictionary<string, bool> bools)
-    {
-        bools = [];
-
-        if (!_playerBools.Any()) return false;
-        else return _playerBools.TryGetValue(steamId, out bools);
-    }
-    public static void SetPlayerBools(this ulong steamId, ConcurrentDictionary<string, bool> data)
-    {
-        _playerBools[steamId] = data;
-        SavePlayerBools();
-    }
-    */
     public static bool TryGetPlayerExperience(this ulong steamId, out KeyValuePair<int, float> experience)
     {
         return _playerExperience.TryGetValue(steamId, out experience);
@@ -191,29 +189,30 @@ internal static class DataService
     {
         return _playerBloodStats.TryGetValue(steamId, out bloodStats);
     }
-    public static bool TryGetFamiliarActives(this ulong steamId, out (Entity Familiar, int FamKey) activeFamiliar)
-    {
-        return _familiarActives.TryGetValue(steamId, out activeFamiliar);
-    }
     public static bool TryGetFamiliarBox(this ulong steamId, out string familiarSet)
     {
-        return _familiarBoxes.TryGetValue(steamId, out familiarSet);
+        return _playerFamiliarBox.TryGetValue(steamId, out familiarSet);
     }
-    public static bool TryGetFamiliarBoxPreset(this ulong steamId, out int defaultFamiliar)
+    public static bool TryGetBindingIndex(this ulong steamId, out int index)
     {
-        return _familiarBoxIndex.TryGetValue(steamId, out defaultFamiliar);
-    }
-    public static bool TryGetFamiliarBattleGroup(this ulong steamId, out List<int> battleGroup)
-    {
-        return _familiarBattleGroups.TryGetValue(steamId, out battleGroup);
+        if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+        {
+            Entity playerCharacter = playerInfo.CharEntity;
+
+            if (playerCharacter.Has<Energy>())
+            {
+                Energy energy = playerCharacter.Read<Energy>();
+                index = (int)energy.RegainEnergyChance._Value;
+
+                return true;
+            }
+        }
+
+        return _playerBindingIndex.TryGetValue(steamId, out index);
     }
     public static bool TryGetPlayerQuests(this ulong steamId, out Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> quests)
     {
         return _playerQuests.TryGetValue(steamId, out quests);
-    }
-    public static bool TryGetPlayerParties(this ulong steamId, out ConcurrentList<string> parties)
-    {
-        return _playerParties.TryGetValue(steamId, out parties);
     }
     public static void SetPlayerExperience(this ulong steamId, KeyValuePair<int, float> data)
     {
@@ -410,10 +409,6 @@ internal static class DataService
         _playerBloodStats[steamId] = data;
         SavePlayerBloodStats();
     }
-    public static void SetFamiliarActives(this ulong steamId, (Entity Familiar, int FamKey) data)
-    {
-        _familiarActives[steamId] = data;
-    }
     public static void SetFamiliarBox(this ulong steamId, string data = null)
     {
         FamiliarUnlocksData familiarBoxes = FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId);
@@ -447,25 +442,29 @@ internal static class DataService
             }
         }
 
-        _familiarBoxes[steamId] = data;
+        _playerFamiliarBox[steamId] = data;
     }
-    public static void SetFamiliarBoxPreset(this ulong steamId, int data)
+    public static void SetBindingIndex(this ulong steamId, int index)
     {
-        _familiarBoxIndex[steamId] = data;
-    }
-    public static void SetFamiliarBattleGroup(this ulong steamId, List<int> data)
-    {
-        _familiarBattleGroups[steamId] = data;
-        SaveFamiliarBattleGroups();
+        if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+        {
+            Entity playerCharacter = playerInfo.CharEntity;
+
+            if (playerCharacter.Has<Energy>())
+            {
+                playerCharacter.With((ref Energy energy) =>
+                {
+                    energy.RegainEnergyChance._Value = index;
+                });
+            }
+        }
+
+        _playerBindingIndex[steamId] = index;
     }
     public static void SetPlayerQuests(this ulong steamId, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)> data)
     {
         _playerQuests[steamId] = data;
         SavePlayerQuests();
-    }
-    public static void SetPlayerParties(this ulong steamId, ConcurrentList<string> data)
-    {
-        _playerParties[steamId] = data;
     }
     public static class PlayerDictionaries
     {
@@ -475,9 +474,6 @@ internal static class DataService
         // leveling data
         public static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerExperience = [];
         public static ConcurrentDictionary<ulong, KeyValuePair<DateTime, float>> _playerRestedXP = [];
-
-        // old implementation of bools
-        public static ConcurrentDictionary<ulong, ConcurrentDictionary<string, bool>> _playerBools = [];
 
         // class data
         public static ConcurrentDictionary<ulong, Dictionary<Classes.PlayerClass, (List<int> WeaponStats, List<int> BloodStats)>> _playerClass = [];
@@ -526,17 +522,20 @@ internal static class DataService
         public static ConcurrentDictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> _playerBloodStats = [];
 
         // familiar data
-        public static ConcurrentDictionary<ulong, (Entity Familiar, int FamKey)> _familiarActives = []; // mmm should probably either refactor to not need this or give everyone their own file, or why is this even a file geez cache it up
-        public static ConcurrentDictionary<ulong, string> _familiarBoxes = [];
-        public static ConcurrentDictionary<ulong, int> _familiarBoxIndex = [];
-        public static ConcurrentDictionary<ulong, List<int>> _familiarBattleGroups = [];
+        public static ConcurrentDictionary<ulong, string> _playerFamiliarBox = [];
+        public static ConcurrentDictionary<ulong, int> _playerBindingIndex = [];
+
+        // battle arena centers
         public static List<List<float>> _familiarBattleCoords = [];
+
+        // players filtered from appearing in prestige leaderboard data (for accounts unconcerned with progression existing only for the fulfillment of admin-related duties)
+        public static List<ulong> _ignorePrestigeLeaderboard = [];
+
+        // players banned from receiving shared experience due to bad behaviour or whatever
+        public static List<ulong> _ignoreSharedExperience = [];
 
         // quests data
         public static ConcurrentDictionary<ulong, Dictionary<QuestSystem.QuestType, (QuestSystem.QuestObjective Objective, int Progress, DateTime LastReset)>> _playerQuests = [];
-
-        // parties cache
-        public static ConcurrentDictionary<ulong, ConcurrentList<string>> _playerParties = [];
     }
     public static class PlayerPersistence
     {
@@ -554,7 +553,6 @@ internal static class DataService
             {"Classes", PlayerClassesJson },
             {"Prestiges", PlayerPrestigesJson },
             {"ExoFormData", PlayerExoFormsJson },
-            {"PlayerBools", PlayerBoolsJson},
             {"PlayerParties", PlayerPartiesJson},
             {"Woodcutting", PlayerWoodcuttingJson},
             {"Mining", PlayerMiningJson},
@@ -591,7 +589,8 @@ internal static class DataService
             {"BruteLegacy", PlayerBruteLegacyJson},
             {"BloodStats", PlayerBloodStatsJson},
             {"FamiliarBattleCoords", FamiliarBattleCoordsJson },
-            {"FamiliarBattleGroups", PlayerFamiliarBattleGroupsJson }
+            {"IgnoredPrestigeLeaderboard", IgnoredPrestigeLeaderboardJson},
+            {"IgnoredSharedExperience", IgnoredSharedExperienceJson}
         };
         public static class JsonFilePaths
         {
@@ -601,7 +600,6 @@ internal static class DataService
             public static readonly string PlayerPrestigesJson = Path.Combine(DirectoryPaths[1], "player_prestiges.json");
             public static readonly string PlayerExoFormsJson = Path.Combine(DirectoryPaths[1], "player_exoforms.json");
             public static readonly string PlayerClassesJson = Path.Combine(DirectoryPaths[0], "player_classes.json");
-            public static readonly string PlayerBoolsJson = Path.Combine(DirectoryPaths[0], "player_bools.json");
             public static readonly string PlayerPartiesJson = Path.Combine(DirectoryPaths[0], "player_parties.json");
             public static readonly string PlayerWoodcuttingJson = Path.Combine(DirectoryPaths[5], "player_woodcutting.json");
             public static readonly string PlayerMiningJson = Path.Combine(DirectoryPaths[5], "player_mining.json");
@@ -638,7 +636,8 @@ internal static class DataService
             public static readonly string PlayerBruteLegacyJson = Path.Combine(DirectoryPaths[4], "player_brute.json");
             public static readonly string PlayerBloodStatsJson = Path.Combine(DirectoryPaths[4], "player_blood_stats.json");
             public static readonly string FamiliarBattleCoordsJson = Path.Combine(DirectoryPaths[6], "familiar_battle_coords.json");
-            public static readonly string PlayerFamiliarBattleGroupsJson = Path.Combine(DirectoryPaths[6], "player_familiar_battle_groups.json");
+            public static readonly string IgnoredPrestigeLeaderboardJson = Path.Combine(DirectoryPaths[1], "ignored_prestige_leaderboard.json");
+            public static readonly string IgnoredSharedExperienceJson = Path.Combine(DirectoryPaths[1], "ignored_shared_experience.json");
         }
         static void LoadData<T>(ref ConcurrentDictionary<ulong, T> dataStructure, string key)
         {
@@ -677,7 +676,7 @@ internal static class DataService
             {
                 File.Create(path).Dispose();
                 dataStructure = [];
-                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                Core.Log.LogInfo($"{key} file created...");
                 return;
             }
             try
@@ -708,7 +707,7 @@ internal static class DataService
             {
                 File.Create(path).Dispose();
                 dataStructure = [];
-                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                Core.Log.LogInfo($"{key} file created...");
                 return;
             }
             try
@@ -737,7 +736,7 @@ internal static class DataService
             {
                 File.Create(path).Dispose();
                 dataStructure = [];
-                Core.Log.LogInfo($"{key} file created as it did not exist.");
+                Core.Log.LogInfo($"{key} file created...");
                 return;
             }
             try
@@ -751,6 +750,34 @@ internal static class DataService
                 else
                 {
                     var data = JsonSerializer.Deserialize<List<int>>(json, _jsonOptions);
+                    dataStructure = data ?? [];
+                }
+            }
+            catch (IOException ex)
+            {
+                Core.Log.LogInfo($"Failed to read {key} data from file: {ex.Message}");
+            }
+        }
+        static void LoadData<T>(ref List<ulong> dataStructure, string key)
+        {
+            string path = _filePaths[key];
+            if (!File.Exists(path))
+            {
+                File.Create(path).Dispose();
+                dataStructure = [];
+                Core.Log.LogInfo($"{key} file created...");
+                return;
+            }
+            try
+            {
+                string json = File.ReadAllText(path);
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    dataStructure = [];
+                }
+                else
+                {
+                    var data = JsonSerializer.Deserialize<List<ulong>>(json, _jsonOptions);
                     dataStructure = data ?? [];
                 }
             }
@@ -813,7 +840,7 @@ internal static class DataService
                 Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
             }
         }
-        static void SaveData<T>(List<int> data, string key)
+        static void SaveData<T>(List<ulong> data, string key)
         {
             string path = _filePaths[key];
 
@@ -828,7 +855,7 @@ internal static class DataService
             }
             catch (JsonException ex)
             {
-                Core.Log.LogInfo($"JSON serialization error when saving {key} data: {ex.Message}");
+                Core.Log.LogInfo($"JSON serialization error saving {key} - {ex.Message}");
             }
         }
 
@@ -874,7 +901,8 @@ internal static class DataService
         public static void LoadPlayerBruteLegacy() => LoadData(ref _playerBruteLegacy, "BruteLegacy");
         public static void LoadPlayerBloodStats() => LoadData(ref _playerBloodStats, "BloodStats");
         public static void LoadFamiliarBattleCoords() => LoadData<List<float>>(ref _familiarBattleCoords, "FamiliarBattleCoords");
-        public static void LoadFamiliarBattleGroups() => LoadData(ref _familiarBattleGroups, "FamiliarBattleGroups");
+        public static void LoadIgnoredPrestigeLeaderboard() => LoadData<List<ulong>>(ref _ignorePrestigeLeaderboard, "IgnoredPrestigeLeaderboard");
+        public static void LoadIgnoredSharedExperience() => LoadData<List<ulong>>(ref _ignoreSharedExperience, "IgnoredSharedExperience");
 
         // save methods
         public static void SavePlayerExperience() => SaveData(_playerExperience, "Experience");
@@ -918,7 +946,8 @@ internal static class DataService
         public static void SavePlayerBruteLegacy() => SaveData(_playerBruteLegacy, "BruteLegacy");
         public static void SavePlayerBloodStats() => SaveData(_playerBloodStats, "BloodStats");
         public static void SaveFamiliarBattleCoords() => SaveData<List<float>>(_familiarBattleCoords, "FamiliarBattleCoords");
-        public static void SaveFamiliarBattleGroups() => SaveData(_familiarBattleGroups, "FamiliarBattleGroups");
+        public static void SaveIgnoredPrestigeLeaderboard() => SaveData<List<ulong>>(_ignorePrestigeLeaderboard, "IgnoredPrestigeLeaderboard");
+        public static void SaveIgnoredSharedExperience() => SaveData<List<ulong>>(_ignoreSharedExperience, "IgnoredSharedExperience");
     }
     public static class PlayerBoolsManager
     {
@@ -965,63 +994,13 @@ internal static class DataService
         {
             WriteIndented = true,
         };
-
-        [Serializable]
-        public class FamiliarUnlocksData
-        {
-            public Dictionary<string, List<int>> UnlockedFamiliars { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarExperienceData
-        {
-            public Dictionary<int, KeyValuePair<int, float>> FamiliarExperience { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarPrestigeData
-        {
-            public Dictionary<int, KeyValuePair<int, List<FamiliarStatType>>> FamiliarPrestige { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarPrestigeData_V2
-        {
-            public Dictionary<int, KeyValuePair<int, List<int>>> FamiliarPrestige { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarBuffsData
-        {
-            public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = []; // can use actual perma buffs or just musb_dots from traits I guess maybe?
-        }
-
-        [Serializable]
-        public class FamiliarBattleGroupsData
-        {
-            public Dictionary<int, List<int>> FamiliarBattleGroups { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarEquipmentData
-        {
-            public Dictionary<int, List<int>> FamiliarEquipment { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarTraitsData
-        {
-            public Dictionary<int, Dictionary<string, Dictionary<FamiliarStatType, float>>> FamiliarTraitModifiers { get; set; } = [];
-        }
-
-        [Serializable]
-        public class FamiliarTrait(string name, Dictionary<FamiliarStatType, float> familiarTraits)
-        {
-            public string Name = name;
-            public Dictionary<FamiliarStatType, float> FamiliarTraits = familiarTraits;
-        }
         public static class FamiliarUnlocksManager
         {
+            [Serializable]
+            public class FamiliarUnlocksData
+            {
+                public Dictionary<string, List<int>> UnlockedFamiliars { get; set; } = [];
+            }
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[8], $"{steamId}_familiar_unlocks.json");
             public static void SaveFamiliarUnlocksData(ulong steamId, FamiliarUnlocksData data)
             {
@@ -1042,6 +1021,11 @@ internal static class DataService
         }
         public static class FamiliarExperienceManager
         {
+            [Serializable]
+            public class FamiliarExperienceData
+            {
+                public Dictionary<int, KeyValuePair<int, float>> FamiliarExperience { get; set; } = [];
+            }
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[7], $"{steamId}_familiar_experience.json");
             public static void SaveFamiliarExperienceData(ulong steamId, FamiliarExperienceData data)
             {
@@ -1062,6 +1046,11 @@ internal static class DataService
         }
         public static class FamiliarPrestigeManager
         {
+            [Serializable]
+            public class FamiliarPrestigeData
+            {
+                public Dictionary<int, KeyValuePair<int, List<FamiliarStatType>>> FamiliarPrestige { get; set; } = [];
+            }
             public static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[7], $"{steamId}_familiar_prestige.json");
             public static void SaveFamiliarPrestigeData(ulong steamId, FamiliarPrestigeData data)
             {
@@ -1080,8 +1069,13 @@ internal static class DataService
                 return JsonSerializer.Deserialize<FamiliarPrestigeData>(jsonString);
             }
         }
-        public static class FamiliarPrestigeManager_V2
+        public static class FamiliarPrestigeManager_V2 // redo this with class for prestige data when adding traits or something
         {
+            [Serializable]
+            public class FamiliarPrestigeData_V2
+            {
+                public Dictionary<int, KeyValuePair<int, List<int>>> FamiliarPrestige { get; set; } = [];
+            }
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[7], $"{steamId}_familiar_prestige_v2.json");
             public static void SaveFamiliarPrestigeData_V2(ulong steamId, FamiliarPrestigeData_V2 data)
             {
@@ -1100,7 +1094,7 @@ internal static class DataService
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarPrestigeData_V2>(jsonString);
             }
-            public static void MigrateToV2(FamiliarPrestigeData oldData, ulong steamId)
+            public static void MigrateToV2(FamiliarPrestigeManager.FamiliarPrestigeData oldData, ulong steamId)
             {
                 FamiliarPrestigeData_V2 newData = new();
 
@@ -1109,9 +1103,7 @@ internal static class DataService
                     int famKey = entry.Key;
                     int prestigeLevel = entry.Value.Key;
 
-                    List<int> newStatIndices = entry.Value.Value
-                        .Select(stat => (int)stat)
-                        .ToList();
+                    List<int> newStatIndices = [..entry.Value.Value.Select(stat => (int)stat)];
 
                     newData.FamiliarPrestige[famKey] = new(prestigeLevel, newStatIndices);
                 }
@@ -1122,12 +1114,17 @@ internal static class DataService
                 string oldPath = FamiliarPrestigeManager.GetFilePath(steamId);
                 if (File.Exists(oldPath))
                 {
-                    // File.Delete(oldPath);
+                    // File.Delete(oldPath); maybe later >_>
                 }
             }
         }
         public static class FamiliarBuffsManager
         {
+            [Serializable]
+            public class FamiliarBuffsData
+            {
+                public Dictionary<int, List<int>> FamiliarBuffs { get; set; } = []; // can use actual perma buffs or just musb_dots from traits I guess maybe?
+            }
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[8], $"{steamId}_familiar_buffs.json");
             public static void SaveFamiliarBuffsData(ulong steamId, FamiliarBuffsData data)
             {
@@ -1146,9 +1143,24 @@ internal static class DataService
                 return JsonSerializer.Deserialize<FamiliarBuffsData>(jsonString);
             }
         }
-        public static class FamiliarBattleGroupsManager // will be implementing soon'ish to support saving multiple battle groups
+        public static class FamiliarBattleGroupsManager
         {
-            static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[10], $"{steamId}_battle_groups.json");
+            const int MAX_BATTLE_GROUPS = 10;
+            static readonly ConcurrentDictionary<ulong, FamiliarBattleGroup> _activeFamiliarBattleGroup = []; // use first battle group for player if nothing here
+
+            [Serializable]
+            public class FamiliarBattleGroup
+            { 
+                public string Name { get; set; }
+                public List<int> Familiars { get; set; } = [0, 0, 0];
+            }
+
+            [Serializable]
+            public class FamiliarBattleGroupsData
+            {
+                public List<FamiliarBattleGroup> BattleGroups { get; set; } = [];
+            }
+            static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[11], $"{steamId}_battle_groups.json");
             public static void SaveFamiliarBattleGroupsData(ulong steamId, FamiliarBattleGroupsData data)
             {
                 string filePath = GetFilePath(steamId);
@@ -1165,50 +1177,568 @@ internal static class DataService
                 string jsonString = File.ReadAllText(filePath);
                 return JsonSerializer.Deserialize<FamiliarBattleGroupsData>(jsonString);
             }
+            public static bool AssignFamiliarToGroup(ChatCommandContext ctx, ulong steamId, string groupName, int slotIndex)
+            {
+                var data = LoadFamiliarBattleGroupsData(steamId);
+                if (!data.BattleGroups.Any(bg => bg.Name == groupName)) return false;
+
+                var battleGroup = data.BattleGroups.First(bg => bg.Name == groupName);
+
+                if (battleGroup.Familiars.Contains(ActiveFamiliarManager.GetActiveFamiliarData(steamId).FamiliarId))
+                {
+                    LocalizationService.HandleReply(ctx, "Active familiar already present in battle group!");
+                    return false;
+                }
+
+                battleGroup.Familiars[slotIndex - 1] = ActiveFamiliarManager.GetActiveFamiliarData(steamId).FamiliarId;
+                SaveFamiliarBattleGroupsData(steamId, data);
+                return true;
+            }
+            public static bool AssignFamiliarToGroupDebug(ulong steamId, string groupName, int slotIndex, int familiarId)
+            {
+                var data = LoadFamiliarBattleGroupsData(steamId);
+                var battleGroup = data.BattleGroups.FirstOrDefault(bg => bg.Name == groupName);
+
+                if (battleGroup == null)
+                {
+                    Core.Log.LogWarning($"Battle group {groupName} not found for {steamId} for auto queue testing!");
+                    return false;
+                }
+
+                battleGroup.Familiars[slotIndex] = familiarId;
+                SaveFamiliarBattleGroupsData(steamId, data);
+                Core.Log.LogWarning($"Assigned familiar {familiarId} to {groupName} slot {slotIndex} for {steamId} for auto queue testing!");
+
+                return true;
+            }
+            public static FamiliarBattleGroup GetFamiliarBattleGroup(ulong steamId, string groupName)
+            {
+                FamiliarBattleGroupsData data = LoadFamiliarBattleGroupsData(steamId);
+                return data.BattleGroups.FirstOrDefault(bg => bg.Name == groupName);
+            }
+            public static bool CreateBattleGroup(ChatCommandContext ctx, ulong steamId, string groupName)
+            {
+                var data = LoadFamiliarBattleGroupsData(steamId);
+                if (data.BattleGroups.Count >= MAX_BATTLE_GROUPS)
+                {
+                    LocalizationService.HandleReply(ctx, $"Can't have more than <color=white>{MAX_BATTLE_GROUPS}</color> battle groups!");
+                    return false;
+                }
+
+                if (data.BattleGroups.Any(bg => bg.Name == groupName)) return false;
+
+                data.BattleGroups.Add(new FamiliarBattleGroup { Name = groupName });
+                SaveFamiliarBattleGroupsData(steamId, data);
+                return true;
+            }
+            public static bool DeleteBattleGroup(ChatCommandContext ctx, ulong steamId, string groupName)
+            {
+                var data = LoadFamiliarBattleGroupsData(steamId);
+                var group = data.BattleGroups.FirstOrDefault(bg => bg.Name == groupName);
+                if (group == null) return false;
+
+                data.BattleGroups.Remove(group);
+                SaveFamiliarBattleGroupsData(steamId, data);
+                LocalizationService.HandleReply(ctx, $"Deleted battle group <color=white>{groupName}</color>!");
+                return true;
+            }
+            public static bool SetActiveBattleGroup(ChatCommandContext ctx, ulong steamId, string groupName)
+            {
+                var data = LoadFamiliarBattleGroupsData(steamId);
+                var battleGroup = data.BattleGroups.FirstOrDefault(bg => bg.Name == groupName);
+                if (battleGroup == null) return false;
+
+                _activeFamiliarBattleGroup[steamId] = battleGroup;
+                return true;
+            }
+            public static string GetActiveBattleGroupName(ulong steamId)
+            {
+                return _activeFamiliarBattleGroup.TryGetValue(steamId, out var battleGroup) ? battleGroup.Name : string.Empty;
+            }
+            public static void HandleBattleGroupDetailsReply(ChatCommandContext ctx, ulong steamId, FamiliarBattleGroup battleGroup)
+            {
+                if (battleGroup.Familiars.Any(x => x != 0))
+                {
+                    FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
+                    FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+                    List<string> familiars = [];
+
+                    BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup, ref familiars);
+
+                    string familiarReply = string.Join(", ", familiars);
+                    LocalizationService.HandleReply(ctx, $"Battle Group - {familiarReply}");
+                }
+                else
+                {
+                    LocalizationService.HandleReply(ctx, "No familiars in battle group!");
+                }
+            }
+            static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData_V2 prestigeData, FamiliarBattleGroup battleGroup, ref List<string> familiars)
+            {
+                foreach (int famKey in battleGroup.Familiars)
+                {
+                    if (famKey == 0) continue;
+
+                    PrefabGUID famPrefab = new(famKey);
+                    string famName = famPrefab.GetLocalizedName();
+                    string colorCode = "<color=#FF69B4>";
+
+                    int level = FamiliarLevelingSystem.GetFamiliarExperience(steamId, famKey).Key;
+                    int prestiges = prestigeData.FamiliarPrestige.ContainsKey(famKey) ? prestigeData.FamiliarPrestige[famKey].Key : 0;
+
+                    if (buffsData.FamiliarBuffs.ContainsKey(famKey) && FamiliarUnlockSystem.ShinyBuffColorHexes.TryGetValue(new(buffsData.FamiliarBuffs[famKey][0]), out var hexColor))
+                    {
+                        colorCode = $"<color={hexColor}>";
+                    }
+
+                    familiars.Add($"<color=white>{battleGroup.Familiars.IndexOf(famKey) + 1}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]");
+                }
+            }
         }
         public static class FamiliarEquipmentManager
         {
+            static SystemService SystemService => Core.SystemService;
+            static JewelSpawnSystem JewelSpawnSystem => SystemService.JewelSpawnSystem;
+
+            const int EQUIPMENT_SLOTS = 7;
+            static readonly PrefabGUID _bonusStatsBuff = new(737485591);
+
+            static readonly JsonSerializerOptions _jsonOptions = new()
+            {
+                WriteIndented = true,
+                Converters = { new FamiliarEquipmentModel.EquipmentBaseConverter() }
+            };
+            static string GetFilePath(ulong steamId) =>
+                Path.Combine(DirectoryPaths[10], $"{steamId}_familiar_equipment.json");
+            public static void SaveFamiliarEquipmentData(ulong steamId, FamiliarEquipmentModel.FamiliarEquipmentData data)
+            {
+                try
+                {
+                    File.WriteAllText(GetFilePath(steamId), JsonSerializer.Serialize(data, _jsonOptions));
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[SaveFamiliarEquipmentData] Failed to save familiar equipment ({steamId}) - {ex.Message}");
+                }
+            }
+            public static FamiliarEquipmentModel.FamiliarEquipmentData LoadFamiliarEquipment(ulong steamId)
+            {
+                string filePath = GetFilePath(steamId);
+
+                try
+                {
+                    return File.Exists(filePath)
+                        ? JsonSerializer.Deserialize<FamiliarEquipmentModel.FamiliarEquipmentData>(File.ReadAllText(filePath), _jsonOptions) ?? new FamiliarEquipmentModel.FamiliarEquipmentData()
+                        : new FamiliarEquipmentModel.FamiliarEquipmentData();
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[LoadFamiliarEquipment] Failed to load familiar equipment ({steamId}) - {ex.Message}");
+                    return new FamiliarEquipmentModel.FamiliarEquipmentData();
+                }
+            }
+            public static List<FamiliarEquipmentModel.EquipmentBase> GetFamiliarEquipment(ulong steamId, int famKey)
+            {
+                var equipmentData = LoadFamiliarEquipment(steamId);
+
+                if (!equipmentData.FamiliarEquipment.TryGetValue(famKey, out var familiarEquipment))
+                {
+                    familiarEquipment = [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (FamiliarEquipmentModel.EquipmentBase)new FamiliarEquipmentModel.StandardEquipment { Equipment = 0, Quality = 0 })];
+
+                    equipmentData.FamiliarEquipment[famKey] = familiarEquipment;
+                    SaveFamiliarEquipmentData(steamId, equipmentData);
+                }
+
+                return familiarEquipment;
+            }
+            public static void SaveFamiliarEquipment(ulong steamId, int famKey, List<FamiliarEquipmentModel.EquipmentBase> familiarEquipment)
+            {
+                var equipmentData = LoadFamiliarEquipment(steamId);
+                equipmentData.FamiliarEquipment[famKey] = familiarEquipment;
+                SaveFamiliarEquipmentData(steamId, equipmentData);
+            }
+            public static void EquipFamiliar(ulong steamId, int famKey, Entity servant, Entity familiar)
+            {
+                EntityManager entityManager = Core.EntityManager;
+                bool professions = ConfigService.ProfessionSystem;
+                List<FamiliarEquipmentModel.EquipmentBase> familiarEquipment = GetFamiliarEquipment(steamId, famKey);
+
+                Entity inventory = InventoryUtilities.TryGetInventoryEntity(entityManager, servant, out inventory) ? inventory : Entity.Null;
+                if (!inventory.Exists()) return;
+
+                foreach (var equipment in familiarEquipment)
+                {
+                    if (equipment.Equipment.Equals(0)) continue;
+
+                    PrefabGUID equipmentPrefabGuid = new(equipment.Equipment);
+                    int professionLevel = professions ? equipment.Quality : 0;
+
+                    AddItemResponse addItemResponse = InventoryUtilitiesServer.TryAddItem(Core.GetAddItemSettings(), inventory, equipmentPrefabGuid, 1);
+                    Entity equipmentEntity = addItemResponse.NewEntity;
+
+                    // CreateLegendaryWeaponDebugEvent
+                    // SystemService.DebugEventsSystem.CreateLegendaryWeaponEvent
+                    // would need user to have spare slot to then equip on familiar, could try tryAddItem with the inventoryBuffer option? and haxemptyslot or w/e
+
+                    /*
+                    if (equipmentEntity.IsAncestralWeapon() && equipment is FamiliarEquipmentModel.AncestralWeapon ancestralWeapon)
+                    {
+                        equipmentEntity.AddWith((ref LegendaryItemInstance legendaryItem) =>
+                        {
+                            legendaryItem.TierIndex = (byte)ancestralWeapon.Tier;
+                        });
+
+                        equipmentEntity.AddWith((ref LegendaryItemSpellModSetComponent spellModSet) =>
+                        {
+                            spellModSet.StatMods.Mod0.Id = new PrefabGUID(ancestralWeapon.StatMods[0].StatMod);
+                            spellModSet.StatMods.Mod0.Power = ancestralWeapon.StatMods[0].Value;
+                            spellModSet.StatMods.Mod1.Id = new PrefabGUID(ancestralWeapon.StatMods[1].StatMod);
+                            spellModSet.StatMods.Mod1.Power = ancestralWeapon.StatMods[1].Value;
+                            spellModSet.StatMods.Mod2.Id = new PrefabGUID(ancestralWeapon.StatMods[2].StatMod);
+                            spellModSet.StatMods.Mod2.Power = ancestralWeapon.StatMods[2].Value;
+                            spellModSet.AbilityMods0.Mod0.Id = SpellSchoolInfusionMap.SpellSchoolInfusions[ancestralWeapon.Infusion];
+                        });
+
+                        JewelSpawnSystem.InitializeLegendaryItemData(equipmentEntity); // can save out the powers from 0-1 but still need what that is for the actual stat, ugh
+                    }
+                    */
+
+                    if (professionLevel > 0 && equipmentEntity.Exists()) EquipmentManager.ApplyEquipmentStats(professionLevel, equipmentEntity);
+                }
+
+                familiar.TryApplyBuff(_bonusStatsBuff);
+            }
+            public static List<FamiliarEquipmentModel.EquipmentBase> UnequipFamiliar(Entity servant)
+            {
+                servant.TryRemove<Disabled>();
+
+                List<FamiliarEquipmentModel.EquipmentBase> familiarEquipment = [];
+                bool professions = ConfigService.ProfessionSystem;
+
+                if (servant.TryGetComponent(out ServantEquipment servantEquipment))
+                {
+                    foreach (FamiliarEquipmentType familiarEquipmentType in Enum.GetValues(typeof(FamiliarEquipmentType)))
+                    {
+                        if (FamiliarEquipmentMap.TryGetValue(familiarEquipmentType, out EquipmentType equipmentType) && servantEquipment.IsEquipped(equipmentType))
+                        {
+                            Entity equipmentEntity = servantEquipment.GetEquipmentEntity(equipmentType).GetEntityOnServer();
+                            PrefabGUID equipmentPrefabGuid = servantEquipment.GetEquipmentItemId(equipmentType);
+                            int professionLevel = professions ? EquipmentManager.CalculateProfessionLevelOfEquipmentFromMaxDurability(equipmentEntity) : 0;
+
+                            if (!equipmentEntity.IsAncestralWeapon())
+                            {
+                                familiarEquipment.Add(new FamiliarEquipmentModel.StandardEquipment { Equipment = equipmentPrefabGuid.GuidHash, Quality = professionLevel });
+                                continue;
+                            }
+                            else
+                            {
+                                LegendaryItemInstance legendaryItemInstance = equipmentEntity.Read<LegendaryItemInstance>();
+                                LegendaryItemSpellModSetComponent legendaryItemSpellModSet = equipmentEntity.Read<LegendaryItemSpellModSetComponent>();
+                                SpellModSet statModSet = legendaryItemSpellModSet.StatMods;
+                                PrefabGUID spellSchoolInfusion = legendaryItemSpellModSet.AbilityMods0.Mod0.Id;
+
+                                var statMods = new FamiliarEquipmentModel.StatMods[statModSet.Count];
+                                for (int i = 0; i < statModSet.Count; i++)
+                                {
+                                    statMods[i] = new FamiliarEquipmentModel.StatMods
+                                    {
+                                        StatMod = statModSet[i].Id.GuidHash,
+                                        Value = statModSet[i].Power
+                                    };
+                                }
+
+                                familiarEquipment.Add(new FamiliarEquipmentModel.AncestralWeapon
+                                {
+                                    Equipment = equipmentPrefabGuid.GuidHash,
+                                    Tier = legendaryItemInstance.TierIndex,
+                                    Quality = professionLevel,
+                                    Infusion = SpellSchoolInfusionMap.SpellSchoolInfusions[spellSchoolInfusion],
+                                    StatMods = statMods
+                                });
+                            }
+                        }
+                        else
+                        {
+                            familiarEquipment.Add(new FamiliarEquipmentModel.StandardEquipment { Equipment = 0, Quality = 0 });
+                        }
+                    }
+
+                    servant.TryDestroy();
+                    return familiarEquipment;
+                }
+
+                return [..Enumerable.Range(0, EQUIPMENT_SLOTS).Select(_ => (FamiliarEquipmentModel.EquipmentBase)new FamiliarEquipmentModel.StandardEquipment { Equipment = 0, Quality = 0 })];
+            }
+        }
+        public static class FamiliarEquipmentModel
+        {
+            [Serializable]
+            public abstract class EquipmentBase
+            {
+                public int Equipment { get; set; }
+                public int Quality { get; set; }
+            }
+
+            [Serializable]
+            public class StandardEquipment : EquipmentBase { }
+
+            [Serializable]
+            public class AncestralWeapon : EquipmentBase
+            {
+                public int Tier { get; set; }
+                public SpellSchool Infusion { get; set; }
+                public StatMods[] StatMods { get; set; }
+            }
+
+            [Serializable]
+            public class StatMods
+            {
+                public int StatMod { get; set; }
+                public float Value { get; set; }
+            }
+
+            [Serializable]
+            public class FamiliarEquipmentData
+            {
+                public Dictionary<int, List<EquipmentBase>> FamiliarEquipment { get; set; } = [];
+            }
+            public class EquipmentBaseConverter : JsonConverter<EquipmentBase>
+            {
+                public override EquipmentBase Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                {
+                    using JsonDocument doc = JsonDocument.ParseValue(ref reader);
+                    JsonElement root = doc.RootElement;
+
+                    if (!root.TryGetProperty("Equipment", out _))
+                        throw new JsonException("Invalid Equipment data!");
+
+                    try
+                    {
+                        return root.TryGetProperty("Infusion", out _)
+                            ? JsonSerializer.Deserialize<AncestralWeapon>(root.GetRawText(), options)
+                            : JsonSerializer.Deserialize<StandardEquipment>(root.GetRawText(), options);
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogError($"[EquipmentBaseConverter] Failed to deserialize familiar equipment - {ex.Message}");
+                        return new StandardEquipment { Equipment = 0, Quality = 0 };
+                    }
+                }
+                public override void Write(Utf8JsonWriter writer, EquipmentBase value, JsonSerializerOptions options)
+                {
+                    if (value is AncestralWeapon ancestralWeapon)
+                        JsonSerializer.Serialize(writer, ancestralWeapon, options);
+                    else if (value is StandardEquipment standardEquipment)
+                        JsonSerializer.Serialize(writer, standardEquipment, options);
+                }
+            }
+        }
+
+        /*
+        public static class FamiliarEquipmentManager
+        {
+            static readonly PrefabGUID _bonusStatsBuff = new(737485591);
+
+            static readonly JsonSerializerOptions _jsonOptions = new()
+            {
+                WriteIndented = true,
+                Converters = { new EquipmentBaseConverter() }
+            };
+            public class EquipmentBaseConverter : JsonConverter<EquipmentBase>
+            {
+                public override EquipmentBase Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                {
+                    using JsonDocument doc = JsonDocument.ParseValue(ref reader);
+                    JsonElement root = doc.RootElement;
+
+                    if (!root.TryGetProperty("Equipment", out _))
+                        throw new JsonException("Invalid Equipment data!");
+
+                    try
+                    {
+                        return root.TryGetProperty("Infusion", out _) // If "Infusion" exists, it's AncestralWeapon
+                            ? JsonSerializer.Deserialize<AncestralWeapon>(root.GetRawText(), options)
+                            : JsonSerializer.Deserialize<StandardEquipment>(root.GetRawText(), options);
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogError($"[EquipmentBaseConverter] Failed to deserialize familiar equipment - {ex.Message}");
+                        return new StandardEquipment { Equipment = 0, Quality = 0 }; // Return a default item instead of failing
+                    }
+                }
+                public override void Write(Utf8JsonWriter writer, EquipmentBase value, JsonSerializerOptions options)
+                {
+                    if (value is AncestralWeapon ancestralWeapon)
+                        JsonSerializer.Serialize(writer, ancestralWeapon, options);
+                    else if (value is StandardEquipment standardEquipment)
+                        JsonSerializer.Serialize(writer, standardEquipment, options);
+                }
+            }
+
+            [Serializable]
+            public abstract class EquipmentBase
+            {
+                public int Equipment { get; set; }
+                public int Quality { get; set; }
+            }
+
+            [Serializable]
+            public class StandardEquipment : EquipmentBase
+            {
+
+            }
+
+            [Serializable]
+            public class StatMod
+            {
+                public UnitStatType UnitStatType { get; set; }
+                public float Value { get; set; }
+            }
+
+            [Serializable]
+            public class AncestralWeapon : EquipmentBase
+            {
+                public SpellSchool Infusion { get; set; }
+                public StatMod[] StatMods { get; set; }
+            }
+
+            [Serializable]
+            public class FamiliarEquipmentData
+            {
+                public Dictionary<int, List<EquipmentBase>> FamiliarEquipment { get; set; } = [];
+            }
+
             static string GetFilePath(ulong steamId) => Path.Combine(DirectoryPaths[10], $"{steamId}_familiar_equipment.json");
             public static void SaveFamiliarEquipmentData(ulong steamId, FamiliarEquipmentData data)
             {
                 string filePath = GetFilePath(steamId);
-                string jsonString = JsonSerializer.Serialize(data, _jsonOptions);
-
-                File.WriteAllText(filePath, jsonString);
+                try
+                {
+                    string jsonString = JsonSerializer.Serialize(data, _jsonOptions);
+                    File.WriteAllText(filePath, jsonString);
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[SaveFamiliarEquipmentData] Failed to save familiar equipment ({steamId}) - {ex.Message}");
+                }
             }
             public static FamiliarEquipmentData LoadFamiliarEquipment(ulong steamId)
             {
                 string filePath = GetFilePath(steamId);
-                if (!File.Exists(filePath))
-                    return new FamiliarEquipmentData();
-
-                string jsonString = File.ReadAllText(filePath);
-                return JsonSerializer.Deserialize<FamiliarEquipmentData>(jsonString);
-            }
-            public static List<int> GetFamiliarEquipment(ulong steamId, int famKey)
-            {
-                var equipmentData = LoadFamiliarEquipment(steamId);
-
-                if (!equipmentData.FamiliarEquipment.TryGetValue(famKey, out var equipment))
+                try
                 {
-                    equipment = [0, 0, 0, 0, 0, 0, 0];
-                    equipmentData.FamiliarEquipment[famKey] = equipment;
+                    string jsonString = File.ReadAllText(filePath);
+                    return JsonSerializer.Deserialize<FamiliarEquipmentData>(jsonString, _jsonOptions) ?? new FamiliarEquipmentData();
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[LoadFamiliarEquipment] Failed to load familiar equipment ({steamId}) - {ex.Message}");
+                    return new FamiliarEquipmentData(); // Return an empty set instead of failing
+                }
+            }
+            public static List<EquipmentBase> GetFamiliarEquipment(ulong steamId, int famKey)
+            {
+                FamiliarEquipmentData equipmentData = LoadFamiliarEquipment(steamId);
+
+                if (!equipmentData.FamiliarEquipment.TryGetValue(famKey, out var familiarEquipment))
+                {
+                    StandardEquipment equipment = new()
+                    {
+                        Equipment = 0,
+                        Quality = 0
+                    };
+
+                    familiarEquipment = [equipment, equipment, equipment, equipment, equipment, equipment, equipment];
+                    equipmentData.FamiliarEquipment[famKey] = familiarEquipment;
 
                     SaveFamiliarEquipmentData(steamId, equipmentData);
                 }
 
-                return equipment;
+                return familiarEquipment;
             }
-            public static void SaveFamiliarEquipment(ulong steamId, int famKey, List<int> equipment)
+            public static void SaveFamiliarEquipment(ulong steamId, int famKey, List<EquipmentBase> familiarEquipment)
             {
-                var equipmentData = LoadFamiliarEquipment(steamId);
-                equipmentData.FamiliarEquipment[famKey] = equipment;
+                FamiliarEquipmentData equipmentData = LoadFamiliarEquipment(steamId);
+                equipmentData.FamiliarEquipment[famKey] = familiarEquipment;
 
                 SaveFamiliarEquipmentData(steamId, equipmentData);
             }
+            public static void EquipFamiliar(ulong steamId, int famKey, Entity servant, Entity familiar)
+            {
+                EntityManager EntityManager = Core.EntityManager;
+                bool professions = ConfigService.ProfessionSystem;
+
+                List<EquipmentBase> familiarEquipment = GetFamiliarEquipment(steamId, famKey);
+
+                Entity inventory = InventoryUtilities.TryGetInventoryEntity(EntityManager, servant, out inventory) ? inventory : Entity.Null;
+                if (!inventory.Exists()) return;
+
+                for (int i = 0; i < familiarEquipment.Count; i++)
+                {
+                    PrefabGUID equipmentPrefabGuid = new(familiarEquipment[i].Equipment);
+                    int professionLevel = professions ? familiarEquipment[i].Quality : 0;
+
+                    if (equipmentPrefabGuid.HasValue())
+                    {
+                        AddItemResponse addItemResponse = InventoryUtilitiesServer.TryAddItem(Core.GetAddItemSettings(), inventory, equipmentPrefabGuid, 1);
+
+                        if (professionLevel > 0)
+                        {
+                            EquipmentManager.ApplyEquipmentStats(professionLevel, addItemResponse.NewEntity);
+                        }
+                    }
+                }
+
+                familiar.TryApplyBuff(_bonusStatsBuff);
+            }
+            public static List<EquipmentBase> UnequipFamiliar(Entity servant)
+            {
+                List<EquipmentBase> familiarEquipment = [];
+
+                servant.TryRemove<Disabled>();
+                bool professions = ConfigService.ProfessionSystem;
+
+                if (servant.TryGet(out ServantEquipment servantEquipment))
+                {
+                    foreach (FamiliarEquipmentType familiarEquipmentType in Enum.GetValues(typeof(FamiliarEquipmentType)))
+                    {
+                        if (Enum.TryParse(familiarEquipmentType.ToString(), true, out EquipmentType equipmentType) && servantEquipment.IsEquipped(equipmentType))
+                        {
+                            PrefabGUID equipmentPrefabGuid = servantEquipment.GetEquipmentItemId(equipmentType);
+                            int professionLevel = professions ? EquipmentManager.CalculateProfessionLevelOfEquipmentFromMaxDurability(
+                                servantEquipment.GetEquipmentEntity(equipmentType).GetEntityOnServer()) : 0;
+
+                            familiarEquipment.Add(new StandardEquipment { Equipment = equipmentPrefabGuid.GuidHash, Quality = professionLevel});
+                        }
+                        else
+                        {
+                            familiarEquipment.Add(new StandardEquipment { Equipment = 0, Quality = 0 });
+                        }
+                    }
+
+                    servant.Destroy();
+                    return familiarEquipment;
+                }
+
+                familiarEquipment = [..Enumerable.Range(0, 7).Select(_ => (EquipmentBase)new StandardEquipment { Equipment = 0, Quality = 0 })];
+                return familiarEquipment;
+            }
         }
+        */
 
         /* need to rethink some of these since primaryAttackSpeed is garbage for most if not unused on units entirely and depends on how equipment stats pan out
+        [Serializable]
+        public class FamiliarTraitsData
+        {
+            public Dictionary<int, Dictionary<string, Dictionary<FamiliarStatType, float>>> FamiliarTraitModifiers { get; set; } = [];
+        }
+
+        [Serializable]
+        public class FamiliarTrait(string name, Dictionary<FamiliarStatType, float> familiarTraits)
+        {
+            public string Name = name;
+            public Dictionary<FamiliarStatType, float> FamiliarTraits = familiarTraits;
+        }
         public static readonly List<FamiliarTrait> FamiliarTraits =
         [
         // Offensive Traits
@@ -1348,29 +1878,6 @@ internal static class DataService
     {
         public static void LoadPlayerData()
         {
-            try // guess this could be where all the migrating stuff and rely on enumerating files in directories instead of PlayerInfo from cache since that won't be ready yet, noting for later
-            {
-                string playerSanguimancyJson = Path.Combine(DirectoryPaths[3], "player_sanguimancy.json"); // handle old format to new
-                string playerUnarmedJson = Path.Combine(DirectoryPaths[3], "player_unarmed.json");
-                string playerFamiliarActivesJson = Path.Combine(DirectoryPaths[6], "player_familiar_actives.json");
-
-                if (File.Exists(playerSanguimancyJson) && !File.Exists(playerUnarmedJson))
-                {
-                    File.Copy(playerSanguimancyJson, PlayerUnarmedExpertiseJson, overwrite: false);
-                }
-
-                if (File.Exists(playerFamiliarActivesJson))
-                {
-                    // File.Delete(playerFamiliarActivesJson);
-                }
-            }
-            catch (Exception ex)
-            {
-                Core.Log.LogError($"Failed to migrate sanguimancy data to unarmed: {ex}");
-            }
-
-            // LoadPlayerBools();
-
             if (SoftSynergies || HardSynergies)
             {
                 LoadPlayerClasses();
@@ -1401,7 +1908,7 @@ internal static class DataService
                 }
             }
 
-            if (ConfigService.BloodSystem)
+            if (ConfigService.LegacySystem)
             {
                 foreach (var loadFunction in _loadLegacies)
                 {
@@ -1409,7 +1916,7 @@ internal static class DataService
                 }
             }
 
-            if (ProfessionSystem)
+            if (ConfigService.ProfessionSystem)
             {
                 foreach (var loadFunction in _loadProfessions)
                 {
@@ -1430,7 +1937,9 @@ internal static class DataService
         [
             LoadPlayerExperience,
             LoadPlayerPrestiges,
-            LoadPlayerExoFormData
+            LoadPlayerExoFormData,
+            LoadIgnoredPrestigeLeaderboard,
+            LoadIgnoredSharedExperience
         ];
 
         static readonly Action[] _loadExpertises =
@@ -1481,8 +1990,7 @@ internal static class DataService
 
         static readonly Action[] _loadFamiliars =
         [
-            LoadFamiliarBattleCoords,
-            LoadFamiliarBattleGroups
+            LoadFamiliarBattleCoords
         ];
     }
 }

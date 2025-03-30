@@ -19,7 +19,7 @@ internal static class ReactToInventoryChangedSystemPatch
     static SystemService SystemService => Core.SystemService;
     static JewelSpawnSystem JewelSpawnSystem => SystemService.JewelSpawnSystem;
 
-    static readonly System.Random _random = new();
+    static readonly Random _random = new();
 
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
@@ -33,11 +33,14 @@ internal static class ReactToInventoryChangedSystemPatch
     const float MERLOT_BONUS = 2f;
     const float MAX_BLOOD_QUALITY = 100f;
 
+    const float ONYX_TEAR_FACTOR = 8f;
+
     const float SCT_DELAY = 0.75f;
 
     static readonly PrefabGUID _itemJewelTemplate = new(1075994038);
     static readonly PrefabGUID _advancedGrinder = new(-178579946);
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);
+    static readonly PrefabGUID _onyxTear = Prefabs.Item_Ingredient_OnyxTear;
 
     static readonly List<PrefabGUID> _jewelTemplates = 
     [
@@ -48,6 +51,26 @@ internal static class ReactToInventoryChangedSystemPatch
         new(-1796954295), // Item_Jewel_Chaos_T04
         new(271061481)    // Item_Jewel_Blood_T04
     ];
+
+    static readonly List<PrefabGUID> _perfectGems =
+    [
+        Prefabs.Item_Ingredient_Gem_Amethyst_T04,
+        Prefabs.Item_Ingredient_Gem_Ruby_T04,
+        Prefabs.Item_Ingredient_Gem_Sapphire_T04,
+        Prefabs.Item_Ingredient_Gem_Emerald_T04,
+        Prefabs.Item_Ingredient_Gem_Topaz_T04,
+        Prefabs.Item_Ingredient_Gem_Miststone_T04
+    ];
+
+    static readonly Dictionary<PrefabGUID, PrefabGUID> _perfectGemPrimals = new()
+    {
+        { Prefabs.Item_Ingredient_Gem_Emerald_T04, Prefabs.Item_Jewel_Unholy_T04 },
+        { Prefabs.Item_Ingredient_Gem_Topaz_T04, Prefabs.Item_Jewel_Storm_T04 },
+        { Prefabs.Item_Ingredient_Gem_Miststone_T04, Prefabs.Item_Jewel_Illusion_T04 },
+        { Prefabs.Item_Ingredient_Gem_Sapphire_T04, Prefabs.Item_Jewel_Frost_T04 },
+        { Prefabs.Item_Ingredient_Gem_Amethyst_T04, Prefabs.Item_Jewel_Chaos_T04 },
+        { Prefabs.Item_Ingredient_Gem_Ruby_T04, Prefabs.Item_Jewel_Blood_T04 }
+    };
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -89,8 +112,7 @@ internal static class ReactToInventoryChangedSystemPatch
 
                         if (_extraRecipes && castleWorkstation.GetPrefabGuid().Equals(_gemCuttingTable) && itemPrefabGuid.Equals(_itemJewelTemplate))
                         {
-                            SpawnPrimalJewel(inventory);
-
+                            SpawnPrimalJewel(castleWorkstation, inventory);
                             continue;
                         }
                         
@@ -156,8 +178,11 @@ internal static class ReactToInventoryChangedSystemPatch
 
                                                 float bloodQualityBonus = 1f + (storedBlood.BloodQuality / 100f);
                                                 alchemyMultiplier += bloodQualityBonus;
-
                                                 professionXP *= alchemyMultiplier;
+                                            }
+                                            if (itemPrefabGuid.Equals(_onyxTear))
+                                            {
+                                                professionXP *= ONYX_TEAR_FACTOR;
                                             }
                                             else professionXP *= ALCHEMY_FACTOR;
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
@@ -187,11 +212,36 @@ internal static class ReactToInventoryChangedSystemPatch
             inventoryChangedEvents.Dispose();
         }
     }
-    static void SpawnPrimalJewel(Entity inventory)
+    static void SpawnPrimalJewel(Entity station, Entity inventory)
     {
+        PrefabGUID perfectGem = PrefabGUID.Empty;
+        PrefabGUID primalJewel = PrefabGUID.Empty;
+
+        foreach (PrefabGUID item in _perfectGems)
+        {
+            int amount = ServerGameManager.GetInventoryItemCount(station, item);
+
+            if (amount > 0)
+            {
+                // Core.Log.LogWarning($"Found {amount} {item.GetPrefabName()} in gemcutter...");
+                perfectGem = item;
+                break;
+            }
+        }
+
+        if (_perfectGemPrimals.TryGetValue(perfectGem, out PrefabGUID primalJewelTemplate) && ServerGameManager.TryRemoveInventoryItem(station, perfectGem, 1))
+        {
+            // Core.Log.LogWarning($"Removed {perfectGem.GetPrefabName()} from gemcutter, set primal jewel template - {primalJewelTemplate.GetPrefabName()}");
+            primalJewel = primalJewelTemplate;
+        }
+
         if (ServerGameManager.TryRemoveInventoryItem(inventory, _itemJewelTemplate, 1))
         {
-            PrefabGUID primalJewel = _jewelTemplates.ElementAt(_random.Next(_jewelTemplates.Count));
+            if (!primalJewel.HasValue()) primalJewel = _jewelTemplates.ElementAt(_random.Next(_jewelTemplates.Count));
+
+            // PrefabGUID spellSchoolPrefabGuid = JewelSpawnSystemPatch.JewelSpellSchool.TryGetValue(primalJewel, out PrefabGUID spellSchool) ? spellSchool : PrefabGUID.Empty;
+            // var jewelAbilities = JewelSpawnSystemPatch.JewelToSpellsMapping[primalJewel];
+            // PrefabGUID abilityPrefabGuid = jewelAbilities.ElementAt(_random.Next(jewelAbilities.Count));
 
             AddItemResponse addResponse = ServerGameManager.TryAddInventoryItem(inventory, primalJewel, 1);
             if (addResponse.Success && addResponse.NewEntity.TryGetComponent(out JewelInstance jewelInstance))
@@ -200,12 +250,25 @@ internal static class ReactToInventoryChangedSystemPatch
 
                 JewelSpawnSystem.UninitializedJewelAbility uninitializedJewel = new()
                 {
-                    AbilityGuid = jewelInstance.Ability.HasValue() ? jewelInstance.Ability : jewelInstance.OverrideAbilityType,
+                    AbilityGuid =  PrefabGUID.Empty,
                     JewelEntity = jewelEntity,
                     JewelTier = jewelInstance.TierIndex
                 };
 
-                JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false);
+                JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false); // no idea why the tooltip only shows up right away when this is outside the try block compared to only after closing-opening gem cutter inventory if using try block but moving on x_x
+
+                /*
+                try
+                {
+                    // Unity.Mathematics.Random random = new();
+                    // JewelSpawnSystem.InitializeJewelOnSpawn(jewelEntity, ref random);
+                    // JewelSpawnSystem.InitializeSpawnedJewel(uninitializedJewel, false);
+                }
+                catch
+                {
+                    // Core.Log.LogInfo($"InitializeSpawnedJewel() try-catch - {ex}");
+                }
+                */
             }
         }
     }

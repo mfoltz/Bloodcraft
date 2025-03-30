@@ -16,7 +16,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
 {
     static readonly bool _professions = ConfigService.ProfessionSystem;
 
-    const int BASE_FISHING_XP = 100;
+    const int BASE_PROFESSION_XP = 100;
     const float SCT_DELAY = 0.75f;
 
     static readonly PrefabGUID _fishingTravelToTarget = new(-1130746976);
@@ -64,7 +64,7 @@ internal static class CreateGameplayEventOnDestroySystemPatch
 
                         float delay = SCT_DELAY;
 
-                        ProfessionSystem.SetProfession(target, playerCharacter, steamId, BASE_FISHING_XP * multiplier, handler, ref delay);
+                        ProfessionSystem.SetProfession(target, playerCharacter, steamId, BASE_PROFESSION_XP * multiplier, handler, ref delay);
                         ProfessionSystem.GiveProfessionBonus(target, prefabGuid, playerCharacter, userEntity, user, steamId, handler, delay);
                     }
                 }

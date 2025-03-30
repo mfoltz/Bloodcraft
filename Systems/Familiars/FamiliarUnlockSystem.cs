@@ -6,6 +6,9 @@ using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 
 namespace Bloodcraft.Systems.Familiars;
 internal static class FamiliarUnlockSystem
@@ -20,9 +23,7 @@ internal static class FamiliarUnlockSystem
 
     static readonly bool _shareUnlocks = ConfigService.ShareUnlocks;
     static readonly bool _allowVBloods = ConfigService.AllowVBloods;
-    static readonly bool _allowMinions = ConfigService.AllowMinions;
 
-    // static readonly PrefabGUID _shinyUnlockBuff = new(620130895);
     static readonly PrefabGUID _familiarUnlockBuff = new(104224016);
 
     public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
@@ -42,7 +43,7 @@ internal static class FamiliarUnlockSystem
         new(-1584807109) // CHAR_Undead_SkeletonSoldier_Withered
     ];
 
-    public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexMap = new()
+    public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexes = new()
     {
         { new(348724578), "#A020F0" },   // ignite purple (Hex: A020F0)
         { new(-1576512627), "#FFD700" },  // static yellow (Hex: FFD700)
@@ -50,6 +51,16 @@ internal static class FamiliarUnlockSystem
         { new(1723455773), "#008080" },   // weaken teal (Hex: 008080)
         { new(27300215), "#00FFFF" },     // chill cyan (Hex: 00FFFF)
         { new(-325758519), "#00FF00" }    // condemn green (Hex: 00FF00)
+    };
+
+    public static readonly Dictionary<PrefabGUID, string> ShinyBuffSpellSchools = new()
+    {
+        { new(348724578), "<color=#A020F0>Chaos</color>" },   // ignite purple (Hex: A020F0)
+        { new(-1576512627), "<color=#FFD700>Storm</color>" },  // static yellow (Hex: FFD700)
+        { new(-1246704569), "<color=#FF0000>Blood</color>" },  // leech red (Hex: FF0000)
+        { new(1723455773), "<color=#008080>Illusion</color>" },   // weaken teal (Hex: 008080)
+        { new(27300215), "<color=#00FFFF>Frost</color>" },       // chill cyan (Hex: 00FFFF)
+        { new(-325758519), "<color=#00FF00>Unholy</color>" }    // condemn green (Hex: 00FF00)
     };
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
@@ -61,13 +72,14 @@ internal static class FamiliarUnlockSystem
         if (target.TryGetComponent(out PrefabGUID targetPrefabGuid) && target.TryGetComponent(out EntityCategory targetCategory))
         {
             string targetPrefabName = targetPrefabGuid.GetPrefabName();
+            bool isVBloodOrGateBoss = target.IsVBloodOrGateBoss();
 
             if (!ValidTarget(targetPrefabName, targetPrefabGuid, targetCategory)) return;
-            else if (!target.IsVBloodOrGateBoss() && (int)targetCategory.UnitCategory < 5)
+            else if (!isVBloodOrGateBoss && (int)targetCategory.UnitCategory < 5)
             {
                 HandleRoll(_unitUnlockChance, targetPrefabGuid, source);
             }
-            else if (_allowVBloods && (target.IsVBlood() || target.IsGateBoss()))
+            else if (_allowVBloods && isVBloodOrGateBoss)
             {
                 HandleRoll(_vBloodUnlockChance, targetPrefabGuid, source);
             }
@@ -95,7 +107,7 @@ internal static class FamiliarUnlockSystem
     }
     static void HandleRoll(float dropChance, PrefabGUID targetPrefabGuid, Entity playerCharacter)
     {
-        if (RollForChance(dropChance))
+        if (Misc.RollForChance(dropChance))
         {
             HandleUnlock(targetPrefabGuid, playerCharacter);
         }
@@ -106,7 +118,7 @@ internal static class FamiliarUnlockSystem
         ulong steamId = user.PlatformId;
         int famKey = targetPrefabGuid.GuidHash;
 
-        FamiliarUnlocksData data = FamiliarUnlocksManager.LoadFamiliarUnlocksData(steamId);
+        FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
         string lastListName = data.UnlockedFamiliars.Keys.LastOrDefault();
 
         if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
@@ -137,11 +149,11 @@ internal static class FamiliarUnlockSystem
         {
             List<int> currentList = data.UnlockedFamiliars[lastListName];
             currentList.Add(famKey);
-            FamiliarUnlocksManager.SaveFamiliarUnlocksData(steamId, data);
+            SaveFamiliarUnlocksData(steamId, data);
 
-            FamiliarExperienceData famData = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
-            famData.FamiliarExperience[famKey] = new(FamiliarSummonSystem.BASE_LEVEL, Progression.ConvertLevelToXp(FamiliarSummonSystem.BASE_LEVEL));
-            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, famData);
+            FamiliarExperienceData famData = LoadFamiliarExperienceData(steamId);
+            famData.FamiliarExperience[famKey] = new(FamiliarBindingSystem.BASE_LEVEL, Progression.ConvertLevelToXp(FamiliarBindingSystem.BASE_LEVEL));
+            SaveFamiliarExperienceData(steamId, famData);
 
             isShiny = HandleShiny(famKey, steamId, _shinyChance);
             HandleFamiliarUnlockBuff(playerCharacter);
@@ -162,13 +174,14 @@ internal static class FamiliarUnlockSystem
     }
     public static bool HandleShiny(int famKey, ulong steamId, float chance, int choice = -1)
     {
-        FamiliarBuffsData buffsData = FamiliarBuffsManager.LoadFamiliarBuffsData(steamId);
-        if (chance < 1f && RollForChance(chance)) // roll
+        FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
+
+        if (chance < 1f && Misc.RollForChance(chance))
         {
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
-                famBuffs.Add(ShinyBuffColorHexMap.ElementAt(_random.Next(ShinyBuffColorHexMap.Count)).Key.GuidHash);
+                famBuffs.Add(ShinyBuffColorHexes.ElementAt(_random.Next(ShinyBuffColorHexes.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
@@ -176,7 +189,7 @@ internal static class FamiliarUnlockSystem
                 return false;
             }
 
-            FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
+            SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
         else if (chance >= 1f && choice == -1)
@@ -184,7 +197,7 @@ internal static class FamiliarUnlockSystem
             if (!buffsData.FamiliarBuffs.ContainsKey(famKey))
             {
                 List<int> famBuffs = [];
-                famBuffs.Add(ShinyBuffColorHexMap.ElementAt(_random.Next(ShinyBuffColorHexMap.Count)).Key.GuidHash);
+                famBuffs.Add(ShinyBuffColorHexes.ElementAt(_random.Next(ShinyBuffColorHexes.Count)).Key.GuidHash);
                 buffsData.FamiliarBuffs[famKey] = famBuffs;
             }
             else if (buffsData.FamiliarBuffs.ContainsKey(famKey))
@@ -192,7 +205,7 @@ internal static class FamiliarUnlockSystem
                 return false;
             }
 
-            FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
+            SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
         else if (chance >= 1f && choice != -1)
@@ -208,16 +221,11 @@ internal static class FamiliarUnlockSystem
                 buffsData.FamiliarBuffs[famKey][0] = choice;
             }
 
-            FamiliarBuffsManager.SaveFamiliarBuffsData(steamId, buffsData);
+            SaveFamiliarBuffsData(steamId, buffsData);
             return true;
         }
 
         return false;
-    }
-    static bool RollForChance(float chance)
-    {
-        // float roll = (float)_random.NextDouble();
-        return _random.NextDouble() < chance;
     }
     static void HandleFamiliarUnlockBuff(Entity playerCharacter)
     {

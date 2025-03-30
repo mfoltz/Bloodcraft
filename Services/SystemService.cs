@@ -1,10 +1,11 @@
 ﻿using Il2CppInterop.Runtime;
 using ProjectM;
+using ProjectM.CastleBuilding;
 using ProjectM.Gameplay.Systems;
-using ProjectM.Gameplay.WarEvents;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using ProjectM.Shared.Systems;
+using ProjectM.Tiles;
 using Unity.Entities;
 
 namespace Bloodcraft.Services;
@@ -70,7 +71,21 @@ internal class SystemService(World world)
     public StatChangeSystem StatChangeSystem => _statChangeSystem ??= GetSystem<StatChangeSystem>();
 
     NetworkIdSystem.Singleton _networkIdSystem_Singleton;
-    public NetworkIdSystem.Singleton NetworkIdSystem => _networkIdSystem_Singleton = ServerScriptMapper.GetSingleton<NetworkIdSystem.Singleton>();
+    public NetworkIdSystem.Singleton NetworkIdSystem
+    {
+        get
+        {
+            if (_networkIdSystem_Singleton.Equals(default(NetworkIdSystem.Singleton)))
+            {
+                _networkIdSystem_Singleton = GetSingleton<NetworkIdSystem.Singleton>();
+            }
+
+            return _networkIdSystem_Singleton;
+        }
+    }
+
+    GenerateCastleSystem _generateCastleSystem;
+    public GenerateCastleSystem GenerateCastleSystem => _generateCastleSystem ??= GetOrCreateSystem<GenerateCastleSystem>();
 
     ServerBootstrapSystem _serverBootstrapSystem;
     public ServerBootstrapSystem ServerBootstrapSystem => _serverBootstrapSystem ??= GetSystem<ServerBootstrapSystem>();
@@ -116,8 +131,22 @@ internal class SystemService(World world)
 
     MapZoneCollectionSystem _mapZoneCollectionSystem;
     public MapZoneCollectionSystem MapZoneCollectionSystem => _mapZoneCollectionSystem ??= GetSystem<MapZoneCollectionSystem>();
+
+    UserActivityGridSystem _userActivityGridSystem;
+    public UserActivityGridSystem UserActivityGridSystem => _userActivityGridSystem ??= GetSystem<UserActivityGridSystem>();
+
+    ServantPowerSystem _servantPowerSystem;
+    public ServantPowerSystem ServantPowerSystem => _servantPowerSystem ??= GetSystem<ServantPowerSystem>();
     T GetSystem<T>() where T : ComponentSystemBase
     {
-        return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"Failed to get {Il2CppType.Of<T>().FullName} from the Server...");
+        return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get ({Il2CppType.Of<T>().FullName})");
+    }
+    T GetOrCreateSystem<T>() where T : ComponentSystemBase
+    {
+        return _world.GetOrCreateSystemManaged<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get or create ({Il2CppType.Of<T>().FullName})");
+    }
+    T GetSingleton<T>() // where T : ComponentSystemBase
+    {
+        return ServerScriptMapper.GetSingleton<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get singleton ({Il2CppType.Of<T>().FullName})");
     }
 }

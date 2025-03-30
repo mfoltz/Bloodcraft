@@ -70,7 +70,7 @@ internal static class ProfessionHandlerFactory
                     return new FishingHandler();
                 if (itemTypeName.Contains("plant") || itemTypeName.Contains("trippyshroom"))
                     return new HarvestingHandler();
-                if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable") || itemTypeName.Contains("duskcaller"))
+                if (itemTypeName.Contains("canteen") || itemTypeName.Contains("potion") || itemTypeName.Contains("bottle") || itemTypeName.Contains("flask") || itemTypeName.Contains("consumable") || itemTypeName.Contains("duskcaller") || itemTypeName.Contains("onyxtear"))
                     return new AlchemyHandler();
                 else
                     return null;

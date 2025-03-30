@@ -1,4 +1,5 @@
 using Bloodcraft.Systems.Familiars;
+using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -9,20 +10,25 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
-using static Bloodcraft.Utilities.Misc;
+using static Bloodcraft.Utilities.EntityQueries;
+using static Bloodcraft.Utilities.Familiars;
 
 namespace Bloodcraft.Services;
-internal class PlayerService // this is basically a worse version of the PlayerService from KindredCommands, if you're here looking for good examples to follow :p
+internal class PlayerService
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    // static readonly Regex _regex = new(@"^\d+");
+    static readonly bool _leveling = ConfigService.LevelingSystem;
 
-    static readonly WaitForSeconds _delay = new(60f);
+    const float START_DELAY = 30f;
+    const float ROUTINE_DELAY = 60f;
+
+    static readonly WaitForSeconds _startDelay = new(START_DELAY);
+    static readonly WaitForSeconds _delay = new(ROUTINE_DELAY);
 
     static readonly ComponentType[] _userComponent =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<User>()),
+        ComponentType.ReadOnly(Il2CppType.Of<User>())
     ];
 
     static readonly ComponentType[] _familiarComponents =
@@ -32,16 +38,22 @@ internal class PlayerService // this is basically a worse version of the PlayerS
         ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>())
     ];
 
+    static EntityQuery _onlineUserQuery;
     static EntityQuery _userQuery;
-    static EntityQuery _allUsersQuery;
+    // static EntityQuery _familiarQuery;
 
-    static bool _migratedPlayerBools = false;
-    static bool _migratedFamiliarPrestige = false;
-    static bool _purgedRemaining = false;
-    static bool _playersCached = false;
+    static bool _shouldMigrate = true;
+    static bool _shouldDestroy = true;
+    static bool _rebuildCache = true;
 
-    public static readonly ConcurrentDictionary<ulong, PlayerInfo> PlayerCache = [];
-    public static readonly ConcurrentDictionary<ulong, PlayerInfo> OnlineCache = [];
+    static readonly ConcurrentDictionary<ulong, PlayerInfo> _steamIdPlayerInfoCache = [];
+    public static IReadOnlyDictionary<ulong, PlayerInfo> SteamIdPlayerInfoCache => _steamIdPlayerInfoCache;
+
+    static readonly ConcurrentDictionary<ulong, PlayerInfo> _steamIdOnlinePlayerInfoCache = [];
+    public static IReadOnlyDictionary<ulong, PlayerInfo> SteamIdOnlinePlayerInfoCache => _steamIdOnlinePlayerInfoCache;
+
+    static readonly ConcurrentDictionary<int, ulong> _userIndexSteamIdCache = [];
+    public static IReadOnlyDictionary<int, ulong> UserIndexSteamIdCache => _userIndexSteamIdCache;
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -50,172 +62,185 @@ internal class PlayerService // this is basically a worse version of the PlayerS
     }
     public PlayerService()
     {
-        EntityQueryDesc entityQueryDesc = new()
+        _userQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = _userComponent,
             Options = EntityQueryOptions.IncludeDisabled
-        };
+        });
 
-        _allUsersQuery = EntityManager.CreateEntityQuery(entityQueryDesc);
-
-        entityQueryDesc = new()
+        _onlineUserQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = _userComponent,
-        };
+        });
 
-        _userQuery = EntityManager.CreateEntityQuery(entityQueryDesc);
+        /*
+        _familiarQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
+        {
+            All = _familiarComponents,
+            Options = EntityQueryOptions.IncludeDisabled
+        });
+        */
 
         PlayerServiceRoutine().Start();
     }
+
+    static readonly int[] _typeIndices = [0];
     static IEnumerator PlayerServiceRoutine()
     {
+        // yield return _startDelay;
+
+        if (_rebuildCache) BuildPlayerInfoCache();
+        if (_shouldDestroy) DestroyFamiliars();
+        if (_shouldMigrate) MigrateFamiliarPrestigeData();
+
         while (true)
         {
-            OnlineCache.Clear();
-            var players = Queries.GetEntitiesEnumerable(_playersCached ? _userQuery : _allUsersQuery);
+            _steamIdOnlinePlayerInfoCache.Clear();
+            _userIndexSteamIdCache.Clear();
 
-            players
-                .Select(userEntity =>
+            yield return QueryResultStreamAsync(
+                _onlineUserQuery,
+                _userComponent,
+                _typeIndices,
+                stream =>
                 {
-                    User user = userEntity.Read<User>();
-                    string playerName = user.CharacterName.Value;
-                    ulong steamId = user.PlatformId;
-                    Entity character = user.LocalCharacter.GetEntityOnServer();
-
-                    return new
+                    try
                     {
-                        SteamIdEntry = new KeyValuePair<ulong, PlayerInfo>(
-                            steamId, new PlayerInfo(userEntity, character, user))
-                    };
-                })
-                .SelectMany(entry => new[] { entry.SteamIdEntry })
-                .GroupBy(entry => entry.Key)
-                .ToDictionary(group => group.Key, group => group.First().Value)
-                .ForEach(kvp =>
-                {
-                    PlayerCache[kvp.Key] = kvp.Value;
-
-                    if (kvp.Value.User.IsConnected)
-                    {
-                        OnlineCache[kvp.Key] = kvp.Value;
-                    }
-                });
-
-            // should probably organize elsewhere, just convenient to put here for now since using PlayerInfo for it
-            if (!_migratedPlayerBools && File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
-            {
-                List<PlayerInfo> playerCache = new(PlayerCache.Values);
-
-                foreach (PlayerInfo playerInfo in playerCache)
-                {
-                    ulong steamId = playerInfo.User.PlatformId;
-
-                    if (PlayerBoolsManager.TryMigrateBools(steamId))
-                    {
-                        // Core.Log.LogInfo($"Migrated player bools for {playerInfo.User.CharacterName.Value}! (should only happen once per player)");
-                    }
-                    else
-                    {
-                        // Core.Log.LogInfo($"No bools to migrate for {playerInfo.User.CharacterName.Value}! (already migrated or didn't have bools data before now)");
-                    }
-                }
-
-                if (!DataService.PlayerDictionaries._playerBools.Any())
-                {
-                    if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
-                    {
-                        // File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
-                        // Core.Log.LogInfo($"No entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
-                    }
-                }
-                else
-                {
-                    // Core.Log.LogInfo($"Entries remaining in old bools file: {DataService.PlayerDictionaries._playerBools.Count}");
-
-                    if (File.Exists(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson))
-                    {
-                        // File.Delete(DataService.PlayerPersistence.JsonFilePaths.PlayerBoolsJson);
-                    }
-                }
-
-                _migratedPlayerBools = true;
-            }
-            
-            if (!_migratedFamiliarPrestige)
-            {
-                List<PlayerInfo> playerCache = new(PlayerCache.Values);
-
-                foreach (PlayerInfo playerInfo in playerCache)
-                {
-                    var oldPrestigeData = FamiliarPrestigeManager.LoadFamiliarPrestigeData(playerInfo.User.PlatformId);
-                    if (oldPrestigeData != null) FamiliarPrestigeManager_V2.MigrateToV2(oldPrestigeData, playerInfo.User.PlatformId);
-                }
-
-                /*
-                string path = ConfigService.ConfigInitialization.DirectoryPaths[7];
-                foreach (string file in Directory.EnumerateFiles(path, "*.json"))
-                {
-                    string fileName = Path.GetFileNameWithoutExtension(file);
-                    Match match = _regex.Match(fileName);
-
-                    if (match.Success)
-                    {
-                        ulong steamId = ulong.Parse(match.Value);
-                        var oldPrestigeData = FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId);
-
-                        if (oldPrestigeData != null) FamiliarPrestigeManager_V2.MigrateToV2(oldPrestigeData, steamId);
-                    }
-                }
-                */
-
-                _migratedFamiliarPrestige = true;
-            }
-
-            if (!_purgedRemaining)
-            {
-                EntityQuery familiarsQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-                {
-                    All = _familiarComponents,
-                    Options = EntityQueryOptions.IncludeDisabled
-                });
-
-                NativeArray<Entity> entities = familiarsQuery.ToEntityArray(Allocator.TempJob);
-                Entity killer = PlayerCache.Values.FirstOrDefault().CharEntity;
-
-                try
-                {
-                    if (killer.Exists())
-                    {
-                        foreach (Entity entity in entities)
+                        using (stream)
                         {
-                            if (!entity.Exists()) continue;
+                            foreach (QueryResult result in stream.GetResults())
+                            {
+                                Entity userEntity = result.Entity;
+                                User user = result.ResolveComponentData<User>();
+                                Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
 
-                            FamiliarSummonSystem.RemoveDropTable(entity);
-                            StatChangeUtility.KillOrDestroyEntity(EntityManager, entity, killer, killer, Core.ServerTime, StatChangeReason.Default, true);
+                                ulong steamId = user.PlatformId;
+                                PlayerInfo playerInfo = new(userEntity, playerCharacter, user);
+
+                                _steamIdPlayerInfoCache[steamId] = playerInfo;
+
+                                if (user.IsConnected)
+                                {
+                                    _steamIdOnlinePlayerInfoCache[steamId] = playerInfo;
+                                    _userIndexSteamIdCache[user.Index] = steamId;
+                                }
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Core.Log.LogWarning($"[PlayerService] PlayerServiceRoutine() - {ex}");
+                    }
                 }
-                catch (Exception e)
-                {
-                    Core.Log.LogWarning($"Error cleaning remaining familiars: {e}");
-                }
-                finally
-                {
-                    entities.Dispose();
-                    familiarsQuery.Dispose();
-
-                    _purgedRemaining = true;
-                }
-            }
-
-            if (!_playersCached) _playersCached = true;
+            );
 
             yield return _delay;
         }
     }
+    static void BuildPlayerInfoCache()
+    {
+        NativeArray<Entity> userEntities = _userQuery.ToEntityArray(Allocator.Temp);
+
+        try
+        {
+            foreach (Entity userEntity in userEntities)
+            {
+                if (!userEntity.Exists()) continue;
+
+                User user = userEntity.GetUser();
+                Entity character = user.LocalCharacter.GetEntityOnServer();
+
+                ulong steamId = user.PlatformId;
+                string playerName = user.CharacterName.Value;
+
+                _steamIdPlayerInfoCache[steamId] = new PlayerInfo(userEntity, character, user);
+
+                if (user.IsConnected)
+                {
+                    _steamIdOnlinePlayerInfoCache[steamId] = new PlayerInfo(userEntity, character, user);
+                    _userIndexSteamIdCache[user.Index] = steamId;
+                }
+
+                if (_leveling)
+                {
+                    int level = LevelingSystem.GetLevel(steamId);
+                    bool hasPrestiged = PrestigeManager.HasPrestiged(steamId);
+                    Progression.PlayerProgressionCacheManager.UpdatePlayerProgression(steamId, level, hasPrestiged);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogWarning($"[PlayerService] BuildPlayerInfoCache() - {ex}");
+        }
+        finally
+        {
+            userEntities.Dispose();
+        }
+
+        _rebuildCache = false;
+    }
+    static void DestroyFamiliars()
+    {
+        try
+        {
+            foreach (var keyValuePair in SteamIdPlayerInfoCache)
+            {
+                ulong steamId = keyValuePair.Key;
+                Entity playerCharacter = keyValuePair.Value.CharEntity;
+
+                ActiveFamiliarData activeFamiliarData = ActiveFamiliarManager.GetActiveFamiliarData(steamId);
+
+                Entity servant = activeFamiliarData.Servant;
+                Entity familiar = activeFamiliarData.Familiar;
+
+                if (servant.Exists())
+                {
+                    FamiliarBindingSystem.RemoveDropTable(servant);
+                    StatChangeUtility.KillOrDestroyEntity(EntityManager, servant, playerCharacter, playerCharacter, Core.ServerTime, StatChangeReason.Default, true);
+                }
+
+                if (familiar.Exists())
+                {
+                    FamiliarBindingSystem.RemoveDropTable(familiar);
+                    StatChangeUtility.KillOrDestroyEntity(EntityManager, familiar, playerCharacter, playerCharacter, Core.ServerTime, StatChangeReason.Default, true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogWarning($"[PlayerService] DestroyFamiliars() - {ex}");
+        }
+
+        _shouldDestroy = false;
+    }
+    static void MigrateFamiliarPrestigeData()
+    {
+        foreach (var keyValuePair in SteamIdPlayerInfoCache)
+        {
+            ulong steamId = keyValuePair.Key;
+
+            var oldPrestigeData = FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId);
+            if (oldPrestigeData != null) FamiliarPrestigeManager_V2.MigrateToV2(oldPrestigeData, steamId);
+        }
+
+        _shouldMigrate = false;
+    }
+    public static void HandleConnection(ulong steamId, PlayerInfo playerInfo)
+    {
+        _steamIdOnlinePlayerInfoCache.TryAdd(steamId, playerInfo);
+        _steamIdPlayerInfoCache.TryAdd(steamId, playerInfo);
+    }
+    public static void HandleDisconnection(ulong steamId)
+    {
+        _steamIdOnlinePlayerInfoCache.TryRemove(steamId, out _);
+    }
     public static PlayerInfo GetPlayerInfo(string playerName)
     {
-        PlayerInfo playerInfo = PlayerCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == playerName.ToLower()).Value;
-        return playerInfo;
+        return SteamIdPlayerInfoCache.FirstOrDefault(kvp => kvp.Value.User.CharacterName.Value.ToLower() == playerName.ToLower()).Value;
+    }
+    public static ulong? GetSteamId(int userIndex)
+    {
+        return UserIndexSteamIdCache.TryGetValue(userIndex, out ulong steamId) ? steamId : null;
     }
 }

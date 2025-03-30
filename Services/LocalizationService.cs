@@ -1,7 +1,9 @@
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.UI;
 using Stunlock.Core;
+using Stunlock.Localization;
 using System.Reflection;
 using System.Text.Json;
 using Unity.Collections;
@@ -37,28 +39,55 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     static readonly string _language = ConfigService.LanguageLocalization;
     static readonly Dictionary<string, string> _localizedLanguages = new()
     {
-        {"English", "Bloodcraft.Localization.English.json"},
-        {"German", "Bloodcraft.Localization.German.json"},
-        {"French", "Bloodcraft.Localization.French.json"},
-        {"Spanish", "Bloodcraft.Localization.Spanish.json"},
-        {"Italian", "Bloodcraft.Localization.Italian.json"},
-        {"Japanese", "Bloodcraft.Localization.Japanese.json"},
-        {"Koreana", "Bloodcraft.Localization.Koreana.json"},
-        {"Portuguese", "Bloodcraft.Localization.Portuguese.json"},
-        {"Russian", "Bloodcraft.Localization.Russian.json"},
-        {"SimplifiedChinese", "Bloodcraft.Localization.SChinese.json"},
-        {"TraditionalChinese", "Bloodcraft.Localization.TChinese.json"},
-        {"Hungarian", "Bloodcraft.Localization.Hungarian.json"},
-        {"Latam", "Bloodcraft.Localization.Latam.json"},
-        {"Polish", "Bloodcraft.Localization.Polish.json"},
-        {"Thai", "Bloodcraft.Localization.Thai.json"},
-        {"Turkish", "Bloodcraft.Localization.Turkish.json"},
-        {"Vietnamese", "Bloodcraft.Localization.Vietnamese.json"},
-        {"Brazilian", "Bloodcraft.Localization.Brazilian.json"}
+        {"English", "Bloodcraft.Resources.Localization.English.json"},
+        {"German", "Bloodcraft.Resources.Localization.German.json"},
+        {"French", "Bloodcraft.Resources.Localization.French.json"},
+        {"Spanish", "Bloodcraft.Resources.Localization.Spanish.json"},
+        {"Italian", "Bloodcraft.Resources.Localization.Italian.json"},
+        {"Japanese", "Bloodcraft.Resources.Localization.Japanese.json"},
+        {"Koreana", "Bloodcraft.Resources.Localization.Koreana.json"},
+        {"Portuguese", "Bloodcraft.Resources.Localization.Portuguese.json"},
+        {"Russian", "Bloodcraft.Resources.Localization.Russian.json"},
+        {"SimplifiedChinese", "Bloodcraft.Resources.Localization.SChinese.json"},
+        {"TraditionalChinese", "Bloodcraft.Resources.Localization.TChinese.json"},
+        {"Hungarian", "Bloodcraft.Resources.Localization.Hungarian.json"},
+        {"Latam", "Bloodcraft.Resources.Localization.Latam.json"},
+        {"Polish", "Bloodcraft.Resources.Localization.Polish.json"},
+        {"Thai", "Bloodcraft.Resources.Localization.Thai.json"},
+        {"Turkish", "Bloodcraft.Resources.Localization.Turkish.json"},
+        {"Vietnamese", "Bloodcraft.Resources.Localization.Vietnamese.json"},
+        {"Brazilian", "Bloodcraft.Resources.Localization.Brazilian.json"}
     };
 
     static readonly Dictionary<int, string> _guidHashesToGuidStrings = [];
     static readonly Dictionary<string, string> _guidStringsToLocalizedNames = [];
+
+    static readonly Dictionary<PrefabGUID, string> _prefabGuidsToNames = new() // based off of converter (FoundPrimal) from KindredCommands, will add other names over time for villagers and others maybe >_>
+    {
+        {Prefabs.CHAR_Bandit_Chaosarrow_GateBoss_Minor, "Primal Lidia"},
+        {Prefabs.CHAR_Bandit_Foreman_VBlood_GateBoss_Minor, "Primal Rufus"},
+        {Prefabs.CHAR_Bandit_StoneBreaker_VBlood_GateBoss_Minor, "Primal Errol"},
+        {Prefabs.CHAR_Bandit_Tourok_GateBoss_Minor, "Primal Quincey"},
+        {Prefabs.CHAR_Frostarrow_GateBoss_Minor, "Primal Keely"},
+        {Prefabs.CHAR_Gloomrot_Purifier_VBlood_GateBoss_Major, "Primal Angram"},
+        {Prefabs.CHAR_Gloomrot_Voltage_VBlood_GateBoss_Major, "Primal Domina"},
+        {Prefabs.CHAR_Militia_Guard_VBlood_GateBoss_Minor, "Primal Vincent"},
+        {Prefabs.CHAR_Militia_Leader_VBlood_GateBoss_Major, "Primal Octavian"},
+        {Prefabs.CHAR_Poloma_VBlood_GateBoss_Minor, "Primal Poloma"},
+        {Prefabs.CHAR_Spider_Queen_VBlood_GateBoss_Major, "Primal Ungora"},
+        {Prefabs.CHAR_Undead_BishopOfDeath_VBlood_GateBoss_Minor, "Primal Goreswine"},
+        {Prefabs.CHAR_Undead_BishopOfShadows_VBlood_GateBoss_Major, "Primal Leandra"},
+        {Prefabs.CHAR_Undead_Infiltrator_VBlood_GateBoss_Major, "Primal Bane"},
+        {Prefabs.CHAR_Undead_Leader_Vblood_GateBoss_Minor, "Primal Kriig"},
+        {Prefabs.CHAR_Undead_ZealousCultist_VBlood_GateBoss_Major, "Primal Foulrot"},
+        {Prefabs.CHAR_VHunter_Jade_VBlood_GateBoss_Major, "Primal Jade"},
+        {Prefabs.CHAR_VHunter_Leader_GateBoss_Minor, "Primal Tristan"},
+        {Prefabs.CHAR_Villager_CursedWanderer_VBlood_GateBoss_Major, "Primal Ben"},
+        {Prefabs.CHAR_Wendigo_GateBoss_Major, "Primal Frostmaw"},
+        {Prefabs.CHAR_WerewolfChieftain_VBlood_GateBoss_Major, "Primal Willfred"},
+        {Prefabs.CHAR_Winter_Yeti_VBlood_GateBoss_Major, "Primal Terrorclaw"}
+    };
+
     public LocalizationService()
     {
         InitializeLocalizations();
@@ -70,7 +99,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     }
     static void LoadPrefabHashesToGuidStrings()
     {
-        string resourceName = "Bloodcraft.Localization.Prefabs.json";
+        string resourceName = "Bloodcraft.Resources.Localization.Prefabs.json";
         Assembly assembly = Assembly.GetExecutingAssembly();
 
         Stream stream = assembly.GetManifestResourceStream(resourceName);
@@ -84,7 +113,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     }
     static void LoadGuidStringsToLocalizedNames()
     {
-        string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Localization.English.json";
+        string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Resources.Localization.English.json";
         Assembly assembly = Assembly.GetExecutingAssembly();
 
         Stream stream = assembly.GetManifestResourceStream(resourceName);
@@ -97,7 +126,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
             .ToDictionary(x => x.Guid, x => x.Text)
             .ForEach(kvp => _guidStringsToLocalizedNames[kvp.Key] = kvp.Value);
     }
-    internal static void HandleReply(ChatCommandContext ctx, string message)
+    public static void HandleReply(ChatCommandContext ctx, string message)
     {
         ctx.Reply(message);
     }
@@ -116,7 +145,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         EventId = NetworkEvents.EventId_ChatMessageServerEvent,
         IsDebugEvent = false,
     };
-    internal static void SendToClient(Entity playerCharacter, Entity userEntity, string messageWithMAC) // for later
+    public static void SendToClient(Entity playerCharacter, Entity userEntity, string messageWithMAC) // for later maybe also should be moved >_>
     {
         ChatMessageServerEvent chatMessageEvent = new()
         {
@@ -132,7 +161,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         networkEntity.Write(_networkEventType);
         networkEntity.Write(chatMessageEvent);
     }
-    internal static void HandleServerReply(EntityManager entityManager, User user, string message)
+    public static void HandleServerReply(EntityManager entityManager, User user, string message)
     {
         ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
     }
@@ -145,9 +174,9 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
 
         return string.Empty;
     }
-    public static string GetGuidString(PrefabGUID prefabGUID)
+    public static string GetGuidString(PrefabGUID prefabGuid)
     {
-        if (_guidHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out string guidString))
+        if (_guidHashesToGuidStrings.TryGetValue(prefabGuid.GuidHash, out string guidString))
         {
             return guidString;
         }
@@ -162,6 +191,11 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         }
 
         return string.Empty;
+    }
+    public static string GetNameFromPrefabGuid(PrefabGUID prefabGuid)
+    {
+        if (_prefabGuidsToNames.TryGetValue(prefabGuid, out string characterName)) return characterName;
+        else return GetNameFromGuidString(GetGuidString(prefabGuid));
     }
 
     /* this works fine for languages without heavy reliance on order of phrases, at some point will refactor responses to use strings from user-made language file but until then this is best bet

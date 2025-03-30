@@ -95,7 +95,7 @@ internal static class WeaponManager
 
                 var classes = steamId.TryGetPlayerClasses(out var classData) ? classData : [];
                 var (WeaponStats, _) = classes.First().Value; // get class to check if stat allowed
-                List<WeaponStatType> weaponStatTypes = WeaponStats.Select(value => (WeaponStatType)value).ToList();
+                List<WeaponStatType> weaponStatTypes = [..WeaponStats.Select(value => (WeaponStatType)value)];
 
                 if (!weaponStatTypes.Contains(statType)) // hard synergy stat check
                 {
@@ -151,46 +151,25 @@ internal static class WeaponManager
             }
 
             var buffer = buffEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
+
             foreach (WeaponStatType weaponStatType in bonuses)
             {
                 float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, weaponStatType);
-                bool found = false;
+                UnitStatType statType = WeaponStatTypes[weaponStatType];
 
-                for (int i = 0; i < buffer.Length; i++)
+                ModifyUnitStatBuff_DOTS newStatBuff = new()
                 {
-                    ModifyUnitStatBuff_DOTS statBuff = buffer[i];
-                    if (statBuff.StatType.Equals(WeaponStatTypes[weaponStatType])) // Assuming WeaponStatType can be cast to UnitStatType
-                    {
-                        if (weaponStatType.Equals(WeaponStatType.MovementSpeed))
-                        {
-                            break;
-                        }
+                    StatType = statType,
+                    ModificationType = !statType.Equals(UnitStatType.MovementSpeed) ? ModificationType.AddToBase : ModificationType.MultiplyBaseAdd,
+                    Value = scaledBonus,
+                    Modifier = 1,
+                    IncreaseByStacks = false,
+                    ValueByStacks = 0,
+                    Priority = 0,
+                    Id = ModificationIDs.Create().NewModificationId()
+                };
 
-                        statBuff.Value += scaledBonus; // Modify the value accordingly
-                        buffer[i] = statBuff; // Assign the modified struct back to the buffer
-                        found = true;
-
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    UnitStatType statType = WeaponStatTypes[weaponStatType];
-                    ModifyUnitStatBuff_DOTS newStatBuff = new()
-                    {
-                        StatType = statType,
-                        ModificationType = ModificationType.AddToBase,
-                        Value = scaledBonus,
-                        Modifier = 1,
-                        IncreaseByStacks = false,
-                        ValueByStacks = 0,
-                        Priority = 0,
-                        Id = ModificationIDs.Create().NewModificationId()
-                    };
-
-                    buffer.Add(newStatBuff);
-                }
+                buffer.Add(newStatBuff);
             }
         }
     }
@@ -204,7 +183,7 @@ internal static class WeaponManager
             if (_classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
             {
                 var (classWeaponStats, _) = classes.First().Value; // get class to check if stat allowed
-                List<WeaponStatType> weaponStatTypes = classWeaponStats.Select(value => (WeaponStatType)value).ToList();
+                List<WeaponStatType> weaponStatTypes = [..classWeaponStats.Select(value => (WeaponStatType)value)];
 
                 if (weaponStatTypes.Contains(statType))
                 {

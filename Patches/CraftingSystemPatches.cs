@@ -26,6 +26,7 @@ internal static class CraftingSystemPatches
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
 
+    const float BASE_PROFESSION_XP = 50f;
     const float CRAFT_THRESHOLD = 0.975f;
     const float SCT_DELAY = 0.75f;
     const int MAX_PROFESSION_LEVEL = 100;
@@ -35,7 +36,47 @@ internal static class CraftingSystemPatches
     static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> _playerCraftingJobs = [];  
     public static readonly ConcurrentDictionary<ulong, Dictionary<Entity, Dictionary<PrefabGUID, int>>> ValidatedCraftingJobs = [];
 
+    static readonly ConcurrentDictionary<ulong, int> _playerLegendaryCraftingJobs = [];
+    public static readonly ConcurrentDictionary<ulong, int> ValidatedLegendaryCraftingJobs = [];
+
     static readonly Dictionary<Entity, bool> _craftFinished = [];
+
+    /*
+    [HarmonyPatch(typeof(ForgeSystem_Events), nameof(ForgeSystem_Events.OnUpdate))]
+    [HarmonyPrefix]
+    static void Prefix(ForgeSystem_Events __instance)
+    {
+        if (!Core._initialized) return;
+        else if (!_professions && !_quests) return;
+
+        NativeArray<Entity> entities = __instance.EntityQueries[3].ToEntityArray(Allocator.Temp);
+
+        try
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.Has<ForgeEvents.StartRepair>() && entity.TryGetComponent(out FromCharacter fromCharacter))
+                {
+                    ulong steamId = fromCharacter.User.GetSteamId();
+
+                    if (!_playerLegendaryCraftingJobs.ContainsKey(steamId))
+                    {
+                        _playerLegendaryCraftingJobs.TryAdd(steamId, 0);
+                    }
+
+                    _playerLegendaryCraftingJobs[steamId]++;
+                }
+            }
+        }
+        finally
+        {
+            entities.Dispose();
+        }
+
+        entities = __instance.EntityQueries[4].ToEntityArray(Allocator.Temp);
+
+    }
+    */
 
     [HarmonyPatch(typeof(ForgeSystem_Update), nameof(ForgeSystem_Update.OnUpdate))]
     [HarmonyPrefix]
@@ -45,6 +86,7 @@ internal static class CraftingSystemPatches
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -56,7 +98,7 @@ internal static class CraftingSystemPatches
                 Entity userEntity = userOwner.Owner._Entity;
                 User user = userEntity.GetUser();
                 ulong steamId = user.PlatformId;
-
+                
                 Entity itemEntity = forge_Shared.ItemEntity._Entity;
                 PrefabGUID itemPrefab = itemEntity.GetPrefabGuid();
 
@@ -77,8 +119,7 @@ internal static class CraftingSystemPatches
                     if (steamId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, itemPrefab, 1, user);
                     else if (!_professions) continue;
 
-                    float ProfessionValue = 50f;
-                    ProfessionValue *= ProfessionMappings.GetTierMultiplier(itemPrefab);
+                    float professionValue = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefab);
                     IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
 
                     if (handler != null)
@@ -90,14 +131,13 @@ internal static class CraftingSystemPatches
                             Durability durability = itemEntity.Read<Durability>();
                             Durability originalDurability = originalItem.Read<Durability>();
 
-                            // Core.Log.LogInfo($"Legendary Weapon Durabilities: {itemEntity.GetPrefabGuid().GetPrefabName()}/{durability.MaxDurability} | {originalItem.GetPrefabGuid().GetPrefabName()}/{originalDurability.MaxDurability}");
-
                             if (durability.MaxDurability > originalDurability.MaxDurability) continue; // already handled
 
                             float delay = SCT_DELAY;
 
-                            ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, ProfessionValue, handler, ref delay);
-                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity); // need to make sure this works okay for the MUSB_DOTS on legendaries at least, the spell mod parts def not though
+                            // Core.Log.LogWarning($"Handling profession xp for {itemPrefab.GetPrefabName()}");
+                            ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, professionValue, handler, ref delay);
+                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
                         }
                     }
                 }
@@ -186,6 +226,7 @@ internal static class CraftingSystemPatches
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._StartCraftItemEventQuery.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)

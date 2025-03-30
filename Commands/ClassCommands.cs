@@ -4,7 +4,6 @@ using Bloodcraft.Utilities;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
-using UnityEngine.TextCore.Text;
 using VampireCommandFramework;
 using static Bloodcraft.Utilities.Classes;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
@@ -181,7 +180,7 @@ internal static class ClassCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't selected a class or shift spells aren't enabled! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)");
+            LocalizationService.HandleReply(ctx, "You haven't selected a class or you haven't activated shift spells! (<color=white>'.class s [Class]'</color> | <color=white>'.class shift'</color>)");
         }
     }
 
@@ -462,7 +461,7 @@ internal static class ClassCommands
         }
     }
 
-    [Command(name: "iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen", description: "Globally syncs class buffs (removes all then applies from current class) for players if needed.")]
+    [Command(name: "iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen", description: "Globally syncs class buffs (removes all currently configured class buffs if found then applies buffs for current class) for players if needed.")]
     public static void GlobalClassSyncCommand(ChatCommandContext ctx)
     {
         if (!_classes) 
@@ -474,7 +473,7 @@ internal static class ClassCommands
         GlobalSyncClassBuffs(ctx).Start();
     }
 
-    [Command(name: "iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", description: "Globally removes class buffs from players to then facilitate changing class buffs in config.")]
+    [Command(name: "iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", adminOnly: true, usage: ".class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen", description: "Globally removes class buffs from players to facilitate changing class buffs in config.")]
     public static void GlobalClassPurgeCommand(ChatCommandContext ctx)
     {
         if (!_classes)

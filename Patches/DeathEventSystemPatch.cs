@@ -1,16 +1,15 @@
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
-using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
-using static Bloodcraft.Systems.Familiars.FamiliarSummonSystem;
+using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Systems.Familiars.FamiliarBindingSystem;
+using static Bloodcraft.Utilities.Familiars;
 
 namespace Bloodcraft.Patches;
 
@@ -20,7 +19,7 @@ internal static class DeathEventListenerSystemPatch
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
-    static readonly bool _legacies = ConfigService.BloodSystem;
+    static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _professions = ConfigService.ProfessionSystem;
     static readonly bool _allowMinions = ConfigService.FamiliarSystem && ConfigService.AllowMinions;
     public class DeathEventArgs : EventArgs
@@ -28,6 +27,7 @@ internal static class DeathEventListenerSystemPatch
         public Entity Source { get; set; }
         public Entity Target { get; set; }
         public HashSet<Entity> DeathParticipants { get; set; }
+        public float ScrollingTextDelay { get; set; }
     }
     public static event EventHandler<DeathEventArgs> OnDeathEventHandler;
     static void RaiseDeathEvent(DeathEventArgs deathEvent)
@@ -68,7 +68,8 @@ internal static class DeathEventListenerSystemPatch
                         {
                             Source = deathSource,
                             Target = deathEvent.Died,
-                            DeathParticipants = Misc.GetDeathParticipants(deathSource)
+                            DeathParticipants = Progression.GetDeathParticipantsV2(deathSource),
+                            ScrollingTextDelay = 0f
                         };
 
                         if (isMinion)
@@ -83,7 +84,11 @@ internal static class DeathEventListenerSystemPatch
 
                         RaiseDeathEvent(deathArgs);
 
-                        if (_legacies && isFeedKill) BloodSystem.ProcessLegacy(deathArgs.Source, deathArgs.Target);
+                        if (_legacies && isFeedKill)
+                        {
+                            // deathArgs.RefreshStats = false;
+                            BloodSystem.ProcessLegacy(deathArgs);
+                        }
                     }
                 }
                 else if (_professions && deathEvent.Killer.IsPlayer())
@@ -112,17 +117,21 @@ internal static class DeathEventListenerSystemPatch
         ref ComponentLookup<Trader> traderLookup, ref ComponentLookup<UnitLevel> unitLevelLookup, 
         ref ComponentLookup<VBloodConsumeSource> vBloodConsumeSourceLookup)
     {
-        // if (deathEvent.Killer.IsPlayer()) Core.Log.LogInfo($"DeathEvent died - {deathEvent.Died.GetPrefabGuid()}");
-
         if (deathEvent.Killer == deathEvent.Died) return false;
-        else if (_familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity player))
+        else if (_familiars && deathEvent.Died.TryGetFollowedPlayer(out Entity playerCharacter))
         {
-            ulong steamId = player.GetSteamId();
+            ulong steamId = playerCharacter.GetSteamId();
+            bool hasActive = steamId.HasActiveFamiliar();
 
-            if (steamId.TryGetFamiliarActives(out var actives) && actives.FamKey.Equals(deathEvent.Died.GetPrefabGuidHash()))
+            if (hasActive)
             { 
-                // Familiars.UnequipFamiliar(deathEvent.Died);
-                Familiars.ClearFamiliarActives(steamId);
+                Entity familiar = GetActiveFamiliar(playerCharacter);
+
+                if (familiar.Equals(deathEvent.Died))
+                {
+                    FamiliarEquipmentManager.UnequipFamiliar(GetFamiliarServant(playerCharacter));
+                    ActiveFamiliarManager.ResetActiveFamiliarData(steamId);
+                }
             }
 
             return false;
@@ -132,7 +141,7 @@ internal static class DeathEventListenerSystemPatch
             ulong ownerId = match.Key;
 
             PlayerBattleFamiliars[ownerId].Remove(deathEvent.Died);
-            if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(deathEvent.Died)) Familiars.HandleFamiliarMinions(deathEvent.Died);
+            if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(deathEvent.Died)) HandleFamiliarMinions(deathEvent.Died);
 
             if (!PlayerBattleFamiliars[ownerId].Any() && BattleService.Matchmaker.MatchPairs.TryGetMatch(ownerId, out var matchPair))
             {
@@ -142,8 +151,8 @@ internal static class DeathEventListenerSystemPatch
                 {
                     foreach (Entity familiar in PlayerBattleFamiliars[pairedId])
                     {
-                        if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) Familiars.HandleFamiliarMinions(familiar);
-                        if (familiar.Exists()) familiar.Destroy();
+                        if (LinkMinionToOwnerOnSpawnSystemPatch.FamiliarMinions.ContainsKey(familiar)) HandleFamiliarMinions(familiar);
+                        if (familiar.Exists()) familiar.TryDestroy();
                     }
 
                     PlayerBattleFamiliars[pairedId].Clear();

@@ -80,7 +80,7 @@ internal static class LevelingCommands
 
         if (level < 0 || level > ConfigService.MaxLevel)
         {
-            LocalizationService.HandleReply(ctx, $"Level must be between 0 and {ConfigService.MaxLevel}");
+            LocalizationService.HandleReply(ctx, $"Level must be between <color=white>0</color> and <color=white>{ConfigService.MaxLevel}</color>!");
             return;
         }
 
@@ -92,11 +92,43 @@ internal static class LevelingCommands
             steamId.SetPlayerExperience(xpData);
 
             LevelingSystem.SetLevel(playerInfo.CharEntity);
-            LocalizationService.HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>");
+            LocalizationService.HandleReply(ctx, $"Level set to <color=white>{level}</color> for <color=green>{foundUser.CharacterName.Value}</color>!");
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "You haven't earned any experience yet!");
+            LocalizationService.HandleReply(ctx, $"Couldn't find experience data for {foundUser.CharacterName.Value}");
+        }
+    }
+
+    [Command(name: "ignoresharedexperience", shortHand: "ignore", adminOnly: true, usage: ".lvl ignore [Player]", description: "Adds (or removes) player to list of those who are not eligible to receive shared experience.")]
+    public static void IgnoreSharedExperiencePlayerCommand(ChatCommandContext ctx, string name)
+    {
+        if (!ConfigService.LevelingSystem)
+        {
+            LocalizationService.HandleReply(ctx, "Leveling is not enabled.");
+            return;
+        }
+
+        PlayerInfo playerInfo = GetPlayerInfo(name);
+        if (!playerInfo.UserEntity.Exists())
+        {
+            ctx.Reply($"Couldn't find player...");
+            return;
+        }
+
+        if (!DataService.PlayerDictionaries._ignoreSharedExperience.Contains(playerInfo.User.PlatformId))
+        {
+            DataService.PlayerDictionaries._ignoreSharedExperience.Add(playerInfo.User.PlatformId);
+            DataService.PlayerPersistence.SaveIgnoredSharedExperience();
+
+            ctx.Reply($"<color=green>{playerInfo.User.CharacterName.Value}</color> added to the ignore shared experience list!");
+        }
+        else if (DataService.PlayerDictionaries._ignoreSharedExperience.Contains(playerInfo.User.PlatformId))
+        {
+            DataService.PlayerDictionaries._ignoreSharedExperience.Remove(playerInfo.User.PlatformId);
+            DataService.PlayerPersistence.SaveIgnoredSharedExperience();
+
+            ctx.Reply($"<color=green>{playerInfo.User.CharacterName.Value}</color> removed from the ignore shared experience list!");
         }
     }
 }

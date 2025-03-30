@@ -5,10 +5,10 @@ using Stunlock.Core;
 using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 
@@ -29,9 +29,9 @@ internal static class FamiliarLevelingSystem
 
     static readonly PrefabGUID _levelUpBuff = new(-1133938228);
 
-    static readonly WaitForSeconds _delay = new(3f); // try 1.5f? 0.75f old value, actually try 3 since needs to be after first
+    static readonly WaitForSeconds _delay = new(0.75f); // try 1.5f? 0.75f old value, actually try 3 since needs to be after first
 
-    static readonly float3 _gold = new(1.0f, 0.8431373f, 0.0f);
+    static readonly float3 _gold = new(1f, 0.75f, 0f); // Rich Gold
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
     static readonly PrefabGUID _sctResourceGain = new(1876501183);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
@@ -90,15 +90,15 @@ internal static class FamiliarLevelingSystem
     }
     public static void UpdateFamiliarExperience(Entity player, Entity familiar, int famKey, ulong steamId, KeyValuePair<int, float> familiarXP, float gainedXP, int currentLevel)
     {
-        FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
+        FamiliarExperienceData data = LoadFamiliarExperienceData(steamId);
         data.FamiliarExperience[famKey] = new(familiarXP.Key, familiarXP.Value + gainedXP);
 
-        FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, data);
+        SaveFamiliarExperienceData(steamId, data);
         CheckAndHandleLevelUp(player, familiar, famKey, steamId, data.FamiliarExperience[famKey], currentLevel, gainedXP);
     }
     public static KeyValuePair<int, float> GetFamiliarExperience(ulong steamId, int famKey)
     {
-        FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
+        FamiliarExperienceData data = LoadFamiliarExperienceData(steamId);
 
         if (data.FamiliarExperience.TryGetValue(famKey, out var familiarData))
         {
@@ -106,7 +106,7 @@ internal static class FamiliarLevelingSystem
         }
         else
         {
-            return new(FamiliarSummonSystem.BASE_LEVEL, ConvertLevelToXp(FamiliarSummonSystem.BASE_LEVEL));
+            return new(FamiliarBindingSystem.BASE_LEVEL, ConvertLevelToXp(FamiliarBindingSystem.BASE_LEVEL));
         }
     }
     public static void CheckAndHandleLevelUp(Entity player, Entity familiar, int famKey, ulong steamId, KeyValuePair<int, float> familiarXP, int currentLevel, float gainedXP)
@@ -116,38 +116,33 @@ internal static class FamiliarLevelingSystem
         bool leveledUp = false;
         int newLevel = ConvertXpToLevel(familiarXP.Value);
 
+        if (newLevel >= _maxFamiliarLevel) return;
+        else if (gainedXP <= 0) return;
+
         if (newLevel > currentLevel)
         {
             leveledUp = true;
-            FamiliarExperienceData data = FamiliarExperienceManager.LoadFamiliarExperienceData(steamId);
+            FamiliarExperienceData data = LoadFamiliarExperienceData(steamId);
 
             data.FamiliarExperience[famKey] = new(newLevel, familiarXP.Value);
-            FamiliarExperienceManager.SaveFamiliarExperienceData(steamId, data);
+            SaveFamiliarExperienceData(steamId, data);
         }
 
         if (leveledUp)
         {
             familiar.TryApplyBuff(_levelUpBuff);
 
-            /*
-            UnitLevel unitLevel = familiar.Read<UnitLevel>();
-            unitLevel.Level._Value = newLevel;
-            familiar.Write(unitLevel);
-            */
-
             familiar.With((ref UnitLevel unitLevel) =>
             {
                 unitLevel.Level._Value = newLevel;
             });
 
-            FamiliarSummonSystem.ModifyUnitStats(familiar, newLevel, steamId, famKey);
-            if (familiar.Has<BloodConsumeSource>()) FamiliarSummonSystem.ModifyBloodSource(familiar, newLevel);
+            FamiliarBindingSystem.ModifyUnitStats(familiar, newLevel, steamId, famKey);
+            if (familiar.Has<BloodConsumeSource>()) FamiliarBindingSystem.ModifyBloodSource(familiar, newLevel);
         }
 
-        if (GetPlayerBool(steamId, SCT_FAMILIAR_KEY))
+        if (GetPlayerBool(steamId, SCT_FAMILIAR_LVL_KEY))
         {
-            // float3 targetPosition = familiar.Read<Translation>().Value;
-
             FamiliarExperienceSCTDelayRoutine(player, userEntity, familiar, _gold, gainedXP).Start();
         }
     }
@@ -155,8 +150,7 @@ internal static class FamiliarLevelingSystem
     {
         yield return _delay;
         
-        float3 position = familiar.GetPosition();
-        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, character, gainedXP, _sctResourceGain, userEntity);
+        ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, familiar.GetPosition(), color, character, gainedXP, _sctResourceGain, userEntity);
     }
     static float GetXp(ulong steamID, int familiarId)
     {
