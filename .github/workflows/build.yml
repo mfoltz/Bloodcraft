@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 7.0.x
-      
+          
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -24,16 +24,34 @@ jobs:
         
       - name: Restore dependencies
         run: dotnet restore
+        
+      - name: Discover .csproj
+        id: discover_csproj
+        run: |
+          # Find the first .csproj outside bin/obj directories.
+          # Adjust if you have multiple .csproj files.
+          csproj_file=$(find . -type f -name '*.csproj' \
+            -not -path '*/bin/*' \
+            -not -path '*/obj/*' | head -n 1)
+          
+          echo "csproj_file=$csproj_file" >> $GITHUB_OUTPUT
+        
+      - name: Get DLL name
+        id: get_dll_name
+        run: |
+          csproj="${{ steps.discover_csproj.outputs.csproj_file }}"
+          dll_name=$(basename "$csproj" .csproj)
+          echo "dll_name=$dll_name" >> $GITHUB_OUTPUT
 
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
-      - name: Extract Version from .csproj
+      - name: Extract version from .csproj
         id: extract_version
         run: |
-          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" Bloodcraft.csproj)
-          echo "version=$version" >> $GITHUB_ENV   
-          
+          version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "${{ steps.discover_csproj.outputs.csproj_file }}")
+          echo "version=$version" >> $GITHUB_ENV
+
       - name: Update thunderstore.toml
         run: |
           sed -i "s/versionNumber = \".*\"/versionNumber = \"${{ env.version }}\"/" thunderstore.toml
@@ -48,21 +66,10 @@ jobs:
           else
             echo "No changes to commit in thunderstore.toml"
           fi
-
-      - name: Create secrets.json
-        run: |
-          mkdir -p /home/runner/work/Bloodcraft/Bloodcraft/Resources
-          echo '{
-            "NEW_SHARED_KEY": "${{ secrets.NEW_SHARED_KEY }}",
-            "OLD_SHARED_KEY": "${{ secrets.OLD_SHARED_KEY }}"
-          }' > /home/runner/work/Bloodcraft/Bloodcraft/Resources/secrets.json
-        
+          
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=${{ env.version }} -p:RunGenerateREADME=false
 
-      - name: Clean Up
-        run: rm /home/runner/work/Bloodcraft/Bloodcraft/Resources/secrets.json
-        
       - name: GH Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'workflow_dispatch'
@@ -73,7 +80,7 @@ jobs:
           prerelease: true
           tag_name: v${{ env.version }}
           files: |
-            ./bin/Release/net6.0/Bloodcraft.dll
+            ./bin/Release/net6.0/${{ steps.get_dll_name.outputs.dll_name }}.dll
             CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

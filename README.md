@@ -1,5 +1,7 @@
 ## Table of Contents
 
+- [Wiki](https://wide-beryl-52e.notion.site/1a5264b1e5058040a1f5e1f4b82ea2db?v=1a5264b1e5058072a8cf000cf1d2ea65) by [@onjulraz](https://github.com/onjulraz) (README still under construction, putting here so won't forget to include 👍)
+
 *README under construction, putting these enums here for now. note that when selecting via command in-game should use the number shown by the respective 'lst' command for bloods & weapons*
 
 ### BloodStatType
