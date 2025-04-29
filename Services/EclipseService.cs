@@ -1,9 +1,11 @@
-﻿using Bloodcraft.Patches;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Patches;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Professions;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
 using Stunlock.Core;
@@ -14,7 +16,8 @@ using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.PlayerService;
-using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
+using static Bloodcraft.Systems.Leveling.ClassManager;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Services;
 internal class EclipseService
@@ -23,7 +26,7 @@ internal class EclipseService
     static SystemService SystemService => Core.SystemService;
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _shiftSpell = ConfigService.ShiftSlot;
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _legacies = ConfigService.LegacySystem;
@@ -38,12 +41,12 @@ internal class EclipseService
     static readonly WaitForSeconds _newUserDelay = new(15f);
 
     const int MAX_RETRIES = 20;
-    const string V1_1_2 = "1.1.2";
-    const string V1_2_2 = "1.2.2";
-    // const string V1_3_2 = "1.3.2";
+    const string V1_3 = "1.3";
 
     static readonly Regex _oldRegex = new(@"^\[(\d+)\]:(\d+)$");
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
+
+    const string VERSION_1_3 = "1.3";
 
     static readonly ConcurrentDictionary<ulong, string> _registeredUsersAndClientVersions = [];
     public static IReadOnlyDictionary<ulong, string> RegisteredUsersAndClientVersions => _registeredUsersAndClientVersions;
@@ -68,7 +71,7 @@ internal class EclipseService
 
             if (!ulong.TryParse(match.Groups[3].Value, out ulong steamId))
             {
-                Core.Log.LogWarning($"Invalid steamId in modern (>={V1_2_2}) Eclipse message!");
+                Core.Log.LogWarning($"Couldn't parse steamId for Eclipse[{V1_3}]!");
                 return;
             }
 
@@ -85,6 +88,7 @@ internal class EclipseService
             return;
         }
 
+        /*
         Match oldMatch = _oldRegex.Match(message);
 
         if (oldMatch.Success)
@@ -109,6 +113,7 @@ internal class EclipseService
 
             return;
         }
+        */
 
         Core.Log.LogWarning("Failed to parse client registration message from Eclipse!");
     }
@@ -135,6 +140,7 @@ internal class EclipseService
             {
                 switch (version)
                 {
+                    /*
                     case V1_1_2:
                         IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
                         versionHandlerV1_1_2?.SendClientConfig(playerInfo.User);
@@ -145,7 +151,6 @@ internal class EclipseService
                         versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
                         versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
                         return true;
-                    /*
                     case V1_3_2:
                         IVersionHandler<ProgressDataV1_3_2> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3_2>(version);
                         versionHandlerV1_3_2?.SendClientConfig(playerInfo.User);
@@ -155,7 +160,7 @@ internal class EclipseService
                     default:
                         if (IsVersion1_3(version))
                         {
-                            IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>("1.3.2");
+                            IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(VERSION_1_3);
                             versionHandler13X?.SendClientConfig(playerInfo.User);
                             versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
                             return true;
@@ -220,6 +225,7 @@ internal class EclipseService
                     {
                         switch (version)
                         {
+                            /*
                             case V1_1_2:
                                 IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
                                 versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
@@ -228,7 +234,6 @@ internal class EclipseService
                                 IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
                                 versionHandlerV1_2_2.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
                                 break;
-                            /*
                             case V1_3_2:
                                 IVersionHandler<ProgressDataV1_3> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3>(version);
                                 versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
@@ -237,7 +242,8 @@ internal class EclipseService
                             default:
                                 if (IsVersion1_3(version))
                                 {
-                                    IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>("1.3.2");
+                                    if ((_legacies || _expertise || _classes) && !playerInfo.CharEntity.HasBuff(Buffs.BonusStatsBuff)) playerInfo.CharEntity.TryApplyBuff(Buffs.BonusStatsBuff);
+                                    IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(V1_3);
                                     versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
                                     break;
                                 }
@@ -281,14 +287,14 @@ internal class EclipseService
 
             if (_prestige)
             {
-                IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(PrestigeType.Experience);
+                IPrestige prestigeHandler = PrestigeFactory.GetPrestige(PrestigeType.Experience);
                 experiencePrestige = prestigeHandler.GetPrestigeLevel(steamId);
             }
         }
 
-        if (_classes && Utilities.Classes.HasClass(steamId))
+        if (_classes && steamId.HasClass(out PlayerClass? playerClass) && playerClass.HasValue)
         {
-            classEnum = (int)Utilities.Classes.GetPlayerClass(steamId) + 1; // 0 for no class on client
+            classEnum = (int)playerClass.Value + 1;
         }
 
         return (experiencePercent, experienceLevel, experiencePrestige, classEnum);
@@ -304,7 +310,7 @@ internal class EclipseService
         if (_legacies)
         {
             BloodType bloodType = BloodSystem.GetBloodTypeFromPrefab(character.Read<Blood>().BloodType);
-            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+            IBloodLegacy bloodHandler = BloodLegacyFactory.GetBloodHandler(bloodType);
 
             if (bloodHandler != null)
             {
@@ -314,7 +320,7 @@ internal class EclipseService
 
                 if (_prestige)
                 {
-                    IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(BloodSystem.BloodTypeToPrestigeMap[bloodType]);
+                    IPrestige prestigeHandler = PrestigeFactory.GetPrestige(BloodSystem.BloodPrestigeTypes[bloodType]);
                     legacyPrestige = prestigeHandler.GetPrestigeLevel(steamId);
                 }
 
@@ -347,7 +353,7 @@ internal class EclipseService
         if (_expertise)
         {
             WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(character.Read<Equipment>().WeaponSlot.SlotEntity._Entity);
-            IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            IWeaponExpertise expertiseHandler = WeaponExpertiseFactory.GetExpertise(weaponType);
 
             if (expertiseHandler != null)
             {
@@ -357,7 +363,7 @@ internal class EclipseService
 
                 if (_prestige)
                 {
-                    IPrestigeHandler prestigeHandler = PrestigeHandlerFactory.GetPrestigeHandler(WeaponSystem.WeaponPrestigeMap[weaponType]);
+                    IPrestige prestigeHandler = PrestigeFactory.GetPrestige(WeaponSystem.WeaponPrestigeTypes[weaponType]);
                     expertisePrestige = prestigeHandler.GetPrestigeLevel(steamId);
                 }
 
@@ -385,7 +391,7 @@ internal class EclipseService
 
         if (_familiars)
         {
-            Entity familiar = Utilities.Familiars.GetActiveFamiliar(character);
+            Entity familiar = Familiars.GetActiveFamiliar(character);
 
             if (!familiar.Exists())
             {
@@ -404,7 +410,7 @@ internal class EclipseService
 
             if (_familiarPrestige)
             {
-                familiarPrestige = FamiliarPrestigeManager_V2.LoadFamiliarPrestigeData_V2(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0 ? prestigeData.Key : familiarPrestige;
+                familiarPrestige = FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData > 0 ? prestigeData : familiarPrestige;
             }
 
             UnitStats unitStats = familiar.Read<UnitStats>();
@@ -447,37 +453,37 @@ internal class EclipseService
 
         if (_professions)
         {
-            IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "enchanting");
-            enchantingLevel = professionHandler.GetProfessionData(steamId).Key;
-            enchantingProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            IProfession profession = ProfessionFactory.GetProfession(ProfessionType.Enchanting);
+            enchantingLevel = profession.GetProfessionData(steamId).Key;
+            enchantingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "alchemy");
-            alchemyLevel = professionHandler.GetProfessionData(steamId).Key;
-            alchemyProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Alchemy);
+            alchemyLevel = profession.GetProfessionData(steamId).Key;
+            alchemyProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "harvesting");
-            harvestingLevel = professionHandler.GetProfessionData(steamId).Key;
-            harvestingProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Harvesting);
+            harvestingLevel = profession.GetProfessionData(steamId).Key;
+            harvestingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "blacksmithing");
-            blacksmithingLevel = professionHandler.GetProfessionData(steamId).Key;
-            blacksmithingProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Blacksmithing);
+            blacksmithingLevel = profession.GetProfessionData(steamId).Key;
+            blacksmithingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "tailoring");
-            tailoringLevel = professionHandler.GetProfessionData(steamId).Key;
-            tailoringProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Tailoring);
+            tailoringLevel = profession.GetProfessionData(steamId).Key;
+            tailoringProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "woodcutting");
-            woodcuttingLevel = professionHandler.GetProfessionData(steamId).Key;
-            woodcuttingProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Woodcutting);
+            woodcuttingLevel = profession.GetProfessionData(steamId).Key;
+            woodcuttingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "mining");
-            miningLevel = professionHandler.GetProfessionData(steamId).Key;
-            miningProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Mining);
+            miningLevel = profession.GetProfessionData(steamId).Key;
+            miningProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
-            professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, "fishing");
-            fishingLevel = professionHandler.GetProfessionData(steamId).Key;
-            fishingProgress = ProfessionSystem.GetLevelProgress(steamId, professionHandler);
+            profession = ProfessionFactory.GetProfession(ProfessionType.Fishing);
+            fishingLevel = profession.GetProfessionData(steamId).Key;
+            fishingProgress = ProfessionSystem.GetLevelProgress(steamId, profession);
 
             return (enchantingProgress, enchantingLevel, alchemyProgress, alchemyLevel, harvestingProgress,
                 harvestingLevel, blacksmithingProgress, blacksmithingLevel, tailoringProgress, tailoringLevel,

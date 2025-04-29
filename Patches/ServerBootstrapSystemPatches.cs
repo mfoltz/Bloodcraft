@@ -1,9 +1,9 @@
-﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Legacies;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
-using Lidgren.Network;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -19,7 +19,7 @@ using static Bloodcraft.Utilities.Familiars;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
-using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Patches;
 
@@ -29,17 +29,13 @@ internal static class ServerBootstrapSystemPatches
     static EntityManager EntityManager => Core.EntityManager;
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
     static SystemService SystemService => Core.SystemService;
-    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
-    static EntityCommandBufferSystem EntityCommandBufferSystem => SystemService.EntityCommandBufferSystem;
-
-    static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
     static readonly WaitForSeconds _delay = new(1f);
 
     static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
@@ -57,18 +53,15 @@ internal static class ServerBootstrapSystemPatches
     static readonly int _startingLevel = ConfigService.StartingLevel;
     static readonly int _maxLevel = ConfigService.MaxLevel;
 
-    static readonly PrefabGUID _shroudBuff = new(1504279833);
-    static readonly PrefabGUID _shroudCloak = new(1063517722);
-    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
-    static readonly PrefabGUID _bonusStatsBuff = new(737485591);
+    static readonly PrefabGUID _shroudBuff = Buffs.ShroudBuff;
+    static readonly PrefabGUID _shroudCloak = PrefabGUIDs.Item_Cloak_Main_ShroudOfTheForest;
+    static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusPlayerStatsBuff;
 
     [HarmonyPatch(typeof(ServerBootstrapSystem), nameof(ServerBootstrapSystem.OnUserConnected))]
     [HarmonyPostfix]
     static void OnUserConnectedPostfix(ServerBootstrapSystem __instance, NetConnectionId netConnectionId)
     {
-        if (!__instance._NetEndPointToApprovedUserIndex.ContainsKey(netConnectionId)) return;
-
-        int userIndex = __instance._NetEndPointToApprovedUserIndex[netConnectionId];
+        if (!__instance._NetEndPointToApprovedUserIndex.TryGetValue(netConnectionId, out int userIndex)) return;
         ServerBootstrapSystem.ServerClient serverClient = __instance._ApprovedUsersLookup[userIndex];
 
         Entity userEntity = serverClient.UserEntity;
@@ -360,11 +353,9 @@ internal static class ServerBootstrapSystemPatches
 
                 if (_exoForm && exists && prestiges.TryGetValue(PrestigeType.Experience, out int exoPrestiges) && exoPrestiges > 0)
                 {
-                    // PrestigeManager.ResetDamageResistCategoryStats(playerCharacter); // undo old exo stuff
-
                     if (!steamId.TryGetPlayerExoFormData(out var _))
                     {
-                        KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, ExoForm.CalculateFormDuration(exoPrestiges));
+                        KeyValuePair<DateTime, float> timeEnergyPair = new(DateTime.UtcNow, Shapeshifts.CalculateFormDuration(exoPrestiges));
                         steamId.SetPlayerExoFormData(timeEnergyPair);
                     }
                 }
@@ -410,11 +401,6 @@ internal static class ServerBootstrapSystemPatches
 
         if (_classes)
         {
-            if (!steamId.TryGetPlayerClasses(out var _))
-            {
-                steamId.SetPlayerClasses([]);
-            }
-
             if (!steamId.TryGetPlayerSpells(out var _))
             {
                 steamId.SetPlayerSpells((0, 0, 0));
@@ -431,11 +417,6 @@ internal static class ServerBootstrapSystemPatches
             };
 
             HandleConnection(steamId, playerInfo);
-
-            if (playerCharacter.HasBuff(_vBloodBloodBuff))
-            {
-                playerCharacter.TryRemoveBuff(buffPrefabGuid: _vBloodBloodBuff);
-            }
 
             if (!playerCharacter.HasBuff(_bonusStatsBuff))
             {

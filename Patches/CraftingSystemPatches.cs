@@ -1,3 +1,4 @@
+using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
@@ -85,7 +86,7 @@ internal static class CraftingSystemPatches
         if (!Core._initialized) return;
         else if (!_professions && !_quests) return;
 
-        NativeArray<Entity> entities = __instance.__query_1536473549_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
 
         try
         {
@@ -120,7 +121,7 @@ internal static class CraftingSystemPatches
                     else if (!_professions) continue;
 
                     float professionValue = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefab);
-                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefab, "");
+                    IProfession handler = ProfessionFactory.GetProfession(itemPrefab);
 
                     if (handler != null)
                     {
@@ -137,7 +138,7 @@ internal static class CraftingSystemPatches
 
                             // Core.Log.LogWarning($"Handling profession xp for {itemPrefab.GetPrefabName()}");
                             ProfessionSystem.SetProfession(entity, user.LocalCharacter.GetEntityOnServer(), steamId, professionValue, handler, ref delay);
-                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
                         }
                     }
                 }
@@ -156,7 +157,8 @@ internal static class CraftingSystemPatches
         if (!Core._initialized) return;
         else if (!_professions && !_quests) return;
 
-        NativeArray<Entity> entities = __instance.__query_1831452865_0.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -192,6 +194,7 @@ internal static class CraftingSystemPatches
         else if (!_professions) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -282,6 +285,7 @@ internal static class CraftingSystemPatches
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._EventQuery.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -324,6 +328,7 @@ internal static class CraftingSystemPatches
         else if (!_professions && !_quests) return;
 
         NativeArray<Entity> entities = __instance._MoveItemBetweenInventoriesEventQuery.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -336,7 +341,8 @@ internal static class CraftingSystemPatches
                     int fromSlot = moveItemBetweenInventoriesEvent.FromSlot;
 
                     PrefabGUID itemPrefabGUID = InventoryUtilities.TryGetInventoryEntity(EntityManager, fromCharacter.Character, out Entity playerInventory)
-                        && ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var inventoryBuffer) && inventoryBuffer.TryGetAtIndex(fromSlot, out InventoryBuffer item) ? item.ItemType : PrefabGUID.Empty;
+                        && ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var inventoryBuffer) && (fromSlot >= 0 && fromSlot < inventoryBuffer.Length) ? inventoryBuffer[fromSlot].ItemType: PrefabGUID.Empty;
+                        // && ServerGameManager.TryGetBuffer<InventoryBuffer>(playerInventory, out var inventoryBuffer) && inventoryBuffer.TryGetAtIndex(fromSlot, out InventoryBuffer item) ? item.ItemType : PrefabGUID.Empty;
 
                     if (receivingInventory.Has<CastleWorkstation>())
                     {

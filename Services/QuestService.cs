@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Utilities;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
@@ -6,6 +7,7 @@ using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.PlayerService;
@@ -16,6 +18,9 @@ namespace Bloodcraft.Services;
 internal class QuestService
 {
     static EntityManager EntityManager => Core.EntityManager;
+    static SystemService SystemService => Core.SystemService;
+    static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
+    static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
 
@@ -37,16 +42,27 @@ internal class QuestService
     static readonly ComponentType[] _targetUnitAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-        ComponentType.ReadOnly(Il2CppType.Of<UnitLevel>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Movement>())
+        ComponentType.ReadOnly(Il2CppType.Of<Health>()),
+        ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
     ];
 
     static readonly ComponentType[] _craftableItemAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-        ComponentType.ReadOnly(Il2CppType.Of<ItemData>()),
-        ComponentType.ReadOnly(Il2CppType.Of<InventoryItem>())
+        ComponentType.ReadOnly(Il2CppType.Of<RecipeData>()),
+        ComponentType.ReadOnly(Il2CppType.Of<RecipeRequirementBuffer>()),
+        ComponentType.ReadOnly(Il2CppType.Of<RecipeOutputBuffer>())
     ];
+
+    /*
+    static readonly ComponentType[] _craftableItemAnyComponents =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<Equippable>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ConsumableCondition>()),
+        ComponentType.ReadOnly(Il2CppType.Of<Salvageable>())
+    ];
+    */
 
     static readonly ComponentType[] _harvestableResourceAllComponents =
     [
@@ -66,54 +82,57 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>())
     ];
 
+    /*
     static readonly ComponentType[] _craftableItemNoneComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<ShatteredItem>()),
         ComponentType.ReadOnly(Il2CppType.Of<UpgradeableLegendaryItem>())
     ];
+    */
 
-    static EntityQuery _vBloodUnitQuery;
-    static EntityQuery _targetUnitQuery;
-    static EntityQuery _craftableItemQuery;
-    static EntityQuery _harvestableResourceQuery;
+    static QueryDesc _vBloodUnitQueryDesc;
+    static QueryDesc _targetUnitQueryDesc;
+    // static QueryDesc _craftableItemQueryDesc;
+    static QueryDesc _harvestableResourceQueryDesc;
 
     static readonly ConcurrentDictionary<PrefabGUID, HashSet<Entity>> _targetCache = [];
     public static IReadOnlyDictionary<PrefabGUID, HashSet<Entity>> TargetCache => _targetCache;
 
     static readonly List<PrefabGUID> _shardBearers = 
     [
-        Prefabs.CHAR_Manticore_VBlood,
-        Prefabs.CHAR_ChurchOfLight_Paladin_VBlood,
-        Prefabs.CHAR_Gloomrot_Monster_VBlood,
-        Prefabs.CHAR_Vampire_Dracula_VBlood
+        PrefabGUIDs.CHAR_Manticore_VBlood,
+        PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood,
+        PrefabGUIDs.CHAR_Gloomrot_Monster_VBlood,
+        PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
+        PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
     ];
 
     static readonly HashSet<string> _filteredTargetUnits =
     [
         "Trader",
-            "HostileVillager",
-            "TombSummon",
-            "StatueSpawn",
-            "SmiteOrb",
-            "CardinalAide",
-            "GateBoss",
-            "DraculaMinion",
-            "Summon",
-            "Minion",
-            "Chieftain",
-            "ConstrainingPole",
-            "Horse",
-            "EnchantedCross",
-            "DivineAngel",
-            "FallenAngel",
-            "FarbaneSuprise",
-            "Withered",
-            "Servant",
-            "Spider_Melee",
-            "Spider_Range",
-            "GroundSword",
-            "FloatingWeapon",
-            "Airborne"
+        "HostileVillager",
+        "TombSummon",
+        "StatueSpawn",
+        "SmiteOrb",
+        "CardinalAide",
+        "GateBoss",
+        "DraculaMinion",
+        "Summon",
+        "Minion",
+        "Chieftain",
+        "ConstrainingPole",
+        "Horse",
+        "EnchantedCross",
+        "DivineAngel",
+        "FallenAngel",
+        "FarbaneSuprise",
+        "Withered",
+        "Servant",
+        "Spider_Melee",
+        "Spider_Range",
+        "GroundSword",
+        "FloatingWeapon",
+        "Airborne"
     ];
 
     static readonly HashSet<string> _filteredCraftableItems =
@@ -161,6 +180,7 @@ internal class QuestService
     static bool _harvestables = true;
     public QuestService()
     {
+        /*
         _vBloodUnitQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
         {
             All = _vBloodUnitAllComponents,
@@ -187,8 +207,14 @@ internal class QuestService
             All = _harvestableResourceAllComponents,
             Options = EntityQueryOptions.IncludeSpawnTag
         });
+        */
 
-        Configuration.InitializeQuestRewardItems();
+        _vBloodUnitQueryDesc = EntityManager.CreateQueryDesc(_vBloodUnitAllComponents, _targetUnitNoneComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
+        _targetUnitQueryDesc = EntityManager.CreateQueryDesc(_targetUnitAllComponents, _targetUnitNoneComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
+        // _craftableItemQueryDesc = EntityManager.CreateQueryDesc(_craftableItemAllComponents, typeIndices: [0, 1], options: EntityQueryOptions.IncludeSpawnTag);
+        _harvestableResourceQueryDesc = EntityManager.CreateQueryDesc(allTypes: _harvestableResourceAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeSpawnTag);
+
+        Configuration.GetQuestRewardItems();
         QuestServiceRoutine().Start();
     }
 
@@ -196,15 +222,14 @@ internal class QuestService
     static IEnumerator QuestServiceRoutine()
     {
         if (_shouldReset) ResetShardBearers().Start();
-        if (_craftables) InitializeCraftables().Start();
+        // if (_craftables) InitializeCraftables().Start();
+        if (_craftables) InitializeCraftables();
         if (_harvestables) InitializeHarvestables().Start();
 
         while (true)
         {
             yield return QueryResultStreamAsync(
-                _targetUnitQuery,
-                _targetUnitAllComponents,
-                _typeIndices,
+                _targetUnitQueryDesc,
                 stream =>
                 {
                     try
@@ -277,6 +302,7 @@ internal class QuestService
                 yield return null;
             }
 
+            // Core.Log.LogWarning($"[QuestService] TargetCache - {TargetCache.Count}");
             _lastUpdate = DateTime.UtcNow;
             yield return _routineDelay;
         }
@@ -284,9 +310,7 @@ internal class QuestService
     static IEnumerator ResetShardBearers()
     {
         yield return QueryResultStreamAsync(
-            _vBloodUnitQuery,
-            _vBloodUnitAllComponents,
-            _typeIndices,
+            _vBloodUnitQueryDesc,
             stream =>
             {
                 try
@@ -310,12 +334,70 @@ internal class QuestService
 
         _shouldReset = false;
     }
-    static IEnumerator InitializeCraftables()
+    static void InitializeCraftables()
     {
+        var prefabGuidEntities = PrefabCollectionSystem._PrefabGuidToEntityMap;
+        var recipeDataMap = GameDataSystem.RecipeHashLookupMap;
+
+        var prefabGuids = recipeDataMap.GetKeyArray(Allocator.Temp);
+        var recipeDatas = recipeDataMap.GetValueArray(Allocator.Temp);
+
+        try
+        {
+            for (int i = 0; i < prefabGuids.Length; i++)
+            {
+                PrefabGUID prefabGuid = prefabGuids[i];
+                RecipeData recipeData = recipeDatas[i];
+                Entity recipeEntity = recipeData.Entity;
+
+                // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabGuid.GetPrefabName()}");
+
+                if (!recipeEntity.TryGetBuffer<RecipeOutputBuffer>(out var buffer) || buffer.IsEmpty)
+                {
+                    // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - Empty buffer: {prefabGuid.GetPrefabName()}");
+                    continue;
+                }
+
+                if (!prefabGuidEntities.TryGetValue(buffer[0].Guid, out Entity prefabEntity))
+                {
+                    // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - Couldn't get item prefab from RecipeOutputBuffer: {prefabGuid.GetPrefabName()} | {(buffer.IsEmpty ? buffer.get_Item(0).Guid.GetPrefabName() : string.Empty)}");
+                    continue;
+                }
+
+                string prefabName = prefabEntity.GetPrefabGuid().GetPrefabName();
+
+                // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabName}");
+
+                if (_filteredCraftableItems.Any(item => prefabName.Contains(item, StringComparison.OrdinalIgnoreCase))) continue;
+
+                if (prefabEntity.Has<Equippable>() && prefabEntity.TryGetComponent(out Salvageable salvageable))
+                {
+                    if (salvageable.RecipeGUID.HasValue())
+                    {
+                        // Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
+                        CraftPrefabs.Add(prefabGuid);
+                    }
+                }
+                else if (prefabEntity.Has<ConsumableCondition>())
+                {
+                    // Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
+                    CraftPrefabs.Add(prefabGuid);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {ex}");
+        }
+        finally
+        {
+            prefabGuids.Dispose();
+            recipeDatas.Dispose();
+        }
+
+        /*
         yield return QueryResultStreamAsync(
-            _craftableItemQuery,
-            _craftableItemAllComponents,
-            _typeIndices,
+            _craftableItemQueryDesc,
             stream =>
             {
                 try
@@ -326,16 +408,30 @@ internal class QuestService
                         {
                             Entity entity = result.Entity;
                             PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
-                            string prefabName = prefabGuid.GetPrefabName();
+                            RecipeData recipeData = result.ResolveComponentData<RecipeData>();
+
+                            Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabGuid.GetPrefabName()}");
+
+                            if (!entity.TryGetBufferAccessor<RecipeOutputBuffer>(out var buffer) 
+                            || buffer.IsEmpty || !prefabGuidEntities.TryGetValue(buffer[0].Guid, out Entity prefabEntity)) continue;
+
+                            string prefabName = prefabEntity.GetPrefabGuid().GetPrefabName();
+
+                            Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabName}");
 
                             if (_filteredCraftableItems.Any(item => prefabName.Contains(item, StringComparison.OrdinalIgnoreCase))) continue;
 
                             if (entity.Has<Equippable>() && entity.TryGetComponent(out Salvageable salvageable))
                             {
-                                if (salvageable.RecipeGUID.HasValue()) CraftPrefabs.Add(prefabGuid);
+                                if (salvageable.RecipeGUID.HasValue())
+                                {
+                                    Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
+                                    CraftPrefabs.Add(prefabGuid);
+                                }
                             }
                             else if (entity.Has<ConsumableCondition>())
                             {
+                                Core.Log.LogWarning($"[QuestService] Added to CraftPrefabs - {prefabName}");
                                 CraftPrefabs.Add(prefabGuid);
                             }
                         }
@@ -347,15 +443,15 @@ internal class QuestService
                 }
             }
         );
+        */
 
+        // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {CraftPrefabs.Count}");
         _craftables = false;
     }
     static IEnumerator InitializeHarvestables()
     {
         yield return QueryResultStreamAsync(
-            _harvestableResourceQuery,
-            _harvestableResourceAllComponents,
-            _typeIndices,
+            _harvestableResourceQueryDesc,
             stream =>
             {
                 try
@@ -381,6 +477,7 @@ internal class QuestService
             }
         );
 
+        // Core.Log.LogWarning($"[QuestService] InitializeHarvestables() - {ResourcePrefabs.Count}");
         _harvestables = false;
     }
 }

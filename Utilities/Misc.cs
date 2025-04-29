@@ -1,11 +1,12 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Patches;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
 using Stunlock.Core;
 using System.Diagnostics;
 using System.Text;
-using System.Text.RegularExpressions;
 using Unity.Entities;
 using VampireCommandFramework;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
@@ -20,7 +21,8 @@ internal static class Misc
     static GameDataSystem GameDataSystem => SystemService.GameDataSystem;
 
     static readonly Random _random = new();
-    public enum SpellSchool
+    const string STAT_MOD = "StatMod";
+    public enum SpellSchool : int
     {
         Shadow = 0,
         Blood = 1,
@@ -30,7 +32,7 @@ internal static class Misc
         Frost = 5,
         Storm = 6
     }
-    public class BiDictionary<T1, T2> : IEnumerable<KeyValuePair<T1, T2>>
+    public class BiDictionary<T1, T2> : IEnumerable<KeyValuePair<T1, T2>> // kind of weird but idk it can stay for now
     {
         readonly Dictionary<T1, T2> _forward = [];
         readonly Dictionary<T2, T1> _reverse = [];
@@ -61,23 +63,23 @@ internal static class Misc
         public static readonly BiDictionary<SpellSchool, PrefabGUID> SpellSchoolInfusions = [];
         static SpellSchoolInfusionMap()
         {
-            SpellSchoolInfusions.Add(SpellSchool.Blood, Prefabs.SpellMod_Weapon_BloodInfused);
-            SpellSchoolInfusions.Add(SpellSchool.Chaos, Prefabs.SpellMod_Weapon_ChaosInfused);
-            SpellSchoolInfusions.Add(SpellSchool.Shadow, Prefabs.SpellMod_Weapon_UndeadInfused);
-            SpellSchoolInfusions.Add(SpellSchool.Illusion, Prefabs.SpellMod_Weapon_IllusionInfused);
-            SpellSchoolInfusions.Add(SpellSchool.Frost, Prefabs.SpellMod_Weapon_FrostInfused);
-            SpellSchoolInfusions.Add(SpellSchool.Storm, Prefabs.SpellMod_Weapon_StormInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Blood, PrefabGUIDs.SpellMod_Weapon_BloodInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Chaos, PrefabGUIDs.SpellMod_Weapon_ChaosInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Shadow, PrefabGUIDs.SpellMod_Weapon_UndeadInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Illusion, PrefabGUIDs.SpellMod_Weapon_IllusionInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Frost, PrefabGUIDs.SpellMod_Weapon_FrostInfused);
+            SpellSchoolInfusions.Add(SpellSchool.Storm, PrefabGUIDs.SpellMod_Weapon_StormInfused);
         }
     }
 
     static readonly Dictionary<PrefabGUID, PrefabGUID> _infusionShinyBuffs = new()
     {
-        { Prefabs.SpellMod_Weapon_BloodInfused, new(348724578) },     // ignite 
-        { Prefabs.SpellMod_Weapon_ChaosInfused, new (-1576512627) },  // static
-        { Prefabs.SpellMod_Weapon_UndeadInfused, new (-1246704569) }, // leech
-        { Prefabs.SpellMod_Weapon_IllusionInfused, new(1723455773) }, // weaken
-        { Prefabs.SpellMod_Weapon_FrostInfused, new(27300215) },      // chill
-        { Prefabs.SpellMod_Weapon_StormInfused, new(-325758519) }     // condemn
+        { PrefabGUIDs.SpellMod_Weapon_BloodInfused, new(348724578) },     // ignite 
+        { PrefabGUIDs.SpellMod_Weapon_ChaosInfused, new (-1576512627) },  // static
+        { PrefabGUIDs.SpellMod_Weapon_UndeadInfused, new (-1246704569) }, // leech
+        { PrefabGUIDs.SpellMod_Weapon_IllusionInfused, new(1723455773) }, // weaken
+        { PrefabGUIDs.SpellMod_Weapon_FrostInfused, new(27300215) },      // chill
+        { PrefabGUIDs.SpellMod_Weapon_StormInfused, new(-325758519) }     // condemn
     };
     public static IReadOnlyDictionary<PrefabGUID, PrefabGUID> InfusionShinyBuffs => _infusionShinyBuffs;
     public enum ScrollingTextMessage
@@ -87,7 +89,7 @@ internal static class Misc
         PlayerLegacy,
         FamiliarExperience,
         ProfessionExperience,
-        ProfessionYield
+        ProfessionYields
     }
 
     const string SCT_PLAYER_LVL = "PlayerXP";
@@ -95,7 +97,7 @@ internal static class Misc
     const string SCT_PLAYER_BL = "LegacyXP";
     const string SCT_FAMILIAR_LVL = "FamiliarXP";
     const string SCT_PROFESSIONS = "ProfessionXP";
-    const string SCT_YIELD = "BonusYield";
+    const string SCT_YIELD = "ProfessionYields";
 
     public static readonly List<string> ScrollingTextNames =
     [
@@ -114,7 +116,7 @@ internal static class Misc
         { SCT_PLAYER_BL, ScrollingTextMessage.PlayerLegacy },
         { SCT_FAMILIAR_LVL, ScrollingTextMessage.FamiliarExperience },
         { SCT_PROFESSIONS, ScrollingTextMessage.ProfessionExperience },
-        { SCT_YIELD, ScrollingTextMessage.ProfessionYield }
+        { SCT_YIELD, ScrollingTextMessage.ProfessionYields }
     };
 
     public static readonly Dictionary<ScrollingTextMessage, string> ScrollingTextBoolKeyMap = new()
@@ -124,7 +126,7 @@ internal static class Misc
         { ScrollingTextMessage.PlayerLegacy, SCT_PLAYER_BL_KEY },
         { ScrollingTextMessage.FamiliarExperience, SCT_FAMILIAR_LVL_KEY },
         { ScrollingTextMessage.ProfessionExperience, SCT_PROFESSIONS_KEY },
-        { ScrollingTextMessage.ProfessionYield, SCT_YIELD_KEY }
+        { ScrollingTextMessage.ProfessionYields, SCT_YIELD_KEY }
     };
     public static class PlayerBoolsManager
     {
@@ -147,7 +149,7 @@ internal static class Misc
         public const string SCT_FAMILIAR_LVL_KEY = "FamiliarExperienceSCT";
         public const string SCT_PROFESSIONS_KEY = "ProfessionExperienceSCT";
         public const string SCT_YIELD_KEY = "ProfessionYieldSCT";
-        public const string EXO_FORM_KEY = "ExoForm";
+        public const string SHAPESHIFT_KEY = "Shapeshift";
         public const string SHROUD_KEY = "Shroud";
         public const string CLASS_BUFFS_KEY = "Passives";
         public const string PRESTIGE_BUFFS_KEY = "PrestigeBuffs";
@@ -173,7 +175,7 @@ internal static class Misc
             [SCT_FAMILIAR_LVL_KEY] = true,
             [SCT_PROFESSIONS_KEY] = true,
             [SCT_YIELD_KEY] = true,
-            [EXO_FORM_KEY] = false,
+            [SHAPESHIFT_KEY] = false,
             [SHROUD_KEY] = true,
             [CLASS_BUFFS_KEY] = true,
             [PRESTIGE_BUFFS_KEY] = true
@@ -452,6 +454,18 @@ internal static class Misc
             string message = "Something fell out of your bag!";
             InventoryUtilitiesServer.CreateDropItem(EntityManager, playerCharacter, itemType, amount, new Entity()); // does this create multiple drops to account for excessive stacks? noting for later
             LocalizationService.HandleServerReply(EntityManager, user, message);
+        }
+    }
+    public static void GetStatModPrefabs()
+    {
+        var namesToPrefabGuids = SystemService.PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary;
+
+        foreach (var kvp in namesToPrefabGuids)
+        {
+            if (kvp.Key.StartsWith(STAT_MOD))
+            {
+                JewelSpawnSystemPatch.StatMods.TryAdd(kvp.Key, kvp.Value);
+            }
         }
     }
     public static bool RollForChance(float chance)

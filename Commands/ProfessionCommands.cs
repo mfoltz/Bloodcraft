@@ -1,6 +1,6 @@
+using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
-using Stunlock.Core;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
@@ -37,9 +37,15 @@ internal static class ProfessionCommands
             return;
         }
 
+        if (!Enum.TryParse(profession, true, out ProfessionType professionType))
+        {
+            LocalizationService.HandleReply(ctx, $"Valid professions: {ProfessionFactory.GetProfessionNames()}");
+            return;
+        }
+
         ulong steamId = ctx.Event.User.PlatformId;
 
-        IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, profession.ToLower());
+        IProfession professionHandler = ProfessionFactory.GetProfession(professionType);
         if (professionHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid profession.");
@@ -80,7 +86,13 @@ internal static class ProfessionCommands
             return;
         }
 
-        IProfessionHandler professionHandler = ProfessionHandlerFactory.GetProfessionHandler(PrefabGUID.Empty, profession.ToLower());
+        if (!Enum.TryParse(profession, true, out ProfessionType professionType))
+        {
+            LocalizationService.HandleReply(ctx, $"Valid professions: {ProfessionFactory.GetProfessionNames()}");
+            return;
+        }
+
+        IProfession professionHandler = ProfessionFactory.GetProfession(professionType);
         if (professionHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid profession.");
@@ -104,6 +116,6 @@ internal static class ProfessionCommands
             return;
         }
 
-        LocalizationService.HandleReply(ctx, $"Available professions: {ProfessionHandlerFactory.GetAllProfessions()}");
+        LocalizationService.HandleReply(ctx, $"Available professions: {ProfessionFactory.GetProfessionNames()}");
     }
 }

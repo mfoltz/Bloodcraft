@@ -1,114 +1,145 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using Unity.Entities;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Systems.Legacies.BloodSystem;
+using static Bloodcraft.Systems.Leveling.ClassManager;
+using static Bloodcraft.Utilities.Progression.ModifyUnitStatBuffSettings;
 
 namespace Bloodcraft.Systems.Legacies;
 internal static class BloodManager
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly bool _hardSynergies = ConfigService.HardSynergies;
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
 
-    static readonly float _statSynergyMultiplier = ConfigService.StatSynergyMultiplier;
+    static readonly float _synergyMultiplier = ConfigService.SynergyMultiplier;
     static readonly float _prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
     static readonly int _maxLegacyLevel = ConfigService.MaxBloodLevel;
     static readonly int _legacyStatChoices = ConfigService.LegacyStatChoices;
     public static class BloodStats
     {
-        public enum BloodStatType
+        public enum BloodStatType : int
         {
-            HealingReceived, // 0
-            DamageReduction, // 1
-            PhysicalResistance, // 2
-            SpellResistance, // 3
-            ResourceYield, // 4
-            BloodDrain, // 5
-            SpellCooldownRecoveryRate, // 6
-            WeaponCooldownRecoveryRate, // 7
-            UltimateCooldownRecoveryRate, // 8
-            MinionDamage, // 9
-            ShieldAbsorb, // 10
-            BloodEfficiency // 11
+            HealingReceived = 0,
+            DamageReduction = 1,
+            PhysicalResistance = 2,
+            SpellResistance = 3,
+            ResourceYield = 4,
+            ReducedBloodDrain = 5,
+            SpellCooldownRecoveryRate = 6,
+            WeaponCooldownRecoveryRate = 7,
+            UltimateCooldownRecoveryRate = 8,
+            MinionDamage = 9,
+            AbilityAttackSpeed = 10,
+            CorruptionDamageReduction = 11
         }
-
-        public static readonly Dictionary<BloodStatType, UnitStatType> BloodStatTypes = new()
+        public static IReadOnlyDictionary<BloodStatType, UnitStatType> BloodStatTypes => _bloodStatTypes;
+        static readonly Dictionary<BloodStatType, UnitStatType> _bloodStatTypes = new()
         {
             { BloodStatType.HealingReceived, UnitStatType.HealingReceived },
             { BloodStatType.DamageReduction, UnitStatType.DamageReduction },
             { BloodStatType.PhysicalResistance, UnitStatType.PhysicalResistance },
             { BloodStatType.SpellResistance, UnitStatType.SpellResistance },
             { BloodStatType.ResourceYield, UnitStatType.ResourceYield },
-            { BloodStatType.BloodDrain, UnitStatType.BloodDrain },
+            { BloodStatType.ReducedBloodDrain, UnitStatType.ReducedBloodDrain },
             { BloodStatType.SpellCooldownRecoveryRate, UnitStatType.SpellCooldownRecoveryRate },
             { BloodStatType.WeaponCooldownRecoveryRate, UnitStatType.WeaponCooldownRecoveryRate },
             { BloodStatType.UltimateCooldownRecoveryRate, UnitStatType.UltimateCooldownRecoveryRate },
             { BloodStatType.MinionDamage, UnitStatType.MinionDamage },
-            { BloodStatType.ShieldAbsorb, UnitStatType.ShieldAbsorb },
-            { BloodStatType.BloodEfficiency, UnitStatType.BloodEfficiency }
+            { BloodStatType.AbilityAttackSpeed, UnitStatType.AbilityAttackSpeed },
+            { BloodStatType.CorruptionDamageReduction, UnitStatType.CorruptionDamageReduction }
         };
-
-        public static readonly Dictionary<BloodStatType, float> BloodStatValues = new()
+        public static IReadOnlyDictionary<BloodStatType, float> BloodStatBaseCaps => _bloodStatBaseCaps;
+        static readonly Dictionary<BloodStatType, float> _bloodStatBaseCaps = new()
         {
             {BloodStatType.HealingReceived, ConfigService.HealingReceived},
             {BloodStatType.DamageReduction, ConfigService.DamageReduction},
             {BloodStatType.PhysicalResistance, ConfigService.PhysicalResistance},
             {BloodStatType.SpellResistance, ConfigService.SpellResistance},
             {BloodStatType.ResourceYield, ConfigService.ResourceYield},
-            {BloodStatType.BloodDrain, ConfigService.BloodDrain},
+            {BloodStatType.ReducedBloodDrain, ConfigService.ReducedBloodDrain},
             {BloodStatType.SpellCooldownRecoveryRate, ConfigService.SpellCooldownRecoveryRate},
             {BloodStatType.WeaponCooldownRecoveryRate, ConfigService.WeaponCooldownRecoveryRate},
             {BloodStatType.UltimateCooldownRecoveryRate, ConfigService.UltimateCooldownRecoveryRate},
             {BloodStatType.MinionDamage, ConfigService.MinionDamage},
-            {BloodStatType.ShieldAbsorb, ConfigService.ShieldAbsorb},
-            {BloodStatType.BloodEfficiency, ConfigService.BloodEfficiency}
+            {BloodStatType.AbilityAttackSpeed, ConfigService.AbilityAttackSpeed},
+            {BloodStatType.CorruptionDamageReduction, ConfigService.CorruptionDamageReduction}
         };
     }
-    public static bool ChooseStat(ulong steamId, BloodType BloodType, BloodStatType statType)
+    public static bool ChooseStat(ulong steamId, BloodType bloodType, BloodStatType bloodStatType)
     {
-        if (steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(BloodType, out var Stats))
+        if (steamId.TryGetPlayerBloodStats(out var bloodTypeStats) && bloodTypeStats.TryGetValue(bloodType, out var bloodStats))
         {
-            if (_hardSynergies)
+            if (_classes)
             {
-                if (!Utilities.Classes.HasClass(steamId))
+                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
                 {
                     return false;
                 }
 
-                var classes = steamId.TryGetPlayerClasses(out var classData) ? classData : [];
-                var (_, BloodStats) = classes.First().Value; // get class to check if stat allowed
-                List<BloodStatType> bloodStatTypes = [..BloodStats.Select(value => (BloodStatType)value)];
-
-                if (!bloodStatTypes.Contains(statType)) // hard synergy stat check
+                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
                 {
                     return false;
                 }
 
-                if (Stats.Count >= _legacyStatChoices || Stats.Contains(statType))
-                {
-                    return false; // Only allow configured amount of stats to be chosen and no duplicates
-                }
-
-                Stats.Add(statType);
-                steamId.SetPlayerBloodStats(bloodStats);
+                bloodStats.Add(bloodStatType);
+                steamId.SetPlayerBloodStats(bloodTypeStats);
 
                 return true;
             }
             else
             {
-                if (Stats.Count >= _legacyStatChoices || Stats.Contains(statType))
+                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
                 {
                     return false; // Only allow configured amount of stats to be chosen and no duplicates
                 }
 
-                Stats.Add(statType);
-                steamId.SetPlayerBloodStats(bloodStats);
+                bloodStats.Add(bloodStatType);
+                steamId.SetPlayerBloodStats(bloodTypeStats);
 
                 return true;
             }
+
+            /*
+            if (_hardSynergies)
+            {
+                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
+                {
+                    return false;
+                }
+
+                if (!ClassBloodStatSynergies.TryGetValue(playerClass.Value, out List<BloodStatType> bloodStatTypes) || !bloodStatTypes.Contains(bloodStatType))
+                {
+                    return false;
+                }
+
+                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
+                {
+                    return false;
+                }
+
+                bloodStats.Add(bloodStatType);
+                steamId.SetPlayerBloodStats(bloodTypeStats);
+
+                return true;
+            }
+            else
+            {
+                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
+                {
+                    return false; // Only allow configured amount of stats to be chosen and no duplicates
+                }
+
+                bloodStats.Add(bloodStatType);
+                steamId.SetPlayerBloodStats(bloodTypeStats);
+
+                return true;
+            }
+            */
         }
         return false;
     }
@@ -122,32 +153,32 @@ internal static class BloodManager
     }
     public static void UpdateBloodStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
     {
-        BloodType bloodType = GetCurrentBloodType(playerCharacter.Read<Blood>());
-        ApplyBloodStats(buffEntity, bloodType, steamId);
+        BloodType bloodType = GetCurrentBloodType(playerCharacter.GetBlood());
+        ApplyBloodStats(buffEntity, playerCharacter, bloodType, steamId);
     }
-    public static void ApplyBloodStats(Entity bloodBuff, BloodType bloodType, ulong steamId)
+    public static void ApplyBloodStats(Entity buffEntity, Entity playerCharacter, BloodType bloodType, ulong steamId)
     {
-        IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
+        IBloodLegacy handler = BloodLegacyFactory.GetBloodHandler(bloodType);
 
-        if (handler != null && steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bonuses))
+        if (handler != null && steamId.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var bloodStatTypes))
         {
-            if (!bloodBuff.Has<ModifyUnitStatBuff_DOTS>())
+            if (!buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
             {
-                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(bloodBuff);
+                buffer = EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buffEntity);
             }
 
-            var buffer = bloodBuff.ReadBuffer<ModifyUnitStatBuff_DOTS>();
-
-            foreach (var bloodStatType in bonuses)
+            foreach (BloodStatType bloodStatType in bloodStatTypes)
             {
-                float scaledBonus = CalculateScaledBloodBonus(handler, steamId, bloodType, bloodStatType);
-                UnitStatType statType = BloodStatTypes[bloodStatType];
+                if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType, 
+                    bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
                 ModifyUnitStatBuff_DOTS newStatBuff = new()
                 {
-                    StatType = statType,
-                    ModificationType = !statType.Equals(UnitStatType.BloodDrain) ? ModificationType.AddToBase : ModificationType.Multiply,
-                    Value = !statType.Equals(UnitStatType.BloodDrain) ? scaledBonus : 1f - scaledBonus,
+                    StatType = modifyUnitStatBuff.TargetUnitStat,
+                    ModificationType = modifyUnitStatBuff.ModificationType,
+                    AttributeCapType = modifyUnitStatBuff.AttributeCapType,
+                    SoftCapValue = 0f,
+                    Value = statValue,
                     Modifier = 1,
                     IncreaseByStacks = false,
                     ValueByStacks = 0,
@@ -155,40 +186,62 @@ internal static class BloodManager
                     Id = ModificationIDs.Create().NewModificationId()
                 };
 
+                Core.Log.LogWarning($"[BloodManager] {newStatBuff.StatType} | {newStatBuff.Value} | {newStatBuff.AttributeCapType} | {newStatBuff.Id.Id}");
                 buffer.Add(newStatBuff);
             }
         }
     }
-    public static float CalculateScaledBloodBonus(IBloodHandler handler, ulong steamId, BloodType bloodType, BloodStatType statType)
+    public static bool TryGetScaledModifyUnitLegacyStat(IBloodLegacy handler, Entity playerCharacter, ulong steamId, 
+        BloodType bloodType, BloodStatType bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)
     {
+        modifyUnitStatBuff = default;
+        statValue = 0f;
+
         if (handler != null)
         {
-            var xpData = handler.GetLegacyData(steamId);
-            float maxBonus = BloodStatValues[statType];
-
-            if (_classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
+            if (!ModifyUnitLegacyStatBuffs.TryGetValue(bloodStatType, out modifyUnitStatBuff))
             {
-                var (_, classBloodStats) = classes.First().Value;
-                List<BloodStatType> bloodStatTypes = [..classBloodStats.Select(value => (BloodStatType)value)];
-
-                if (bloodStatTypes.Contains(statType))
-                {
-                    maxBonus *= _statSynergyMultiplier;
-                }
+                return false;
             }
 
-            if (_prestige && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(BloodTypeToPrestigeMap[bloodType], out var PrestigeData))
+            var xpData = handler.GetLegacyData(steamId);
+            float maxBonus = modifyUnitStatBuff.BaseCap;
+
+            if (_classes && steamId.HasClass(out PlayerClass? playerClass) 
+                && playerClass.HasValue && ClassBloodStatSynergies[playerClass.Value].Contains(bloodStatType))
             {
-                float gainFactor = 1 + (_prestigeStatMultiplier * PrestigeData);
+                maxBonus *= _synergyMultiplier;
+            }
+
+            if (_prestige && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(BloodPrestigeTypes[bloodType], out var legacyPrestiges))
+            {
+                float gainFactor = 1 + (_prestigeStatMultiplier * legacyPrestiges);
                 maxBonus *= gainFactor;
             }
 
-            float scaledBonus = maxBonus * ((float)xpData.Key / _maxLegacyLevel);
+            /*
+            try
+            {
+                if (playerCharacter.TryGetComponent(out VampireAttributeCapModificationsSource capModificationsSource)
+                    && capModificationsSource.ModificationsEntity.TryGetComponent(out VampireAttributeCapModifications capModifications)
+                    && BloodStatTypes.TryGetValue(bloodStatType, out UnitStatType unitStatType))
+                {
+                    AttributeCapModIds capModIds = capModifications.CapModIds.GetCap(unitStatType);
+                    capModId = modifyUnitStatBuff.AttributeCapType.Equals(AttributeCapType.SoftCapped) ?
+                        capModIds.SoftCapModId : capModIds.HardCapModId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError($"[BloodManager] Error getting cap modifications: {ex}");
+            }
+            */
 
-            return scaledBonus;
+            statValue = maxBonus * ((float)xpData.Key / _maxLegacyLevel);
+            return true;
         }
 
-        return 0;
+        return false;
     }
     public static BloodType GetCurrentBloodType(Blood blood)
     {

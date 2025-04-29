@@ -1,11 +1,11 @@
 ﻿using Bloodcraft.Patches;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Behaviours;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
 using ProjectM.Scripting;
-using Steamworks;
 using Stunlock.Core;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -18,7 +18,7 @@ using static Bloodcraft.Patches.LinkMinionToOwnerOnSpawnSystemPatch;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarEquipmentManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
-using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager_V2;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Familiars.FamiliarBindingSystem;
@@ -39,26 +39,23 @@ internal static class Familiars
     static readonly WaitForSeconds _bindingDelay = new(0.25f);
     static readonly WaitForSeconds _delay = new(2f);
 
-    static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
-    static readonly PrefabGUID _pveCombatBuff = new(581443919);
-    static readonly PrefabGUID _pvpCombatBuff = new(697095869);
-    static readonly PrefabGUID _dominateBuff = new(-1447419822);
-    static readonly PrefabGUID _takeFlightBuff = new(1205505492);
-    static readonly PrefabGUID _inkCrawlerDeathBuff = new(1273155981);
-    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
-    static readonly PrefabGUID _disableAggroBuff = new(1934061152);
-    static readonly PrefabGUID _vanishBuff = new(1595547018);          
-    static readonly PrefabGUID _interactModeBuff = new(1520432556);     
-    static readonly PrefabGUID _bonusStatsBuff = new(737485591);
+    static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusPlayerStatsBuff;
+    static readonly PrefabGUID _defaultEmoteBuff = Buffs.DefaultEmoteBuff;
+    static readonly PrefabGUID _pveCombatBuff = Buffs.PvECombatBuff;
+    static readonly PrefabGUID _pvpCombatBuff = Buffs.PvPCombatBuff;
+    static readonly PrefabGUID _dominateBuff = Buffs.DominateBuff;
+    static readonly PrefabGUID _takeFlightBuff = Buffs.TakeFlightBuff;
+    static readonly PrefabGUID _inkCrawlerDeathBuff = Buffs.InkCrawlerDeathBuff;
+    static readonly PrefabGUID _invulnerableBuff = Buffs.AdminInvulnerableBuff;
+    static readonly PrefabGUID _disableAggroBuff = Buffs.DisableAggroBuff;
+    static readonly PrefabGUID _vanishBuff = Buffs.VanishBuff;
+    static readonly PrefabGUID _interactModeBuff = Buffs.InteractModeBuff;
 
-    static readonly PrefabGUID _targetSwallowedBuff = new(-915145807);
-    static readonly PrefabGUID _hasSwallowedBuff = new(1457576969);
+    static readonly PrefabGUID _spiritDouble = PrefabGUIDs.CHAR_Cursed_MountainBeast_SpiritDouble;
+    static readonly PrefabGUID _highlordGroundSword = PrefabGUIDs.CHAR_Legion_HighLord_GroundSword;
+    static readonly PrefabGUID _enchantedCross = PrefabGUIDs.CHAR_ChurchOfLight_EnchantedCross;
 
-    static readonly PrefabGUID _spiritDouble = new(-935560085);
-    static readonly PrefabGUID _highlordGroundSword = new(-1266036232);
-    static readonly PrefabGUID _enchantedCross = Prefabs.CHAR_ChurchOfLight_EnchantedCross;
-
-    static readonly PrefabGUID _itemSchematic = new(2085163661);
+    static readonly PrefabGUID _itemSchematic = PrefabGUIDs.Item_Ingredient_Research_Schematic;
 
     static readonly float3 _southFloat3 = new(0f, 0f, -1f);
 
@@ -215,18 +212,16 @@ internal static class Familiars
         { "General Valencia the Depraved", new(495971434)},
         { "Dracula the Immortal King", new(-327335305)},
         { "General Cassius the Betrayer", new(-496360395)},
-        { "General Elena the Hollow", new(795262842)},        
-        { "Willfred the Village Elder", new(-1505705712)}
-    };
+        { "General Elena the Hollow", PrefabGUIDs.CHAR_Vampire_IceRanger_VBlood},        
+        { "Willfred the Village Elder", PrefabGUIDs.CHAR_WerewolfChieftain_Human},
+        { "Sir Erwin the Gallant Cavalier", PrefabGUIDs.CHAR_Militia_Fabian_VBlood},
+        { "Gaius the Cursed Champion", PrefabGUIDs.CHAR_Undead_ArenaChampion_VBlood},
+        { "Stavros the Carver", PrefabGUIDs.CHAR_Blackfang_CarverBoss_VBlood},
+        { "Dantos the Forgebinder", PrefabGUIDs.CHAR_Blackfang_Valyr_VBlood},
+        { "Lucile the Venom Alchemist", PrefabGUIDs.CHAR_Blackfang_Lucie_VBlood},
+        { "Jakira the Shadow Huntress", PrefabGUIDs.CHAR_Blackfang_Livith_VBlood},
+        { "Megara the Serpent Queen", PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood}
 
-    public static readonly Dictionary<PrefabGUID, int> VBloodSpawnBuffTierMap = new()
-    {
-        {new(600470494), 1},    // Buff_General_Spawn_VBlood_AlphaWolf
-        {new(148706785), 4},    // Buff_General_Spawn_VBlood_FirstBandits
-        {new(-703593639), 7},   // Buff_General_Spawn_VBlood_EarlyGame
-        {new(-184730451), 10},  // Buff_General_Spawn_VBlood_MidGame
-        {new(-2071666138), 15}, // Buff_General_Spawn_VBlood_EndGame
-        {new(-1163165749), 25}  // Buff_General_Spawn_VBlood_ShardBosses
     };
 
     public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];
@@ -357,7 +352,7 @@ internal static class Familiars
                 return;
             }
 
-            data.UnlockedFamiliars[activeBox].Add(prefabHash);
+            data.FamiliarUnlocks[activeBox].Add(prefabHash);
             SaveFamiliarUnlocksData(steamId, data);
 
             LocalizationService.HandleReply(ctx, $"<color=green>{new PrefabGUID(prefabHash).GetLocalizedName()}</color> added to <color=white>{activeBox}</color>.");
@@ -365,15 +360,15 @@ internal static class Familiars
         else if (unit.ToLower().StartsWith("char")) // search for full and/or partial name match
         {
             // Try using TryGetValue for an exact match (case-sensitive)
-            if (!PrefabCollectionSystem.NameToPrefabGuidDictionary.TryGetValue(unit, out PrefabGUID match))
+            if (!PrefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(unit, out PrefabGUID match))
             {
                 // If exact match is not found, do a case-insensitive search for full or partial matches
-                foreach (var kvp in PrefabCollectionSystem.NameToPrefabGuidDictionary)
+                foreach (var kvp in LocalizationService.PrefabGuidNames)
                 {
                     // Check for a case-insensitive full match
-                    if (kvp.Key.Equals(unit, System.StringComparison.OrdinalIgnoreCase))
+                    if (kvp.Value.Equals(unit, System.StringComparison.OrdinalIgnoreCase))
                     {
-                        match = kvp.Value; // Full match found
+                        match = kvp.Key; // Full match found
                         break;
                     }
                 }
@@ -388,7 +383,7 @@ internal static class Familiars
                     return;
                 }
 
-                data.UnlockedFamiliars[activeBox].Add(match.GuidHash);
+                data.FamiliarUnlocks[activeBox].Add(match.GuidHash);
                 SaveFamiliarUnlocksData(steamId, data);
 
                 LocalizationService.HandleReply(ctx, $"<color=green>{match.GetLocalizedName()}</color> (<color=yellow>{match.GuidHash}</color>) added to <color=white>{activeBox}</color>.");
@@ -414,12 +409,14 @@ internal static class Familiars
             ReturnFamiliar(playerPosition, familiar);
         }
 
+        /*
         if (familiar.ShouldRelocate())
         {
             Core.Log.LogWarning($"Familiar {familiar.GetPrefabGuid().GetLocalizedName()} stuck, relocating!");
             PreventDisableFamiliar(familiar);
             ReturnFamiliar(playerPosition, familiar);
         }
+        */
     }
     static bool ShouldRelocate(this Entity familiar)
     {
@@ -429,6 +426,13 @@ internal static class Familiars
         }
 
         return false;
+    }
+    public static void SetPreCombatPosition(Entity playerCharacter, Entity familiar)
+    {
+        familiar.With((ref AggroConsumer aggroConsumer) =>
+        {
+            aggroConsumer.PreCombatPosition = playerCharacter.GetPosition();
+        });
     }
     public static void HandleFamiliarEnteringCombat(Entity playerCharacter, Entity familiar)
     {
@@ -441,6 +445,8 @@ internal static class Familiars
         }
 
         familiar.With((ref Follower follower) => follower.ModeModifiable._Value = 1);
+
+        SetPreCombatPosition(playerCharacter, familiar);
         TryReturnFamiliar(playerCharacter, familiar);
     }
     public static void ReturnFamiliar(float3 position, Entity familiar)
@@ -535,7 +541,7 @@ internal static class Familiars
         {
             PrefabGUID shinyBuff = new(buffsData.FamiliarBuffs[familiarId].FirstOrDefault());
 
-            if (ShinyBuffSpellSchools.TryGetValue(shinyBuff, out string spellSchool) && familiar.TryGetBuffStacks(shinyBuff, out int stacks))
+            if (ShinyBuffSpellSchools.TryGetValue(shinyBuff, out string spellSchool) && familiar.TryGetBuffStacks(shinyBuff, out Entity _, out int stacks))
             {
                 return $"{spellSchool}[<color=white>{stacks}</color>]";
             }
@@ -630,7 +636,7 @@ internal static class Familiars
             LocalizationService.HandleServerReply(EntityManager, user, "Couldn't find active box! Use '<color=white>.fam listboxes</color>' and select one with '<color=white>.fam cb [BoxName]</color>");
             return;
         }
-        else if (!hasActive && LoadFamiliarUnlocksData(steamId).UnlockedFamiliars.TryGetValue(box, out var famKeys))
+        else if (!hasActive && LoadFamiliarUnlocksData(steamId).FamiliarUnlocks.TryGetValue(box, out var famKeys))
         {
             if (boxIndex == -1 && steamId.TryGetBindingIndex(out boxIndex))
             {
@@ -740,10 +746,57 @@ internal static class Familiars
 
     const float MAX_AGGRO_RANGE = 25f;
     const float DISTANCE_AGGRO_BASE = 100f;
-    public static void AddToFamiliarAggroBuffer(Entity playerCharacter, Entity familiar, Entity target) // prioritizing enemy targets?
+    public static void SyncAggro(Entity playerCharacter, Entity familiar)
+    {
+        if (!playerCharacter.TryGetBuffer<InverseAggroBufferElement>(out var inverseAggroBuffer) || inverseAggroBuffer.IsEmpty) return;
+
+        List<Entity> targets = [];
+
+        foreach (InverseAggroBufferElement aggroBufferElement in inverseAggroBuffer)
+        {
+            Entity target = aggroBufferElement.Entity;
+            if (target.Exists()) targets.Add(target);
+        }
+
+        AddToFamiliarAggroBuffer(playerCharacter, familiar, targets);
+    }
+    public static void AddToFamiliarAggroBuffer(Entity playerCharacter, Entity familiar, List<Entity> targets)
     {
         if (!familiar.TryGetBuffer<AggroBuffer>(out var buffer)) return;
-        else if (target.GetPrefabGuid().Equals(_enchantedCross)) return; // see if works to ignore
+
+        // Core.Log.LogWarning($"Adding to aggro buffer for {familiar.GetPrefabGuid().GetLocalizedName()}");
+
+        List<Entity> entities = [];
+        foreach (AggroBuffer aggroBufferEntry in buffer)
+        {
+            entities.Add(aggroBufferEntry.Entity);
+        }
+
+        foreach (Entity target in targets)
+        {
+            if (entities.Contains(target)) continue;
+            else if (target.GetPrefabGuid().Equals(_enchantedCross)) continue;
+            else if (target.TryGetComponent(out BloodConsumeSource bloodConsumeSource)
+                && bloodConsumeSource.BloodQuality >= BLOOD_QUALITY_IGNORE) continue;
+
+            float distance = Vector3.Distance(playerCharacter.GetPosition(), target.GetPosition());
+            float distanceFactor = Mathf.Clamp01(1f - (distance / MAX_AGGRO_RANGE));
+
+            float baseAggro = target.IsVBloodOrGateBoss() ? 400f : 100f;
+            float aggroValue = baseAggro + (DISTANCE_AGGRO_BASE * distanceFactor);
+
+            AggroBuffer aggroBufferElement = new()
+            {
+                DamageValue = aggroValue,
+                Entity = target,
+                Weight = 1f
+            };
+
+            buffer.Add(aggroBufferElement);
+        }
+
+        /*
+        if (target.GetPrefabGuid().Equals(_enchantedCross)) return; // see if works to ignore
 
         bool targetInBuffer = false;
 
@@ -760,9 +813,6 @@ internal static class Familiars
         else if (target.TryGetComponent(out BloodConsumeSource bloodConsumeSource) 
             && bloodConsumeSource.BloodQuality >= BLOOD_QUALITY_IGNORE) return; // make sure this doesn't have unintended effects on targeting vBloods or something | seems good?
 
-        // float distance = Vector3.Distance(playerCharacter.GetPosition(), target.GetPosition());
-        // float aggroValue = target.IsVBloodOrGateBoss() ? 500f : 100f;
-
         float distance = Vector3.Distance(playerCharacter.GetPosition(), target.GetPosition());
         float distanceFactor = Mathf.Clamp01(1f - (distance / MAX_AGGRO_RANGE)); // Closer = 1, Far = 0
 
@@ -772,12 +822,12 @@ internal static class Familiars
         AggroBuffer aggroBufferElement = new()
         {
             DamageValue = aggroValue,
-            NextPlayerCombatBuffSpawnTime = double.MinValue,
             Entity = target,
             Weight = 1f
         };
 
         buffer.Add(aggroBufferElement);
+        */
     }
     public static void FaceYourEnemy(Entity familiar, Entity target)
     {
@@ -822,7 +872,7 @@ internal static class Familiars
 
         return $"<color=green>{new PrefabGUID(familiarId).GetLocalizedName()}</color>";
     }
-    public static void HandleFamiliarPrestige(ChatCommandContext ctx, string statType, int clampedCost) // need to replace first block in command with this method but laterrrr
+    public static void HandleFamiliarPrestige(ChatCommandContext ctx, int clampedCost) // need to replace first block in command with this method but laterrrr
     {
         Entity playerCharacter = ctx.Event.SenderCharacterEntity;
         User user = ctx.User;
@@ -839,23 +889,23 @@ internal static class Familiars
         int familiarId = activeFamiliar.FamiliarId;
 
         FamiliarExperienceData xpData = LoadFamiliarExperienceData(steamId);
-        FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+        FamiliarPrestigeData prestigeData = LoadFamiliarPrestigeData(steamId);
 
         if (!prestigeData.FamiliarPrestige.ContainsKey(familiarId))
         {
-            prestigeData.FamiliarPrestige[familiarId] = new(0, []);
-            SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+            prestigeData.FamiliarPrestige[familiarId] = 0;
+            SaveFamiliarPrestigeData(steamId, prestigeData);
         }
 
-        prestigeData = LoadFamiliarPrestigeData_V2(steamId);
-        List<int> stats = prestigeData.FamiliarPrestige[familiarId].Value;
+        prestigeData = LoadFamiliarPrestigeData(steamId);
 
-        if (prestigeData.FamiliarPrestige[familiarId].Key >= ConfigService.MaxFamiliarPrestiges)
+        if (prestigeData.FamiliarPrestige[familiarId] >= ConfigService.MaxFamiliarPrestiges)
         {
             LocalizationService.HandleReply(ctx, $"Your familiar has already prestiged the maximum number of times! (<color=white>{ConfigService.MaxFamiliarPrestiges}</color>)");
             return;
         }
 
+        /*
         int value = -1;
 
         if (stats.Count < FamiliarPrestigeStats.Count) // if less than max stats parse entry and add if set doesnt already contain
@@ -893,16 +943,20 @@ internal static class Familiars
             LocalizationService.HandleReply(ctx, "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')");
             return;
         }
+        */
 
         if (ServerGameManager.TryRemoveInventoryItem(playerCharacter, _itemSchematic, clampedCost))
         {
-            int prestigeLevel = prestigeData.FamiliarPrestige[familiarId].Key + 1;
-            prestigeData.FamiliarPrestige[familiarId] = new(prestigeLevel, stats);
-            SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+            int prestigeLevel = prestigeData.FamiliarPrestige[familiarId] + 1;
+            prestigeData.FamiliarPrestige[familiarId] = prestigeLevel;
+            SaveFamiliarPrestigeData(steamId, prestigeData);
 
             Entity familiar = GetActiveFamiliar(playerCharacter);
             ModifyUnitStats(familiar, xpData.FamiliarExperience[familiarId].Key, steamId, familiarId);
 
+            LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
+
+            /*
             if (value == -1)
             {
                 LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level!");
@@ -911,10 +965,11 @@ internal static class Familiars
             {
                 LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]; the accumulated knowledge allowed them to retain their level! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
             }
+            */
         }
         else
         {
-            LocalizationService.HandleReply(ctx, "Failed to remove schematics from your inventory! This shouldn't happen and you may want to inform the developer.");
+            LocalizationService.HandleReply(ctx, "Failed to remove schematics from your inventory!");
         }
     }
     public static IEnumerator HandleFamiliarShapeshiftRoutine(User user, Entity playerCharacter, Entity familiar)
@@ -939,55 +994,3 @@ internal static class Familiars
         buffEntity.Remove<Script_Castleman_AdaptLevel_DataShared>();
     }
 }
-
-/*
-public static void ResetAggro(Entity familiar) /// mmm best way for now might be using the following mode
-{
-    if (!familiar.Has<AggroConsumer>()) return;
-    else if (familiar.TryGetBuffer<BuffBuffer>(out var buffer))
-    {
-        foreach (BuffBuffer buff in buffer)
-        {
-            Entity buffEntity = buff.Entity;
-
-            if (buffEntity.Has<InCombatBuff>())
-            {
-                familiar.TryRemoveBuff(buff.PrefabGuid);
-                Core.Log.LogInfo($"Removed in combat buff {buff.PrefabGuid.GetPrefabName()} from familiar {familiar.GetPrefabGuid().GetPrefabName()}!");
-
-                break;
-            }
-        }
-
-        try
-        {
-            if (familiar.TryGetComponent(out BehaviourTreeState behaviourTreeState) && AiUtility.IsInCombat(behaviourTreeState.Value))
-            {
-                ServerGameManager serverGameManager = ServerGameManager;
-                ExtendedGameManager.SetBehaviourTreeState(ref serverGameManager, familiar, GenericEnemyState.Follow);
-
-                Core.Log.LogInfo($"Reset familiar behaviour state to follow on returning!");
-            }
-            else
-            {
-                Core.Log.LogInfo($"Familiar not in combat, no need to reset!");
-            }
-        }
-        catch (Exception e)
-        {
-            Core.Log.LogWarning($"Error resetting familiar behaviour state: {e}");
-        }
-
-        // familiar.TryApplyBuffWithLifeTimeDestroy(_disableAggroBuff, AGGRO_BUFF_DURATION);
-    }
-}
-
-public static void ResetAndDisableAggro(Entity familiar)
-{
-    if (!familiar.Has<AggroConsumer>()) return;
-    else
-    {
-        // familiar.TryApplyBuff(_disableAggroBuff);
-    }
-}
-*/

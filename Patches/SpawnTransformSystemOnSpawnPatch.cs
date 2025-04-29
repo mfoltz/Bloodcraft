@@ -25,6 +25,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID _dracula = new(-327335305);
     static readonly PrefabGUID _monster = new(1233988687);
     static readonly PrefabGUID _solarus = new(-740796338);
+    static readonly PrefabGUID _megara = new(591725925);
     static readonly PrefabGUID _divineAngel = new(-1737346940);
     static readonly PrefabGUID _fallenAngel = new(-76116724);
 
@@ -32,8 +33,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID _draculaVisual = new(-1923843097);
     static readonly PrefabGUID _monsterVisual = new(-2067402784);
     static readonly PrefabGUID _solarusVisual = new(178225731);
-
-    static readonly HashSet<PrefabGUID> _unitPrefabGuidsToModify = [_manticore, _dracula, _monster, _solarus, _divineAngel, _fallenAngel];
+    static readonly PrefabGUID _megaraVisual = new(-2104035188); // educated guess this is the purple aura for corrupted blood units
 
     static readonly List<PrefabGUID> _variantBuffs = // #soon
     [
@@ -56,34 +56,34 @@ internal static class SpawnTransformSystemOnSpawnPatch
                 if (!entity.TryGetComponent(out PrefabGUID prefabGuid)) continue;
                 else if (entity.IsPlayerOwned()) continue;
 
-                if (_unitPrefabGuidsToModify.Contains(prefabGuid))
-                {
-                    if (prefabGuid.Equals(_manticore))
-                    {
-                        HandleManticore(entity);
-                    }
-                    else if (prefabGuid.Equals(_dracula))
-                    {
-                        HandleDracula(entity);
-                    }
-                    else if (prefabGuid.Equals(_monster))
-                    {
-                        HandleMonster(entity);
-                    }
-                    else if (prefabGuid.Equals(_solarus))
-                    {
-                        HandleSolarus(entity);
-                    }
-                    else if (prefabGuid.Equals(_divineAngel))
-                    {
-                        HandleAngel(entity);
-                    }
-                    else if (prefabGuid.Equals(_fallenAngel))
-                    {
-                        HandleFallenAngel(entity);
-                    }
-                }
+                int guidHash = prefabGuid.GuidHash;
 
+                switch (guidHash)
+                {
+                    case -393555055: // Manticore
+                        HandleManticore(entity);
+                        break;
+                    case -327335305: // Dracula
+                        HandleDracula(entity);
+                        break;
+                    case 1233988687: // Monster
+                        HandleMonster(entity);
+                        break;
+                    case -740796338: // Solarus
+                        HandleSolarus(entity);
+                        break;
+                    case 591725925: // Megara
+                        HandleMegara(entity);
+                        break;
+                    case -1737346940: // Divine Angel
+                        HandleDivineAngel(entity);
+                        break;
+                    case -76116724: // Fallen Angel
+                        HandleFallenAngel(entity);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         catch (Exception ex)
@@ -143,7 +143,19 @@ internal static class SpawnTransformSystemOnSpawnPatch
 
         Buffs.HandleShinyBuff(entity, _draculaVisual);
     }
-    static void HandleAngel(Entity entity)
+    static void HandleMegara(Entity entity)
+    {
+        entity.Remove<DynamicallyWeakenAttackers>();
+
+        SetLevel(entity);
+        SetAttackSpeed(entity);
+        SetHealth(entity);
+        SetPower(entity);
+        // SetMoveSpeed(entity, 2.5f, 3.5f); // should probably wait till fighting her before tuning >_>
+
+        Buffs.HandleShinyBuff(entity, _megaraVisual);
+    }
+    static void HandleDivineAngel(Entity entity)
     {
         SetAttackSpeed(entity);
         SetHealth(entity);
@@ -170,7 +182,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     {
         entity.With((ref AbilityBar_Shared abilityBarShared) =>
         {
-            abilityBarShared.AttackSpeed._Value = 2f;
+            abilityBarShared.AbilityAttackSpeed._Value = 2f;
             abilityBarShared.PrimaryAttackSpeed._Value = 2f;
         });
     }

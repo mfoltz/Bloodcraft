@@ -1,8 +1,10 @@
+using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
+using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -11,6 +13,7 @@ using static Bloodcraft.Systems.Legacies.BloodManager;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
+using static Bloodcraft.Utilities.Progression.ModifyUnitStatBuffSettings;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
 
@@ -45,38 +48,40 @@ internal static class BloodCommands
             return;
         }
 
-        ulong steamID = ctx.Event.User.PlatformId;
-        IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+        ulong steamId = ctx.Event.User.PlatformId;
+        IBloodLegacy handler = BloodLegacyFactory.GetBloodHandler(bloodType);
 
-        if (bloodHandler == null)
+        if (handler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid blood legacy.");
             return;
         }
 
-        var data = bloodHandler.GetLegacyData(steamID);
+        var data = handler.GetLegacyData(steamId);
         int progress = (int)(data.Value - ConvertLevelToXp(data.Key));
 
-        int prestigeLevel = steamID.TryGetPlayerPrestiges(out var prestiges) ? prestiges[BloodSystem.BloodTypeToPrestigeMap[bloodType]] : 0;
+        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[BloodSystem.BloodPrestigeTypes[bloodType]] : 0;
 
         if (data.Key > 0)
         {
-            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamID, bloodHandler)}%</color>) in <color=red>{bloodHandler.GetBloodType()}</color>!");
+            LocalizationService.HandleReply(ctx, $"You're level [<color=white>{data.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] with <color=yellow>{progress}</color> <color=#FFC0CB>essence</color> (<color=white>{BloodSystem.GetLevelProgress(steamId, handler)}%</color>) in <color=red>{handler.GetBloodType()}</color>!");
 
-            if (steamID.TryGetPlayerBloodStats(out var bloodStats) && bloodStats.TryGetValue(bloodType, out var stats))
+            if (steamId.TryGetPlayerBloodStats(out var bloodTypeStats) && bloodTypeStats.TryGetValue(bloodType, out var bloodStatTypes))
             {
-                List<KeyValuePair<BloodStatType, string>> bonusBloodStats = [];
+                List<KeyValuePair<BloodStatType, string>> bloodLegacyStats = [];
 
-                foreach (var stat in stats)
+                foreach (BloodStatType bloodStatType in bloodStatTypes)
                 {
-                    float bonus = CalculateScaledBloodBonus(bloodHandler, steamID, bloodType, stat);
-                    string bonusString = (bonus * 100).ToString("F1") + "%";
-                    bonusBloodStats.Add(new KeyValuePair<BloodStatType, string>(stat, bonusString));
+                    if (!TryGetScaledModifyUnitLegacyStat(handler, playerCharacter, steamId, bloodType, 
+                        bloodStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
+
+                    string bloodStatString = (statValue * 100).ToString("F1") + "%";
+                    bloodLegacyStats.Add(new KeyValuePair<BloodStatType, string>(bloodStatType, bloodStatString));
                 }
 
-                for (int i = 0; i < bonusBloodStats.Count; i += 6)
+                for (int i = 0; i < bloodLegacyStats.Count; i += 6)
                 {
-                    var batch = bonusBloodStats.Skip(i).Take(6);
+                    var batch = bloodLegacyStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     LocalizationService.HandleReply(ctx, $"<color=red>{bloodType}</color> Stats: {bonuses}");
                 }
@@ -88,7 +93,7 @@ internal static class BloodCommands
         }
         else
         {
-            LocalizationService.HandleReply(ctx, $"No progress in <color=red>{bloodHandler.GetBloodType()}</color> yet.");
+            LocalizationService.HandleReply(ctx, $"No progress in <color=red>{handler.GetBloodType()}</color> yet.");
         }
     }
 
@@ -251,7 +256,7 @@ internal static class BloodCommands
         var bloodStatsWithCaps = Enum.GetValues(typeof(BloodStatType))
             .Cast<BloodStatType>()
             .Select((stat, index) =>
-                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Misc.FormatPercentStatValue(BloodStatValues[stat])}</color>")
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Misc.FormatPercentStatValue(BloodStatBaseCaps[stat])}</color>")
             .ToList();
 
         if (bloodStatsWithCaps.Count == 0)
@@ -298,7 +303,7 @@ internal static class BloodCommands
             return;
         }
 
-        var BloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+        var BloodHandler = BloodLegacyFactory.GetBloodHandler(bloodType);
         if (BloodHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid blood legacy.");

@@ -1,12 +1,11 @@
-﻿using Bloodcraft.Patches;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Patches;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Expertise;
-using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
 using ProjectM.Network;
-using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;
@@ -19,10 +18,14 @@ internal static class PrestigeManager
     static EntityManager EntityManager => Core.EntityManager;
 
     const int EXO_PRESTIGES = 100;
+    public class PrestigePerk
+    {
 
-    static readonly PrefabGUID _experienceBuff = new(1280015305); // AB_BatVampire_BatStorm_ProjectileSpawnerBuff
-    static readonly PrefabGUID _expertiseBuff = new(2114888655);  // AB_VHunter_Leader_Whirlwind_Channel
-    static readonly PrefabGUID _legacyBuff = new(-1381763893);    // AB_Blood_BloodStorm_PostBuffAttack
+    }
+
+    static readonly PrefabGUID _experienceBuff = PrefabGUIDs.AB_BatVampire_BatStorm_ProjectileSpawnerBuff;
+    static readonly PrefabGUID _expertiseBuff = PrefabGUIDs.AB_VHunter_Leader_Whirlwind_Channel;
+    static readonly PrefabGUID _legacyBuff = PrefabGUIDs.AB_Blood_BloodStorm_PostBuffAttack;
 
     public static readonly Dictionary<PrestigeType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
     {
@@ -161,6 +164,33 @@ internal static class PrestigeManager
                 return (false, default);
             }
         },
+        { PrestigeType.TwinBladesExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerTwinBladesExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.DaggersExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerDaggersExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { PrestigeType.ClawsExpertise, steamID =>
+            {
+                if (steamID.TryGetPlayerClawsExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
         { PrestigeType.WorkerLegacy, steamID =>
             {
                 if (steamID.TryGetPlayerWorkerLegacy(out var data))
@@ -241,6 +271,15 @@ internal static class PrestigeManager
                 }
                 return (false, default);
             }
+        },
+        { PrestigeType.CorruptionLegacy, steamID =>
+            {
+                if (steamID.TryGetPlayerCorruptionLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
         }
     };
 
@@ -261,6 +300,9 @@ internal static class PrestigeManager
         { PrestigeType.WhipExpertise, (steamID, data) => steamID.SetPlayerWhipExpertise(data) },
         { PrestigeType.UnarmedExpertise, (steamID, data) => steamID.SetPlayerUnarmedExpertise(data) },
         { PrestigeType.FishingPoleExpertise, (steamID, data) => steamID.SetPlayerFishingPoleExpertise(data) },
+        { PrestigeType.TwinBladesExpertise, (steamID, data) => steamID.SetPlayerTwinBladesExpertise(data) },
+        { PrestigeType.DaggersExpertise, (steamID, data) => steamID.SetPlayerDaggersExpertise(data) },
+        { PrestigeType.ClawsExpertise, (steamID, data) => steamID.SetPlayerClawsExpertise(data) },
         { PrestigeType.WorkerLegacy, (steamID, data) => steamID.SetPlayerWorkerLegacy(data) },
         { PrestigeType.WarriorLegacy, (steamID, data) => steamID.SetPlayerWarriorLegacy(data) },
         { PrestigeType.ScholarLegacy, (steamID, data) => steamID.SetPlayerScholarLegacy(data) },
@@ -269,7 +311,8 @@ internal static class PrestigeManager
         { PrestigeType.DraculinLegacy, (steamID, data) => steamID.SetPlayerDraculinLegacy(data) },
         { PrestigeType.ImmortalLegacy, (steamID, data) => steamID.SetPlayerImmortalLegacy(data) },
         { PrestigeType.CreatureLegacy, (steamID, data) => steamID.SetPlayerCreatureLegacy(data) },
-        { PrestigeType.BruteLegacy, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }
+        { PrestigeType.BruteLegacy, (steamID, data) => steamID.SetPlayerBruteLegacy(data) },
+        { PrestigeType.CorruptionLegacy, (steamID, data) => steamID.SetPlayerCorruptionLegacy(data) }
     };
 
     public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxLevel = new()
@@ -289,6 +332,9 @@ internal static class PrestigeManager
         { PrestigeType.WhipExpertise, ConfigService.MaxExpertiseLevel },
         { PrestigeType.UnarmedExpertise, ConfigService.MaxExpertiseLevel },
         { PrestigeType.FishingPoleExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.TwinBladesExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.DaggersExpertise, ConfigService.MaxExpertiseLevel },
+        { PrestigeType.ClawsExpertise, ConfigService.MaxExpertiseLevel },
         { PrestigeType.WorkerLegacy, ConfigService.MaxBloodLevel },
         { PrestigeType.WarriorLegacy, ConfigService.MaxBloodLevel },
         { PrestigeType.ScholarLegacy, ConfigService.MaxBloodLevel },
@@ -297,7 +343,8 @@ internal static class PrestigeManager
         { PrestigeType.DraculinLegacy, ConfigService.MaxBloodLevel },
         { PrestigeType.ImmortalLegacy, ConfigService.MaxBloodLevel },
         { PrestigeType.CreatureLegacy, ConfigService.MaxBloodLevel },
-        { PrestigeType.BruteLegacy, ConfigService.MaxBloodLevel }
+        { PrestigeType.BruteLegacy, ConfigService.MaxBloodLevel },
+        { PrestigeType.CorruptionLegacy, ConfigService.MaxBloodLevel }
     };
 
     public static readonly Dictionary<PrestigeType, int> PrestigeTypeToMaxPrestiges = new()
@@ -317,6 +364,9 @@ internal static class PrestigeManager
         { PrestigeType.WhipExpertise, ConfigService.MaxExpertisePrestiges },
         { PrestigeType.UnarmedExpertise, ConfigService.MaxExpertisePrestiges },
         { PrestigeType.FishingPoleExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.TwinBladesExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.DaggersExpertise, ConfigService.MaxExpertisePrestiges },
+        { PrestigeType.ClawsExpertise, ConfigService.MaxExpertisePrestiges },
         { PrestigeType.WorkerLegacy, ConfigService.MaxLegacyPrestiges },
         { PrestigeType.WarriorLegacy, ConfigService.MaxLegacyPrestiges },
         { PrestigeType.ScholarLegacy, ConfigService.MaxLegacyPrestiges },
@@ -325,7 +375,8 @@ internal static class PrestigeManager
         { PrestigeType.DraculinLegacy, ConfigService.MaxLegacyPrestiges },
         { PrestigeType.ImmortalLegacy, ConfigService.MaxLegacyPrestiges },
         { PrestigeType.CreatureLegacy, ConfigService.MaxLegacyPrestiges },
-        { PrestigeType.BruteLegacy, ConfigService.MaxLegacyPrestiges }
+        { PrestigeType.BruteLegacy, ConfigService.MaxLegacyPrestiges },
+        { PrestigeType.CorruptionLegacy, ConfigService.MaxLegacyPrestiges }
     };
     public static void DisplayPrestigeInfo(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, int prestigeLevel, int maxPrestigeLevel)
     {
@@ -393,9 +444,9 @@ internal static class PrestigeManager
                prestigeData.TryGetValue(parsedPrestigeType, out var prestigeLevel) &&
                prestigeLevel < PrestigeTypeToMaxPrestiges[parsedPrestigeType];
     }
-    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestigeHandler handler, KeyValuePair<int, float> xpData)
+    public static void PerformPrestige(ChatCommandContext ctx, ulong steamId, PrestigeType parsedPrestigeType, IPrestige handler, KeyValuePair<int, float> xpData)
     {
-        handler.Prestige(steamId);
+        handler.DoPrestige(steamId);
 
         if (!steamId.TryGetPlayerPrestiges(out var prestigeData)) return;
         int updatedPrestigeLevel = prestigeData[parsedPrestigeType];
@@ -416,7 +467,7 @@ internal static class PrestigeManager
 
         LevelingSystem.SetLevel(playerCharacter);
 
-        List<int> buffs = Configuration.ParseConfigIntegerString(ConfigService.PrestigeBuffs);
+        List<int> buffs = Configuration.ParseIntegersFromString(ConfigService.PrestigeBuffs);
         PrefabGUID buffPrefab = new(buffs[prestigeLevel - 1]);
         if (!buffPrefab.GuidHash.Equals(0)) Buffs.TryApplyPermanentBuff(playerCharacter, buffPrefab);
 
@@ -461,11 +512,11 @@ internal static class PrestigeManager
 
         string totalEffectString = (combinedFactor * 100).ToString("F2") + "%";
 
-        if (BloodSystem.BloodTypeToPrestigeMap.ContainsValue(parsedPrestigeType))
+        if (parsedPrestigeType.ToString().Contains("Legacy"))
         {
             Buffs.TryApplyBuff(playerCharacter, _legacyBuff);
         }
-        else if (WeaponSystem.WeaponPrestigeMap.ContainsValue(parsedPrestigeType))
+        else if (parsedPrestigeType.ToString().Contains("Expertise"))
         {
             if (playerCharacter.TryApplyAndGetBuff(_expertiseBuff, out Entity buffEntity))
             {

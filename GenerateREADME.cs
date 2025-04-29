@@ -105,7 +105,7 @@ internal static class GenerateREADME
 
                 if (commandMatch.Groups["adminOnly"].Success)
                 {
-                    bool.TryParse(commandMatch.Groups["adminOnly"].Value, out adminOnly);
+                    adminOnly = bool.TryParse(commandMatch.Groups["adminOnly"].Value, out adminOnly) && adminOnly;
                 }
 
                 string usage = commandMatch.Groups["usage"].Success ? commandMatch.Groups["usage"].Value : string.Empty;

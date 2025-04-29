@@ -1,22 +1,23 @@
-﻿using ProjectM;
+﻿using Bloodcraft.Interfaces;
+using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
 using Unity.Entities;
 
 namespace Bloodcraft.Systems.Professions;
-internal static class EquipmentManager
+internal static class EquipmentQualityManager
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    const float MAX_DURABILITY_MULTIPLIER = 1f;
-    const float MAX_WEAPON_MULTIPLIER = 0.1f;
-    const float MAX_ARMOR_MULTIPLIER = 0.1f;
-    const float MAX_SOURCE_MULTIPLIER = 0.1f;
+    const float MAX_DURABILITY_BONUS = 1f;
+    const float MAX_WEAPON_BONUS = 0.1f;
+    const float MAX_ARMOR_BONUS = 0.1f;
+    const float MAX_MAGIC_BONUS = 0.1f;
 
     const int MAX_PROFESSION_LEVEL = 100;
     public static void ApplyEquipmentStats(ulong steamId, Entity equipmentEntity)
     {
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.GetPrefabGuid());
+        IProfession handler = ProfessionFactory.GetProfession(equipmentEntity.GetPrefabGuid());
 
         int professionLevel = handler.GetProfessionData(steamId).Key;
         float scaledBonus = 0f;
@@ -46,7 +47,7 @@ internal static class EquipmentManager
     }
     public static void ApplyEquipmentStats(int professionLevel, Entity equipmentEntity)
     {
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(equipmentEntity.GetPrefabGuid());
+        IProfession handler = ProfessionFactory.GetProfession(equipmentEntity.GetPrefabGuid());
         float scaledBonus = 0f;
 
         if (equipmentEntity.Has<Durability>())
@@ -72,16 +73,16 @@ internal static class EquipmentManager
             buffer[i] = statBuff;
         }
     }
-    static float CalculateStatBonus(IProfessionHandler handler, int professionLevel)
+    static float CalculateStatBonus(IProfession handler, int professionLevel)
     {
         if (handler == null)
             return 0;
 
         float equipmentMultiplier = handler switch
         {
-            BlacksmithingHandler => MAX_WEAPON_MULTIPLIER,
-            TailoringHandler => MAX_ARMOR_MULTIPLIER,
-            EnchantingHandler => MAX_SOURCE_MULTIPLIER,
+            BlacksmithingProfession => MAX_WEAPON_BONUS,
+            TailoringProfession => MAX_ARMOR_BONUS,
+            EnchantingProfession => MAX_MAGIC_BONUS,
             _ => 0
         };
 
@@ -89,7 +90,7 @@ internal static class EquipmentManager
     }
     static float CalculateDurabilityBonus(int professionLevel)
     {
-        return 1 + (MAX_DURABILITY_MULTIPLIER * (professionLevel / (float)MAX_PROFESSION_LEVEL));
+        return 1 + (MAX_DURABILITY_BONUS * (professionLevel / (float)MAX_PROFESSION_LEVEL));
     }
     public static int CalculateProfessionLevelOfEquipmentFromMaxDurability(Entity equipmentEntity)
     {
@@ -99,7 +100,7 @@ internal static class EquipmentManager
         float prefabMaxDurability = prefabEntity.GetMaxDurability();
 
         float durabilityRatio = equipmentMaxDurability / prefabMaxDurability - 1f;
-        int professionLevel = (int)(durabilityRatio * MAX_PROFESSION_LEVEL / MAX_DURABILITY_MULTIPLIER);
+        int professionLevel = (int)(durabilityRatio * MAX_PROFESSION_LEVEL / MAX_DURABILITY_BONUS);
 
         return Math.Clamp(professionLevel, 0, MAX_PROFESSION_LEVEL);
     }

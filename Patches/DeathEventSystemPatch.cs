@@ -37,11 +37,11 @@ internal static class DeathEventListenerSystemPatch
 
     [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
     [HarmonyPostfix]
-    static void OnUpdatePostfix(DeathEventListenerSystem __instance)
+    static unsafe void OnUpdatePostfix(DeathEventListenerSystem __instance)
     {
         if (!Core._initialized) return;
 
-        NativeArray<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArray<DeathEvent>(Allocator.Temp);
+        using NativeAccessor<DeathEvent> deathEvents = __instance._DeathEventQuery.ToComponentDataArrayAccessor<DeathEvent>();
 
         ComponentLookup<Movement> movementLookup = __instance.GetComponentLookup<Movement>(true);
         ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
@@ -49,11 +49,13 @@ internal static class DeathEventListenerSystemPatch
         ComponentLookup<UnitLevel> unitLevelLookup = __instance.GetComponentLookup<UnitLevel>(true);
         ComponentLookup<Minion> minionLookup = __instance.GetComponentLookup<Minion>(true);
         ComponentLookup<VBloodConsumeSource> vBloodConsumeSourceLookup = __instance.GetComponentLookup<VBloodConsumeSource>(true);
-
+        
         try
         {
-            foreach (DeathEvent deathEvent in deathEvents)
+            for (int i = 0; i < deathEvents.Length; i++)
             {
+                DeathEvent deathEvent = deathEvents[i];
+
                 if (!ValidateTarget(deathEvent, ref blockFeedBuffLookup, ref traderLookup, ref unitLevelLookup, ref vBloodConsumeSourceLookup)) continue;
                 else if (movementLookup.HasComponent(deathEvent.Died))
                 {
@@ -68,7 +70,7 @@ internal static class DeathEventListenerSystemPatch
                         {
                             Source = deathSource,
                             Target = deathEvent.Died,
-                            DeathParticipants = Progression.GetDeathParticipantsV2(deathSource),
+                            DeathParticipants = Progression.GetDeathParticipants(deathSource),
                             ScrollingTextDelay = 0f
                         };
 
@@ -99,7 +101,7 @@ internal static class DeathEventListenerSystemPatch
         }
         finally
         {
-            deathEvents.Dispose();
+            // deathEvents.Dispose();
         }
     }
     static Entity ValidateSource(Entity source)

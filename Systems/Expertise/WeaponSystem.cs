@@ -1,5 +1,5 @@
-﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -11,6 +11,7 @@ using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponSystem
@@ -153,6 +154,33 @@ internal static class WeaponSystem
                 }
                 return (false, default);
             }
+        },
+        { WeaponType.TwinBlades, steamID =>
+            {
+                if (steamID.TryGetPlayerTwinBladesExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Daggers, steamID =>
+            {
+                if (steamID.TryGetPlayerDaggersExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
+        },
+        { WeaponType.Claws, steamID =>
+            {
+                if (steamID.TryGetPlayerClawsExpertise(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
         }
     };
     public static readonly Dictionary<WeaponType, Action<ulong, KeyValuePair<int, float>>> SetExtensionMap = new()
@@ -169,9 +197,13 @@ internal static class WeaponSystem
         { WeaponType.Longbow, (steamID, data) => steamID.SetPlayerLongbowExpertise(data) },
         { WeaponType.Whip, (steamID, data) => steamID.SetPlayerWhipExpertise(data) },
         { WeaponType.Unarmed, (steamID, data) => steamID.SetPlayerUnarmedExpertise(data) },
-        { WeaponType.FishingPole, (steamID, data) => steamID.SetPlayerFishingPoleExpertise(data) }
+        { WeaponType.FishingPole, (steamID, data) => steamID.SetPlayerFishingPoleExpertise(data) },
+        { WeaponType.TwinBlades, (steamID, data) => steamID.SetPlayerTwinBladesExpertise(data) },
+        { WeaponType.Daggers, (steamID, data) => steamID.SetPlayerDaggersExpertise(data) },
+        { WeaponType.Claws, (steamID, data) => steamID.SetPlayerClawsExpertise(data) }
     };
-    public static readonly Dictionary<WeaponType, PrestigeType> WeaponPrestigeMap = new()
+    public static IReadOnlyDictionary<WeaponType, PrestigeType> WeaponPrestigeTypes => _weaponPrestigeTypes;
+    static readonly Dictionary<WeaponType, PrestigeType> _weaponPrestigeTypes = new()
     {
         { WeaponType.Sword, PrestigeType.SwordExpertise },
         { WeaponType.Axe, PrestigeType.AxeExpertise },
@@ -185,7 +217,10 @@ internal static class WeaponSystem
         { WeaponType.Longbow, PrestigeType.LongbowExpertise },
         { WeaponType.Whip, PrestigeType.WhipExpertise },
         { WeaponType.Unarmed, PrestigeType.UnarmedExpertise },
-        { WeaponType.FishingPole, PrestigeType.FishingPoleExpertise }
+        { WeaponType.FishingPole, PrestigeType.FishingPoleExpertise },
+        { WeaponType.TwinBlades, PrestigeType.TwinBladesExpertise },
+        { WeaponType.Daggers, PrestigeType.DaggersExpertise },
+        { WeaponType.Claws, PrestigeType.ClawsExpertise }
     };
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
@@ -217,7 +252,7 @@ internal static class WeaponSystem
 
             if (steamId.TryGetPlayerPrestiges(out var prestiges))
             {
-                if (prestiges.TryGetValue(WeaponPrestigeMap[weaponType], out var expertisePrestige))
+                if (prestiges.TryGetValue(WeaponPrestigeTypes[weaponType], out var expertisePrestige))
                 {
                     changeFactor -= (_prestigeRatesReducer * expertisePrestige);
                 }
@@ -230,7 +265,7 @@ internal static class WeaponSystem
 
             expertiseValue *= changeFactor * groupMultiplier;
 
-            IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            IWeaponExpertise handler = WeaponExpertiseFactory.GetExpertise(weaponType);
             if (handler != null)
             {
                 SaveExpertiseExperience(steamId, handler, expertiseValue, out bool leveledUp, out int newLevel);
@@ -246,7 +281,7 @@ internal static class WeaponSystem
         if (isVBlood) return ExpertiseValue * _vBloodExpertiseMultiplier;
         else return ExpertiseValue * _unitExpertiseMultiplier;
     }
-    public static void SaveExpertiseExperience(ulong steamId, IWeaponHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
+    public static void SaveExpertiseExperience(ulong steamId, IWeaponExpertise handler, float gainedXP, out bool leveledUp, out int newLevel)
     {
         var xpData = handler.GetExpertiseData(steamId);
         int currentLevel = xpData.Key;
@@ -276,7 +311,7 @@ internal static class WeaponSystem
 
         handler.SetExpertiseData(steamId, new KeyValuePair<int, float>(newLevel, newExperience));
     }
-    public static void NotifyPlayer(Entity playerCharacter, Entity userEntity, User user, ulong steamId, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponHandler handler, float delay)
+    public static void NotifyPlayer(Entity playerCharacter, Entity userEntity, User user, ulong steamId, WeaponType weaponType, float gainedXP, bool leveledUp, int newLevel, IWeaponExpertise handler, float delay)
     {
         int gainedIntXP = (int)gainedXP;
         int levelProgress = GetLevelProgress(steamId, handler);
@@ -334,7 +369,7 @@ internal static class WeaponSystem
         ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctGeneric, userEntity);
         // delay += DELAY_ADD;
     }
-    public static int GetLevelProgress(ulong steamID, IWeaponHandler handler)
+    public static int GetLevelProgress(ulong steamID, IWeaponExpertise handler)
     {
         int currentLevel = GetLevel(steamID, handler);
         float currentXP = GetXp(steamID, handler);
@@ -347,20 +382,20 @@ internal static class WeaponSystem
 
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
     }
-    static float GetXp(ulong steamID, IWeaponHandler handler)
+    static float GetXp(ulong steamID, IWeaponExpertise handler)
     {
         var xpData = handler.GetExpertiseData(steamID);
         return xpData.Value;
     }
-    public static int GetLevel(ulong steamID, IWeaponHandler handler)
+    public static int GetLevel(ulong steamID, IWeaponExpertise handler)
     {
         var xpData = handler.GetExpertiseData(steamID);
         return xpData.Key;
     }
     public static WeaponType GetWeaponTypeFromWeaponEntity(Entity weaponEntity)
     {
-        if (weaponEntity == Entity.Null) return WeaponType.Unarmed;
-        string weaponCheck = weaponEntity.Read<PrefabGUID>().GetPrefabName();
+        if (!weaponEntity.HasValue()) return WeaponType.Unarmed;
+        string weaponCheck = weaponEntity.GetPrefabGuid().GetPrefabName();
 
         return Enum.GetValues(typeof(WeaponType))
             .Cast<WeaponType>()

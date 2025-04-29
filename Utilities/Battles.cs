@@ -3,14 +3,21 @@ using Stunlock.Core;
 using VampireCommandFramework;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
-using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager_V2;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Familiars.FamiliarUnlockSystem;
-using static Bloodcraft.Utilities.Familiars;
+using static Bloodcraft.Core;
+using System.Reflection;
 
 namespace Bloodcraft.Utilities;
 internal static class Battles
 {
+    const string SANGUIS = "Sanguis";
+    const string SANGUIS_DATA_CLASS = "Sanguis.Core+DataStructures";
+    const string SANGUIS_DATA_PROPERTY = "PlayerTokens";
+    const string SANGUIS_CONFIG_CLASS = "Sanguis.Plugin";
+    const string SANGUIS_CONFIG_PROPERTY = "TokensPerMinute";
+    const string SANGUIS_SAVE_METHOD = "SavePlayerTokens";
     public static bool TryGetMatch(this HashSet<(ulong, ulong)> hashSet, ulong value, out (ulong, ulong) matchingPair)
     {
         matchingPair = default;
@@ -43,7 +50,7 @@ internal static class Battles
 
         return false;
     }
-    public static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData_V2 prestigeData, List<int> battleGroup, ref List<string> familiars)
+    public static void BuildBattleGroupDetailsReply(ulong steamId, FamiliarBuffsData buffsData, FamiliarPrestigeData prestigeData, List<int> battleGroup, ref List<string> familiars)
     {
         foreach (int famKey in battleGroup)
         {
@@ -68,15 +75,72 @@ internal static class Battles
 
             if (!prestigeData.FamiliarPrestige.ContainsKey(famKey))
             {
-                prestigeData.FamiliarPrestige[famKey] = new(0, []);
-                SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+                prestigeData.FamiliarPrestige[famKey] = 0;
+                SaveFamiliarPrestigeData(steamId, prestigeData);
             }
             else
             {
-                prestiges = prestigeData.FamiliarPrestige[famKey].Key;
+                prestiges = prestigeData.FamiliarPrestige[famKey];
             }
 
             familiars.Add($"<color=white>{battleGroup.IndexOf(famKey) + 1}</color>: <color=green>{famName}</color>{(buffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color>" : "")} [<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]");
+        }
+    }
+    static void DetectSanguis()
+    {
+        try
+        {
+            Assembly sanguis = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name == SANGUIS);
+
+            if (sanguis != null)
+            {
+                Type config = sanguis.GetType(SANGUIS_CONFIG_CLASS);
+                Type data = sanguis.GetType(SANGUIS_DATA_CLASS);
+
+                if (config != null && data != null)
+                {
+                    PropertyInfo configProperty = config.GetProperty(SANGUIS_CONFIG_PROPERTY, BindingFlags.Static | BindingFlags.Public);
+                    PropertyInfo dataProperty = data.GetProperty(SANGUIS_DATA_PROPERTY, BindingFlags.Static | BindingFlags.Public);
+
+                    if (configProperty != null && dataProperty != null)
+                    {
+                        MethodInfo saveTokens = data.GetMethod(SANGUIS_SAVE_METHOD, BindingFlags.Static | BindingFlags.Public);
+                        Dictionary<ulong, (int Tokens, (DateTime Start, DateTime DailyLogin) TimeData)> playerTokens = (Dictionary<ulong, (int, (DateTime, DateTime))>)(dataProperty?.GetValue(null) ?? new());
+                        int tokensTransferred = (int)(configProperty?.GetValue(null) ?? 0);
+
+                        if (saveTokens != null && playerTokens.Any() && tokensTransferred > 0)
+                        {
+                            BattleService._awardSanguis = true;
+                            BattleService._tokensProperty = dataProperty;
+                            BattleService._tokensTransferred = tokensTransferred;
+                            BattleService._saveTokens = saveTokens;
+                            BattleService._playerTokens = playerTokens;
+
+                            Log.LogInfo($"{SANGUIS} registered for familiar battle rewards!");
+                        }
+                        else
+                        {
+                            Log.LogWarning($"Couldn't get {SANGUIS_SAVE_METHOD} | {SANGUIS_CONFIG_PROPERTY} from {SANGUIS}!");
+                        }
+                    }
+                    else
+                    {
+                        Log.LogWarning($"Couldn't get {SANGUIS_DATA_PROPERTY} | {SANGUIS_CONFIG_PROPERTY} from {SANGUIS}!");
+                    }
+                }
+                else
+                {
+                    Log.LogWarning($"Couldn't get {SANGUIS_DATA_CLASS} | {SANGUIS_CONFIG_CLASS} from {SANGUIS}!");
+                }
+            }
+            else
+            {
+                Log.LogInfo($"{SANGUIS} not registered for familiar battle rewards!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Error during {SANGUIS} registration: {ex.Message}");
         }
     }
 
@@ -124,7 +188,7 @@ internal static class Battles
         if (battleGroup.Familiars.Any(x => x != 0))
         {
             FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
-            FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+            FamiliarPrestigeData prestigeData = LoadFamiliarPrestigeData(steamId);
             List<string> familiars = [];
 
             BuildBattleGroupDetailsReply(steamId, buffsData, prestigeData, battleGroup.Familiars, ref familiars);

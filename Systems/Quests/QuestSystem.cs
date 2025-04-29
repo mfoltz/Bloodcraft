@@ -1,8 +1,11 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Systems.Leveling;
+using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Scripting;
@@ -50,19 +53,20 @@ internal static class QuestSystem
     public static readonly HashSet<PrefabGUID> CraftPrefabs = [];
     public static readonly HashSet<PrefabGUID> ResourcePrefabs = [];
 
-    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
+    static readonly PrefabGUID _invulnerableBuff = Buffs.AdminInvulnerableBuff;
 
-    static readonly PrefabGUID _graveyardSkeleton = new(1395549638);
-    static readonly PrefabGUID _forestWolf = new(-1418430647);
+    static readonly PrefabGUID _graveyardSkeleton = PrefabGUIDs.CHAR_Undead_SkeletonCrossbow_Graveyard;
+    static readonly PrefabGUID _forestWolf = PrefabGUIDs.CHAR_Forest_Wolf;
 
-    static readonly PrefabGUID _reinforcedBoneSword = new(-796306296);
-    static readonly PrefabGUID _reinforcedBoneMace = new(-1998017941);
+    static readonly PrefabGUID _reinforcedBoneSword = PrefabGUIDs.Item_Weapon_Sword_T02_Bone_Reinforced;
+    static readonly PrefabGUID _reinforcedBoneMace = PrefabGUIDs.Item_Weapon_Mace_T02_Bone_Reinforced;
 
-    static readonly PrefabGUID _standardWood = new(-1593377811);
-    static readonly PrefabGUID _hallowedWood = new(-2014020548);
-    static readonly PrefabGUID _gloomWood = new(-1740500585);
-    static readonly PrefabGUID _cursedWood = new(608397239);
-    static readonly PrefabGUID _itemIngredientStone = new(-1531666018);
+    static readonly PrefabGUID _standardWood = PrefabGUIDs.Item_Ingredient_Wood_Standard;
+    static readonly PrefabGUID _hallowedWood = PrefabGUIDs.Item_Ingredient_Wood_Hallow;
+    static readonly PrefabGUID _gloomWood = PrefabGUIDs.Item_Ingredient_Wood_Gloom;
+    static readonly PrefabGUID _cursedWood = PrefabGUIDs.Item_Ingredient_Wood_Cursed;
+    static readonly PrefabGUID _corruptedWood = PrefabGUIDs.Item_Ingredient_Wood_CorruptedOak;
+    static readonly PrefabGUID _itemIngredientStone = PrefabGUIDs.Item_Ingredient_Stone;
 
     const int DEFAULT_MAX_LEVEL = 90;
     const float XP_PERCENTAGE = 0.03f;
@@ -71,12 +75,12 @@ internal static class QuestSystem
 
     static readonly List<PrefabGUID> _perfectGems =
     [
-        Prefabs.Item_Ingredient_Gem_Amethyst_T04,
-        Prefabs.Item_Ingredient_Gem_Ruby_T04,
-        Prefabs.Item_Ingredient_Gem_Sapphire_T04,
-        Prefabs.Item_Ingredient_Gem_Emerald_T04,
-        Prefabs.Item_Ingredient_Gem_Topaz_T04,
-        Prefabs.Item_Ingredient_Gem_Miststone_T04
+        PrefabGUIDs.Item_Ingredient_Gem_Amethyst_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Ruby_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Sapphire_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Emerald_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Topaz_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Miststone_T04
     ];
     public enum QuestType
     {
@@ -87,14 +91,16 @@ internal static class QuestSystem
     {
         Kill,
         Craft,
-        Gather
+        Gather,
+        Fish
     }
 
     static readonly List<TargetType> _targetTypes =
     [
         TargetType.Kill,
         TargetType.Craft,
-        TargetType.Gather
+        TargetType.Gather,
+        TargetType.Fish
     ];
 
     static readonly Dictionary<QuestType, int> _questMultipliers = new()
@@ -121,72 +127,37 @@ internal static class QuestSystem
         { "T05", (50, ConfigService.MaxLevel) },
         { "T06", (60, ConfigService.MaxLevel) },
         { "T07", (70, ConfigService.MaxLevel) }
-        //{ "T08", (70, ConfigService.MaxLevel) },
-        //{ "T09", (80, ConfigService.MaxLevel) }
     };
 
-    static readonly Dictionary<string, (int MinLevel, int MaxLevel)> _consumableTierLevelRangeMap = new()
+    static readonly Dictionary<PrefabGUID, (int MinLevel, int MaxLevel)> _consumableTierLevelRangeMap = new()
     {
-        { "Salve_Vermin", (0, 30) },
-        { "PhysicalPowerPotion_T01", (15, ConfigService.MaxLevel) },
-        { "SpellPowerPotion_T01", (15, ConfigService.MaxLevel) },
-        { "WranglersPotion_T01", (15, ConfigService.MaxLevel) },
-        { "SunResistancePotion_T01", (15, ConfigService.MaxLevel) },
-        { "HealingPotion_T01", (15, ConfigService.MaxLevel) },
-        { "FireResistancePotion_T01", (15, ConfigService.MaxLevel) },
-        { "DuskCaller", (50, ConfigService.MaxLevel) },
-        { "SpellLeechPotion_T01", (50, ConfigService.MaxLevel) },
-        { "PhysicalPowerPotion_T02", (65, ConfigService.MaxLevel) },
-        { "SpellPowerPotion_T02", (65, ConfigService.MaxLevel) },
-        { "HealingPotion_T02", (40, ConfigService.MaxLevel) },
-        { "HolyResistancePotion_T01", (40, ConfigService.MaxLevel) },
-        { "HolyResistancePotion_T02", (40, ConfigService.MaxLevel) }
+        { PrefabGUIDs.Item_Consumable_Salve_Vermin, (0, 30) },
+        { PrefabGUIDs.Item_Consumable_PhysicalPowerPotion_T01, (15, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_SpellPowerPotion_T01, (15, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_WranglersPotion_T01, (15, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_SunResistancePotion_T01, (15, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_HealingPotion_T01, (15, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_FireResistancePotion_T01, (15, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_DuskCaller, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_PhysicalPowerPotion_T02, (65, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_SpellPowerPotion_T02, (65, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_HealingPotion_T02, (40, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_HolyResistancePotion_T01, (40, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Consumable_HolyResistancePotion_T02, (40, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Bat_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Beast_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Blasphemous_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Crow_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Prowler_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Raven_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Twisted_T01, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Elixir_Werewolf_T01, (50, ConfigService.MaxLevel) }
     };
 
-    static readonly Dictionary<ulong, Dictionary<QuestType, (int Progress, bool Active)>> _questCoroutines = [];
+    static readonly List<int> _amounts = [500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000];
+
+    static readonly Dictionary<ulong, Dictionary<QuestType, (int Progress, bool Active)>> _delayedQuestMessages = [];
     static readonly WaitForSeconds _questMessageDelay = new(0.1f);
-    static HashSet<PrefabGUID> GetKillPrefabsForLevel(int playerLevel)
-    {
-        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
-        HashSet<PrefabGUID> prefabs = [];
-
-        foreach (PrefabGUID prefabGuid in QuestService.TargetCache.Keys)
-        {
-            if (prefabMap.TryGetValue(prefabGuid, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
-            {
-                bool isVBlood = targetEntity.Has<VBloodUnit>();
-
-                if (!isVBlood)
-                {
-                    if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80)
-                    {
-                        prefabs.Add(prefabGuid);
-                    }
-                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
-                    {
-                        prefabs.Add(prefabGuid);
-                    }
-                }
-                else if (isVBlood)
-                {
-                    if (unitLevel.Level._Value > playerLevel)
-                    {
-                        continue;
-                    }
-                    else if (playerLevel > DEFAULT_MAX_LEVEL && unitLevel.Level._Value > 80)
-                    {
-                        prefabs.Add(prefabGuid);
-                    }
-                    else if (Math.Abs(unitLevel.Level._Value - playerLevel) <= 10)
-                    {
-                        prefabs.Add(prefabGuid);
-                    }
-                }
-            }
-        }
-
-        return prefabs;
-    }
     static IEnumerable<PrefabGUID> GetKillPrefabsForLevelEnumerable(int playerLevel)
     {
         var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
@@ -195,7 +166,7 @@ internal static class QuestSystem
         {
             if (prefabMap.TryGetValue(prefabGuid, out Entity targetEntity) && targetEntity.TryGetComponent(out UnitLevel unitLevel))
             {
-                bool isVBlood = targetEntity.Has<VBloodUnit>();
+                bool isVBlood = targetEntity.IsVBlood();
                 int level = unitLevel.Level._Value;
 
                 if (isVBlood && level > playerLevel) continue;
@@ -207,48 +178,14 @@ internal static class QuestSystem
             }
         }
     }
-    static HashSet<PrefabGUID> GetCraftPrefabsForLevel(int playerLevel)
-    {
-        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
-
-        HashSet<PrefabGUID> prefabs = [];
-
-        foreach (PrefabGUID prefabGuid in CraftPrefabs)
-        {
-            if (!prefabMap.TryGetValue(prefabGuid, out Entity prefab) || !prefab.TryGetComponent(out ItemData itemData)) continue;
-
-            string prefabName = prefabGuid.GetPrefabName();
-            string tier;
-
-            Match match = _regex.Match(prefabName);
-
-            if (match.Success) tier = match.Value;
-            else continue;
-
-            if (itemData.ItemType == ItemType.Equippable)
-            {
-                if (IsWithinLevelRange(tier, playerLevel, _equipmentTierLevelRangeMap))
-                {
-                    prefabs.Add(prefabGuid);
-                }
-            }
-            else if (itemData.ItemType == ItemType.Consumable)
-            {
-                if (IsConsumableWithinLevelRange(prefabName, playerLevel, _consumableTierLevelRangeMap))
-                {
-                    prefabs.Add(prefabGuid);
-                }
-            }
-        }
-
-        return prefabs;
-    }
     static IEnumerable<PrefabGUID> GetCraftPrefabsForLevelEnumerable(int playerLevel)
     {
         var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
 
         foreach (PrefabGUID prefabGuid in CraftPrefabs)
         {
+            Core.Log.LogWarning($"CraftPrefab: {prefabGuid.GetPrefabName()}");
+
             if (prefabMap.TryGetValue(prefabGuid, out Entity prefab) && prefab.TryGetComponent(out ItemData itemData))
             {
                 string prefabName = prefabGuid.GetPrefabName();
@@ -260,53 +197,14 @@ internal static class QuestSystem
 
                 if (itemData.ItemType == ItemType.Equippable)
                 {
-                    if (IsWithinLevelRange(tier, playerLevel, _equipmentTierLevelRangeMap)) yield return prefabGuid;
+                    if (IsWithinLevelRange(tier, playerLevel)) yield return prefabGuid;
                 }
                 else if (itemData.ItemType == ItemType.Consumable)
                 {
-                    if (IsConsumableWithinLevelRange(prefabName, playerLevel, _consumableTierLevelRangeMap)) yield return prefabGuid;
+                    if (IsConsumableWithinLevelRange(prefabGuid, playerLevel)) yield return prefabGuid;
                 }
             }
         }
-    }
-    static HashSet<PrefabGUID> GetGatherPrefabsForLevel(int playerLevel)
-    {
-        var prefabMap = PrefabCollectionSystem._PrefabGuidToEntityMap;
-
-        HashSet<PrefabGUID> prefabs = [];
-
-        foreach (PrefabGUID prefab in ResourcePrefabs)
-        {
-            if (prefabMap.TryGetValue(prefab, out Entity prefabEntity) && prefabEntity.TryGetComponent(out EntityCategory entityCategory) && entityCategory.ResourceLevel._Value <= playerLevel)
-            {
-                var buffer = prefabEntity.ReadBuffer<DropTableBuffer>();
-
-                foreach (DropTableBuffer drop in buffer)
-                {
-                    if (drop.DropTrigger == DropTriggerType.YieldResourceOnDamageTaken)
-                    {
-                        Entity dropTable = prefabMap[drop.DropTableGuid];
-                        if (!dropTable.Has<DropTableDataBuffer>()) continue;
-
-                        var dropTableDataBuffer = dropTable.ReadBuffer<DropTableDataBuffer>();
-                        foreach (DropTableDataBuffer dropTableData in dropTableDataBuffer)
-                        {
-                            string prefabName = dropTableData.ItemGuid.GetPrefabName();
-
-                            if (prefabName.Contains("Item_Ingredient"))
-                            {
-                                prefabs.Add(dropTableData.ItemGuid);
-                                break;
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        return prefabs;
     }
     static IEnumerable<PrefabGUID> GetGatherPrefabsForLevelEnumerable(int playerLevel)
     {
@@ -342,23 +240,20 @@ internal static class QuestSystem
             }
         }
     }
-    static bool IsWithinLevelRange(string tier, int playerLevel, Dictionary<string, (int MinLevel, int MaxLevel)> tierMap)
+    static bool IsWithinLevelRange(string tier, int playerLevel)
     {
-        if (tierMap.TryGetValue(tier, out var range))
+        if (_equipmentTierLevelRangeMap.TryGetValue(tier, out var levelRange))
         {
-            return playerLevel >= range.MinLevel && playerLevel <= range.MaxLevel;
+            return playerLevel >= levelRange.MinLevel && playerLevel <= levelRange.MaxLevel;
         }
 
         return false;
     }
-    static bool IsConsumableWithinLevelRange(string prefabName, int playerLevel, Dictionary<string, (int MinLevel, int MaxLevel)> tierMap)
+    static bool IsConsumableWithinLevelRange(PrefabGUID prefabGuid, int playerLevel)
     {
-        foreach (var kvp in tierMap)
+        if (_consumableTierLevelRangeMap.TryGetValue(prefabGuid, out var levelRange))
         {
-            if (prefabName.Contains(kvp.Key))
-            {
-                return playerLevel >= kvp.Value.MinLevel && playerLevel <= kvp.Value.MaxLevel;
-            }
+            return playerLevel >= levelRange.MinLevel && playerLevel <= levelRange.MaxLevel;
         }
 
         return false;
@@ -380,8 +275,7 @@ internal static class QuestSystem
                 else if (questType.Equals(QuestType.Daily)) target = _graveyardSkeleton;
                 else if (questType.Equals(QuestType.Weekly)) target = _forestWolf;
 
-                // requiredAmount = _random.Next(6, 8) * _questMultipliers[questType];
-                requiredAmount = 6 * _questMultipliers[questType]; // mmm want to redo this a bit eventually but need to ignore for now, 6 it is
+                requiredAmount = 6 * _questMultipliers[questType];
                 string targetLower = target.GetPrefabName().ToLower();
 
                 if ((targetLower.Contains("vblood") || targetLower.Contains("vhunter")))
@@ -418,27 +312,17 @@ internal static class QuestSystem
                 else if (questType.Equals(QuestType.Daily)) target = _standardWood;
                 else if (questType.Equals(QuestType.Weekly)) target = _itemIngredientStone;
 
-                List<int> amounts = [500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000];
-                requiredAmount = (int)(amounts.ElementAt(_random.Next(amounts.Count)) * _questMultipliers[questType] * _resourceYieldModifier);
+                requiredAmount = (int)(_amounts.ElementAt(_random.Next(_amounts.Count)) * _questMultipliers[questType] * _resourceYieldModifier);
 
-                if (target.Equals(_cursedWood) || target.Equals(_gloomWood) || target.Equals(_hallowedWood)) requiredAmount /= 2;
+                if (target.Equals(_cursedWood) || target.Equals(_gloomWood) || target.Equals(_hallowedWood) || target.Equals(_corruptedWood)) requiredAmount /= 2;
+                break;
+            case TargetType.Fish:
+                requiredAmount = _random.Next(2, 4) * _questMultipliers[questType];
                 break;
             default:
                 throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest goal type encountered when generating quest objective!");
         }
         return new QuestObjective { Goal = goal, Target = target, RequiredAmount = requiredAmount };
-    }
-    static HashSet<PrefabGUID> GetGoalPrefabsForLevel(TargetType goal, int level)
-    {
-        HashSet<PrefabGUID> prefabs = goal switch
-        {
-            TargetType.Kill => GetKillPrefabsForLevel(level),
-            TargetType.Craft => GetCraftPrefabsForLevel(level),
-            TargetType.Gather => GetGatherPrefabsForLevel(level),
-            _ => throw new ArgumentOutOfRangeException(goal.ToString(), "Unknown quest goal type encountered when generating quest objective!")
-        };
-
-        return prefabs;
     }
     static IEnumerable<PrefabGUID> GetGoalPrefabsForLevelEnumerable(TargetType goal, int level)
     {
@@ -447,6 +331,7 @@ internal static class QuestSystem
             TargetType.Kill => GetKillPrefabsForLevelEnumerable(level),
             TargetType.Craft => GetCraftPrefabsForLevelEnumerable(level),
             TargetType.Gather => GetGatherPrefabsForLevelEnumerable(level),
+            TargetType.Fish => [PrefabGUIDs.FakeItem_AnyFish],
             _ => throw new ArgumentOutOfRangeException(
                 goal.ToString(), 
                 "Unknown quest goal type encountered when generating quest objective!")
@@ -632,21 +517,21 @@ internal static class QuestSystem
 
                 questData[quest.Key] = new(quest.Value.Objective, quest.Value.Progress + amount, quest.Value.LastReset);
 
-                if (!_questCoroutines.ContainsKey(steamId))
+                if (!_delayedQuestMessages.ContainsKey(steamId))
                 {
-                    _questCoroutines[steamId] = [];
+                    _delayedQuestMessages[steamId] = [];
                 }
 
-                if (!_questCoroutines[steamId].ContainsKey(quest.Key))
+                if (!_delayedQuestMessages[steamId].ContainsKey(quest.Key))
                 {
                     var questEntry = (questData[quest.Key].Progress, true);
-                    _questCoroutines[steamId].Add(quest.Key, questEntry);
+                    _delayedQuestMessages[steamId].Add(quest.Key, questEntry);
 
                     QuestProgressDelayRoutine(questData, quest, user, steamId, colorType).Start();
                 }
                 else
                 {
-                    _questCoroutines[steamId][quest.Key] = (questData[quest.Key].Progress, true);
+                    _delayedQuestMessages[steamId][quest.Key] = (questData[quest.Key].Progress, true);
                 }
 
                 if (quest.Value.Objective.RequiredAmount <= questData[quest.Key].Progress && !quest.Value.Objective.Complete)
@@ -754,11 +639,11 @@ internal static class QuestSystem
         if (_expertiseAndLegacies)
         {
             // Get current weapon and blood handlers
-            Expertise.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
-            IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            Interfaces.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
+            IWeaponExpertise expertiseHandler = WeaponExpertiseFactory.GetExpertise(weaponType);
 
             BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter.GetBlood());
-            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+            IBloodLegacy bloodHandler = BloodLegacyFactory.GetBloodHandler(bloodType);
 
             if (expertiseHandler != null)
             {
@@ -834,8 +719,8 @@ internal static class QuestSystem
         }
         else if (_expertise)
         {
-            Expertise.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
-            IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+            Interfaces.WeaponType weaponType = WeaponManager.GetCurrentWeaponType(playerCharacter);
+            IWeaponExpertise expertiseHandler = WeaponExpertiseFactory.GetExpertise(weaponType);
 
             if (expertiseHandler != null)
             {
@@ -850,7 +735,7 @@ internal static class QuestSystem
         else if (_legacy)
         {
             BloodType bloodType = BloodManager.GetCurrentBloodType(playerCharacter.GetBlood());
-            IBloodHandler bloodHandler = BloodHandlerFactory.GetBloodHandler(bloodType);
+            IBloodLegacy bloodHandler = BloodLegacyFactory.GetBloodHandler(bloodType);
 
             if (bloodHandler != null)
             {
@@ -871,13 +756,13 @@ internal static class QuestSystem
         LevelingSystem.NotifyPlayer(playerCharacter, steamId, gainedXP, leveledUp, newLevel, DELAY);
         return "<color=#FFC0CB>experience</color>";
     }
-    static string GainExpertiseExperience(Entity playerCharacter, Entity userEntity, User user, ulong steamId, Expertise.WeaponType weaponType, IWeaponHandler handler, float gainedXP)
+    static string GainExpertiseExperience(Entity playerCharacter, Entity userEntity, User user, ulong steamId, Interfaces.WeaponType weaponType, IWeaponExpertise handler, float gainedXP)
     {
         WeaponSystem.SaveExpertiseExperience(steamId, handler, gainedXP, out bool leveledUp, out int newLevel);
         WeaponSystem.NotifyPlayer(playerCharacter, userEntity, user, steamId, weaponType, gainedXP, leveledUp, newLevel, handler, DELAY);
         return "<color=#FFC0CB>expertise</color>";
     }
-    static string GainLegacyExperience(Entity playerCharacter, Entity userEntity, User user, ulong steamId, BloodType bloodType, IBloodHandler handler, float gainedXP)
+    static string GainLegacyExperience(Entity playerCharacter, Entity userEntity, User user, ulong steamId, BloodType bloodType, IBloodLegacy handler, float gainedXP)
     {
         BloodSystem.SaveBloodExperience(steamId, handler, gainedXP, out bool leveledUp, out int newLevel);
         BloodSystem.NotifyPlayer(playerCharacter, userEntity, user, steamId, bloodType, gainedXP, leveledUp, newLevel, handler, DELAY);
@@ -929,11 +814,11 @@ internal static class QuestSystem
             LocalizationService.HandleServerReply(EntityManager, user, message);
         }
 
-        _questCoroutines[steamId].Remove(quest.Key);
+        _delayedQuestMessages[steamId].Remove(quest.Key);
 
-        if (_questCoroutines[steamId].Count == 0)
+        if (_delayedQuestMessages[steamId].Count == 0)
         {
-            _questCoroutines.Remove(steamId);
+            _delayedQuestMessages.Remove(steamId);
         }
     }
 }

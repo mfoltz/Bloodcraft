@@ -1,8 +1,4 @@
 ﻿using BepInEx.Configuration;
-using Lidgren.Network;
-using ProjectM.Network;
-using ProjectM.Terrain;
-using Stunlock.Network;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -28,14 +24,14 @@ internal static class ConfigService
     static readonly Lazy<bool> _bearFormDash = new(() => GetConfigValue<bool>("BearFormDash"));
     public static bool BearFormDash => _bearFormDash.Value;
 
-    static readonly Lazy<bool> _bleedingEdge = new(() => GetConfigValue<bool>("BleedingEdge"));
-    public static bool BleedingEdge => _bleedingEdge.Value;
-
-    static readonly Lazy<bool> _heavyFrame = new(() => GetConfigValue<bool>("HeavyFrame"));
-    public static bool HeavyFrame => _heavyFrame.Value;
-
     static readonly Lazy<int> _primalJewelCost = new(() => GetConfigValue<int>("PrimalJewelCost"));
     public static int PrimalJewelCost => _primalJewelCost.Value;
+
+    static readonly Lazy<string> _bleedingEdge = new(() => GetConfigValue<string>("BleedingEdge"));
+    public static string BleedingEdge => _bleedingEdge.Value;
+
+    static readonly Lazy<bool> _twilightArsenal = new(() => GetConfigValue<bool>("TwilightArsenal"));
+    public static bool TwilightArsenal => _twilightArsenal.Value;
 
     static readonly Lazy<bool> _starterKit = new(() => GetConfigValue<bool>("StarterKit"));
     public static bool StarterKit => _starterKit.Value;
@@ -238,8 +234,8 @@ internal static class ConfigService
     static readonly Lazy<float> _spellCritDamage = new(() => GetConfigValue<float>("SpellCritDamage"));
     public static float SpellCritDamage => _spellCritDamage.Value;
 
-    static readonly Lazy<bool> _bloodSystem = new(() => GetConfigValue<bool>("BloodSystem"));
-    public static bool LegacySystem => _bloodSystem.Value;
+    static readonly Lazy<bool> _legacySystem = new(() => GetConfigValue<bool>("LegacySystem"));
+    public static bool LegacySystem => _legacySystem.Value;
 
     static readonly Lazy<int> _maxLegacyPrestiges = new(() => GetConfigValue<int>("MaxLegacyPrestiges"));
     public static int MaxLegacyPrestiges => _maxLegacyPrestiges.Value;
@@ -283,8 +279,8 @@ internal static class ConfigService
     static readonly Lazy<float> _resourceYield = new(() => GetConfigValue<float>("ResourceYield"));
     public static float ResourceYield => _resourceYield.Value;
 
-    static readonly Lazy<float> _bloodDrain = new(() => GetConfigValue<float>("BloodDrain"));
-    public static float BloodDrain => _bloodDrain.Value;
+    static readonly Lazy<float> _reducedBloodDrain = new(() => GetConfigValue<float>("ReducedBloodDrain"));
+    public static float ReducedBloodDrain => _reducedBloodDrain.Value;
 
     static readonly Lazy<float> _spellCooldownRecoveryRate = new(() => GetConfigValue<float>("SpellCooldownRecoveryRate"));
     public static float SpellCooldownRecoveryRate => _spellCooldownRecoveryRate.Value;
@@ -298,11 +294,11 @@ internal static class ConfigService
     static readonly Lazy<float> _minionDamage = new(() => GetConfigValue<float>("MinionDamage"));
     public static float MinionDamage => _minionDamage.Value;
 
-    static readonly Lazy<float> _shieldAbsorb = new(() => GetConfigValue<float>("ShieldAbsorb"));
-    public static float ShieldAbsorb => _shieldAbsorb.Value;
+    static readonly Lazy<float> _abilityAttackSpeed = new(() => GetConfigValue<float>("AbilityAttackSpeed"));
+    public static float AbilityAttackSpeed => _abilityAttackSpeed.Value;
 
-    static readonly Lazy<float> _bloodEfficiency = new(() => GetConfigValue<float>("BloodEfficiency"));
-    public static float BloodEfficiency => _bloodEfficiency.Value;
+    static readonly Lazy<float> _corruptionDamageReduction = new(() => GetConfigValue<float>("CorruptionDamageReduction"));
+    public static float CorruptionDamageReduction => _corruptionDamageReduction.Value;
 
     static readonly Lazy<bool> _professionSystem = new(() => GetConfigValue<bool>("ProfessionSystem"));
     public static bool ProfessionSystem => _professionSystem.Value;
@@ -388,92 +384,74 @@ internal static class ConfigService
     static readonly Lazy<int> _prestigeCostItemQuantity = new(() => GetConfigValue<int>("PrestigeCostItemQuantity"));
     public static int PrestigeCostItemQuantity => _prestigeCostItemQuantity.Value;
 
-    static readonly Lazy<bool> _softSynergies = new(() => GetConfigValue<bool>("SoftSynergies"));
-    public static bool SoftSynergies => _softSynergies.Value;
+    static readonly Lazy<bool> _classSystem = new(() => GetConfigValue<bool>("ClassSystem"));
+    public static bool ClassSystem => _classSystem.Value;
 
-    static readonly Lazy<bool> _hardSynergies = new(() => GetConfigValue<bool>("HardSynergies"));
-    public static bool HardSynergies => _hardSynergies.Value;
+    // static readonly Lazy<bool> _lockedSynergies = new(() => GetConfigValue<bool>("LockedSynergies"));
+    // public static bool LockedSynergies => _lockedSynergies.Value;
 
-    static readonly Lazy<bool> _classSpellSchoolOnHitEffects = new(() => GetConfigValue<bool>("ClassSpellSchoolOnHitEffects"));
-    public static bool ClassSpellSchoolOnHitEffects => _classSpellSchoolOnHitEffects.Value;
+    static readonly Lazy<bool> _classOnHitEffects = new(() => GetConfigValue<bool>("ClassOnHitEffects"));
+    public static bool ClassOnHitEffects => _classOnHitEffects.Value;
 
     static readonly Lazy<float> _onHitProcChance = new(() => GetConfigValue<float>("OnHitProcChance"));
     public static float OnHitProcChance => _onHitProcChance.Value;
 
-    static readonly Lazy<float> _statSynergyMultiplier = new(() => GetConfigValue<float>("StatSynergyMultiplier"));
-    public static float StatSynergyMultiplier => _statSynergyMultiplier.Value;
+    static readonly Lazy<float> _synergyMultiplier = new(() => GetConfigValue<float>("SynergyMultiplier"));
+    public static float SynergyMultiplier => _synergyMultiplier.Value;
 
-    static readonly Lazy<string> _bloodKnightWeapon = new(() => GetConfigValue<string>("BloodKnightWeapon"));
-    public static string BloodKnightWeapon => _bloodKnightWeapon.Value;
+    static readonly Lazy<string> _bloodKnightWeaponSynergies = new(() => GetConfigValue<string>("BloodKnightWeaponSynergies"));
+    public static string BloodKnightWeaponSynergies => _bloodKnightWeaponSynergies.Value;
 
-    static readonly Lazy<string> _bloodKnightBlood = new(() => GetConfigValue<string>("BloodKnightBlood"));
-    public static string BloodKnightBlood => _bloodKnightBlood.Value;
+    static readonly Lazy<string> _bloodKnightBloodSynergies = new(() => GetConfigValue<string>("BloodKnightBloodSynergies"));
+    public static string BloodKnightBloodSynergies => _bloodKnightBloodSynergies.Value;
 
-    static readonly Lazy<string> _demonHunterWeapon = new(() => GetConfigValue<string>("DemonHunterWeapon"));
-    public static string DemonHunterWeapon => _demonHunterWeapon.Value;
+    static readonly Lazy<string> _demonHunterWeaponSynergies = new(() => GetConfigValue<string>("DemonHunterWeaponSynergies"));
+    public static string DemonHunterWeaponSynergies => _demonHunterWeaponSynergies.Value;
 
-    static readonly Lazy<string> _demonHunterBlood = new(() => GetConfigValue<string>("DemonHunterBlood"));
-    public static string DemonHunterBlood => _demonHunterBlood.Value;
+    static readonly Lazy<string> _demonHunterBloodSynergies = new(() => GetConfigValue<string>("DemonHunterBloodSynergies"));
+    public static string DemonHunterBloodSynergies => _demonHunterBloodSynergies.Value;
 
-    static readonly Lazy<string> _vampireLordWeapon = new(() => GetConfigValue<string>("VampireLordWeapon"));
-    public static string VampireLordWeapon => _vampireLordWeapon.Value;
+    static readonly Lazy<string> _vampireLordWeaponSynergies = new(() => GetConfigValue<string>("VampireLordWeaponSynergies"));
+    public static string VampireLordWeaponSynergies => _vampireLordWeaponSynergies.Value;
 
-    static readonly Lazy<string> _vampireLordBlood = new(() => GetConfigValue<string>("VampireLordBlood"));
-    public static string VampireLordBlood => _vampireLordBlood.Value;
+    static readonly Lazy<string> _vampireLordBloodSynergies = new(() => GetConfigValue<string>("VampireLordBloodSynergies"));
+    public static string VampireLordBloodSynergies => _vampireLordBloodSynergies.Value;
 
-    static readonly Lazy<string> _shadowBladeWeapon = new(() => GetConfigValue<string>("ShadowBladeWeapon"));
-    public static string ShadowBladeWeapon => _shadowBladeWeapon.Value;
+    static readonly Lazy<string> _shadowBladeWeaponSynergies = new(() => GetConfigValue<string>("ShadowBladeWeaponSynergies"));
+    public static string ShadowBladeWeaponSynergies => _shadowBladeWeaponSynergies.Value;
 
-    static readonly Lazy<string> _shadowBladeBlood = new(() => GetConfigValue<string>("ShadowBladeBlood"));
-    public static string ShadowBladeBlood => _shadowBladeBlood.Value;
+    static readonly Lazy<string> _shadowBladeBloodSynergies = new(() => GetConfigValue<string>("ShadowBladeBloodSynergies"));
+    public static string ShadowBladeBloodSynergies => _shadowBladeBloodSynergies.Value;
 
-    static readonly Lazy<string> _arcaneSorcererWeapon = new(() => GetConfigValue<string>("ArcaneSorcererWeapon"));
-    public static string ArcaneSorcererWeapon => _arcaneSorcererWeapon.Value;
+    static readonly Lazy<string> _arcaneSorcererWeaponSynergies = new(() => GetConfigValue<string>("ArcaneSorcererWeaponSynergies"));
+    public static string ArcaneSorcererWeaponSynergies => _arcaneSorcererWeaponSynergies.Value;
 
-    static readonly Lazy<string> _arcaneSorcererBlood = new(() => GetConfigValue<string>("ArcaneSorcererBlood"));
-    public static string ArcaneSorcererBlood => _arcaneSorcererBlood.Value;
+    static readonly Lazy<string> _arcaneSorcererBloodSynergies = new(() => GetConfigValue<string>("ArcaneSorcererBloodSynergies"));
+    public static string ArcaneSorcererBloodSynergies => _arcaneSorcererBloodSynergies.Value;
 
-    static readonly Lazy<string> _deathMageWeapon = new(() => GetConfigValue<string>("DeathMageWeapon"));
-    public static string DeathMageWeapon => _deathMageWeapon.Value;
+    static readonly Lazy<string> _deathMageWeaponSynergies = new(() => GetConfigValue<string>("DeathMageWeaponSynergies"));
+    public static string DeathMageWeaponSynergies => _deathMageWeaponSynergies.Value;
 
-    static readonly Lazy<string> _deathMageBlood = new(() => GetConfigValue<string>("DeathMageBlood"));
-    public static string DeathMageBlood => _deathMageBlood.Value;
+    static readonly Lazy<string> _deathMageBloodSynergies = new(() => GetConfigValue<string>("DeathMageBloodSynergies"));
+    public static string DeathMageBloodSynergies => _deathMageBloodSynergies.Value;
 
     static readonly Lazy<int> _defaultClassSpell = new(() => GetConfigValue<int>("DefaultClassSpell"));
     public static int DefaultClassSpell => _defaultClassSpell.Value;
 
-    static readonly Lazy<string> _bloodKnightBuffs = new(() => GetConfigValue<string>("BloodKnightBuffs"));
-    public static string BloodKnightBuffs => _bloodKnightBuffs.Value;
-
     static readonly Lazy<string> _bloodKnightSpells = new(() => GetConfigValue<string>("BloodKnightSpells"));
     public static string BloodKnightSpells => _bloodKnightSpells.Value;
-
-    static readonly Lazy<string> _demonHunterBuffs = new(() => GetConfigValue<string>("DemonHunterBuffs"));
-    public static string DemonHunterBuffs => _demonHunterBuffs.Value;
 
     static readonly Lazy<string> _demonHunterSpells = new(() => GetConfigValue<string>("DemonHunterSpells"));
     public static string DemonHunterSpells => _demonHunterSpells.Value;
 
-    static readonly Lazy<string> _vampireLordBuffs = new(() => GetConfigValue<string>("VampireLordBuffs"));
-    public static string VampireLordBuffs => _vampireLordBuffs.Value;
-
     static readonly Lazy<string> _vampireLordSpells = new(() => GetConfigValue<string>("VampireLordSpells"));
     public static string VampireLordSpells => _vampireLordSpells.Value;
-
-    static readonly Lazy<string> _shadowBladeBuffs = new(() => GetConfigValue<string>("ShadowBladeBuffs"));
-    public static string ShadowBladeBuffs => _shadowBladeBuffs.Value;
 
     static readonly Lazy<string> _shadowBladeSpells = new(() => GetConfigValue<string>("ShadowBladeSpells"));
     public static string ShadowBladeSpells => _shadowBladeSpells.Value;
 
-    static readonly Lazy<string> _arcaneSorcererBuffs = new(() => GetConfigValue<string>("ArcaneSorcererBuffs"));
-    public static string ArcaneSorcererBuffs => _arcaneSorcererBuffs.Value;
-
     static readonly Lazy<string> _arcaneSorcererSpells = new(() => GetConfigValue<string>("ArcaneSorcererSpells"));
     public static string ArcaneSorcererSpells => _arcaneSorcererSpells.Value;
-
-    static readonly Lazy<string> _deathMageBuffs = new(() => GetConfigValue<string>("DeathMageBuffs"));
-    public static string DeathMageBuffs => _deathMageBuffs.Value;
 
     static readonly Lazy<string> _deathMageSpells = new(() => GetConfigValue<string>("DeathMageSpells"));
     public static string DeathMageSpells => _deathMageSpells.Value;
@@ -486,7 +464,7 @@ internal static class ConfigService
         static readonly Lazy<List<string>> _directoryPaths = new(() =>
         {
             return
-        [
+            [
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME),                                     // 0
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerLeveling"),                   // 1
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Quests"),                           // 2
@@ -499,7 +477,7 @@ internal static class ConfigService
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PlayerBools"),                      // 9
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarEquipment"),   // 10
             Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "Familiars", "FamiliarBattleGroups") // 11
-        ];
+            ];
         });
         public static List<string> DirectoryPaths => _directoryPaths.Value;
 
@@ -529,15 +507,16 @@ internal static class ConfigService
             new ConfigEntryDefinition("General", "ClientCompanion", true, "Enable if using the client companion mod, can configure what's displayed in the client config."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
-            new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled)."),
-            new ConfigEntryDefinition("General", "BearFormDash", true, "Enable or disable bear form dash."),
-            new ConfigEntryDefinition("General", "BleedingEdge", true, "Enable or disable stacking bleed on the final primary attack for slashers."),
-            new ConfigEntryDefinition("General", "HeavyFrame", true, "Enable or disable a heavier feel for the crossbow with faster projectiles."),
-            // new ConfigEntryDefinition("General", "TwilightArsenal", true, "Enable or disable experimental ability replacements on shadow matter weapons."),
+            new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
+            new ConfigEntryDefinition("General", "BearFormDash", false, "Enable or disable bear form dash."),
+            new ConfigEntryDefinition("General", "BleedingEdge", "Slashers, Crossbow, Pistols, TwinBlades", "Enable various weapon-specific changes; some are more experimental than others, see README for details."),
+            new ConfigEntryDefinition("General", "TwilightArsenal", false, "Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs)."),
             new ConfigEntryDefinition("General", "PrimalJewelCost", -77477508, "If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers)."),
+            
             new ConfigEntryDefinition("StarterKit", "StarterKit", false, "Enable or disable the starter kit."),
             new ConfigEntryDefinition("StarterKit", "KitPrefabs", "862477668,-1531666018,-1593377811,1821405450", "Item prefabGuids for starting kit."),
             new ConfigEntryDefinition("StarterKit", "KitQuantities", "500,1000,1000,250", "The quantity of each item in the starter kit."),
+
             new ConfigEntryDefinition("Quests", "QuestSystem", false, "Enable or disable quests (kill, gather, and crafting)."),
             new ConfigEntryDefinition("Quests", "InfiniteDailies", false, "Enable or disable infinite dailies."),
             new ConfigEntryDefinition("Quests", "DailyPerfectChance", 0.1f, "Chance to receive a random perfect gem (can be used to control spell school for primal jewels in gemcutter) when completing daily quests."),
@@ -547,6 +526,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Quests", "RerollDailyAmount", 50, "Cost of prefab for rerolling daily."),
             new ConfigEntryDefinition("Quests", "RerollWeeklyPrefab", -949672483, "Prefab item for rerolling weekly."),
             new ConfigEntryDefinition("Quests", "RerollWeeklyAmount", 50, "Cost of prefab for rerolling weekly. Won't work if already completed for the week."),
+            
             new ConfigEntryDefinition("Leveling", "LevelingSystem", false, "Enable or disable the leveling system."),
             new ConfigEntryDefinition("Leveling", "RestedXPSystem", false, "Enable or disable rested experience for players logging out inside of coffins (half for wooden, full for stone). Prestiging level will reset accumulated rested xp."),
             new ConfigEntryDefinition("Leveling", "RestedXPRate", 0.05f, "Rate of Rested XP accumulation per tick (as a percentage of maximum allowed rested XP, if configured to one tick per hour 20 hours offline in a stone coffin will provide maximum current rested XP)."),
@@ -564,8 +544,9 @@ internal static class ConfigService
             new ConfigEntryDefinition("Leveling", "ExpShare", true, "Enable or disable sharing experience with nearby players (ExpShareDistance) in combat that are within level range (ExpShareLevelRange, this does not apply to players that have prestiged at least once on PvE servers or clan members of the player that does the final blow) along with familiar unlock sharing if enabled (on PvP servers will only apply to clan members)."),
             new ConfigEntryDefinition("Leveling", "ExpShareLevelRange", 10, "Maximum level difference between players allowed for ExpShare, players who have prestiged at least once are exempt from this. Use 0 for no level diff restrictions."),
             new ConfigEntryDefinition("Leveling", "ExpShareDistance", 25f, "Default is ~5 floor tile lengths."),
+            
             new ConfigEntryDefinition("Prestige", "PrestigeSystem", false, "Enable or disable the prestige system (requires leveling to be enabled as well)."),
-            new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level."),
+            new ConfigEntryDefinition("Prestige", "PrestigeBuffs", "1504279833,0,0,0,0,0,0,0,0,0", "The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level (only shroud for first default while reworked)."),
             new ConfigEntryDefinition("Prestige", "PrestigeLevelsToUnlockClassSpells", "0,1,2,3,4,5", "The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 each if you want them unlocked from the start."),
             new ConfigEntryDefinition("Prestige", "MaxLevelingPrestiges", 10, "The maximum number of prestiges a player can reach in leveling."),
             new ConfigEntryDefinition("Prestige", "LevelingPrestigeReducer", 0.05f, "Flat factor by which experience is reduced per increment of prestige in leveling."),
@@ -577,6 +558,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Prestige", "ExoPrestigeRewardQuantity", 500, "The quantity of the reward for exo prestiging."),
             new ConfigEntryDefinition("Prestige", "TrueImmortal", false, "Enable or disable Immortal blood for the duration of exoform."),
             new ConfigEntryDefinition("Prestige", "Leaderboard", true, "Enable or disable the various prestige leaderboard rankings."),
+            
             new ConfigEntryDefinition("Expertise", "ExpertiseSystem", false, "Enable or disable the expertise system."),
             new ConfigEntryDefinition("Expertise", "MaxExpertisePrestiges", 10, "The maximum number of prestiges a player can reach in expertise."),
             new ConfigEntryDefinition("Expertise", "UnarmedSlots", false, "Enable or disable the ability to use extra unarmed spell slots."),
@@ -600,7 +582,8 @@ internal static class ConfigService
             new ConfigEntryDefinition("Expertise", "PhysicalCritDamage", 0.50f, "The base cap for physical critical strike damage."),
             new ConfigEntryDefinition("Expertise", "SpellCritChance", 0.10f, "The base cap for spell critical strike chance."),
             new ConfigEntryDefinition("Expertise", "SpellCritDamage", 0.50f, "The base cap for spell critical strike damage."),
-            new ConfigEntryDefinition("Legacies", "BloodSystem", false, "Enable or disable the blood legacy system."),
+            
+            new ConfigEntryDefinition("Legacies", "LegacySystem", false, "Enable or disable the blood legacy system."),
             new ConfigEntryDefinition("Legacies", "MaxLegacyPrestiges", 10, "The maximum number of prestiges a player can reach in blood legacies."),
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies."),
             new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units."),
@@ -613,21 +596,23 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "PhysicalResistance", 0.10f, "The base cap for physical resistance."),
             new ConfigEntryDefinition("Legacies", "SpellResistance", 0.10f, "The base cap for spell resistance."),
             new ConfigEntryDefinition("Legacies", "ResourceYield", 0.25f, "The base cap for resource yield."),
-            new ConfigEntryDefinition("Legacies", "BloodDrain", 0.5f, "The base cap for blood drain reduction."),
+            new ConfigEntryDefinition("Legacies", "ReducedBloodDrain", 0.5f, "The base cap for reduced blood drain."),
             new ConfigEntryDefinition("Legacies", "SpellCooldownRecoveryRate", 0.10f, "The base cap for spell cooldown recovery rate."),
             new ConfigEntryDefinition("Legacies", "WeaponCooldownRecoveryRate", 0.10f, "The base cap for weapon cooldown recovery rate."),
             new ConfigEntryDefinition("Legacies", "UltimateCooldownRecoveryRate", 0.20f, "The base cap for ultimate cooldown recovery rate."),
             new ConfigEntryDefinition("Legacies", "MinionDamage", 0.25f, "The base cap for minion damage."),
-            new ConfigEntryDefinition("Legacies", "ShieldAbsorb", 0.50f, "The base cap for shield absorb."),
-            new ConfigEntryDefinition("Legacies", "BloodEfficiency", 0.10f, "The base cap for blood efficiency."),
+            new ConfigEntryDefinition("Legacies", "AbilityAttackSpeed", 0.10f, "The base cap for ability attack speed."),
+            new ConfigEntryDefinition("Legacies", "CorruptionDamageReduction", 0.10f, "The base cap for corruption damage reduction."),
+            
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
             new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained."),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes."), // maybe this should be in general >_>
+            
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),
             new ConfigEntryDefinition("Familiars", "ShareUnlocks", false, "Enable or disable sharing unlocks between players in clans or parties (uses exp share distance)."),
             new ConfigEntryDefinition("Familiars", "FamiliarCombat", true, "Enable or disable combat for familiars."),
             new ConfigEntryDefinition("Familiars", "FamiliarPvP", true, "Enable or disable PvP participation for familiars. (if set to false, familiars will be unbound when entering PvP combat)."),
-            new ConfigEntryDefinition("Familiars", "FamiliarBattles", false, "Enable or disable familiar battle system."),
+            new ConfigEntryDefinition("Familiars", "FamiliarBattles", false, "Enable or disable familiar battle system (most likely not working atm after 1.1, use at own risk for now)."),
             new ConfigEntryDefinition("Familiars", "FamiliarPrestige", false, "Enable or disable the prestige system for familiars."),
             new ConfigEntryDefinition("Familiars", "MaxFamiliarPrestiges", 10, "The maximum number of prestiges a familiar can reach."),
             new ConfigEntryDefinition("Familiars", "FamiliarPrestigeStatMultiplier", 0.10f, "The multiplier for applicable stats gained per familiar prestige."),
@@ -642,43 +627,42 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "VBloodUnlockChance", 0.01f, "The chance for a VBlood unlock as a familiar."),
             new ConfigEntryDefinition("Familiars", "PrimalEchoes", false, "Enable or disable acquiring vBloods with configured item reward from exo prestiging (default primal shards) at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable."),
-            new ConfigEntryDefinition("Familiars", "EchoesFactor", 1, "Increase to multiply costs for vBlood purchases. Valid values are integers between 1-4, if outside that range in either direction it will be clamped."),
+            new ConfigEntryDefinition("Familiars", "EchoesFactor", 1, "Increase to multiply costs for vBlood purchases. Valid integers are between 1-4, if values are outside that range they will be clamped."),
             // new ConfigEntryDefinition("Familiars", "TraitChance", 0.2f, "The chance for a trait when unlocking familiars. Guaranteed on second unlock of same unit."),
             // new ConfigEntryDefinition("Familiars", "TraitRerollItemQuantity", 1000, "Quantity of schematics required to reroll familiar trait. It's schematics, forever, because servers never provide sinks for schematics D:<"), // actually maybe vampiricDust
-            new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
+            new ConfigEntryDefinition("Familiars", "ShinyChance", 0.2f, "The chance for a shiny when unlocking familiars (6 total buffs, 1 buff per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff."),
             new ConfigEntryDefinition("Familiars", "ShinyCostItemQuantity", 100, "Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 50-200, if outside that range in either direction it will be clamped."),
             new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped."),
-            new ConfigEntryDefinition("Classes", "SoftSynergies", false, "Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time)."),
-            new ConfigEntryDefinition("Classes", "HardSynergies", false, "Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time)."),
+            
+            new ConfigEntryDefinition("Classes", "ClassSystem", false, "Enable classes without synergy restrictions."),
+            // new ConfigEntryDefinition("Classes", "LockedSynergies", false, "Enforce classes with synergy restrictions."),
             new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),
             new ConfigEntryDefinition("Classes", "ChangeClassQuantity", 750, "Quantity of item required for changing class."),
-            new ConfigEntryDefinition("Classes", "ClassSpellSchoolOnHitEffects", false, "Enable or disable class spell school on hit effects (respective debuff from spell school, leech chill condemn etc)."),
+            new ConfigEntryDefinition("Classes", "ClassOnHitEffects", true, "Enable or disable class spell school on hit effects (chance to proc respective debuff from spell school when dealing damage (leech, chill, condemn etc), second tier effect will proc if first is already present on target."),
             new ConfigEntryDefinition("Classes", "OnHitProcChance", 0.075f, "The chance for a class effect to proc on hit."),
-            new ConfigEntryDefinition("Classes", "StatSynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap."),
-            new ConfigEntryDefinition("Classes", "BloodKnightWeapon", "0,3,5,6", "Blood Knight weapon synergies."),
-            new ConfigEntryDefinition("Classes", "BloodKnightBlood", "1,5,7,10", "Blood Knight blood synergies."),
-            new ConfigEntryDefinition("Classes", "DemonHunterWeapon", "1,2,8,9", "Demon Hunter weapon synergies."),
-            new ConfigEntryDefinition("Classes", "DemonHunterBlood", "2,5,7,9", "Demon Hunter blood synergies"),
-            new ConfigEntryDefinition("Classes", "VampireLordWeapon", "0,4,6,7", "Vampire Lord weapon synergies."),
-            new ConfigEntryDefinition("Classes", "VampireLordBlood", "1,3,8,11", "Vampire Lord blood synergies."),
-            new ConfigEntryDefinition("Classes", "ShadowBladeWeapon", "1,2,6,9", "Shadow Blade weapon synergies."),
-            new ConfigEntryDefinition("Classes", "ShadowBladeBlood", "3,5,7,10", "Shadow Blade blood synergies."),
-            new ConfigEntryDefinition("Classes", "ArcaneSorcererWeapon", "4,7,10,11", "Arcane Sorcerer weapon synergies."),
-            new ConfigEntryDefinition("Classes", "ArcaneSorcererBlood", "0,6,8,10", "Arcane Sorcerer blood synergies."),
-            new ConfigEntryDefinition("Classes", "DeathMageWeapon", "0,4,7,11", "Death Mage weapon synergies."),
-            new ConfigEntryDefinition("Classes", "DeathMageBlood", "2,3,6,9", "Death Mage blood synergies."),
+            new ConfigEntryDefinition("Classes", "SynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap."),
+
+            // eyeing for either revamp or expanding to make up for blood buffs
+            new ConfigEntryDefinition("Classes", "BloodKnightWeaponSynergies", "MaxHealth,PrimaryAttackSpeed,PrimaryLifeLeech,PhysicalPower", "Blood Knight weapon synergies."),
+            new ConfigEntryDefinition("Classes", "BloodKnightBloodSynergies", "DamageReduction,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed", "Blood Knight blood synergies."),
+            new ConfigEntryDefinition("Classes", "DemonHunterWeaponSynergies", "MovementSpeed,PrimaryAttackSpeed,PhysicalCritChance,PhysicalCritDamage", "Demon Hunter weapon synergies."),
+            new ConfigEntryDefinition("Classes", "DemonHunterBloodSynergies", "PhysicalResistance,BloodDrain,WeaponCooldownRecoveryRate,MinionDamage", "Demon Hunter blood synergies"),
+            new ConfigEntryDefinition("Classes", "VampireLordWeaponSynergies", "MaxHealth,SpellLifeLeech,PhysicalPower,SpellPower", "Vampire Lord weapon synergies."),
+            new ConfigEntryDefinition("Classes", "VampireLordBloodSynergies", "DamageReduction,SpellResistance,UltimateCooldownRecoveryRate,CorruptionDamageReduction", "Vampire Lord blood synergies."),
+            new ConfigEntryDefinition("Classes", "ShadowBladeWeaponSynergies", "MovementSpeed,PrimaryAttackSpeed,PhysicalPower,PhysicalCritDamage", "Shadow Blade weapon synergies."),
+            new ConfigEntryDefinition("Classes", "ShadowBladeBloodSynergies", "SpellResistance,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed", "Shadow Blade blood synergies."),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererWeaponSynergies", "SpellLifeLeech,SpellPower,SpellCritChance,SpellCritDamage", "Arcane Sorcerer weapon synergies."),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererBloodSynergies", "HealingReceived,SpellCooldownRecoveryRate,UltimateCooldownRecoveryRate,AbilityAttackSpeed", "Arcane Sorcerer blood synergies."),
+            new ConfigEntryDefinition("Classes", "DeathMageWeaponSynergies", "MaxHealth,SpellLifeLeech,SpellPower,SpellCritDamage", "Death Mage weapon synergies."),
+            new ConfigEntryDefinition("Classes", "DeathMageBloodSynergies", "PhysicalResistance,SpellResistance,SpellCooldownRecoveryRate,MinionDamage", "Death Mage blood synergies."),
+
+            // need to revamp these to some degree and add new spells etc.
             new ConfigEntryDefinition("Classes", "DefaultClassSpell", -433204738, "Default spell (veil of shadow) available to all classes."),
-            new ConfigEntryDefinition("Classes", "BloodKnightBuffs", "1828387635,-534491790,-1055766373,-584203677", "The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs)."),
             new ConfigEntryDefinition("Classes", "BloodKnightSpells", "-880131926,651613264,2067760264,189403977,375131842", "Blood Knight shift spells, granted at levels of prestige."),
-            new ConfigEntryDefinition("Classes", "DemonHunterBuffs", "-154702686,-285745649,-1510965956,-397097531", "The PrefabGUID hashes for demon hunter leveling blood buffs."),
             new ConfigEntryDefinition("Classes", "DemonHunterSpells", "-356990326,-987810170,1071205195,1249925269,-914344112", "Demon Hunter shift spells, granted at levels of prestige."),
-            new ConfigEntryDefinition("Classes", "VampireLordBuffs", "1558171501,997154800,-1413561088,1103099361", "The PrefabGUID hashes for vampire lord leveling blood buffs."),
             new ConfigEntryDefinition("Classes", "VampireLordSpells", "78384915,295045820,-1000260252,91249849,1966330719", "Vampire Lord shift spells, granted at levels of prestige."),
-            new ConfigEntryDefinition("Classes", "ShadowBladeBuffs", "894725875,-1596803256,-993492354,210193036", "The PrefabGUID hashes for shadow blade leveling blood buffs."),
             new ConfigEntryDefinition("Classes", "ShadowBladeSpells", "1019568127,1575317901,1112116762,-358319417,1174831223", "Shadow Blade shift spells, granted at levels of prestige."),
-            new ConfigEntryDefinition("Classes", "ArcaneSorcererBuffs", "1614027598,884683323,-1576592687,-1859298707", "The PrefabGUID hashes for arcane leveling blood buffs."),
             new ConfigEntryDefinition("Classes", "ArcaneSorcererSpells", "247896794,268059675,-242769430,-2053450457,1650878435", "Arcane Sorcerer shift spells, granted at levels of prestige."),
-            new ConfigEntryDefinition("Classes", "DeathMageBuffs", "-901503997,-804597757,1934870645,1201299233", "The PrefabGUID hashes for death mage leveling blood buffs."),
             new ConfigEntryDefinition("Classes", "DeathMageSpells", "-1204819086,481411985,1961570821,2138402840,-1781779733", "Death Mage shift spells, granted at levels of prestige.")
         ];
         public static void InitializeConfig()
@@ -786,7 +770,7 @@ internal static class ConfigService
             }
 
             var configFile = Path.Combine(BepInEx.Paths.ConfigPath, $"{MyPluginInfo.PLUGIN_GUID}.cfg");
-            if (File.Exists(configFile)) CleanAndOrganizeConfig(configFile);
+            if (File.Exists(configFile)) OrganizeConfig(configFile);
         }
         static void UpdateConfigProperty(string key, object configEntry)
         {
@@ -915,7 +899,7 @@ internal static class ConfigService
         }
 
         const string DEFAULT_VALUE_LINE = "# Default value: ";
-        static void CleanAndOrganizeConfig(string configFile)
+        static void OrganizeConfig(string configFile)
         {
             try
             {

@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Shared;
 using Stunlock.Core;
@@ -331,9 +332,9 @@ internal static class Recipes // pending organization and refactoring, should al
             }
 
             recipeRequirementBuffer = prefabEntity.ReadBuffer<RecipeRequirementBuffer>();
-            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = Prefabs.Item_Ingredient_Gemdust, Amount = 8 });
-            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = Prefabs.Item_Ingredient_Plant_PlantFiber, Amount = 16 });
-            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = Prefabs.Item_Ingredient_Pollen, Amount = 24 });
+            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = PrefabGUIDs.Item_Ingredient_Gemdust, Amount = 8 });
+            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = PrefabGUIDs.Item_Ingredient_Plant_PlantFiber, Amount = 16 });
+            recipeRequirementBuffer.Add(new RecipeRequirementBuffer { Guid = PrefabGUIDs.Item_Ingredient_Pollen, Amount = 24 });
         }
 
         if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_batteryCharge, out prefabEntity))

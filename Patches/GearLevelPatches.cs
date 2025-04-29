@@ -5,11 +5,10 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
-using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
-using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Patches;
 
@@ -17,12 +16,10 @@ namespace Bloodcraft.Patches;
 internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSystem_Destroy, ArmorLevelSystem_Spawn, ArmorLevelSystem_Destroy
 {
     static SystemService SystemService => Core.SystemService;
-    static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
+    // static ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystemSpawn => SystemService.ModifyUnitStatBuffSystem_Spawn;
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
-
-    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
 
     static readonly Dictionary<ulong, int> _playerMaxWeaponLevels = [];
 
@@ -34,6 +31,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682408_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -58,6 +56,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         if (!Core._initialized) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -66,15 +65,16 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
 
                 if (_expertise && entityOwner.Owner.TryGetPlayer(out Entity playerCharacter))
                 {
-                    ulong steamId = playerCharacter.GetSteamId();
+                    // ulong steamId = playerCharacter.GetSteamId();
 
                     WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
-                    if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole)) // apply it here since it won't appear in the system naturally as it won't have the buffer till added
+
+                    if (weaponType.Equals(WeaponType.Unarmed) || weaponType.Equals(WeaponType.FishingPole))
                     {
                         // WeaponManager.ApplyWeaponStats(steamId, weaponType, entity);
-
-                        Buffs.RefreshStats(playerCharacter);
                     }
+                    
+                    Buffs.RefreshStats(playerCharacter);
                 }
 
                 if (_leveling && entityOwner.Owner.TryGetPlayer(out playerCharacter))
@@ -131,6 +131,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_1111682356_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -156,6 +157,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -163,7 +165,10 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                 if (!entity.TryGetComponent(out EntityOwner entityOwner) || !entityOwner.Owner.Exists()) continue;
                 else if (entityOwner.Owner.IsPlayer())
                 {
-                    if (entity.Has<ArmorLevel>()) entity.Write(new ArmorLevel { Level = 0f });
+                    entity.HasWith((ref ArmorLevel armorLevel) =>
+                    {
+                        armorLevel.Level = 0f;
+                    });
                 }
             }
         }
@@ -181,6 +186,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_663986227_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -206,6 +212,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         else if (!_leveling) return;
 
         NativeArray<Entity> entities = __instance.__query_663986292_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)

@@ -1,7 +1,9 @@
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
+using Bloodcraft.Patches;
 using HarmonyLib;
+using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
 using UnityEngine;
 using VampireCommandFramework;
@@ -33,6 +35,7 @@ internal class Plugin : BasePlugin
         InitializeConfig();
         CommandRegistry.RegisterAll();
         LoadPlayerData();
+        // ModifyUnitStatsDetour.InitializeCreate();
 
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }

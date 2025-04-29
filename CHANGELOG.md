@@ -1,3 +1,10 @@
+`1.8.0`
+- various changes to features and implementations for VRising 1.1 compatibility
+- units only possess basic core stats (many stats are now 'VampireSpecificAttributes'); additional stats for prestiging familiars are not currently an option and their existing stats (except health) will continue to scale with prestiges (REWORKING)
+- viable options for class and prestige buffs are significantly lessened; replacing class passive buffs with various stat equivalents or some such and reorienting player prestiges, leaving prestige buff config for now but default is empty except for shroud of the forest (REWORKING)
+- most attribute bonuses from Expertise, Legacy and other sources require Eclipse to be reflected on the character sheet post 1.1
+- WIP >_>
+
 `1.7.7`
 - quest progress command replies with time remaining till reset if already completed
 - Simon familiar holy rain lasts for 30s again, Dracula should no longer try to return/hide

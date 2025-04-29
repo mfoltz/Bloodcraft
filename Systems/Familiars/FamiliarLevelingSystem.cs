@@ -67,9 +67,9 @@ internal static class FamiliarLevelingSystem
             if (gainedXP <= 0) return;
         }
 
-        if (_familiarPrestige && FamiliarPrestigeManager_V2.LoadFamiliarPrestigeData_V2(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData > 0)
         {
-            int prestiges = prestigeData.Key;
+            int prestiges = prestigeData;
             float expReductionFactor = 1 - _levelingPrestigeReducer * prestiges;
 
             gainedXP *= expReductionFactor;

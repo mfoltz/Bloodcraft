@@ -9,28 +9,25 @@ using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Systems.Quests;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
-using Il2CppInterop.Runtime.Injection;
 using ProjectM;
-using ProjectM.Behaviours;
-using ProjectM.Gameplay.Scripting;
-using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
-using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
-using System.Reflection;
-using System.Runtime.InteropServices;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using static Bloodcraft.Utilities.EntityQueries;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft;
-internal static class Core // probably about time to tidy this up again >_>
+internal static class Core
 {
     public static World Server { get; } = GetServerWorld() ?? throw new Exception("There is no Server world!");
     public static EntityManager EntityManager => Server.EntityManager;
     public static ServerGameManager ServerGameManager => SystemService.ServerScriptMapper.GetServerGameManager();
     public static SystemService SystemService { get; } = new(Server);
+    public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
     public static double ServerTime => ServerGameManager.ServerTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
@@ -38,64 +35,49 @@ internal static class Core // probably about time to tidy this up again >_>
 
     static readonly List<PrefabGUID> _returnBuffs =
     [
-        new PrefabGUID(-560330878),  // ReturnBuff
-        new PrefabGUID(2086395440),  // ReturnNoInvulnerableBuff
-        new PrefabGUID(-1049988817), // ValenciaReturnBuff
-        new PrefabGUID(-1377587236), // DraculaReturnBuff
-        new PrefabGUID(-1448806401), // OtherDraculaReturnBuff
-        new PrefabGUID(-1511222240), // WerewolfChieftainReturnBuff
-        new PrefabGUID(-1773136595), // DominaReturnBuff
-        new PrefabGUID(-1983671299), // AngramReturnBuff
-        new PrefabGUID(1089939900),  // AdamReturnBuff
-        new PrefabGUID(-1435372081)  // SolarusReturnBuff
+        PrefabGUIDs.Buff_Shared_Return,
+        PrefabGUIDs.Buff_Shared_Return_NoInvulernable,
+        PrefabGUIDs.Buff_Vampire_BloodKnight_Return,
+        PrefabGUIDs.Buff_Vampire_Dracula_Return,
+        PrefabGUIDs.Buff_Dracula_Return,
+        PrefabGUIDs.Buff_WerewolfChieftain_Return,
+        PrefabGUIDs.Buff_Werewolf_Return,
+        PrefabGUIDs.Buff_Monster_Return,
+        PrefabGUIDs.Buff_Purifier_Return,
+        PrefabGUIDs.Buff_Blackfang_Morgana_Return,
+        PrefabGUIDs.Buff_ChurchOfLight_Paladin_Return,
+        PrefabGUIDs.Buff_Gloomrot_Voltage_Return,
+        PrefabGUIDs.Buff_Militia_Fabian_Return
     ];
 
     static readonly List<PrefabGUID> _shardNecklaces =
     [
-        Prefabs.Item_MagicSource_SoulShard_Manticore,
-        Prefabs.Item_MagicSource_SoulShard_Solarus,
-        Prefabs.Item_MagicSource_SoulShard_Dracula,
-        Prefabs.Item_MagicSource_SoulShard_Monster
+        PrefabGUIDs.Item_MagicSource_SoulShard_Manticore,
+        PrefabGUIDs.Item_MagicSource_SoulShard_Solarus,
+        PrefabGUIDs.Item_MagicSource_SoulShard_Dracula,
+        PrefabGUIDs.Item_MagicSource_SoulShard_Monster,
+        PrefabGUIDs.Item_MagicSource_SoulShard_Morgana
     ];
 
-    // static readonly bool _performance = ConfigService.PerformanceAuditing;
-
-    static readonly PrefabGUID _fallenAngel = new(-76116724);
-
-    static readonly PrefabGUID _defaultEmoteBuff = new(-988102043);
-    static readonly PrefabGUID _bonusStatsBuff = new(737485591);
-
-    static readonly PrefabGUID _bearDashAbility = new(1873182450);
-    static readonly PrefabGUID _wolfBiteAbility = new(-1262842180);
-
-    static readonly PrefabGUID _wolfBiteCast = new(990205141);
-
-    static readonly PrefabGUID _vargulfBleedBuff = new(1581496399);
-
-    static readonly HashSet<PrefabGUID> _bearFormBuffs =
+    static readonly List<PrefabGUID> _bearFormBuffs =
     [
-        new(-1569370346), // AB_Shapeshift_Bear_Buff
-        new(-858273386)   // AB_Shapeshift_Bear_Skin01_Buff
+        PrefabGUIDs.AB_Shapeshift_Bear_Buff,       
+        PrefabGUIDs.AB_Shapeshift_Bear_Skin01_Buff
     ];
 
-    static readonly HashSet<PrefabGUID> _soulShardDropTables =
+    static readonly List<PrefabGUID> _shardBearerDropTables =
     [
-        new(-454715368),  // DT_Unit_Relic_Manticore_Unique
-        new(-1629745461), // DT_Unit_Relic_Paladin_Unique
-        new(492631484),   // DT_Unit_Relic_Monster_Unique
-        new(-191917509)   // DT_Unit_Relic_Dracula_Unique
+        PrefabGUIDs.DT_Unit_Relic_Manticore_Unique,
+        PrefabGUIDs.DT_Unit_Relic_Paladin_Unique,  
+        PrefabGUIDs.DT_Unit_Relic_Monster_Unique,  
+        PrefabGUIDs.DT_Unit_Relic_Dracula_Unique,  
+        PrefabGUIDs.DT_Unit_Relic_Morgana_Unique
     ];
+    public static IReadOnlySet<WeaponType> BleedingEdge => _bleedingEdge;
+    static HashSet<WeaponType> _bleedingEdge = [];
 
-    const float DIRECTION_DURATION = 6f; // for making familiars on team two face correct direction until battle starts
+    const int SECONDARY_SKILL_SLOT = 4;
     const int BLEED_STACKS = 3;
-
-    const string SANGUIS = "Sanguis";
-    const string SANGUIS_DATA_CLASS = "Sanguis.Core+DataStructures";
-    const string SANGUIS_DATA_PROPERTY = "PlayerTokens";
-    const string SANGUIS_CONFIG_CLASS = "Sanguis.Plugin";
-    const string SANGUIS_CONFIG_PROPERTY = "TokensPerMinute";
-    const string SANGUIS_SAVE_METHOD = "SavePlayerTokens";
-    public static byte[] OLD_SHARED_KEY { get; internal set; }
     public static byte[] NEW_SHARED_KEY { get; internal set; }
 
     public static bool _initialized = false;
@@ -103,7 +85,6 @@ internal static class Core // probably about time to tidy this up again >_>
     {
         if (_initialized) return;
 
-        OLD_SHARED_KEY = Convert.FromBase64String(SecretManager.GetOldSharedKey()); // loading these last causes a bad format exception now... oh computers, you so fun
         NEW_SHARED_KEY = Convert.FromBase64String(SecretManager.GetNewSharedKey());
 
         if (!ComponentRegistry._initialized) ComponentRegistry.Initialize();
@@ -114,51 +95,68 @@ internal static class Core // probably about time to tidy this up again >_>
         if (ConfigService.ClientCompanion) _ = new EclipseService();
 
         if (ConfigService.ExtraRecipes) Recipes.ModifyRecipes();
-        if (ConfigService.StarterKit) Configuration.InitializeStarterKitItems();
-        if (ConfigService.PrestigeSystem) Buffs.PrestigeBuffs();
-        if (ConfigService.SoftSynergies || ConfigService.HardSynergies)
-        {
-            Configuration.InitializeClassPassiveBuffs();
-            Configuration.InitializeClassSpellCooldowns();
-            Classes.InitializeJewels();
 
-            /*
-            foreach (List<PrefabGUID> passiveBuffs in Classes.ClassPassiveStatBuffs.Values)
-            {
-                foreach (PrefabGUID buffPrefabGuid in passiveBuffs)
-                {
-                    if (Classes.BuffStatBonuses.TryGetValue(buffPrefabGuid, out var statValuePair))
-                    {
-                        Classes.HandleModifyUnitStatBufferPrefabs(buffPrefabGuid, statValuePair);
-                    }
-                }
-            }
-            */
+        if (ConfigService.StarterKit) Configuration.GetStarterKitItems();
+
+        if (ConfigService.PrestigeSystem) Buffs.GetPrestigeBuffs();
+
+        if (ConfigService.ClassSystem)
+        {
+            // Configuration.InitializeClassPassiveBuffs();
+            Configuration.GetClassSpellCooldowns();
+            Classes.GetAbilityJewels();
         }
 
         if (ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += LevelingSystem.OnUpdate;
+
         if (ConfigService.ExpertiseSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += WeaponSystem.OnUpdate;
+
         if (ConfigService.QuestSystem)
         {
             _ = new QuestService();
             DeathEventListenerSystemPatch.OnDeathEventHandler += QuestSystem.OnUpdate;
         }
+
         if (ConfigService.FamiliarSystem)
         {
-            Configuration.InitializeBannedFamiliarUnits();
+            Configuration.GetExcludedFamiliars();
             if (!ConfigService.LevelingSystem) DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarLevelingSystem.OnUpdate;
             DeathEventListenerSystemPatch.OnDeathEventHandler += FamiliarUnlockSystem.OnUpdate;
-            //DetectSanguis(); want to nail the fun factor and make sure no glaring bugs before adding stakes
+
             _ = new BattleService();
             _ = new FamiliarService();
         }
+
         if (ConfigService.ProfessionSystem)
         {
-            GatherStatMods();
+            Misc.GetStatModPrefabs(); // modifier stuff, although... fusion forge, hm
         }
 
+        try
+        {
+            // PlayerCombatBuffSystemAggroDetour.Initialize();
+            // ModifyUnitStatsDetour.InitializeUpdateLookups();
+            // DealDamageSystemDetour.Initialize();
+            // Log.LogWarning($"[Core] Initial EntityManager capacity - {EntityManager.EntityCapacity}");
+        }
+        catch (Exception e)
+        {
+            Log.LogWarning($"Error initializing detours: {e}");
+        }
+
+        GetWeaponTypes();
         ModifyPrefabs();
-        // MiscLogging();
+        Buffs.GetStackableBuffs();
+
+        try
+        {
+            ServerGameBalanceSettings = ServerGameBalanceSettings.Get(SystemService.ServerGameSettingsSystem._ServerBalanceSettings);
+            Progression.GetAttributeCaps();
+        }
+        catch (Exception e)
+        {
+            Log.LogWarning($"Error getting attribute soft caps: {e}");
+        }
 
         _initialized = true;
         DebugLoggerPatch._initialized = true;
@@ -171,43 +169,47 @@ internal static class Core // probably about time to tidy this up again >_>
     {
         if (_monoBehaviour == null)
         {
-            _monoBehaviour = new GameObject("Bloodcraft").AddComponent<IgnorePhysicsDebugSystem>();
+            _monoBehaviour = new GameObject(MyPluginInfo.PLUGIN_NAME).AddComponent<IgnorePhysicsDebugSystem>();
             UnityEngine.Object.DontDestroyOnLoad(_monoBehaviour.gameObject);
         }
 
         _monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
-    public unsafe static AddItemSettings GetAddItemSettings()
+    public static AddItemSettings GetAddItemSettings()
     {
         AddItemSettings addItemSettings = new()
         {
             EntityManager = EntityManager,
+            DropRemainder = true,
+            ItemDataMap = ServerGameManager.ItemLookupMap,
             EquipIfPossible = true
         };
 
-        GCHandle handle = GCHandle.Alloc(ServerGameManager.ItemLookupMap, GCHandleType.Pinned);
-
-        try
-        {
-            IntPtr address = handle.AddrOfPinnedObject();
-            addItemSettings.ItemDataMap = Marshal.ReadIntPtr(address);
-        }
-        finally
-        {
-            if (handle.IsAllocated) handle.Free();
-        }
-
         return addItemSettings;
+    }
+    static void GetWeaponTypes()
+    {
+        _bleedingEdge = [..Configuration.ParseEnumsFromString<WeaponType>(ConfigService.BleedingEdge)];
     }
     static void ModifyPrefabs()
     {
+        if (ConfigService.LevelingSystem)
+        {
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_EquipBuff_Shared_General, out Entity prefabEntity))
+            {
+                prefabEntity.Add<ScriptSpawn>();
+            }
+        }
+
         if (ConfigService.FamiliarSystem)
         {
+            Entity prefabEntity = Entity.Null;
+
             foreach (PrefabGUID prefabGUID in _returnBuffs)
             {
-                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGUID, out Entity returnBuffPrefab))
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGUID, out prefabEntity))
                 {
-                    if (returnBuffPrefab.TryGetBuffer<HealOnGameplayEvent>(out var buffer))
+                    if (prefabEntity.TryGetBuffer<HealOnGameplayEvent>(out var buffer))
                     {
                         HealOnGameplayEvent healOnGameplayEvent = buffer[0];
                         healOnGameplayEvent.showSCT = false;
@@ -220,86 +222,66 @@ internal static class Core // probably about time to tidy this up again >_>
             {
                 var itemDataHashMap = SystemService.GameDataSystem.ItemHashLookupMap;
                 
-                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(shardNecklace, out Entity shardNecklacePrefab))
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(shardNecklace, out prefabEntity))
                 {
-                    ItemData itemData = shardNecklacePrefab.Read<ItemData>();
+                    ItemData itemData = prefabEntity.Read<ItemData>();
 
                     itemData.ItemCategory &= ~ItemCategory.Soulshard; // Remove Soulshard
                     itemData.ItemCategory |= ItemCategory.BloodBound | ItemCategory.Magic; // Add BloodBound and Magic
-                    shardNecklacePrefab.Write(itemData);
+                    prefabEntity.Write(itemData);
 
                     itemDataHashMap[shardNecklace] = itemData;
                 }
             }
 
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_defaultEmoteBuff, out Entity defaultEmotePrefab))
+            /*
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.DefaultEmoteBuff, out prefabEntity))
             {
-                defaultEmotePrefab.With((ref LifeTime lifeTime) =>
+                prefabEntity.With((ref LifeTime lifeTime) =>
                 {
                     lifeTime.Duration = DIRECTION_DURATION;
                 });
 
-                defaultEmotePrefab.With((ref ModifyRotation modifyRotation) =>
+                prefabEntity.With((ref ModifyRotation modifyRotation) =>
                 {
                     modifyRotation.TargetDirectionType = TargetDirectionType.TowardsBuffOwner;
                     modifyRotation.SnapToDirection = true;
                     modifyRotation.Type = RotationModificationType.Set;
                 });
             }
+            */
+            
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.BonusStatsBuff, out prefabEntity))
+            {
+                prefabEntity.Add<ScriptSpawn>();
+                // prefabEntity.TryRemove<BuffModificationFlagData>();
+                
+                if (prefabEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
+                {
+                    // Log.LogWarning($"[ModifyPrefabs] - Clearing ModifyUnitStatBuff_DOTS buffer for {Buffs.BonusStatsBuff.GetPrefabName()}...");
+                    buffer.Clear();
+                }
+            }
         }
+
         if (ConfigService.BearFormDash)
         {
-            /*
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_wolfBiteCast, out Entity wolfBiteCastPrefab))
-            {
-                wolfBiteCastPrefab.With((ref AbilityState abilityState) =>
-                {
-                    AbilityTypeFlag abilityTypeFlags = abilityState.AbilityTypeFlag;
-
-                    abilityTypeFlags |= AbilityTypeFlag.Interact;
-                    abilityTypeFlags &= ~(AbilityTypeFlag.AbilityKit | AbilityTypeFlag.AbilityKit_BreakStealth);
-
-                    abilityState.AbilityTypeFlag = abilityTypeFlags;
-                });
-            }
-            */
-
             foreach (PrefabGUID bearFormBuff in _bearFormBuffs)
             {
                 if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(bearFormBuff, out Entity bearFormPrefab)
                     && bearFormPrefab.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
                 {
                     ReplaceAbilityOnSlotBuff abilityOnSlotBuff = buffer[4];
-                    abilityOnSlotBuff.NewGroupId = _bearDashAbility;
+                    abilityOnSlotBuff.NewGroupId = PrefabGUIDs.AB_Shapeshift_Bear_Dash_Group;
 
-                    buffer[4] = abilityOnSlotBuff;
+                    buffer[SECONDARY_SKILL_SLOT] = abilityOnSlotBuff;
                 }
             }
-
-            /*
-            foreach (PrefabGUID wolfFormBuff in _wolfFormBuffs)
-            {
-                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(wolfFormBuff, out Entity wolfFormPrefab)
-                    && wolfFormPrefab.TryGetBuffer<ReplaceAbilityOnSlotBuff>(out var buffer))
-                {
-                    ReplaceAbilityOnSlotBuff buff = new()
-                    {
-                        Target = ReplaceAbilityTarget.BuffTarget,
-                        Slot = 0,
-                        NewGroupId = _wolfBiteAbility,
-                        CopyCooldown = true,
-                        Priority = 99,
-                        CastBlockType = GroupSlotModificationCastBlockType.WholeCast
-                    };
-
-                    buffer.Insert(0, buff);
-                }
-            }
-            */
         }
-        if (ConfigService.EliteShardBearers) // should probably just modify their stats on the base prefabs instead of in the spawnTransformSystem >_> actually no then that would make more work to then correct fams, hrm
+
+        if (ConfigService.EliteShardBearers)
         {
-            foreach (PrefabGUID soulShardDropTable in _soulShardDropTables)
+            foreach (PrefabGUID soulShardDropTable in _shardBearerDropTables)
             {
                 if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(soulShardDropTable, out Entity soulShardDropTablePrefab)
                     && soulShardDropTablePrefab.TryGetBuffer<DropTableDataBuffer>(out var buffer) && !buffer.IsEmpty)
@@ -317,123 +299,133 @@ internal static class Core // probably about time to tidy this up again >_>
                 }
             }
         }
-        if (ConfigService.BleedingEdge)
+
+        if (BleedingEdge.Any())
         {
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_vargulfBleedBuff, out Entity bleedBuffPrefab))
+            if (BleedingEdge.Contains(WeaponType.Slashers))
             {
-                bleedBuffPrefab.With((ref Buff buff) =>
+                if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.VargulfBleedBuff, out Entity bleedBuffPrefab))
                 {
-                    buff.MaxStacks = BLEED_STACKS;
-                    buff.IncreaseStacks = true;
-                });
-            }
-        }
-        if (ConfigService.HeavyFrame)
-        {
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Prefabs.AB_Vampire_Crossbow_Primary_Projectile, out Entity crossbowProjectilePrefab))
-            {
-                crossbowProjectilePrefab.With((ref RagdollForceSource ragdollForceSource) =>
-                {
-                    ragdollForceSource.ForceModifier = 2f;
-                });
-
-                crossbowProjectilePrefab.With((ref Projectile projectile) =>
-                {
-                    projectile.Speed = 100f;
-                });
-            }
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Prefabs.AB_Vampire_Crossbow_Primary_Cast, out Entity crossbowCastPrefab))
-            {
-                crossbowCastPrefab.With((ref AbilityCastTimeData abilityCastTimeData) =>
-                {
-                    // abilityCastTimeData.MaxCastTime._Value = 1.2f; made animation look odd
-                });
-            }
-        }
-        if (ConfigService.LegacySystem || ConfigService.ExpertiseSystem)
-        {
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(_bonusStatsBuff, out Entity bonusStatsBuffPrefab) 
-                && bonusStatsBuffPrefab.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
-            {
-                buffer.Clear();
-            }
-        }
-    }
-
-    static readonly ComponentType[] _prefabGUIDComponent =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-    ];
-
-    const string STAT_MOD = "StatMod";
-    static void GatherStatMods()
-    {
-        var namesToPrefabGuids = SystemService.PrefabCollectionSystem.NameToPrefabGuidDictionary;
-
-        foreach (var kvp in namesToPrefabGuids)
-        {
-            if (kvp.Key.StartsWith(STAT_MOD))
-            {
-                JewelSpawnSystemPatch.StatMods.TryAdd(kvp.Key, kvp.Value);
-            }
-        }
-    }
-    static void DetectSanguis()
-    {
-        try
-        {
-            Assembly sanguis = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name == SANGUIS);
-
-            if (sanguis != null)
-            {
-                Type config = sanguis.GetType(SANGUIS_CONFIG_CLASS);
-                Type data = sanguis.GetType(SANGUIS_DATA_CLASS);
-
-                if (config != null && data != null)
-                {
-                    PropertyInfo configProperty = config.GetProperty(SANGUIS_CONFIG_PROPERTY, BindingFlags.Static | BindingFlags.Public);
-                    PropertyInfo dataProperty = data.GetProperty(SANGUIS_DATA_PROPERTY, BindingFlags.Static | BindingFlags.Public);
-
-                    if (configProperty != null && dataProperty != null)
+                    bleedBuffPrefab.With((ref Buff buff) =>
                     {
-                        MethodInfo saveTokens = data.GetMethod(SANGUIS_SAVE_METHOD, BindingFlags.Static | BindingFlags.Public);
-                        Dictionary<ulong, (int Tokens, (DateTime Start, DateTime DailyLogin) TimeData)> playerTokens = (Dictionary<ulong, (int, (DateTime, DateTime))>)(dataProperty?.GetValue(null) ?? new());
-                        int tokensTransferred = (int)(configProperty?.GetValue(null) ?? 0);
-
-                        if (saveTokens != null && playerTokens.Any() && tokensTransferred > 0)
-                        {
-                            BattleService._awardSanguis = true;
-                            BattleService._tokensProperty = dataProperty;
-                            BattleService._tokensTransferred = tokensTransferred;
-                            BattleService._saveTokens = saveTokens;
-                            BattleService._playerTokens = playerTokens;
-
-                            Log.LogInfo($"{SANGUIS} registered for familiar battle rewards!");
-                        }
-                        else
-                        {
-                            Log.LogWarning($"Couldn't get {SANGUIS_SAVE_METHOD} | {SANGUIS_CONFIG_PROPERTY} from {SANGUIS}!");
-                        }
-                    }
-                    else
-                    {
-                        Log.LogWarning($"Couldn't get {SANGUIS_DATA_PROPERTY} | {SANGUIS_CONFIG_PROPERTY} from {SANGUIS}!");
-                    }
-                }
-                else
-                {
-                    Log.LogWarning($"Couldn't get {SANGUIS_DATA_CLASS} | {SANGUIS_CONFIG_CLASS} from {SANGUIS}!");
+                        buff.MaxStacks = BLEED_STACKS;
+                        buff.IncreaseStacks = true;
+                    });
                 }
             }
-            else
+
+            if (BleedingEdge.Contains(WeaponType.Crossbow) || BleedingEdge.Contains(WeaponType.Pistols))
             {
-                Log.LogInfo($"{SANGUIS} not registered for familiar battle rewards!");
+                ComponentType[] _projectileAllComponents =
+                [
+                    ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
+                    ComponentType.ReadOnly(Il2CppType.Of<Projectile>()),
+                    ComponentType.ReadOnly(Il2CppType.Of<LifeTime>()),
+                    ComponentType.ReadOnly(Il2CppType.Of<Velocity>())
+                ];
+
+                QueryDesc projectileQueryDesc = EntityManager.CreateQueryDesc(_projectileAllComponents, typeIndices: [0], options: EntityQueryOptions.IncludeAll);
+                BleedingEdgePrimaryProjectileRoutine(projectileQueryDesc).Start();
             }
         }
-        catch (Exception ex)
+        else
         {
-            Log.LogError($"Error during {SANGUIS} registration: {ex.Message}");
+            // Log.LogWarning($"[ModifyPrefabs] - No Bleeding Edge weapons!");
         }
+
+        if (ConfigService.TwilightArsenal)
+        {
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_Axe_T09_ShadowMatter, out Entity prefabEntity))
+            {
+                prefabEntity.With((ref EquippableData equippableData) =>
+                {
+                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_DualHammers_Ability03;
+                });
+            }
+
+            /*
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_Reaper_T09_ShadowMatter, out prefabEntity))
+            {
+                prefabEntity.With((ref EquippableData equippableData) =>
+                {
+                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_Pollaxe_Ability03;
+                });
+            }
+
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_TwinBlades_T09_ShadowMatter, out prefabEntity))
+            {
+                prefabEntity.With((ref EquippableData equippableData) =>
+                {
+                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_Pollaxe_Ability03;
+                });
+            }
+
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_Weapon_GreatSword_T09_ShadowMatter, out prefabEntity))
+            {
+                prefabEntity.With((ref EquippableData equippableData) =>
+                {
+                    equippableData.BuffGuid = PrefabGUIDs.EquipBuff_Weapon_Pollaxe_Ability03;
+                });
+            }
+            */
+        }
+    }
+    static IEnumerator BleedingEdgePrimaryProjectileRoutine(QueryDesc projectileQueryDesc)
+    {
+        bool pistols = BleedingEdge.Contains(WeaponType.Pistols);
+        bool crossbow = BleedingEdge.Contains(WeaponType.Crossbow);
+
+        yield return QueryResultStreamAsync(
+            projectileQueryDesc,
+            stream =>
+            {
+                try
+                {
+                    using (stream)
+                    {
+                        foreach (QueryResult result in stream.GetResults())
+                        {
+                            Entity entity = result.Entity;
+                            PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
+                            string prefabName = prefabGuid.GetPrefabName();
+
+                            if (pistols && IsWeaponPrimaryProjectile(prefabName, WeaponType.Pistols))
+                            {
+                                // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - editing {prefabName}");
+                                entity.With((ref Projectile projectile) =>
+                                {
+                                    projectile.Range *= 1.25f;
+                                });
+                                entity.HasWith((ref LifeTime lifeTime) =>
+                                {
+                                    lifeTime.Duration *= 1.25f;
+                                });
+                            }
+                            else if (crossbow && IsWeaponPrimaryProjectile(prefabName, WeaponType.Crossbow))
+                            {
+                                // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - editing {prefabName}");
+                                entity.With((ref Projectile projectile) =>
+                                {
+                                    projectile.Speed = 100f;
+                                });
+                            }
+                            else
+                            {
+                                // Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - {prefabName}");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"[BleedingEdgePrimaryProjectileRoutine] - {ex}");
+                }
+            }
+        );
+    }
+    static bool IsWeaponPrimaryProjectile(string prefabName, WeaponType weaponType)
+    {
+        return prefabName.ContainsAll([weaponType.ToString(), "Primary", "Projectile"]);
     }
     public static void LogEntity(World world, Entity entity)
     {
@@ -449,310 +441,27 @@ internal static class Core // probably about time to tidy this up again >_>
             Log.LogWarning($"Error dumping entity: {e.Message}");
         }
     }
-    static void LogServerSystems()
+}
+public readonly unsafe struct NativeAccessor<T>(NativeArray<T> array) : IDisposable where T : unmanaged
+{
+    readonly T* _ptr = (T*)array.m_Buffer;
+    readonly int _length = array.Length;
+    public T this[int index]
     {
-        foreach (var systemBase in Server.Systems)
-        {
-            Il2CppSystem.Type systemType = systemBase.GetIl2CppType();
-
-            if (systemBase.EntityQueries.Length == 0)
-            {
-                Log.LogInfo($"{systemType.FullName}: No queries!");
-
-                continue;
-            }
-
-            Log.LogInfo("=============================");
-            Log.LogInfo(systemType.FullName);
-
-            foreach (EntityQuery query in systemBase.EntityQueries)
-            {
-                EntityQueryDesc entityQueryDesc = query.GetEntityQueryDesc();
-                Log.LogInfo($" All: {string.Join(",", entityQueryDesc.All)}");
-                Log.LogInfo($" Any: {string.Join(",", entityQueryDesc.Any)}");
-                Log.LogInfo($" Absent: {string.Join(",", entityQueryDesc.Absent)}");
-                Log.LogInfo($" None: {string.Join(",", entityQueryDesc.None)}");
-            }
-        }
+        get => _ptr[index];
+        set => _ptr[index] = value;
     }
-
-    /*
-    static readonly string _performanceAuditPath = Path.Combine(BepInEx.Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME, "PerformanceAudits");
-    static int _queries;
-    static string _logFilePath;
-    static TimeSpan _lastCpuTime = TimeSpan.Zero;
-
-    // Generate a unique log file name per session
-    static void ServerPerformanceLogger()
+    public int Length => _length;
+    public void Dispose() => array.Dispose();
+}
+public readonly unsafe struct BufferAccessor<T>(DynamicBuffer<T> buffer) where T : unmanaged
+{
+    readonly T* _ptr = (T*)buffer.m_Buffer;
+    readonly int _length = buffer.Length;
+    public T this[int index]
     {
-        if (!Directory.Exists(_performanceAuditPath))
-        {
-            Directory.CreateDirectory(_performanceAuditPath);
-        }
-
-        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd_HH-mm-ss");
-
-        _queries = EntityManager.CalculateAliveEntityQueryCount();
-        _logFilePath = Path.Combine(_performanceAuditPath, $"PerformanceAudit_{timestamp}.txt");
+        get => _ptr[index];
+        set => _ptr[index] = value;
     }
-    public static void LogPerformanceStats()
-    {
-        Process currentProcess = Process.GetCurrentProcess();
-
-        float memoryUsedGB = currentProcess.WorkingSet64 / (1024f * 1024f * 1024f);
-        float totalMemoryGB = GetTotalMemoryGB();
-
-        TimeSpan cpuTime = currentProcess.TotalProcessorTime;
-        float cpuUsage = 0;
-
-        if (_lastCpuTime != TimeSpan.Zero)
-        {
-            TimeSpan cpuDelta = cpuTime - _lastCpuTime;
-            cpuUsage = (float)(cpuDelta.TotalMilliseconds / 1000.0); // Approximate percentage
-        }
-
-        _lastCpuTime = cpuTime;
-
-        int queryCount = GetEntityQueryCount();
-        string logEntry = $"[{DateTime.UtcNow:HH:mm:ss}] RAM: {memoryUsedGB:F2} GB / {totalMemoryGB:F2} GB | CPU: {cpuUsage:F2}% | EntityQueries: {queryCount} (+{(queryCount > _queries ? queryCount - _queries: queryCount)})";
-
-        File.AppendAllText(_logFilePath, logEntry + Environment.NewLine);
-    }
-    static float GetTotalMemoryGB()
-    {
-        return SystemInfo.systemMemorySize / 1024f;
-    }
-    static int GetEntityQueryCount()
-    {
-        return EntityManager.CalculateAliveEntityQueryCount();
-    }
-    
-    static readonly ComponentType[] _prefabGUIDComponent =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
-    ];
-
-    static readonly ComponentType[] _dealDamageOnGameplayEventComponent =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<DealDamageOnGameplayEvent>()),
-    ];
-    static void MiscLogging()
-    {
-        if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(new(1649578802), out Entity prefabEntity))
-        {
-            LogEntity(Server, prefabEntity);
-        }
-    }
-    static void LogEntities()
-    {
-        ComponentType[] _cleanupComponent =
-        [
-            ComponentType.ReadOnly(Il2CppType.Of<CleanupEntity>()),
-        ];
-
-        EntityQuery entitiesQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            // None = Array.Empty<ComponentType>(),  // No excluded components
-            // All = Array.Empty<ComponentType>(),  // No required components
-            Any = _cleanupComponent,  // No optional components
-            Options = EntityQueryOptions.IncludeAll
-        });
-
-        NativeArray<Entity> entities = entitiesQuery.ToEntityArray(Allocator.TempJob);
-        Log.LogInfo($"CleanupEntities - ({entities.Length})");
-
-        int minimum = 400;
-        Entity source = Entity.Null;
-
-        if (entities.Length >= minimum)
-        {
-            entities.Dispose();
-            entitiesQuery.Dispose();
-            return;
-        }
-
-        try
-        {
-            int needed = minimum - entities.Length;
-            Entity sweeper;
-
-            for (int i = 0; i < needed; i++)
-            {
-                sweeper = EntityManager.CreateEntity();
-
-                sweeper.Add<CleanupEntity>();
-                sweeper.Add<Simulate>();
-            }
-
-            Log.LogInfo($"Restored {needed} cleanup entities!");
-        }
-        catch (Exception e)
-        {
-            Log.LogError(e);
-        }
-        finally
-        {
-            entities.Dispose();
-            entitiesQuery.Dispose();
-        }
-    }
-    static void LogWorlds()
-    {
-        try
-        {
-            foreach (World world in World._All_k__BackingField)
-            {
-                if (world != null)
-                {
-                    Log.LogInfo($"World: {world.Name}");
-                    var systems = world.m_Systems;
-
-                    foreach (var system in systems)
-                    {
-                        Log.LogInfo($"System: {system.GetIl2CppType().Name}");
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Log.LogError(e);
-        }
-
-        try
-        {
-            foreach (World world in World.s_AllWorlds)
-            {
-                if (world != null)
-                {
-                    Log.LogInfo($"World: {world.Name}");
-                    var systems = world.m_Systems;
-
-                    foreach (var system in systems)
-                    {
-                        Log.LogInfo($"System: {system.GetIl2CppType().Name}");
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Log.LogError(e);
-        }
-
-        try
-        {
-            World world = World._DefaultGameObjectInjectionWorld_k__BackingField;
-
-            if (world != null)
-            {
-                Log.LogInfo($"World: {world.Name}");
-                var systems = world.m_Systems;
-
-                foreach (var system in systems)
-                {
-                    Log.LogInfo($"System: {system.GetIl2CppType().Name}");
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Log.LogError(e);
-        }
-    }
-    static void LogActiveServerSystems()
-    {
-        Log.LogInfo("ACTIVE SERVER SYSTEMS");
-
-        foreach (var kvp in Server.m_SystemLookup)
-        {
-            Il2CppSystem.Type systemType = kvp.Key;
-            ComponentSystemBase systemBase = kvp.Value;
-
-            if (systemBase.EntityQueries.Length == 0)
-            {
-                Log.LogInfo("=============================");
-                Log.LogInfo($"{systemType.FullName}: No queries!");
-
-                continue;
-            }
-
-            Log.LogInfo("=============================");
-            Log.LogInfo(systemType.FullName);
-
-            foreach (EntityQuery query in systemBase.EntityQueries)
-            {
-                EntityQueryDesc entityQueryDesc = query.GetEntityQueryDesc();
-                Log.LogInfo($" All: {string.Join(",", entityQueryDesc.All)}");
-                Log.LogInfo($" Any: {string.Join(",", entityQueryDesc.Any)}");
-                Log.LogInfo($" Absent: {string.Join(",", entityQueryDesc.Absent)}");
-                Log.LogInfo($" None: {string.Join(",", entityQueryDesc.None)}");
-            }
-        }
-
-        Log.LogInfo("END ACTIVE SERVER SYSTEMS");
-    }
-    static void LogAllServerSystems()
-    {
-        Log.LogInfo("ALL SERVER SYSTEMS");
-
-        foreach (ComponentSystemBase systemBase in Server.m_Systems)
-        {
-            Il2CppSystem.Type systemType = systemBase.GetIl2CppType();
-
-            if (systemBase.EntityQueries.Length == 0)
-            {
-                Log.LogInfo("=============================");
-                Log.LogInfo($"{systemType.FullName}: No queries!");
-
-                continue;
-            }
-
-            Log.LogInfo("=============================");
-            Log.LogInfo(systemType.FullName);
-
-            foreach (EntityQuery query in systemBase.EntityQueries)
-            {
-                EntityQueryDesc entityQueryDesc = query.GetEntityQueryDesc();
-                Log.LogInfo($" All: {string.Join(",", entityQueryDesc.All)}");
-                Log.LogInfo($" Any: {string.Join(",", entityQueryDesc.Any)}");
-                Log.LogInfo($" Absent: {string.Join(",", entityQueryDesc.Absent)}");
-                Log.LogInfo($" None: {string.Join(",", entityQueryDesc.None)}");
-            }
-        }
-
-        Log.LogInfo("END ALL SERVER SYSTEMS");
-    }
-    static void LogDealDamageOnGameplayEvents()
-    {
-        EntityQuery dealDamageOnGameplayEventQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _dealDamageOnGameplayEventComponent,
-            Options = EntityQueryOptions.IncludeAll
-        });
-
-        NativeArray<Entity> entities = dealDamageOnGameplayEventQuery.ToEntityArray(Allocator.TempJob);
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (entity.TryGetBuffer<DealDamageOnGameplayEvent>(out var buffer))
-                {
-                    Log.LogInfo(entity.GetPrefabGuid().GetPrefabName());
-
-                    for (int i = 0; i < buffer.Length; i++)
-                    {
-                        DealDamageOnGameplayEvent dealDamageOnGameplayEvent = buffer[i];
-                        Log.LogInfo($"  DealDamageOnGameplayEvent - MainType: {dealDamageOnGameplayEvent.Parameters.MainType} | MainFactor: {dealDamageOnGameplayEvent.Parameters.MainFactor} | RawDamagePercent: {dealDamageOnGameplayEvent.Parameters.RawDamagePercent} | RawDamageValue: {dealDamageOnGameplayEvent.Parameters.RawDamageValue}");
-                    }
-                }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-            dealDamageOnGameplayEventQuery.Dispose();
-        }
-    }
-    */
+    public int Length => _length;
 }

@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using ProjectM;
 using Stunlock.Core;
 using Unity.Entities;
@@ -12,7 +13,7 @@ internal static class Quests
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly PrefabGUID _imprisonedBuff = new(1603329680);
+    static readonly PrefabGUID _imprisonedBuff = PrefabGUIDs.ImprisonedBuff;
 
     const float MAX_DISTANCE = 2000f;
 

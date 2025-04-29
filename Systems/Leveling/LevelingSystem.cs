@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Utilities;
@@ -9,6 +10,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
+using static Bloodcraft.Systems.Leveling.ClassManager;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
 using User = ProjectM.Network.User;
@@ -20,7 +22,7 @@ internal static class LevelingSystem
     static SystemService SystemService => Core.SystemService;
     static EndSimulationEntityCommandBufferSystem EndSimulationEntityCommandBufferSystem => SystemService.EndSimulationEntityCommandBufferSystem;
 
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _restedXPSystem = ConfigService.RestedXPSystem;
 
@@ -44,20 +46,17 @@ internal static class LevelingSystem
     static readonly PrefabGUID _levelUpBuff = new(-1133938228);
     static readonly PrefabGUID _warEventTrash = new(2090187901);
 
-    static readonly float3 _gold = new(1f, 0.75f, 0f); // Rich Gold
+    static readonly float3 _gold = new(1f, 0.75f, 0f);
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
     static readonly PrefabGUID _sctGeneric = new(-1687715009);
 
-    // public static readonly HashSet<ulong> PartiedPlayers = [];
-
+    // review these*
     static readonly HashSet<PrefabGUID> _extraGearLevelBuffs =
     [
         new(-1567599344), // SetBonus_PhysicalPower_GearLevel_01
         new(244750581),   // SetBonus_GearLevel_02
         new(-1469378405) // SetBonus_GearLevel_01
     ];
-
-    static readonly PrefabGUID _bruteGearLevelBuff = new(-1596803256);
     public static void OnUpdate(object sender, DeathEventArgs deathEvent)
     {
         ProcessExperience(deathEvent);
@@ -239,7 +238,7 @@ internal static class LevelingSystem
                     $"Congratulations, you've reached level <color=white>{newLevel}</color>!");
             }
 
-            if (_classes && GetPlayerBool(steamId, REMINDERS_KEY) && !Classes.HasClass(steamId))
+            if (_classes && GetPlayerBool(steamId, REMINDERS_KEY) && !steamId.HasClass(out PlayerClass? _))
             {
                 LocalizationService.HandleServerReply(EntityManager, user,
                     $"Don't forget to choose a class! Use <color=white>'.class l'</color> to view choices and see what they have to offer with <color=white>'.class lb [Class]'</color> (buffs), <color=white>'.class lsp [Class]'</color> (spells), and <color=white>'.class lst [Class]'</color> (synergies). (toggle reminders with <color=white>'.misc remindme'</color>)");
@@ -320,7 +319,7 @@ internal static class LevelingSystem
             int playerLevel = xpData.Key;
 
             PlayerProgressionCacheManager.UpdatePlayerProgressionLevel(steamId, playerLevel);
-            HandleExtraLevels(playerCharacter, ref playerLevel);
+            HandleExtraLevel(playerCharacter, ref playerLevel);
 
             playerCharacter.With((ref Equipment equipment) =>
             {
@@ -330,13 +329,8 @@ internal static class LevelingSystem
             });
         }
     }
-    static void HandleExtraLevels(Entity playerCharacter, ref int playerLevel)
+    static void HandleExtraLevel(Entity playerCharacter, ref int playerLevel)
     {
-        if (playerCharacter.HasBuff(_bruteGearLevelBuff))
-        {
-            playerLevel++;
-        }
-
         if (_extraGearLevelBuffs.Any(buff => playerCharacter.HasBuff(buff)))
         {
             playerLevel++;

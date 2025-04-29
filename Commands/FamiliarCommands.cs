@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using Bloodcraft.Patches;
+using Bloodcraft.Resources;
 using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
@@ -16,7 +17,7 @@ using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBattleGroupsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
-using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager_V2;
+using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarPrestigeManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Familiars.FamiliarBindingSystem;
@@ -48,8 +49,8 @@ internal static class FamiliarCommands
     const int ECHOES_MIN = 1;
     const int ECHOES_MAX = 4;
 
-    static readonly int _minLevel = PrefabCollectionSystem._PrefabGuidToEntityMap[Prefabs.CHAR_Forest_Wolf_VBlood].GetUnitLevel();
-    static readonly int _maxLevel = PrefabCollectionSystem._PrefabGuidToEntityMap[Prefabs.CHAR_Vampire_Dracula_VBlood].GetUnitLevel();
+    static readonly int _minLevel = PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUIDs.CHAR_Forest_Wolf_VBlood].GetUnitLevel();
+    static readonly int _maxLevel = PrefabCollectionSystem._PrefabGuidToEntityMap[PrefabGUIDs.CHAR_Vampire_Dracula_VBlood].GetUnitLevel();
 
     static readonly PrefabGUID _dominateBuff = new(-1447419822);
     static readonly PrefabGUID _takeFlightBuff = new(1205505492);
@@ -110,11 +111,11 @@ internal static class FamiliarCommands
         FamiliarUnlocksData familiarUnlocksData = LoadFamiliarUnlocksData(steamId);
         FamiliarBuffsData familiarBuffsData = LoadFamiliarBuffsData(steamId);
         FamiliarExperienceData familiarExperienceData = LoadFamiliarExperienceData(steamId);
-        FamiliarPrestigeData_V2 familiarPrestigeData_V2 = LoadFamiliarPrestigeData_V2(steamId);
+        FamiliarPrestigeData familiarPrestigeData_V2 = LoadFamiliarPrestigeData(steamId);
 
         string box = steamId.TryGetFamiliarBox(out box) ? box : string.Empty;
 
-        if (!string.IsNullOrEmpty(box) && familiarUnlocksData.UnlockedFamiliars.TryGetValue(box, out var famKeys))
+        if (!string.IsNullOrEmpty(box) && familiarUnlocksData.FamiliarUnlocks.TryGetValue(box, out var famKeys))
         {
             int count = 1;
             LocalizationService.HandleReply(ctx, $"<color=white>{box}</color>:");
@@ -135,7 +136,7 @@ internal static class FamiliarCommands
                 }
 
                 int level = familiarExperienceData.FamiliarExperience.TryGetValue(famKey, out var experienceData) ? experienceData.Key : 1;
-                int prestiges = familiarPrestigeData_V2.FamiliarPrestige.TryGetValue(famKey, out var prestigeData) ? prestigeData.Key : 0;
+                int prestiges = familiarPrestigeData_V2.FamiliarPrestige.TryGetValue(famKey, out var prestigeData) ? prestigeData : 0;
 
                 string levelAndPrestiges = prestiges > 0 ? $"[<color=white>{level}</color>][<color=#90EE90>{prestiges}</color>]" : $"[<color=white>{level}</color>]";
                 LocalizationService.HandleReply(ctx, $"<color=yellow>{count}</color>| <color=green>{famName}</color>{(familiarBuffsData.FamiliarBuffs.ContainsKey(famKey) ? $"{colorCode}*</color> {levelAndPrestiges}" : $" {levelAndPrestiges}")}");
@@ -161,10 +162,10 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (data.UnlockedFamiliars.Keys.Count > 0)
+        if (data.FamiliarUnlocks.Keys.Count > 0)
         {
             List<string> sets = [];
-            foreach (var key in data.UnlockedFamiliars.Keys)
+            foreach (var key in data.FamiliarUnlocks.Keys)
             {
                 sets.Add(key);
             }
@@ -199,7 +200,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (data.UnlockedFamiliars.TryGetValue(name, out var _))
+        if (data.FamiliarUnlocks.TryGetValue(name, out var _))
         {
             steamId.SetFamiliarBox(name);
             LocalizationService.HandleReply(ctx, $"Box Selected - <color=white>{name}</color>");
@@ -222,13 +223,13 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (!data.UnlockedFamiliars.ContainsKey(name) && data.UnlockedFamiliars.TryGetValue(current, out var familiarBox))
+        if (!data.FamiliarUnlocks.ContainsKey(name) && data.FamiliarUnlocks.TryGetValue(current, out var familiarBox))
         {
             // Remove the old set
-            data.UnlockedFamiliars.Remove(current);
+            data.FamiliarUnlocks.Remove(current);
 
             // Add the set with the new name
-            data.UnlockedFamiliars[name] = familiarBox;
+            data.FamiliarUnlocks[name] = familiarBox;
 
             if (steamId.TryGetFamiliarBox(out var set) && set.Equals(current)) // change active set to new name if it was the old name
             {
@@ -257,20 +258,20 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count < 10)
+        if (data.FamiliarUnlocks.TryGetValue(name, out var familiarSet) && familiarSet.Count < 10)
         {
             if (steamId.HasActiveFamiliar())
             {
                 ActiveFamiliarData activeFamiliar = GetActiveFamiliarData(steamId);
                 int familiarId = activeFamiliar.FamiliarId;
 
-                var keys = data.UnlockedFamiliars.Keys;
+                var keys = data.FamiliarUnlocks.Keys;
 
                 foreach (var key in keys)
                 {
-                    if (data.UnlockedFamiliars[key].Contains(familiarId))
+                    if (data.FamiliarUnlocks[key].Contains(familiarId))
                     {
-                        data.UnlockedFamiliars[key].Remove(familiarId);
+                        data.FamiliarUnlocks[key].Remove(familiarId);
                         familiarSet.Add(familiarId);
 
                         SaveFamiliarUnlocksData(steamId, data);
@@ -281,7 +282,7 @@ internal static class FamiliarCommands
                 LocalizationService.HandleReply(ctx, $"<color=green>{PrefabGUID.GetLocalizedName()}</color> moved - <color=white>{name}</color>");
             }
         }
-        else if (data.UnlockedFamiliars.ContainsKey(name))
+        else if (data.FamiliarUnlocks.ContainsKey(name))
         {
             LocalizationService.HandleReply(ctx, "Box is full!");
         }
@@ -303,15 +304,15 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (data.UnlockedFamiliars.TryGetValue(name, out var familiarSet) && familiarSet.Count == 0)
+        if (data.FamiliarUnlocks.TryGetValue(name, out var familiarSet) && familiarSet.Count == 0)
         {
             // Delete the box
-            data.UnlockedFamiliars.Remove(name);
+            data.FamiliarUnlocks.Remove(name);
             SaveFamiliarUnlocksData(steamId, data);
 
             LocalizationService.HandleReply(ctx, $"Deleted box - <color=white>{name}</color>");
         }
-        else if (data.UnlockedFamiliars.ContainsKey(name))
+        else if (data.FamiliarUnlocks.ContainsKey(name))
         {
             LocalizationService.HandleReply(ctx, "Box is not empty!");
         }
@@ -333,10 +334,10 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (data.UnlockedFamiliars.Count > 0 && data.UnlockedFamiliars.Count < BOX_CAP)
+        if (data.FamiliarUnlocks.Count > 0 && data.FamiliarUnlocks.Count < BOX_CAP)
         {
             // Add the box
-            data.UnlockedFamiliars.Add(name, []);
+            data.FamiliarUnlocks.Add(name, []);
             SaveFamiliarUnlocksData(steamId, data);
 
             LocalizationService.HandleReply(ctx, $"Added box - <color=white>{name}</color>");
@@ -373,12 +374,12 @@ internal static class FamiliarCommands
         else
         {
             FamiliarUnlocksData unlocksData = LoadFamiliarUnlocksData(steamId);
-            string lastListName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
+            string lastListName = unlocksData.FamiliarUnlocks.Keys.LastOrDefault();
 
             if (string.IsNullOrEmpty(lastListName))
             {
-                lastListName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
-                unlocksData.UnlockedFamiliars[lastListName] = [];
+                lastListName = $"box{unlocksData.FamiliarUnlocks.Count + 1}";
+                unlocksData.FamiliarUnlocks[lastListName] = [];
 
                 SaveFamiliarUnlocksData(steamId, unlocksData);
 
@@ -439,7 +440,7 @@ internal static class FamiliarCommands
                 ulong steamId = ctx.Event.User.PlatformId;
                 FamiliarUnlocksData unlocksData = LoadFamiliarUnlocksData(steamId);
 
-                if (unlocksData.UnlockedFamiliars.Values.Any(list => list.Contains(vBloodPrefabGuid.GuidHash)))
+                if (unlocksData.FamiliarUnlocks.Values.Any(list => list.Contains(vBloodPrefabGuid.GuidHash)))
                 {
                     LocalizationService.HandleReply(ctx, $"<color=white>{vBloodPrefabGuid.GetLocalizedName()}</color> is already unlocked!");
                     return;
@@ -467,21 +468,21 @@ internal static class FamiliarCommands
                 {
                     if (ServerGameManager.TryRemoveInventoryItem(inventoryEntity, exoItem, factoredCost))
                     {
-                        string lastBoxName = unlocksData.UnlockedFamiliars.Keys.LastOrDefault();
+                        string lastBoxName = unlocksData.FamiliarUnlocks.Keys.LastOrDefault();
 
-                        if (string.IsNullOrEmpty(lastBoxName) || unlocksData.UnlockedFamiliars.TryGetValue(lastBoxName, out var box) && box.Count >= BOX_SIZE)
+                        if (string.IsNullOrEmpty(lastBoxName) || unlocksData.FamiliarUnlocks.TryGetValue(lastBoxName, out var box) && box.Count >= BOX_SIZE)
                         {
-                            lastBoxName = $"box{unlocksData.UnlockedFamiliars.Count + 1}";
+                            lastBoxName = $"box{unlocksData.FamiliarUnlocks.Count + 1}";
 
-                            unlocksData.UnlockedFamiliars[lastBoxName] = [];
-                            unlocksData.UnlockedFamiliars[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
+                            unlocksData.FamiliarUnlocks[lastBoxName] = [];
+                            unlocksData.FamiliarUnlocks[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
 
                             SaveFamiliarUnlocksData(steamId, unlocksData);
                             LocalizationService.HandleReply(ctx, $"New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>");
                         }
-                        else if (unlocksData.UnlockedFamiliars.ContainsKey(lastBoxName))
+                        else if (unlocksData.FamiliarUnlocks.ContainsKey(lastBoxName))
                         {
-                            unlocksData.UnlockedFamiliars[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
+                            unlocksData.FamiliarUnlocks[lastBoxName].Add(vBloodPrefabGuid.GuidHash);
 
                             SaveFamiliarUnlocksData(steamId, unlocksData);
                             LocalizationService.HandleReply(ctx, $"New unit unlocked: <color=green>{vBloodPrefabGuid.GetLocalizedName()}</color>");
@@ -513,7 +514,7 @@ internal static class FamiliarCommands
         ulong steamId = ctx.User.PlatformId;
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
 
-        if (steamId.TryGetFamiliarBox(out var activeBox) && data.UnlockedFamiliars.TryGetValue(activeBox, out var familiarSet))
+        if (steamId.TryGetFamiliarBox(out var activeBox) && data.FamiliarUnlocks.TryGetValue(activeBox, out var familiarSet))
         {
             if (choice < 1 || choice > familiarSet.Count)
             {
@@ -653,17 +654,17 @@ internal static class FamiliarCommands
 
             int prestigeLevel = 0;
 
-            FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+            FamiliarPrestigeData prestigeData = LoadFamiliarPrestigeData(steamId);
             FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
 
             if (!prestigeData.FamiliarPrestige.ContainsKey(familiarId))
             {
-                prestigeData.FamiliarPrestige[familiarId] = new(0, []);
-                SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+                prestigeData.FamiliarPrestige[familiarId] = 0;
+                SaveFamiliarPrestigeData(steamId, prestigeData);
             }
             else
             {
-                prestigeLevel = prestigeData.FamiliarPrestige[familiarId].Key;
+                prestigeLevel = prestigeData.FamiliarPrestige[familiarId];
             }
 
             LocalizationService.HandleReply(ctx, $"Your familiar is level [<color=white>{xpData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and has <color=yellow>{progress}</color> <color=#FFC0CB>experience</color> (<color=white>{percent}%</color>)!");
@@ -677,6 +678,7 @@ internal static class FamiliarCommands
                 AiMoveSpeeds originalMoveSpeeds = familiar.GetPrefabEntity().Read<AiMoveSpeeds>();
                 AiMoveSpeeds aiMoveSpeeds = familiar.Read<AiMoveSpeeds>();
 
+                /*
                 LifeLeech lifeLeech = new()
                 {
                     PrimaryLeechFactor = new(0f),
@@ -693,7 +695,8 @@ internal static class FamiliarCommands
                     lifeLeech.PhysicalLifeLeechFactor._Value = familiarLifeLeech.PhysicalLifeLeechFactor._Value;
                     lifeLeech.SpellLifeLeechFactor._Value = familiarLifeLeech.SpellLifeLeechFactor._Value;
                 }
-
+                */
+                
                 List<KeyValuePair<string, string>> statPairs = [];
 
                 foreach (FamiliarStatType statType in Enum.GetValues(typeof(FamiliarStatType)))
@@ -712,6 +715,7 @@ internal static class FamiliarCommands
                         case FamiliarStatType.SpellPower:
                             displayValue = ((int)unitStats.SpellPower._Value).ToString();
                             break;
+                        /*
                         case FamiliarStatType.PrimaryLifeLeech:
                             displayValue = lifeLeech.PrimaryLeechFactor._Value == 0f
                                 ? string.Empty
@@ -726,26 +730,6 @@ internal static class FamiliarCommands
                             displayValue = lifeLeech.SpellLifeLeechFactor._Value == 0f
                                 ? string.Empty
                                 : (lifeLeech.SpellLifeLeechFactor._Value * 100).ToString("F1") + "%";
-                            break;
-                        case FamiliarStatType.PhysicalCritChance:
-                            displayValue = unitStats.PhysicalCriticalStrikeChance._Value == 0f
-                                ? string.Empty
-                                : (unitStats.PhysicalCriticalStrikeChance._Value * 100).ToString("F1") + "%"; 
-                            break;
-                        case FamiliarStatType.PhysicalCritDamage:
-                            displayValue = unitStats.PhysicalCriticalStrikeDamage._Value == 2f
-                                ? string.Empty
-                                : ((unitStats.PhysicalCriticalStrikeDamage._Value - 1f) * 100).ToString("F1") + "%";
-                            break;
-                        case FamiliarStatType.SpellCritChance:
-                            displayValue = unitStats.SpellCriticalStrikeChance._Value == 0f
-                                ? string.Empty
-                                : (unitStats.SpellCriticalStrikeChance._Value * 100).ToString("F1") + "%"; 
-                            break;
-                        case FamiliarStatType.SpellCritDamage:
-                            displayValue = unitStats.SpellCriticalStrikeDamage._Value == 2f
-                                ? string.Empty
-                                : ((unitStats.SpellCriticalStrikeDamage._Value - 1f) * 100).ToString("F1") + "%";
                             break;
                         case FamiliarStatType.HealingReceived:
                             displayValue = unitStats.HealingReceived._Value == 0f
@@ -773,10 +757,11 @@ internal static class FamiliarCommands
                                 : ((aiMoveSpeeds.Walk._Value / originalMoveSpeeds.Walk._Value) * 100).ToString("F1") + "%";
                             break;
                         case FamiliarStatType.CastSpeed:
-                            displayValue = abilityBar_Shared.AttackSpeed._Value == 1f
+                            displayValue = abilityBar_Shared.AbilityAttackSpeed._Value == 1f
                                 ? string.Empty
-                                : (abilityBar_Shared.AttackSpeed._Value * 100).ToString("F1") + "%";
+                                : (abilityBar_Shared.AbilityAttackSpeed._Value * 100).ToString("F1") + "%";
                             break;
+                        */
                         default:
                             continue;
                     }
@@ -857,6 +842,7 @@ internal static class FamiliarCommands
         }
     }
 
+    /*
     [Command(name: "listprestigestats", shortHand: "lst", adminOnly: false, usage: ".fam lst", description: "Display options for familiar prestige stats.")]
     public static void ListPrestigeStatsCommand(ChatCommandContext ctx)
     {
@@ -875,7 +861,7 @@ internal static class FamiliarCommands
             ActiveFamiliarData activeFamiliar = GetActiveFamiliarData(steamId);
             int familiarId = activeFamiliar.FamiliarId;
 
-            FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+            FamiliarPrestigeData prestigeData = LoadFamiliarPrestigeData(steamId);
             if (prestigeData.FamiliarPrestige.TryGetValue(familiarId, out var famPrestige))
             {
                 existingStats = famPrestige.Value;
@@ -901,31 +887,11 @@ internal static class FamiliarCommands
 
             LocalizationService.HandleReply(ctx, replyMessage);
         }
-
-        /*
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        var prestigeStats = FamiliarPrestigeStats
-            .Select((stat, index) =>
-                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Misc.FormatPercentStatValue(FamiliarBaseStatValues[stat])}</color>")
-            .ToList();
-
-        for (int i = 0; i < prestigeStats.Count; i += 4)
-        {
-            var batch = prestigeStats.Skip(i).Take(4);
-            string replyMessage = string.Join(", ", batch);
-
-            LocalizationService.HandleReply(ctx, replyMessage);
-        }
-        */
     }
+    */
 
-    [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr [Stat]", description: "Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.")]
-    public static void PrestigeFamiliarCommand(ChatCommandContext ctx, string statType = "")
+    [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr", description: "Prestiges familiar if conditions are met, raising base stats by configured multiplier.")]
+    public static void PrestigeFamiliarCommand(ChatCommandContext ctx)
     {
         if (!ConfigService.FamiliarSystem)
         {
@@ -953,29 +919,27 @@ internal static class FamiliarCommands
 
             if (InventoryUtilities.TryGetInventoryEntity(EntityManager, playerCharacter, out Entity inventory) && ServerGameManager.GetInventoryItemCount(inventory, _itemSchematic) >= clampedCost)
             {
-                HandleFamiliarPrestige(ctx, statType, clampedCost);
+                HandleFamiliarPrestige(ctx, clampedCost);
             }
             else if (xpData.FamiliarExperience[familiarId].Key >= ConfigService.MaxFamiliarLevel)
             {
-                FamiliarPrestigeData_V2 prestigeData = LoadFamiliarPrestigeData_V2(steamId);
+                FamiliarPrestigeData prestigeData = LoadFamiliarPrestigeData(steamId);
 
                 if (!prestigeData.FamiliarPrestige.ContainsKey(familiarId))
                 {
-                    prestigeData.FamiliarPrestige[familiarId] = new(0, []);
-                    SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+                    prestigeData.FamiliarPrestige[familiarId] = 0;
+                    SaveFamiliarPrestigeData(steamId, prestigeData);
                 }
 
-                prestigeData = LoadFamiliarPrestigeData_V2(steamId);
-                List<int> stats = prestigeData.FamiliarPrestige[familiarId].Value;
+                prestigeData = LoadFamiliarPrestigeData(steamId);
 
-                if (prestigeData.FamiliarPrestige[familiarId].Key >= ConfigService.MaxFamiliarPrestiges)
+                if (prestigeData.FamiliarPrestige[familiarId] >= ConfigService.MaxFamiliarPrestiges)
                 {
                     LocalizationService.HandleReply(ctx, "Familiar is already at maximum number of prestiges!");
                     return;
                 }
 
-                int value = -1;
-
+                /*
                 if (stats.Count < FamiliarPrestigeStats.Count) // if less than max stats, parse entry and add if set doesnt already contain
                 {
                     if (int.TryParse(statType, out value))
@@ -1011,18 +975,22 @@ internal static class FamiliarCommands
                     LocalizationService.HandleReply(ctx, "Familiar already has all prestige stats! ('<color=white>.fam pr</color>' instead of '<color=white>.fam pr [PrestigeStat]</color>')");
                     return;
                 }
+                */
 
                 KeyValuePair<int, float> newXP = new(1, ConvertLevelToXp(1)); // reset level to 1
                 xpData.FamiliarExperience[familiarId] = newXP;
                 SaveFamiliarExperienceData(steamId, xpData);
 
-                int prestigeLevel = prestigeData.FamiliarPrestige[familiarId].Key + 1;
-                prestigeData.FamiliarPrestige[familiarId] = new(prestigeLevel, stats);
-                SaveFamiliarPrestigeData_V2(steamId, prestigeData);
+                int prestigeLevel = prestigeData.FamiliarPrestige[familiarId] + 1;
+                prestigeData.FamiliarPrestige[familiarId] = prestigeLevel;
+                SaveFamiliarPrestigeData(steamId, prestigeData);
 
                 Entity familiar = GetActiveFamiliar(playerCharacter);
                 ModifyUnitStats(familiar, newXP.Key, steamId, familiarId);
 
+                LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>]!");
+
+                /*
                 if (value == -1)
                 {
                     LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>!");
@@ -1031,6 +999,7 @@ internal static class FamiliarCommands
                 {
                     LocalizationService.HandleReply(ctx, $"Your familiar has prestiged [<color=#90EE90>{prestigeLevel}</color>] and is now level <color=white>{newXP.Key}</color>! (+<color=#00FFFF>{FamiliarPrestigeStats[value]}</color>)");
                 }
+                */
             }
             else
             {
@@ -1096,7 +1065,7 @@ internal static class FamiliarCommands
 
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
         FamiliarBuffsData buffsData = LoadFamiliarBuffsData(steamId);
-        int count = data.UnlockedFamiliars.Keys.Count;
+        int count = data.FamiliarUnlocks.Keys.Count;
 
         if (count > 0)
         {
@@ -1104,7 +1073,7 @@ internal static class FamiliarCommands
 
             if (name.Equals("vblood", StringComparison.OrdinalIgnoreCase))
             {
-                foreach (var box in data.UnlockedFamiliars)
+                foreach (var box in data.FamiliarUnlocks)
                 {
                     var matchingFamiliars = box.Value.Where(famKey =>
                     {
@@ -1140,7 +1109,7 @@ internal static class FamiliarCommands
             }
             else if (!name.IsNullOrWhiteSpace())
             {
-                foreach (var box in data.UnlockedFamiliars)
+                foreach (var box in data.FamiliarUnlocks)
                 {
                     var matchingFamiliars = box.Value.Where(famKey =>
                     {
@@ -1201,13 +1170,13 @@ internal static class FamiliarCommands
         var shinyFamiliars = buffsData.FamiliarBuffs;
         Dictionary<string, Dictionary<string, int>> foundBoxMatches = [];
 
-        if (data.UnlockedFamiliars.Count == 0)
+        if (data.FamiliarUnlocks.Count == 0)
         {
             LocalizationService.HandleReply(ctx, "You haven't unlocked any familiars yet!");
             return;
         }
 
-        foreach (var box in data.UnlockedFamiliars)
+        foreach (var box in data.FamiliarUnlocks)
         {
             var matchingFamiliars = box.Value
                 .Select((famKey, index) => new { FamKey = famKey, Index = index })

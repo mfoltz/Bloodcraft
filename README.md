@@ -1,42 +1,12 @@
 ## Table of Contents
 
-- [Wiki](https://wide-beryl-52e.notion.site/1a5264b1e5058040a1f5e1f4b82ea2db?v=1a5264b1e5058072a8cf000cf1d2ea65) by [@onjulraz](https://github.com/onjulraz) (README still under construction, putting here so won't forget to include 👍)
-
-*README under construction, putting these enums here for now. note that when selecting via command in-game should use the number shown by the respective 'lst' command for bloods & weapons*
-
-### BloodStatType
-HealingReceived, // 0
-DamageReduction, // 1
-PhysicalResistance, // 2
-SpellResistance, // 3
-ResourceYield, // 4
-BloodDrain, // 5
-SpellCooldownRecoveryRate, // 6
-WeaponCooldownRecoveryRate, // 7
-UltimateCooldownRecoveryRate, // 8
-MinionDamage, // 9
-ShieldAbsorb, // 10
-BloodEfficiency // 11
-
-### WeaponStatType
-MaxHealth, // 0
-MovementSpeed, // 1
-PrimaryAttackSpeed, // 2
-PhysicalLifeLeech, // 3
-SpellLifeLeech, // 4
-PrimaryLifeLeech, // 5
-PhysicalPower, // 6
-SpellPower, // 7
-PhysicalCritChance, // 8
-PhysicalCritDamage, // 9
-SpellCritChance, // 10
-SpellCritDamage // 11
-
+- [BepInExRC2](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2) <--- **REQUIRED**
+- [VCF1.1](https://github.com/Odjit/VampireCommandFramework/releases/tag/1.1) <--- **RECOMMENDED**
 - [Sponsors](#sponsors)
 - [Features](#features)
 - [Commands](#commands)
-- [Configuration](#configuration)
 - [Recipes](#recipes)
+- [Configuration](#configuration)
 - [Recommended Mods](#recommended)
 
 ## Sponsor this project
@@ -166,7 +136,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Applies class buffs appropriately if not present.
   - Shortcut: *.class sb*
 - `.class list`
-  - Lists classes.
+  - List available classes.
   - Shortcut: *.class l*
 - `.class listbuffs [Class]`
   - Shows perks that can be gained from class.
@@ -175,7 +145,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   - Shows spells that can be gained from class.
   - Shortcut: *.class lsp [Class]*
 - `.class liststats [Class]`
-  - Shows weapon and blood stat synergies for a class.
+  - List weapon and blood stat synergies for a class.
   - Shortcut: *.class lst [Class]*
 - `.class lockshift`
   - Toggle shift spell.
@@ -236,9 +206,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.familiar listprestigestats`
   - Display options for familiar prestige stats.
   - Shortcut: *.fam lst*
-- `.familiar prestige [Stat]`
-  - Prestiges familiar if at max, raising base stats by configured multiplier and adding an extra chosen stat.
-  - Shortcut: *.fam pr [Stat]*
+- `.familiar prestige`
+  - Prestiges familiar if conditions are met, raising base stats by configured multiplier.
+  - Shortcut: *.fam pr*
 - `.familiar reset`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.fam reset*
@@ -426,13 +396,13 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
   Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect.
 - **Potion Stacking**: `PotionStacking` (bool, default: False)
-  Enable or disable potion stacking (can have t01 effects and t02 effects at the same time. also requires professions enabled).
-- **Bear Form Dash**: `BearFormDash` (bool, default: True)
+  Enable or disable potion stacking (can have t01/t02 effects at the same time).
+- **Bear Form Dash**: `BearFormDash` (bool, default: False)
   Enable or disable bear form dash.
-- **Bleeding Edge**: `BleedingEdge` (bool, default: True)
-  Enable or disable stacking bleed on the final primary attack for slashers.
-- **Heavy Frame**: `HeavyFrame` (bool, default: True)
-  Enable or disable a heavier feel for the crossbow with faster projectiles.
+- **Bleeding Edge**: `BleedingEdge` (string, default: "Slashers, Crossbow, Pistols, TwinBlades")
+  Enable various weapon-specific changes; some are more experimental than others, see README for details.
+- **Twilight Arsenal**: `TwilightArsenal` (bool, default: False)
+  Enable or disable experimental ability replacements on shadow weapons (currently just axes but like cosplaying as Thor with two mjolnirs).
 - **Primal Jewel Cost**: `PrimalJewelCost` (int, default: -77477508)
   If extra recipes is enabled with a valid item prefab here (default demon fragments), it can be refined via gemcutter for random enhanced tier 4 jewels (better rolls, more modifiers).
 
@@ -503,8 +473,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Prestige
 - **Prestige System**: `PrestigeSystem` (bool, default: False)
   Enable or disable the prestige system (requires leveling to be enabled as well).
-- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,475045773,1643157297,946705138,-1266262267,-773025435,-1043659405,-1583573438,-1869022798,-536284884")
-  The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level.
+- **Prestige Buffs**: `PrestigeBuffs` (string, default: "1504279833,0,0,0,0,0,0,0,0,0")
+  The PrefabGUID hashes for general prestige buffs, use 0 to skip otherwise buff applies at the prestige level (only shroud for first default while reworked).
 - **Prestige Levels To Unlock Class Spells**: `PrestigeLevelsToUnlockClassSpells` (string, default: "0,1,2,3,4,5")
   The prestige levels at which class spells are unlocked. This should match the number of spells per class +1 to account for the default class spell. Can leave at 0 each if you want them unlocked from the start.
 - **Max Leveling Prestiges**: `MaxLevelingPrestiges` (int, default: 10)
@@ -577,7 +547,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The base cap for spell critical strike damage.
 
 ### Legacies
-- **Blood System**: `BloodSystem` (bool, default: False)
+- **Legacy System**: `LegacySystem` (bool, default: False)
   Enable or disable the blood legacy system.
 - **Max Legacy Prestiges**: `MaxLegacyPrestiges` (int, default: 10)
   The maximum number of prestiges a player can reach in blood legacies.
@@ -603,8 +573,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The base cap for spell resistance.
 - **Resource Yield**: `ResourceYield` (float, default: 0.25)
   The base cap for resource yield.
-- **Blood Drain**: `BloodDrain` (float, default: 0.5)
-  The base cap for blood drain reduction.
+- **Reduced Blood Drain**: `ReducedBloodDrain` (float, default: 0.5)
+  The base cap for reduced blood drain.
 - **Spell Cooldown Recovery Rate**: `SpellCooldownRecoveryRate` (float, default: 0.1)
   The base cap for spell cooldown recovery rate.
 - **Weapon Cooldown Recovery Rate**: `WeaponCooldownRecoveryRate` (float, default: 0.1)
@@ -613,10 +583,10 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The base cap for ultimate cooldown recovery rate.
 - **Minion Damage**: `MinionDamage` (float, default: 0.25)
   The base cap for minion damage.
-- **Shield Absorb**: `ShieldAbsorb` (float, default: 0.5)
-  The base cap for shield absorb.
-- **Blood Efficiency**: `BloodEfficiency` (float, default: 0.1)
-  The base cap for blood efficiency.
+- **Ability Attack Speed**: `AbilityAttackSpeed` (float, default: 0.1)
+  The base cap for ability attack speed.
+- **Corruption Damage Reduction**: `CorruptionDamageReduction` (float, default: 0.1)
+  The base cap for corruption damage reduction.
 
 ### Professions
 - **Profession System**: `ProfessionSystem` (bool, default: False)
@@ -636,7 +606,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Familiar Pv P**: `FamiliarPvP` (bool, default: True)
   Enable or disable PvP participation for familiars. (if set to false, familiars will be unbound when entering PvP combat).
 - **Familiar Battles**: `FamiliarBattles` (bool, default: False)
-  Enable or disable familiar battle system.
+  Enable or disable familiar battle system (most likely not working atm after 1.1, use at own risk for now).
 - **Familiar Prestige**: `FamiliarPrestige` (bool, default: False)
   Enable or disable the prestige system for familiars.
 - **Max Familiar Prestiges**: `MaxFamiliarPrestiges` (int, default: 10)
@@ -666,77 +636,63 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - **Primal Echoes**: `PrimalEchoes` (bool, default: False)
   Enable or disable acquiring vBloods with configured item reward from exo prestiging (default primal shards) at cost scaling to unit tier using exo reward quantity as the base (highest tier are shard bearers which cost exo reward quantity times 25, or in other words after 25 exo prestiges a player would be able to purchase a shard bearer). Must enable exo prestiging (and therefore normal prestiging), checks for banned vBloods before allowing if applicable.
 - **Echoes Factor**: `EchoesFactor` (int, default: 1)
-  Increase to multiply costs for vBlood purchases. Valid values are integers between 1-4, if outside that range in either direction it will be clamped.
+  Increase to multiply costs for vBlood purchases. Valid integers are between 1-4, if values are outside that range they will be clamped.
 - **Shiny Chance**: `ShinyChance` (float, default: 0.2)
-  The chance for a shiny when unlocking familiars (6 total, 1 per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
+  The chance for a shiny when unlocking familiars (6 total buffs, 1 buff per familiar). Guaranteed on second unlock of same unit, chance on damage dealt (same as configured onHitEffect chance) to apply spell school debuff.
 - **Shiny Cost Item Quantity**: `ShinyCostItemQuantity` (int, default: 100)
   Quantity of vampiric dust required to make a familiar shiny. May also be spent to change shiny familiar's shiny buff at 25% cost. Enable ExtraRecipes to allow player refinement of this item from Advanced Grinders. Valid values are between 50-200, if outside that range in either direction it will be clamped.
 - **Prestige Cost Item Quantity**: `PrestigeCostItemQuantity` (int, default: 1000)
   Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped.
 
 ### Classes
-- **Soft Synergies**: `SoftSynergies` (bool, default: False)
-  Allow class synergies (turns on classes and does not restrict stat choices, do not use this and hard syergies at the same time).
-- **Hard Synergies**: `HardSynergies` (bool, default: False)
-  Enforce class synergies (turns on classes and restricts stat choices, do not use this and soft syergies at the same time).
+- **Class System**: `ClassSystem` (bool, default: False)
+  Enable classes without synergy restrictions.
 - **Change Class Item**: `ChangeClassItem` (int, default: 576389135)
   Item PrefabGUID cost for changing class.
 - **Change Class Quantity**: `ChangeClassQuantity` (int, default: 750)
   Quantity of item required for changing class.
-- **Class Spell School On Hit Effects**: `ClassSpellSchoolOnHitEffects` (bool, default: False)
-  Enable or disable class spell school on hit effects (respective debuff from spell school, leech chill condemn etc).
+- **Class On Hit Effects**: `ClassOnHitEffects` (bool, default: True)
+  Enable or disable class spell school on hit effects (chance to proc respective debuff from spell school when dealing damage (leech, chill, condemn etc), second tier effect will proc if first is already present on target.
 - **On Hit Proc Chance**: `OnHitProcChance` (float, default: 0.075)
   The chance for a class effect to proc on hit.
-- **Stat Synergy Multiplier**: `StatSynergyMultiplier` (float, default: 1.5)
+- **Synergy Multiplier**: `SynergyMultiplier` (float, default: 1.5)
   Multiplier for class stat synergies to base stat cap.
-- **Blood Knight Weapon**: `BloodKnightWeapon` (string, default: "0,3,5,6")
+- **Blood Knight Weapon Synergies**: `BloodKnightWeaponSynergies` (string, default: "MaxHealth,PrimaryAttackSpeed,PrimaryLifeLeech,PhysicalPower")
   Blood Knight weapon synergies.
-- **Blood Knight Blood**: `BloodKnightBlood` (string, default: "1,5,7,10")
+- **Blood Knight Blood Synergies**: `BloodKnightBloodSynergies` (string, default: "DamageReduction,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed")
   Blood Knight blood synergies.
-- **Demon Hunter Weapon**: `DemonHunterWeapon` (string, default: "1,2,8,9")
+- **Demon Hunter Weapon Synergies**: `DemonHunterWeaponSynergies` (string, default: "MovementSpeed,PrimaryAttackSpeed,PhysicalCritChance,PhysicalCritDamage")
   Demon Hunter weapon synergies.
-- **Demon Hunter Blood**: `DemonHunterBlood` (string, default: "2,5,7,9")
+- **Demon Hunter Blood Synergies**: `DemonHunterBloodSynergies` (string, default: "PhysicalResistance,BloodDrain,WeaponCooldownRecoveryRate,MinionDamage")
   Demon Hunter blood synergies
-- **Vampire Lord Weapon**: `VampireLordWeapon` (string, default: "0,4,6,7")
+- **Vampire Lord Weapon Synergies**: `VampireLordWeaponSynergies` (string, default: "MaxHealth,SpellLifeLeech,PhysicalPower,SpellPower")
   Vampire Lord weapon synergies.
-- **Vampire Lord Blood**: `VampireLordBlood` (string, default: "1,3,8,11")
+- **Vampire Lord Blood Synergies**: `VampireLordBloodSynergies` (string, default: "DamageReduction,SpellResistance,UltimateCooldownRecoveryRate,CorruptionDamageReduction")
   Vampire Lord blood synergies.
-- **Shadow Blade Weapon**: `ShadowBladeWeapon` (string, default: "1,2,6,9")
+- **Shadow Blade Weapon Synergies**: `ShadowBladeWeaponSynergies` (string, default: "MovementSpeed,PrimaryAttackSpeed,PhysicalPower,PhysicalCritDamage")
   Shadow Blade weapon synergies.
-- **Shadow Blade Blood**: `ShadowBladeBlood` (string, default: "3,5,7,10")
+- **Shadow Blade Blood Synergies**: `ShadowBladeBloodSynergies` (string, default: "SpellResistance,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed")
   Shadow Blade blood synergies.
-- **Arcane Sorcerer Weapon**: `ArcaneSorcererWeapon` (string, default: "4,7,10,11")
+- **Arcane Sorcerer Weapon Synergies**: `ArcaneSorcererWeaponSynergies` (string, default: "SpellLifeLeech,SpellPower,SpellCritChance,SpellCritDamage")
   Arcane Sorcerer weapon synergies.
-- **Arcane Sorcerer Blood**: `ArcaneSorcererBlood` (string, default: "0,6,8,10")
+- **Arcane Sorcerer Blood Synergies**: `ArcaneSorcererBloodSynergies` (string, default: "HealingReceived,SpellCooldownRecoveryRate,UltimateCooldownRecoveryRate,AbilityAttackSpeed")
   Arcane Sorcerer blood synergies.
-- **Death Mage Weapon**: `DeathMageWeapon` (string, default: "0,4,7,11")
+- **Death Mage Weapon Synergies**: `DeathMageWeaponSynergies` (string, default: "MaxHealth,SpellLifeLeech,SpellPower,SpellCritDamage")
   Death Mage weapon synergies.
-- **Death Mage Blood**: `DeathMageBlood` (string, default: "2,3,6,9")
+- **Death Mage Blood Synergies**: `DeathMageBloodSynergies` (string, default: "PhysicalResistance,SpellResistance,SpellCooldownRecoveryRate,MinionDamage")
   Death Mage blood synergies.
 - **Default Class Spell**: `DefaultClassSpell` (int, default: -433204738)
   Default spell (veil of shadow) available to all classes.
-- **Blood Knight Buffs**: `BloodKnightBuffs` (string, default: "1828387635,-534491790,-1055766373,-584203677")
-  The PrefabGUID hashes for blood knight leveling blood buffs. Granted every MaxLevel/(# of blood buffs).
 - **Blood Knight Spells**: `BloodKnightSpells` (string, default: "-880131926,651613264,2067760264,189403977,375131842")
   Blood Knight shift spells, granted at levels of prestige.
-- **Demon Hunter Buffs**: `DemonHunterBuffs` (string, default: "-154702686,-285745649,-1510965956,-397097531")
-  The PrefabGUID hashes for demon hunter leveling blood buffs.
 - **Demon Hunter Spells**: `DemonHunterSpells` (string, default: "-356990326,-987810170,1071205195,1249925269,-914344112")
   Demon Hunter shift spells, granted at levels of prestige.
-- **Vampire Lord Buffs**: `VampireLordBuffs` (string, default: "1558171501,997154800,-1413561088,1103099361")
-  The PrefabGUID hashes for vampire lord leveling blood buffs.
 - **Vampire Lord Spells**: `VampireLordSpells` (string, default: "78384915,295045820,-1000260252,91249849,1966330719")
   Vampire Lord shift spells, granted at levels of prestige.
-- **Shadow Blade Buffs**: `ShadowBladeBuffs` (string, default: "894725875,-1596803256,-993492354,210193036")
-  The PrefabGUID hashes for shadow blade leveling blood buffs.
 - **Shadow Blade Spells**: `ShadowBladeSpells` (string, default: "1019568127,1575317901,1112116762,-358319417,1174831223")
   Shadow Blade shift spells, granted at levels of prestige.
-- **Arcane Sorcerer Buffs**: `ArcaneSorcererBuffs` (string, default: "1614027598,884683323,-1576592687,-1859298707")
-  The PrefabGUID hashes for arcane leveling blood buffs.
 - **Arcane Sorcerer Spells**: `ArcaneSorcererSpells` (string, default: "247896794,268059675,-242769430,-2053450457,1650878435")
   Arcane Sorcerer shift spells, granted at levels of prestige.
-- **Death Mage Buffs**: `DeathMageBuffs` (string, default: "-901503997,-804597757,1934870645,1201299233")
-  The PrefabGUID hashes for death mage leveling blood buffs.
 - **Death Mage Spells**: `DeathMageSpells` (string, default: "-1204819086,481411985,1961570821,2138402840,-1781779733")
   Death Mage shift spells, granted at levels of prestige.
 

@@ -1,14 +1,14 @@
+using Bloodcraft.Resources;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Network;
-using ProjectM.UI;
 using Stunlock.Core;
-using Stunlock.Localization;
 using System.Reflection;
 using System.Text.Json;
 using Unity.Collections;
 using Unity.Entities;
 using VampireCommandFramework;
+using static Bloodcraft.Resources.PrefabNames;
 
 namespace Bloodcraft.Services;
 internal class LocalizationService // the bones are from KindredCommands, ty Odjit c:
@@ -61,45 +61,77 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
 
     static readonly Dictionary<int, string> _guidHashesToGuidStrings = [];
     static readonly Dictionary<string, string> _guidStringsToLocalizedNames = [];
+    public static IReadOnlyDictionary<PrefabGUID, string> PrefabGuidNames => _prefabGuidNames;
+    static readonly Dictionary<PrefabGUID, string> _prefabGuidNames = [];
 
-    static readonly Dictionary<PrefabGUID, string> _prefabGuidsToNames = new() // based off of converter (FoundPrimal) from KindredCommands, will add other names over time for villagers and others maybe >_>
+    static readonly Dictionary<PrefabGUID, string> _prefabGuidNameOverrides = new() // based off of converter (FoundPrimal) from KindredCommands, will add other names over time for villagers and others maybe >_>
     {
-        {Prefabs.CHAR_Bandit_Chaosarrow_GateBoss_Minor, "Primal Lidia"},
-        {Prefabs.CHAR_Bandit_Foreman_VBlood_GateBoss_Minor, "Primal Rufus"},
-        {Prefabs.CHAR_Bandit_StoneBreaker_VBlood_GateBoss_Minor, "Primal Errol"},
-        {Prefabs.CHAR_Bandit_Tourok_GateBoss_Minor, "Primal Quincey"},
-        {Prefabs.CHAR_Frostarrow_GateBoss_Minor, "Primal Keely"},
-        {Prefabs.CHAR_Gloomrot_Purifier_VBlood_GateBoss_Major, "Primal Angram"},
-        {Prefabs.CHAR_Gloomrot_Voltage_VBlood_GateBoss_Major, "Primal Domina"},
-        {Prefabs.CHAR_Militia_Guard_VBlood_GateBoss_Minor, "Primal Vincent"},
-        {Prefabs.CHAR_Militia_Leader_VBlood_GateBoss_Major, "Primal Octavian"},
-        {Prefabs.CHAR_Poloma_VBlood_GateBoss_Minor, "Primal Poloma"},
-        {Prefabs.CHAR_Spider_Queen_VBlood_GateBoss_Major, "Primal Ungora"},
-        {Prefabs.CHAR_Undead_BishopOfDeath_VBlood_GateBoss_Minor, "Primal Goreswine"},
-        {Prefabs.CHAR_Undead_BishopOfShadows_VBlood_GateBoss_Major, "Primal Leandra"},
-        {Prefabs.CHAR_Undead_Infiltrator_VBlood_GateBoss_Major, "Primal Bane"},
-        {Prefabs.CHAR_Undead_Leader_Vblood_GateBoss_Minor, "Primal Kriig"},
-        {Prefabs.CHAR_Undead_ZealousCultist_VBlood_GateBoss_Major, "Primal Foulrot"},
-        {Prefabs.CHAR_VHunter_Jade_VBlood_GateBoss_Major, "Primal Jade"},
-        {Prefabs.CHAR_VHunter_Leader_GateBoss_Minor, "Primal Tristan"},
-        {Prefabs.CHAR_Villager_CursedWanderer_VBlood_GateBoss_Major, "Primal Ben"},
-        {Prefabs.CHAR_Wendigo_GateBoss_Major, "Primal Frostmaw"},
-        {Prefabs.CHAR_WerewolfChieftain_VBlood_GateBoss_Major, "Primal Willfred"},
-        {Prefabs.CHAR_Winter_Yeti_VBlood_GateBoss_Major, "Primal Terrorclaw"}
+        {PrefabGUIDs.CHAR_Bandit_Chaosarrow_GateBoss_Minor, "Primal Lidia"},
+        {PrefabGUIDs.CHAR_Bandit_Foreman_VBlood_GateBoss_Minor, "Primal Rufus"},
+        {PrefabGUIDs.CHAR_Bandit_StoneBreaker_VBlood_GateBoss_Minor, "Primal Errol"},
+        {PrefabGUIDs.CHAR_Bandit_Tourok_GateBoss_Minor, "Primal Quincey"},
+        {PrefabGUIDs.CHAR_Frostarrow_GateBoss_Minor, "Primal Keely"},
+        {PrefabGUIDs.CHAR_Gloomrot_Purifier_VBlood_GateBoss_Major, "Primal Angram"},
+        {PrefabGUIDs.CHAR_Gloomrot_Voltage_VBlood_GateBoss_Major, "Primal Domina"},
+        {PrefabGUIDs.CHAR_Militia_Guard_VBlood_GateBoss_Minor, "Primal Vincent"},
+        {PrefabGUIDs.CHAR_Militia_Leader_VBlood_GateBoss_Major, "Primal Octavian"},
+        {PrefabGUIDs.CHAR_Poloma_VBlood_GateBoss_Minor, "Primal Poloma"},
+        {PrefabGUIDs.CHAR_Spider_Queen_VBlood_GateBoss_Major, "Primal Ungora"},
+        {PrefabGUIDs.CHAR_Undead_BishopOfDeath_VBlood_GateBoss_Minor, "Primal Goreswine"},
+        {PrefabGUIDs.CHAR_Undead_BishopOfShadows_VBlood_GateBoss_Major, "Primal Leandra"},
+        {PrefabGUIDs.CHAR_Undead_Infiltrator_VBlood_GateBoss_Major, "Primal Bane"},
+        {PrefabGUIDs.CHAR_Undead_Leader_Vblood_GateBoss_Minor, "Primal Kriig"},
+        {PrefabGUIDs.CHAR_Undead_ZealousCultist_VBlood_GateBoss_Major, "Primal Foulrot"},
+        {PrefabGUIDs.CHAR_VHunter_Jade_VBlood_GateBoss_Major, "Primal Jade"},
+        {PrefabGUIDs.CHAR_VHunter_Leader_GateBoss_Minor, "Primal Tristan"},
+        {PrefabGUIDs.CHAR_Villager_CursedWanderer_VBlood_GateBoss_Major, "Primal Ben"},
+        {PrefabGUIDs.CHAR_Wendigo_GateBoss_Major, "Primal Frostmaw"},
+        {PrefabGUIDs.CHAR_WerewolfChieftain_VBlood_GateBoss_Major, "Primal Willfred"},
+        {PrefabGUIDs.CHAR_Winter_Yeti_VBlood_GateBoss_Major, "Primal Terrorclaw"}
     };
-
     public LocalizationService()
     {
         InitializeLocalizations();
+        InitializePrefabGuidNames();
     }
     static void InitializeLocalizations()
     {
-        LoadPrefabHashesToGuidStrings();
+        // LoadPrefabHashesToGuidStrings();
         LoadGuidStringsToLocalizedNames();
     }
+    static void InitializePrefabGuidNames()
+    {
+        var namesToPrefabGuids = Core.SystemService.PrefabCollectionSystem._PrefabDataLookup;
+
+        var prefabGuids = namesToPrefabGuids.GetKeyArray(Allocator.Temp);
+        var assetData = namesToPrefabGuids.GetValueArray(Allocator.Temp);
+
+        try
+        {
+            for (int i = 0; i < prefabGuids.Length; i++)
+            {
+                var prefabGuid = prefabGuids[i];
+                var assetDataValue = assetData[i];
+
+                _prefabGuidNames[prefabGuid] = assetDataValue.AssetName.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogWarning($"Error initializing prefab names: {ex.Message}");
+        }
+        finally
+        {
+            // Core.Log.LogWarning($"[LocalizationService] Prefab names initialized - {_prefabGuidsToNames.Count}");
+            prefabGuids.Dispose();
+            assetData.Dispose();
+        }
+    }
+
+    /*
     static void LoadPrefabHashesToGuidStrings()
     {
-        string resourceName = "Bloodcraft.Resources.Localization.Prefabs.json";
+        string resourceName = "Bloodcraft.Resources.Localization.PrefabNames.json";
         Assembly assembly = Assembly.GetExecutingAssembly();
 
         Stream stream = assembly.GetManifestResourceStream(resourceName);
@@ -111,6 +143,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         prefabNames
             .ForEach(kvp => _guidHashesToGuidStrings[kvp.Key] = kvp.Value);
     }
+    */
     static void LoadGuidStringsToLocalizedNames()
     {
         string resourceName = _localizedLanguages.ContainsKey(_language) ? _localizedLanguages[_language] : "Bloodcraft.Resources.Localization.English.json";
@@ -125,6 +158,38 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         localizationFile.Nodes
             .ToDictionary(x => x.Guid, x => x.Text)
             .ForEach(kvp => _guidStringsToLocalizedNames[kvp.Key] = kvp.Value);
+    }
+    public static string GetAssetGuidString(PrefabGUID prefabGUID)
+    {
+        if (_guidHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out var guidString))
+        {
+            return guidString;
+        }
+
+        return string.Empty;
+    }
+    public static string GetGuidString(PrefabGUID prefabGuid)
+    {
+        if (LocalizedNameKeys.TryGetValue(prefabGuid, out string guidString))
+        {
+            return guidString;
+        }
+
+        return string.Empty;
+    }
+    public static string GetNameFromGuidString(string guidString)
+    {
+        if (_guidStringsToLocalizedNames.TryGetValue(guidString, out string localizedName))
+        {
+            return localizedName;
+        }
+
+        return string.Empty;
+    }
+    public static string GetNameFromPrefabGuid(PrefabGUID prefabGuid)
+    {
+        if (_prefabGuidNameOverrides.TryGetValue(prefabGuid, out string characterName)) return characterName;
+        else return GetNameFromGuidString(GetGuidString(prefabGuid));
     }
     public static void HandleReply(ChatCommandContext ctx, string message)
     {
@@ -163,39 +228,8 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     }
     public static void HandleServerReply(EntityManager entityManager, User user, string message)
     {
-        ServerChatUtils.SendSystemMessageToClient(entityManager, user, message);
-    }
-    public static string GetAssetGuidString(PrefabGUID prefabGUID)
-    {
-        if (_guidHashesToGuidStrings.TryGetValue(prefabGUID.GuidHash, out var guidString))
-        {
-            return guidString;
-        }
-
-        return string.Empty;
-    }
-    public static string GetGuidString(PrefabGUID prefabGuid)
-    {
-        if (_guidHashesToGuidStrings.TryGetValue(prefabGuid.GuidHash, out string guidString))
-        {
-            return guidString;
-        }
-
-        return string.Empty;
-    }
-    public static string GetNameFromGuidString(string guidString)
-    {
-        if (_guidStringsToLocalizedNames.TryGetValue(guidString, out string localizedName))
-        {
-            return localizedName;
-        }
-
-        return string.Empty;
-    }
-    public static string GetNameFromPrefabGuid(PrefabGUID prefabGuid)
-    {
-        if (_prefabGuidsToNames.TryGetValue(prefabGuid, out string characterName)) return characterName;
-        else return GetNameFromGuidString(GetGuidString(prefabGuid));
+        FixedString512Bytes fixedMessage = new(message);
+        ServerChatUtils.SendSystemMessageToClient(entityManager, user, ref fixedMessage);
     }
 
     /* this works fine for languages without heavy reliance on order of phrases, at some point will refactor responses to use strings from user-made language file but until then this is best bet

@@ -1,4 +1,6 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Professions;
 using Bloodcraft.Systems.Quests;
 using HarmonyLib;
@@ -40,7 +42,7 @@ internal static class ReactToInventoryChangedSystemPatch
     static readonly PrefabGUID _itemJewelTemplate = new(1075994038);
     static readonly PrefabGUID _advancedGrinder = new(-178579946);
     static readonly PrefabGUID _gemCuttingTable = new(-21483617);
-    static readonly PrefabGUID _onyxTear = Prefabs.Item_Ingredient_OnyxTear;
+    static readonly PrefabGUID _onyxTear = PrefabGUIDs.Item_Ingredient_OnyxTear;
 
     static readonly List<PrefabGUID> _jewelTemplates = 
     [
@@ -54,22 +56,22 @@ internal static class ReactToInventoryChangedSystemPatch
 
     static readonly List<PrefabGUID> _perfectGems =
     [
-        Prefabs.Item_Ingredient_Gem_Amethyst_T04,
-        Prefabs.Item_Ingredient_Gem_Ruby_T04,
-        Prefabs.Item_Ingredient_Gem_Sapphire_T04,
-        Prefabs.Item_Ingredient_Gem_Emerald_T04,
-        Prefabs.Item_Ingredient_Gem_Topaz_T04,
-        Prefabs.Item_Ingredient_Gem_Miststone_T04
+        PrefabGUIDs.Item_Ingredient_Gem_Amethyst_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Ruby_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Sapphire_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Emerald_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Topaz_T04,
+        PrefabGUIDs.Item_Ingredient_Gem_Miststone_T04
     ];
 
     static readonly Dictionary<PrefabGUID, PrefabGUID> _perfectGemPrimals = new()
     {
-        { Prefabs.Item_Ingredient_Gem_Emerald_T04, Prefabs.Item_Jewel_Unholy_T04 },
-        { Prefabs.Item_Ingredient_Gem_Topaz_T04, Prefabs.Item_Jewel_Storm_T04 },
-        { Prefabs.Item_Ingredient_Gem_Miststone_T04, Prefabs.Item_Jewel_Illusion_T04 },
-        { Prefabs.Item_Ingredient_Gem_Sapphire_T04, Prefabs.Item_Jewel_Frost_T04 },
-        { Prefabs.Item_Ingredient_Gem_Amethyst_T04, Prefabs.Item_Jewel_Chaos_T04 },
-        { Prefabs.Item_Ingredient_Gem_Ruby_T04, Prefabs.Item_Jewel_Blood_T04 }
+        { PrefabGUIDs.Item_Ingredient_Gem_Emerald_T04, PrefabGUIDs.Item_Jewel_Unholy_T04 },
+        { PrefabGUIDs.Item_Ingredient_Gem_Topaz_T04, PrefabGUIDs.Item_Jewel_Storm_T04 },
+        { PrefabGUIDs.Item_Ingredient_Gem_Miststone_T04, PrefabGUIDs.Item_Jewel_Illusion_T04 },
+        { PrefabGUIDs.Item_Ingredient_Gem_Sapphire_T04, PrefabGUIDs.Item_Jewel_Frost_T04 },
+        { PrefabGUIDs.Item_Ingredient_Gem_Amethyst_T04, PrefabGUIDs.Item_Jewel_Chaos_T04 },
+        { PrefabGUIDs.Item_Ingredient_Gem_Ruby_T04, PrefabGUIDs.Item_Jewel_Blood_T04 }
     };
 
     [HarmonyPatch(typeof(ReactToInventoryChangedSystem), nameof(ReactToInventoryChangedSystem.OnUpdate))]
@@ -79,7 +81,7 @@ internal static class ReactToInventoryChangedSystemPatch
         if (!Core._initialized) return;
         else if (!_professions && !_quests && !_extraRecipes) return;
 
-        NativeArray<InventoryChangedEvent> inventoryChangedEvents = __instance.__query_2096870024_0.ToComponentDataArray<InventoryChangedEvent>(Allocator.Temp);
+        NativeArray<InventoryChangedEvent> inventoryChangedEvents = __instance.EntityQueries[0].ToComponentDataArray<InventoryChangedEvent>(Allocator.Temp);
         try
         {
             foreach (InventoryChangedEvent inventoryChangedEvent in inventoryChangedEvents)
@@ -92,8 +94,7 @@ internal static class ReactToInventoryChangedSystemPatch
                     {
                         User questUser = inventoryConnection.InventoryOwner.Read<PlayerCharacter>().UserEntity.Read<User>();
 
-                        if (!DealDamageSystemPatch.LastDamageTime.ContainsKey(questUser.PlatformId)) continue;
-                        else if (DealDamageSystemPatch.LastDamageTime.TryGetValue(questUser.PlatformId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.10f)
+                        if (StatChangeSystemPatch.LastDamageTime.TryGetValue(questUser.PlatformId, out DateTime lastDamageTime) && (DateTime.UtcNow - lastDamageTime).TotalSeconds < 0.1f)
                         {
                             if (questUser.PlatformId.TryGetPlayerQuests(out var quests)) QuestSystem.ProcessQuestProgress(quests, inventoryChangedEvent.Item, inventoryChangedEvent.Amount, questUser);
                         }
@@ -153,15 +154,15 @@ internal static class ReactToInventoryChangedSystemPatch
                                     float professionXP = BASE_PROFESSION_XP * ProfessionMappings.GetTierMultiplier(itemPrefabGuid);
                                     float delay = SCT_DELAY;
 
-                                    IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGuid, "");
+                                    IProfession handler = ProfessionFactory.GetProfession(itemPrefabGuid);
 
                                     switch (handler)
                                     {
-                                        case BlacksmithingHandler:
+                                        case BlacksmithingProfession:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+                                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
                                             break;
-                                        case AlchemyHandler:
+                                        case AlchemyProfession:
                                             if (itemEntity.TryGetComponent(out StoredBlood storedBlood))
                                             {
                                                 bool merlot = itemName.Contains("Bloodwine");
@@ -187,13 +188,13 @@ internal static class ReactToInventoryChangedSystemPatch
                                             else professionXP *= ALCHEMY_FACTOR;
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
                                             break;
-                                        case EnchantingHandler:
+                                        case EnchantingProfession:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+                                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
                                             break;
-                                        case TailoringHandler:
+                                        case TailoringProfession:
                                             ProfessionSystem.SetProfession(inventoryConnection.InventoryOwner, user.LocalCharacter.GetEntityOnServer(), steamId, professionXP, handler, ref delay);
-                                            EquipmentManager.ApplyEquipmentStats(steamId, itemEntity);
+                                            EquipmentQualityManager.ApplyEquipmentStats(steamId, itemEntity);
                                             break;
                                         default:
                                             break;

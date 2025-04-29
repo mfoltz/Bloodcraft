@@ -1,6 +1,6 @@
-﻿using Bloodcraft.Patches;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Patches;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
 using Il2CppInterop.Runtime;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
@@ -16,9 +16,10 @@ using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
+using static Bloodcraft.Systems.Leveling.ClassManager;
 using static Bloodcraft.Systems.Leveling.LevelingSystem;
-using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.EntityQueries;
+using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 
 namespace Bloodcraft.Utilities;
 internal static class Classes
@@ -35,35 +36,28 @@ internal static class Classes
     static readonly WaitForSeconds _longDelay = new(10f);
     static readonly Regex _classNameRegex = new("(?<!^)([A-Z])");
 
-    static readonly PrefabGUID _vBloodAbilityBuff = new(1171608023);
+    static readonly PrefabGUID _vBloodAbilityBuff = Buffs.VBloodAbilityReplaceBuff;
 
     const string NO_NAME = "No Name";
     const string PRIMARY_ATTACK = "Primary Attack";
-
-    static NativeParallelHashMap<PrefabGUID, ItemData> _itemLookup = SystemService.GameDataSystem.ItemHashLookupMap;
+    static NativeParallelHashMap<PrefabGUID, ItemData> ItemLookup => SystemService.GameDataSystem.ItemHashLookupMap;
     static PrefabLookupMap _prefabLookupMap = PrefabCollectionSystem._PrefabLookupMap;
 
     static readonly Dictionary<PrefabGUID, List<Entity>> _abilityJewelMap = [];
 
-    static EntityQuery _jewelQuery;
+    static QueryDesc _jewelQueryDesc;
 
     static readonly ComponentType[] _jewelComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
         ComponentType.ReadOnly(Il2CppType.Of<JewelInstance>()),
-        ComponentType.ReadOnly(Il2CppType.Of<JewelLevelSource>())
+        ComponentType.ReadOnly(Il2CppType.Of<JewelLevelSource>()),
+        ComponentType.ReadOnly(Il2CppType.Of<ItemData>()),
+        ComponentType.ReadOnly(Il2CppType.Of<InventoryItem>()),
+        ComponentType.ReadOnly(Il2CppType.Of<SpellModSetComponent>())
     ];
 
     static readonly int[] _typeIndices = [0, 1];
-    public enum PlayerClass
-    {
-        BloodKnight,
-        DemonHunter,
-        VampireLord,
-        ShadowBlade,
-        ArcaneSorcerer,
-        DeathMage
-    }
 
     static readonly Dictionary<PlayerClass, string> _classColorMap = new()
     {
@@ -73,75 +67,6 @@ internal static class Classes
         { PlayerClass.ArcaneSorcerer, "#008080" },
         { PlayerClass.VampireLord, "#00FFFF" },
         { PlayerClass.DeathMage, "#00FF00" }
-    };
-
-    public static readonly Dictionary<PlayerClass, List<PrefabGUID>> ClassPassiveStatBuffs = new()
-    {
-        // Warrior Archetype
-        [PlayerClass.BloodKnight] =
-        [
-            new(-500035095),   // Shared: SetBonus_SpellPower_T06
-            new(-567664068),   // Shared: SetBonus_Speed_Minor_Buff_02
-            new(1178148717),   // Shared: SetBonus_MaxHealth_PhysPower_T08
-
-            new(-753729496),   // BloodKnight Unique 1: SetBonus_AttackSpeed_Minor_Buff_01
-            new(1966156848),   // BloodKnight Unique 2: SetBonus_MovementSpeed_T06
-            new(-1281560674)   // BloodKnight Unique 3: SetBonus_Speed_Minor_Buff_01
-        ],
-        [PlayerClass.VampireLord] =
-        [
-            new(-500035095),   // Shared: SetBonus_SpellPower_T06
-            new(-567664068),   // Shared: SetBonus_Speed_Minor_Buff_02
-            new(1178148717),   // Shared: SetBonus_MaxHealth_PhysPower_T08
-
-            new(-965685546),   // VampireLord Unique 1: SetBonus_Damage_Minor_Buff_02
-            new(249601863),    // VampireLord Unique 2: SetBonus_AttackSpeed_T04
-            new(-1240045321)   // VampireLord Unique 3: SetBonus_MovementSpeed_T04
-        ],
-
-        // Rogue Archetype
-        [PlayerClass.DemonHunter] =
-        [
-            new(-1161614593),  // Shared: SetBonus_PhysicalCritChance_T04
-            new(-2026669113),  // Shared: SetBonus_AttackSpeed_Minor_Buff_02
-            new(495242428),    // Shared: SetBonus_Damage_Minor_Buff_01
-
-            new(-1630759636),  // DemonHunter Unique 1: SetBonus_MovementSpeed_PhysCritChance_T08
-            new(-692773400),   // DemonHunter Unique 2: SetBonus_SpellPower_SpellLeech_T08
-            new(803329072)     // DemonHunter Unique 3: SetBonus_CCReduction_T06
-        ],
-        [PlayerClass.ShadowBlade] =
-        [
-            new(-1161614593),  // Shared: SetBonus_PhysicalCritChance_T04
-            new(-2026669113),  // Shared: SetBonus_AttackSpeed_Minor_Buff_02
-            new(495242428),    // Shared: SetBonus_Damage_Minor_Buff_01
-
-            new(-1100642493),  // ShadowBlade Unique 1: SetBonus_Speed_02
-            new(505940050),    // ShadowBlade Unique 2: SetBonus_AttackSpeed_PhysPower_T08
-            new(-104461547)    // ShadowBlade Unique 3: SetBonus_PhysicalCritChance_T06
-        ],
-
-        // Mage Archetype
-        [PlayerClass.ArcaneSorcerer] =
-        [
-            new(1777596670),   // Shared: SetBonus_SpellPower_T04
-            new(2070760442),   // Shared: SetBonus_HealingReceived_T06
-            new(32536495),     // Shared: SetBonus_HealingReceived_T04
-
-            new(-753729496),   // ArcaneSorcerer Unique 1: SetBonus_AttackSpeed_Minor_Buff_01
-            new(-567664068),   // ArcaneSorcerer Unique 2: SetBonus_Speed_Minor_Buff_02
-            new(-1630759636)   // ArcaneSorcerer Unique 3: SetBonus_MovementSpeed_PhysCritChance_T08
-        ],
-        [PlayerClass.DeathMage] =
-        [
-            new(1777596670),   // Shared: SetBonus_SpellPower_T04
-            new(2070760442),   // Shared: SetBonus_HealingReceived_T06
-            new(32536495),     // Shared: SetBonus_HealingReceived_T04
-
-            new(-692773400),   // DeathMage Unique 1: SetBonus_SpellPower_SpellLeech_T08
-            new(908755409),    // DeathMage Unique 2: SetBonus_AttackSpeed_T06
-            new(-176045156)    // DeathMage Unique 3: SetBonus_DamageReduction_T08 (newly added)
-        ]
     };
 
     public static readonly Dictionary<PlayerClass, List<PrefabGUID>> ClassShiftAbilities = new()
@@ -229,6 +154,7 @@ internal static class Classes
     // Class Abilities
     // AB_Vampire_BloodKnight_HighKick_Abilitygroup PrefabGuid(-1638937811)
 
+    // this does not really pan out anymore but can still use stats as template
     // guess can try to match current default power levels more or less, also need to consider how to remove all of the old buffs gracefully probably by filtering for some uniqueness about their permanence
     public static readonly Dictionary<PrefabGUID, Dictionary<UnitStatType, float>> BuffStatBonuses = new()
     {
@@ -309,7 +235,7 @@ internal static class Classes
         },
         [new PrefabGUID(505940050)] = new() // SetBonus_AttackSpeed_PhysPower_T08
         {
-            { UnitStatType.AttackSpeed, 0.2f },
+            // { UnitStatType.AttackSpeed, 0.2f },
         },
         [new PrefabGUID(-104461547)] = new() // SetBonus_PhysicalCritChance_T06
         {
@@ -333,7 +259,7 @@ internal static class Classes
         // Unique - ArcaneSorcerer
         [new PrefabGUID(-753729496)] = new() // SetBonus_AttackSpeed_Minor_Buff_01
         {
-            { UnitStatType.AttackSpeed, 0.1f },
+            // { UnitStatType.AttackSpeed, 0.1f },
         },
         [new PrefabGUID(-567664068)] = new() // SetBonus_Speed_Minor_Buff_02
         {
@@ -351,7 +277,7 @@ internal static class Classes
         },
         [new PrefabGUID(908755409)] = new() // SetBonus_AttackSpeed_T06
         {
-            { UnitStatType.ShieldAbsorb, 0.5f }, // onhit synergy?
+            // { UnitStatType.ShieldAbsorb, 0.5f }, // onhit synergy?
         },
         [new PrefabGUID(-176045156)] = new() // SetBonus_DamageReduction_T08
         {
@@ -361,24 +287,25 @@ internal static class Classes
 
     public static readonly Dictionary<PlayerClass, (string, string)> ClassWeaponBloodMap = new()
     {
-        { PlayerClass.BloodKnight, (ConfigService.BloodKnightWeapon, ConfigService.BloodKnightBlood) },
-        { PlayerClass.DemonHunter, (ConfigService.DemonHunterWeapon, ConfigService.DemonHunterBlood) },
-        { PlayerClass.VampireLord, (ConfigService.VampireLordWeapon, ConfigService.VampireLordBlood) },
-        { PlayerClass.ShadowBlade, (ConfigService.ShadowBladeWeapon, ConfigService.ShadowBladeBlood) },
-        { PlayerClass.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeapon, ConfigService.ArcaneSorcererBlood) },
-        { PlayerClass.DeathMage, (ConfigService.DeathMageWeapon, ConfigService.DeathMageBlood) }
+        { PlayerClass.BloodKnight, (ConfigService.BloodKnightWeaponSynergies, ConfigService.BloodKnightBloodSynergies) },
+        { PlayerClass.DemonHunter, (ConfigService.DemonHunterWeaponSynergies, ConfigService.DemonHunterBloodSynergies) },
+        { PlayerClass.VampireLord, (ConfigService.VampireLordWeaponSynergies, ConfigService.VampireLordBloodSynergies) },
+        { PlayerClass.ShadowBlade, (ConfigService.ShadowBladeWeaponSynergies, ConfigService.ShadowBladeBloodSynergies) },
+        { PlayerClass.ArcaneSorcerer, (ConfigService.ArcaneSorcererWeaponSynergies, ConfigService.ArcaneSorcererBloodSynergies) },
+        { PlayerClass.DeathMage, (ConfigService.DeathMageWeaponSynergies, ConfigService.DeathMageBloodSynergies) }
     };
 
     public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
     {
-        { PlayerClass.BloodKnight, (Configuration.ParseConfigIntegerString(ConfigService.BloodKnightWeapon), Configuration.ParseConfigIntegerString(ConfigService.BloodKnightBlood)) },
-        { PlayerClass.DemonHunter, (Configuration.ParseConfigIntegerString(ConfigService.DemonHunterWeapon), Configuration.ParseConfigIntegerString(ConfigService.DemonHunterBlood)) },
-        { PlayerClass.VampireLord, (Configuration.ParseConfigIntegerString(ConfigService.VampireLordWeapon), Configuration.ParseConfigIntegerString(ConfigService.VampireLordBlood)) },
-        { PlayerClass.ShadowBlade, (Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeWeapon), Configuration.ParseConfigIntegerString(ConfigService.ShadowBladeBlood)) },
-        { PlayerClass.ArcaneSorcerer, (Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererWeapon), Configuration.ParseConfigIntegerString(ConfigService.ArcaneSorcererBlood)) },
-        { PlayerClass.DeathMage, (Configuration.ParseConfigIntegerString(ConfigService.DeathMageWeapon), Configuration.ParseConfigIntegerString(ConfigService.DeathMageBlood)) }
+        { PlayerClass.BloodKnight, (Configuration.ParseIntegersFromString(ConfigService.BloodKnightWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.BloodKnightBloodSynergies)) },
+        { PlayerClass.DemonHunter, (Configuration.ParseIntegersFromString(ConfigService.DemonHunterWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.DemonHunterBloodSynergies)) },
+        { PlayerClass.VampireLord, (Configuration.ParseIntegersFromString(ConfigService.VampireLordWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.VampireLordBloodSynergies)) },
+        { PlayerClass.ShadowBlade, (Configuration.ParseIntegersFromString(ConfigService.ShadowBladeWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.ShadowBladeBloodSynergies)) },
+        { PlayerClass.ArcaneSorcerer, (Configuration.ParseIntegersFromString(ConfigService.ArcaneSorcererWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.ArcaneSorcererBloodSynergies)) },
+        { PlayerClass.DeathMage, (Configuration.ParseIntegersFromString(ConfigService.DeathMageWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.DeathMageBloodSynergies)) }
     };
 
+    /*
     public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
     {
         { PlayerClass.BloodKnight, ConfigService.BloodKnightBuffs },
@@ -388,6 +315,7 @@ internal static class Classes
         { PlayerClass.ArcaneSorcerer, ConfigService.ArcaneSorcererBuffs },
         { PlayerClass.DeathMage, ConfigService.DeathMageBuffs }
     };
+    */
 
     public static readonly Dictionary<PlayerClass, string> ClassSpellsMap = new()
     {
@@ -400,22 +328,13 @@ internal static class Classes
     };
     public static List<PrefabGUID> GetClassBuffs(ulong steamId)
     {
-        if (HasClass(steamId))
+        if (steamId.HasClass(out PlayerClass? playerClass) && playerClass.HasValue)
         {
-            PlayerClass playerClass = GetPlayerClass(steamId);
-            return UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(playerClass, out var classBuffs) ?
+            return UpdateBuffsBufferDestroyPatch.ClassBuffsOrdered.TryGetValue(playerClass.Value, out var classBuffs) ?
                 classBuffs : [];
         }
 
         return [];
-    }
-    public static PlayerClass GetPlayerClass(ulong steamId)
-    {
-        if (steamId.TryGetPlayerClasses(out var classes))
-        {
-            return classes.First().Key;
-        }
-        throw new Exception("Player does not have a class.");
     }
     public static bool HandleClassChangeItem(ChatCommandContext ctx)
     {
@@ -437,9 +356,17 @@ internal static class Classes
 
         return true;
     }
-    public static bool HasClass(ulong steamId)
+    public static bool HasClass(this ulong steamId, out PlayerClass? playerClass)
     {
-        return steamId.TryGetPlayerClasses(out var classes) && classes.Keys.Count > 0;
+        playerClass = null;
+
+        if (steamId.TryGetPlayerClass(out PlayerClass playerClassType))
+        {
+            playerClass = playerClassType;
+            return true;
+        }
+
+        return false;
     }
     public static void RemoveClassBuffs(Entity playerCharacter, List<PrefabGUID> classBuffs)
     {
@@ -517,7 +444,7 @@ internal static class Classes
             allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
             allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
 
-            LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.StatSynergyMultiplier}</color>]:");
+            LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies[x<color=white>{ConfigService.SynergyMultiplier}</color>]:");
 
             for (int i = 0; i < allStats.Count; i += 6)
             {
@@ -533,7 +460,7 @@ internal static class Classes
     }
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
-        List<int> spells = Configuration.ParseConfigIntegerString(ClassSpellsMap[playerClass]);
+        List<int> spells = Configuration.ParseIntegersFromString(ClassSpellsMap[playerClass]);
 
         if (spells.Count == 0)
         {
@@ -585,37 +512,16 @@ internal static class Classes
         parsedClassType = default;
         return false;
     }
-    public static void RemoveAndUpdatePlayerClass(Entity character, PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
+    public static void UpdatePlayerClass(Entity character, PlayerClass parsedClassType, ulong steamId)
     {
-        List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
-        classes.Clear();
+        if (steamId.HasClass(out PlayerClass? playerClass) && playerClass.HasValue)
+        {
+            List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
+            RemoveClassBuffs(character, classBuffs);
+        }
 
-        var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
-        var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
-
-        var classWeaponStats = Configuration.ParseConfigIntegerString(weaponConfigEntry);
-        var classBloodStats = Configuration.ParseConfigIntegerString(bloodConfigEntry);
-
-        classes[parsedClassType] = (classWeaponStats, classBloodStats);
-        steamId.SetPlayerClasses(classes);
-
-        // yield return _delay;
-
-        RemoveClassBuffs(character, classBuffs);
+        steamId.SetPlayerClass(parsedClassType);
         ApplyClassBuffs(character, steamId);
-    }
-    public static void UpdatePlayerClass(PlayerClass parsedClassType, Dictionary<PlayerClass, (List<int>, List<int>)> classes, ulong steamId)
-    {
-        classes.Clear();
-
-        var weaponConfigEntry = ClassWeaponBloodMap[parsedClassType].Item1;
-        var bloodConfigEntry = ClassWeaponBloodMap[parsedClassType].Item2;
-
-        var classWeaponStats = Configuration.ParseConfigIntegerString(weaponConfigEntry);
-        var classBloodStats = Configuration.ParseConfigIntegerString(bloodConfigEntry);
-
-        classes[parsedClassType] = (classWeaponStats, classBloodStats);
-        steamId.SetPlayerClasses(classes);
     }
     public static void RemoveShift(Entity character)
     {
@@ -654,13 +560,15 @@ internal static class Classes
                         }
                     }
 
+                    var _itemLookup = ItemLookup;
+
                     if (JewelEquipUtilitiesServer.TryUnequipJewel(EntityManager, ref _itemLookup, inventoryEntity, abilityGroup))
                     {
                         tryEquip = true;
                     }
                 }
 
-                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
+                if ((index >= 0 && index < firstBuffer.Length) && buffEntity.Exists())
                 {
                     firstBuffer.RemoveAt(index);
                     DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
@@ -724,19 +632,22 @@ internal static class Classes
                         }
                     }
 
+                    var _itemLookup = ItemLookup;
+
                     if (JewelEquipUtilitiesServer.TryUnequipJewel(EntityManager, ref _itemLookup, inventoryEntity, abilityGroup))
                     {
                         tryEquip = true;
                     }
                 }
 
-                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
+                if (index >= 0 && index < firstBuffer.Length && buffEntity.Exists())
                 {
                     firstBuffer.RemoveAt(index);
                     DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
                 }
             }
 
+            // cache that, geez
             VBloodAbilityUtilities.InstantiateBuff(EntityManager, ActivateVBloodAbilitySystem._BuffSpawnerSystemData, character, PrefabCollectionSystem._PrefabGuidToEntityMap[_vBloodAbilityBuff], spellPrefabGUID, 3);
 
             if (ServerGameManager.TryGetBuffer<VBloodAbilityBuffEntry>(character, out var secondBuffer))
@@ -805,13 +716,15 @@ internal static class Classes
                         }
                     }
 
+                    var _itemLookup = ItemLookup;
+
                     if (JewelEquipUtilitiesServer.TryUnequipJewel(EntityManager, ref _itemLookup, inventoryEntity, abilityGroup))
                     {
                         tryEquip = true;
                     }
                 }
 
-                if (firstBuffer.IsIndexWithinRange(index) && buffEntity.Exists())
+                if (index >= 0 && index < firstBuffer.Length && buffEntity.Exists())
                 {
                     firstBuffer.RemoveAt(index);
                     DestroyUtility.Destroy(EntityManager, buffEntity, DestroyDebugReason.TryRemoveBuff);
@@ -861,7 +774,7 @@ internal static class Classes
             }
         }
 
-        if (replaceBuffer.IsIndexWithinRange(toRemove)) replaceBuffer.RemoveAt(toRemove);
+        if (toRemove >= 0 && toRemove < replaceBuffer.Length) replaceBuffer.RemoveAt(toRemove);
 
         ServerGameManager.ModifyAbilityGroupOnSlot(buffEntity, character, 3, PrefabGUID.Empty);
     }
@@ -893,7 +806,7 @@ internal static class Classes
             }
         }
 
-        if (replaceBuffer.IsIndexWithinRange(toRemove)) replaceBuffer.RemoveAt(toRemove);
+        if (toRemove >= 0 && toRemove < replaceBuffer.Length) replaceBuffer.RemoveAt(toRemove);
 
         ReplaceAbilityOnSlotBuff buff = new()
         {
@@ -964,22 +877,15 @@ internal static class Classes
 
         return prefabName;
     }
-    public static void InitializeJewels()
+    public static void GetAbilityJewels()
     {
-        _jewelQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _jewelComponents,
-            Options = EntityQueryOptions.IncludeAll
-        }); 
-        
-        GenerateAbilityJewelMap().Start();
+        _jewelQueryDesc = EntityManager.CreateQueryDesc(_jewelComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeAll);
+        GetAbilityJewelsRoutine().Start();
     }
-    static IEnumerator GenerateAbilityJewelMap()
+    static IEnumerator GetAbilityJewelsRoutine()
     {
         yield return QueryResultStreamAsync(
-            _jewelQuery,
-            _jewelComponents,
-            _typeIndices,
+            _jewelQueryDesc,
             stream =>
             {
                 try
@@ -991,6 +897,8 @@ internal static class Classes
                             Entity entity = result.Entity;
                             PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
                             JewelInstance jewelInstance = result.ResolveComponentData<JewelInstance>();
+
+                            // Core.Log.LogWarning($"[GetAbilityJewels] {prefabGuid.GetPrefabName()}");
 
                             if (!jewelInstance.OverrideAbilityType.HasValue()) continue;
 
@@ -1011,6 +919,8 @@ internal static class Classes
                 {
                     Core.Log.LogWarning($"GenerateAbilityJewelMap() - {ex}");
                 }
+
+                // Core.Log.LogWarning($"[GenerateAbilityJewelMap] Jewel map generated - {_abilityJewelMap.Count}");
             }
         );
     }
@@ -1035,7 +945,7 @@ internal static class Classes
     }
     public static void ApplyClassBuffs(Entity player, ulong steamId)
     {
-        if (!HasClass(steamId))
+        if (steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
         {
             // Core.Log.LogInfo($"No player class found - {steamId}");
             return;
@@ -1148,31 +1058,8 @@ internal static class Classes
 
             return string.Join(", ", formattedStats);
         }
+
         else return string.Empty;
-    }
-    public static void HandleModifyUnitStatBufferPrefabs(PrefabGUID buffPrefabGuid, Dictionary<UnitStatType, float> unitStats)
-    {
-        if (PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(buffPrefabGuid, out Entity prefabEntity) && prefabEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
-        {
-            buffer.Clear();
-
-            foreach (var kvp in unitStats)
-            {
-                ModifyUnitStatBuff_DOTS newStatBuff = new()
-                {
-                    StatType = kvp.Key,
-                    ModificationType = ModificationType.Add, // this needs to be different based on the stat, can either make general map or specify per dictionary entry TBD
-                    Value = kvp.Value,
-                    Modifier = 1,
-                    IncreaseByStacks = false,
-                    ValueByStacks = 0,
-                    Priority = 0,
-                    Id = ModificationId.Empty
-                };
-
-                buffer.Add(newStatBuff);
-            }
-        }
     }
     static string FormatPercentStatValue(float value)
     {

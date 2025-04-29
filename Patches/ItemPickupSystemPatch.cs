@@ -3,6 +3,7 @@ using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Patches.StatChangeSystemPatch;
 
 namespace Bloodcraft.Patches;
 
@@ -19,6 +20,7 @@ internal static class ItemPickupSystemPatch
         else if (!_quests) return;
 
         NativeArray<Entity> entities = __instance._Query.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -27,8 +29,7 @@ internal static class ItemPickupSystemPatch
                 else if (entityOwner.Owner.TryGetPlayer(out Entity player))
                 {
                     ulong steamId = player.GetSteamId();
-
-                    if (DealDamageSystemPatch.LastDamageTime.ContainsKey(steamId)) DealDamageSystemPatch.LastDamageTime.Remove(steamId);
+                    if (LastDamageTime.ContainsKey(steamId)) RemoveOnItemPickup(steamId);
                 }
             }
         }

@@ -37,7 +37,14 @@ internal class BattleService
     static readonly WaitForSeconds _secondDelay = new(1f);
     static readonly WaitForSeconds _delay = new(0.25f);
 
+    /*
     static readonly ComponentType[] _unitTeamComponent =
+    [
+        ComponentType.ReadOnly(Il2CppType.Of<UnitTeam>()),
+    ];
+    */
+
+    static ComponentType[] _unitTeamComponent =
     [
         ComponentType.ReadOnly(Il2CppType.Of<UnitTeam>()),
     ];
@@ -93,13 +100,24 @@ internal class BattleService
 
             try
             {
+                // Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<ComponentType> componentTypes = new(_unitTeamComponent);
+                EntityQueryBuilder entityQueryBuilder = new();
+
+                entityQueryBuilder.WithAll(ref _unitTeamComponent);
+                entityQueryBuilder.WithOptions(EntityQueryOptions.IncludeDisabled);
+
+                EntityQuery unitTeamQuery = EntityManager.CreateEntityQuery(ref entityQueryBuilder);
+
+                /*
                 EntityQuery unitTeamQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
                 {
                     All = _unitTeamComponent,
                     Options = EntityQueryOptions.IncludeDisabled
                 });
+                */
 
                 NativeArray<Entity> entities = unitTeamQuery.ToEntityArray(Allocator.TempJob);
+
                 try
                 {
                     foreach (Entity entity in entities)

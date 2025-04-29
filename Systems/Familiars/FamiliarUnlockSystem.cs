@@ -5,7 +5,6 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 using static Bloodcraft.Patches.DeathEventListenerSystemPatch;
-using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarBuffsManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarExperienceManager;
 using static Bloodcraft.Services.DataService.FamiliarPersistence.FamiliarUnlocksManager;
@@ -24,7 +23,7 @@ internal static class FamiliarUnlockSystem
     static readonly bool _shareUnlocks = ConfigService.ShareUnlocks;
     static readonly bool _allowVBloods = ConfigService.AllowVBloods;
 
-    static readonly PrefabGUID _familiarUnlockBuff = new(104224016);
+    static readonly PrefabGUID _familiarUnlockBuff = Buffs.HighlordDeadBuff;
 
     public static readonly HashSet<PrefabGUID> ConfiguredPrefabGuidBans = [];
     public static readonly HashSet<UnitCategory> ConfiguredCategoryBans = [];
@@ -38,10 +37,12 @@ internal static class FamiliarUnlockSystem
         "servant"
     ];
 
+    /*
     static readonly HashSet<PrefabGUID> _defaultPrefabGUIDBans =
     [
         new(-1584807109) // CHAR_Undead_SkeletonSoldier_Withered
     ];
+    */
 
     public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexes = new()
     {
@@ -99,7 +100,8 @@ internal static class FamiliarUnlockSystem
     }
     public static bool IsBannedPrefabGuid(PrefabGUID prefabGuid)
     {
-        return (ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGUIDBans.Contains(prefabGuid));
+        // return (ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGUIDBans.Contains(prefabGuid));
+        return (ConfiguredPrefabGuidBans.Contains(prefabGuid));
     }
     static bool BannedCategory(EntityCategory category)
     {
@@ -119,12 +121,12 @@ internal static class FamiliarUnlockSystem
         int famKey = targetPrefabGuid.GuidHash;
 
         FamiliarUnlocksData data = LoadFamiliarUnlocksData(steamId);
-        string lastListName = data.UnlockedFamiliars.Keys.LastOrDefault();
+        string lastListName = data.FamiliarUnlocks.Keys.LastOrDefault();
 
-        if (string.IsNullOrEmpty(lastListName) || data.UnlockedFamiliars[lastListName].Count >= 10)
+        if (string.IsNullOrEmpty(lastListName) || data.FamiliarUnlocks[lastListName].Count >= 10)
         {
-            lastListName = $"box{data.UnlockedFamiliars.Count + 1}";
-            data.UnlockedFamiliars[lastListName] = [];
+            lastListName = $"box{data.FamiliarUnlocks.Count + 1}";
+            data.FamiliarUnlocks[lastListName] = [];
 
             if (steamId.TryGetFamiliarBox(out var box) && string.IsNullOrEmpty(box))
             {
@@ -135,7 +137,7 @@ internal static class FamiliarUnlockSystem
         bool isAlreadyUnlocked = false;
         bool isShiny = false;
 
-        foreach (var list in data.UnlockedFamiliars.Values)
+        foreach (var list in data.FamiliarUnlocks.Values)
         {
             if (list.Contains(famKey))
             {
@@ -147,7 +149,7 @@ internal static class FamiliarUnlockSystem
 
         if (!isAlreadyUnlocked)
         {
-            List<int> currentList = data.UnlockedFamiliars[lastListName];
+            List<int> currentList = data.FamiliarUnlocks[lastListName];
             currentList.Add(famKey);
             SaveFamiliarUnlocksData(steamId, data);
 
@@ -240,9 +242,10 @@ internal static class FamiliarUnlockSystem
                 });
             }
 
-            if (buffEntity.Has<ServerControlsPositionBuff>()) buffEntity.Remove<ServerControlsPositionBuff>();
-            if (buffEntity.Has<BuffModificationFlagData>()) buffEntity.Remove<BuffModificationFlagData>();
-            if (buffEntity.Has<BlockFeedBuff>()) buffEntity.Remove<BlockFeedBuff>();
+            buffEntity.TryRemove<ServerControlsMovementBuff>();
+            buffEntity.TryRemove<ServerControlsRotationBuff>();
+            buffEntity.TryRemove<BuffModificationFlagData>();
+            buffEntity.TryRemove<BlockFeedBuff>();
         }
     }
 }

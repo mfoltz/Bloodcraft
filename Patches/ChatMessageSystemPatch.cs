@@ -28,19 +28,18 @@ internal static class ChatMessageSystemPatch
         else if (!_eclipse) return;
 
         NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
-        // NativeArray<ChatMessageEvent> messages = __instance.EntityQueries[0].ToComponentDataArray<ChatMessageEvent>(Allocator.Temp);
+        NativeArray<ChatMessageEvent> chatMessageEvents = __instance.EntityQueries[0].ToComponentDataArray<ChatMessageEvent>(Allocator.Temp);
 
         try
         {
-            foreach (Entity entity in entities)
+            for (int i = 0; i < entities.Length; i++)
             {
-                ChatMessageEvent chatMessageEvent = entity.Read<ChatMessageEvent>();
-                string message = chatMessageEvent.MessageText.Value;
+                Entity entity = entities[i];
+                ChatMessageEvent chatMessageEvent = chatMessageEvents[i];
 
-                if (CheckMAC(message, out string originalMessage))
+                if (CheckMAC(chatMessageEvent.MessageText.Value, out string originalMessage))
                 {
                     EclipseService.HandleClientMessage(originalMessage);
-
                     EntityManager.DestroyEntity(entity);
                 }
             }
@@ -48,6 +47,7 @@ internal static class ChatMessageSystemPatch
         finally
         {
             entities.Dispose();
+            chatMessageEvents.Dispose();
         }
     }
     public static bool CheckMAC(string receivedMessage, out string originalMessage)
@@ -60,8 +60,7 @@ internal static class ChatMessageSystemPatch
             string receivedMAC = match.Groups[1].Value;
             string intermediateMessage = _regexMAC.Replace(receivedMessage, "");
 
-            if (VerifyMAC(intermediateMessage, receivedMAC, Core.OLD_SHARED_KEY) ||
-                VerifyMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
+            if (VerifyMAC(intermediateMessage, receivedMAC, Core.NEW_SHARED_KEY))
             {
                 originalMessage = intermediateMessage;
 
@@ -83,25 +82,7 @@ internal static class ChatMessageSystemPatch
             Encoding.UTF8.GetBytes(recalculatedMAC),
             Encoding.UTF8.GetBytes(receivedMAC));
     }
-    public static string GenerateMACV1_1_2(string message)
-    {
-        using var hmac = new HMACSHA256(Core.OLD_SHARED_KEY);
-        byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
-        byte[] hashBytes = hmac.ComputeHash(messageBytes);
-
-        return Convert.ToBase64String(hashBytes);
-    }
-    public static string GenerateMACV1_2_2(string message)
-    {
-        using var hmac = new HMACSHA256(Core.NEW_SHARED_KEY);
-        byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
-        byte[] hashBytes = hmac.ComputeHash(messageBytes);
-
-        return Convert.ToBase64String(hashBytes);
-    }
-    public static string GenerateMACV1_3_2(string message)
+    public static string GenerateMAC(string message)
     {
         using var hmac = new HMACSHA256(Core.NEW_SHARED_KEY);
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);

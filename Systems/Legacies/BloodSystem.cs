@@ -1,5 +1,6 @@
-﻿using Bloodcraft.Services;
-using Bloodcraft.Systems.Leveling;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -24,16 +25,14 @@ internal static class BloodSystem
     static readonly float _vBloodLegacyMultiplier = ConfigService.VBloodLegacyMultiplier;
     static readonly float _unitLegacyMultiplier = ConfigService.UnitLegacyMultiplier;
 
-    static readonly WaitForSeconds _delay = new(1.5f);
-
-    static readonly float3 _red = new(0.9f, 0f, 0.1f); // Vibrant Red
+    static readonly float3 _red = new(0.9f, 0f, 0.1f);
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
-    static readonly PrefabGUID _sctGeneric = new(-1687715009);
+    static readonly PrefabGUID _sctGeneric = PrefabGUIDs.SCT_Type_Generic;
 
     const int BASE_BLOOD_FACTOR = 10;
     const float BLOOD_TYPE_FACTOR = 3f;
-
-    public static readonly Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensionMap = new()
+    public static IReadOnlyDictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> TryGetExtensions => _tryGetExtensions;
+    static readonly Dictionary<BloodType, Func<ulong, (bool Success, KeyValuePair<int, float> Data)>> _tryGetExtensions = new()
     {
         { BloodType.Worker, steamID =>
             {
@@ -124,10 +123,19 @@ internal static class BloodSystem
                 }
                 return (false, default);
             }
+        },
+        { BloodType.Corruption, steamID =>
+            {
+                if (steamID.TryGetPlayerCorruptionLegacy(out var data))
+                {
+                    return (true, data);
+                }
+                return (false, default);
+            }
         }
     };
-
-    public static readonly Dictionary<BloodType, Action<ulong, KeyValuePair<int, float>>> SetExtensionMap = new()
+    public static IReadOnlyDictionary<BloodType, Action<ulong, KeyValuePair<int, float>>> SetExtensions => _setExtensions;
+    static readonly Dictionary<BloodType, Action<ulong, KeyValuePair<int, float>>> _setExtensions = new()
     {
         { BloodType.Worker, (steamID, data) => steamID.SetPlayerWorkerLegacy(data) },
         { BloodType.Warrior, (steamID, data) => steamID.SetPlayerWarriorLegacy(data) },
@@ -138,10 +146,11 @@ internal static class BloodSystem
         { BloodType.Draculin, (steamID, data) => steamID.SetPlayerDraculinLegacy(data) },
         { BloodType.Immortal, (steamID, data) => steamID.SetPlayerImmortalLegacy(data) },
         { BloodType.Creature, (steamID, data) => steamID.SetPlayerCreatureLegacy(data) },
-        { BloodType.Brute, (steamID, data) => steamID.SetPlayerBruteLegacy(data) }
+        { BloodType.Brute, (steamID, data) => steamID.SetPlayerBruteLegacy(data) },
+        { BloodType.Corruption, (steamID, data) => steamID.SetPlayerCorruptionLegacy(data) }
     };
-
-    public static readonly Dictionary<BloodType, PrestigeType> BloodTypeToPrestigeMap = new()
+    public static IReadOnlyDictionary<BloodType, PrestigeType> BloodPrestigeTypes => _bloodPrestigeTypes;
+    static readonly Dictionary<BloodType, PrestigeType> _bloodPrestigeTypes = new()
     {
         { BloodType.Worker, PrestigeType.WorkerLegacy },
         { BloodType.Warrior, PrestigeType.WarriorLegacy },
@@ -151,48 +160,50 @@ internal static class BloodSystem
         { BloodType.Draculin, PrestigeType.DraculinLegacy },
         { BloodType.Immortal, PrestigeType.ImmortalLegacy },
         { BloodType.Creature, PrestigeType.CreatureLegacy },
-        { BloodType.Brute, PrestigeType.BruteLegacy }
+        { BloodType.Brute, PrestigeType.BruteLegacy },
+        { BloodType.Corruption, PrestigeType.CorruptionLegacy }
     };
-
-    public static readonly Dictionary<PrefabGUID, BloodType> BuffToBloodTypeMap = new() // base buffs present regardless of blood quality indicating type consumed
+    public static IReadOnlyDictionary<PrefabGUID, BloodType> BloodBuffToBloodType => _bloodBuffToBloodType;
+    static readonly Dictionary<PrefabGUID, BloodType> _bloodBuffToBloodType = new() 
     {
-        { new PrefabGUID(-773025435), BloodType.Worker }, // yield bonus
-        { new PrefabGUID(-804597757), BloodType.Warrior }, // phys bonus
-        { new PrefabGUID(1934870645), BloodType.Scholar }, // spell bonus
-        { new PrefabGUID(1201299233), BloodType.Rogue }, // crit bonus
-        { new PrefabGUID(-1266262267), BloodType.Mutant }, // drain bonus
-        // { new PrefabGUID(560247144), BloodType.VBlood }, // vblood_0
-        { new PrefabGUID(1558171501), BloodType.Draculin }, // speed bonus
-        { new PrefabGUID(-488475343), BloodType.Immortal }, // phys & spell bonus
-        { new PrefabGUID(894725875), BloodType.Creature }, // speed bonus
-        { new PrefabGUID(1828387635), BloodType.Brute } // primary life leech
+        { PrefabGUIDs.AB_BloodBuff_Worker_Tier1, BloodType.Worker },
+        { PrefabGUIDs.AB_BloodBuff_Warrior_Tier1, BloodType.Warrior },
+        { PrefabGUIDs.AB_BloodBuff_Scholar_Tier1, BloodType.Scholar },
+        { PrefabGUIDs.AB_BloodBuff_Rogue_Tier1, BloodType.Rogue },
+        { PrefabGUIDs.AB_BloodBuff_Mutant_Tier1, BloodType.Mutant },
+        { PrefabGUIDs.AB_BloodBuff_Draculin_Tier1, BloodType.Draculin },
+        { PrefabGUIDs.AB_BloodBuff_Dracula_Tier1, BloodType.Immortal },
+        { PrefabGUIDs.AB_BloodBuff_Creature_Tier1, BloodType.Creature },
+        { PrefabGUIDs.AB_BloodBuff_Brute_Tier1, BloodType.Brute },
+        { PrefabGUIDs.AB_BloodBuff_Corruption_Tier1, BloodType.Corruption }
     };
-
-    public static readonly Dictionary<BloodType, PrefabGUID> BloodTypeToBuffMap = new()
+    public static IReadOnlyDictionary<BloodType, PrefabGUID> BloodTypeToBloodBuff => _bloodTypeToBloodBuff;
+    static readonly Dictionary<BloodType, PrefabGUID> _bloodTypeToBloodBuff = new()
     {
-        { BloodType.Worker, new PrefabGUID(-773025435) }, // yield bonus
-        { BloodType.Warrior, new PrefabGUID(-804597757) }, // phys bonus
-        { BloodType.Scholar, new PrefabGUID(1934870645) }, // spell bonus
-        { BloodType.Rogue, new PrefabGUID(1201299233) }, // crit bonus
-        { BloodType.Mutant, new PrefabGUID(-1266262267) }, // drain bonus
-        { BloodType.VBlood, new PrefabGUID(560247144) }, // vblood_0
-        { BloodType.Draculin, new PrefabGUID(1558171501) }, // speed bonus
-        { BloodType.Immortal, new PrefabGUID(-488475343) }, // phys/spell bonus
-        { BloodType.Creature, new PrefabGUID(894725875) }, // speed bonus
-        { BloodType.Brute, new PrefabGUID(1828387635) } // primary life leech
+        { BloodType.Worker, PrefabGUIDs.AB_BloodBuff_Worker_Tier1 },
+        { BloodType.Warrior, PrefabGUIDs.AB_BloodBuff_Warrior_Tier1 },
+        { BloodType.Scholar, PrefabGUIDs.AB_BloodBuff_Scholar_Tier1 },
+        { BloodType.Rogue, PrefabGUIDs.AB_BloodBuff_Rogue_Tier1 },
+        { BloodType.Mutant, PrefabGUIDs.AB_BloodBuff_Mutant_Tier1 },
+        { BloodType.Draculin, PrefabGUIDs.AB_BloodBuff_Draculin_Tier1 }, 
+        { BloodType.Immortal, PrefabGUIDs.AB_BloodBuff_Dracula_Tier1 },
+        { BloodType.Creature, PrefabGUIDs.AB_BloodBuff_Creature_Tier1 }, 
+        { BloodType.Brute, PrefabGUIDs.AB_BloodBuff_Brute_Tier1 }, 
+        { BloodType.Corruption, PrefabGUIDs.AB_BloodBuff_Corruption_Tier1 }
     };
-
-    public static readonly Dictionary<BloodType, PrefabGUID> BloodTypeToConsumeSourceMap = new()
+    public static IReadOnlyDictionary<BloodType, PrefabGUID> BloodTypeToConsumeSource => _bloodTypeToConsumeSource;
+    static readonly Dictionary<BloodType, PrefabGUID> _bloodTypeToConsumeSource = new()
     {
-        { BloodType.Worker, new PrefabGUID(1743532914) }, // CHAR_Bandit_Worker_Gatherer
-        { BloodType.Warrior, new PrefabGUID(923140362) }, // CHAR_Bandit_Thief
-        { BloodType.Scholar, new PrefabGUID(-700632469) }, // CHAR_Militia_Nun
-        { BloodType.Rogue, new PrefabGUID(1220569089) }, // CHAR_Bandit_Scout
-        { BloodType.Mutant, new PrefabGUID(1092792896) }, // CHAR_Mutant_Spitter
-        { BloodType.Draculin, new PrefabGUID(-494298686) }, // CHAR_Legion_NightMaiden
-        { BloodType.Creature, new PrefabGUID(-218175217) }, // CHAR_Cursed_Wolf
-        { BloodType.Immortal, new PrefabGUID(55100532) }, // CHAR_Dracula_BloodSoul_heart
-        { BloodType.Brute, new PrefabGUID(2005508157) } // CHAR_Militia_Heavy
+        { BloodType.Worker, PrefabGUIDs.CHAR_Bandit_Worker_Gatherer },
+        { BloodType.Warrior, PrefabGUIDs.CHAR_Bandit_Thief },
+        { BloodType.Scholar, PrefabGUIDs.CHAR_Militia_Nun },
+        { BloodType.Rogue, PrefabGUIDs.CHAR_Bandit_Scout },
+        { BloodType.Mutant, PrefabGUIDs.CHAR_Mutant_Spitter },
+        { BloodType.Draculin, PrefabGUIDs.CHAR_Legion_NightMaiden },
+        { BloodType.Creature, PrefabGUIDs.CHAR_Cursed_Wolf },
+        { BloodType.Immortal, PrefabGUIDs.CHAR_Dracula_BloodSoul_Heart },
+        { BloodType.Brute, PrefabGUIDs.CHAR_Militia_Heavy },
+        { BloodType.Corruption, PrefabGUIDs.CHAR_Corrupted_Wolf }
     };
     public static void ProcessLegacy(DeathEventArgs deathEvent)
     {
@@ -202,7 +213,7 @@ internal static class BloodSystem
         if (!target.TryGetComponent(out BloodConsumeSource bloodConsumeSource)) return;
 
         BloodType targetBloodType = GetBloodTypeFromPrefab(bloodConsumeSource.UnitBloodType._Value);
-        int unitLevel = target.Read<UnitLevel>().Level;
+        int unitLevel = target.GetUnitLevel();
 
         float bloodValue;
 
@@ -233,14 +244,14 @@ internal static class BloodSystem
         qualityMultiplier = Mathf.Min(qualityMultiplier, 2f); // Cap the multiplier at 2
         bloodValue *= qualityMultiplier;
 
-        IBloodHandler handler = BloodHandlerFactory.GetBloodHandler(bloodType);
+        IBloodLegacy handler = BloodLegacyFactory.GetBloodHandler(bloodType);
         if (handler != null)
         {
             SaveBloodExperience(steamId, handler, bloodValue, out bool leveledUp, out int newLevel);
             NotifyPlayer(playerCharacter, userEntity, user, steamId, bloodType, bloodValue, leveledUp, newLevel, handler, deathEvent.ScrollingTextDelay);
         }
     }
-    public static void SaveBloodExperience(ulong steamID, IBloodHandler handler, float gainedXP, out bool leveledUp, out int newLevel)
+    public static void SaveBloodExperience(ulong steamID, IBloodLegacy handler, float gainedXP, out bool leveledUp, out int newLevel)
     {
         var xpData = handler.GetLegacyData(steamID);
         int currentLevel = xpData.Key;
@@ -295,7 +306,7 @@ internal static class BloodSystem
             }
         }
     }
-    public static void NotifyPlayer(Entity playerCharacter, Entity userEntity, User user, ulong steamId, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodHandler handler, float delay)
+    public static void NotifyPlayer(Entity playerCharacter, Entity userEntity, User user, ulong steamId, BloodType bloodType, float gainedXP, bool leveledUp, int newLevel, IBloodLegacy handler, float delay)
     {
         int gainedIntXP = (int)gainedXP;
         int levelProgress = GetLevelProgress(steamId, handler);
@@ -328,7 +339,7 @@ internal static class BloodSystem
         float3 position = playerCharacter.GetPosition();
         ScrollingCombatTextMessage.Create(EntityManager, EndSimulationEntityCommandBufferSystem.CreateCommandBuffer(), _experienceAssetGuid, position, color, playerCharacter, gainedXP, _sctGeneric, userEntity);
     }
-    public static int GetLevelProgress(ulong SteamID, IBloodHandler handler)
+    public static int GetLevelProgress(ulong SteamID, IBloodLegacy handler)
     {
         int currentLevel = GetLevel(SteamID, handler);
         float currentXP = GetXp(SteamID, handler);
@@ -341,12 +352,12 @@ internal static class BloodSystem
 
         return 100 - (int)Math.Ceiling(earnedXP / neededXP * 100);
     }
-    static float GetXp(ulong steamID, IBloodHandler handler)
+    static float GetXp(ulong steamID, IBloodLegacy handler)
     {
         var xpData = handler.GetLegacyData(steamID);
         return xpData.Value;
     }
-    public static int GetLevel(ulong steamID, IBloodHandler handler)
+    public static int GetLevel(ulong steamID, IBloodLegacy handler)
     {
         var xpData = handler.GetLegacyData(steamID);
         return xpData.Key;

@@ -12,7 +12,6 @@ namespace Bloodcraft.Patches;
 [HarmonyPatch]
 internal static class BehaviourStateChangedSystemPatch
 {
-    static EntityManager EntityManager => Core.EntityManager;
 
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
@@ -24,39 +23,38 @@ internal static class BehaviourStateChangedSystemPatch
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_221632411_0.ToEntityArray(Allocator.Temp);
+        NativeArray<BehaviourTreeStateChangedEvent> behaviourTreeStateChangedEvents = __instance.__query_221632411_0.ToComponentDataArray<BehaviourTreeStateChangedEvent>(Allocator.Temp);
+
+        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
+
         try
         {
-            foreach (Entity entity in entities)
+            for (int i = 0; i < behaviourTreeStateChangedEvents.Length; i++)
             {
-                if (!entity.TryGetComponent(out BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent)) continue;
-                else if (behaviourTreeStateChangedEvent.Entity.TryGetFollowedPlayer(out Entity player))
-                {
-                    Entity familiar = behaviourTreeStateChangedEvent.Entity;
-                    BehaviourTreeState behaviourTreeState = familiar.Read<BehaviourTreeState>();
+                Entity source = entities[i];
+                BehaviourTreeStateChangedEvent behaviourTreeStateChangedEvent = behaviourTreeStateChangedEvents[i];
+                Entity target = behaviourTreeStateChangedEvent.Entity;
 
+                if (!blockFeedBuffLookup.HasComponent(target)) continue;
+                else if (target.TryGetFollowedPlayer(out Entity playerCharacter))
+                {
                     if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Return))
                     {
-                        behaviourTreeState.Value = GenericEnemyState.Follow;
-                        behaviourTreeStateChangedEvent.NewState = GenericEnemyState.Follow;
+                        target.With((ref BehaviourTreeState behaviourTreeState) =>
+                        {
+                            behaviourTreeState.Value = GenericEnemyState.Follow;
+                        });
 
-                        entity.Write(behaviourTreeStateChangedEvent);
-                        behaviourTreeStateChangedEvent.Entity.Write(behaviourTreeState);
+                        source.With((ref BehaviourTreeStateChangedEvent behaviourTreeState) =>
+                        {
+                            behaviourTreeState.NewState = GenericEnemyState.Follow;
+                        });
 
-                        // ExtendedGameManager.SetBehaviourTreeState(); good to know about, don't feel like messing with what works atm
-
-                        Familiars.HandleFamiliarMinions(familiar);
+                        Familiars.HandleFamiliarMinions(target);
                     }
                     else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Idle))
                     {
-                        Familiars.TryReturnFamiliar(player, familiar);
-                    }
-                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Relocate_Unstuck))
-                    {
-                        Core.Log.LogWarning($"[BehaviourStateChangedSystem] Relocate_Unstuck: {familiar.GetPrefabGuid()}");
-                    }
-                    else if (behaviourTreeStateChangedEvent.NewState.Equals(GenericEnemyState.Relocate_CombatArea))
-                    {
-                        Core.Log.LogWarning($"[BehaviourStateChangedSystem] Relocate_CombatArea: {familiar.GetPrefabGuid()}");
+                        Familiars.TryReturnFamiliar(playerCharacter, target);
                     }
                 }
             }

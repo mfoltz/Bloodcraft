@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
@@ -417,12 +418,12 @@ internal static class JewelSpawnSystemPatch
 
     static readonly Dictionary<PrefabGUID, PrefabGUID> _jewelSpellSchool = new()
     {
-        { new(1412786604), Prefabs.UnholySpellSchoolAsset }, // Unholy
-        { new(2023809276), Prefabs.StormSpellSchoolAsset },  // Storm
-        { new(97169184), Prefabs.IllusionSpellSchoolAsset }, // Illusion
-        { new(-147757377), Prefabs.FrostSpellSchoolAsset },  // Frost
-        { new(-1796954295), Prefabs.ChaosSpellSchoolAsset }, // Chaos
-        { new(271061481), Prefabs.BloodSpellSchoolAsset }    // Blood
+        { new(1412786604), PrefabGUIDs.UnholySpellSchoolAsset }, // Unholy
+        { new(2023809276), PrefabGUIDs.StormSpellSchoolAsset },  // Storm
+        { new(97169184), PrefabGUIDs.IllusionSpellSchoolAsset }, // Illusion
+        { new(-147757377), PrefabGUIDs.FrostSpellSchoolAsset },  // Frost
+        { new(-1796954295), PrefabGUIDs.ChaosSpellSchoolAsset }, // Chaos
+        { new(271061481), PrefabGUIDs.BloodSpellSchoolAsset }    // Blood
     };
 
     static readonly Dictionary<PrefabGUID, (double Min, double Max)?> _spellModPowerRanges = new() // this might be entirely superfluous but don't want to find out right now x_x

@@ -1,17 +1,13 @@
-using Bloodcraft.Systems.Familiars;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using Il2CppInterop.Runtime;
-using ProjectM;
 using ProjectM.Network;
 using System.Collections;
 using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-using static Bloodcraft.Services.DataService.FamiliarPersistence;
 using static Bloodcraft.Utilities.EntityQueries;
-using static Bloodcraft.Utilities.Familiars;
 
 namespace Bloodcraft.Services;
 internal class PlayerService
@@ -20,30 +16,20 @@ internal class PlayerService
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
 
-    const float START_DELAY = 30f;
+    // const float START_DELAY = 30f;
     const float ROUTINE_DELAY = 60f;
 
-    static readonly WaitForSeconds _startDelay = new(START_DELAY);
+    // static readonly WaitForSeconds _startDelay = new(START_DELAY);
     static readonly WaitForSeconds _delay = new(ROUTINE_DELAY);
 
-    static readonly ComponentType[] _userComponent =
+    static readonly ComponentType[] _userAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<User>())
     ];
 
-    static readonly ComponentType[] _familiarComponents =
-    [
-        ComponentType.ReadOnly(Il2CppType.Of<Follower>()),
-        ComponentType.ReadOnly(Il2CppType.Of<TeamReference>()),
-        ComponentType.ReadOnly(Il2CppType.Of<BlockFeedBuff>())
-    ];
+    static QueryDesc _onlineUserQueryDesc;
+    static QueryDesc _userQueryDesc;
 
-    static EntityQuery _onlineUserQuery;
-    static EntityQuery _userQuery;
-    // static EntityQuery _familiarQuery;
-
-    static bool _shouldMigrate = true;
-    static bool _shouldDestroy = true;
     static bool _rebuildCache = true;
 
     static readonly ConcurrentDictionary<ulong, PlayerInfo> _steamIdPlayerInfoCache = [];
@@ -53,7 +39,7 @@ internal class PlayerService
     public static IReadOnlyDictionary<ulong, PlayerInfo> SteamIdOnlinePlayerInfoCache => _steamIdOnlinePlayerInfoCache;
 
     static readonly ConcurrentDictionary<int, ulong> _userIndexSteamIdCache = [];
-    public static IReadOnlyDictionary<int, ulong> UserIndexSteamIdCache => _userIndexSteamIdCache;
+    static IReadOnlyDictionary<int, ulong> UserIndexSteamIdCache => _userIndexSteamIdCache;
     public struct PlayerInfo(Entity userEntity = default, Entity charEntity = default, User user = default)
     {
         public User User { get; set; } = user;
@@ -62,24 +48,8 @@ internal class PlayerService
     }
     public PlayerService()
     {
-        _userQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _userComponent,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-
-        _onlineUserQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _userComponent,
-        });
-
-        /*
-        _familiarQuery = EntityManager.CreateEntityQuery(new EntityQueryDesc
-        {
-            All = _familiarComponents,
-            Options = EntityQueryOptions.IncludeDisabled
-        });
-        */
+        _userQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents, options: EntityQueryOptions.IncludeDisabled);
+        _onlineUserQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents);
 
         PlayerServiceRoutine().Start();
     }
@@ -87,11 +57,7 @@ internal class PlayerService
     static readonly int[] _typeIndices = [0];
     static IEnumerator PlayerServiceRoutine()
     {
-        // yield return _startDelay;
-
         if (_rebuildCache) BuildPlayerInfoCache();
-        if (_shouldDestroy) DestroyFamiliars();
-        if (_shouldMigrate) MigrateFamiliarPrestigeData();
 
         while (true)
         {
@@ -99,9 +65,7 @@ internal class PlayerService
             _userIndexSteamIdCache.Clear();
 
             yield return QueryResultStreamAsync(
-                _onlineUserQuery,
-                _userComponent,
-                _typeIndices,
+                _onlineUserQueryDesc,
                 stream =>
                 {
                     try
@@ -139,7 +103,7 @@ internal class PlayerService
     }
     static void BuildPlayerInfoCache()
     {
-        NativeArray<Entity> userEntities = _userQuery.ToEntityArray(Allocator.Temp);
+        NativeArray<Entity> userEntities = _userQueryDesc.EntityQuery.ToEntityArray(Allocator.Temp);
 
         try
         {
@@ -179,52 +143,6 @@ internal class PlayerService
         }
 
         _rebuildCache = false;
-    }
-    static void DestroyFamiliars()
-    {
-        try
-        {
-            foreach (var keyValuePair in SteamIdPlayerInfoCache)
-            {
-                ulong steamId = keyValuePair.Key;
-                Entity playerCharacter = keyValuePair.Value.CharEntity;
-
-                ActiveFamiliarData activeFamiliarData = ActiveFamiliarManager.GetActiveFamiliarData(steamId);
-
-                Entity servant = activeFamiliarData.Servant;
-                Entity familiar = activeFamiliarData.Familiar;
-
-                if (servant.Exists())
-                {
-                    FamiliarBindingSystem.RemoveDropTable(servant);
-                    StatChangeUtility.KillOrDestroyEntity(EntityManager, servant, playerCharacter, playerCharacter, Core.ServerTime, StatChangeReason.Default, true);
-                }
-
-                if (familiar.Exists())
-                {
-                    FamiliarBindingSystem.RemoveDropTable(familiar);
-                    StatChangeUtility.KillOrDestroyEntity(EntityManager, familiar, playerCharacter, playerCharacter, Core.ServerTime, StatChangeReason.Default, true);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogWarning($"[PlayerService] DestroyFamiliars() - {ex}");
-        }
-
-        _shouldDestroy = false;
-    }
-    static void MigrateFamiliarPrestigeData()
-    {
-        foreach (var keyValuePair in SteamIdPlayerInfoCache)
-        {
-            ulong steamId = keyValuePair.Key;
-
-            var oldPrestigeData = FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId);
-            if (oldPrestigeData != null) FamiliarPrestigeManager_V2.MigrateToV2(oldPrestigeData, steamId);
-        }
-
-        _shouldMigrate = false;
     }
     public static void HandleConnection(ulong steamId, PlayerInfo playerInfo)
     {

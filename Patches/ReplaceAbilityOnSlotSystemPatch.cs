@@ -19,12 +19,10 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     static PrefabCollectionSystem PrefabCollectionSystem => SystemService.PrefabCollectionSystem;
     static ActivateVBloodAbilitySystem ActivateVBloodAbilitySystem => SystemService.ActivateVBloodAbilitySystem;
 
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _unarmedSlots = ConfigService.UnarmedSlots;
     static readonly bool _shiftSlot = ConfigService.ShiftSlot;
     static readonly bool _shapeshiftAbilities = ConfigService.BearFormDash;
-
-    static readonly PrefabGUID _vBloodAbilityReplaceBuff = new(1171608023);
 
     [HarmonyPatch(typeof(ReplaceAbilityOnSlotSystem), nameof(ReplaceAbilityOnSlotSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -32,7 +30,8 @@ internal static class ReplaceAbilityOnSlotSystemPatch
     {
         if (!Core._initialized) return;
 
-        NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp); // All Components: ProjectM.EntityOwner [ReadOnly], ProjectM.Buff [ReadOnly], ProjectM.ReplaceAbilityOnSlotData [ReadOnly], ProjectM.ReplaceAbilityOnSlotBuff [Buffer] [ReadOnly], Unity.Entities.SpawnTag [ReadOnly]
+        NativeArray<Entity> entities = __instance.__query_1482480545_0.ToEntityArray(Allocator.Temp);
+        
         try
         {
             foreach (Entity entity in entities)
@@ -48,8 +47,7 @@ internal static class ReplaceAbilityOnSlotSystemPatch
                     bool slotSpells = prefabName.Contains("unarmed", StringComparison.OrdinalIgnoreCase) || prefabName.Contains("fishingpole", StringComparison.OrdinalIgnoreCase);
                     bool shiftSpell = prefabName.Contains("weapon", StringComparison.OrdinalIgnoreCase);
 
-                    (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells;
-                    if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out spells))
+                    if (_unarmedSlots && slotSpells && steamId.TryGetPlayerSpells(out (int FirstUnarmed, int SecondUnarmed, int ClassSpell) spells))
                     {
                         HandleExtraSpells(entity, steamId, spells);
                     }

@@ -25,11 +25,13 @@ internal class SystemService(World world)
     ServerScriptMapper _serverScriptMapper;
     public ServerScriptMapper ServerScriptMapper => _serverScriptMapper ??= GetSystem<ServerScriptMapper>();
 
+    /*
     ModifyUnitStatBuffSystem_Spawn _modifyUnitStatBuffSystem_Spawn;
     public ModifyUnitStatBuffSystem_Spawn ModifyUnitStatBuffSystem_Spawn => _modifyUnitStatBuffSystem_Spawn ??= GetSystem<ModifyUnitStatBuffSystem_Spawn>();
 
     ModifyUnitStatBuffSystem_Destroy _modifyUnitStatBuffSystem_Destroy;
     public ModifyUnitStatBuffSystem_Destroy ModifyUnitStatBuffSystem_Destroy => _modifyUnitStatBuffSystem_Destroy ??= GetSystem<ModifyUnitStatBuffSystem_Destroy>();
+    */
 
     EntityCommandBufferSystem _entityCommandBufferSystem;
     public EntityCommandBufferSystem EntityCommandBufferSystem => _entityCommandBufferSystem ??= GetSystem<EntityCommandBufferSystem>();
@@ -69,20 +71,6 @@ internal class SystemService(World world)
 
     StatChangeSystem _statChangeSystem;
     public StatChangeSystem StatChangeSystem => _statChangeSystem ??= GetSystem<StatChangeSystem>();
-
-    NetworkIdSystem.Singleton _networkIdSystem_Singleton;
-    public NetworkIdSystem.Singleton NetworkIdSystem
-    {
-        get
-        {
-            if (_networkIdSystem_Singleton.Equals(default(NetworkIdSystem.Singleton)))
-            {
-                _networkIdSystem_Singleton = GetSingleton<NetworkIdSystem.Singleton>();
-            }
-
-            return _networkIdSystem_Singleton;
-        }
-    }
 
     GenerateCastleSystem _generateCastleSystem;
     public GenerateCastleSystem GenerateCastleSystem => _generateCastleSystem ??= GetOrCreateSystem<GenerateCastleSystem>();
@@ -137,6 +125,48 @@ internal class SystemService(World world)
 
     ServantPowerSystem _servantPowerSystem;
     public ServantPowerSystem ServantPowerSystem => _servantPowerSystem ??= GetSystem<ServantPowerSystem>();
+
+    NetworkIdSystem.Singleton _networkIdSystem_Singleton;
+    public NetworkIdSystem.Singleton NetworkIdSystem
+    {
+        get
+        {
+            if (_networkIdSystem_Singleton.Equals(default(NetworkIdSystem.Singleton)))
+            {
+                _networkIdSystem_Singleton = GetSingleton<NetworkIdSystem.Singleton>();
+            }
+
+            return _networkIdSystem_Singleton;
+        }
+    }
+
+    CurrentCastsSystem.Singleton _currentCastsSystem_Singleton;
+    public CurrentCastsSystem.Singleton CurrentCastsSystem
+    {
+        get
+        {
+            if (_currentCastsSystem_Singleton.Equals(default(CurrentCastsSystem.Singleton)))
+            {
+                _currentCastsSystem_Singleton = GetSingleton<CurrentCastsSystem.Singleton>();
+            }
+
+            return _currentCastsSystem_Singleton;
+        }
+    }
+
+    TileModelSpatialLookupSystem.Singleton _tileModelSpatialLookupSystem_Singleton;
+    public TileModelSpatialLookupSystem.Singleton TileModelSpatialLookupSystem
+    {
+        get
+        {
+            if (_tileModelSpatialLookupSystem_Singleton.Equals(default(TileModelSpatialLookupSystem.Singleton)))
+            {
+                _tileModelSpatialLookupSystem_Singleton = GetSingleton<TileModelSpatialLookupSystem.Singleton>();
+            }
+
+            return _tileModelSpatialLookupSystem_Singleton;
+        }
+    }
     T GetSystem<T>() where T : ComponentSystemBase
     {
         return _world.GetExistingSystemManaged<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get ({Il2CppType.Of<T>().FullName})");

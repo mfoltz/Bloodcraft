@@ -22,6 +22,7 @@ internal static class ImprisonedBuffSystemPatch
         else if (!_familiars) return;
 
         NativeArray<Entity> entities = __instance.__query_1231815368_0.ToEntityArray(Allocator.Temp);
+
         try
         {
             foreach (Entity entity in entities)
@@ -29,7 +30,7 @@ internal static class ImprisonedBuffSystemPatch
                 if (!entity.Has<Buff>()) continue;
 
                 Entity buffTarget = entity.GetBuffTarget();
-                if (!buffTarget.Has<CharmSource>()) // if no charm source, found familiar being imprisoned, destroy it
+                if (!buffTarget.Has<CharmSource>() && buffTarget.Has<BlockFeedBuff>()) // if no charm source, found familiar being imprisoned, destroy it
                 {
                     if (buffTarget.Has<Disabled>()) buffTarget.Remove<Disabled>();
                     if (buffTarget.Has<Minion>()) buffTarget.Remove<Minion>();

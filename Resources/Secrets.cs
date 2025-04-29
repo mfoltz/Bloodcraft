@@ -8,9 +8,6 @@ internal class Secrets
 {
     [JsonPropertyName("NEW_SHARED_KEY")]
     public string NewSharedKey { get; set; }
-
-    [JsonPropertyName("OLD_SHARED_KEY")]
-    public string OldSharedKey { get; set; }
 }
 internal static class SecretManager
 {
@@ -21,7 +18,7 @@ internal static class SecretManager
     }
     static void LoadSecrets()
     {
-        var resourceName = "Bloodcraft.Resources.secrets.json"; // Replace with your actual namespace and file path
+        var resourceName = "Bloodcraft.Resources.secrets.json";
         var assembly = Assembly.GetExecutingAssembly();
 
         using var stream = assembly.GetManifestResourceStream(resourceName)
@@ -35,9 +32,5 @@ internal static class SecretManager
     public static string GetNewSharedKey()
     {
         return _secrets.NewSharedKey;
-    }
-    public static string GetOldSharedKey()
-    {
-        return _secrets.OldSharedKey;
     }
 }

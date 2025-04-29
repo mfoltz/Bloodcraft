@@ -1,6 +1,5 @@
 ﻿using Bloodcraft.Services;
 using HarmonyLib;
-using Unity.Entities;
 using UnityEngine;
 
 namespace Bloodcraft.Patches;
@@ -12,7 +11,7 @@ internal class DebugLoggerPatch
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     const string MAP_ICON_ERROR = "PlayerMapIcon requires the creator to have the PlayerCharacter component.";
 
-    [HarmonyPatch(typeof(Debug), nameof(Debug.LogError), new Type[] { typeof(Il2CppSystem.Object) })] // don't use preview feature here or github workflow gets mad
+    [HarmonyPatch(typeof(Debug), nameof(Debug.LogError), new Type[] { typeof(Il2CppSystem.Object) })] // don't use preview feature here (collection initialization) or github workflow gets mad
     [HarmonyPrefix]
     static bool LogErrorPrefix(Il2CppSystem.Object message)
     {

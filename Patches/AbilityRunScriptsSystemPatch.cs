@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
@@ -7,6 +8,7 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
+using static Bloodcraft.Utilities.Shapeshifts;
 
 namespace Bloodcraft.Patches;
 
@@ -15,18 +17,17 @@ internal static class AbilityRunScriptsSystemPatch
 {
     static ServerGameManager ServerGameManager => Core.ServerGameManager;
 
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
 
     const float COOLDOWN_FACTOR = 8f;
+    public static IReadOnlyDictionary<PrefabGUID, int> ClassSpells => _classSpells;
+    static readonly Dictionary<PrefabGUID, int> _classSpells = [];
 
-    public static readonly Dictionary<PrefabGUID, int> ClassSpells = [];
-
-    static readonly PrefabGUID _dominateBuff = new(-1447419822);
-    static readonly PrefabGUID _useWaypointAbilityGroup = new(695067846);
-    static readonly PrefabGUID _useCastleWaypointAbilityGroup = new(893332545);
-    static readonly PrefabGUID _vanishBuff = new(1595547018);                   // AB_Bandit_Thief_Rush_Buff
+    static readonly PrefabGUID _useWaypointAbilityGroup = PrefabGUIDs.AB_Interact_UseWaypoint_AbilityGroup;
+    static readonly PrefabGUID _useCastleWaypointAbilityGroup = PrefabGUIDs.AB_Interact_UseWaypoint_Castle_AbilityGroup;
+    static readonly PrefabGUID _vanishBuff = Buffs.VanishBuff;
 
     [HarmonyPatch(typeof(AbilityRunScriptsSystem), nameof(AbilityRunScriptsSystem.OnUpdate))]
     [HarmonyPrefix]
@@ -36,34 +37,35 @@ internal static class AbilityRunScriptsSystemPatch
         else if (!_classes) return;
 
         // NativeArray<Entity> entities = __instance._OnCastEndedQuery.ToEntityArray(Allocator.Temp);
-        NativeArray<AbilityPostCastEndedEvent> castEndedEvents = __instance._OnPostCastEndedQuery.ToComponentDataArray<AbilityPostCastEndedEvent>(Allocator.Temp);
+        NativeArray<AbilityPostCastEndedEvent> postCastEndedEvents = __instance._OnPostCastEndedQuery.ToComponentDataArray<AbilityPostCastEndedEvent>(Allocator.Temp);
 
         try
         {
-            foreach (AbilityPostCastEndedEvent postCastEnded in castEndedEvents)
-            {
-                if (!postCastEnded.AbilityGroup.TryGetComponent(out PrefabGUID prefabGuid)) continue;
-                else if (postCastEnded.AbilityGroup.Has<VBloodAbilityData>()) continue;
-                else if (postCastEnded.Character.IsPlayer())
+            foreach (AbilityPostCastEndedEvent postCastEndedEvent in postCastEndedEvents)
+            {                
+                if (postCastEndedEvent.AbilityGroup.Has<VBloodAbilityData>()) continue;
+                else if (postCastEndedEvent.Character.IsPlayer())
                 {
-                    if (_exoForm && Buffs.ExoFormAbilityMap.ContainsValue(prefabGuid))
+                    PrefabGUID prefabGuid = postCastEndedEvent.AbilityGroup.GetPrefabGuid();
+
+                    if (ShapeshiftRegistry.TryGetByAbilityGroup(prefabGuid, out var shapeshift))
                     {
-                        if (postCastEnded.AbilityGroup.TryGetComponent(out AbilityGroupSlot abilityGroupSlot) && Buffs.ExoFormCooldownMap.TryGetValue(abilityGroupSlot.SlotId, out float cooldown))
+                        if (shapeshift.TryGetCooldown(prefabGuid, out var cooldown))
                         {
-                            ServerGameManager.SetAbilityGroupCooldown(postCastEnded.Character, prefabGuid, cooldown);
+                            ServerGameManager.SetAbilityGroupCooldown(postCastEndedEvent.Character, prefabGuid, cooldown);
                         }
                     }
                     else if (ClassSpells.ContainsKey(prefabGuid))
                     {
                         float cooldown = ClassSpells[prefabGuid].Equals(0) ? COOLDOWN_FACTOR : (ClassSpells[prefabGuid] + 1) * COOLDOWN_FACTOR;
-                        ServerGameManager.SetAbilityGroupCooldown(postCastEnded.Character, prefabGuid, cooldown);
+                        ServerGameManager.SetAbilityGroupCooldown(postCastEndedEvent.Character, prefabGuid, cooldown);
                     }
                 }
             }
         }
         finally
         {
-            castEndedEvents.Dispose();
+            postCastEndedEvents.Dispose();
         }
     }
 
@@ -81,22 +83,10 @@ internal static class AbilityRunScriptsSystemPatch
         {
             foreach (AbilityCastStartedEvent castStartedEvent in castStartedEvents)
             {
-                if (!castStartedEvent.AbilityGroup.TryGetComponent(out PrefabGUID prefabGUID)) continue;
-                else if ((prefabGUID.Equals(_useCastleWaypointAbilityGroup) || prefabGUID.Equals(_useWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity playerCharacter))
+                PrefabGUID prefabGuid = castStartedEvent.AbilityGroup.GetPrefabGuid();
+
+                if ((prefabGuid.Equals(_useCastleWaypointAbilityGroup) || prefabGuid.Equals(_useWaypointAbilityGroup)) && castStartedEvent.Character.TryGetPlayer(out Entity playerCharacter))
                 {
-                    /*
-                    User user = player.GetUser();
-                    ulong steamId = user.PlatformId;
-
-                    Entity familiar = Familiars.GetActiveFamiliar(player);
-
-                    if (familiar.Exists() && !familiar.IsDisabled() && !familiar.HasBuff(_vanishBuff) && steamId.TryGetFamiliarActives(out var data))
-                    {
-                        Familiars.AutoCallMap[player] = familiar;
-                        Familiars.DismissFamiliar(player, familiar, user, steamId);
-                    }
-                    */
-
                     User user = playerCharacter.GetUser();
                     ulong steamId = user.PlatformId;
 
@@ -122,6 +112,10 @@ internal static class AbilityRunScriptsSystemPatch
         {
             castStartedEvents.Dispose();
         }
+    }
+    public static void AddClassSpell(PrefabGUID prefabGuid, int spellIndex)
+    {
+        _classSpells.TryAdd(prefabGuid, spellIndex);
     }
 
     /*

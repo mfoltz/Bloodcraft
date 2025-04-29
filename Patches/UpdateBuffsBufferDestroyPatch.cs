@@ -1,4 +1,6 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using Bloodcraft.Utilities;
 using HarmonyLib;
@@ -8,48 +10,93 @@ using Stunlock.Core;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
-using static Bloodcraft.Utilities.EntityQueries;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal static class UpdateBuffsBufferDestroyPatch
 {
+    static readonly bool _leveling = ConfigService.LevelingSystem;
     static readonly bool _legacies = ConfigService.LegacySystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _shouldHandleStats = _legacies || _expertise || _classes || _leveling || _familiars;
 
-    static readonly PrefabGUID _combatBuff = new(581443919);
-    static readonly PrefabGUID _tauntEmoteBuff = new(-508293388);
-    static readonly PrefabGUID _phasingBuff = new(-79611032);
-    static readonly PrefabGUID _exoFormBuff = new(-31099041);
-    static readonly PrefabGUID _gateBossFeedCompleteBuff = new(-354622715);
-    static readonly PrefabGUID _vBloodBloodBuff = new(20081801);
-    static readonly PrefabGUID _bonusStatsBuff = new(737485591);
-    static readonly PrefabGUID _werewolfStandardBuff = new(-1598161201);
-    static readonly PrefabGUID _werewolfVBloodBuff = new(-622259665);
-    static readonly PrefabGUID _bossFeedCompleteBuff = new(1233405326);
-    static readonly PrefabGUID _vanishBuff = new(1595547018);
+    static readonly PrefabGUID _combatBuff = Buffs.PvECombatBuff;
+    static readonly PrefabGUID _tauntEmoteBuff = Buffs.TauntEmoteBuff;
+    static readonly PrefabGUID _phasingBuff = Buffs.PhasingBuff;
+    static readonly PrefabGUID _evolvedVampireFormBuff = Buffs.EvolvedVampireBuff;
+    static readonly PrefabGUID _gateBossFeedCompleteBuff = Buffs.GateBossFeedCompleteBuff;
+    static readonly PrefabGUID _standardWerewolfBuff = Buffs.StandardWerewolfBuff;
+    static readonly PrefabGUID _vBloodWerewolfBuff = Buffs.VBloodWerewolfBuff;
+    static readonly PrefabGUID _vanishBuff = Buffs.VanishBuff;
 
-    static readonly PrefabGUID _gateBossFeedCompleteGroup = new(-1446310610);
-    static readonly PrefabGUID _bloodBoltSwarmGroup = new(797450963);
+    static readonly PrefabGUID _gateBossFeedCompleteGroup = PrefabGUIDs.AB_FeedGateBoss_03_Complete_AbilityGroup;
 
-    static readonly PrefabGUID _shroudBuff = new(1504279833);
-    static readonly PrefabGUID _shroudCloak = new(1063517722);
+    static readonly PrefabGUID _shroudBuff = Buffs.ShroudBuff;
+    static readonly PrefabGUID _shroudCloak = PrefabGUIDs.Item_Cloak_Main_ShroudOfTheForest;
 
     static readonly PrefabGUID _travelStoneBuff = new(-342726392);
     static readonly PrefabGUID _travelWoodenBuff = new(-1194613929);
     static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
 
+    static readonly PrefabGUID _bonusStatsBuff = Buffs.BonusStatsBuff;
+    // static readonly PrefabGUID _bonusPlayerStatsBuff = Buffs.BonusPlayerStatsBuff;
+    // static readonly PrefabGUID _bonusFamiliarStatsBuff = Buffs.BonusFamiliarStatsBuff;
+
+    /*
+    static readonly HashSet<PrefabGUID> _bonusStatBuffs =
+    [
+        _bonusPlayerStatsBuff,
+        _bonusFamiliarStatsBuff
+    ];
+    */
+
     public static readonly List<PrefabGUID> PrestigeBuffs = [];
-    public static readonly Dictionary<Classes.PlayerClass, HashSet<PrefabGUID>> ClassBuffsSet = [];
-    public static readonly Dictionary<Classes.PlayerClass, List<PrefabGUID>> ClassBuffsOrdered = [];
+    public static readonly Dictionary<ClassManager.PlayerClass, HashSet<PrefabGUID>> ClassBuffsSet = [];
+    public static readonly Dictionary<ClassManager.PlayerClass, List<PrefabGUID>> ClassBuffsOrdered = [];
 
     static readonly EntityQuery _query = QueryService.UpdateBuffsBufferDestroyQuery;
+
+    /*
+    [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(UpdateBuffsBuffer_Destroy __instance)
+    {
+        if (!Core._initialized) return;
+        else if (!(_familiars || _prestige || _classes)) return;
+
+        NativeArray<Entity> entities = _query.ToEntityArray(Allocator.Temp);
+
+        NativeArray<PrefabGUID> prefabGuids = _query.ToComponentDataArray<PrefabGUID>(Allocator.Temp);
+        NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
+
+        ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>(true);
+        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
+
+        try
+        {
+            for (int i = 0; i < entities.Length; i++)
+            {
+                Entity entity = entities.get_Item(i);
+                Entity buffTarget = buffs.get_Item(i).Target;
+
+                bool isPlayerTarget = playerCharacterLookup.HasComponent(buffTarget);
+
+                PrefabGUID buffPrefabGuid = prefabGuids.get_Item(i);
+                int buffType = GetBuffType(buffPrefabGuid);
+
+                // Core.Log.LogWarning($"[UpdateBuffsBufferDestroyPatch] - {buffPrefabGuid.GetPrefabName()}");
+
+                }
+            }
+        }
+    }
+    */
 
     [HarmonyPatch(typeof(UpdateBuffsBuffer_Destroy), nameof(UpdateBuffsBuffer_Destroy.OnUpdate))]
     [HarmonyPostfix]
@@ -64,6 +111,9 @@ internal static class UpdateBuffsBufferDestroyPatch
         NativeArray<Buff> buffs = _query.ToComponentDataArray<Buff>(Allocator.Temp);
 
         ComponentLookup<PlayerCharacter> playerCharacterLookup = __instance.GetComponentLookup<PlayerCharacter>(true);
+        ComponentLookup<BlockFeedBuff> blockFeedBuffLookup = __instance.GetComponentLookup<BlockFeedBuff>(true);
+        ComponentLookup<WeaponLevel> weaponLevelLookup = __instance.GetComponentLookup<WeaponLevel>(true);
+        ComponentLookup<BloodBuff> bloodBuffLookup = __instance.GetComponentLookup<BloodBuff>(true);
 
         try
         {
@@ -73,20 +123,26 @@ internal static class UpdateBuffsBufferDestroyPatch
                 Entity buffTarget = buffs[i].Target;
 
                 bool isPlayerTarget = playerCharacterLookup.HasComponent(buffTarget);
+                bool isFamiliarTarget = blockFeedBuffLookup.HasComponent(buffTarget);
+                bool isWeaponEquipBuff = weaponLevelLookup.HasComponent(entity);
+                bool isBloodBuff = bloodBuffLookup.HasComponent(entity);
 
                 PrefabGUID buffPrefabGuid = prefabGuids[i];
-                int buffType = GetBuffType(buffPrefabGuid._Value);
+                int buffType = GetBuffType(buffPrefabGuid, isWeaponEquipBuff, isPlayerTarget, isFamiliarTarget, isBloodBuff);
+
+                // Core.Log.LogWarning($"[UpdateBuffsBufferDestroyPatch] - {buffPrefabGuid.GetPrefabName()}");
 
                 switch (buffType)
                 {
                     case 1 when _exoForm && isPlayerTarget: // ExoForm Buff
                         ulong steamId = buffTarget.GetSteamId();
                         buffTarget.TryApplyBuff(_gateBossFeedCompleteBuff);
-                        ExoForm.UpdatePartialExoFormChargeUsed(entity, steamId);
+                        Shapeshifts.UpdatePartialExoFormChargeUsed(entity, steamId);
                         break;
                     case 2:
-                        if (!buffTarget.HasBuff(_vanishBuff)) buffTarget.TryApplyBuff(_bonusStatsBuff);
-                        // buffTarget.TryApplyBuff(_bonusStatsBuff);
+                        // Core.Log.LogWarning($"[UpdateBuffsBufferDestroyPatch] Triggering stat refresh - {buffTarget.GetPrefabGuid().GetPrefabName()}");
+                        if (playerCharacterLookup.HasComponent(buffTarget)) buffTarget.TryApplyBuff(_bonusStatsBuff);
+                        if (blockFeedBuffLookup.HasComponent(buffTarget) && !buffTarget.HasBuff(_vanishBuff)) buffTarget.TryApplyBuff(_bonusStatsBuff);
                         break;
                     case 3 when _familiars && isPlayerTarget: // Prevent unending combat music; might have been handled elsewhere by now, noting to check later
                         Entity familiar = Familiars.GetActiveFamiliar(buffTarget);
@@ -99,18 +155,25 @@ internal static class UpdateBuffsBufferDestroyPatch
                             Familiars.TryReturnFamiliar(buffTarget, familiar);
                         }
                         break;
-                    case 4 when _exoForm && isPlayerTarget: // Taunt Emote Buff
+                    case 4 when isPlayerTarget: // Taunt Emote Buff
                         User user = buffTarget.GetUser();
                         steamId = user.PlatformId;
-                        if (GetPlayerBool(steamId, EXO_FORM_KEY))
+                        if (GetPlayerBool(steamId, SHAPESHIFT_KEY))
                         {
-                            if (EmoteSystemPatch.ExitingForm.Contains(steamId))
+                            if (EmoteSystemPatch.BlockShapeshift.Contains(steamId))
                             {
-                                EmoteSystemPatch.ExitingForm.Remove(steamId);
+                                EmoteSystemPatch.BlockShapeshift.Remove(steamId);
                             }
-                            else if (ExoForm.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(buffTarget);
+                            // else if (Shapeshifts.CheckExoFormCharge(user, steamId)) ApplyExoFormBuff(buffTarget);
+                            else ApplyShapeshiftBuff(steamId, buffTarget);
                         }
                         break;
+                    /*
+                    case 5 when _shouldHandleStats:
+                        // if (buffTarget.TryGetBuff(_bonusStatsBuff, out Entity buffEntity)) ScriptSpawnServerPatch.RemovePlayerBonusStats(buffEntity, buffTarget);
+                        Buffs.RefreshStats(buffTarget);
+                        break;
+                    */
                     case 7 when _prestige && isPlayerTarget: // Prestige Buffs
                         steamId = buffTarget.GetSteamId();
                         int index = PrestigeBuffs.IndexOf(buffPrefabGuid);
@@ -138,10 +201,11 @@ internal static class UpdateBuffsBufferDestroyPatch
                     default: // class buffs otherwise, probably merits a case for switch but later
                         if (_classes && isPlayerTarget)
                         {
+                            /*
                             steamId = buffTarget.GetSteamId();
                             if (GetPlayerBool(steamId, CLASS_BUFFS_KEY) && Classes.HasClass(steamId))
                             {
-                                Classes.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
+                                ClassManager.PlayerClass playerClass = Classes.GetPlayerClass(steamId);
 
                                 if (ClassBuffsSet.TryGetValue(playerClass, out HashSet<PrefabGUID> classBuffs) && classBuffs.Contains(buffPrefabGuid))
                                 {
@@ -153,6 +217,7 @@ internal static class UpdateBuffsBufferDestroyPatch
                             {
                                 continue; // allow class buff destruction
                             }
+                            */
                         }
                         break;
                 }
@@ -165,27 +230,45 @@ internal static class UpdateBuffsBufferDestroyPatch
             buffs.Dispose();
         }
     }
-    static int GetBuffType(int prefabGuid)
+    static int GetBuffType(PrefabGUID prefabGuid, bool isWeaponEquipBuff, bool isPlayerTarget, bool isFamiliarTarget, bool isBloodBuff)
     {
-        if (PrestigeBuffs.Any(buff => buff.GuidHash.Equals(prefabGuid)))
+        int guidHash = prefabGuid.GuidHash;
+
+        if ((isWeaponEquipBuff || isBloodBuff) && (isPlayerTarget || isFamiliarTarget))
+        {
+            return 5; // Handle Stats
+        }
+        else if (prefabGuid.Equals(_bonusStatsBuff))
+        {
+            return 2;
+        }
+        else if (PrestigeBuffs.Contains(prefabGuid))
         {
             return 7;
         }
-        else return prefabGuid switch
+        else return guidHash switch
         {
             -31099041 => 1,                 // ExoForm Buff
-            737485591 => 2,                 // Set bonus buff trying for bonus stats
+            // 20081801 => 2,                  // bonus stats testing
+            // 737485591 => 2,              // Set bonus buff trying for bonus stats
             581443919 => 3,                 // Combat Buff
             -508293388 => 4,                // Taunt Emote Buff
             -1598161201 or -622259665 => 8, // Werewolf Buffs
             _ => 0,
         };
     }
-    static void ApplyExoFormBuff(Entity playerCharacter)
+    static void ApplyShapeshiftBuff(ulong steamId, Entity playerCharacter)
     {
-        playerCharacter.TryApplyBuff(_exoFormBuff);
+        if (!Shapeshifts.ShapeshiftCache.TryGetShapeshiftBuff(steamId, out PrefabGUID shapeshiftBuff))
+        {
+            // Core.Log.LogWarning($"Shapeshift buff not found for {steamId}");
+            return;
+        }
+
+        // Core.Log.LogWarning($"Applying shapeshift buff {shapeshiftBuff.GetPrefabName()} for {steamId}");
+        playerCharacter.TryApplyBuff(shapeshiftBuff);
         playerCharacter.TryApplyBuff(_phasingBuff);
-        playerCharacter.CastAbility(playerCharacter, _gateBossFeedCompleteGroup);
+        playerCharacter.CastAbility(_gateBossFeedCompleteGroup);
         playerCharacter.TryApplyBuff(_gateBossFeedCompleteBuff);
     }
 }

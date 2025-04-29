@@ -1,4 +1,6 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using ProjectM;
 using ProjectM.Scripting;
 using ProjectM.Shared;
@@ -45,9 +47,9 @@ internal static class ProfessionSystem
     static readonly float3 _saplingColor = new(0.4f, 0.25f, 0.2f);
     static readonly float3 _radiantFiberColor = new(0.8f, 0.1f, 0.5f); 
 
-    static readonly PrefabGUID _goldOre = Prefabs.Item_Ingredient_Mineral_GoldOre;
-    static readonly PrefabGUID _radiantFibre = Prefabs.Item_Ingredient_Plant_RadiantFiber;
-    static readonly PrefabGUID _mutantGrease = Prefabs.Item_Ingredient_MutantGrease;
+    static readonly PrefabGUID _goldOre = PrefabGUIDs.Item_Ingredient_Mineral_GoldOre;
+    static readonly PrefabGUID _radiantFibre = PrefabGUIDs.Item_Ingredient_Plant_RadiantFiber;
+    static readonly PrefabGUID _mutantGrease = PrefabGUIDs.Item_Ingredient_MutantGrease;
 
     static readonly List<PrefabGUID> _plantSeeds =
     [
@@ -120,7 +122,7 @@ internal static class ProfessionSystem
         }
 
         professionValue = (int)(professionValue * _professionMultiplier);
-        IProfessionHandler handler = ProfessionHandlerFactory.GetProfessionHandler(itemPrefabGuid);
+        IProfession handler = ProfessionFactory.GetProfession(itemPrefabGuid);
 
         if (handler != null)
         {
@@ -135,7 +137,7 @@ internal static class ProfessionSystem
             GiveProfessionBonus(target, targetPrefabGuid, playerCharacter, userEntity, user, steamId, handler, delay);
         }
     }
-    public static void GiveProfessionBonus(Entity target, PrefabGUID prefabGuid, Entity playerCharacter, Entity userEntity, User user, ulong steamId, IProfessionHandler handler, float delay)
+    public static void GiveProfessionBonus(Entity target, PrefabGUID prefabGuid, Entity playerCharacter, Entity userEntity, User user, ulong steamId, IProfession handler, float delay)
     {
         if (!PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity)) return;
 
@@ -281,7 +283,7 @@ internal static class ProfessionSystem
             }
         }
     }
-    public static void SetProfession(Entity target, Entity source, ulong steamID, float value, IProfessionHandler handler, ref float delay)
+    public static void SetProfession(Entity target, Entity source, ulong steamID, float value, IProfession handler, ref float delay)
     {
         var xpData = handler.GetProfessionData(steamID);
 
@@ -289,7 +291,7 @@ internal static class ProfessionSystem
 
         UpdateProfessionExperience(target, source, steamID, xpData, value, handler, ref delay);
     }
-    static void UpdateProfessionExperience(Entity target, Entity source, ulong steamId, KeyValuePair<int, float> xpData, float gainedXP, IProfessionHandler handler, ref float delay)
+    static void UpdateProfessionExperience(Entity target, Entity source, ulong steamId, KeyValuePair<int, float> xpData, float gainedXP, IProfession handler, ref float delay)
     {
         float newExperience = xpData.Value + gainedXP;
         int newLevel = ConvertXpToLevel(newExperience);
@@ -310,7 +312,7 @@ internal static class ProfessionSystem
 
         NotifyPlayer(target, source, steamId, gainedXP, leveledUp, handler, ref delay);
     }
-    static void NotifyPlayer(Entity target, Entity playerCharacter, ulong steamID, float gainedXP, bool leveledUp, IProfessionHandler handler, ref float delay)
+    static void NotifyPlayer(Entity target, Entity playerCharacter, ulong steamID, float gainedXP, bool leveledUp, IProfession handler, ref float delay)
     {
         Entity userEntity = playerCharacter.GetUserEntity();
         User user = userEntity.GetUser();
@@ -350,16 +352,16 @@ internal static class ProfessionSystem
             Core.Log.LogError($"Error in ProfessionSCTDelayRoutine: {e.Message}");
         }
     }
-    static float GetXp(ulong steamID, IProfessionHandler handler)
+    static float GetXp(ulong steamID, IProfession handler)
     {
         var xpData = handler.GetProfessionData(steamID);
         return xpData.Value;
     }
-    static int GetLevel(ulong steamID, IProfessionHandler handler)
+    static int GetLevel(ulong steamID, IProfession handler)
     {
         return ConvertXpToLevel(GetXp(steamID, handler));
     }
-    public static int GetLevelProgress(ulong steamID, IProfessionHandler handler)
+    public static int GetLevelProgress(ulong steamID, IProfession handler)
     {
         float currentXP = GetXp(steamID, handler);
         int currentLevelXP = ConvertLevelToXp(GetLevel(steamID, handler));

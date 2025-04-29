@@ -1,40 +1,45 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Interfaces;
+using Bloodcraft.Services;
+using Bloodcraft.Utilities;
 using ProjectM;
 using Unity.Entities;
 using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
+using static Bloodcraft.Systems.Expertise.WeaponSystem;
+using static Bloodcraft.Systems.Leveling.ClassManager;
+using static Bloodcraft.Utilities.Progression.ModifyUnitStatBuffSettings;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Systems.Expertise;
 internal static class WeaponManager
 {
     static EntityManager EntityManager => Core.EntityManager;
 
-    static readonly bool _hardSynergies = ConfigService.HardSynergies;
-    static readonly bool _classes = ConfigService.SoftSynergies || ConfigService.HardSynergies;
+    static readonly bool _classes = ConfigService.ClassSystem;
     static readonly bool _prestige = ConfigService.PrestigeSystem;
 
-    static readonly float _statSynergyMultiplier = ConfigService.StatSynergyMultiplier;
+    static readonly float _synergyMultiplier = ConfigService.SynergyMultiplier;
     static readonly float _prestigeStatMultiplier = ConfigService.PrestigeStatMultiplier;
     static readonly int _maxExpertiseLevel = ConfigService.MaxExpertiseLevel;
     static readonly int _expertiseStatChoices = ConfigService.ExpertiseStatChoices;
     public class WeaponStats
     {
-        public enum WeaponStatType
+        public enum WeaponStatType : int
         {
-            MaxHealth, // 0
-            MovementSpeed, // 1
-            PrimaryAttackSpeed, // 2
-            PhysicalLifeLeech, // 3
-            SpellLifeLeech, // 4
-            PrimaryLifeLeech, // 5
-            PhysicalPower, // 6
-            SpellPower, // 7
-            PhysicalCritChance, // 8
-            PhysicalCritDamage, // 9
-            SpellCritChance, // 10
-            SpellCritDamage // 11
+            MaxHealth = 0,
+            MovementSpeed = 1,
+            PrimaryAttackSpeed = 2,
+            PhysicalLifeLeech = 3,
+            SpellLifeLeech = 4,
+            PrimaryLifeLeech = 5,
+            PhysicalPower = 6,
+            SpellPower = 7,
+            PhysicalCritChance = 8,
+            PhysicalCritDamage = 9,
+            SpellCritChance = 10,
+            SpellCritDamage = 11
         }
-
-        public static readonly Dictionary<WeaponStatType, string> WeaponStatFormats = new()
+        public static IReadOnlyDictionary<WeaponStatType, string> WeaponStatFormats => _weaponStatFormats;
+        static readonly Dictionary<WeaponStatType, string> _weaponStatFormats = new()
         {
             { WeaponStatType.MaxHealth, "integer" },
             { WeaponStatType.MovementSpeed, "decimal" },
@@ -49,8 +54,8 @@ internal static class WeaponManager
             { WeaponStatType.SpellCritChance, "percentage" },
             { WeaponStatType.SpellCritDamage, "percentage" }
         };
-
-        public static readonly Dictionary<WeaponStatType, UnitStatType> WeaponStatTypes = new()
+        public static IReadOnlyDictionary<WeaponStatType, UnitStatType> WeaponStatTypes => _weaponStatTypes;
+        static readonly Dictionary<WeaponStatType, UnitStatType> _weaponStatTypes = new()
         {
             { WeaponStatType.MaxHealth, UnitStatType.MaxHealth },
             { WeaponStatType.MovementSpeed, UnitStatType.MovementSpeed },
@@ -65,8 +70,8 @@ internal static class WeaponManager
             { WeaponStatType.SpellCritChance, UnitStatType.SpellCriticalStrikeChance },
             { WeaponStatType.SpellCritDamage, UnitStatType.SpellCriticalStrikeDamage },
         };
-
-        public static readonly Dictionary<WeaponStatType, float> WeaponStatValues = new()
+        public static IReadOnlyDictionary<WeaponStatType, float> WeaponStatBaseCaps => _weaponStatBaseCaps;
+        static readonly Dictionary<WeaponStatType, float> _weaponStatBaseCaps = new()
         {
             {WeaponStatType.MaxHealth, ConfigService.MaxHealth},
             {WeaponStatType.MovementSpeed, ConfigService.MovementSpeed},
@@ -82,48 +87,81 @@ internal static class WeaponManager
             {WeaponStatType.SpellCritDamage, ConfigService.SpellCritDamage}
         };
     }
-    public static bool ChooseStat(ulong steamId, WeaponType weaponType, WeaponStatType statType)
+    public static bool ChooseStat(ulong steamId, WeaponType weaponType, WeaponStatType weaponStatType)
     {
-        if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var Stats))
+        if (steamId.TryGetPlayerWeaponStats(out var weaponTypeStats) && weaponTypeStats.TryGetValue(weaponType, out var weaponStats))
         {
-            if (_hardSynergies)
+            if (_classes)
             {
-                if (!Utilities.Classes.HasClass(steamId))
+                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
                 {
                     return false;
                 }
 
-                var classes = steamId.TryGetPlayerClasses(out var classData) ? classData : [];
-                var (WeaponStats, _) = classes.First().Value; // get class to check if stat allowed
-                List<WeaponStatType> weaponStatTypes = [..WeaponStats.Select(value => (WeaponStatType)value)];
-
-                if (!weaponStatTypes.Contains(statType)) // hard synergy stat check
+                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
                 {
                     return false;
                 }
 
-                if (Stats.Count >= _expertiseStatChoices || Stats.Contains(statType))
-                {
-                    return false; // Only allow configured amount of stats to be chosen and no duplicates
-                }
-
-                Stats.Add(statType);
-                steamId.SetPlayerWeaponStats(weaponStats);
+                weaponStats.Add(weaponStatType);
+                steamId.SetPlayerWeaponStats(weaponTypeStats);
 
                 return true;
             }
             else
             {
-                if (Stats.Count >= _expertiseStatChoices || Stats.Contains(statType))
+                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
                 {
-                    return false; // Only allow configured amount of stats to be chosen and no duplicates
+                    return false;
                 }
 
-                Stats.Add(statType);
-                steamId.SetPlayerWeaponStats(weaponStats);
+                weaponStats.Add(weaponStatType);
+                steamId.SetPlayerWeaponStats(weaponTypeStats);
 
                 return true;
             }
+
+            /*
+            if (_lockedSynergies)
+            {
+                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
+                {
+                    return false;
+                }
+
+                if (!ClassWeaponStatSynergies.TryGetValue(playerClass.Value, out List<WeaponStatType> weaponStatTypes) || !weaponStatTypes.Contains(weaponStatType))
+                {
+                    return false;
+                }
+
+                if (!weaponStatTypes.Contains(weaponStatType))
+                {
+                    return false;
+                }
+
+                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
+                {
+                    return false;
+                }
+
+                weaponStats.Add(weaponStatType);
+                steamId.SetPlayerWeaponStats(weaponTypeStats);
+
+                return true;
+            }
+            else
+            {
+                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
+                {
+                    return false;
+                }
+
+                weaponStats.Add(weaponStatType);
+                steamId.SetPlayerWeaponStats(weaponTypeStats);
+
+                return true;
+            }
+            */
         }
         return false;
     }
@@ -138,30 +176,31 @@ internal static class WeaponManager
     public static void UpdateWeaponStats(Entity buffEntity, Entity playerCharacter, ulong steamId)
     {
         WeaponType weaponType = GetCurrentWeaponType(playerCharacter);
-        ApplyWeaponStats(buffEntity, weaponType, steamId);
+        ApplyWeaponStats(buffEntity, playerCharacter, steamId, weaponType);
     }
-    public static void ApplyWeaponStats(Entity buffEntity, WeaponType weaponType, ulong steamId)
+    public static void ApplyWeaponStats(Entity buffEntity, Entity playerCharacter, ulong steamId, WeaponType weaponType)
     {
-        IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+        IWeaponExpertise handler = WeaponExpertiseFactory.GetExpertise(weaponType);
+
         if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var bonuses))
         {
-            if (!buffEntity.Has<ModifyUnitStatBuff_DOTS>())
+            if (!buffEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
             {
-                EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buffEntity);
+                buffer = EntityManager.AddBuffer<ModifyUnitStatBuff_DOTS>(buffEntity);
             }
-
-            var buffer = buffEntity.ReadBuffer<ModifyUnitStatBuff_DOTS>();
 
             foreach (WeaponStatType weaponStatType in bonuses)
             {
-                float scaledBonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, weaponStatType);
-                UnitStatType statType = WeaponStatTypes[weaponStatType];
+                if (!TryGetScaledModifyUnitExpertiseStat(handler, playerCharacter, steamId, weaponType, 
+                    weaponStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
                 ModifyUnitStatBuff_DOTS newStatBuff = new()
                 {
-                    StatType = statType,
-                    ModificationType = !statType.Equals(UnitStatType.MovementSpeed) ? ModificationType.AddToBase : ModificationType.MultiplyBaseAdd,
-                    Value = scaledBonus,
+                    StatType = modifyUnitStatBuff.TargetUnitStat,
+                    ModificationType = modifyUnitStatBuff.ModificationType,
+                    AttributeCapType = modifyUnitStatBuff.AttributeCapType,
+                    SoftCapValue = 0f,
+                    Value = statValue,
                     Modifier = 1,
                     IncreaseByStacks = false,
                     ValueByStacks = 0,
@@ -169,42 +208,66 @@ internal static class WeaponManager
                     Id = ModificationIDs.Create().NewModificationId()
                 };
 
+                Core.Log.LogWarning($"[WeaponManager] {newStatBuff.StatType} | {newStatBuff.Value} | {newStatBuff.AttributeCapType} | {newStatBuff.Id.Id}");
                 buffer.Add(newStatBuff);
             }
         }
     }
-    public static float CalculateScaledWeaponBonus(IWeaponHandler handler, ulong steamId, WeaponType weaponType, WeaponStatType statType)
+    public static bool TryGetScaledModifyUnitExpertiseStat(IWeaponExpertise handler, Entity playerCharacter, ulong steamId,
+        WeaponType weaponType, WeaponStatType weaponStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)
     {
+        modifyUnitStatBuff = default;
+        statValue = 0f;
+
         if (handler != null)
         {
-            var xpData = handler.GetExpertiseData(steamId);
-            float maxBonus = WeaponStatValues[statType];
-
-            if (_classes && steamId.TryGetPlayerClasses(out var classes) && classes.Count != 0)
+            if (!ModifyUnitExpertiseStatBuffs.TryGetValue(weaponStatType, out modifyUnitStatBuff))
             {
-                var (classWeaponStats, _) = classes.First().Value; // get class to check if stat allowed
-                List<WeaponStatType> weaponStatTypes = [..classWeaponStats.Select(value => (WeaponStatType)value)];
-
-                if (weaponStatTypes.Contains(statType))
-                {
-                    maxBonus *= _statSynergyMultiplier;
-                }
+                return false;
             }
 
-            if (_prestige && steamId.TryGetPlayerPrestiges(out var prestiges) && prestiges.TryGetValue(WeaponSystem.WeaponPrestigeMap[weaponType], out var PrestigeData))
+            var xpData = handler.GetExpertiseData(steamId);
+            float maxBonus = modifyUnitStatBuff.BaseCap;
+
+            if (_classes && steamId.HasClass(out PlayerClass? playerClass)
+                && playerClass.HasValue && ClassWeaponStatSynergies[playerClass.Value].Contains(weaponStatType))
             {
-                float gainFactor = 1 + (_prestigeStatMultiplier * PrestigeData);
+                maxBonus *= _synergyMultiplier;
+            }
+
+            if (_prestige && steamId.TryGetPlayerPrestiges(out var prestigeData) && prestigeData.TryGetValue(WeaponPrestigeTypes[weaponType], out var expertisePrestiges))
+            {
+                float gainFactor = 1 + (_prestigeStatMultiplier * expertisePrestiges);
                 maxBonus *= gainFactor;
             }
 
-            float scaledBonus = maxBonus * ((float)xpData.Key / _maxExpertiseLevel); // Scale bonus up to 99%
-            return scaledBonus;
+            /*
+            try
+            {
+                if (playerCharacter.TryGetComponent(out VampireAttributeCapModificationsSource capModificationsSource)
+                    && capModificationsSource.ModificationsEntity.TryGetComponent(out VampireAttributeCapModifications capModifications)
+                    && WeaponStatTypes.TryGetValue(weaponStatType, out UnitStatType unitStatType))
+                {
+                    AttributeCapModIds capModIds = capModifications.CapModIds.GetCap(unitStatType);
+                    capModId = modifyUnitStatBuff.AttributeCapType.Equals(AttributeCapType.SoftCapped) ?
+                        capModIds.SoftCapModId : capModIds.HardCapModId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError($"[WeaponManager] Error getting cap modifications: {ex}");
+            }
+            */
+
+            statValue = maxBonus * ((float)xpData.Key / _maxExpertiseLevel);
+            return true;
         }
-        return 0; // Return 0 if no handler is found or other error
+
+        return false;
     }
     public static WeaponType GetCurrentWeaponType(Entity character)
     {
         Entity weapon = character.Read<Equipment>().WeaponSlot.SlotEntity._Entity;
-        return WeaponSystem.GetWeaponTypeFromWeaponEntity(weapon);
+        return GetWeaponTypeFromWeaponEntity(weapon);
     }
 }

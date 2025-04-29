@@ -1,5 +1,5 @@
+using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
-using Bloodcraft.Systems.Expertise;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
@@ -10,12 +10,14 @@ using Unity.Transforms;
 using VampireCommandFramework;
 using static Bloodcraft.Services.PlayerService;
 using static Bloodcraft.Systems.Expertise.WeaponManager;
+using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
 using static Bloodcraft.Systems.Expertise.WeaponSystem;
 using static Bloodcraft.Utilities.Misc.PlayerBoolsManager;
 using static Bloodcraft.Utilities.Progression;
+using static Bloodcraft.Utilities.Progression.ModifyUnitStatBuffSettings;
 using static VCF.Core.Basics.RoleCommands;
 using User = ProjectM.Network.User;
-using WeaponType = Bloodcraft.Systems.Expertise.WeaponType;
+using WeaponType = Bloodcraft.Interfaces.WeaponType;
 
 namespace Bloodcraft.Commands;
 
@@ -36,10 +38,10 @@ internal static class WeaponCommands
             return;
         }
 
-        Entity character = ctx.Event.SenderCharacterEntity;
-        WeaponType weaponType = GetCurrentWeaponType(character);
+        Entity playerCharacter = ctx.Event.SenderCharacterEntity;
+        WeaponType weaponType = GetCurrentWeaponType(playerCharacter);
 
-        IWeaponHandler handler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+        IWeaponExpertise handler = WeaponExpertiseFactory.GetExpertise(weaponType);
         if (handler == null)
         {
             LocalizationService.HandleReply(ctx, "Expertise handler for weapon is null; this shouldn't happen and you may want to inform the developer.");
@@ -50,26 +52,27 @@ internal static class WeaponCommands
         var ExpertiseData = handler.GetExpertiseData(steamId);
 
         int progress = (int)(ExpertiseData.Value - ConvertLevelToXp(ExpertiseData.Key));
-        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponPrestigeMap[weaponType]] : 0;
+        int prestigeLevel = steamId.TryGetPlayerPrestiges(out var prestiges) ? prestiges[WeaponPrestigeTypes[weaponType]] : 0;
 
         if (ExpertiseData.Key > 0 || ExpertiseData.Value > 0)
         {
             LocalizationService.HandleReply(ctx, $"Your weapon expertise is [<color=white>{ExpertiseData.Key}</color>][<color=#90EE90>{prestigeLevel}</color>] and you have <color=yellow>{progress}</color> <color=#FFC0CB>expertise</color> (<color=white>{GetLevelProgress(steamId, handler)}%</color>) with <color=#c0c0c0>{weaponType}</color>!");
 
-            if (steamId.TryGetPlayerWeaponStats(out var weaponStats) && weaponStats.TryGetValue(weaponType, out var stats))
+            if (steamId.TryGetPlayerWeaponStats(out var weaponTypeStats) && weaponTypeStats.TryGetValue(weaponType, out var weaponStatTypes))
             {
-                List<KeyValuePair<WeaponStats.WeaponStatType, string>> bonusWeaponStats = [];
-                foreach (var stat in stats)
+                List<KeyValuePair<WeaponStatType, string>> weaponExpertiseStats = [];
+                foreach (WeaponStatType weaponStatType in weaponStatTypes)
                 {
-                    float bonus = CalculateScaledWeaponBonus(handler, steamId, weaponType, stat);
-                    string formattedBonus = Misc.FormatWeaponStatValue(stat, bonus);
+                    if (!TryGetScaledModifyUnitExpertiseStat(handler, playerCharacter, steamId, weaponType, 
+                        weaponStatType, out float statValue, out ModifyUnitStatBuff modifyUnitStatBuff)) continue;
 
-                    bonusWeaponStats.Add(new KeyValuePair<WeaponStats.WeaponStatType, string>(stat, formattedBonus));
+                    string weaponStatString = Misc.FormatWeaponStatValue(weaponStatType, statValue);
+                    weaponExpertiseStats.Add(new KeyValuePair<WeaponStatType, string>(weaponStatType, weaponStatString));
                 }
 
-                for (int i = 0; i < bonusWeaponStats.Count; i += 6)
+                for (int i = 0; i < weaponExpertiseStats.Count; i += 6)
                 {
-                    var batch = bonusWeaponStats.Skip(i).Take(6);
+                    var batch = weaponExpertiseStats.Skip(i).Take(6);
                     string bonuses = string.Join(", ", batch.Select(stat => $"<color=#00FFFF>{stat.Key}</color>: <color=white>{stat.Value}</color>"));
                     LocalizationService.HandleReply(ctx, $"<color=#c0c0c0>{weaponType}</color> Stats: {bonuses}");
                 }
@@ -245,7 +248,7 @@ internal static class WeaponCommands
             return;
         }
 
-        IWeaponHandler expertiseHandler = ExpertiseHandlerFactory.GetExpertiseHandler(weaponType);
+        IWeaponExpertise expertiseHandler = WeaponExpertiseFactory.GetExpertise(weaponType);
         if (expertiseHandler == null)
         {
             LocalizationService.HandleReply(ctx, "Invalid weapon type.");
@@ -280,7 +283,7 @@ internal static class WeaponCommands
         var weaponStatsWithCaps = Enum.GetValues(typeof(WeaponStats.WeaponStatType))
             .Cast<WeaponStats.WeaponStatType>()
             .Select((stat, index) =>
-                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Misc.FormatWeaponStatValue(stat, WeaponStats.WeaponStatValues[stat])}</color>")
+                $"<color=yellow>{index + 1}</color>| <color=#00FFFF>{stat}</color>: <color=white>{Misc.FormatWeaponStatValue(stat, WeaponStats.WeaponStatBaseCaps[stat])}</color>")
             .ToList();
 
         if (weaponStatsWithCaps.Count == 0)

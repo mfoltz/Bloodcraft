@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Gameplay.Scripting;
@@ -67,30 +68,28 @@ internal static class FamiliarBindingSystem
 
     public static Entity _unitTeamSingleton = Entity.Null;
 
-    static readonly PrefabGUID _invulnerableBuff = new(-480024072);
-    static readonly PrefabGUID _hideSpawnBuff = new(-133411573);
-    static readonly PrefabGUID _vanishBuff = new(1595547018);
-    static readonly PrefabGUID _interactModeBuff = new(1520432556);
-    static readonly PrefabGUID _monsterFakePos = new(1529452061);
-    static readonly PrefabGUID _divineAngel = new(-1737346940);
+    static readonly PrefabGUID _invulnerableBuff = Buffs.AdminInvulnerableBuff;
+    static readonly PrefabGUID _hideSpawnBuff = PrefabGUIDs.Buff_General_Spawn_Unit_Fast_WarEvent;
 
-    static readonly PrefabGUID _externalInventory = Prefabs.External_Inventory;
-    static readonly PrefabGUID _familiarServant = new(1193263017);
-    static readonly PrefabGUID _invisibleAndImmaterialBuff = new(-1144825660);
+    static readonly PrefabGUID _monsterFakePos = PrefabGUIDs.AB_Monster_HomePos_FakeTarget;
+    static readonly PrefabGUID _charDivineAngel = PrefabGUIDs.CHAR_Paladin_DivineAngel;
 
-    static readonly PrefabGUID _ignoredFaction = new(-1430861195);
-    static readonly PrefabGUID _playerFaction = new(1106458752);
-    static readonly PrefabGUID _legionFaction = new(-772044125);
-    static readonly PrefabGUID _cursedFaction = new(1522496317);
+    static readonly PrefabGUID _charVampireCultistServant = PrefabGUIDs.CHAR_Vampire_Cultist_Male_Servant;
+    static readonly PrefabGUID _invisibleAndImmaterialBuff = Buffs.InvisibleAndImmaterialBuff;
+
+    static readonly PrefabGUID _ignoredFaction = PrefabGUIDs.Faction_Ignored;
+    static readonly PrefabGUID _playerFaction = PrefabGUIDs.Faction_Players;
+    static readonly PrefabGUID _legionFaction = PrefabGUIDs.Faction_Legion;
+    static readonly PrefabGUID _cursedFaction = PrefabGUIDs.Faction_Cursed;
 
     static readonly PrefabGUID _teamOneMarkerBuff = PrefabGUID.Empty;
-    static readonly PrefabGUID _teamTwoMarkerBuff = new(-1887712500);
+    static readonly PrefabGUID _teamTwoMarkerBuff = PrefabGUIDs.AB_Undead_Infiltrator_MasterOfDisguise_HintBuff;
 
-    static readonly PrefabGUID _mapIconAlliedPlayer = new(-892362184);
-    static readonly PrefabGUID _mapIconBuff = new(-1476191492);
+    static readonly PrefabGUID _mapIconAlliedPlayer = PrefabGUIDs.MapIcon_Player;
+    static readonly PrefabGUID _mapIconBuff = PrefabGUIDs.AB_Interact_Mount_Target_LastOwner_BuffIcon;
 
-    static readonly PrefabGUID _openTheCagesAbilityGroup = new(2030404176);
-    static readonly PrefabGUID _werewolfChieftain = new(-1505705712);
+    static readonly PrefabGUID _openTheCages = PrefabGUIDs.AB_WerewolfChieftain_OpenTheCages_AbilityGroup;
+    static readonly PrefabGUID _charWerewolfChieftainVBlood = PrefabGUIDs.CHAR_WerewolfChieftain_Human;
 
     static readonly List<PrefabGUID> _teamFactions =
     [
@@ -101,7 +100,8 @@ internal static class FamiliarBindingSystem
     {
         MaxHealth,
         PhysicalPower,
-        SpellPower,
+        SpellPower
+        /*
         PrimaryLifeLeech,
         PhysicalLifeLeech,
         SpellLifeLeech,
@@ -115,8 +115,10 @@ internal static class FamiliarBindingSystem
         SpellResistance,
         MovementSpeed,
         CastSpeed
+        */
     }
 
+    /*
     public static readonly Dictionary<FamiliarStatType, float> FamiliarBaseStatValues = new()
     {
         {FamiliarStatType.PhysicalCritChance, 0.2f},
@@ -138,6 +140,7 @@ internal static class FamiliarBindingSystem
         FamiliarStatType.MovementSpeed,
         FamiliarStatType.CastSpeed
     ];
+    */
 
     public static readonly ConcurrentDictionary<ulong, List<PrefabGUID>> PlayerBattleGroups = [];
     public static readonly ConcurrentDictionary<ulong, List<Entity>> PlayerBattleFamiliars = [];
@@ -495,14 +498,17 @@ internal static class FamiliarBindingSystem
         int prestigeLevel = 0;
         List<FamiliarStatType> familiarPrestigeStats = [];
 
-        if (_familiarPrestige && FamiliarPrestigeManager_V2.LoadFamiliarPrestigeData_V2(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData) && prestigeData.Key > 0)
+        if (_familiarPrestige && FamiliarPrestigeManager.LoadFamiliarPrestigeData(steamId).FamiliarPrestige.TryGetValue(famKey, out var prestigeData))
         {
-            prestigeLevel = prestigeData.Key;
+            prestigeLevel = prestigeData;
+
+            /*
             List<int> prestigeStatIndexes = prestigeData.Value; // Already stored as indexes in V2
 
             familiarPrestigeStats = [..prestigeStatIndexes
                 .Where(index => index >= 0 && index < FamiliarPrestigeStats.Count) // Prevent out-of-range errors
                 .Select(index => FamiliarPrestigeStats[index])];
+            */
         }
 
         powerFactor += prestigeLevel * POWER_SKEW;
@@ -527,6 +533,7 @@ internal static class FamiliarBindingSystem
         familiarUnitStats.PhysicalPower._Value = unitStats.PhysicalPower._Value * powerFactor; // scaling these with prestige not a great idea in retrospect, nerfed that a bit but they also start at higher base power per prestige then probably rebalancing when equipment stats come into play
         familiarUnitStats.SpellPower._Value = unitStats.SpellPower._Value * powerFactor;
         
+        /*
         foreach (FamiliarStatType prestigeStat in familiarPrestigeStats)
         {
             switch (prestigeStat)
@@ -535,7 +542,7 @@ internal static class FamiliarBindingSystem
                     familiarUnitStats.PhysicalCriticalStrikeChance._Value = FamiliarBaseStatValues[FamiliarStatType.PhysicalCritChance] * prestigeFactor;
                     break;
                 case FamiliarStatType.SpellCritChance:
-                    familiarUnitStats.SpellCriticalStrikeChance._Value = FamiliarBaseStatValues[FamiliarStatType.SpellCritChance] * prestigeFactor;
+                    familiarUnitStats.a._Value = FamiliarBaseStatValues[FamiliarStatType.SpellCritChance] * prestigeFactor;
                     break;
                 case FamiliarStatType.HealingReceived:
                     familiarUnitStats.HealingReceived._Value = FamiliarBaseStatValues[FamiliarStatType.HealingReceived] * prestigeFactor;
@@ -551,12 +558,13 @@ internal static class FamiliarBindingSystem
                     familiarAiMoveSpeeds.Run._Value = aiMoveSpeeds.Run._Value * (1 + (FamiliarBaseStatValues[FamiliarStatType.MovementSpeed] * prestigeFactor));
                     break;
                 case FamiliarStatType.CastSpeed:
-                    familiarAbilityBarShared.AttackSpeed._Value = abilityBar_Shared.AttackSpeed._Value * (1 + (FamiliarBaseStatValues[FamiliarStatType.CastSpeed] * prestigeFactor));
+                    familiarAbilityBarShared.AbilityAttackSpeed._Value = abilityBar_Shared.AbilityAttackSpeed._Value * (1 + (FamiliarBaseStatValues[FamiliarStatType.CastSpeed] * prestigeFactor));
                     break;
                 default:
                     break;
             }
         }
+        */
 
         familiar.Write(familiarUnitStats);
         familiar.Write(familiarAbilityBarShared);
@@ -565,7 +573,7 @@ internal static class FamiliarBindingSystem
         familiar.With((ref UnitLevel unitLevel) =>
         {
             unitLevel.Level._Value = level;
-            unitLevel.HideLevel = false;    // client-side?
+            unitLevel.HideLevel = false;
         });
 
         float maxHealth = _gameDifficulty.Equals(GameDifficulty.Hard) ? HARD_HEALTH : NORMAL_HEALTH;
@@ -602,8 +610,7 @@ internal static class FamiliarBindingSystem
             }
         }
 
-        RemoveMisc(familiar, familiarId); // probably move this
-        // if (Utilities.Familiars.FamiliarServantMap.TryGetValue(familiar, out Entity servant)) Utilities.Familiars.SyncFamiliarServant(familiar, servant);
+        RemoveMisc(familiar, familiarId);
     }
     public static void ModifyBloodSource(Entity familiar, int level)
     {
@@ -648,12 +655,14 @@ internal static class FamiliarBindingSystem
             dynamicCollision.AgainstPlayers.PushStrengthMin._Value = 0f;
         });
 
+        /*
         if (!familiar.Has<MapCollision>()) return;
 
         familiar.With((ref MapCollision mapCollision) =>
         {
             mapCollision.Radius = 0.5f; // this usually does weird stuff, noting to change back probably immediately after testing >_> 0.4f, 0.2f
         });
+        */
     }
     public static void RemoveDropTable(Entity familiar)
     {
@@ -674,11 +683,13 @@ internal static class FamiliarBindingSystem
     }
     static void ModifyAggro(Entity familiar)
     {
+        /*
         familiar.With((ref AggroConsumer aggroConsumer) =>
         {
             aggroConsumer.ProximityRadius = 0f;
             aggroConsumer.ProximityWeight = 0f;
         });
+        */
 
         familiar.With((ref AlertModifiers alertModifiers) =>
         {
@@ -710,7 +721,7 @@ internal static class FamiliarBindingSystem
 
             for (int i = 0; i < buffer.Length; i++)
             {
-                if (buffer[i].SpawnPrefab.Equals(_monsterFakePos)) // bounds error console spam culprit
+                if (buffer[i].SpawnPrefab.Equals(_monsterFakePos)) // bounds error console spam culprit?
                 {
                     SpawnPrefabOnGameplayEvent spawnPrefabOnGameplayEvent = buffer[i];
                     spawnPrefabOnGameplayEvent.SpawnPrefab = PrefabGUID.Empty;
@@ -736,7 +747,7 @@ internal static class FamiliarBindingSystem
             }
         }
 
-        if (familiarId.Equals(_divineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>()) // don't want fallen angels spawning from divine angel familiars on death
+        if (familiarId.Equals(_charDivineAngel) && familiar.Has<Script_ApplyBuffUnderHealthThreshold_DataServer>()) // don't want fallen angels spawning from divine angel familiars on death
         {
             familiar.With((ref Script_ApplyBuffUnderHealthThreshold_DataServer script_ApplyBuffUnderHealthThreshold_DataServer) =>
             {
@@ -744,13 +755,13 @@ internal static class FamiliarBindingSystem
             });
         }
 
-        if (familiarId.Equals(_werewolfChieftain) && familiar.TryGetBuffer<AbilityGroupSlotBuffer>(out var abilityGroupBuffer)) // don't want wilfred familiars opening cages in werewolf village
+        if (familiarId.Equals(_charWerewolfChieftainVBlood) && familiar.TryGetBuffer<AbilityGroupSlotBuffer>(out var abilityGroupBuffer)) // don't want wilfred familiars opening cages in werewolf village
         {
             for (int i = abilityGroupBuffer.Length - 1; i >= 0; i--)
             {
                 AbilityGroupSlotBuffer entry = abilityGroupBuffer[i];
 
-                if (entry.BaseAbilityGroupOnSlot.Equals(_openTheCagesAbilityGroup))
+                if (entry.BaseAbilityGroupOnSlot.Equals(_openTheCages))
                 {
                     // buffer.RemoveAt(i);
                     entry.GroupSlotEntity.GetEntityOnServer().TryDestroy();
@@ -849,7 +860,7 @@ internal static class FamiliarBindingSystem
     }
     static Entity HandleFamiliarServant(Entity familiar)
     {
-        Entity servant = ServerGameManager.InstantiateEntityImmediate(familiar, _familiarServant);
+        Entity servant = ServerGameManager.InstantiateEntityImmediate(familiar, _charVampireCultistServant);
 
         if (servant.Exists())
         {
@@ -939,7 +950,7 @@ internal static class FamiliarBindingSystem
                 follower.Stationary._Value = true;
             });
 
-            DisableFamiliarServantDelayRoutine(servant).Start(); // doing this immediately is reverted by server
+            DisableFamiliarServantDelayRoutine(servant).Start(); // doing this immediately is reverted by server idk
 
             return servant;
         }

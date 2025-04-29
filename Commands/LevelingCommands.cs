@@ -1,3 +1,4 @@
+using Bloodcraft.Interfaces;
 using Bloodcraft.Services;
 using Bloodcraft.Systems.Leveling;
 using ProjectM.Network;
