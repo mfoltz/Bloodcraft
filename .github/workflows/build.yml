@@ -72,7 +72,6 @@ jobs:
           mkdir -p /home/runner/work/Bloodcraft/Bloodcraft/Resources
           echo '{
             "NEW_SHARED_KEY": "${{ secrets.NEW_SHARED_KEY }}",
-            "OLD_SHARED_KEY": "${{ secrets.OLD_SHARED_KEY }}"
           }' > /home/runner/work/Bloodcraft/Bloodcraft/Resources/secrets.json
           
       - name: Build (Release)
