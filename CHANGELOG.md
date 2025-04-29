@@ -1,5 +1,6 @@
 `1.8.2`
-- fixed issue with default config generation for class weapon blood stats types caused by mismatched string->enum 
+- fixed a few issue with default config generation for class weapon blood stats types caused by mismatched string->enum and using wrong parsing method
+- fixed fam unlock buff not having lifetime as it used to
 
 `1.8.1`
 - minor versioning to fix workflow snafu
