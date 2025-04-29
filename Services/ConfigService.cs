@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Bloodcraft.Systems.Expertise.WeaponManager.WeaponStats;
+using static Bloodcraft.Systems.Legacies.BloodManager.BloodStats;
 
 namespace Bloodcraft.Services;
 internal static class ConfigService
@@ -643,18 +645,42 @@ internal static class ConfigService
             new ConfigEntryDefinition("Classes", "SynergyMultiplier", 1.5f, "Multiplier for class stat synergies to base stat cap."),
 
             // eyeing for either revamp or expanding to make up for blood buffs
-            new ConfigEntryDefinition("Classes", "BloodKnightWeaponSynergies", "MaxHealth,PrimaryAttackSpeed,PrimaryLifeLeech,PhysicalPower", "Blood Knight weapon synergies."),
-            new ConfigEntryDefinition("Classes", "BloodKnightBloodSynergies", "DamageReduction,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed", "Blood Knight blood synergies."),
-            new ConfigEntryDefinition("Classes", "DemonHunterWeaponSynergies", "MovementSpeed,PrimaryAttackSpeed,PhysicalCritChance,PhysicalCritDamage", "Demon Hunter weapon synergies."),
-            new ConfigEntryDefinition("Classes", "DemonHunterBloodSynergies", "PhysicalResistance,BloodDrain,WeaponCooldownRecoveryRate,MinionDamage", "Demon Hunter blood synergies"),
-            new ConfigEntryDefinition("Classes", "VampireLordWeaponSynergies", "MaxHealth,SpellLifeLeech,PhysicalPower,SpellPower", "Vampire Lord weapon synergies."),
-            new ConfigEntryDefinition("Classes", "VampireLordBloodSynergies", "DamageReduction,SpellResistance,UltimateCooldownRecoveryRate,CorruptionDamageReduction", "Vampire Lord blood synergies."),
-            new ConfigEntryDefinition("Classes", "ShadowBladeWeaponSynergies", "MovementSpeed,PrimaryAttackSpeed,PhysicalPower,PhysicalCritDamage", "Shadow Blade weapon synergies."),
-            new ConfigEntryDefinition("Classes", "ShadowBladeBloodSynergies", "SpellResistance,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed", "Shadow Blade blood synergies."),
-            new ConfigEntryDefinition("Classes", "ArcaneSorcererWeaponSynergies", "SpellLifeLeech,SpellPower,SpellCritChance,SpellCritDamage", "Arcane Sorcerer weapon synergies."),
-            new ConfigEntryDefinition("Classes", "ArcaneSorcererBloodSynergies", "HealingReceived,SpellCooldownRecoveryRate,UltimateCooldownRecoveryRate,AbilityAttackSpeed", "Arcane Sorcerer blood synergies."),
-            new ConfigEntryDefinition("Classes", "DeathMageWeaponSynergies", "MaxHealth,SpellLifeLeech,SpellPower,SpellCritDamage", "Death Mage weapon synergies."),
-            new ConfigEntryDefinition("Classes", "DeathMageBloodSynergies", "PhysicalResistance,SpellResistance,SpellCooldownRecoveryRate,MinionDamage", "Death Mage blood synergies."),
+            new ConfigEntryDefinition("Classes", "BloodKnightWeaponSynergies",
+                $"{WeaponStatType.MaxHealth},{WeaponStatType.PrimaryAttackSpeed},{WeaponStatType.PrimaryLifeLeech},{WeaponStatType.PhysicalPower}",
+                "Blood Knight weapon synergies."),
+            new ConfigEntryDefinition("Classes", "BloodKnightBloodSynergies",
+                $"{BloodStatType.DamageReduction},{BloodStatType.ReducedBloodDrain},{BloodStatType.WeaponCooldownRecoveryRate},{BloodStatType.AbilityAttackSpeed}",
+                "Blood Knight blood synergies."),
+            new ConfigEntryDefinition("Classes", "DemonHunterWeaponSynergies",
+                $"{WeaponStatType.MovementSpeed},{WeaponStatType.PrimaryAttackSpeed},{WeaponStatType.PhysicalCritChance},{WeaponStatType.PhysicalCritDamage}",
+                "Demon Hunter weapon synergies."),
+            new ConfigEntryDefinition("Classes", "DemonHunterBloodSynergies",
+                $"{BloodStatType.PhysicalResistance},{BloodStatType.ReducedBloodDrain},{BloodStatType.WeaponCooldownRecoveryRate},{BloodStatType.MinionDamage}",
+                "Demon Hunter blood synergies"),
+            new ConfigEntryDefinition("Classes", "VampireLordWeaponSynergies",
+                $"{WeaponStatType.MaxHealth},{WeaponStatType.SpellLifeLeech},{WeaponStatType.PhysicalPower},{WeaponStatType.SpellPower}",
+                "Vampire Lord weapon synergies."),
+            new ConfigEntryDefinition("Classes", "VampireLordBloodSynergies",
+                $"{BloodStatType.DamageReduction},{BloodStatType.SpellResistance},{BloodStatType.UltimateCooldownRecoveryRate},{BloodStatType.CorruptionDamageReduction}",
+                "Vampire Lord blood synergies."),
+            new ConfigEntryDefinition("Classes", "ShadowBladeWeaponSynergies",
+                $"{WeaponStatType.MovementSpeed},{WeaponStatType.PrimaryAttackSpeed},{WeaponStatType.PhysicalPower},{WeaponStatType.PhysicalCritDamage}",
+                "Shadow Blade weapon synergies."),
+            new ConfigEntryDefinition("Classes", "ShadowBladeBloodSynergies",
+                $"{BloodStatType.SpellResistance},{BloodStatType.ReducedBloodDrain},{BloodStatType.WeaponCooldownRecoveryRate},{BloodStatType.AbilityAttackSpeed}",
+                "Shadow Blade blood synergies."),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererWeaponSynergies",
+                $"{WeaponStatType.SpellLifeLeech},{WeaponStatType.SpellPower},{WeaponStatType.SpellCritChance},{WeaponStatType.SpellCritDamage}",
+                "Arcane Sorcerer weapon synergies."),
+            new ConfigEntryDefinition("Classes", "ArcaneSorcererBloodSynergies",
+                $"{BloodStatType.HealingReceived},{BloodStatType.SpellCooldownRecoveryRate},{BloodStatType.UltimateCooldownRecoveryRate},{BloodStatType.AbilityAttackSpeed}",
+                "Arcane Sorcerer blood synergies."),
+            new ConfigEntryDefinition("Classes", "DeathMageWeaponSynergies",
+                $"{WeaponStatType.MaxHealth},{WeaponStatType.SpellLifeLeech},{WeaponStatType.SpellPower},{WeaponStatType.SpellCritDamage}",
+                "Death Mage weapon synergies."),
+            new ConfigEntryDefinition("Classes", "DeathMageBloodSynergies",
+                $"{BloodStatType.PhysicalResistance},{BloodStatType.SpellResistance},{BloodStatType.SpellCooldownRecoveryRate},{BloodStatType.MinionDamage}",
+                "Death Mage blood synergies."),
 
             // need to revamp these to some degree and add new spells etc.
             new ConfigEntryDefinition("Classes", "DefaultClassSpell", -433204738, "Default spell (veil of shadow) available to all classes."),

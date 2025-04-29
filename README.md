@@ -659,11 +659,11 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Multiplier for class stat synergies to base stat cap.
 - **Blood Knight Weapon Synergies**: `BloodKnightWeaponSynergies` (string, default: "MaxHealth,PrimaryAttackSpeed,PrimaryLifeLeech,PhysicalPower")
   Blood Knight weapon synergies.
-- **Blood Knight Blood Synergies**: `BloodKnightBloodSynergies` (string, default: "DamageReduction,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed")
+- **Blood Knight Blood Synergies**: `BloodKnightBloodSynergies` (string, default: "DamageReduction,ReducedBloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed")
   Blood Knight blood synergies.
 - **Demon Hunter Weapon Synergies**: `DemonHunterWeaponSynergies` (string, default: "MovementSpeed,PrimaryAttackSpeed,PhysicalCritChance,PhysicalCritDamage")
   Demon Hunter weapon synergies.
-- **Demon Hunter Blood Synergies**: `DemonHunterBloodSynergies` (string, default: "PhysicalResistance,BloodDrain,WeaponCooldownRecoveryRate,MinionDamage")
+- **Demon Hunter Blood Synergies**: `DemonHunterBloodSynergies` (string, default: "PhysicalResistance,ReducedBloodDrain,WeaponCooldownRecoveryRate,MinionDamage")
   Demon Hunter blood synergies
 - **Vampire Lord Weapon Synergies**: `VampireLordWeaponSynergies` (string, default: "MaxHealth,SpellLifeLeech,PhysicalPower,SpellPower")
   Vampire Lord weapon synergies.
@@ -671,7 +671,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Vampire Lord blood synergies.
 - **Shadow Blade Weapon Synergies**: `ShadowBladeWeaponSynergies` (string, default: "MovementSpeed,PrimaryAttackSpeed,PhysicalPower,PhysicalCritDamage")
   Shadow Blade weapon synergies.
-- **Shadow Blade Blood Synergies**: `ShadowBladeBloodSynergies` (string, default: "SpellResistance,BloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed")
+- **Shadow Blade Blood Synergies**: `ShadowBladeBloodSynergies` (string, default: "SpellResistance,ReducedBloodDrain,WeaponCooldownRecoveryRate,AbilityAttackSpeed")
   Shadow Blade blood synergies.
 - **Arcane Sorcerer Weapon Synergies**: `ArcaneSorcererWeaponSynergies` (string, default: "SpellLifeLeech,SpellPower,SpellCritChance,SpellCritDamage")
   Arcane Sorcerer weapon synergies.

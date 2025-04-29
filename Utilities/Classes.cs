@@ -296,14 +296,14 @@ internal static class Classes
     };
 
     public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
-    {
-        { PlayerClass.BloodKnight, (Configuration.ParseIntegersFromString(ConfigService.BloodKnightWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.BloodKnightBloodSynergies)) },
-        { PlayerClass.DemonHunter, (Configuration.ParseIntegersFromString(ConfigService.DemonHunterWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.DemonHunterBloodSynergies)) },
-        { PlayerClass.VampireLord, (Configuration.ParseIntegersFromString(ConfigService.VampireLordWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.VampireLordBloodSynergies)) },
-        { PlayerClass.ShadowBlade, (Configuration.ParseIntegersFromString(ConfigService.ShadowBladeWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.ShadowBladeBloodSynergies)) },
-        { PlayerClass.ArcaneSorcerer, (Configuration.ParseIntegersFromString(ConfigService.ArcaneSorcererWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.ArcaneSorcererBloodSynergies)) },
-        { PlayerClass.DeathMage, (Configuration.ParseIntegersFromString(ConfigService.DeathMageWeaponSynergies), Configuration.ParseIntegersFromString(ConfigService.DeathMageBloodSynergies)) }
-    };
+{
+    { PlayerClass.BloodKnight, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.BloodKnightWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.BloodKnightBloodSynergies).Select(e => (int)e).ToList()) },
+    { PlayerClass.DemonHunter, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.DemonHunterWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.DemonHunterBloodSynergies).Select(e => (int)e).ToList()) },
+    { PlayerClass.VampireLord, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.VampireLordWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.VampireLordBloodSynergies).Select(e => (int)e).ToList()) },
+    { PlayerClass.ShadowBlade, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.ShadowBladeWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.ShadowBladeBloodSynergies).Select(e => (int)e).ToList()) },
+    { PlayerClass.ArcaneSorcerer, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.ArcaneSorcererWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.ArcaneSorcererBloodSynergies).Select(e => (int)e).ToList()) },
+    { PlayerClass.DeathMage, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.DeathMageWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.DeathMageBloodSynergies).Select(e => (int)e).ToList()) }
+};
 
     /*
     public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()

@@ -1,3 +1,6 @@
+`1.8.2`
+- fixed issue with default config generation for class weapon blood stats types caused by mismatched string->enum 
+
 `1.8.1`
 - minor versioning to fix workflow snafu
 

@@ -12,7 +12,7 @@ v-rising = ["oakveil-update", "mods", "server"]
 [package]
 namespace = "zfolmt"
 name = "Bloodcraft"
-versionNumber = "1.8.1"
+versionNumber = "1.8.2"
 description = "Leveling, expertise, legacies, professions, familiars, classes, quests!"
 websiteUrl = "https://github.com/mfoltz/Bloodcraft"
 containsNsfwContent = false

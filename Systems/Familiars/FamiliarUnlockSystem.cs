@@ -233,14 +233,11 @@ internal static class FamiliarUnlockSystem
     {
         if (playerCharacter.TryApplyAndGetBuff(_familiarUnlockBuff, out Entity buffEntity))
         {
-            if (!buffEntity.Has<LifeTime>())
+            buffEntity.HasWith((ref LifeTime lifeTime) =>
             {
-                buffEntity.AddWith((ref LifeTime lifeTime) =>
-                {
-                    lifeTime.Duration = 3f;
-                    lifeTime.EndAction = LifeTimeEndAction.Destroy;
-                });
-            }
+                lifeTime.Duration = 3f;
+                lifeTime.EndAction = LifeTimeEndAction.Destroy;
+            });
 
             buffEntity.TryRemove<ServerControlsMovementBuff>();
             buffEntity.TryRemove<ServerControlsRotationBuff>();
