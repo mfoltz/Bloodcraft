@@ -1,3 +1,6 @@
+`1.8.1`
+- minor versioning to fix workflow snafu
+
 `1.8.0`
 - various changes to features and implementations for VRising 1.1 compatibility
 - units only possess basic core stats (many stats are now 'VampireSpecificAttributes'); additional stats for prestiging familiars are not currently an option and their existing stats (except health) will continue to scale with prestiges (REWORKING)
