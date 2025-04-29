@@ -184,8 +184,6 @@ internal static class QuestSystem
 
         foreach (PrefabGUID prefabGuid in CraftPrefabs)
         {
-            Core.Log.LogWarning($"CraftPrefab: {prefabGuid.GetPrefabName()}");
-
             if (prefabMap.TryGetValue(prefabGuid, out Entity prefab) && prefab.TryGetComponent(out ItemData itemData))
             {
                 string prefabName = prefabGuid.GetPrefabName();
