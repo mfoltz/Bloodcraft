@@ -1,9 +1,7 @@
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using Bloodcraft.Patches;
 using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
 using UnityEngine;
 using VampireCommandFramework;
