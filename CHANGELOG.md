@@ -1,3 +1,7 @@
+`1.8.4`
+- minor change after hotfix
+- snipped bloodkey gearscore when leveling enabled
+
 `1.8.3`
 - removed obsolete check on class changing
 - removed class requirement for choosing stats
