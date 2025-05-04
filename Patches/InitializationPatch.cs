@@ -1,14 +1,14 @@
 using HarmonyLib;
-using Unity.Scenes;
+using ProjectM;
 
 namespace Bloodcraft.Patches;
 
 [HarmonyPatch]
 internal static class InitializationPatch
 {
-    [HarmonyPatch(typeof(SceneSystem), nameof(SceneSystem.ShutdownStreamingSupport))]
+    [HarmonyPatch(typeof(SpawnTeamSystem_OnPersistenceLoad), nameof(SpawnTeamSystem_OnPersistenceLoad.OnUpdate))]
     [HarmonyPostfix]
-    static void ShutdownStreamingSupportPostfix()
+    static void OnUpdatePostfix()
     {
         try
         {
@@ -17,7 +17,7 @@ internal static class InitializationPatch
             if (Core._initialized)
             {
                 Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized!");
-                Plugin.Harmony.Unpatch(typeof(SceneSystem).GetMethod("ShutdownStreamingSupport"), typeof(InitializationPatch).GetMethod("ShutdownStreamingSupportPostfix"));
+                Plugin.Harmony.Unpatch(typeof(SpawnTeamSystem_OnPersistenceLoad).GetMethod("OnUpdate"), typeof(InitializationPatch).GetMethod("OnUpdatePostfix"));
             }
         }
         catch (Exception ex)

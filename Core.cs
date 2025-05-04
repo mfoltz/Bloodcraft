@@ -206,6 +206,11 @@ internal static class Core
             {
                 prefabEntity.Add<ScriptSpawn>();
             }
+
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(PrefabGUIDs.Item_EquipBuff_MagicSource_BloodKey_T01, out prefabEntity))
+            {
+                prefabEntity.Add<ScriptSpawn>();
+            }
         }
 
         if (ConfigService.FamiliarSystem)

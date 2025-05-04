@@ -186,12 +186,12 @@ internal static class EntityQueries
         ComponentType[] types = queryDesc.ComponentTypes;
         int[] indices = queryDesc.TypeIndices;
 
-        Misc.Performance.Start("QueryResultStreamAsync");
+        // Misc.Performance.Start("QueryResultStreamAsync");
         var chunks = entityQuery.CreateArchetypeChunkArrayAsync(Allocator.TempJob, out var handle);
 
         while (!handle.IsCompleted)
             yield return null;
-        Misc.Performance.Stop();
+        // Misc.Performance.Stop();
 
         handle.Complete();
 
