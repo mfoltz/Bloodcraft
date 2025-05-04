@@ -11,7 +11,7 @@ using System.Collections.Concurrent;
 using Unity.Collections;
 using Unity.Entities;
 using static Bloodcraft.Systems.Leveling.ClassManager;
-using static Bloodcraft.Systems.Leveling.ClassManager.ClassOnDamageSettings;
+using static Bloodcraft.Systems.Leveling.ClassManager.ClassOnHitSettings;
 using static Bloodcraft.Utilities.Classes;
 
 namespace Bloodcraft.Patches;
@@ -28,28 +28,6 @@ internal static class StatChangeSystemPatch
     static readonly Random _random = new();
     public static IReadOnlyDictionary<ulong, DateTime> LastDamageTime => _lastDamageTime;
     static readonly ConcurrentDictionary<ulong, DateTime> _lastDamageTime = [];
-
-    /*
-    static readonly Dictionary<PlayerClass, PrefabGUID> _classOnHitDebuffs = new()
-    {
-        { PlayerClass.BloodKnight, Buffs.VampireLeechDebuff },
-        { PlayerClass.DemonHunter, Buffs.VampireStaticDebuff },
-        { PlayerClass.VampireLord, Buffs.VampireChillDebuff },
-        { PlayerClass.ShadowBlade, Buffs.VampireIgniteDebuff },
-        { PlayerClass.ArcaneSorcerer, Buffs.VampireWeakenDebuff },
-        { PlayerClass.DeathMage, Buffs.VampireCondemnDebuff }
-    };
-
-    static readonly Dictionary<PlayerClass, PrefabGUID> _classOnHitEffects = new()
-    {
-        { PlayerClass.BloodKnight, Buffs.BloodCurseBuff },        // apply debuff to enemy
-        { PlayerClass.DemonHunter, Buffs.StormChargeBuff },       // increase buff stacks player
-        { PlayerClass.VampireLord, Buffs.FrostWeaponBuff },       // apply buff to player
-        { PlayerClass.ShadowBlade, Buffs.ChaosHeatedBuff },       // apply buff to player   
-        { PlayerClass.ArcaneSorcerer, Buffs.IllusionShieldBuff }, // apply buff to player
-        { PlayerClass.DeathMage, Buffs.UnholyAmplifyBuff }        // apply debuff to enemy
-    };
-    */
 
     static readonly HashSet<PrefabGUID> _shinyOnHitDebuffs = new()
     {
@@ -129,7 +107,7 @@ internal static class StatChangeSystemPatch
                             float debuffChance = SHINY_DEBUFF_CHANCE * stacks;
                             double nextDouble = _random.NextDouble();
 
-                            Core.Log.LogWarning($"Familiar rolling for shiny debuff - {sourceOwner.GetPrefabGuid().GetPrefabName()}");
+                            // Core.Log.LogWarning($"Familiar rolling for shiny debuff - {sourceOwner.GetPrefabGuid().GetPrefabName()}");
 
                             if (nextDouble <= debuffChance)
                             {
@@ -190,65 +168,9 @@ internal static class StatChangeSystemPatch
                         if (!steamId.HasClass(out PlayerClass? playerClass) 
                             || !playerClass.HasValue) continue;
 
-                        if (_random.NextDouble() <= _onHitProcChance && ClassOnDamageEffects.TryGetValue(playerClass.Value, out OnDamageEffects onDamageEffects))
+                        if (_random.NextDouble() <= _onHitProcChance && ClassOnDamageEffects.TryGetValue(playerClass.Value, out OnHitEffects onDamageEffects))
                         {
                             onDamageEffects.ApplyEffect(playerCharacter, damageTakenEvent.Entity);
-
-                            /*
-                            if (damageTakenEvent.Entity.HasBuff(prefabGuid) && _classOnHitEffects.TryGetValue(playerClass.Value, out prefabGuid))
-                            {
-                                if (playerClass.Equals(PlayerClass.DemonHunter))
-                                {
-                                    if (!playerCharacter.HasBuff(_stormShield03))
-                                    {
-                                        if (!playerCharacter.HasBuff(_stormShield02))
-                                        {
-                                            if (!playerCharacter.HasBuff(_stormShield01))
-                                            {
-                                                Buffs.TryApplyBuff(playerCharacter, _stormShield01);
-                                            }
-                                            else if (playerCharacter.TryGetBuff(_stormShield01, out Entity stormShieldFirstBuff))
-                                            {
-                                                stormShieldFirstBuff.With((ref Age age) =>
-                                                {
-                                                    age.Value = 0f;
-                                                });
-                                                Buffs.TryApplyBuff(playerCharacter, _stormShield02);
-                                            }
-                                        }
-                                        else if (playerCharacter.TryGetBuff(_stormShield02, out Entity stormShieldSecondBuff))
-                                        {
-                                            stormShieldSecondBuff.With((ref Age age) =>
-                                            {
-                                                age.Value = 0f;
-                                            });
-                                            Buffs.TryApplyBuff(playerCharacter, _stormShield03);
-                                        }
-                                    }
-                                    else if (playerCharacter.TryGetBuff(_stormShield03, out Entity stormShieldThirdBuff))
-                                    {
-                                        stormShieldThirdBuff.With((ref Age age) =>
-                                        {
-                                            age.Value = 0f;
-                                        });
-                                    }
-                                }
-                                else
-                                {
-                                    Buffs.TryApplyBuff(playerCharacter, prefabGuid);
-                                }
-                            }
-                            else
-                            {
-                                if (Buffs.TryApplyBuff(damageTakenEvent.Entity, prefabGuid) && damageTakenEvent.Entity.TryGetBuff(prefabGuid, out Entity buffEntity))
-                                {
-                                    buffEntity.With((ref EntityOwner entityOwner) =>
-                                    {
-                                        entityOwner.Owner = playerCharacter;
-                                    });
-                                }
-                            }
-                            */
                         }
                     }
                     else if (_familiars)

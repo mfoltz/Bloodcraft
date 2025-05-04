@@ -74,73 +74,17 @@ internal static class BloodManager
     {
         if (steamId.TryGetPlayerBloodStats(out var bloodTypeStats) && bloodTypeStats.TryGetValue(bloodType, out var bloodStats))
         {
-            if (_classes)
+            if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
             {
-                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
-                {
-                    return false;
-                }
-
-                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
-                {
-                    return false;
-                }
-
-                bloodStats.Add(bloodStatType);
-                steamId.SetPlayerBloodStats(bloodTypeStats);
-
-                return true;
-            }
-            else
-            {
-                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
-                {
-                    return false; // Only allow configured amount of stats to be chosen and no duplicates
-                }
-
-                bloodStats.Add(bloodStatType);
-                steamId.SetPlayerBloodStats(bloodTypeStats);
-
-                return true;
+                return false; // Only allow configured amount of stats to be chosen and no duplicates
             }
 
-            /*
-            if (_hardSynergies)
-            {
-                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
-                {
-                    return false;
-                }
+            bloodStats.Add(bloodStatType);
+            steamId.SetPlayerBloodStats(bloodTypeStats);
 
-                if (!ClassBloodStatSynergies.TryGetValue(playerClass.Value, out List<BloodStatType> bloodStatTypes) || !bloodStatTypes.Contains(bloodStatType))
-                {
-                    return false;
-                }
-
-                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
-                {
-                    return false;
-                }
-
-                bloodStats.Add(bloodStatType);
-                steamId.SetPlayerBloodStats(bloodTypeStats);
-
-                return true;
-            }
-            else
-            {
-                if (bloodStats.Count >= _legacyStatChoices || bloodStats.Contains(bloodStatType))
-                {
-                    return false; // Only allow configured amount of stats to be chosen and no duplicates
-                }
-
-                bloodStats.Add(bloodStatType);
-                steamId.SetPlayerBloodStats(bloodTypeStats);
-
-                return true;
-            }
-            */
+            return true;
         }
+
         return false;
     }
     public static void ResetStats(ulong steamId, BloodType BloodType)
@@ -186,7 +130,7 @@ internal static class BloodManager
                     Id = ModificationIDs.Create().NewModificationId()
                 };
 
-                Core.Log.LogWarning($"[BloodManager] {newStatBuff.StatType} | {newStatBuff.Value} | {newStatBuff.AttributeCapType} | {newStatBuff.Id.Id}");
+                // Core.Log.LogWarning($"[BloodManager] {newStatBuff.StatType} | {newStatBuff.Value} | {newStatBuff.AttributeCapType} | {newStatBuff.Id.Id}");
                 buffer.Add(newStatBuff);
             }
         }

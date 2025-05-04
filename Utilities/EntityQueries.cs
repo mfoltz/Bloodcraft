@@ -82,6 +82,8 @@ internal static class EntityQueries
 
             if (!chunk.Has(ref handle))
             {
+                // var componentType = Il2CppType.Of<T>();
+                // Core.Log.LogWarning($"Chunk {index} missing {componentType.FullName}[{TypeIndex}]!");
                 return default(T);
             }
 
@@ -184,10 +186,12 @@ internal static class EntityQueries
         ComponentType[] types = queryDesc.ComponentTypes;
         int[] indices = queryDesc.TypeIndices;
 
+        Misc.Performance.Start("QueryResultStreamAsync");
         var chunks = entityQuery.CreateArchetypeChunkArrayAsync(Allocator.TempJob, out var handle);
 
         while (!handle.IsCompleted)
             yield return null;
+        Misc.Performance.Stop();
 
         handle.Complete();
 

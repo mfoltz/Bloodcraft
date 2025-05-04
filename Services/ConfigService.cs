@@ -11,8 +11,8 @@ internal static class ConfigService
     static readonly Lazy<string> _languageLocalization = new(() => GetConfigValue<string>("LanguageLocalization"));
     public static string LanguageLocalization => _languageLocalization.Value;
 
-    static readonly Lazy<bool> _clientCompanion = new(() => GetConfigValue<bool>("ClientCompanion"));
-    public static bool ClientCompanion => _clientCompanion.Value;
+    static readonly Lazy<bool> _eclipse = new(() => GetConfigValue<bool>("Eclipse"));
+    public static bool Eclipse => _eclipse.Value;
 
     static readonly Lazy<bool> _eliteShardBearers = new(() => GetConfigValue<bool>("EliteShardBearers"));
     public static bool EliteShardBearers => _eliteShardBearers.Value;
@@ -305,8 +305,8 @@ internal static class ConfigService
     static readonly Lazy<bool> _professionSystem = new(() => GetConfigValue<bool>("ProfessionSystem"));
     public static bool ProfessionSystem => _professionSystem.Value;
 
-    static readonly Lazy<float> _professionMultiplier = new(() => GetConfigValue<float>("ProfessionMultiplier"));
-    public static float ProfessionMultiplier => _professionMultiplier.Value;
+    static readonly Lazy<float> _professionFactor = new(() => GetConfigValue<float>("ProfessionFactor"));
+    public static float ProfessionFactor => _professionFactor.Value;
 
     static readonly Lazy<bool> _extraRecipes = new(() => GetConfigValue<bool>("ExtraRecipes"));
     public static bool ExtraRecipes => _extraRecipes.Value;
@@ -349,9 +349,6 @@ internal static class ConfigService
 
     static readonly Lazy<string> _bannedTypes = new(() => GetConfigValue<string>("BannedTypes"));
     public static string BannedTypes => _bannedTypes.Value;
-
-    static readonly Lazy<float> _vBloodDamageMultiplier = new(() => GetConfigValue<float>("VBloodDamageMultiplier"));
-    public static float VBloodDamageMultiplier => _vBloodDamageMultiplier.Value;
 
     static readonly Lazy<float> _unitFamiliarMultiplier = new(() => GetConfigValue<float>("UnitFamiliarMultiplier"));
     public static float UnitFamiliarMultiplier => _unitFamiliarMultiplier.Value;
@@ -506,7 +503,7 @@ internal static class ConfigService
         public static readonly List<ConfigEntryDefinition> ConfigEntries =
         [
             new ConfigEntryDefinition("General", "LanguageLocalization", "English", "The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese"),
-            new ConfigEntryDefinition("General", "ClientCompanion", true, "Enable if using the client companion mod, can configure what's displayed in the client config."),
+            new ConfigEntryDefinition("General", "Eclipse", true, "Enables the server sending player mod data to clients using Eclipse."),
             new ConfigEntryDefinition("General", "EliteShardBearers", false, "Enable or disable elite shard bearers."),
             new ConfigEntryDefinition("General", "ShardBearerLevel", 0, "Sets level of shard bearers if elite shard bearers is enabled. Leave at 0 for no effect."),
             new ConfigEntryDefinition("General", "PotionStacking", false, "Enable or disable potion stacking (can have t01/t02 effects at the same time)."),
@@ -569,7 +566,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Expertise", "UnitExpertiseMultiplier", 2f, "The multiplier for expertise gained from units."),
             new ConfigEntryDefinition("Expertise", "VBloodExpertiseMultiplier", 5f, "The multiplier for expertise gained from VBloods."),
             new ConfigEntryDefinition("Expertise", "UnitSpawnerExpertiseFactor", 1f, "The multiplier for experience gained from unit spawners (vermin nests, tombs)."),
-            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 2, "The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display."),
+            new ConfigEntryDefinition("Expertise", "ExpertiseStatChoices", 3, "The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItem", 576389135, "Item PrefabGUID cost for resetting weapon stats."),
             new ConfigEntryDefinition("Expertise", "ResetExpertiseItemQuantity", 500, "Quantity of item required for resetting stats."),
             new ConfigEntryDefinition("Expertise", "MaxHealth", 250f, "The base cap for maximum health."),
@@ -590,7 +587,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "MaxBloodLevel", 100, "The maximum level a player can reach in blood legacies."),
             new ConfigEntryDefinition("Legacies", "UnitLegacyMultiplier", 1f, "The multiplier for lineage gained from units."),
             new ConfigEntryDefinition("Legacies", "VBloodLegacyMultiplier", 5f, "The multiplier for lineage gained from VBloods."),
-            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 2, "The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display."),
+            new ConfigEntryDefinition("Legacies", "LegacyStatChoices", 3, "The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display."),
             new ConfigEntryDefinition("Legacies", "ResetLegacyItem", 576389135, "Item PrefabGUID cost for resetting blood stats."),
             new ConfigEntryDefinition("Legacies", "ResetLegacyItemQuantity", 500, "Quantity of item required for resetting blood stats."),
             new ConfigEntryDefinition("Legacies", "HealingReceived", 0.15f, "The base cap for healing received."),
@@ -607,7 +604,7 @@ internal static class ConfigService
             new ConfigEntryDefinition("Legacies", "CorruptionDamageReduction", 0.10f, "The base cap for corruption damage reduction."),
             
             new ConfigEntryDefinition("Professions", "ProfessionSystem", false, "Enable or disable the profession system."),
-            new ConfigEntryDefinition("Professions", "ProfessionMultiplier", 10f, "The multiplier for profession experience gained."),
+            new ConfigEntryDefinition("Professions", "ProfessionFactor", 10f, "The multiplier for profession experience."),
             new ConfigEntryDefinition("Professions", "ExtraRecipes", false, "Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes."), // maybe this should be in general >_>
             
             new ConfigEntryDefinition("Familiars", "FamiliarSystem", false, "Enable or disable the familiar system."),
@@ -623,7 +620,6 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "AllowMinions", false, "Allow Minions to be unlocked as familiars (leaving these excluded by default since some have undesirable behaviour and I am not sifting through them all to correct that, enable at own risk)."),
             new ConfigEntryDefinition("Familiars", "BannedUnits", "", "The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs."),
             new ConfigEntryDefinition("Familiars", "BannedTypes", "", "The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast)."),
-            new ConfigEntryDefinition("Familiars", "VBloodDamageMultiplier", 1f, "Leave at 1 for no change (controls damage familiars do to VBloods)."),
             new ConfigEntryDefinition("Familiars", "UnitFamiliarMultiplier", 7.5f, "The multiplier for experience gained from units."),
             new ConfigEntryDefinition("Familiars", "VBloodFamiliarMultiplier", 15f, "The multiplier for experience gained from VBloods."),
             new ConfigEntryDefinition("Familiars", "UnitUnlockChance", 0.05f, "The chance for a unit unlock as a familiar."),
@@ -637,7 +633,6 @@ internal static class ConfigService
             new ConfigEntryDefinition("Familiars", "PrestigeCostItemQuantity", 1000, "Quantity of schematics required to immediately prestige familiar (gain total levels equal to max familiar level, extra levels remaining from the amount needed to prestige will be added to familiar after prestiging). Valid values are between 500-2000, if outside that range in either direction it will be clamped."),
             
             new ConfigEntryDefinition("Classes", "ClassSystem", false, "Enable classes without synergy restrictions."),
-            // new ConfigEntryDefinition("Classes", "LockedSynergies", false, "Enforce classes with synergy restrictions."),
             new ConfigEntryDefinition("Classes", "ChangeClassItem", 576389135, "Item PrefabGUID cost for changing class."),
             new ConfigEntryDefinition("Classes", "ChangeClassQuantity", 750, "Quantity of item required for changing class."),
             new ConfigEntryDefinition("Classes", "ClassOnHitEffects", true, "Enable or disable class spell school on hit effects (chance to proc respective debuff from spell school when dealing damage (leech, chill, condemn etc), second tier effect will proc if first is already present on target."),

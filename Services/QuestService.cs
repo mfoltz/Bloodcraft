@@ -45,8 +45,13 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<Health>()),
         ComponentType.ReadOnly(Il2CppType.Of<UnitStats>()),
         ComponentType.ReadOnly(Il2CppType.Of<Movement>()),
+        ComponentType.ReadOnly(Il2CppType.Of<AbilityBar_Server>()),
+        ComponentType.ReadOnly(Il2CppType.Of<AbilityBar_Shared>()),
+        ComponentType.ReadOnly(Il2CppType.Of<AggroConsumer>())
+
     ];
 
+    /*
     static readonly ComponentType[] _craftableItemAllComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<PrefabGUID>()),
@@ -55,7 +60,6 @@ internal class QuestService
         ComponentType.ReadOnly(Il2CppType.Of<RecipeOutputBuffer>())
     ];
 
-    /*
     static readonly ComponentType[] _craftableItemAnyComponents =
     [
         ComponentType.ReadOnly(Il2CppType.Of<Equippable>()),
@@ -77,9 +81,9 @@ internal class QuestService
 
     static readonly ComponentType[] _targetUnitNoneComponents =
     [
-        ComponentType.ReadOnly(Il2CppType.Of<SpawnTag>()),
-        ComponentType.ReadOnly(Il2CppType.Of<Minion>()),
-        ComponentType.ReadOnly(Il2CppType.Of<DestroyOnSpawn>())
+        new(Il2CppType.Of<SpawnTag>()),
+        new(Il2CppType.Of<Minion>()),
+        new(Il2CppType.Of<DestroyOnSpawn>())
     ];
 
     /*
@@ -103,7 +107,7 @@ internal class QuestService
         PrefabGUIDs.CHAR_Manticore_VBlood,
         PrefabGUIDs.CHAR_ChurchOfLight_Paladin_VBlood,
         PrefabGUIDs.CHAR_Gloomrot_Monster_VBlood,
-        PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
+        // PrefabGUIDs.CHAR_Vampire_Dracula_VBlood,
         PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood
     ];
 
@@ -209,8 +213,8 @@ internal class QuestService
         });
         */
 
-        _vBloodUnitQueryDesc = EntityManager.CreateQueryDesc(_vBloodUnitAllComponents, _targetUnitNoneComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
-        _targetUnitQueryDesc = EntityManager.CreateQueryDesc(_targetUnitAllComponents, _targetUnitNoneComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
+        _vBloodUnitQueryDesc = EntityManager.CreateQueryDesc(_vBloodUnitAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
+        _targetUnitQueryDesc = EntityManager.CreateQueryDesc(_targetUnitAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeDisabled);
         // _craftableItemQueryDesc = EntityManager.CreateQueryDesc(_craftableItemAllComponents, typeIndices: [0, 1], options: EntityQueryOptions.IncludeSpawnTag);
         _harvestableResourceQueryDesc = EntityManager.CreateQueryDesc(allTypes: _harvestableResourceAllComponents, typeIndices: _typeIndices, options: EntityQueryOptions.IncludeSpawnTag);
 
@@ -222,7 +226,6 @@ internal class QuestService
     static IEnumerator QuestServiceRoutine()
     {
         if (_shouldReset) ResetShardBearers().Start();
-        // if (_craftables) InitializeCraftables().Start();
         if (_craftables) InitializeCraftables();
         if (_harvestables) InitializeHarvestables().Start();
 
@@ -235,13 +238,22 @@ internal class QuestService
                     try
                     {
                         Dictionary<PrefabGUID, HashSet<Entity>> prefabGuidEntityGroups = [];
-
                         using (stream)
                         {
+                            ComponentLookup<Minion> minionLookup = EntityManager.GetComponentLookup<Minion>(true);
+                            ComponentLookup<DestroyOnSpawn> destroyOnSpawnLookup = EntityManager.GetComponentLookup<DestroyOnSpawn>(true);
+                            ComponentLookup<Trader> traderLookup = EntityManager.GetComponentLookup<Trader>(true);
+
                             foreach (QueryResult result in stream.GetResults())
                             {
+                                if (minionLookup.HasComponent(result.Entity) 
+                                    || destroyOnSpawnLookup.HasComponent(result.Entity) 
+                                    || traderLookup.HasComponent(result.Entity)) continue;
+
                                 PrefabGUID prefabGuid = result.ResolveComponentData<PrefabGUID>();
                                 string prefabName = prefabGuid.GetPrefabName();
+
+                                // Core.Log.LogWarning($"[QuestService] QuestServiceRoutine() - {prefabName}");
 
                                 if (_filteredTargetUnits.Any(unit => prefabName.Contains(unit, StringComparison.OrdinalIgnoreCase)))
                                     continue;
@@ -277,6 +289,7 @@ internal class QuestService
                 }
             );
 
+
             foreach (PrefabGUID prefabGuid in _shardBearers)
             {
                 _targetCache.TryRemove(prefabGuid, out var _);
@@ -302,7 +315,8 @@ internal class QuestService
                 yield return null;
             }
 
-            // Core.Log.LogWarning($"[QuestService] TargetCache - {TargetCache.Count}");
+            Core.Log.LogWarning($"[QuestService] TargetCache - {TargetCache.Count}");
+
             _lastUpdate = DateTime.UtcNow;
             yield return _routineDelay;
         }
@@ -364,7 +378,8 @@ internal class QuestService
                     continue;
                 }
 
-                string prefabName = prefabEntity.GetPrefabGuid().GetPrefabName();
+                prefabGuid = prefabEntity.GetPrefabGuid();
+                string prefabName = prefabGuid.GetPrefabName();
 
                 // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {prefabName}");
 
@@ -445,7 +460,7 @@ internal class QuestService
         );
         */
 
-        // Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {CraftPrefabs.Count}");
+        Core.Log.LogWarning($"[QuestService] InitializeCraftables() - {CraftPrefabs.Count}");
         _craftables = false;
     }
     static IEnumerator InitializeHarvestables()

@@ -177,7 +177,7 @@ internal static class Misc
             [SCT_YIELD_KEY] = true,
             [SHAPESHIFT_KEY] = false,
             [SHROUD_KEY] = true,
-            [CLASS_BUFFS_KEY] = true,
+            [CLASS_BUFFS_KEY] = false,
             [PRESTIGE_BUFFS_KEY] = true
         };
         public static bool GetPlayerBool(ulong steamId, string boolKey)
@@ -472,7 +472,7 @@ internal static class Misc
     {
         return _random.NextDouble() < chance;
     }
-    public static class PerformanceTimer
+    public static class Performance
     {
         static readonly Stopwatch _stopwatch = new();
         static string _label = "";

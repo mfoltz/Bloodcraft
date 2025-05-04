@@ -310,51 +310,6 @@ internal static class PrestigeCommands
         LocalizationService.HandleReply(ctx, $"Player <color=green>{playerInfo.User.CharacterName.Value}</color> has been set to level <color=white>{level}</color> in <color=#90EE90>{parsedPrestigeType}</color> prestige.");
     }
 
-    /*
-    [Command(name: "listbuffs", shortHand: "lb", adminOnly: false, usage: ".prestige lb", description: "Lists prestige buff names.")]
-    public static void PrestigeBuffsCommand(ChatCommandContext ctx)
-    {
-        if (!ConfigService.PrestigeSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Prestiging is not enabled.");
-            return;
-        }
-
-        List<int> buffs = Configuration.ParseIntegersFromString(ConfigService.PrestigeBuffs);
-
-        if (buffs.Count == 0)
-        {
-            LocalizationService.HandleReply(ctx, "No leveling prestige buffs configured!");
-            return;
-        }
-
-        var prestigeBuffs = buffs.Select((buff, index) =>
-        {
-            string prefab = new PrefabGUID(buff).GetPrefabName();
-            int prefabIndex = prefab.IndexOf("Prefab");
-            if (prefabIndex != -1)
-            {
-                prefab = prefab[..prefabIndex].TrimEnd();
-            }
-            return $"<color=yellow>{index + 1}</color>| <color=white>{prefab}</color> at prestige <color=green>{index + 1}</color>";
-        }).ToList();
-
-        if (prestigeBuffs.Count == 0)
-        {
-            LocalizationService.HandleReply(ctx, "No leveling prestige buffs configured!");
-        }
-        else
-        {
-            for (int i = 0; i < prestigeBuffs.Count; i += 4)
-            {
-                var batch = prestigeBuffs.Skip(i).Take(4);
-                string replyMessage = string.Join(", ", batch);
-                LocalizationService.HandleReply(ctx, replyMessage);
-            }
-        }
-    }
-    */
-
     [Command(name: "reset", shortHand: "r", adminOnly: true, usage: ".prestige r [Player] [PrestigeType]", description: "Handles resetting prestiging.")]
     public static void ResetPrestige(ChatCommandContext ctx, string name, string prestigeType)
     {

@@ -35,7 +35,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
     static readonly PrefabGUID _solarusVisual = new(178225731);
     static readonly PrefabGUID _megaraVisual = new(-2104035188); // educated guess this is the purple aura for corrupted blood units
 
-    static readonly List<PrefabGUID> _variantBuffs = // #soon
+    static readonly List<PrefabGUID> _variantBuffs = // #soonTM
     [
         new(-429891372), // AB_Chaos_PowerSurge_Buff
     ];
@@ -64,7 +64,7 @@ internal static class SpawnTransformSystemOnSpawnPatch
                         HandleManticore(entity);
                         break;
                     case -327335305: // Dracula
-                        HandleDracula(entity);
+                        // HandleDracula(entity);
                         break;
                     case 1233988687: // Monster
                         HandleMonster(entity);

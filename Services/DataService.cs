@@ -175,10 +175,6 @@ internal static class DataService
     {
         return _playerMutantLegacy.TryGetValue(steamId, out mutantLegacy);
     }
-    public static bool TryGetPlayerVBloodLegacy(this ulong steamId, out KeyValuePair<int, float> vBloodLegacy)
-    {
-        return _playerVBloodLegacy.TryGetValue(steamId, out vBloodLegacy);
-    }
     public static bool TryGetPlayerDraculinLegacy(this ulong steamId, out KeyValuePair<int, float> draculinLegacy)
     {
         return _playerDraculinLegacy.TryGetValue(steamId, out draculinLegacy);
@@ -197,7 +193,7 @@ internal static class DataService
     }
     public static bool TryGetPlayerCorruptionLegacy(this ulong steamId, out KeyValuePair<int, float> corruptedLegacy)
     {
-        return _playerCorruptedLegacy.TryGetValue(steamId, out corruptedLegacy);
+        return _playerCorruptionLegacy.TryGetValue(steamId, out corruptedLegacy);
     }
     public static bool TryGetPlayerBloodStats(this ulong steamId, out Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>> bloodStats)
     {
@@ -418,11 +414,6 @@ internal static class DataService
         _playerMutantLegacy[steamId] = data;
         SavePlayerMutantLegacy();
     }
-    public static void SetPlayerVBloodLegacy(this ulong steamId, KeyValuePair<int, float> data)
-    {
-        _playerVBloodLegacy[steamId] = data;
-        SavePlayerVBloodLegacy();
-    }
     public static void SetPlayerDraculinLegacy(this ulong steamId, KeyValuePair<int, float> data)
     {
         _playerDraculinLegacy[steamId] = data;
@@ -445,8 +436,8 @@ internal static class DataService
     }
     public static void SetPlayerCorruptionLegacy(this ulong steamId, KeyValuePair<int, float> data)
     {
-        _playerCorruptedLegacy[steamId] = data;
-        SavePlayerCorruptedLegacy();
+        _playerCorruptionLegacy[steamId] = data;
+        SavePlayerCorruptionLegacy();
     }
     public static void SetPlayerBloodStats(this ulong steamId, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>> data)
     {
@@ -573,7 +564,7 @@ internal static class DataService
         public static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerImmortalLegacy = [];
         public static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerCreatureLegacy = [];
         public static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerBruteLegacy = [];
-        public static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerCorruptedLegacy = [];
+        public static ConcurrentDictionary<ulong, KeyValuePair<int, float>> _playerCorruptionLegacy = [];
         public static ConcurrentDictionary<ulong, Dictionary<BloodType, List<BloodManager.BloodStats.BloodStatType>>> _playerBloodStats = [];
 
         // familiar data
@@ -633,7 +624,6 @@ internal static class DataService
             {"TwinBladesExpertise", PlayerTwinBladesExpertiseJson},
             {"DaggersExpertise", PlayerDaggersExpertiseJson},
             {"ClawsExpertise", PlayerClawsExpertiseJson},
-            {"CorruptionLegacy", PlayerCorruptionLegacyJson},
             {"PlayerSpells", PlayerSpellsJson},
             {"WeaponStats", PlayerWeaponStatsJson},
             {"WorkerLegacy", PlayerWorkerLegacyJson},
@@ -641,11 +631,11 @@ internal static class DataService
             {"ScholarLegacy", PlayerScholarLegacyJson},
             {"RogueLegacy", PlayerRogueLegacyJson},
             {"MutantLegacy", PlayerMutantLegacyJson},
-            {"VBloodLegacy", PlayerVBloodLegacyJson},
             {"DraculinLegacy", PlayerDraculinLegacyJson},
             {"ImmortalLegacy", PlayerImmortalLegacyJson},
             {"CreatureLegacy", PlayerCreatureLegacyJson},
             {"BruteLegacy", PlayerBruteLegacyJson},
+            {"CorruptionLegacy", PlayerCorruptionLegacyJson},
             {"BloodStats", PlayerBloodStatsJson},
             {"FamiliarBattleCoords", FamiliarBattleCoordsJson },
             {"IgnoredPrestigeLeaderboard", IgnoredPrestigeLeaderboardJson},
@@ -691,7 +681,6 @@ internal static class DataService
             public static readonly string PlayerScholarLegacyJson = Path.Combine(DirectoryPaths[4], "player_scholar.json");
             public static readonly string PlayerRogueLegacyJson = Path.Combine(DirectoryPaths[4], "player_rogue.json");
             public static readonly string PlayerMutantLegacyJson = Path.Combine(DirectoryPaths[4], "player_mutant.json");
-            public static readonly string PlayerVBloodLegacyJson = Path.Combine(DirectoryPaths[4], "player_vblood.json");
             public static readonly string PlayerDraculinLegacyJson = Path.Combine(DirectoryPaths[4], "player_draculin.json");
             public static readonly string PlayerImmortalLegacyJson = Path.Combine(DirectoryPaths[4], "player_immortal.json");
             public static readonly string PlayerCreatureLegacyJson = Path.Combine(DirectoryPaths[4], "player_creature.json");
@@ -883,12 +872,11 @@ internal static class DataService
         public static void LoadPlayerScholarLegacy() => LoadData(ref _playerScholarLegacy, "ScholarLegacy");
         public static void LoadPlayerRogueLegacy() => LoadData(ref _playerRogueLegacy, "RogueLegacy");
         public static void LoadPlayerMutantLegacy() => LoadData(ref _playerMutantLegacy, "MutantLegacy");
-        public static void LoadPlayerVBloodLegacy() => LoadData(ref _playerVBloodLegacy, "VBloodLegacy");
         public static void LoadPlayerDraculinLegacy() => LoadData(ref _playerDraculinLegacy, "DraculinLegacy");
         public static void LoadPlayerImmortalLegacy() => LoadData(ref _playerImmortalLegacy, "ImmortalLegacy");
         public static void LoadPlayerCreatureLegacy() => LoadData(ref _playerCreatureLegacy, "CreatureLegacy");
         public static void LoadPlayerBruteLegacy() => LoadData(ref _playerBruteLegacy, "BruteLegacy");
-        public static void LoadPlayerCorruptedLegacy() => LoadData(ref _playerCorruptedLegacy, "CorruptionLegacy");
+        public static void LoadPlayerCorruptionLegacy() => LoadData(ref _playerCorruptionLegacy, "CorruptionLegacy");
         public static void LoadPlayerBloodStats() => LoadData(ref _playerBloodStats, "BloodStats");
         public static void LoadFamiliarBattleCoords() => LoadData<List<float>>(ref _familiarBattleCoords, "FamiliarBattleCoords");
         public static void LoadIgnoredPrestigeLeaderboard() => LoadData<List<ulong>>(ref _ignorePrestigeLeaderboard, "IgnoredPrestigeLeaderboard");
@@ -932,12 +920,11 @@ internal static class DataService
         public static void SavePlayerScholarLegacy() => SaveData(_playerScholarLegacy, "ScholarLegacy");
         public static void SavePlayerRogueLegacy() => SaveData(_playerRogueLegacy, "RogueLegacy");
         public static void SavePlayerMutantLegacy() => SaveData(_playerMutantLegacy, "MutantLegacy");
-        public static void SavePlayerVBloodLegacy() => SaveData(_playerVBloodLegacy, "VBloodLegacy");
         public static void SavePlayerDraculinLegacy() => SaveData(_playerDraculinLegacy, "DraculinLegacy");
         public static void SavePlayerImmortalLegacy() => SaveData(_playerImmortalLegacy, "ImmortalLegacy");
         public static void SavePlayerCreatureLegacy() => SaveData(_playerCreatureLegacy, "CreatureLegacy");
         public static void SavePlayerBruteLegacy() => SaveData(_playerBruteLegacy, "BruteLegacy");
-        public static void SavePlayerCorruptedLegacy() => SaveData(_playerCorruptedLegacy, "CorruptionLegacy");
+        public static void SavePlayerCorruptionLegacy() => SaveData(_playerCorruptionLegacy, "CorruptionLegacy");
         public static void SavePlayerBloodStats() => SaveData(_playerBloodStats, "BloodStats");
         public static void SaveFamiliarBattleCoords() => SaveData<List<float>>(_familiarBattleCoords, "FamiliarBattleCoords");
         public static void SaveIgnoredPrestigeLeaderboard() => SaveData<List<ulong>>(_ignorePrestigeLeaderboard, "IgnoredPrestigeLeaderboard");
@@ -978,6 +965,7 @@ internal static class DataService
                 }
             }
 
+            bools[Misc.PlayerBoolsManager.CLASS_BUFFS_KEY] = false;
             SavePlayerBools(steamId, bools);
             return bools;
         }
@@ -1562,6 +1550,9 @@ internal static class DataService
             LoadPlayerWhipExpertise,
             LoadPlayerFishingPoleExpertise,
             LoadPlayerUnarmedExpertise,
+            LoadPlayerTwinBladesExpertise,
+            LoadPlayerDaggersExpertise,
+            LoadPlayerClawsExpertise,
             LoadPlayerSpells,
             LoadPlayerWeaponStats
         ];
@@ -1573,11 +1564,11 @@ internal static class DataService
             LoadPlayerScholarLegacy,
             LoadPlayerRogueLegacy,
             LoadPlayerMutantLegacy,
-            LoadPlayerVBloodLegacy,
             LoadPlayerDraculinLegacy,
             LoadPlayerImmortalLegacy,
             LoadPlayerCreatureLegacy,
             LoadPlayerBruteLegacy,
+            LoadPlayerCorruptionLegacy,
             LoadPlayerBloodStats
         ];
 

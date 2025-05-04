@@ -1,3 +1,21 @@
+`1.8.3`
+- removed obsolete check on class changing
+- removed class requirement for choosing stats
+- fixed synergies reply command
+- new weapons and blood should save progress
+- elite shard bearers does not modify Dracula for now to avoid portal crashing issues (may need to boss lock/unlock with KindredCommands)
+- profession multiplier affects all professions as intended, renaming the config option to reset the value to new default
+- unarmed weapon level equivalent matches expertise when leveling is not active
+- fixed credit for fishing quests, should no longer be an empty key in chat when viewing details
+- familiar max level should no longer clamp to the level below max
+- exp share looks much better if not fixed entirely, dare I hope? :fingerscrossed:
+- changing harmony priority for more proactive Eclipse message handling
+- added oakveil fishing drops table
+- level ranges for different types of wood gathering quests
+- ensured quest prefab pools and objective generation are functioning as expected
+- continuing cleanup of old commands not relevant to current feature set
+- will update descriptions and such soon now that I've secured a tiny box's worth of breathing room :p
+
 `1.8.2`
 - fixed a few issue with default config generation for class weapon blood stats types caused by mismatched string->enum and using wrong parsing method
 - fixed fam unlock buff not having lifetime as it used to

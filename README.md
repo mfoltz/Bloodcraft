@@ -1,7 +1,8 @@
 ## Table of Contents
 
 - [BepInExRC2](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2) <--- **REQUIRED**
-- [VCF1.1](https://github.com/Odjit/VampireCommandFramework/releases/tag/1.1) <--- **RECOMMENDED**
+- [VCF1.1](https://github.com/Odjit/VampireCommandFramework/releases/tag/1.1) <--- **REQUIRED**
+- [Eclipse](https://new.thunderstore.io/c/v-rising/p/zfolmt/Eclipse/) <--- **RECOMMENDED**
 - [Sponsors](#sponsors)
 - [Features](#features)
 - [Commands](#commands)
@@ -132,15 +133,9 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.class change [Class]`
   - Change classes.
   - Shortcut: *.class c [Class]*
-- `.class syncbuffs`
-  - Applies class buffs appropriately if not present.
-  - Shortcut: *.class sb*
 - `.class list`
   - List available classes.
   - Shortcut: *.class l*
-- `.class listbuffs [Class]`
-  - Shows perks that can be gained from class.
-  - Shortcut: *.class lb [Class]*
 - `.class listspells [Class]`
   - Shows spells that can be gained from class.
   - Shortcut: *.class lsp [Class]*
@@ -150,15 +145,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.class lockshift`
   - Toggle shift spell.
   - Shortcut: *.class shift*
-- `.class passivebuffs`
-  - Toggles class passives (buffs only, other class effects remain active).
-  - Shortcut: *.class passives*
-- `.class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen` 🔒
-  - Globally syncs class buffs (removes all currently configured class buffs if found then applies buffs for current class) for players if needed.
-  - Shortcut: *.class iacknowledgethiswillgloballyremovethensyncallclassbuffsonplayersandwantthattohappen*
-- `.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen` 🔒
-  - Globally removes class buffs from players to facilitate changing class buffs in config.
-  - Shortcut: *.class iacknowledgethiswillremoveallclassbuffsfromplayersandwantthattohappen*
 
 ### Familiar Commands
 - `.familiar bind [#]`
@@ -293,9 +279,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.prestige set [Player] [PrestigeType] [Level]` 🔒
   - Sets the specified player to a certain level of prestige in a certain type of prestige.
   - Shortcut: *.prestige set [Player] [PrestigeType] [Level]*
-- `.prestige listbuffs`
-  - Lists prestige buff names.
-  - Shortcut: *.prestige lb*
 - `.prestige reset [Player] [PrestigeType]` 🔒
   - Handles resetting prestiging.
   - Shortcut: *.prestige r [Player] [PrestigeType]*
@@ -389,8 +372,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### General
 - **Language Localization**: `LanguageLocalization` (string, default: "English")
   The language localization for prefabs displayed to users. English by default. Options: Brazilian, English, French, German, Hungarian, Italian, Japanese, Koreana, Latam, Polish, Russian, SimplifiedChinese, Spanish, TraditionalChinese, Thai, Turkish, Vietnamese
-- **Client Companion**: `ClientCompanion` (bool, default: True)
-  Enable if using the client companion mod, can configure what's displayed in the client config.
+- **Eclipse**: `Eclipse` (bool, default: True)
+  Enables the server sending player mod data to clients using Eclipse.
 - **Elite Shard Bearers**: `EliteShardBearers` (bool, default: False)
   Enable or disable elite shard bearers.
 - **Shard Bearer Level**: `ShardBearerLevel` (int, default: 0)
@@ -515,7 +498,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The multiplier for expertise gained from VBloods.
 - **Unit Spawner Expertise Factor**: `UnitSpawnerExpertiseFactor` (float, default: 1)
   The multiplier for experience gained from unit spawners (vermin nests, tombs).
-- **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 2)
+- **Expertise Stat Choices**: `ExpertiseStatChoices` (int, default: 3)
   The maximum number of stat choices a player can pick for a weapon expertise. Max of 3 will be sent to client UI for display.
 - **Reset Expertise Item**: `ResetExpertiseItem` (int, default: 576389135)
   Item PrefabGUID cost for resetting weapon stats.
@@ -557,7 +540,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The multiplier for lineage gained from units.
 - **V Blood Legacy Multiplier**: `VBloodLegacyMultiplier` (float, default: 5)
   The multiplier for lineage gained from VBloods.
-- **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 2)
+- **Legacy Stat Choices**: `LegacyStatChoices` (int, default: 3)
   The maximum number of stat choices a player can pick for a blood legacy. Max of 3 will be sent to client UI for display.
 - **Reset Legacy Item**: `ResetLegacyItem` (int, default: 576389135)
   Item PrefabGUID cost for resetting blood stats.
@@ -591,8 +574,8 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ### Professions
 - **Profession System**: `ProfessionSystem` (bool, default: False)
   Enable or disable the profession system.
-- **Profession Multiplier**: `ProfessionMultiplier` (float, default: 10)
-  The multiplier for profession experience gained.
+- **Profession Factor**: `ProfessionFactor` (float, default: 10)
+  The multiplier for profession experience.
 - **Extra Recipes**: `ExtraRecipes` (bool, default: False)
   Enable or disable extra recipes. Players will not be able to add/change shiny buffs for familiars without this unless other means of obtaining vampiric dust are provided, salvage additions are controlled by this setting as well. See 'Recipes' section in README for complete list of changes.
 
@@ -623,8 +606,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   The PrefabGUID hashes for units that cannot be used as familiars. Same structure as the buff lists except unit prefabs.
 - **Banned Types**: `BannedTypes` (string, default: "")
   The types of units that cannot be used as familiars go here (Human, Undead, Demon, Mechanical, Beast).
-- **V Blood Damage Multiplier**: `VBloodDamageMultiplier` (float, default: 1)
-  Leave at 1 for no change (controls damage familiars do to VBloods).
 - **Unit Familiar Multiplier**: `UnitFamiliarMultiplier` (float, default: 7.5)
   The multiplier for experience gained from units.
 - **V Blood Familiar Multiplier**: `VBloodFamiliarMultiplier` (float, default: 15)

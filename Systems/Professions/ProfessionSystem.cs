@@ -31,7 +31,7 @@ internal static class ProfessionSystem
     const int FISH_STEP = 20;
     const int GREASE_STEP = 4;
 
-    static readonly float _professionMultiplier = ConfigService.ProfessionMultiplier;
+    static readonly float _professionMultiplier = ConfigService.ProfessionFactor;
     const int MAX_PROFESSION_LEVEL = 100;
 
     static readonly AssetGuid _experienceAssetGuid = AssetGuid.FromString("4210316d-23d4-4274-96f5-d6f0944bd0bb");
@@ -121,7 +121,7 @@ internal static class ProfessionSystem
             professionValue = 10;
         }
 
-        professionValue = (int)(professionValue * _professionMultiplier);
+        // professionValue = (int)(professionValue * _professionMultiplier);
         IProfession handler = ProfessionFactory.GetProfession(itemPrefabGuid);
 
         if (handler != null)
@@ -285,6 +285,7 @@ internal static class ProfessionSystem
     }
     public static void SetProfession(Entity target, Entity source, ulong steamID, float value, IProfession handler, ref float delay)
     {
+        value *= _professionMultiplier;
         var xpData = handler.GetProfessionData(steamID);
 
         if (xpData.Key >= MAX_PROFESSION_LEVEL) return;
@@ -648,13 +649,25 @@ internal static class ProfessionMappings
         { new(67930804) } //goldenbassriver
     };
 
+    static readonly List<PrefabGUID> _oakveilFishDrops = new()
+    {
+        { new(-1642545082) }, //goby
+        { new(447901086) }, //stinger
+        { new(-149778795) }, //rainbow
+        { new(736318803) }, //sagefish
+        { new(-1779269313) }, //bloodsnapper
+        { new(67930804) }, //goldenbassriver
+        { PrefabGUIDs.Item_Ingredient_Fish_Corrupted_T03 } 
+    };
+
     static readonly Dictionary<string, List<PrefabGUID>> _fishingAreaDrops = new()
     {
         { "farbane", _farbaneFishDrops},
         { "dunley", _dunleyFishDrops},
         { "gloomrot", _gloomrotFishDrops},
         { "cursed", _cursedFishDrops},
-        { "silverlight", _silverlightFishDrops}
+        { "silverlight", _silverlightFishDrops},
+        { "oakveil", _oakveilFishDrops}
     };
 
     static readonly Dictionary<string, int> _woodcuttingMultipliers = new()

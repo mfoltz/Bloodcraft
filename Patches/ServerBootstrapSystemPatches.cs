@@ -10,7 +10,6 @@ using ProjectM.Scripting;
 using Stunlock.Core;
 using Stunlock.Network;
 using System.Collections;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Bloodcraft.Services.DataService.FamiliarPersistence;
@@ -31,6 +30,7 @@ internal static class ServerBootstrapSystemPatches
     static SystemService SystemService => Core.SystemService;
 
     static readonly WaitForSeconds _delay = new(1f);
+    static readonly WaitForSeconds _newCharacterDelay = new(2.5f);
 
     static readonly PrefabGUID _insideWoodenCoffin = new(381160212);
     static readonly PrefabGUID _insideStoneCoffin = new(569692162);
@@ -42,7 +42,7 @@ internal static class ServerBootstrapSystemPatches
     static readonly bool _familiars = ConfigService.FamiliarSystem;
     static readonly bool _expertise = ConfigService.ExpertiseSystem;
     static readonly bool _quests = ConfigService.QuestSystem;
-    static readonly bool _eclipse = ConfigService.ClientCompanion;
+    static readonly bool _eclipse = ConfigService.Eclipse;
     static readonly bool _exoForm = ConfigService.ExoPrestiging;
     static readonly bool _restedXP = ConfigService.RestedXPSystem;
     static readonly bool _professions = ConfigService.ProfessionSystem;
@@ -194,6 +194,21 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetPlayerFishingPoleExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
+            if (!steamId.TryGetPlayerTwinBladesExpertise(out var _))
+            {
+                steamId.SetPlayerTwinBladesExpertise(new KeyValuePair<int, float>(0, 0f));
+            }
+
+            if (!steamId.TryGetPlayerDaggersExpertise(out var _))
+            {
+                steamId.SetPlayerDaggersExpertise(new KeyValuePair<int, float>(0, 0f));
+            }
+
+            if (!steamId.TryGetPlayerClawsExpertise(out var _))
+            {
+                steamId.SetPlayerClawsExpertise(new KeyValuePair<int, float>(0, 0f));
+            }
+
             if (!steamId.TryGetPlayerWeaponStats(out var weaponStats))
             {
                 weaponStats = [];
@@ -239,11 +254,6 @@ internal static class ServerBootstrapSystemPatches
                 steamId.SetPlayerMutantLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
-            if (!steamId.TryGetPlayerVBloodLegacy(out var _))
-            {
-                steamId.SetPlayerVBloodLegacy(new KeyValuePair<int, float>(0, 0f));
-            }
-
             if (!steamId.TryGetPlayerDraculinLegacy(out var _))
             {
                 steamId.SetPlayerDraculinLegacy(new KeyValuePair<int, float>(0, 0f));
@@ -262,6 +272,11 @@ internal static class ServerBootstrapSystemPatches
             if (!steamId.TryGetPlayerBruteLegacy(out var _))
             {
                 steamId.SetPlayerBruteLegacy(new KeyValuePair<int, float>(0, 0f));
+            }
+
+            if (!steamId.TryGetPlayerCorruptionLegacy(out var _))
+            {
+                steamId.SetPlayerTwinBladesExpertise(new KeyValuePair<int, float>(0, 0f));
             }
 
             if (!steamId.TryGetPlayerBloodStats(out var bloodStats))
@@ -423,6 +438,11 @@ internal static class ServerBootstrapSystemPatches
                 playerCharacter.TryApplyBuff(_bonusStatsBuff);
             }
         }
+        else if (_eclipse)
+        {
+            // Core.Log.LogWarning($"[HandlePreRegistration] - {steamId}");
+            EclipseService.HandlePreRegistration(steamId);
+        }
     }
     public static void UnbindFamiliarOnUserDisconnected(User user, Entity playerCharacter)
     {
@@ -487,63 +507,105 @@ internal static class ServerBootstrapSystemPatches
             UnbindFamiliarOnUserDisconnected(user, playerCharacter); // need to yeet immediately to account for server restarts where no time after everyone 'logs out'
         }
 
-        if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId);
+        if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId, userIndex);
     }
 
     [HarmonyPatch(typeof(KickBanSystem_Server), nameof(KickBanSystem_Server.OnUpdate))] // treat this an OnUserDisconnected to account for player swaps
     [HarmonyPrefix]
     static void OnUpdatePrefix(KickBanSystem_Server __instance)
     {
-        NativeArray<Entity> entities = __instance._KickQuery.ToEntityArray(Allocator.Temp);
-        // NativeArray<KickEvent> kickEvents = __instance._KickQuery.ToComponentDataArray<KickEvent>(Allocator.Temp);
+        using NativeAccessor<KickEvent> kickEvents = __instance._KickQuery.ToComponentDataArrayAccessor<KickEvent>();
 
         try
         {
-            foreach (Entity entity in entities)
+            for (int i = 0; i < kickEvents.Length; i++)
             {
-                if (entity.TryGetComponent(out KickEvent kickEvent))
+                KickEvent kickEvent = kickEvents[i];
+                ulong steamId = kickEvent.PlatformId;
+
+                if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
                 {
-                    ulong steamId = kickEvent.PlatformId;
-
-                    if (steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                    if (_leveling)
                     {
-                        if (_leveling)
+                        if (_restedXP && steamId.TryGetPlayerRestedXP(out var restedData))
                         {
-                            if (_restedXP && steamId.TryGetPlayerRestedXP(out var restedData))
-                            {
-                                restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
-                                steamId.SetPlayerRestedXP(restedData);
-                            }
+                            restedData = new KeyValuePair<DateTime, float>(DateTime.UtcNow, restedData.Value);
+                            steamId.SetPlayerRestedXP(restedData);
                         }
-
-                        if (_eclipse)
-                        {
-                            if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.UnregisterUser(steamId);
-                        }
-
-                        if (_prestige)
-                        {
-                            SetPlayerBool(steamId, SHROUD_KEY, false);
-
-                            if (playerInfo.CharEntity.HasBuff(_shroudBuff) && playerInfo.CharEntity.TryGetComponent(out Equipment equipment))
-                            {
-                                if (!equipment.IsEquipped(_shroudCloak, out var _)) playerInfo.CharEntity.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
-                            }
-                        }
-
-                        if (_familiars && playerInfo.CharEntity.Exists())
-                        {
-                            UnbindFamiliarOnUserDisconnected(playerInfo.User, playerInfo.CharEntity);
-                        }
-
-                        if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId);
                     }
+
+                    if (_eclipse)
+                    {
+                        if (EclipseService.RegisteredUsersAndClientVersions.ContainsKey(steamId)) EclipseService.UnregisterUser(steamId);
+                    }
+
+                    if (_prestige)
+                    {
+                        SetPlayerBool(steamId, SHROUD_KEY, false);
+
+                        if (playerInfo.CharEntity.HasBuff(_shroudBuff) && playerInfo.CharEntity.TryGetComponent(out Equipment equipment))
+                        {
+                            if (!equipment.IsEquipped(_shroudCloak, out var _)) playerInfo.CharEntity.TryRemoveBuff(buffPrefabGuid: _shroudBuff);
+                        }
+                    }
+
+                    if (_familiars && playerInfo.CharEntity.Exists())
+                    {
+                        UnbindFamiliarOnUserDisconnected(playerInfo.User, playerInfo.CharEntity);
+                    }
+
+                    if (SteamIdOnlinePlayerInfoCache.ContainsKey(steamId)) HandleDisconnection(steamId, playerInfo.User.Index);
                 }
+                
             }
         }
-        finally
+        catch (Exception ex)
         {
-            entities.Dispose();
+            Core.Log.LogError($"Error in KickBanSystem_Server: {ex}");
         }
     }
+
+    [HarmonyPatch(typeof(HandleCreateCharacterEventSystem), nameof(HandleCreateCharacterEventSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnCharacterCreated(HandleCreateCharacterEventSystem __instance)
+    {
+        using NativeAccessor<FromCharacter> fromCharacterEvents = __instance._CreateCharacterEventQuery.ToComponentDataArrayAccessor<FromCharacter>();
+
+        try
+        {
+            for (int i = 0; i < fromCharacterEvents.Length; i++)
+            {
+                FromCharacter fromCharacter = fromCharacterEvents[i];
+                Entity userEntity = fromCharacter.User;
+
+                // Core.Log.LogWarning($"[HandleCreateCharacterEventSystem] PreRegistration for new character...");
+                HandleCharacterCreatedRoutine(userEntity).Start();
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogError($"Error in HandleCreateCharacterEventSystem: {ex}");
+        }
+    }
+    static IEnumerator HandleCharacterCreatedRoutine(Entity userEntity)
+    {
+        yield return _newCharacterDelay;
+
+        User user = userEntity.GetUser();
+        // Core.Log.LogWarning($"New character created - {user.PlatformId} | {user.LocalCharacter.GetEntityOnServer().Exists()}");
+
+        PlayerInfo playerInfo = new()
+        {
+            CharEntity = user.LocalCharacter.GetEntityOnServer(),
+            UserEntity = userEntity,
+            User = user
+        };
+
+        HandleConnection(user.PlatformId, playerInfo);
+
+        if (!playerInfo.CharEntity.HasBuff(_bonusStatsBuff))
+        {
+            playerInfo.CharEntity.TryApplyBuff(_bonusStatsBuff);
+        }
+    } 
 }

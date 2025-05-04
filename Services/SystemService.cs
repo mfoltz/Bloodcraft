@@ -154,17 +154,31 @@ internal class SystemService(World world)
         }
     }
 
-    TileModelSpatialLookupSystem.Singleton _tileModelSpatialLookupSystem_Singleton;
-    public TileModelSpatialLookupSystem.Singleton TileModelSpatialLookupSystem
+    Entity _tileModelSpatialLookupSystem;
+    public Entity TileModelSpatialLookupSystem
     {
         get
         {
-            if (_tileModelSpatialLookupSystem_Singleton.Equals(default(TileModelSpatialLookupSystem.Singleton)))
+            if (!_tileModelSpatialLookupSystem.Exists())
             {
-                _tileModelSpatialLookupSystem_Singleton = GetSingleton<TileModelSpatialLookupSystem.Singleton>();
+                _tileModelSpatialLookupSystem = GetSingletonEntity<TileModelSpatialLookupSystem.Singleton>();
             }
 
-            return _tileModelSpatialLookupSystem_Singleton;
+            return _tileModelSpatialLookupSystem;
+        }
+    }
+
+    Entity _dayNightCycleSystem;
+    public Entity DayNightCycleSystem
+    {
+        get
+        {
+            if (!_dayNightCycleSystem.Exists())
+            {
+                _dayNightCycleSystem = GetSingletonEntityFromAccessor<DayNightCycle>();
+            }
+
+            return _dayNightCycleSystem;
         }
     }
     T GetSystem<T>() where T : ComponentSystemBase
@@ -173,10 +187,20 @@ internal class SystemService(World world)
     }
     T GetOrCreateSystem<T>() where T : ComponentSystemBase
     {
-        return _world.GetOrCreateSystemManaged<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get or create ({Il2CppType.Of<T>().FullName})");
+        return _world.GetOrCreateSystemManaged<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get ({Il2CppType.Of<T>().FullName})");
     }
-    T GetSingleton<T>() // where T : ComponentSystemBase
+    T GetSingleton<T>()
     {
-        return ServerScriptMapper.GetSingleton<T>() ?? throw new InvalidOperationException($"[{_world.Name}] - failed to get singleton ({Il2CppType.Of<T>().FullName})");
+        return ServerScriptMapper.GetSingleton<T>();
+    }
+    Entity GetSingletonEntity<T>()
+    {
+        return ServerScriptMapper.GetSingletonEntity<T>();
+    }
+    Entity GetSingletonEntityFromAccessor<T>()
+    {
+        return SingletonAccessor<T>.TryGetSingletonEntityWasteful(Core.EntityManager, out Entity singletonEntity)
+            ? singletonEntity
+            : throw new InvalidOperationException($"[{_world.Name}] - failed to get singleton entity ({Il2CppType.Of<T>().FullName})");
     }
 }

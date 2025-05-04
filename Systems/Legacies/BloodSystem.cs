@@ -79,15 +79,6 @@ internal static class BloodSystem
                 return (false, default);
             }
         },
-        { BloodType.VBlood, steamID =>
-            {
-                if (steamID.TryGetPlayerVBloodLegacy(out var data))
-                {
-                    return (true, data);
-                }
-                return (false, default);
-            }
-        },
         { BloodType.Draculin, steamID =>
             {
                 if (steamID.TryGetPlayerDraculinLegacy(out var data))
@@ -142,7 +133,6 @@ internal static class BloodSystem
         { BloodType.Scholar, (steamID, data) => steamID.SetPlayerScholarLegacy(data) },
         { BloodType.Rogue, (steamID, data) => steamID.SetPlayerRogueLegacy(data) },
         { BloodType.Mutant, (steamID, data) => steamID.SetPlayerMutantLegacy(data) },
-        { BloodType.VBlood, (steamID, data) => steamID.SetPlayerVBloodLegacy(data) },
         { BloodType.Draculin, (steamID, data) => steamID.SetPlayerDraculinLegacy(data) },
         { BloodType.Immortal, (steamID, data) => steamID.SetPlayerImmortalLegacy(data) },
         { BloodType.Creature, (steamID, data) => steamID.SetPlayerCreatureLegacy(data) },
@@ -251,9 +241,9 @@ internal static class BloodSystem
             NotifyPlayer(playerCharacter, userEntity, user, steamId, bloodType, bloodValue, leveledUp, newLevel, handler, deathEvent.ScrollingTextDelay);
         }
     }
-    public static void SaveBloodExperience(ulong steamID, IBloodLegacy handler, float gainedXP, out bool leveledUp, out int newLevel)
+    public static void SaveBloodExperience(ulong steamId, IBloodLegacy handler, float gainedXP, out bool leveledUp, out int newLevel)
     {
-        var xpData = handler.GetLegacyData(steamID);
+        var xpData = handler.GetLegacyData(steamId);
         int currentLevel = xpData.Key;
         float currentXP = xpData.Value;
 
@@ -261,7 +251,6 @@ internal static class BloodSystem
         {
             leveledUp = false;
             newLevel = currentLevel;
-
             return;
         }
 
@@ -279,7 +268,7 @@ internal static class BloodSystem
             }
         }
 
-        handler.SetLegacyData(steamID, new KeyValuePair<int, float>(newLevel, newExperience));
+        handler.SetLegacyData(steamId, new KeyValuePair<int, float>(newLevel, newExperience));
     }
     static void HandleBloodLevelUp(User user, BloodType bloodType, int newLevel, ulong steamID)
     {

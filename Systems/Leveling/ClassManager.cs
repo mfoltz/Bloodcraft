@@ -104,9 +104,9 @@ internal static class ClassManager
         BloodDrainMultiplier = 94,
         CorruptionDamageReduction = 95
     }
-    public class ClassOnDamageSettings
+    public class ClassOnHitSettings
     {
-        public class OnDamageEffects(PrefabGUID primary, PrefabGUID secondary, bool isDebuff)
+        public class OnHitEffects(PrefabGUID primary, PrefabGUID secondary, bool isDebuff)
         {
             public PrefabGUID Primary { get; } = primary;
             public PrefabGUID Secondary { get; } = secondary;
@@ -120,8 +120,8 @@ internal static class ClassManager
                 else source.TryApplyBuff(Secondary);
             }
         }
-        public static IReadOnlyDictionary<PlayerClass, OnDamageEffects> ClassOnDamageEffects => _classOnDamageEffects;
-        static readonly Dictionary<PlayerClass, OnDamageEffects> _classOnDamageEffects = new()
+        public static IReadOnlyDictionary<PlayerClass, OnHitEffects> ClassOnDamageEffects => _classOnDamageEffects;
+        static readonly Dictionary<PlayerClass, OnHitEffects> _classOnDamageEffects = new()
         {
             { PlayerClass.BloodKnight, new(Buffs.VampireLeechDebuff, Buffs.BloodCurseBuff, true) },
             { PlayerClass.DemonHunter, new(Buffs.VampireStaticDebuff, Buffs.StormChargeBuff, false) },

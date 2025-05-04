@@ -64,7 +64,6 @@ internal static class FamiliarBindingSystem
 
     static readonly int _maxFamiliarLevel = ConfigService.MaxFamiliarLevel;
     static readonly float _familiarPrestigeStatMultiplier = ConfigService.FamiliarPrestigeStatMultiplier;
-    static readonly float _vBloodDamageMultiplier = ConfigService.VBloodDamageMultiplier;
 
     public static Entity _unitTeamSingleton = Entity.Null;
 
@@ -317,6 +316,7 @@ internal static class FamiliarBindingSystem
                 ModifyCollision(familiar);
                 RemoveDropTable(familiar);
                 PreventDisableFamiliar(familiar);
+                // HandleMountedUnit(playerCharacter, familiar, battle);
 
                 if (BattleService.Matchmaker.MatchPairs.TryGetMatch(steamId, out var matchPair))
                 {
@@ -360,6 +360,7 @@ internal static class FamiliarBindingSystem
                 ModifyCollision(familiar);
                 RemoveDropTable(familiar);
                 PreventDisableFamiliar(familiar);
+                // HandleMountedUnit(playerCharacter, familiar);
 
                 return true;
             }
@@ -597,19 +598,6 @@ internal static class FamiliarBindingSystem
             health.Value = maxHealth;
         });
 
-        if (!battle && !_vBloodDamageMultiplier.Equals(1f))
-        {
-            DamageCategoryStats damageCategoryStats = familiar.Read<DamageCategoryStats>();
-
-            if (damageCategoryStats.DamageVsVBloods._Value != _vBloodDamageMultiplier)
-            {
-                familiar.With((ref DamageCategoryStats damageCategoryStats) =>
-                {
-                    damageCategoryStats.DamageVsVBloods._Value *= _vBloodDamageMultiplier;
-                });
-            }
-        }
-
         RemoveMisc(familiar, familiarId);
     }
     public static void ModifyBloodSource(Entity familiar, int level)
@@ -646,7 +634,7 @@ internal static class FamiliarBindingSystem
     {
         if (!familiar.Has<DynamicCollision>()) return;
         
-        // probably best values tried here so far
+        // best values tried so far
         familiar.With((ref DynamicCollision dynamicCollision) =>
         {
             dynamicCollision.AgainstPlayers.RadiusOverride = -1f;
@@ -654,15 +642,6 @@ internal static class FamiliarBindingSystem
             dynamicCollision.AgainstPlayers.PushStrengthMax._Value = 0f;
             dynamicCollision.AgainstPlayers.PushStrengthMin._Value = 0f;
         });
-
-        /*
-        if (!familiar.Has<MapCollision>()) return;
-
-        familiar.With((ref MapCollision mapCollision) =>
-        {
-            mapCollision.Radius = 0.5f; // this usually does weird stuff, noting to change back probably immediately after testing >_> 0.4f, 0.2f
-        });
-        */
     }
     public static void RemoveDropTable(Entity familiar)
     {
@@ -856,6 +835,15 @@ internal static class FamiliarBindingSystem
                     buff.Target = familiar;
                 });
             }
+        }
+    }
+    static void HandleMountedUnit(Entity playerCharacter, Entity familiar, bool battle = false)
+    {
+        if (!familiar.TryGetComponent(out UnitMounter unitMounter)) return;
+
+        if (unitMounter.MountEntity.TryGetSyncedEntity(out Entity mount))
+        {
+
         }
     }
     static Entity HandleFamiliarServant(Entity familiar)

@@ -116,7 +116,7 @@ internal static class FamiliarLevelingSystem
         bool leveledUp = false;
         int newLevel = ConvertXpToLevel(familiarXP.Value);
 
-        if (newLevel >= _maxFamiliarLevel) return;
+        if (newLevel > _maxFamiliarLevel) return; // can't use >= here like the others since these aren't all quite standardized like they should be
         else if (gainedXP <= 0) return;
 
         if (newLevel > currentLevel)

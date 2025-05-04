@@ -27,7 +27,8 @@ internal static class Quests
     {
         { TargetType.Kill, "Unit" },
         { TargetType.Craft, "Item" },
-        { TargetType.Gather, "Resource" }
+        { TargetType.Gather, "Resource" },
+        { TargetType.Fish, "Fishing" }
     };
     public static void QuestTrackReply(ChatCommandContext ctx, Dictionary<QuestType, (QuestObjective Objective, int Progress, DateTime LastReset)> questData, QuestType questType)
     {

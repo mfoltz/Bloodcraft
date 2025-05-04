@@ -221,7 +221,6 @@ internal static class Familiars
         { "Lucile the Venom Alchemist", PrefabGUIDs.CHAR_Blackfang_Lucie_VBlood},
         { "Jakira the Shadow Huntress", PrefabGUIDs.CHAR_Blackfang_Livith_VBlood},
         { "Megara the Serpent Queen", PrefabGUIDs.CHAR_Blackfang_Morgana_VBlood}
-
     };
 
     public static readonly ConcurrentDictionary<Entity, Entity> AutoCallMap = [];

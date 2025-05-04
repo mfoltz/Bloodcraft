@@ -29,6 +29,7 @@ internal static class Core
     public static SystemService SystemService { get; } = new(Server);
     public static ServerGameBalanceSettings ServerGameBalanceSettings { get; set; }
     public static double ServerTime => ServerGameManager.ServerTime;
+    public static double DeltaTime => ServerGameManager.DeltaTime;
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour _monoBehaviour;
@@ -73,6 +74,12 @@ internal static class Core
         PrefabGUIDs.DT_Unit_Relic_Dracula_Unique,  
         PrefabGUIDs.DT_Unit_Relic_Morgana_Unique
     ];
+
+    static readonly bool _legacies = ConfigService.LegacySystem;
+    static readonly bool _expertise = ConfigService.ExpertiseSystem;
+    static readonly bool _classes = ConfigService.ClassSystem;
+    static readonly bool _familiars = ConfigService.FamiliarSystem;
+    static readonly bool _shouldApplyBonusStats = _legacies || _expertise || _classes || _familiars;
     public static IReadOnlySet<WeaponType> BleedingEdge => _bleedingEdge;
     static HashSet<WeaponType> _bleedingEdge = [];
 
@@ -92,7 +99,7 @@ internal static class Core
         _ = new PlayerService();
         _ = new LocalizationService();
 
-        if (ConfigService.ClientCompanion) _ = new EclipseService();
+        if (ConfigService.Eclipse) _ = new EclipseService();
 
         if (ConfigService.ExtraRecipes) Recipes.ModifyRecipes();
 
@@ -233,29 +240,15 @@ internal static class Core
                     itemDataHashMap[shardNecklace] = itemData;
                 }
             }
+        }
 
-            /*
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.DefaultEmoteBuff, out prefabEntity))
-            {
-                prefabEntity.With((ref LifeTime lifeTime) =>
-                {
-                    lifeTime.Duration = DIRECTION_DURATION;
-                });
-
-                prefabEntity.With((ref ModifyRotation modifyRotation) =>
-                {
-                    modifyRotation.TargetDirectionType = TargetDirectionType.TowardsBuffOwner;
-                    modifyRotation.SnapToDirection = true;
-                    modifyRotation.Type = RotationModificationType.Set;
-                });
-            }
-            */
-            
-            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.BonusStatsBuff, out prefabEntity))
+        if (_shouldApplyBonusStats)
+        {
+            if (SystemService.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(Buffs.BonusStatsBuff, out Entity prefabEntity))
             {
                 prefabEntity.Add<ScriptSpawn>();
                 // prefabEntity.TryRemove<BuffModificationFlagData>();
-                
+
                 if (prefabEntity.TryGetBuffer<ModifyUnitStatBuff_DOTS>(out var buffer))
                 {
                     // Log.LogWarning($"[ModifyPrefabs] - Clearing ModifyUnitStatBuff_DOTS buffer for {Buffs.BonusStatsBuff.GetPrefabName()}...");

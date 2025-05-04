@@ -291,7 +291,6 @@ internal static class WeaponSystem
         {
             leveledUp = false;
             newLevel = currentLevel;
-
             return;
         }
 
@@ -322,7 +321,7 @@ internal static class WeaponSystem
         if (leveledUp)
         {
             HandleWeaponLevelUp(user, weaponType, newLevel, steamId);
-            Buffs.RefreshStats(user.LocalCharacter.GetEntityOnServer());
+            Buffs.RefreshStats(playerCharacter);
         }
 
         if (GetPlayerBool(steamId, WEAPON_LOG_KEY))

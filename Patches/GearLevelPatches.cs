@@ -5,6 +5,7 @@ using Bloodcraft.Utilities;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Gameplay.Systems;
+using ProjectM.Shared;
 using Unity.Collections;
 using Unity.Entities;
 using User = ProjectM.Network.User;
@@ -49,6 +50,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
         }
     }
 
+    const float SOURCE_LEVEL_FACTOR = 0.3f;
     [HarmonyPatch(typeof(WeaponLevelSystem_Spawn), nameof(WeaponLevelSystem_Spawn.OnUpdate))]
     [HarmonyPrefix]
     static void OnUpdatePrefix(WeaponLevelSystem_Spawn __instance)
@@ -83,6 +85,19 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                 }
                 else if (!_leveling && _expertise && entityOwner.Owner.TryGetPlayer(out playerCharacter))
                 {
+                    ulong steamId = playerCharacter.GetSteamId();
+                    WeaponType weaponType = WeaponSystem.GetWeaponTypeFromWeaponEntity(entity);
+
+                    if (weaponType.Equals(WeaponType.Unarmed) && steamId.TryGetPlayerUnarmedExpertise(out var expertise))
+                    {
+                        float unarmedLevel = expertise.Key * SOURCE_LEVEL_FACTOR;
+                        entity.With((ref WeaponLevel weaponLevel) =>
+                        {
+                            weaponLevel.Level = unarmedLevel;
+                        });
+                    }
+                    
+                    /*
                     ulong steamId = playerCharacter.Read<PlayerCharacter>().UserEntity.Read<User>().PlatformId;
                     int weaponLevel = (int)entity.Read<WeaponLevel>().Level;
                     int unarmedWeaponLevel = 0;
@@ -114,6 +129,7 @@ internal static class GearLevelPatches // WeaponLevelSystem_Spawn, WeaponLevelSy
                     {
                         entity.Write(new WeaponLevel { Level = unarmedWeaponLevel });
                     }
+                    */
                 }
             }
         }

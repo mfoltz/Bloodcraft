@@ -118,6 +118,15 @@ internal static class QuestSystem
         public bool Complete { get; set; }
     }
 
+    static readonly Dictionary<PrefabGUID, (int MinLevel, int MaxLevel)> _woodTierLevelRange = new()
+    {
+        { PrefabGUIDs.Item_Ingredient_Wood_Standard, (0, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Ingredient_Wood_Hallow, (30, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Ingredient_Wood_Gloom, (40, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Ingredient_Wood_Cursed, (50, ConfigService.MaxLevel) },
+        { PrefabGUIDs.Item_Ingredient_Wood_CorruptedOak, (60, ConfigService.MaxLevel) },
+    };
+
     static readonly Dictionary<string, (int MinLevel, int MaxLevel)> _equipmentTierLevelRangeMap = new()
     {
         { "T01", (0, 15) },
@@ -225,7 +234,15 @@ internal static class QuestSystem
                         {
                             string prefabName = dropTableData.ItemGuid.GetPrefabName();
 
-                            if (prefabName.Contains("Item_Ingredient"))
+                            if (prefabName.Contains("Ingredient_Wood"))
+                            {
+                                if (IsWoodWithinLevelRange(prefabGuid, playerLevel))
+                                {
+                                    yield return dropTableData.ItemGuid;
+                                    break;
+                                }
+                            }
+                            else if (prefabName.Contains("Item_Ingredient"))
                             {
                                 yield return dropTableData.ItemGuid;
                                 break;
@@ -250,6 +267,15 @@ internal static class QuestSystem
     static bool IsConsumableWithinLevelRange(PrefabGUID prefabGuid, int playerLevel)
     {
         if (_consumableTierLevelRangeMap.TryGetValue(prefabGuid, out var levelRange))
+        {
+            return playerLevel >= levelRange.MinLevel && playerLevel <= levelRange.MaxLevel;
+        }
+
+        return false;
+    }
+    static bool IsWoodWithinLevelRange(PrefabGUID prefabGuid, int playerLevel)
+    {
+        if (_woodTierLevelRange.TryGetValue(prefabGuid, out var levelRange))
         {
             return playerLevel >= levelRange.MinLevel && playerLevel <= levelRange.MaxLevel;
         }
@@ -315,6 +341,7 @@ internal static class QuestSystem
                 if (target.Equals(_cursedWood) || target.Equals(_gloomWood) || target.Equals(_hallowedWood) || target.Equals(_corruptedWood)) requiredAmount /= 2;
                 break;
             case TargetType.Fish:
+                target = targets.FirstOrDefault();
                 requiredAmount = _random.Next(2, 4) * _questMultipliers[questType];
                 break;
             default:
@@ -564,11 +591,11 @@ internal static class QuestSystem
 
         if (questType.Equals(QuestType.Weekly))
         {
-            Utilities.Misc.GiveOrDropItem(user, user.LocalCharacter.GetEntityOnServer(), perfectGem, 1);
+            Misc.GiveOrDropItem(user, user.LocalCharacter.GetEntityOnServer(), perfectGem, 1);
         }
         else if (questType.Equals(QuestType.Daily) && Utilities.Misc.RollForChance(_dailyPerfectChance))
         {
-            Utilities.Misc.GiveOrDropItem(user, user.LocalCharacter.GetEntityOnServer(), perfectGem, 1);
+            Misc.GiveOrDropItem(user, user.LocalCharacter.GetEntityOnServer(), perfectGem, 1);
         }
     }
     static void HandleItemReward(User user, QuestType questType, QuestObjective objective, string colorType)

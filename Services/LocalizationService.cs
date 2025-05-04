@@ -24,7 +24,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         public string Guid { get; set; }
         public string Text { get; set; }
     }
-    struct Words
+    struct Word
     {
         public string Original { get; set; }
         public string Translation { get; set; }
@@ -33,7 +33,7 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
     {
         public Code[] Codes { get; set; }
         public Node[] Nodes { get; set; }
-        public Words[] Words { get; set; }
+        public Word[] Words { get; set; }
     }
 
     static readonly string _language = ConfigService.LanguageLocalization;
@@ -87,7 +87,8 @@ internal class LocalizationService // the bones are from KindredCommands, ty Odj
         {PrefabGUIDs.CHAR_Villager_CursedWanderer_VBlood_GateBoss_Major, "Primal Ben"},
         {PrefabGUIDs.CHAR_Wendigo_GateBoss_Major, "Primal Frostmaw"},
         {PrefabGUIDs.CHAR_WerewolfChieftain_VBlood_GateBoss_Major, "Primal Willfred"},
-        {PrefabGUIDs.CHAR_Winter_Yeti_VBlood_GateBoss_Major, "Primal Terrorclaw"}
+        {PrefabGUIDs.CHAR_Winter_Yeti_VBlood_GateBoss_Major, "Primal Terrorclaw"},
+        {PrefabGUIDs.FakeItem_AnyFish, "Go Fish!" }
     };
     public LocalizationService()
     {

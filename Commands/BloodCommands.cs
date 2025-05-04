@@ -4,7 +4,6 @@ using Bloodcraft.Systems.Legacies;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Scripting;
-using Steamworks;
 using Stunlock.Core;
 using Unity.Entities;
 using VampireCommandFramework;

@@ -33,7 +33,6 @@ internal class Plugin : BasePlugin
         InitializeConfig();
         CommandRegistry.RegisterAll();
         LoadPlayerData();
-        // ModifyUnitStatsDetour.InitializeCreate();
 
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded!");
     }

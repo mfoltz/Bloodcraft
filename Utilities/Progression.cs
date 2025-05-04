@@ -21,6 +21,7 @@ internal static class Progression
 {
     static SystemService SystemService => Core.SystemService;
     static UserActivityGridSystem UserActivityGridSystem => SystemService.UserActivityGridSystem;
+    static ServerBootstrapSystem ServerBootstrapSystem => SystemService.ServerBootstrapSystem;
 
     static readonly GameModeType _gameMode = SystemService.ServerGameSettingsSystem._Settings.GameModeType;
 
@@ -228,6 +229,8 @@ internal static class Progression
             return [source];
         }
 
+        var userIndexToSteamId = ServerBootstrapSystem._PlatformIdToApprovedUserIndex.ReverseIl2CppDictionary();
+
         HashSet<Entity> players = [source];
 
         try
@@ -236,29 +239,53 @@ internal static class Progression
             UserBitMask128 userBitMask = userActivityGrid.GetUsersInRadius(position, _shareDistance);
             UserBitMask128.Enumerable usersInRange = userBitMask.GetUsers();
 
+            Core.Log.LogWarning($"Users in range of deathEvent - {usersInRange._Mask.Count}");
+
             foreach (int userIndex in usersInRange)
             {
-                ulong? steamId = GetSteamId(userIndex);
+                if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId))
+                {
+                    // Core.Log.LogWarning($"UserIndexToSteamId invalid - {userIndex} | {steamId}");
+                    continue;
+                }
+                else if (IgnoreShared.Contains(steamId))
+                {
+                    // Core.Log.LogWarning($"IgnoreShared - {userIndex} | {steamId}");
+                }
+                if (!steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                {
+                    continue;
+                }
+                if (!playerInfo.CharEntity.HasBuff(_pveCombatBuff))
+                {
+                    // Core.Log.LogWarning($"Not in combat - {userIndex} | {steamId}");
+                    continue;
+                }
 
-                if (!steamId.HasValue || IgnoreShared.Contains(steamId.Value)) continue;
-                if (!steamId.Value.TryGetPlayerInfo(out PlayerInfo playerInfo)) continue;
-                if (!playerInfo.CharEntity.HasBuff(_pveCombatBuff)) continue;
+                var targetProgression = GetProgressionCacheData(steamId);
 
-                var targetProgression = GetProgressionCacheData(steamId.Value);
+                // Core.Log.LogWarning($"ProgressionCache - {userIndex} | {steamId} | {targetProgression.Level} | {targetProgression.HasPrestiged}");
 
                 if (_isPvE)
                 {
                     if (targetProgression.HasPrestiged || _shareLevelRange.Equals(0) || source.IsAllies(playerInfo.CharEntity))
                     {
+                        // Core.Log.LogWarning($"[PvE] Adding {steamId} to participants (hasPrestiged, isAllies, or no shareLevelRange ({_shareLevelRange})");
                         players.Add(playerInfo.CharEntity);
                     }
                     else if (Math.Abs(sourceLevel - targetProgression.Level) <= _shareLevelRange)
                     {
+                        // Core.Log.LogWarning($"[PvE] Adding {steamId} to participants (level difference <= {_shareLevelRange})");
                         players.Add(playerInfo.CharEntity);
+                    }
+                    else
+                    {
+                        // Core.Log.LogWarning($"[PvE] Ignoring {steamId} (level difference > {_shareLevelRange})");
                     }
                 }
                 else if (source.IsAllies(playerInfo.CharEntity))
                 {
+                    // Core.Log.LogWarning($"[PvP] Adding {steamId} to participants (isAllies)");
                     players.Add(playerInfo.CharEntity);
                 }
             }
@@ -272,6 +299,7 @@ internal static class Progression
     }
     public static List<PlayerInfo> GetUsersNearPosition(float3 position, float radius)
     {
+        var userIndexToSteamId = ServerBootstrapSystem._PlatformIdToApprovedUserIndex.ReverseIl2CppDictionary();
         List<PlayerInfo> playerInfos = [];
 
         try
@@ -282,11 +310,17 @@ internal static class Progression
 
             foreach (int userIndex in usersInRange)
             {
-                ulong? steamId = GetSteamId(userIndex);
+                if (!userIndexToSteamId.TryGetValue(userIndex, out ulong steamId))
+                {
+                    // Core.Log.LogWarning($"UserIndexToSteamId invalid - {userIndex} | {steamId}");
+                    continue;
+                }
 
-                if (!steamId.HasValue) continue;
-                if (!steamId.Value.TryGetPlayerInfo(out PlayerInfo playerInfo)) continue;
-                
+                if (!steamId.TryGetPlayerInfo(out PlayerInfo playerInfo))
+                {
+                    continue;
+                }
+
                 playerInfos.Add(playerInfo);
             }
         }

@@ -3,12 +3,32 @@
 namespace Bloodcraft;
 internal static class IExtensions
 {
-    public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(this IDictionary<TKey, TValue> source)
+    public static Dictionary<TValue, TKey> Reverse<TKey, TValue>(
+        this IDictionary<TKey, TValue> source)
     {
         var reversed = new Dictionary<TValue, TKey>();
 
         foreach (var kvp in source)
         {
+            reversed[kvp.Value] = kvp.Key;
+        }
+
+        return reversed;
+    }
+    public static Dictionary<TValue, TKey> ReverseIl2CppDictionary<TKey, TValue>(
+        this Il2CppSystem.Collections.Generic.Dictionary<TKey, TValue> source)
+    {
+        var reversed = new Dictionary<TValue, TKey>();
+
+        if (source == null) return reversed;
+
+        foreach (var kvp in source)
+        {
+            if (reversed.ContainsKey(kvp.Value))
+            {
+                continue;
+            }
+
             reversed[kvp.Value] = kvp.Key;
         }
 

@@ -1,4 +1,5 @@
-﻿using Bloodcraft.Services;
+﻿using Bloodcraft.Resources;
+using Bloodcraft.Services;
 using Bloodcraft.Utilities;
 using ProjectM;
 using ProjectM.Network;
@@ -37,12 +38,11 @@ internal static class FamiliarUnlockSystem
         "servant"
     ];
 
-    /*
-    static readonly HashSet<PrefabGUID> _defaultPrefabGUIDBans =
+    static readonly HashSet<PrefabGUID> _defaultPrefabGuidBans =
     [
-        new(-1584807109) // CHAR_Undead_SkeletonSoldier_Withered
+        PrefabGUIDs.CHAR_Undead_ArenaChampion_VBlood, // absolutely not
+        PrefabGUIDs.CHAR_Militia_Fabian_VBlood        // yes, but need time
     ];
-    */
 
     public static readonly Dictionary<PrefabGUID, string> ShinyBuffColorHexes = new()
     {
@@ -101,7 +101,7 @@ internal static class FamiliarUnlockSystem
     public static bool IsBannedPrefabGuid(PrefabGUID prefabGuid)
     {
         // return (ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGUIDBans.Contains(prefabGuid));
-        return (ConfiguredPrefabGuidBans.Contains(prefabGuid));
+        return (ConfiguredPrefabGuidBans.Contains(prefabGuid) || _defaultPrefabGuidBans.Contains(prefabGuid));
     }
     static bool BannedCategory(EntityCategory category)
     {

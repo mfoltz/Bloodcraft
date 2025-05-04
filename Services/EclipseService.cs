@@ -47,9 +47,10 @@ internal class EclipseService
     static readonly Regex _regex = new(@"^\[ECLIPSE\]\[(\d+)\]:(\d+\.\d+\.\d+);(\d+)$");
 
     const string VERSION_1_3 = "1.3";
-
-    static readonly ConcurrentDictionary<ulong, string> _registeredUsersAndClientVersions = [];
+    public static IReadOnlyDictionary<ulong, string> PendingRegistration => _pendingRegistration;
+    static readonly ConcurrentDictionary<ulong, string> _pendingRegistration = [];
     public static IReadOnlyDictionary<ulong, string> RegisteredUsersAndClientVersions => _registeredUsersAndClientVersions;
+    static readonly ConcurrentDictionary<ulong, string> _registeredUsersAndClientVersions = [];
     public EclipseService()
     {
         EclipseServiceRoutine().Start();
@@ -78,6 +79,7 @@ internal class EclipseService
             switch (eventType)
             {
                 case (int)NetworkEventSubType.RegisterUser:
+                    // Core.Log.LogWarning($"[EclipseService.HandleClientMessage] {steamId}:Eclipse{modVersion} ({DateTime.Now})");
                     RegisterUser(steamId, modVersion);
                     break;
                 default:
@@ -88,33 +90,6 @@ internal class EclipseService
             return;
         }
 
-        /*
-        Match oldMatch = _oldRegex.Match(message);
-
-        if (oldMatch.Success)
-        {
-            int eventType = int.Parse(oldMatch.Groups[1].Value);
-
-            if (!ulong.TryParse(oldMatch.Groups[2].Value, out ulong steamId))
-            {
-                Core.Log.LogWarning($"Invalid steamId in legacy (<{V1_2_2}) Eclipse message!");
-                return;
-            }
-
-            switch (eventType)
-            {
-                case (int)NetworkEventSubType.RegisterUser:
-                    RegisterUser(steamId, V1_1_2);
-                    break;
-                default:
-                    Core.Log.LogError($"Unknown networkEventSubtype encountered handling legacy version (<{V1_2_2}) of Eclipse! {eventType}");
-                    break;
-            }
-
-            return;
-        }
-        */
-
         Core.Log.LogWarning("Failed to parse client registration message from Eclipse!");
     }
     static void RegisterUser(ulong steamId, string version)
@@ -124,47 +99,47 @@ internal class EclipseService
         {
             if (HandleRegistration(playerInfo, steamId, version))
             {
-                Core.Log.LogInfo($"{steamId}:Eclipse{version} registered for Eclipse updates from PlayerCache - (RegisterUser)");
+                // Core.Log.LogInfo($"{steamId}:Eclipse{version} registered!");
             }
         }
+
+        /*
         else
         {
-            DelayedRegistrationRoutine(steamId, version).Start();
+            // DelayedRegistrationRoutine(steamId, version).Start();
+            _pendingRegistration.TryAdd(steamId, version);
+            Core.Log.LogInfo($"{steamId}:Eclipse{version} pending registration...");
         }
+        */
     }
-    static bool HandleRegistration(PlayerInfo playerInfo, ulong steamId, string version)
+    public static void HandlePreRegistration(ulong steamId)
     {
+        _pendingRegistration.TryAdd(steamId, V1_3);
+    }
+    public static void TryRemovePreRegistration(ulong steamId)
+    {
+        _pendingRegistration.TryRemove(steamId, out var _);
+    }
+    public static bool HandleRegistration(PlayerInfo playerInfo, ulong steamId, string version)
+    {
+        // Core.Log.LogWarning($"[EclipseService.HandleRegistration] {steamId}:Eclipse{version}");
         if (_registeredUsersAndClientVersions.TryAdd(steamId, version))
         {
             try
             {
                 switch (version)
                 {
-                    /*
-                    case V1_1_2:
-                        IVersionHandler<ProgressDataV1_1_2> versionHandlerV1_1_2 = VersionHandler.GetHandler<ProgressDataV1_1_2>(version);
-                        versionHandlerV1_1_2?.SendClientConfig(playerInfo.User);
-                        versionHandlerV1_1_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                        return true;
-                    case V1_2_2:
-                        IVersionHandler<ProgressDataV1_2_2> versionHandlerV1_2_2 = VersionHandler.GetHandler<ProgressDataV1_2_2>(version);
-                        versionHandlerV1_2_2?.SendClientConfig(playerInfo.User);
-                        versionHandlerV1_2_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                        return true;
-                    case V1_3_2:
-                        IVersionHandler<ProgressDataV1_3_2> versionHandlerV1_3_2 = VersionHandler.GetHandler<ProgressDataV1_3_2>(version);
-                        versionHandlerV1_3_2?.SendClientConfig(playerInfo.User);
-                        versionHandlerV1_3_2?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
-                        return true;
-                    */
                     default:
                         if (IsVersion1_3(version))
                         {
+                            // Core.Log.LogWarning($"[EclipseService.HandleRegistration] - {version}");
                             IVersionHandler<ProgressDataV1_3> versionHandler13X = VersionHandler.GetHandler<ProgressDataV1_3>(VERSION_1_3);
                             versionHandler13X?.SendClientConfig(playerInfo.User);
                             versionHandler13X?.SendClientProgress(playerInfo.CharEntity, playerInfo.User.PlatformId);
+                            _pendingRegistration.TryRemove(steamId, out var _);
                             return true;
                         }
+
                         Core.Log.LogWarning($"Unsupported client version! {steamId}:Eclipse{version}");
                         return false;
                 }
@@ -250,7 +225,6 @@ internal class EclipseService
                                 else
                                 {
                                     Core.Log.LogWarning($"Unsupported client version in EclipseService! {steamId}:Eclipse{version}, unregistering user to avoid console spam...");
-                                    // _registeredUsersAndClientVersions.TryRemove(steamId, out var _);
                                     UnregisterUser(steamId);
                                     break;
                                 }
@@ -268,7 +242,7 @@ internal class EclipseService
             yield return _delay;
         }
     }
-    static bool IsVersion1_3(string version) => version.StartsWith("1.3.");
+    static bool IsVersion1_3(string version) => version.StartsWith("1.3");
     public static void UnregisterUser(ulong steamId)
     {
         _registeredUsersAndClientVersions.TryRemove(steamId, out var _);

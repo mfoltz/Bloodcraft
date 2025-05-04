@@ -91,77 +91,15 @@ internal static class WeaponManager
     {
         if (steamId.TryGetPlayerWeaponStats(out var weaponTypeStats) && weaponTypeStats.TryGetValue(weaponType, out var weaponStats))
         {
-            if (_classes)
+            if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
             {
-                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
-                {
-                    return false;
-                }
-
-                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
-                {
-                    return false;
-                }
-
-                weaponStats.Add(weaponStatType);
-                steamId.SetPlayerWeaponStats(weaponTypeStats);
-
-                return true;
-            }
-            else
-            {
-                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
-                {
-                    return false;
-                }
-
-                weaponStats.Add(weaponStatType);
-                steamId.SetPlayerWeaponStats(weaponTypeStats);
-
-                return true;
+                return false;
             }
 
-            /*
-            if (_lockedSynergies)
-            {
-                if (!steamId.HasClass(out PlayerClass? playerClass) || !playerClass.HasValue)
-                {
-                    return false;
-                }
+            weaponStats.Add(weaponStatType);
+            steamId.SetPlayerWeaponStats(weaponTypeStats);
 
-                if (!ClassWeaponStatSynergies.TryGetValue(playerClass.Value, out List<WeaponStatType> weaponStatTypes) || !weaponStatTypes.Contains(weaponStatType))
-                {
-                    return false;
-                }
-
-                if (!weaponStatTypes.Contains(weaponStatType))
-                {
-                    return false;
-                }
-
-                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
-                {
-                    return false;
-                }
-
-                weaponStats.Add(weaponStatType);
-                steamId.SetPlayerWeaponStats(weaponTypeStats);
-
-                return true;
-            }
-            else
-            {
-                if (weaponStats.Count >= _expertiseStatChoices || weaponStats.Contains(weaponStatType))
-                {
-                    return false;
-                }
-
-                weaponStats.Add(weaponStatType);
-                steamId.SetPlayerWeaponStats(weaponTypeStats);
-
-                return true;
-            }
-            */
+            return true;
         }
         return false;
     }
@@ -208,7 +146,7 @@ internal static class WeaponManager
                     Id = ModificationIDs.Create().NewModificationId()
                 };
 
-                Core.Log.LogWarning($"[WeaponManager] {newStatBuff.StatType} | {newStatBuff.Value} | {newStatBuff.AttributeCapType} | {newStatBuff.Id.Id}");
+                // Core.Log.LogWarning($"[WeaponManager] {newStatBuff.StatType} | {newStatBuff.Value} | {newStatBuff.AttributeCapType} | {newStatBuff.Id.Id}");
                 buffer.Add(newStatBuff);
             }
         }

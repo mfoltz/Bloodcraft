@@ -15,6 +15,7 @@ internal class PlayerService
     static EntityManager EntityManager => Core.EntityManager;
 
     static readonly bool _leveling = ConfigService.LevelingSystem;
+    static readonly bool _eclipse = ConfigService.Eclipse;
 
     // const float START_DELAY = 30f;
     const float ROUTINE_DELAY = 60f;
@@ -51,7 +52,8 @@ internal class PlayerService
         _userQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents, options: EntityQueryOptions.IncludeDisabled);
         _onlineUserQueryDesc = EntityManager.CreateQueryDesc(_userAllComponents);
 
-        PlayerServiceRoutine().Start();
+        // PlayerServiceRoutine().Start();
+        BuildPlayerInfoCache();
     }
 
     static readonly int[] _typeIndices = [0];
@@ -129,6 +131,7 @@ internal class PlayerService
                 {
                     int level = LevelingSystem.GetLevel(steamId);
                     bool hasPrestiged = PrestigeManager.HasPrestiged(steamId);
+                    // Core.Log.LogWarning($"[PlayerService.BuildPlayerInfoCache] {steamId} - {playerName} - Level: {level} - HasPrestiged: {hasPrestiged}");
                     Progression.PlayerProgressionCacheManager.UpdatePlayerProgression(steamId, level, hasPrestiged);
                 }
             }
@@ -146,12 +149,22 @@ internal class PlayerService
     }
     public static void HandleConnection(ulong steamId, PlayerInfo playerInfo)
     {
-        _steamIdOnlinePlayerInfoCache.TryAdd(steamId, playerInfo);
-        _steamIdPlayerInfoCache.TryAdd(steamId, playerInfo);
+        // Core.Log.LogWarning($"[PlayerService.HandleConnection] {steamId}");
+
+        _steamIdOnlinePlayerInfoCache[steamId] = playerInfo;
+        _steamIdPlayerInfoCache[steamId] = playerInfo;
+        _userIndexSteamIdCache[playerInfo.User.Index] = steamId;
+
+        // if (_eclipse && EclipseService.PendingRegistration.TryGetValue(steamId, out string version)) EclipseService.HandleRegistration(playerInfo, steamId, version);
     }
-    public static void HandleDisconnection(ulong steamId)
+    public static void HandleDisconnection(ulong steamId, int userIndex)
     {
+        // Core.Log.LogWarning($"[PlayerService.HandleDisconnection] {steamId}");
+
         _steamIdOnlinePlayerInfoCache.TryRemove(steamId, out _);
+        _userIndexSteamIdCache.TryRemove(userIndex, out _);
+
+        if (_eclipse) EclipseService.TryRemovePreRegistration(steamId);
     }
     public static PlayerInfo GetPlayerInfo(string playerName)
     {

@@ -296,14 +296,14 @@ internal static class Classes
     };
 
     public static readonly Dictionary<PlayerClass, (List<int>, List<int>)> ClassWeaponBloodEnumMap = new()
-{
-    { PlayerClass.BloodKnight, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.BloodKnightWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.BloodKnightBloodSynergies).Select(e => (int)e).ToList()) },
-    { PlayerClass.DemonHunter, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.DemonHunterWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.DemonHunterBloodSynergies).Select(e => (int)e).ToList()) },
-    { PlayerClass.VampireLord, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.VampireLordWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.VampireLordBloodSynergies).Select(e => (int)e).ToList()) },
-    { PlayerClass.ShadowBlade, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.ShadowBladeWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.ShadowBladeBloodSynergies).Select(e => (int)e).ToList()) },
-    { PlayerClass.ArcaneSorcerer, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.ArcaneSorcererWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.ArcaneSorcererBloodSynergies).Select(e => (int)e).ToList()) },
-    { PlayerClass.DeathMage, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.DeathMageWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.DeathMageBloodSynergies).Select(e => (int)e).ToList()) }
-};
+    {
+        { PlayerClass.BloodKnight, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.BloodKnightWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.BloodKnightBloodSynergies).Select(e => (int)e).ToList()) },
+        { PlayerClass.DemonHunter, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.DemonHunterWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.DemonHunterBloodSynergies).Select(e => (int)e).ToList()) },
+        { PlayerClass.VampireLord, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.VampireLordWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.VampireLordBloodSynergies).Select(e => (int)e).ToList()) },
+        { PlayerClass.ShadowBlade, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.ShadowBladeWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.ShadowBladeBloodSynergies).Select(e => (int)e).ToList()) },
+        { PlayerClass.ArcaneSorcerer, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.ArcaneSorcererWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.ArcaneSorcererBloodSynergies).Select(e => (int)e).ToList()) },
+        { PlayerClass.DeathMage, (Configuration.ParseEnumsFromString<WeaponStatType>(ConfigService.DeathMageWeaponSynergies).Select(e => (int)e).ToList(), Configuration.ParseEnumsFromString<BloodStatType>(ConfigService.DeathMageBloodSynergies).Select(e => (int)e).ToList()) }
+    };
 
     /*
     public static readonly Dictionary<PlayerClass, string> ClassBuffMap = new()
@@ -427,6 +427,47 @@ internal static class Classes
             LocalizationService.HandleReply(ctx, $"{replyMessage}");
         }
     }
+
+    public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
+    {
+        var hasWeaponStats = ClassWeaponStatSynergies.TryGetValue(playerClass, out var weaponStats);
+        var hasBloodStats = ClassBloodStatSynergies.TryGetValue(playerClass, out var bloodStats);
+
+        if (!hasWeaponStats && !hasBloodStats)
+        {
+            LocalizationService.HandleReply(ctx, $"Couldn't find stat synergies for {FormatClassName(playerClass)}...");
+            return;
+        }
+
+        var allStats = new List<string>();
+
+        if (hasWeaponStats && weaponStats is { Count: > 0 })
+        {
+            allStats.AddRange(weaponStats.Select(stat => $"<color=white>{stat}</color> (<color=#00FFFF>Weapon</color>)"));
+        }
+
+        if (hasBloodStats && bloodStats is { Count: > 0 })
+        {
+            allStats.AddRange(bloodStats.Select(stat => $"<color=white>{stat}</color> (<color=red>Blood</color>)"));
+        }
+
+        if (allStats.Count == 0)
+        {
+            LocalizationService.HandleReply(ctx, $"No stat synergies found for {FormatClassName(playerClass)}.");
+            return;
+        }
+
+        LocalizationService.HandleReply(ctx, $"{FormatClassName(playerClass)} stat synergies [x<color=white>{ConfigService.SynergyMultiplier}</color>]:");
+
+        for (int i = 0; i < allStats.Count; i += 6)
+        {
+            var batch = allStats.Skip(i).Take(6);
+            string replyMessage = string.Join(", ", batch);
+            LocalizationService.HandleReply(ctx, $"{replyMessage}");
+        }
+    }
+
+    /*
     public static void ReplyClassSynergies(ChatCommandContext ctx, PlayerClass playerClass)
     {
         if (ClassWeaponBloodMap.TryGetValue(playerClass, out var weaponBloodStats))
@@ -458,6 +499,7 @@ internal static class Classes
             LocalizationService.HandleReply(ctx, $"Couldn't find stat synergies for {FormatClassName(playerClass)}...");
         }
     }
+    */
     public static void ReplyClassSpells(ChatCommandContext ctx, PlayerClass playerClass)
     {
         List<int> spells = Configuration.ParseIntegersFromString(ClassSpellsMap[playerClass]);
@@ -516,12 +558,13 @@ internal static class Classes
     {
         if (steamId.HasClass(out PlayerClass? playerClass) && playerClass.HasValue)
         {
-            List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
-            RemoveClassBuffs(character, classBuffs);
+            // List<PrefabGUID> classBuffs = GetClassBuffs(steamId);
+            // RemoveClassBuffs(character, classBuffs);
         }
 
         steamId.SetPlayerClass(parsedClassType);
-        ApplyClassBuffs(character, steamId);
+        Buffs.RefreshStats(character);
+        // ApplyClassBuffs(character, steamId);
     }
     public static void RemoveShift(Entity character)
     {
