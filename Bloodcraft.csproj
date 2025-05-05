@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Bloodcraft</AssemblyName>
-		<Version>1.8.4</Version>
+		<Version>1.8.5</Version>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<RestoreSources>
 			https://api.nuget.org/v3/index.json;
@@ -56,7 +56,7 @@
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingDedicatedServer\BepInEx\plugins" />
 	</Target>
 	
-	<Target Name="GenerateReadMe" Condition="'$(RunGenerateREADME)' == 'true'" AfterTargets="Build">
+	<Target Name="GenerateREADME" Condition="'$(RunGenerateREADME)' == 'true'" AfterTargets="Build">
 		<Exec Command="dotnet &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(ProjectDir)Commands&quot; &quot;$(ProjectDir)README.md&quot;" />
 	</Target>
 	

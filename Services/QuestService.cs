@@ -315,7 +315,7 @@ internal class QuestService
                 yield return null;
             }
 
-            Core.Log.LogWarning($"[QuestService] TargetCache - {TargetCache.Count}");
+            // Core.Log.LogWarning($"[QuestService] TargetCache - {TargetCache.Count}");
 
             _lastUpdate = DateTime.UtcNow;
             yield return _routineDelay;

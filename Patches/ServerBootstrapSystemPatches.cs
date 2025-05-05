@@ -67,7 +67,7 @@ internal static class ServerBootstrapSystemPatches
         Entity userEntity = serverClient.UserEntity;
         User user = __instance.EntityManager.GetComponentData<User>(userEntity);
         ulong steamId = user.PlatformId;
-
+        
         Entity playerCharacter = user.LocalCharacter.GetEntityOnServer();
         bool exists = playerCharacter.Exists();
 
@@ -276,7 +276,7 @@ internal static class ServerBootstrapSystemPatches
 
             if (!steamId.TryGetPlayerCorruptionLegacy(out var _))
             {
-                steamId.SetPlayerTwinBladesExpertise(new KeyValuePair<int, float>(0, 0f));
+                steamId.SetPlayerCorruptionLegacy(new KeyValuePair<int, float>(0, 0f));
             }
 
             if (!steamId.TryGetPlayerBloodStats(out var bloodStats))

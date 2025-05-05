@@ -842,54 +842,6 @@ internal static class FamiliarCommands
         }
     }
 
-    /*
-    [Command(name: "listprestigestats", shortHand: "lst", adminOnly: false, usage: ".fam lst", description: "Display options for familiar prestige stats.")]
-    public static void ListPrestigeStatsCommand(ChatCommandContext ctx)
-    {
-        if (!ConfigService.FamiliarSystem)
-        {
-            LocalizationService.HandleReply(ctx, "Familiars are not enabled.");
-            return;
-        }
-
-        // Determine which stats the user's active familiar already has.
-        ulong steamId = ctx.Event.User.PlatformId;
-        List<int> existingStats = [];
-
-        if (steamId.HasActiveFamiliar())
-        {
-            ActiveFamiliarData activeFamiliar = GetActiveFamiliarData(steamId);
-            int familiarId = activeFamiliar.FamiliarId;
-
-            FamiliarPrestigeData prestigeData = LoadFamiliarPrestigeData(steamId);
-            if (prestigeData.FamiliarPrestige.TryGetValue(familiarId, out var famPrestige))
-            {
-                existingStats = famPrestige.Value;
-            }
-        }
-
-        // Build the prestigeStats list, skipping any the user already has
-        var prestigeStats = FamiliarPrestigeStats
-            .Select((stat, index) => new { stat, index })
-            .Where(x => !existingStats.Contains(x.index)) // skip stats the familiar already has
-            .Select(x =>
-                $"<color=yellow>{x.index + 1}</color>| " +
-                $"<color=#00FFFF>{x.stat}</color>: " +
-                $"<color=white>{Misc.FormatPercentStatValue(FamiliarBaseStatValues[x.stat])}</color>"
-            )
-            .ToList();
-
-        // Output them in batches of 4 as before
-        for (int i = 0; i < prestigeStats.Count; i += 4)
-        {
-            var batch = prestigeStats.Skip(i).Take(4);
-            string replyMessage = string.Join(", ", batch);
-
-            LocalizationService.HandleReply(ctx, replyMessage);
-        }
-    }
-    */
-
     [Command(name: "prestige", shortHand: "pr", adminOnly: false, usage: ".fam pr", description: "Prestiges familiar if conditions are met, raising base stats by configured multiplier.")]
     public static void PrestigeFamiliarCommand(ChatCommandContext ctx)
     {

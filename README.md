@@ -7,6 +7,7 @@
 - [Features](#features)
 - [Commands](#commands)
 - [Recipes](#recipes)
+- [BleedingEdge](#bleedingedge)
 - [Configuration](#configuration)
 - [Recommended Mods](#recommended)
 
@@ -101,38 +102,35 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 ## Commands
 
 ### Bloodlegacy Commands
-- `.bloodlegacy get [BloodType]`
-  - Display current blood legacy details.
-  - Shortcut: *.bl get [BloodType]*
-- `.bloodlegacy log`
-  - Toggles Legacy progress logging.
-  - Shortcut: *.bl log*
 - `.bloodlegacy choosestat [BloodOrStat] [BloodStat]`
   - Choose a bonus stat to enhance for your blood legacy.
   - Shortcut: *.bl cst [BloodOrStat] [BloodStat]*
-- `.bloodlegacy resetstats`
-  - Reset stats for current blood.
-  - Shortcut: *.bl rst*
-- `.bloodlegacy liststats`
-  - Lists blood stats available.
-  - Shortcut: *.bl lst*
-- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
-  - Sets player blood legacy level.
-  - Shortcut: *.bl set [Player] [Blood] [Level]*
+- `.bloodlegacy get [BloodType]`
+  - Display current blood legacy details.
+  - Shortcut: *.bl get [BloodType]*
 - `.bloodlegacy list`
   - Lists blood legacies available.
   - Shortcut: *.bl l*
+- `.bloodlegacy liststats`
+  - Lists blood stats available.
+  - Shortcut: *.bl lst*
+- `.bloodlegacy log`
+  - Toggles Legacy progress logging.
+  - Shortcut: *.bl log*
+- `.bloodlegacy resetstats`
+  - Reset stats for current blood.
+  - Shortcut: *.bl rst*
+- `.bloodlegacy set [Player] [Blood] [Level]` 🔒
+  - Sets player blood legacy level.
+  - Shortcut: *.bl set [Player] [Blood] [Level]*
 
 ### Class Commands
-- `.class select [Class]`
-  - Select class.
-  - Shortcut: *.class s [Class]*
-- `.class choosespell [#]`
-  - Sets shift spell for class if prestige level is high enough.
-  - Shortcut: *.class csp [#]*
 - `.class change [Class]`
   - Change classes.
   - Shortcut: *.class c [Class]*
+- `.class choosespell [#]`
+  - Sets shift spell for class if prestige level is high enough.
+  - Shortcut: *.class csp [#]*
 - `.class list`
   - List available classes.
   - Shortcut: *.class l*
@@ -145,227 +143,240 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 - `.class lockshift`
   - Toggle shift spell.
   - Shortcut: *.class shift*
+- `.class select [Class]`
+  - Select class.
+  - Shortcut: *.class s [Class]*
 
 ### Familiar Commands
-- `.familiar bind [#]`
-  - Activates specified familiar from current list.
-  - Shortcut: *.fam b [#]*
-- `.familiar unbind`
-  - Destroys active familiar.
-  - Shortcut: *.fam ub*
-- `.familiar list`
-  - Lists unlocked familiars from current box.
-  - Shortcut: *.fam l*
-- `.familiar listboxes`
-  - Shows the available familiar boxes.
-  - Shortcut: *.fam boxes*
-- `.familiar choosebox [Name]`
-  - Choose active box of familiars.
-  - Shortcut: *.fam cb [Name]*
-- `.familiar renamebox [CurrentName] [NewName]`
-  - Renames a box.
-  - Shortcut: *.fam rb [CurrentName] [NewName]*
-- `.familiar movebox [BoxName]`
-  - Moves active familiar to specified box.
-  - Shortcut: *.fam mb [BoxName]*
-- `.familiar deletebox [BoxName]`
-  - Deletes specified box if empty.
-  - Shortcut: *.fam db [BoxName]*
-- `.familiar addbox [BoxName]`
-  - Adds empty box with name.
-  - Shortcut: *.fam ab [BoxName]*
 - `.familiar add [PlayerName] [PrefabGuid/CHAR_Unit_Name]` 🔒
   - Unit testing.
   - Shortcut: *.fam a [PlayerName] [PrefabGuid/CHAR_Unit_Name]*
+- `.familiar addbattlegroup [BattleGroup]`
+  - Creates new battle group.
+  - Shortcut: *.fam abg [BattleGroup]*
+- `.familiar addbox [BoxName]`
+  - Adds empty box with name.
+  - Shortcut: *.fam ab [BoxName]*
+- `.familiar bind [#]`
+  - Activates specified familiar from current list.
+  - Shortcut: *.fam b [#]*
+- `.familiar challenge [PlayerName]`
+  - Challenges a player to battle or displays queue details.
+  - Shortcut: *.fam challenge [PlayerName]*
+- `.familiar choosebattlegroup [BattleGroup]`
+  - Sets active battle group.
+  - Shortcut: *.fam cbg [BattleGroup]*
+- `.familiar choosebox [Name]`
+  - Choose active box of familiars.
+  - Shortcut: *.fam cb [Name]*
+- `.familiar deletebattlegroup [BattleGroup]`
+  - Deletes a battle group.
+  - Shortcut: *.fam dbg [BattleGroup]*
+- `.familiar deletebox [BoxName]`
+  - Deletes specified box if empty.
+  - Shortcut: *.fam db [BoxName]*
 - `.familiar echoes [VBloodName]`
   - VBlood purchasing for exo reward with quantity scaling to unit tier.
   - Shortcut: *.fam echoes [VBloodName]*
-- `.familiar remove [#]`
-  - Removes familiar from current set permanently.
-  - Shortcut: *.fam r [#]*
+- `.familiar emoteactions`
+  - Shows available emote actions.
+  - Shortcut: *.fam actions*
+- `.familiar emotes`
+  - Toggle emote actions.
+  - Shortcut: *.fam e*
 - `.familiar getlevel`
   - Display current familiar leveling progress.
   - Shortcut: *.fam gl*
-- `.familiar setlevel [Player] [Level]` 🔒
-  - Set current familiar level.
-  - Shortcut: *.fam sl [Player] [Level]*
-- `.familiar listprestigestats`
-  - Display options for familiar prestige stats.
-  - Shortcut: *.fam lst*
+- `.familiar list`
+  - Lists unlocked familiars from current box.
+  - Shortcut: *.fam l*
+- `.familiar listbattlegroup [BattleGroup]`
+  - Displays details of the specified battle group, or the active one if none is given.
+  - Shortcut: *.fam bg [BattleGroup]*
+- `.familiar listbattlegroups`
+  - Lists available battle groups.
+  - Shortcut: *.fam bgs*
+- `.familiar listboxes`
+  - Shows the available familiar boxes.
+  - Shortcut: *.fam boxes*
+- `.familiar movebox [BoxName]`
+  - Moves active familiar to specified box.
+  - Shortcut: *.fam mb [BoxName]*
 - `.familiar prestige`
   - Prestiges familiar if conditions are met, raising base stats by configured multiplier.
   - Shortcut: *.fam pr*
+- `.familiar remove [#]`
+  - Removes familiar from current set permanently.
+  - Shortcut: *.fam r [#]*
+- `.familiar renamebox [CurrentName] [NewName]`
+  - Renames a box.
+  - Shortcut: *.fam rb [CurrentName] [NewName]*
 - `.familiar reset`
   - Resets (destroys) entities found in followerbuffer and clears familiar actives data.
   - Shortcut: *.fam reset*
 - `.familiar search [Name]`
   - Searches boxes for familiar(s) with matching name.
   - Shortcut: *.fam s [Name]*
-- `.familiar smartbind [Name]`
-  - Searches and binds a familiar. If multiple matches are found, returns a list for clarification.
-  - Shortcut: *.fam sb [Name]*
-- `.familiar shinybuff [SpellSchool]`
-  - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
-  - Shortcut: *.fam shiny [SpellSchool]*
-- `.familiar toggleoption [Setting]`
-  - Toggles various familiar settings.
-  - Shortcut: *.fam option [Setting]*
-- `.familiar listbattlegroups`
-  - Lists available battle groups.
-  - Shortcut: *.fam bgs*
-- `.familiar listbattlegroup [BattleGroup]`
-  - Displays details of the specified battle group, or the active one if none is given.
-  - Shortcut: *.fam bg [BattleGroup]*
-- `.familiar choosebattlegroup [BattleGroup]`
-  - Sets active battle group.
-  - Shortcut: *.fam cbg [BattleGroup]*
-- `.familiar addbattlegroup [BattleGroup]`
-  - Creates new battle group.
-  - Shortcut: *.fam abg [BattleGroup]*
-- `.familiar slotbattlegroup [BattleGroupOrSlot] [Slot]`
-  - Assigns active familiar to a battle group slot. If no battle group is specified, assigns to active group.
-  - Shortcut: *.fam sbg [BattleGroupOrSlot] [Slot]*
-- `.familiar deletebattlegroup [BattleGroup]`
-  - Deletes a battle group.
-  - Shortcut: *.fam dbg [BattleGroup]*
-- `.familiar challenge [PlayerName]`
-  - Challenges a player to battle or displays queue details.
-  - Shortcut: *.fam challenge [PlayerName]*
 - `.familiar setbattlearena` 🔒
   - Set current position as the center for the familiar battle arena.
   - Shortcut: *.fam sba*
+- `.familiar setlevel [Player] [Level]` 🔒
+  - Set current familiar level.
+  - Shortcut: *.fam sl [Player] [Level]*
+- `.familiar shinybuff [SpellSchool]`
+  - Chooses shiny for current active familiar, one freebie then costs configured amount to change if already unlocked.
+  - Shortcut: *.fam shiny [SpellSchool]*
+- `.familiar slotbattlegroup [BattleGroupOrSlot] [Slot]`
+  - Assigns active familiar to a battle group slot. If no battle group is specified, assigns to active group.
+  - Shortcut: *.fam sbg [BattleGroupOrSlot] [Slot]*
+- `.familiar smartbind [Name]`
+  - Searches and binds a familiar. If multiple matches are found, returns a list for clarification.
+  - Shortcut: *.fam sb [Name]*
+- `.familiar toggle`
+  - Calls or dismisses familar.
+  - Shortcut: *.fam t*
+- `.familiar togglecombat`
+  - Enables or disables combat for familiar.
+  - Shortcut: *.fam c*
+- `.familiar toggleoption [Setting]`
+  - Toggles various familiar settings.
+  - Shortcut: *.fam option [Setting]*
+- `.familiar unbind`
+  - Destroys active familiar.
+  - Shortcut: *.fam ub*
 
 ### Level Commands
-- `.level log`
-  - Toggles leveling progress logging.
-  - Shortcut: *.lvl log*
 - `.level get`
   - Display current leveling progress.
   - Shortcut: *.lvl get*
-- `.level set [Player] [Level]` 🔒
-  - Sets player level.
-  - Shortcut: *.lvl set [Player] [Level]*
 - `.level ignoresharedexperience [Player]` 🔒
   - Adds (or removes) player to list of those who are not eligible to receive shared experience.
   - Shortcut: *.lvl ignore [Player]*
+- `.level log`
+  - Toggles leveling progress logging.
+  - Shortcut: *.lvl log*
+- `.level set [Player] [Level]` 🔒
+  - Sets player level.
+  - Shortcut: *.lvl set [Player] [Level]*
 
 ### Miscellaneous Commands
+- `.miscellaneous prepareforthehunt`
+  - Completes GettingReadyForTheHunt if not already completed.
+  - Shortcut: *.misc prepare*
 - `.miscellaneous reminders`
   - Toggles general reminders for various mod features.
   - Shortcut: *.misc remindme*
 - `.miscellaneous sct [Type]`
   - Toggles various scrolling text elements.
   - Shortcut: *.misc sct [Type]*
-- `.miscellaneous starterkit`
-  - Provides starting kit.
-  - Shortcut: *.misc kitme*
-- `.miscellaneous prepareforthehunt`
-  - Completes GettingReadyForTheHunt if not already completed.
-  - Shortcut: *.misc prepare*
-- `.miscellaneous userstats`
-  - Shows neat information about the player.
-  - Shortcut: *.misc userstats*
 - `.miscellaneous silence`
   - Resets stuck combat music if needed.
   - Shortcut: *.misc silence*
+- `.miscellaneous starterkit`
+  - Provides starting kit.
+  - Shortcut: *.misc kitme*
+- `.miscellaneous userstats`
+  - Shows neat information about the player.
+  - Shortcut: *.misc userstats*
 
 ### Prestige Commands
-- `.prestige self [PrestigeType]`
-  - Handles player prestiging.
-  - Shortcut: *.prestige me [PrestigeType]*
-- `.prestige get [PrestigeType]`
-  - Shows information about player's prestige status.
-  - Shortcut: *.prestige get [PrestigeType]*
-- `.prestige set [Player] [PrestigeType] [Level]` 🔒
-  - Sets the specified player to a certain level of prestige in a certain type of prestige.
-  - Shortcut: *.prestige set [Player] [PrestigeType] [Level]*
-- `.prestige reset [Player] [PrestigeType]` 🔒
-  - Handles resetting prestiging.
-  - Shortcut: *.prestige r [Player] [PrestigeType]*
-- `.prestige syncbuffs`
-  - Applies prestige buffs appropriately if not present.
-  - Shortcut: *.prestige sb*
-- `.prestige list`
-  - Lists prestiges available.
-  - Shortcut: *.prestige l*
-- `.prestige leaderboard [PrestigeType]`
-  - Lists prestige leaderboard for type.
-  - Shortcut: *.prestige lb [PrestigeType]*
 - `.prestige exoform`
   - Toggles taunting to enter exo form.
   - Shortcut: *.prestige exoform*
-- `.prestige ignoreleaderboard [Player]` 🔒
-  - Adds (or removes) player to list of those who will not appear on prestige leaderboards. Intended for admin-duties only accounts.
-  - Shortcut: *.prestige ignore [Player]*
-- `.prestige permashroud`
-  - Toggles permashroud if applicable.
-  - Shortcut: *.prestige shroud*
+- `.prestige get [PrestigeType]`
+  - Shows information about player's prestige status.
+  - Shortcut: *.prestige get [PrestigeType]*
 - `.prestige iacknowledgethiswillremoveallprestigebuffsfromplayersandwantthattohappen` 🔒
   - Globally removes prestige buffs from players to facilitate changing prestige buffs in config.
   - Shortcut: *.prestige iacknowledgethiswillremoveallprestigebuffsfromplayersandwantthattohappen*
+- `.prestige ignoreleaderboard [Player]` 🔒
+  - Adds (or removes) player to list of those who will not appear on prestige leaderboards. Intended for admin-duties only accounts.
+  - Shortcut: *.prestige ignore [Player]*
+- `.prestige leaderboard [PrestigeType]`
+  - Lists prestige leaderboard for type.
+  - Shortcut: *.prestige lb [PrestigeType]*
+- `.prestige list`
+  - Lists prestiges available.
+  - Shortcut: *.prestige l*
+- `.prestige permashroud`
+  - Toggles permashroud if applicable.
+  - Shortcut: *.prestige shroud*
+- `.prestige reset [Player] [PrestigeType]` 🔒
+  - Handles resetting prestiging.
+  - Shortcut: *.prestige r [Player] [PrestigeType]*
+- `.prestige self [PrestigeType]`
+  - Handles player prestiging.
+  - Shortcut: *.prestige me [PrestigeType]*
+- `.prestige set [Player] [PrestigeType] [Level]` 🔒
+  - Sets the specified player to a certain level of prestige in a certain type of prestige.
+  - Shortcut: *.prestige set [Player] [PrestigeType] [Level]*
+- `.prestige syncbuffs`
+  - Applies prestige buffs appropriately if not present.
+  - Shortcut: *.prestige sb*
 
 ### Profession Commands
-- `.profession log`
-  - Toggles profession progress logging.
-  - Shortcut: *.prof log*
 - `.profession get [Profession]`
   - Display your current profession progress.
   - Shortcut: *.prof get [Profession]*
-- `.profession set [Name] [Profession] [Level]` 🔒
-  - Sets player profession level.
-  - Shortcut: *.prof set [Name] [Profession] [Level]*
 - `.profession list`
   - Lists professions available.
   - Shortcut: *.prof l*
+- `.profession log`
+  - Toggles profession progress logging.
+  - Shortcut: *.prof log*
+- `.profession set [Name] [Profession] [Level]` 🔒
+  - Sets player profession level.
+  - Shortcut: *.prof set [Name] [Profession] [Level]*
 
 ### Quest Commands
+- `.quest complete [Name] [QuestType]` 🔒
+  - Forcibly completes a specified quest for a player.
+  - Shortcut: *.quest c [Name] [QuestType]*
 - `.quest log`
   - Toggles quest progress logging.
   - Shortcut: *.quest log*
 - `.quest progress [QuestType]`
   - Display your current quest progress.
   - Shortcut: *.quest p [QuestType]*
-- `.quest track [QuestType]`
-  - Locate and track quest target.
-  - Shortcut: *.quest t [QuestType]*
 - `.quest refresh [Name]` 🔒
   - Refreshes daily and weekly quests for player.
   - Shortcut: *.quest rf [Name]*
 - `.quest reroll [QuestType]`
   - Reroll quest for cost (daily only currently).
   - Shortcut: *.quest r [QuestType]*
-- `.quest complete [Name] [QuestType]` 🔒
-  - Forcibly completes a specified quest for a player.
-  - Shortcut: *.quest c [Name] [QuestType]*
+- `.quest track [QuestType]`
+  - Locate and track quest target.
+  - Shortcut: *.quest t [QuestType]*
 
 ### Weapon Commands
-- `.weapon get`
-  - Displays current weapon expertise details.
-  - Shortcut: *.wep get*
-- `.weapon log`
-  - Toggles expertise logging.
-  - Shortcut: *.wep log*
 - `.weapon choosestat [WeaponOrStat] [WeaponStat]`
   - Choose a weapon stat to enhance based on your expertise.
   - Shortcut: *.wep cst [WeaponOrStat] [WeaponStat]*
+- `.weapon get`
+  - Displays current weapon expertise details.
+  - Shortcut: *.wep get*
+- `.weapon list`
+  - Lists weapon expertises available.
+  - Shortcut: *.wep l*
+- `.weapon liststats`
+  - Lists weapon stats available.
+  - Shortcut: *.wep lst*
+- `.weapon lockspells`
+  - Locks in the next spells equipped to use in your unarmed slots.
+  - Shortcut: *.wep locksp*
+- `.weapon log`
+  - Toggles expertise logging.
+  - Shortcut: *.wep log*
 - `.weapon resetstats`
   - Reset the stats for current weapon.
   - Shortcut: *.wep rst*
 - `.weapon set [Name] [Weapon] [Level]` 🔒
   - Sets player weapon expertise level.
   - Shortcut: *.wep set [Name] [Weapon] [Level]*
-- `.weapon liststats`
-  - Lists weapon stats available.
-  - Shortcut: *.wep lst*
-- `.weapon list`
-  - Lists weapon expertises available.
-  - Shortcut: *.wep l*
 - `.weapon setspells [Name] [Slot] [PrefabGuid] [Radius]` 🔒
   - Manually sets spells for testing (if you enter a radius it will apply to players around the entered name).
   - Shortcut: *.wep spell [Name] [Slot] [PrefabGuid] [Radius]*
-- `.weapon lockspells`
-  - Locks in the next spells equipped to use in your unarmed slots.
-  - Shortcut: *.wep locksp*
+
 
 ## Configuration
 
@@ -723,6 +734,20 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 	- Outputs: x1 Vampiric Dust
 	- Station: Advanced Grinder
 
+## BleedingEdge
+
+### Slashers
+- Every 3rd primary attack (must chain to the last hit) will apply bleed, stacking up to 3 times.
+
+### Crossbow
+- Primary projectile is significantly faster.
+
+### TwinBlades
+- 2nd weapon skill (E) will apply shield from new frost spell when used on vBlood enemies.
+
+### Pistols
+- 25% increased primary attack projectile range.
+
 ## Recommended
 
 - [KindredCommands](https://thunderstore.io/c/v-rising/p/odjit/KindredCommands/) 
@@ -735,12 +760,6 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
   Closest thing to creative mode we'll likely ever get. Copy/paste castles, build wherever with whatever you want!
 - [KindredPortals](https://thunderstore.io/c/v-rising/p/odjit/KindredPortals/)
   Create custom portals and waygates for your server! Pairs great with KindredSchematics for making new areas.
-- [Sanguis](https://thunderstore.io/c/v-rising/p/zfolmt/Sanguis/)
-  Simple login reward/reward players for being online mod.
-- [BloodyNotify](https://thunderstore.io/c/v-rising/p/Trodi/Notify/)
-  Notifications for players coming online or going offline, VBlood kills, and more.
-- [BloodyMerchants](https://thunderstore.io/c/v-rising/p/Trodi/BloodyMerchant/)
-  Custom merchants! Great for letting players buy items they normally can't or providing a use for otherwise unused prefabs.
 - [XPRising](https://thunderstore.io/c/v-rising/p/XPRising/XPRising/)
   If you like the idea of a mod with RPG features but Bloodcraft doesn't float your boat maybe this will!
 
