@@ -1,5 +1,7 @@
 `1.8.5`
-- corruption and twinBlades *now* being saved, my b >_>_
+- touched up README commands/config option autogeneration, should be accurate now
+- added bleeding edge details to README
+- small change to data creation for new players
 
 `1.8.4`
 - minor change after hotfix
